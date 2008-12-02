@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE dbmonster-schema PUBLIC 
+    "-//kernelpanic.pl//DBMonster Database Schema DTD 1.1//EN"
+    "http://dbmonster.kernelpanic.pl/dtd/dbmonster-schema-1.1.dtd">
+
+<dbmonster-schema>
+    <name>LSC Test Schema</name>
+    <table name="person" rows="100">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="sn">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="4"/>
+                <property name="maxLength" value="12"/>
+                <property name="allowSpaces" value="false"/>
+            </generator>
+        </column>
+        <column name="givenName">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="8"/>
+                <property name="maxLength" value="16"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+        <column name="end_of_validity">
+            <generator type="pl.kernelpanic.dbmonster.generator.DateTimeGenerator">
+                <property name="startDate" value="2007-06-19 00:00:00.0 +0100"/>
+                <property name="endDate" value="2040-01-01 00:00:00.0 +0100"/>
+                <property name="returnedType" value="timestamp"/>
+            </generator>
+        </column>
+        <column name="general_title_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="title"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+        <column name="manager_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="person"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+        <column name="structure_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="structure"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+        <column name="location_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="location"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+    </table>
+    <table name="activity" rows="300">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="person_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="person"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+        <column name="structure_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="structure"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+        <column name="title_id">
+            <generator type="pl.kernelpanic.dbmonster.generator.ForeignKeyGenerator">
+                <property name="tableName" value="title"/>
+                <property name="columnName" value="id"/>
+            </generator>
+        </column>
+    </table>
+    <table name="location" rows="10">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="street">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="20"/>
+                <property name="maxLength" value="100"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+        <column name="l">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="20"/>
+                <property name="maxLength" value="100"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+        <column name="postal_code">
+            <generator type="pl.kernelpanic.dbmonster.generator.NumberGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minValue" value="1000"/>
+                <property name="maxValue" value="99999"/>
+                <property name="returnedType" value="integer"/>
+            </generator>
+        </column>
+    </table>
+    <table name="structure" rows="10">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="code">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="4"/>
+                <property name="maxLength" value="12"/>
+                <property name="allowSpaces" value="false"/>
+            </generator>
+        </column>
+        <column name="description">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="1"/>
+                <property name="minLength" value="20"/>
+                <property name="maxLength" value="100"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+    </table>
+    <table name="title" rows="10">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="code">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="4"/>
+                <property name="maxLength" value="12"/>
+                <property name="allowSpaces" value="false"/>
+            </generator>
+        </column>
+        <column name="description">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="1"/>
+                <property name="minLength" value="20"/>
+                <property name="maxLength" value="100"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+    </table>
+    <table name="computer" rows="100">
+        <key databaseDefault="false">
+            <generator type="pl.kernelpanic.dbmonster.generator.MaxKeyGenerator">
+                <property name="columnName" value="id"/>
+            </generator>
+        </key>
+        <column name="hostname">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="8"/>
+                <property name="maxLength" value="16"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+        <column name="end_of_validity">
+            <generator type="pl.kernelpanic.dbmonster.generator.DateTimeGenerator">
+                <property name="startDate" value="2007-06-19 00:00:00.0 +0100"/>
+                <property name="endDate" value="2040-01-01 00:00:00.0 +0100"/>
+                <property name="returnedType" value="timestamp"/>
+            </generator>
+        </column>
+        <column name="password">
+            <generator type="pl.kernelpanic.dbmonster.generator.StringGenerator">
+                <property name="nulls" value="0"/>
+                <property name="minLength" value="6"/>
+                <property name="maxLength" value="8"/>
+                <property name="allowSpaces" value="true"/>
+            </generator>
+        </column>
+    </table>
+</dbmonster-schema>
+

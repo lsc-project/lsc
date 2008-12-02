@@ -1,0 +1,267 @@
+2008-12-01  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Moved to lsc-project.org, package and license change
+
+2008-10-08  Jonathan Clarke <jclarke@lsc-project.org>
+
+	* Add support for auto-detecting the LDAP schema subschemaSubentry
+
+2008-10-01  Jonathan Clarke <jon@lsc-project.org>
+
+	* Update FullDNJndiDstService to support clean operation by return a
+	list of DNs as IDs
+	* Update LocalizedJndiModificationsLayout to display DNs correctly
+
+2008-09-24  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Add support for multiple values for create_value sync option
+	* Add support for DN identifier through FullDNJndiDstService Jndi
+	destination service
+	* Update to 1.0rc5
+	* Add support for default values (not specified in srcJdbcBean)
+
+2008-09-06  Jonathan Clarke <jon@lsc-project.org>
+
+	* Add support for MERGE attribute comparaison mode
+	* Interpret JScript in create_value for attributes
+	* Correct a bug where attributes with a capital first letter couldn't
+	be synchronized properly (internal storage is now all in lower case)
+	* Correct a bug in dry-run mode where null modifications was
+	considered an error
+	* Correct MAJOR bug in launching cleaning tasks using
+	SimpleSynchronize
+	* Correct a bug in paged results usage
+	* Update to 1.0rc4
+
+2008-08-17  Jonathan Clarke <jon@lsc-project.org>
+
+	* Rewrite attribute comparaison function in AbstractBean to support
+	comparing byte arrays as strings (useful for userPassword)
+	* Fix noupdate and nodelete options (-nc and -nd)
+
+2008-06-12  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Add support for paged results (including ldapbp.jar dependencies) to support Active Directory search
+
+2008-05-28  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Fix getDn() as non final method on top object
+
+2008-05-03  Jonathan Clarke <jon@lsc-project.org>
+
+	* Website update, comments clarification and English corrections
+
+2008-05-02  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Fix unfunctional global synchronization filters flag (-n, -nc, ...)
+	* Add severeals test to improve test coverage (14%) (LocalizedJndiModificationsLayout, DateUtils)
+
+2008-04-16  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Add cobertura test coverage status
+	* Add severeals test to improve test coverage (12%)
+
+2008-04-13  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Switching to 1.0rc1
+	* Initiating general and technical specifications
+	* Initiating tests plan
+
+2008-04-12  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Fix sql-map-config.xml file generation
+
+2008-03-19  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Improving code style against checkstyle
+	* Updated OpenDS to 1.0
+
+2008-03-14  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Improving code style against checkstyle
+
+2008-03-11  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Improving doumentation
+	* Update general information
+	* Remove deb package generation
+
+2008-03-01  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Project renamed from Ldap Simple Connector to Ldap Synchronization Connector
+	* Fix duplicated help/usage message
+	* Website update
+	* Simplify directory structure by removing src/impl
+
+2008-02-25  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Switch to 0.9.9
+	* Complete and test the properties generator
+	* Refactor all generators to support properties generator
+	* Moved to interldap-common 0.8
+
+2008-02-24  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Add the CSV2SQL generator
+	* Add the Properties generator skeleton
+
+2008-02-15  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Files location refactoring to improve lsc-sample
+
+2008-02-03  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Switch to 0.9.8
+	* Introduce the new LQL engine as a Rhino scriptable object
+	* Fix duplicate dao.xml file
+
+2008-01-29  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Fix bad messages format
+
+2008-01-25  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Adding Rhino Ecma Script engine to fill the attributes according to
+		properties based rules
+	* Updated license to the new Affero GPL v3 license with dynamic link exception
+
+2008-01-24  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Switch to 0.9.7
+	* Fix configuration issued for SimpleJndiSrc/DstService
+
+2008-01-20  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Removed hsqldb from lsc::sample task to avoid hsqldb creation error
+	* Refactored standard objectclass implementation
+	* Updating the build process to remove *.properties
+	* New SimpleSynchronization generic class to avoid writing a XXXSynchronize file
+	* Add new parameters to interldap.properties
+	* Default properties start with "src" and "dst". Allow "ldap" also as an alias for "dst" prefix
+	* Add the n = nc + nd + nu option
+
+2008-01-18  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Add the JndiModificationsFilter object and cli implementation
+	* Add the parseCommandLine method to AbstractSynchronize
+	* Modify the way AbstractSynchronize must be implemented and Launcher object used
+
+2008-01-17  Jonathan Clarke  <jclarke@linagora.com>
+
+	* Switch to 0.9.6
+	* Rename JdbcServiceObjectGenerator to JdbcSrcServiceObjectGenerator
+	* Update generator to work for LDAP source and destination objectclasses
+	* Add support for creating attributes in the destination not present in the source (see getCreateAttributeNames in SyncOptions)
+
+2008-01-08  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Switch to 0.9.5
+	* Switch interldap-common to 0.7 - must rename lsc.properties to interldap.properties (BAD)
+	* Add the configuration objects structure and inheritence
+	* Add the source and destination properties
+	* Fix the error count by including JNDI errors
+
+2008-01-05  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Change to 0.9.4
+	* Update ibatis dependency
+	* Fix the errors in JUnit test case
+
+2008-01-02  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Change to 0.9.3
+	* Fix the classpath sample
+	* Adding Jooon fix for attribute and objectclass description parsing
+
+2007-12-20  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* 0.9.2:  Fix the database cleaning process
+
+2007-12-06  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* 0.9.1: Include first SyncOptions implementation
+
+2007-11-07  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Update the web site sample
+	* Release the 0.9 version
+
+2007-11-06  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Remove spaces from values to throw empty attributes away
+	* Refactor org.interldap to org.interldap
+
+2007-09-20  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Adding new Directory2directory synchronization initial mode
+
+2007-07-20  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Improving sample
+
+2007-07-19  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Adding artifact on objectweb site
+	* Improving website and first public pre-release
+
+2007-07-14  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Adding src/site and adapt maven information to generate web site
+
+2007-07-13  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Moving app/* to src/main/resources
+	* Modifying source path from src/{app/impl/test} to src/{main/impl/test}/java
+	* Removing all ivy reference
+
+2007-07-12  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* pom.xml: Adding Maven2 compatibility
+	* Removing all ivy reference
+	* build.xml: all libraries are now solved through Maven2 artifacts
+
+2007-07-08  Sebastien Bahloul  <seb@lsc-project.org>
+
+	* Improve and translate comments
+	* Refactor to remove Filters class dependency in the application main package (moved to implementation packages)
+
+2007-07-06  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Include command line interface via commons-cli and prepare the first release
+
+2007-07-05  Sebastien Bahloul <seb@lsc-project.org>
+
+	* improve structure synchronization
+
+2007-06-28  Sebastien Bahloul <seb@lsc-project.org>
+
+	* improve general code documentation
+
+2007-06-19  Sebastien Bahloul <seb@lsc-project.org>
+
+	* inline sample database is now feed with dbMonster
+	* including OpenDS as embedded directory server
+
+2007-06-18  Sebastien Bahloul <seb@lsc-project.org>
+
+	* sample: adding sample database mecanism
+	* default database is now inline hsqldb
+
+2007-06-15  Thomas Chemineau <tchemineau@linagora.com>
+
+	* Major work all around (refactor generate engines, rewrite objects, ...)
+
+2007-05-23  Sebastien Bahloul <seb@lsc-project.org>
+
+	* src/impl/org/interldap/lsc/persistence/iface: removed
+	* src/impl/org/interldap/lsc/persistence/sqlmapdao/*.java: removed
+	* src/impl/org/interldap/lsc/persistence/sqlmapdao/xml/*: moved to ../../xml
+	* src/impl/org/interldap/lsc/service/*.java: bind direct sqlmap class to simplify code generation
+
+2007-01-01  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Continuous development
+
+2006-01-01  Sebastien Bahloul <seb@lsc-project.org>
+
+	* Initial release

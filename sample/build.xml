@@ -1,0 +1,39 @@
+<project name="lsc-sample">
+
+	<property name="sample.dir" value="." />
+	<property name="dbmonster.home" value="${sample.dir}/dbmonster" />
+	<property file="build.properties" />
+
+	<target name="createHsqlDB" unless="${execution.path}" description="Create the HsqlDB structure">
+		<property file="${sample.dir}/database.properties" />
+		<sql autocommit="true" caching="false" showheaders="true" classpathref="execution.path" driver="${driver}" password="${password}" url="${url}" userid="${username}" onerror="abort" src="${sample.dir}/sample-pregen.sql"/>
+	</target>
+
+	<target name="runDbMonster" description="Run the dbMonster tool to fill the inline HsqlDB database">
+		<available file="${dbmonster.home}" type="dir" property="dbmonster.home.ok" />
+		<antcall target="untarDbMonster"/>
+		<available file="${dbmonster.home}" type="dir" property="dbmonster.home.ok" />
+		<fail unless="dbmonster.home.ok" message="'dbmonster.home' must be set in build.properties" />
+		<path id="dbmonster.classpath">
+			<path refid="execution.path"/>
+			<fileset dir="${dbmonster.home}" includes="**/*.jar" />
+		</path>
+		<taskdef name="dbmonster" classname="pl.kernelpanic.dbmonster.ant.DBMonsterTask" classpathref="dbmonster.classpath" />
+
+		<!-- Adding close.sql to shutdown HsqlDB engine in order to be able to launch synchronization -->
+		<dbmonster config="${sample.dir}/dbmonster.properties" verbose="true" postscript="${sample.dir}/close.sql" >
+			<fileset dir="${sample.dir}" includes="dbmonster-schema.xml" />
+		</dbmonster>
+	</target>
+
+	<target name="all" depends="createHsqlDB,runDbMonster" description="run all sample tasks" />
+
+	<target name="untarDbMonster" description="Untar the dbmonster archive" unless="${dbmonster.home.ok}">
+		<untar src="${sample.dir}/dbmonster.tgz" compression="gzip" overwrite="false" dest="${sample.dir}"/>
+	</target>
+
+	<target name="clean" description="Remove the dbmonster directory">
+		<delete dir="${dbmonster.home}" />
+	</target>
+</project>
+

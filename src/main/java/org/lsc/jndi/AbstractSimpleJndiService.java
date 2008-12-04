@@ -45,13 +45,25 @@
  */
 package org.lsc.jndi;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.log4j.Logger;
 import org.lsc.Configuration;
+import org.lsc.LscAttributes;
+import org.lsc.LscObject;
 
 /**
  * This class is an abstract generic but configurable implementation to get data
@@ -61,9 +73,12 @@ import org.lsc.Configuration;
  * read on which type of entries (filterAll and attrId).
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- * @deprecated Merge with AbstractExtendedJndiService
  */
-public abstract class AbstractSimpleJndiService extends AbstractJndiSrcService {
+public abstract class AbstractSimpleJndiService {
+    
+    /** This is the local LOG4J logger. */
+    protected static final Logger LOGGER = 
+        Logger.getLogger(AbstractSimpleJndiService.class);
 
 	/**
 	 * The filter to be completed by replacing {0} by the id to find a
@@ -84,13 +99,13 @@ public abstract class AbstractSimpleJndiService extends AbstractJndiSrcService {
 	 * When finding entries with 'filterAll' filter, the attribute to read
 	 * to reuse it in 'filterId' filter.
 	 */
-	private String attrId;
+	private List<String> attrsId;
 
 	/**
 	 * When a single entry is read in the directory, the attributes array to
 	 * read - Used to limit at the source, the synchronization perimeter.
 	 */
-	private String[] attrs;
+	private List<String> attrs;
 
 	/**
 	 * The default initializer.
@@ -101,16 +116,98 @@ public abstract class AbstractSimpleJndiService extends AbstractJndiSrcService {
 		baseDn = serviceProps.getProperty("baseDn");
 		filterId = serviceProps.getProperty("filterId");
 		filterAll = serviceProps.getProperty("filterAll");
+		
 		String attrsValue = serviceProps.getProperty("attrs");
 		if (attrsValue != null) {
-			Set<String> values = Configuration.getSetFromString(attrsValue);
-			attrs = new String[values.size()];
-			attrs = values.toArray(attrs);
+			attrs = Configuration.getListFromString(attrsValue);
 		}
 
-		attrId = serviceProps.getProperty("attrId");
+		String attrsIdValue = serviceProps.getProperty("pivotAttrs");
+		if(attrsIdValue != null) {
+		    attrsId = Configuration.getListFromString(attrsIdValue);
+		}
 	}
 
+    /**
+     * Map the ldap search result into a top derivated object.
+     *
+     * @param sr the ldap search result
+     * @param objToFill the original object to fill
+     *
+     * @return the object modified
+     *
+     * @throws NamingException thrown if a directory exception is encountered
+     *         while switching to the Java POJO
+     */
+    public final LscObject getObjectFromSR(final SearchResult sr, final LscObject objToFill)
+                              throws NamingException {
+        Method[] methods = objToFill.getClass().getMethods();
+        Map<String, Method> localMethods = new HashMap<String, Method>();
+
+        if (sr==null) return null;
+        
+        for (int i = 0; i < methods.length; i++) {
+            localMethods.put(methods[i].getName(), methods[i]);
+        }
+
+        NamingEnumeration<?> ne = sr.getAttributes().getAll();
+
+        while (ne.hasMore()) {
+            Attribute attr = (Attribute) ne.next();
+            String methodName = "set"
+                                + attr.getID().substring(0, 1).toUpperCase()
+                                + attr.getID().substring(1);
+
+            if (localMethods.containsKey(methodName)) {
+                try {
+                    Class<?>[] paramsType = localMethods.get(methodName)
+                                                     .getParameterTypes();
+
+                    if (List.class.isAssignableFrom(paramsType[0])) {
+                        localMethods.get(methodName)
+                                    .invoke(objToFill, new Object[] { getValue(attr.getAll()) });
+                    } else if (String.class.isAssignableFrom(paramsType[0])) {
+                        localMethods.get(methodName)
+                                    .invoke(objToFill, new Object[] { getValue(attr.getAll()).get(0) });
+                    } else {
+                        throw new RuntimeException("Unable to manage data type !");
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new RuntimeException(e);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                LOGGER.debug("Unable to map search result attribute to "
+                            + attr.getID() + " attribute object !");
+            }
+        }
+
+        return objToFill;
+    }
+
+    /**
+     * Get a list of object values from the NamingEnumeration.
+     *
+     * @param ne the naming enumeration
+     *
+     * @return the object list
+     *
+     * @throws NamingException thrown if a directory exception is encountered
+     *         while switching to the Java POJO
+     */
+    protected static List<?> getValue(final NamingEnumeration<?> ne)
+                            throws NamingException {
+        List<Object> l = new ArrayList<Object>();
+
+        while (ne.hasMore()) {
+            l.add(ne.next());
+        }
+        return l;
+    }
+	
 	/**
 	 * Get the ldap search result according the specified identifier.
 	 * 
@@ -120,10 +217,20 @@ public abstract class AbstractSimpleJndiService extends AbstractJndiSrcService {
 	 *                 thrown if an directory exception is encountered while
 	 *                 getting the identified object
 	 */
-	public final SearchResult get(final String id) throws NamingException {
+	public final SearchResult get(final LscAttributes ids) throws NamingException {
 		SearchControls sc = new SearchControls();
-		sc.setReturningAttributes(attrs);
-		return getJndiServices().getEntry(baseDn, filterId.replaceAll("\\{0\\}", id), sc);
+		String[] attributes = new String[attrs.size()];
+		attributes = attrs.toArray(attributes);
+		sc.setReturningAttributes(attributes);
+		
+		String searchString = filterId;
+		Iterator<String> ite = ids.getAttributesNames().iterator();
+		while (ite.hasNext()) {
+            String id = ite.next();
+            searchString = searchString.replaceAll("\\{" + id + "\\}", ids.getStringValueAttribute(id));
+        }
+		
+		return getJndiServices().getEntry(baseDn, searchString, sc);
 	}
 
 	/**
@@ -136,15 +243,15 @@ public abstract class AbstractSimpleJndiService extends AbstractJndiSrcService {
 	 * Default attrId getter.
 	 * @return the attrId value
 	 */
-	public final String getAttrId() {
-		return attrId;
+	public final List<String> getAttrsId() {
+		return attrsId;
 	}
 
 	/**
 	 * Default attributes getter.
 	 * @return the attrs array
 	 */
-	public final String[] getAttrs() {
+	public final List<String> getAttrs() {
 		return attrs;
 	}
 

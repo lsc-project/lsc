@@ -47,7 +47,7 @@ package org.lsc.jndi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -55,6 +55,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.apache.log4j.Logger;
+import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 
 /**
@@ -64,7 +65,6 @@ import org.lsc.beans.AbstractBean;
  * (filterAll and attrId).
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- * @deprecated Replace by ExtendedJndiDstService
  */
 public class SimpleJndiDstService extends AbstractSimpleJndiService implements IJndiDstService {
 
@@ -102,7 +102,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final AbstractBean getBean(final String id) throws NamingException {
+	public final AbstractBean getBean(final LscAttributes id) throws NamingException {
 		try {
 			SearchResult srObject = get(id);
 			Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
@@ -143,9 +143,9 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identifiers list
 	 */
-	public final Iterator<String> getIdsList() throws NamingException {
-		return JndiServices.getDstInstance().getAttrList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
-				getAttrId()).values().iterator();
-	}
+	public Map<String, LscAttributes> getListPivots() throws NamingException {
+        return JndiServices.getDstInstance().getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
+                getAttrsId());
+    }
 
 }

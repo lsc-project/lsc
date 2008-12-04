@@ -43,32 +43,84 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.jndi;
+package org.lsc;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-
-import javax.naming.NamingException;
-
-import org.lsc.objects.top;
+import java.util.List;
+import java.util.Map;
 
 /**
- * This interface is used to provide entries from LDAP source directories.
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author rschermesser
+ *
  */
-public interface IJndiSrcService {
-
-    /**
-     * This method is a simple object getter.
-     * @param id the object identifier
-     * @return the object or null if not found
-     * @throws NamingException when a directory exception is encountered
-     */
-    top getObject(String id) throws NamingException;
+/**
+ * @author rschermesser
+ *
+ */
+public class LscAttributes {
+    
+    protected Map<String, ?> values;
+    
+    public LscAttributes() {
+        values = new HashMap<String, Object>();
+    }
+    
+    public LscAttributes(Map<String, ?> values) {
+        setAttributes(values);
+    }
+    
+    public String getStringValueAttribute(String attribute) {
+        return (String)values.get(attribute);
+    }
+    
+    public Integer getIntegerValueAttribute(String attribute) {
+        return (Integer)values.get(attribute);
+    }
+    
+    public Boolean getBooleanValueAttribute(String attribute) {
+        return (Boolean)values.get(attribute);
+    }
+    
+    public List<?> getListValueAttribute(String attribute) {
+        return (List<?>)values.get(attribute);  
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<String> getListStringValueAttribute(String attribute) {
+        return (List<String>)values.get(attribute);  
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Integer> getListIntegerValueAttribute(String attribute) {
+        return (List<Integer>)values.get(attribute);  
+    }
+    
+    public List<String> getAttributesNames() {
+        List<String> attributesNames = new ArrayList<String>();
+        Iterator<String> it = values.keySet().iterator();
+        while (it.hasNext()) {
+            attributesNames.add(it.next());
+        }
+        return attributesNames;
+    }
+    
     
     /**
-     * Returns a iterator of all the objects identifier.
-     * @return the ids collection iterator
-     * @throws NamingException when a directory exception is encountered
+     * Java is really weird ...
+     * @return
      */
-    Iterator<String> getIdsList() throws NamingException;
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getAttributes() {
+        return (Map<String, Object>) values;
+    }
+    
+    public void setAttributes(Map<String, ?> values) {
+        this.values = values; 
+    }
+    
+    public String toString() {
+        return null;
+    }
 }

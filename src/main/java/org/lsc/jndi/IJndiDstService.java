@@ -45,16 +45,16 @@
  */
 package org.lsc.jndi;
 
-import org.lsc.beans.AbstractBean;
-
-import java.util.Iterator;
+import java.util.Map;
 
 import javax.naming.NamingException;
 
+import org.lsc.LscAttributes;
+import org.lsc.beans.AbstractBean;
 
 /**
- * This interface is used to provide entries from LDAP destination directories.
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author rschermesser
+ *
  */
 public interface IJndiDstService {
     /**
@@ -63,12 +63,12 @@ public interface IJndiDstService {
      * @return the object or null if not found
      * @throws NamingException when a directory exception is encountered
      */
-    AbstractBean getBean(final String id) throws NamingException;
+    AbstractBean getBean(final LscAttributes ids) throws NamingException;
 
     /**
-     * Returns a iterator of all the objects identifier.
-     * @return the ids collection iterator
-     * @throws NamingException when a directory exception is encountered
+     * Returns a list of all the objects identifiers.
+     * @return the list of ids
      */
-    Iterator<String> getIdsList() throws NamingException;
+    Map<String, LscAttributes> getListPivots() throws NamingException;
+    
 }

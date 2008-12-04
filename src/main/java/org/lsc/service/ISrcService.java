@@ -45,26 +45,28 @@
  */
 package org.lsc.service;
 
-import java.util.Iterator;
+import java.util.Map;
 
-import org.lsc.objects.flat.fTop;
+import javax.naming.NamingException;
 
+import org.lsc.LscAttributes;
+import org.lsc.LscObject;
 
 /**
- * This interface is used to provide entries from relational source database.
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author rschermesser
+ *
  */
-public interface IJdbcSrcService {
+public interface ISrcService {
     /**
      * This method is a simple object getter.
-     * @param id the object identifier
+     * @param ids the object identifiers
      * @return the object or null if not found
      */
-    fTop getFlatObject(String id);
+    LscObject getObject(LscAttributes ids) throws NamingException;
 
     /**
-     * Returns a iterator of all the objects identifier.
-     * @return the ids collection iterator
+     * Returns a list of all the objects identifiers.
+     * @return the list of ids
      */
-    Iterator<String> getIdsList();
+    Map<String, LscAttributes> getListPivots() throws NamingException;
 }

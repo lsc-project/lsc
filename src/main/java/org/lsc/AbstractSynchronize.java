@@ -50,6 +50,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
@@ -63,13 +64,12 @@ import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
 import org.lsc.jndi.IJndiDstService;
-import org.lsc.jndi.IJndiSrcService;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
 import org.lsc.objects.top;
 import org.lsc.objects.flat.fTop;
-import org.lsc.service.IJdbcSrcService;
+import org.lsc.service.ISrcService;
 import org.lsc.utils.I18n;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.LSCStructuralLogger;
@@ -78,7 +78,6 @@ import org.lsc.utils.LSCStructuralLogger;
  * Abstract main class to derive.
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- * @deprecated
  */
 public abstract class AbstractSynchronize {
     /** Log4j configuration file. */
@@ -95,7 +94,6 @@ public abstract class AbstractSynchronize {
 
     /**
      * Default constructor.
-     * @deprecated
      */
     protected AbstractSynchronize() {
         PropertyConfigurator.configure(this.getClass().getClassLoader()
@@ -104,24 +102,8 @@ public abstract class AbstractSynchronize {
         options.addOption("nc", "nocreate", false, "Don't create any entry");
         options.addOption("nu", "noupdate", false, "Don't update");
         options.addOption("nd", "nodelete", false, "Don't delete");
-        options.addOption("n", "dryrun", false,
-        "Don't update the directory at all");
+        options.addOption("n", "dryrun", false, "Don't update the directory at all");
         jmFilter = new JndiModificationsFilter();
-    }
-
-    /**
-     * This method is used to clean different type of data.
-     * 
-     * @param jdbcService
-     *                the jdbc source service
-     * @param dstJndiService
-     *                the jndi destination service
-     * @deprecated
-     */
-    protected final void cleanDb2Ldap(final IJdbcSrcService jdbcService,
-            final IJndiDstService dstJndiService) {
-        cleanDb2Ldap(jdbcService.getClass().getName(), jdbcService,
-                dstJndiService);
     }
 
     /**
@@ -133,10 +115,9 @@ public abstract class AbstractSynchronize {
      *                the jdbc source service
      * @param dstJndiService
      *                the jndi destination service
-     * @deprecated
      */
     protected final void cleanDb2Ldap(final String syncName,
-            final IJdbcSrcService jdbcService,
+            final ISrcService jdbcService,
             final IJndiDstService dstJndiService) {
         
         LOGGER.info("Starting clean for " + syncName);
@@ -148,17 +129,17 @@ public abstract class AbstractSynchronize {
             int countInitiated = 0;
             int countCompleted = 0;
             JndiModifications jm = null;
-            Iterator<String> ids = dstJndiService.getIdsList();
+            Iterator<Entry<String, LscAttributes>> ids = dstJndiService.getListPivots().entrySet().iterator();
 
             while (ids.hasNext()) {
                 countAll++;
 
-                String id = ids.next();
-                fTop object = jdbcService.getFlatObject(id);
+                Entry<String, LscAttributes> id = ids.next();
+                fTop object = (fTop) jdbcService.getObject(id.getValue());
 
                 try {
                     if (object == null) {
-                        AbstractBean bean = dstJndiService.getBean(id);
+                        AbstractBean bean = dstJndiService.getBean(id.getValue());
                         jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
                         jm.setDistinguishName(bean.getDistinguishName());
 
@@ -198,40 +179,24 @@ public abstract class AbstractSynchronize {
     /**
      * Clean data objects.
      * 
-     * @param srcJndiService
-     *                the jndi source service
-     * @param dstJndiService
-     *                the jndi destination service
-     * @deprecated
-     */
-    protected final void cleanLdap2Ldap(final IJndiSrcService srcJndiService,
-            final IJndiDstService dstJndiService) {
-        cleanLdap2Ldap(srcJndiService.getClass().getName(), srcJndiService,
-                dstJndiService);
-    }
-
-    /**
-     * Clean data objects.
-     * 
      * @param syncName
      *                the synchronization name
      * @param srcJndiService
      *                the jndi source service
      * @param dstJndiService
      *                the jndi destination service
-     * @deprecated
      */
     protected final void cleanLdap2Ldap(final String syncName,
-            final IJndiSrcService srcJndiService,
+            final ISrcService srcJndiService,
             final IJndiDstService dstJndiService) {
         
         LOGGER.info("Starting clean for " + syncName);
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
-        Iterator<String> ids = null;
+        Iterator<Entry<String, LscAttributes>> ids = null;
 
         try {
-            ids = dstJndiService.getIdsList();
+            ids = dstJndiService.getListPivots().entrySet().iterator();
         } catch (NamingException e1) {
             LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
             return;
@@ -252,14 +217,14 @@ public abstract class AbstractSynchronize {
         while (ids.hasNext()) {
             countAll++;
 
-            String id = ids.next();
+            Entry<String, LscAttributes> id = ids.next();
 
             try {
-                object = srcJndiService.getObject(id);
+                object = (top) srcJndiService.getObject(id.getValue());
                 if (object == null) {
                     countInitiated++;
 
-                    AbstractBean bean = dstJndiService.getBean(id);
+                    AbstractBean bean = dstJndiService.getBean(id.getValue());
                     jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
                     jm.setDistinguishName(bean.getDistinguishName());
                     
@@ -303,196 +268,35 @@ public abstract class AbstractSynchronize {
                 countAll, countInitiated, countCompleted,
                 countError }));
     }
-
+    
     /**
-     * Synchronize objects from a database to a directory.
-     * 
-     * @param jdbcService
-     *                the source jdbc service
-     * @param dstJndiService
-     *                the destination jndi service
-     * @param object
-     *                the object to duplicate
-     * @param objectBean
-     *                the object bean operations to use
-     * 
-     * @deprecated
-     */
-    protected final void synchronizeDb2Ldap(final IJdbcSrcService jdbcService,
-            final IJndiDstService dstJndiService, final top object,
-            final Class<?> objectBean) {
-        synchronizeDb2Ldap(jdbcService.getClass().getName(), jdbcService,
-                dstJndiService, object, objectBean, null);
-    }
-
-    /**
-     * Synchronize objects from a database to a directory.
-     * 
      * @param syncName
-     *                the synchronization process name
-     * @param jdbcService
-     *                the source jdbc service
-     * @param dstJndiService
-     *                the destination jndi service
+     * @param srcService
+     * @param dstService
      * @param object
-     *                the object to duplicate
      * @param objectBean
-     *                the object bean operations to use
-     * @deprecated
+     * @param customLibrary
      */
-    protected final void synchronizeDb2Ldap(final String syncName,
-            final IJdbcSrcService jdbcService,
-            final IJndiDstService dstJndiService, final top object,
-            final Class<?> objectBean, final Object customLibrary) {
-        
-        LSCStructuralLogger.GLOBAL.info("# Starting synchronization task " + syncName);
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
+    protected final void synchronize2Ldap(final String syncName,
+            final ISrcService srcService,
+            final IJndiDstService dstService,
+            final top object,
+            final Class<? extends AbstractBean> objectBean,
+            final Object customLibrary) {
 
-        int countAll = 0;
-        int countError = 0;
-        int countInitiated = 0;
-        int countCompleted = 0;
-        Iterator<String> ids = jdbcService.getIdsList();
-        JndiModifications jm = null;
-        top newObject = null;
+        LOGGER.info("Starting synchronization for " + syncName);
 
-        while (ids.hasNext()) {
-            jm = null;
-            countAll++;
-
-            String id = ids.next();
-            LOGGER.debug("Synchronizing " + syncName + " for id=" + id);
-
-            try {
-                fTop fObj = (fTop) jdbcService.getFlatObject(id);
-
-                if (fObj == null) {
-                    countError++;
-                    LOGGER.error("Unable to get object from database for id="
-                            + id + " in " + syncName + " synchronize process");
-                    continue;
-                }
-
-                newObject = object.getClass().newInstance();
-                newObject.setUpFromObject(fObj);
-
-                AbstractBean jdbcSt = null;
-
-                try {
-                    jdbcSt = (AbstractBean) objectBean.getMethod("getInstance",
-                            new Class[] { newObject.getClass() }).invoke(null,
-                                    new Object[] { newObject });
-                } catch (InvocationTargetException ite) {
-                    throw ite.getCause();
-                }
-
-                AbstractBean jndiSt = dstJndiService.getBean(id);
-                jm = BeanComparator.calculateModifications(syncOptions, jdbcSt,
-                        jndiSt, customLibrary);
-
-                // Apply modifications to the directory
-                if (jm != null) {
-                    /* Evaluate if you have to do something */
-                    Map<String, Object> table = new HashMap<String, Object>();
-                    table.put("dstBean", jndiSt);
-                    table.put("srcBean", jdbcSt);
-                    String conditionString = syncOptions.getCondition(jm.getOperation());
-                    Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
-                    
-                    if(condition) {
-                        countInitiated++;
-                        JndiModifications jmFiltered = jmFilter.filter(jm);
-                        if (jmFiltered != null) {
-                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
-                                countCompleted++;
-                                logAction(jm, id, syncName);
-                            } else {
-                                countError++;
-                                logActionError(jm, id, null);
-                            }
-                        }
-                    } else {
-                        logShouldAction(jm, id, syncName);
-                    }
-                }
-            } catch (RuntimeException e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Exception e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Throwable e) {
-                countError++;
-                logActionError(jm, id, e);
-            }
-        }
-
-        LSCStructuralLogger.GLOBAL.info("# Ended synchronization task " + syncName);
-        LSCStructuralLogger.GLOBAL.info(
-        		I18n.getMessage(null, "org.lsc.messages.NB_CHANGES",
-        						new Object[] { countAll, countInitiated, countCompleted, countError }
-        						)
-				);
-    }
-
-    /**
-     * Synchronize objects from a directory to a directory.
-     * 
-     * @param srcJndiService
-     *                the source jndi service
-     * @param dstJndiService
-     *                the destination jndi service
-     * @param object
-     *                the object to duplicate
-     * @param objectBean
-     *                the object bean operations to use
-     * @deprecated
-     */
-    protected final void synchronizeLdap2Ldap(
-            final IJndiSrcService srcJndiService,
-            final IJndiDstService dstJndiService, final top object,
-            final Class<?> objectBean) {
-        synchronizeLdap2Ldap("", srcJndiService, dstJndiService, object,
-                objectBean, null);
-    }
-
-    /**
-     * Synchronize objects from a directory to a directory.
-     * 
-     * @param syncName
-     *                the synchronization process name
-     * @param srcJndiService
-     *                the source jndi service
-     * @param dstJndiService
-     *                the destination jndi service
-     * @param object
-     *                the object to duplicate
-     * @param objectBean
-     *                the object bean operations to use
-     * @deprecated
-     */
-    protected final void synchronizeLdap2Ldap(final String syncName,
-            final IJndiSrcService srcJndiService,
-            final IJndiDstService dstJndiService, final top object,
-            final Class<?> objectBean, final Object customLibrary) {
-        
-    	LSCStructuralLogger.GLOBAL.info("# Starting synchronization task " + syncName);
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
-
-        Iterator<String> ids = null;
-
+        Iterator<Entry<String, LscAttributes>> ids = null;
         try {
-            ids = srcJndiService.getIdsList();
-        } catch (NamingException e1) {
+            ids = srcService.getListPivots().entrySet().iterator();
+        } catch(Exception e) {
             LOGGER.fatal("Unable to find any object for service "
-                    + srcJndiService.getClass().getName());
-
+                    + srcService.getClass().getName());
             return;
         }
 
         if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant data source : "
-                    + srcJndiService);
+            LOGGER.error("Empty or non existant data source : " + srcService);
             return;
         }
 
@@ -502,70 +306,61 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
         JndiModifications jm = null;
         top newObject = null;
-        
+        ISyncOptions syncOptions = this.getSyncOptions(syncName);
         // store method to obtain source bean
         Method beanGetInstanceMethod = null;
 
         while (ids.hasNext()) {
             countAll++;
 
-            String id = ids.next();
+            Entry<String, LscAttributes> id = ids.next();
             LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
-            try {
-                newObject = srcJndiService.getObject(id);
 
-                if (newObject == null) {
+            try {
+                LscObject lscObject = srcService.getObject(id.getValue());
+
+                if(lscObject == null) {
                     countError++;
-                    LOGGER.error("Unable to get object from directory for id=" + id);
+                    LOGGER.error("Unable to get object for id=" + id);
                     continue;
                 }
 
-                if (beanGetInstanceMethod == null) {
-                	/*
-                	 * Once all old LSC installations that have Beans with a getInstance(<not top> myclass) methods
-                	 * have been upgraded, we can simplify all code in this if by the following line:
-                	 */
-                	//beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class })
-                	
-                	// get the list of all superclasses of newObject
-                    HashMap<Class<?>,Object> classHierarchy = new HashMap<Class<?>,Object>();
-                    Class<?> currentClass = newObject.getClass();
-                    while (currentClass != null) {
-                    	classHierarchy.put(currentClass, null);
-                    	currentClass = currentClass.getSuperclass();
-                    }
-                    
-                    // get all methods in the objectBean, and find the right "getInstance" method
-                    Method[] methods = objectBean.getMethods();
-                    Class<?>[] parameterTypes = null;
-                    for (Method method : methods) {
-            			if (method.getName().matches("getInstance")) {
-            				parameterTypes = method.getParameterTypes();
-            				if (parameterTypes.length == 1 && classHierarchy.containsKey(method.getParameterTypes()[0])) {
-            					beanGetInstanceMethod = method;
-            					break;
-            				}
-            			}
-            		}
+                // Specific JDBC 
+                if(lscObject.getClass().isAssignableFrom(fTop.class)) {
+                    newObject = object.getClass().newInstance();
+                    newObject.setUpFromObject((fTop)lscObject);
+                } else {
+                    // Specific LDAP
+                    newObject = (top)srcService.getObject(id.getValue());
                 }
 
-                AbstractBean srcJndiSt = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
+                AbstractBean srcBean = null;
+                AbstractBean dstBean = null;
 
-                AbstractBean dstJndiSt = dstJndiService.getBean(id);
-                jm = BeanComparator.calculateModifications(syncOptions,
-                        srcJndiSt, dstJndiSt, customLibrary);
+                if (beanGetInstanceMethod == null) {
+                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
+                }
+                
+                try {
+                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
+                } catch (InvocationTargetException ite) {
+                    throw ite.getCause();
+                }
+
+                dstBean = dstService.getBean(id.getValue());
+                jm = BeanComparator.calculateModifications(syncOptions, srcBean,
+                        dstBean, customLibrary);
+                /* Evaluate if you have to do something */
+                Map<String, Object> table = new HashMap<String, Object>();
+                table.put("dstBean", dstBean);
+                table.put("srcBean", srcBean);
+                String conditionString = syncOptions.getCondition(jm.getOperation());
+                Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
 
                 // Apply modifications to the directory
                 if (jm != null) {
-                    /* Evaluate if you have to do something */
-                    Map<String, Object> table = new HashMap<String, Object>();
-                    table.put("dstBean", dstJndiSt);
-                    table.put("srcBean", srcJndiSt);
-                    String conditionString = syncOptions.getCondition(jm.getOperation());
-                    Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
-
+                    countInitiated++;
                     if(condition) {
-                        countInitiated++;
                         JndiModifications jmFiltered = jmFilter.filter(jm);
                         if (jmFiltered != null) {
                             if (JndiServices.getDstInstance().apply(jmFiltered)) {
@@ -592,15 +387,13 @@ public abstract class AbstractSynchronize {
             }
         }
 
-        LSCStructuralLogger.GLOBAL.info("# Ended synchronization task " + syncName);
-        LSCStructuralLogger.GLOBAL.info(
-        		I18n.getMessage(null, "org.lsc.messages.NB_CHANGES",
-        						new Object[] { countAll, countInitiated, countCompleted, countError }
-        						)
-        		);
+        LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+                "org.lsc.messages.NB_CHANGES", new Object[] {
+                countAll, countInitiated, countCompleted,
+                countError }));
     }
-
-    /**
+    
+        /**
      * Log all effective action.
      * 
      * @param jm
@@ -609,10 +402,9 @@ public abstract class AbstractSynchronize {
      *                object identifier
      * @param except
      *                synchronization process name
-     * @deprecated
      */
     protected final void logActionError(final JndiModifications jm,
-            final String identifier, final Throwable except) {
+            final Entry<String, LscAttributes> identifier, final Throwable except) {
         Object str = null;
 
         if (except != null) {
@@ -639,9 +431,8 @@ public abstract class AbstractSynchronize {
      *                object identifier
      * @param syncName
      *                synchronization process name
-     * @deprecated
      */
-    protected final void logAction(final JndiModifications jm, final String id,
+    protected final void logAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
             final String syncName) {
         switch (jm.getOperation()) {
         case ADD_ENTRY:
@@ -687,9 +478,8 @@ public abstract class AbstractSynchronize {
      * @param id
      * @param syncName
      * 
-     * @deprecated
      */
-    protected final void logShouldAction(final JndiModifications jm, final String id,
+    protected final void logShouldAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
             final String syncName) {
         switch (jm.getOperation()) {
             case ADD_ENTRY:

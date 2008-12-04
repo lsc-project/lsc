@@ -45,13 +45,12 @@
  */
 package org.lsc.jndi;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
 
+import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 
 /**
@@ -81,7 +80,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final AbstractBean getBean(final String id) throws NamingException {
+	public final AbstractBean getBean(final LscAttributes id) throws NamingException {
 		return null;
 	}
 
@@ -101,9 +100,8 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identifiers list
 	 */
-	public final Iterator<String> getIdsList() throws NamingException {
-		List<String> emptyList = Collections.emptyList();
-		return emptyList.iterator();
-	}
+	public Map<String, LscAttributes> getListPivots() throws NamingException {
+        return null;
+    }
 
 }

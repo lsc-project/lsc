@@ -45,20 +45,18 @@
  */
 package org.lsc;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.Logger;
-
-import org.lsc.jndi.IJndiDstService;
-import org.lsc.jndi.IJndiSrcService;
-import org.lsc.objects.top;
-import org.lsc.service.IJdbcSrcService;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.lsc.beans.AbstractBean;
+import org.lsc.jndi.IJndiDstService;
+import org.lsc.objects.top;
+import org.lsc.service.ISrcService;
 
 /**
  * Extends AbstractSynchronize to instantiate a simple synchronization engine
@@ -206,6 +204,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
      * @return the cleaning status
      * @throws Exception 
      */
+    @SuppressWarnings("unchecked")
     private boolean launchTask(final TaskType taskType, final String taskName, final TaskMode taskMode) throws Exception {
         try {
             String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
@@ -225,11 +224,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
             }
             
             top taskObject = null;
-            Class<?> taskBean = null;
+            Class<? extends AbstractBean> taskBean = null;
             if(taskMode == TaskMode.sync) {
                 //Common objects
                 taskObject = (top) Class.forName(objectClassName).newInstance();
-                taskBean = Class.forName(beanClassName);
+                taskBean = (Class<? extends AbstractBean>) Class.forName(beanClassName);
             }
             
             IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[] { dstServiceProperties, beanClassName });
@@ -241,14 +240,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     
                     String srcJndiServiceClass = lscProperties.getProperty(prefix + SRCSERVICE_PROPS_PREFIX);
                     Constructor<?> constrSrcJndiService = Class.forName(srcJndiServiceClass).getConstructor(new Class[] { Properties.class, String.class });
-                    IJndiSrcService srcJndiService = (IJndiSrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties, objectClassName });
+                    ISrcService srcJndiService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties, objectClassName });
 
                     switch(taskMode) {
                         case clean:
                             cleanLdap2Ldap(taskName, srcJndiService, dstJndiService);
                             break;
                         case sync:
-                            synchronizeLdap2Ldap(taskName, srcJndiService, dstJndiService, taskObject, taskBean, customLibrary);
+                            synchronize2Ldap(taskName, srcJndiService, dstJndiService, taskObject, taskBean, customLibrary);
                             break;
                         default :
                             //Should not happen
@@ -258,14 +257,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     break;
                 case db2ldap :
                     String srcServiceClass = lscProperties.getProperty(prefix   + SRCSERVICE_PROPS_PREFIX);
-                    IJdbcSrcService jdbcService = (IJdbcSrcService) Class.forName(srcServiceClass).newInstance();
+                    ISrcService jdbcService = (ISrcService) Class.forName(srcServiceClass).newInstance();
                     
                     switch(taskMode) {
                         case clean:
                             cleanDb2Ldap(taskName, jdbcService, dstJndiService);
                             break;
                         case sync:
-                            synchronizeDb2Ldap(taskName, jdbcService, dstJndiService, taskObject, taskBean, customLibrary);
+                            synchronize2Ldap(taskName, jdbcService, dstJndiService, taskObject, taskBean, customLibrary);
                             break;
                         default :        
                             //Should not happen

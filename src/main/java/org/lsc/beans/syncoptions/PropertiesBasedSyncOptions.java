@@ -45,8 +45,10 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -72,13 +74,13 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
     private Map<String, STATUS_TYPE> status;
 
     /** the default values cache */
-    private Map<String, String[]> defaultValues;
+    private Map<String, List<String>> defaultValues;
 
     /** the create values cache */
-    private Map<String, String[]> createValues;
+    private Map<String, List<String>> createValues;
 
     /** the force values cache */
-    private Map<String, String[]> forceValues;
+    private Map<String, List<String>> forceValues;
 
     /** When nothing else is available, use the default status */
     private STATUS_TYPE defaultStatus;
@@ -98,9 +100,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
      */
     public final void initialize(String syncName) {
         status = new HashMap<String, STATUS_TYPE>();
-        defaultValues = new HashMap<String, String[]>();
-        createValues = new HashMap<String, String[]>();
-        forceValues = new HashMap<String, String[]>();
+        defaultValues = new HashMap<String, List<String>>();
+        createValues = new HashMap<String, List<String>>();
+        forceValues = new HashMap<String, List<String>>();
         defaultStatus = STATUS_TYPE.FORCE;
         this.syncName = syncName; 
 
@@ -138,9 +140,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             } else if (typeName.equalsIgnoreCase("default_value")) {
                 String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
                 StringTokenizer st = new StringTokenizer(value, delimiter);
-                String[] values = new String[st.countTokens()];
+                List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
-                    values[i] = st.nextToken();
+                    values.add(st.nextToken());
                 }
                 defaultValues.put(attributeName.toLowerCase(), values);
                 /* TODO: don't wipe out existing createValue */
@@ -148,17 +150,17 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             } else if (typeName.equalsIgnoreCase("create_value")) {
                 String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
                 StringTokenizer st = new StringTokenizer(value, delimiter);
-                String[] values = new String[st.countTokens()];
+                List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
-                    values[i] = st.nextToken();
+                    values.add(st.nextToken());
                 }
                 createValues.put(attributeName.toLowerCase(), values);
             } else if (typeName.equalsIgnoreCase("force_value")) {
                 String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
                 StringTokenizer st = new StringTokenizer(value, delimiter);
-                String[] values = new String[st.countTokens()];
+                List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
-                    values[i] = st.nextToken();
+                    values.add(st.nextToken());
                 }
                 forceValues.put(attributeName.toLowerCase(), values);
             } else if (typeName.equalsIgnoreCase("delimiter")) {
@@ -192,37 +194,31 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         }
     }
 
-    /**
-     * @deprecated
-     */
-    public final String getDefaultValue(final String id, final String attributeName) {
-        String[] defaultValues = getDefaultValues(id, attributeName.toLowerCase());
-        if (defaultValues != null) return defaultValues[0];
-        return null;
+    public final List<String> getDefaultValues(final String id, final String attributeName) {
+        List<String> values = defaultValues.get(attributeName.toLowerCase());
+        ArrayList<String> copy = null;
+        if(values != null) {
+            copy = new ArrayList<String>(values);
+        }
+        return copy;
     }
 
-    public final String[] getDefaultValues(final String id, final String attributeName) {
-        String[] values = defaultValues.get(attributeName.toLowerCase());
-        return values != null ? values.clone() : null;
+    public final List<String> getCreateValues(final String id, final String attributeName) {
+        List<String> values = createValues.get(attributeName.toLowerCase());
+        ArrayList<String> copy = null;
+        if(values != null) {
+            copy = new ArrayList<String>(values);
+        }
+        return copy;
     }
 
-    /**
-     * @deprecated
-     */
-    public final String getCreateValue(final String id, final String attributeName) {
-        String[] createValues = getCreateValues(id, attributeName.toLowerCase());
-        if (createValues != null) return createValues[0];
-        return null;
-    }
-
-    public final String[] getCreateValues(final String id, final String attributeName) {
-        String[] values = createValues.get(attributeName.toLowerCase());
-        return values != null ? values.clone() : null;
-    }
-
-    public final String[] getForceValues(final String id, final String attributeName) {
-        String[] values = forceValues.get(attributeName.toLowerCase());
-        return values != null ? values.clone() : null;
+    public final List<String> getForceValues(final String id, final String attributeName) {
+        List<String> values = forceValues.get(attributeName.toLowerCase());
+        ArrayList<String> copy = null;
+        if(values != null) {
+            copy = new ArrayList<String>(values);
+        }
+        return copy;
     }
 
     public final Set<String> getCreateAttributeNames() {
@@ -235,14 +231,15 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
     public final Set<String> getForceValuedAttributeNames() {
         return forceValues.keySet();
+        
     }
 
-    public Set<String> getWriteAttributes() {
+    public List<String> getWriteAttributes() {
         String property = Configuration.getString("lsc.tasks." + syncName + ".dstService.attrs");
         if(property == null) {
             return null;
         }
-        return Configuration.getSetFromString(property);
+        return Configuration.getListFromString(property);
     }
 
     public String getCreateCondition() {

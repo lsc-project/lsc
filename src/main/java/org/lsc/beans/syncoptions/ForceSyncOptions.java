@@ -45,6 +45,7 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.util.List;
 import java.util.Set;
 
 import org.lsc.Configuration;
@@ -85,21 +86,25 @@ public class ForceSyncOptions implements ISyncOptions {
     public final Set<String> getDefaultValuedAttributeNames() {
         return null;
     }
-
-    public String[] getCreateValues(String id, String attributeName) {
+    
+    public Set<String> getForceValuedAttributeNames() {
         return null;
     }
 
-    public String[] getDefaultValues(String id, String attributeName) {
+    public List<String> getCreateValues(String id, String attributeName) {
         return null;
     }
 
-    public Set<String> getWriteAttributes() {
-        String property = Configuration.getString("lsc.tasks." + taskname + ".srcService.attrs");
+    public List<String> getDefaultValues(String id, String attributeName) {
+        return null;
+    }
+
+    public List<String> getWriteAttributes() {
+        String property = Configuration.getString("lsc.tasks." + taskname + ".dstService.attrs");
         if(property == null) {
             return null;
         }
-        return Configuration.getSetFromString(property);
+        return Configuration.getListFromString(property);
     }
 
 
@@ -125,11 +130,7 @@ public class ForceSyncOptions implements ISyncOptions {
         return Configuration.getString("lsc.tasks." + taskname + ".dn");
     }
 
-	public Set<String> getForceValuedAttributeNames() {
-		return null;
-	}
-
-	public String[] getForceValues(String id, String attributeName) {
+	public List<String> getForceValues(String id, String attributeName) {
 		return null;
 	}
 

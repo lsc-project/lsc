@@ -45,9 +45,9 @@
  */
 package org.lsc;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
@@ -62,15 +62,6 @@ public class Configuration extends org.lsc.utils.Configuration {
      */
     protected Configuration() {
         super();
-    }
-
-    /**
-     * @return the configuration properties
-     * @deprecated In this project, you must use getSrcProperties() or
-     *             getDstProperties()
-     */
-    public static Properties getLdapProperties() {
-        return org.lsc.utils.Configuration.getLdapProperties();
     }
 
     /**
@@ -96,10 +87,10 @@ public class Configuration extends org.lsc.utils.Configuration {
     /**
      * Get a list of value from a space separated string
      * @param propertyValue the value of a property
-     * @return A set of the property divided
+     * @return A list of the property divided
      */
-    public static Set<String> getSetFromString(String propertyValue, String separator) {
-        Set<String> result = new HashSet<String>();
+    public static List<String> getListFromString(String propertyValue, String separator) {
+        List<String> result = new ArrayList<String>();
         if(propertyValue != null) {
             StringTokenizer st = new StringTokenizer(propertyValue, separator);
             for (int i = 0 ; st.hasMoreTokens() ; i++) {
@@ -109,8 +100,8 @@ public class Configuration extends org.lsc.utils.Configuration {
         return result;
     }
     
-    public static Set<String> getSetFromString(String propertyValue) {
-        return Configuration.getSetFromString(propertyValue, " ");
+    public static List<String> getListFromString(String propertyValue) {
+        return Configuration.getListFromString(propertyValue, " ");
     }
 
     /** People DN. */

@@ -45,15 +45,17 @@
  */
 package org.lsc.jndi;
 
-import org.apache.log4j.Logger;
-
-import org.lsc.objects.top;
-
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
+
+import org.apache.log4j.Logger;
+import org.lsc.LscAttributes;
+import org.lsc.LscObject;
+import org.lsc.objects.top;
+import org.lsc.service.ISrcService;
 
 
 /**
@@ -63,9 +65,8 @@ import javax.naming.directory.SearchControls;
  * attrId). TODO implements JUnit test
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- * @deprecated Merge with ExtendedJndiSrcService
  */
-public class SimpleJndiSrcService extends AbstractSimpleJndiService implements IJndiSrcService {
+public class SimpleJndiSrcService extends AbstractSimpleJndiService implements ISrcService {
 
 	/** The local LOG4J logger. */
 	private static final Logger LOGGER = Logger.getLogger(SimpleJndiSrcService.class);
@@ -107,11 +108,11 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final top getObject(final String id) throws NamingException {
+	public final LscObject getObject(final LscAttributes ids) throws NamingException {
 		try {
-			top topObject = objectClass.newInstance();
+		    LscObject topObject = objectClass.newInstance();
 
-			return this.getObjectFromSR(get(id), topObject);
+			return this.getObjectFromSR(get(ids), topObject);
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to instanciate simple object "
 					+ objectClass.getName()
@@ -145,10 +146,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *                 thrown if an directory exception is encountered while
 	 *                 getting the identifiers list
 	 */
-	public final Iterator<String> getIdsList() throws NamingException {
-		return JndiServices.getSrcInstance().getAttrList(getBaseDn(), 
-				getFilterAll(), SearchControls.SUBTREE_SCOPE, 
-				getAttrId()).values().iterator();
-	}
-
+    public Map<String, LscAttributes> getListPivots() throws NamingException {
+        return JndiServices.getSrcInstance().getAttrsList(getBaseDn(), 
+                getFilterAll(), SearchControls.SUBTREE_SCOPE, 
+                getAttrsId());
+    }
 }

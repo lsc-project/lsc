@@ -45,6 +45,7 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.util.List;
 import java.util.Set;
 
 import org.lsc.jndi.JndiModificationType;
@@ -82,36 +83,13 @@ public interface ISyncOptions {
     STATUS_TYPE getStatus(String id, String attributeName);
 
     /**
-     * Return the default value for a given attribute name.
-     * The default value replace a missing value in the source datasource
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the default value
-     * @deprecated
-     */
-    String getDefaultValue(String id, String attributeName);
-
-    /**
      * Return the default values for a given attribute name.
      * The default values replace a missing value in the source datasource
      * @param id the object identifier according to the datasource
      * @param attributeName the attribute name
      * @return the default value
      */
-    String[] getDefaultValues(String id, String attributeName);
-
-
-    /**
-     * Return the create values for a given attribute name.
-     * The create values replace a missing value in the source datasource 
-     * only while creating a new entry. For coherence, implementation 
-     * classes must guarantee that a default value override a create value
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the create value
-     * @deprecated
-     */
-    String getCreateValue(String id, String attributeName);
+    List<String> getDefaultValues(String id, String attributeName);
 
     /**
      * Return the create value for a given attribute name.
@@ -122,7 +100,7 @@ public interface ISyncOptions {
      * @param attributeName the attribute name
      * @return the create value
      */
-    String[] getCreateValues(String id, String attributeName);
+    List<String> getCreateValues(String id, String attributeName);
 
     /**
      * Return the names of attributes to be created.
@@ -143,7 +121,7 @@ public interface ISyncOptions {
      * @param attributeName the attribute name
      * @return the force value
      */
-    String[] getForceValues(String id, String attributeName);
+    List<String> getForceValues(String id, String attributeName);
 
     /**
      * Return the force valued attributes
@@ -155,7 +133,7 @@ public interface ISyncOptions {
      * Get all the attributes that must be written in the destination
      * @return the attributes to write in the destination
      */
-    Set<String> getWriteAttributes();
+    List<String> getWriteAttributes();
     
     /**
      * Returns the condition for a creation

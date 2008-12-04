@@ -60,6 +60,8 @@ public abstract class LscObject {
     protected String distinguishName;
 
     protected List<String> objectClass;
+    
+    protected LscAttributes attributeValues;
 
     public final String getDistinguishName() {
         return distinguishName;

@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -74,6 +73,7 @@ import javax.naming.ldap.PagedResultsResponseControl;
 
 import org.apache.log4j.Logger;
 import org.lsc.Configuration;
+import org.lsc.LscAttributes;
 
 import com.sun.jndi.ldap.LdapURL;
 
@@ -132,11 +132,11 @@ public final class JndiServices {
      * @return the source directory connected service
      */
     public static JndiServices getSrcInstance() {
-	Properties srcProperties = Configuration.getSrcProperties();
-	if (srcProperties != null && srcProperties.size() > 0) {
-        	return getInstance(Configuration.getSrcProperties());
-	}
-	return null;
+        Properties srcProperties = Configuration.getSrcProperties();
+        if (srcProperties != null && srcProperties.size() > 0) {
+            return getInstance(Configuration.getSrcProperties());
+        }
+        return null;
     }
 
     /**
@@ -535,54 +535,22 @@ public final class JndiServices {
      * @param base the base of the search operation
      * @param filter the filter of the search operation
      * @param scope the scope of the search operation
-     * @param attrName the attribute name to use to
-     * @return the dn of each entry that are returned by the directory
-     * @throws NamingException thrown if something goes wrong
-     */
-    public Map<String, String> getAttrList(final String base, 
-            final String filter, final int scope, final String attrName) 
-            throws NamingException {
-
-        Map<String, Map<String, String>> map = getAttrsList(base, filter, scope, new String[] {attrName});
-        Map<String, String> result = null;
-        if(map != null) {
-            result = new HashMap<String, String>();
-            Iterator<Entry<String, Map<String, String>>> it = map.entrySet().iterator();
-            while (it.hasNext()) {
-                Entry<String, Map<String, String>> entry = it.next();
-                Iterator<String> iteValues = entry.getValue().values().iterator();
-                
-                if(iteValues.hasNext()) {
-                    result.put(entry.getKey(), iteValues.next());
-                }
-            }
-        }
-        
-        return result;
-    }
-
-    /**
-     * Search for a list of attribute values
-     * 
-     * This method is a simple LDAP search operation which is attended to
-     * return a list of the attribute values in all returned entries
-     * 
-     * @param base the base of the search operation
-     * @param filter the filter of the search operation
-     * @param scope the scope of the search operation
      * @param attrsNames table of attribute names to get
      * @return the dn of each entry that are returned by the directory and a map of attribute names and values
      * @throws NamingException thrown if something goes wrong
      */
-    public Map<String, Map<String, String>> getAttrsList(final String base, 
-            final String filter, final int scope, final String[] attrsNames) 
+    public Map<String, LscAttributes> getAttrsList(final String base, 
+            final String filter, final int scope, final List<String> attrsNames) 
             throws NamingException {
 
-        Map<String, Map<String, String>> res = new HashMap<String, Map<String, String>>();
+        Map<String, LscAttributes> res = new HashMap<String, LscAttributes>();
 
+        String[] attributes = new String[attrsNames.size()];
+        attributes = attrsNames.toArray(attributes);
+        
         SearchControls constraints = new SearchControls();
         constraints.setDerefLinkFlag(false);
-        constraints.setReturningAttributes(attrsNames);
+        constraints.setReturningAttributes(attributes);
         constraints.setSearchScope(scope);
         constraints.setReturningObjFlag(true);
 
@@ -615,16 +583,18 @@ public final class JndiServices {
                         SearchResult ldapResult = (SearchResult) results.next();
 
                         // get the value for each attribute requested
-                        String attrName = null;
-                        for (int i = 0; i < attrsNames.length; i++) {
-                            attrName = attrsNames[i];
-                            Attribute attr = ldapResult.getAttributes().get(attrName);
+                        Iterator<String> ite = attrsNames.iterator();
+                        String attribute = null;
+                        while (ite.hasNext()) {
+                            attribute = ite.next();
+                            Attribute attr = ldapResult.getAttributes().get(attribute);
                             if (attr != null && attr.get() != null) {
-                                attrsValues.put(attrName, (String) attr.get());
+                                attrsValues.put(attribute, (String) attr.get());
                             }
                         }
-                        if (attrsValues.size() == attrsNames.length) {
-                            res.put(ldapResult.getName(), attrsValues);
+                        
+                        if (attrsValues.size() == attrsNames.size()) {
+                            res.put(ldapResult.getName(), new LscAttributes(attrsValues));
                         }
                     }
                 }
@@ -661,10 +631,10 @@ public final class JndiServices {
         return res;
     }
 
-	/**
-	 * @return the contextDn
-	 */
-	public String getContextDn() {
-		return contextDn;
-	}
+    /**
+     * @return the contextDn
+     */
+    public String getContextDn() {
+        return contextDn;
+    }
 }

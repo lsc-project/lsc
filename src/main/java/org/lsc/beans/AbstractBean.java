@@ -145,7 +145,7 @@ public abstract class AbstractBean implements IBean {
                             .compareToIgnoreCase("dn") != 0)) {
                 /* Getting parameter name */
                 String paramName = methods[i].getName()
-                .substring(GET_ACCESSOR_PREFIX.length());
+                    .substring(GET_ACCESSOR_PREFIX.length());
                 paramName = paramName.substring(0, 1).toLowerCase() +
                 paramName.substring(1);
 

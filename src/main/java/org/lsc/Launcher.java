@@ -66,7 +66,6 @@ import java.util.StringTokenizer;
  * This class is responsible of parameters analysis
  *
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
- * @deprecated
  */
 public final class Launcher {
     /** The local LOG4J logger. */

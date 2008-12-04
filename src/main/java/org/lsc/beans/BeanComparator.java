@@ -106,7 +106,7 @@ public final class BeanComparator {
             Object customLibrary)	throws NamingException {
 
         JndiModifications jm = null;
-        
+
         String dn = syncOptions.getDn();
         if(srcBean != null && syncOptions.getDn() != null) {
             Map<String, Object> table = new HashMap<String, Object>();
@@ -146,7 +146,7 @@ public final class BeanComparator {
 
     private static JndiModifications getModifyEntry(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
             Object customLibrary) throws NamingException {
-        
+
         JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY, syncOptions.getTaskName());
         jm.setDistinguishName(destBean.getDistinguishName());
 
@@ -162,23 +162,25 @@ public final class BeanComparator {
 
         // Force attribute values for forced attributes in syncoptions
         Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
-        Set<String> writeAttributes = syncOptions.getWriteAttributes();
+        List<String> writeAttributes = syncOptions.getWriteAttributes();
         if (forceAttrsNameSet != null) {
-            
+
             Iterator<String> forceAttrsNameIt = forceAttrsNameSet.iterator();
             while (forceAttrsNameIt.hasNext()) {
                 String attrName = forceAttrsNameIt.next();
-                
+
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    String[] forceValues = syncOptions.getForceValues(srcBean.getDistinguishName(), attrName);
+                    List<String> forceValues = syncOptions.getForceValues(srcBean.getDistinguishName(), attrName);
                     if ( forceValues != null ) {
                         Attribute forceAttribute = new BasicAttribute(attrName);
-                        for (int i=0; i<forceValues.length; i++) {
-                            List<String> values = JScriptEvaluator.evalToStringList(forceValues[i], table);
+                        Iterator<String> forceValuesIt = forceValues.iterator();
+                        while (forceValuesIt.hasNext()) {
+                            String forceValue = forceValuesIt.next();
+                            List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
                             Iterator<String> valuesIt = values.iterator();
                             while (valuesIt.hasNext()) {
-                            	forceAttribute.add(valuesIt.next());
+                                forceAttribute.add(valuesIt.next());
                             }
                         }
                         srcBean.setAttribute(forceAttribute);
@@ -190,19 +192,21 @@ public final class BeanComparator {
         // Use default attributes values specified by syncOptions but not present in srcJdbcBean
         Set<String> defaultAttrsNameSet = syncOptions.getDefaultValuedAttributeNames();
         if (defaultAttrsNameSet != null) {
-            
+
             Iterator<String> defaultAttrsNameIt = defaultAttrsNameSet.iterator();
             while (defaultAttrsNameIt.hasNext()) {
                 String attrName = defaultAttrsNameIt.next();
-                
+
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    String[] defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(), attrName);
+                    List<String> defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(), attrName);
                     if ( defaultValues != null && srcBean.getAttributeById(attrName) == null ) {
                         Attribute defaultAttribute = new BasicAttribute(attrName);
                         List<String> defaultValuesModified = new ArrayList<String>();
-                        for (int i=0; i<defaultValues.length; i++) {
-                            defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValues[i], table));
+                        Iterator<String> defaultValuesIt = defaultValues.iterator();
+                        while(defaultValuesIt.hasNext()) {
+                            String defaultValue = defaultValuesIt.next();
+                            defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
                         }
                         Iterator<String> defaultValuesModifiedIter = defaultValuesModified.iterator();
                         while(defaultValuesModifiedIter.hasNext()) {
@@ -219,10 +223,10 @@ public final class BeanComparator {
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
         while (srcBeanAttrsNameIter.hasNext()) {
             String srcAttrName = srcBeanAttrsNameIter.next();
-            
+
             /* We do something only if we have to write */
             if(writeAttributes == null || writeAttributes.contains(srcAttrName)) {
-            
+
                 ModificationItem mi = null;
                 Attribute srcAttr = srcBean.getAttributeById(srcAttrName);
                 Attribute destAttr = destBean.getAttributeById(srcAttrName);
@@ -234,15 +238,17 @@ public final class BeanComparator {
                     srcAttr = new BasicAttribute(srcAttrName);
                 }
                 while (srcAttr.size() >= 1 && ((String)srcAttr.get(0)).length() == 0) {
-                	srcAttr.remove(0);
+                    srcAttr.remove(0);
                 }
 
                 // Manage default values
-                String[] defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(),	srcAttrName);
+                List<String> defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(),	srcAttrName);
                 List<String> defaultValuesModified = new ArrayList<String>();
                 if (defaultValues != null) {
-                    for (int i = 0; i<defaultValues.length; i++) {
-                        defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValues[i], table));
+                    Iterator<String> defaultValuesIt = defaultValues.iterator();
+                    while(defaultValuesIt.hasNext()) {
+                        String defaultValue = defaultValuesIt.next();
+                        defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
                     }
                 }
 
@@ -251,10 +257,10 @@ public final class BeanComparator {
                                 (srcAttr == null || srcAttr.size() == 0) )) {
                     Iterator<String> defaultValuesIter = defaultValuesModified.iterator();
                     while(defaultValuesIter.hasNext()) {
-                		String value = defaultValuesIter.next();
-            			if (value != null & value.length() > 0) {
-        					srcAttr.add(value);
-            			}
+                        String value = defaultValuesIter.next();
+                        if (value != null & value.length() > 0) {
+                            srcAttr.add(value);
+                        }
                     }
                 }
 
@@ -332,50 +338,56 @@ public final class BeanComparator {
 
         // Force attribute values for forced attributes in syncoptions
         Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
-        Set<String> writeAttributes = syncOptions.getWriteAttributes();
+        List<String> writeAttributes = syncOptions.getWriteAttributes();
         if (forceAttrsNameSet != null) {
-            
+
             Iterator<String> forceAttrsNameIt = forceAttrsNameSet.iterator();
             while (forceAttrsNameIt.hasNext()) {
                 String attrName = forceAttrsNameIt.next();
-                
+
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    String[] forceValues = syncOptions.getForceValues(srcJdbcBean.getDistinguishName(), attrName);
+                    List<String>forceValues = syncOptions.getForceValues(srcJdbcBean.getDistinguishName(), attrName);
                     if ( forceValues != null ) {
                         Attribute forceAttribute = new BasicAttribute(attrName);
-                        for (int i=0; i<forceValues.length; i++) {
-                            List<String> values = JScriptEvaluator.evalToStringList(forceValues[i], table);
+                        Iterator<String> forceValuesIt = forceValues.iterator();
+                        while (forceValuesIt.hasNext()) {
+                            String forceValue = forceValuesIt.next();
+                            List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
                             Iterator<String> valuesIt = values.iterator();
                             while (valuesIt.hasNext()) {
-                            	forceAttribute.add(valuesIt.next());
+                                forceAttribute.add(valuesIt.next());
                             }
                         }
+
                         srcJdbcBean.setAttribute(forceAttribute);
                     }
                 }
             }
         }
-        
+
         Iterator<String> jdbcAttrsName = srcJdbcBean.getAttributesNames().iterator();
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
         while (jdbcAttrsName.hasNext()) {
             String jdbcAttrName = jdbcAttrsName.next();
-            
+
             /* We do something only if we have to write */
             if(writeAttributes == null || writeAttributes.contains(jdbcAttrName)) {
                 Attribute srcJdbcAttribute = srcJdbcBean.getAttributeById(jdbcAttrName);
-                String[] createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), srcJdbcAttribute.getID());
-  
+                List<String> createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), srcJdbcAttribute.getID());
+
                 if ( ( createValues != null ) 
                         && (srcJdbcAttribute.getAll() == null || !srcJdbcAttribute.getAll().hasMore() ||
                                 syncOptions.getStatus(srcJdbcBean.getDistinguishName(), jdbcAttrName)==STATUS_TYPE.MERGE)) {
                     // interpret JScript in createValue
                     table.put("srcAttr", srcJdbcAttribute);
                     List<String> createValuesModified = new ArrayList<String>();
-                    for (int i=0; i<createValues.length; i++) {
-                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValues[i], table));
+                    Iterator<String> createValuesIt = createValues.iterator();
+                    while (createValuesIt.hasNext()) {
+                        String createValue = (String) createValuesIt.next();
+                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
                     }
+
                     Iterator<String> createValuesModifiedIter = createValuesModified.iterator();
                     while(createValuesModifiedIter.hasNext()) {
                         srcJdbcAttribute.add(createValuesModifiedIter.next());
@@ -391,13 +403,16 @@ public final class BeanComparator {
             Iterator<String> createAttrsNameIt = createAttrsNameSet.iterator();
             while (createAttrsNameIt.hasNext()) {
                 String attrName = (String) createAttrsNameIt.next();
-                String[] createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), attrName);
+                List<String> createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), attrName);
                 if ( createValues != null && srcJdbcBean.getAttributeById(attrName) == null ) {
                     Attribute createdAttribute = new BasicAttribute(attrName);
                     List<String> createValuesModified = new ArrayList<String>();
-                    for (int i=0; i<createValues.length; i++) {
-                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValues[i], table));
+                    Iterator<String> createValuesIt = createValues.iterator();
+                    while (createValuesIt.hasNext()) {
+                        String createValue = (String) createValuesIt.next();
+                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
                     }
+
                     Iterator<String> createValuesModifiedIter = createValuesModified.iterator();
                     while(createValuesModifiedIter.hasNext()) {
                         createdAttribute.add(createValuesModifiedIter.next());

@@ -145,6 +145,10 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     + "." + taskName + "." + TYPE_PROPS_PREFIX);
             TaskType task = null;
             try {
+                if(taskType == null) {
+                    //To have only one error
+                    throw new IllegalArgumentException();
+                }
                 task = TaskType.valueOf(taskType.toLowerCase());
             } catch (IllegalArgumentException e) {
                 LOGGER.error("Missing '" + taskName + "' task parameter !");

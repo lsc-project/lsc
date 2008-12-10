@@ -111,6 +111,9 @@ public class AD {
      * @return the number of weeks since the last logon
      */
     public static int getNumberOfWeeksSinceLastLogon(String lastLogonTimestamp) {
+        if(lastLogonTimestamp == null || lastLogonTimestamp.length() == 0) {
+            return 0;
+        }
         Long ts = Long.parseLong(lastLogonTimestamp);
         //We divide the ts by 10⁷ for seconds, 60 seconds, 60 minutes, 24 hours, 7 days
         long llastLogonAdjust=116444736000000000L;  // adjust factor for converting it to java   

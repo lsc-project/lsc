@@ -119,7 +119,7 @@ public abstract class AbstractSynchronize {
     protected final void cleanDb2Ldap(final String syncName,
             final ISrcService jdbcService,
             final IJndiDstService dstJndiService) {
-        
+
         LOGGER.info("Starting clean for " + syncName);
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
@@ -150,9 +150,8 @@ public abstract class AbstractSynchronize {
                         Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
 
                         if (jm != null) {
-                            countInitiated++;
-
                             if(doDelete) {
+                                countInitiated++;
                                 if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
                                     countCompleted++;
                                     logAction(jm, id, syncName);
@@ -189,7 +188,7 @@ public abstract class AbstractSynchronize {
     protected final void cleanLdap2Ldap(final String syncName,
             final ISrcService srcJndiService,
             final IJndiDstService dstJndiService) {
-        
+
         LOGGER.info("Starting clean for " + syncName);
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
@@ -226,8 +225,8 @@ public abstract class AbstractSynchronize {
 
                     AbstractBean bean = dstJndiService.getBean(id.getValue());
                     jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                    jm.setDistinguishName(bean.getDistinguishName());
-                    
+                    jm.setDistinguishName(id.getKey());
+
                     /* Evaluate if you have to do something */
                     Map<String, Object> table = new HashMap<String, Object>();
                     table.put("dstBean", bean);
@@ -235,9 +234,8 @@ public abstract class AbstractSynchronize {
                     Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
 
                     if (jm != null) {
-                        countInitiated++;
-
                         if(doDelete) {
+                            countInitiated++;
                             if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
                                 countCompleted++;
                                 logAction(jm, id, syncName);
@@ -268,7 +266,7 @@ public abstract class AbstractSynchronize {
                 countAll, countInitiated, countCompleted,
                 countError }));
     }
-    
+
     /**
      * @param syncName
      * @param srcService
@@ -295,95 +293,96 @@ public abstract class AbstractSynchronize {
             return;
         }
 
-        if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant data source : " + srcService);
-            return;
-        }
-
         int countAll = 0;
         int countError = 0;
         int countInitiated = 0;
         int countCompleted = 0;
-        JndiModifications jm = null;
-        top newObject = null;
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
-        // store method to obtain source bean
-        Method beanGetInstanceMethod = null;
 
-        while (ids.hasNext()) {
-            countAll++;
+        if (!ids.hasNext()) {
+            LOGGER.error("Empty or non existant data source : " + srcService);
+        } else {
+            JndiModifications jm = null;
+            top newObject = null;
+            ISyncOptions syncOptions = this.getSyncOptions(syncName);
+            // store method to obtain source bean
+            Method beanGetInstanceMethod = null;
 
-            Entry<String, LscAttributes> id = ids.next();
-            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
+            while (ids.hasNext()) {
+                countAll++;
 
-            try {
-                LscObject lscObject = srcService.getObject(id.getValue());
+                Entry<String, LscAttributes> id = ids.next();
+                LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
 
-                if(lscObject == null) {
-                    countError++;
-                    LOGGER.error("Unable to get object for id=" + id);
-                    continue;
-                }
-
-                // Specific JDBC 
-                if(lscObject.getClass().isAssignableFrom(fTop.class)) {
-                    newObject = object.getClass().newInstance();
-                    newObject.setUpFromObject((fTop)lscObject);
-                } else {
-                    // Specific LDAP
-                    newObject = (top)srcService.getObject(id.getValue());
-                }
-
-                AbstractBean srcBean = null;
-                AbstractBean dstBean = null;
-
-                if (beanGetInstanceMethod == null) {
-                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
-                }
-                
                 try {
-                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
-                } catch (InvocationTargetException ite) {
-                    throw ite.getCause();
-                }
+                    LscObject lscObject = srcService.getObject(id.getValue());
 
-                dstBean = dstService.getBean(id.getValue());
-                jm = BeanComparator.calculateModifications(syncOptions, srcBean,
-                        dstBean, customLibrary);
-                /* Evaluate if you have to do something */
-                Map<String, Object> table = new HashMap<String, Object>();
-                table.put("dstBean", dstBean);
-                table.put("srcBean", srcBean);
-                String conditionString = syncOptions.getCondition(jm.getOperation());
-                Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
-
-                // Apply modifications to the directory
-                if (jm != null) {
-                    countInitiated++;
-                    if(condition) {
-                        JndiModifications jmFiltered = jmFilter.filter(jm);
-                        if (jmFiltered != null) {
-                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
-                                countCompleted++;
-                                logAction(jm, id, syncName);
-                            } else {
-                                countError++;
-                                logActionError(jm, id, null);
-                            }
-                        }
-                    } else {
-                        logShouldAction(jm, id, syncName);
+                    if(lscObject == null) {
+                        countError++;
+                        LOGGER.error("Unable to get object for id=" + id);
+                        continue;
                     }
+
+                    // Specific JDBC 
+                    if(lscObject.getClass().isAssignableFrom(fTop.class)) {
+                        newObject = object.getClass().newInstance();
+                        newObject.setUpFromObject((fTop)lscObject);
+                    } else {
+                        // Specific LDAP
+                        newObject = (top)srcService.getObject(id.getValue());
+                    }
+
+                    AbstractBean srcBean = null;
+                    AbstractBean dstBean = null;
+
+                    if (beanGetInstanceMethod == null) {
+                        beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
+                    }
+
+                    try {
+                        srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
+                    } catch (InvocationTargetException ite) {
+                        throw ite.getCause();
+                    }
+
+                    dstBean = dstService.getBean(id.getValue());
+                    jm = BeanComparator.calculateModifications(syncOptions, srcBean,
+                            dstBean, customLibrary);
+
+                    // Apply modifications to the directory
+                    if (jm != null) {
+                        /* Evaluate if you have to do something */
+                        Map<String, Object> table = new HashMap<String, Object>();
+                        table.put("dstBean", dstBean);
+                        table.put("srcBean", srcBean);
+                        String conditionString = syncOptions.getCondition(jm.getOperation());
+                        Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
+
+                        if(condition) {
+                            countInitiated++;
+                            JndiModifications jmFiltered = jmFilter.filter(jm);
+                            if (jmFiltered != null) {
+                                if (JndiServices.getDstInstance().apply(jmFiltered)) {
+                                    countCompleted++;
+                                    logAction(jm, id, syncName);
+                                } else {
+                                    countError++;
+                                    logActionError(jm, id, null);
+                                }
+                            }
+                        } else {
+                            logShouldAction(jm, id, syncName);
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    countError++;
+                    logActionError(jm, id, e);
+                } catch (Exception e) {
+                    countError++;
+                    logActionError(jm, id, e);
+                } catch (Throwable e) {
+                    countError++;
+                    logActionError(jm, id, e);
                 }
-            } catch (RuntimeException e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Exception e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Throwable e) {
-                countError++;
-                logActionError(jm, id, e);
             }
         }
 
@@ -392,8 +391,8 @@ public abstract class AbstractSynchronize {
                 countAll, countInitiated, countCompleted,
                 countError }));
     }
-    
-        /**
+
+    /**
      * Log all effective action.
      * 
      * @param jm
@@ -472,7 +471,7 @@ public abstract class AbstractSynchronize {
         LSCStructuralLogger.DESTINATION.info(jm);
     }
 
-    
+
     /**
      * @param jm
      * @param id
@@ -482,31 +481,31 @@ public abstract class AbstractSynchronize {
     protected final void logShouldAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
             final String syncName) {
         switch (jm.getOperation()) {
-            case ADD_ENTRY:
-                LOGGER.debug("Create condition false. Should have added object " + id);
-                break;
-    
-            case MODIFY_ENTRY:
-                LOGGER.debug("Update condition false. Should have modified object " + id);
-                break;
-    
-            case MODRDN_ENTRY:
-                LOGGER.debug("ModRDN condition false. Should have renamed object " + id);
-                break;
-    
-            case DELETE_ENTRY:
-                LOGGER.debug("Delete condition false. Should have removed object " + id);
-                break;
-    
-            default:
-                LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
-                        "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
-                        id, syncName }));
+        case ADD_ENTRY:
+            LOGGER.debug("Create condition false. Should have added object " + id);
+            break;
+
+        case MODIFY_ENTRY:
+            LOGGER.debug("Update condition false. Should have modified object " + id);
+            break;
+
+        case MODRDN_ENTRY:
+            LOGGER.debug("ModRDN condition false. Should have renamed object " + id);
+            break;
+
+        case DELETE_ENTRY:
+            LOGGER.debug("Delete condition false. Should have removed object " + id);
+            break;
+
+        default:
+            LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
+                    "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
+                    id, syncName }));
         }
 
         LSCStructuralLogger.DESTINATION.debug(jm);
     }
-    
+
     /**
      * Parse the command line arguments according the selected filter.
      * 
@@ -527,7 +526,7 @@ public abstract class AbstractSynchronize {
     public final Options getOptions() {
         return options;
     }
-    
+
     /**
      * @param syncName
      * @return
@@ -546,7 +545,7 @@ public abstract class AbstractSynchronize {
             }
             syncOptions = new ForceSyncOptions();
         }
-        
+
         return syncOptions;
     }
 }

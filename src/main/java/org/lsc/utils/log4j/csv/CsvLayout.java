@@ -143,8 +143,8 @@ public class CsvLayout extends Layout {
                         sb.append(jm.getDistinguishName());
                         
                         //Get the full DN
-                        sb.append(",");
-                        sb.append(Configuration.DN_REAL_ROOT);
+                        //sb.append(",");
+                        //sb.append(Configuration.DN_REAL_ROOT);
                     }
                     sb.append(this.getSeparator());
                 }

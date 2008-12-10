@@ -157,6 +157,13 @@ public interface ISyncOptions {
     String getDeleteCondition();
     
     /**
+     * Returns the condition for a modrdn 
+     * 
+     * @return the condition
+     */
+    String getModrdnCondition();
+    
+    /**
      * Returns the condition for this operation
      * 
      * @param operation The operation type

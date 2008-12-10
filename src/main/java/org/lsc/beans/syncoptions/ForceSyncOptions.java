@@ -121,6 +121,10 @@ public class ForceSyncOptions implements ISyncOptions {
     public String getUpdateCondition() {
         return TRUE_CONDITION;
     }
+    
+    public String getModrdnCondition() {
+        return TRUE_CONDITION;
+    }
 
     public String getCondition(JndiModificationType operation) {
         return TRUE_CONDITION;

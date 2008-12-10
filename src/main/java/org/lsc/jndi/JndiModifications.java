@@ -174,24 +174,28 @@ public class JndiModifications {
      */
     public HashMap<String, List<String>> getModificationsItemsByHash() {
         HashMap<String,  List<String>> result = new HashMap<String,  List<String>>();
-        Iterator<ModificationItem> iterator = this.getModificationItems().iterator();
-        while (iterator.hasNext()) {
-            ModificationItem modificationItem = iterator.next();
-            Attribute attr = modificationItem.getAttribute();
-            String id = attr.getID().toLowerCase();
-            
-            List<String> values = new ArrayList<String>(attr.size());
-
-            try {
-                NamingEnumeration<?> ne = attr.getAll();
-                while(ne.hasMoreElements()) {
-                    values.add(ne.next().toString());
+        List<ModificationItem> mi = this.getModificationItems();
+        
+        if(mi != null) {
+            Iterator<ModificationItem> iterator = this.getModificationItems().iterator();
+            while (iterator.hasNext()) {
+                ModificationItem modificationItem = iterator.next();
+                Attribute attr = modificationItem.getAttribute();
+                String id = attr.getID().toLowerCase();
+                
+                List<String> values = new ArrayList<String>(attr.size());
+    
+                try {
+                    NamingEnumeration<?> ne = attr.getAll();
+                    while(ne.hasMoreElements()) {
+                        values.add(ne.next().toString());
+                    }
+                } catch (NamingException e) {
+                    LOGGER.error("Error in getting the value(s) of the attribute " + id);
                 }
-            } catch (NamingException e) {
-                LOGGER.error("Error in getting the value(s) of the attribute " + id);
+                
+                result.put(id, values);
             }
-            
-            result.put(id, values);
         }
         return result;
     }

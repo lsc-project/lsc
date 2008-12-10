@@ -130,14 +130,14 @@ public final class BeanComparator {
                     || destBean.getDistinguishName().compareToIgnoreCase(srcBean.getDistinguishName()) == 0) {
                 jm = getModifyEntry(syncOptions, srcBean, destBean, customLibrary);
             } else {
+                //WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update
                 jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY, syncOptions.getTaskName());
                 jm.setDistinguishName(destBean.getDistinguishName());
                 jm.setNewDistinguishName(srcBean.getDistinguishName());
-                LOGGER.warn("WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
             }
         }
         if (jm.getOperation() == JndiModificationType.MODRDN_ENTRY
-                || (jm.getModificationItems() != null && jm.getModificationItems().size() != 0)) {
+                || (jm.getModificationItems() != null && jm.getModificationItems().size() != 0)) {            
             return jm;
         } else {
             return null;
@@ -312,7 +312,7 @@ public final class BeanComparator {
             LOGGER.info("Modifying entry \"" + destBean.getDistinguishName() + "\"");
         } else {
             LOGGER.debug("Entry \"" + destBean.getDistinguishName()
-                    + "\" is the same in the database and in the directory.");
+                    + "\" is the same in the source and in the destination");
         }
         return jm;
     }

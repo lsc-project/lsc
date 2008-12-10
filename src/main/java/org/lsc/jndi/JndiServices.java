@@ -403,6 +403,8 @@ public final class JndiServices {
                 ctx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
                 break;
             case MODRDN_ENTRY:
+                //We do not display this warning if we do not apply the modification with the option modrdn = false
+                LOGGER.warn("WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
                 ctx.rename(
                         new LdapName(rewriteBase(jm.getDistinguishName())),
                         new LdapName(rewriteBase(jm.getNewDistinguishName()))
@@ -577,8 +579,9 @@ public final class JndiServices {
                 NamingEnumeration<SearchResult> results = ctx.search(base, filter, constraints);
 
                 if (results != null) {
+                    Map<String, String> attrsValues = null;
                     while (results.hasMoreElements()) {
-                        Map<String, String> attrsValues = new HashMap<String, String>();
+                        attrsValues = new HashMap<String, String>();
 
                         SearchResult ldapResult = (SearchResult) results.next();
 
@@ -593,9 +596,7 @@ public final class JndiServices {
                             }
                         }
                         
-                        if (attrsValues.size() == attrsNames.size()) {
-                            res.put(ldapResult.getName(), new LscAttributes(attrsValues));
-                        }
+                        res.put(ldapResult.getName(), new LscAttributes(attrsValues));
                     }
                 }
                 Control[] respCtls = ctx.getResponseControls();

@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -226,8 +227,9 @@ public abstract class AbstractSimpleJndiService {
 		String searchString = filterId;
 		Iterator<String> ite = ids.getAttributesNames().iterator();
 		while (ite.hasNext()) {
-            String id = ite.next();
-            searchString = searchString.replaceAll("\\{" + id + "\\}", ids.getStringValueAttribute(id));
+            String id = ite.next().toLowerCase();
+            String valueId =  ids.getStringValueAttribute(id);
+            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
         }
 		
 		return getJndiServices().getEntry(baseDn, searchString, sc);

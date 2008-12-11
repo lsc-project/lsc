@@ -268,6 +268,14 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         }
         return property;
     }
+    
+    public String getModrdnCondition() {
+        String property = Configuration.getString("lsc.tasks." + syncName + ".condition.modrdn");
+        if(property == null) {
+            return "true";
+        }
+        return property;
+    }
 
     public String getCondition(JndiModificationType operation) {
         String result = "true";
@@ -280,6 +288,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             break;
         case DELETE_ENTRY:
             result = this.getDeleteCondition();
+            break;
+        case MODRDN_ENTRY:
+            result = this.getModrdnCondition();
             break;
         }
         return result;

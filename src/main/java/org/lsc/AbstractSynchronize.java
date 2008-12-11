@@ -169,8 +169,9 @@ public abstract class AbstractSynchronize {
                         Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
 
                         if (jm != null) {
+                            countInitiated++;
+
                             if(doDelete) {
-                            	countInitiated++;
                                 if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
                                     countCompleted++;
                                     logAction(jm, id, syncName);
@@ -269,8 +270,9 @@ public abstract class AbstractSynchronize {
                     Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
 
                     if (jm != null) {
+                        countInitiated++;
+
                         if(doDelete) {
-                            countInitiated++;
                             if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
                                 countCompleted++;
                                 logAction(jm, id, syncName);
@@ -488,107 +490,107 @@ public abstract class AbstractSynchronize {
             return;
         }
 
+        if (!ids.hasNext()) {
+            LOGGER.error("Empty or non existant data source : "
+                    + srcJndiService);
+            return;
+        }
+
         int countAll = 0;
         int countError = 0;
         int countInitiated = 0;
         int countCompleted = 0;
-
-        if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant data source : "
-                    + srcJndiService);
-	} else {
-		JndiModifications jm = null;
-		top newObject = null;
+        JndiModifications jm = null;
+        top newObject = null;
         
-		// store method to obtain source bean
-		Method beanGetInstanceMethod = null;
+        // store method to obtain source bean
+        Method beanGetInstanceMethod = null;
 
-		while (ids.hasNext()) {
-			countAll++;
+        while (ids.hasNext()) {
+            countAll++;
 
-			String id = ids.next();
-			LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
-			try {
-				newObject = srcJndiService.getObject(id);
+            String id = ids.next();
+            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
+            try {
+                newObject = srcJndiService.getObject(id);
 
-				if (newObject == null) {
-					countError++;
-					LOGGER.error("Unable to get object from directory for id=" + id);
-					continue;
-				}
+                if (newObject == null) {
+                    countError++;
+                    LOGGER.error("Unable to get object from directory for id=" + id);
+                    continue;
+                }
 
-				if (beanGetInstanceMethod == null) {
-					/*
-					 * Once all old LSC installations that have Beans with a getInstance(<not top> myclass) methods
-					 * have been upgraded, we can simplify all code in this if by the following line:
-					 */
-					//beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class })
+                if (beanGetInstanceMethod == null) {
+                	/*
+                	 * Once all old LSC installations that have Beans with a getInstance(<not top> myclass) methods
+                	 * have been upgraded, we can simplify all code in this if by the following line:
+                	 */
+                	//beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class })
+                	
+                	// get the list of all superclasses of newObject
+                    HashMap<Class<?>,Object> classHierarchy = new HashMap<Class<?>,Object>();
+                    Class<?> currentClass = newObject.getClass();
+                    while (currentClass != null) {
+                    	classHierarchy.put(currentClass, null);
+                    	currentClass = currentClass.getSuperclass();
+                    }
+                    
+                    // get all methods in the objectBean, and find the right "getInstance" method
+                    Method[] methods = objectBean.getMethods();
+                    Class<?>[] parameterTypes = null;
+                    for (Method method : methods) {
+            			if (method.getName().matches("getInstance")) {
+            				parameterTypes = method.getParameterTypes();
+            				if (parameterTypes.length == 1 && classHierarchy.containsKey(method.getParameterTypes()[0])) {
+            					beanGetInstanceMethod = method;
+            					break;
+            				}
+            			}
+            		}
+                }
 
-					// get the list of all superclasses of newObject
-					HashMap<Class<?>,Object> classHierarchy = new HashMap<Class<?>,Object>();
-					Class<?> currentClass = newObject.getClass();
-					while (currentClass != null) {
-						classHierarchy.put(currentClass, null);
-						currentClass = currentClass.getSuperclass();
-					}
+                AbstractBean srcJndiSt = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
 
-					// get all methods in the objectBean, and find the right "getInstance" method
-					Method[] methods = objectBean.getMethods();
-					Class<?>[] parameterTypes = null;
-					for (Method method : methods) {
-						if (method.getName().matches("getInstance")) {
-							parameterTypes = method.getParameterTypes();
-							if (parameterTypes.length == 1 && classHierarchy.containsKey(method.getParameterTypes()[0])) {
-								beanGetInstanceMethod = method;
-								break;
-							}
-						}
-					}
-				}
+                AbstractBean dstJndiSt = dstJndiService.getBean(id);
+                jm = BeanComparator.calculateModifications(syncOptions,
+                        srcJndiSt, dstJndiSt, customLibrary);
 
-				AbstractBean srcJndiSt = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
+                // Apply modifications to the directory
+                if (jm != null) {
+                    /* Evaluate if you have to do something */
+                    Map<String, Object> table = new HashMap<String, Object>();
+                    table.put("dstBean", dstJndiSt);
+                    table.put("srcBean", srcJndiSt);
+                    String conditionString = syncOptions.getCondition(jm.getOperation());
+                    Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
 
-				AbstractBean dstJndiSt = dstJndiService.getBean(id);
-				jm = BeanComparator.calculateModifications(syncOptions,
-					srcJndiSt, dstJndiSt, customLibrary);
-
-				// Apply modifications to the directory
-				if (jm != null) {
-					/* Evaluate if you have to do something */
-					Map<String, Object> table = new HashMap<String, Object>();
-					table.put("dstBean", dstJndiSt);
-					table.put("srcBean", srcJndiSt);
-					String conditionString = syncOptions.getCondition(jm.getOperation());
-					Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
-
-					if(condition) {
-						countInitiated++;
-						JndiModifications jmFiltered = jmFilter.filter(jm);
-						if (jmFiltered != null) {
-							if (JndiServices.getDstInstance().apply(jmFiltered)) {
-								countCompleted++;
-								logAction(jm, id, syncName);
-							} else {
-								countError++;
-								logActionError(jm, id, null);
-							}
-						}
-					} else {
-						logShouldAction(jm, id, syncName);
-					}
-				}
-			} catch (RuntimeException e) {
-				countError++;
-				logActionError(jm, id, e);
-			} catch (Exception e) {
-				countError++;
-				logActionError(jm, id, e);
-			} catch (Throwable e) {
-				countError++;
-				logActionError(jm, id, e);
-			}
-		}
-	}
+                    if(condition) {
+                        countInitiated++;
+                        JndiModifications jmFiltered = jmFilter.filter(jm);
+                        if (jmFiltered != null) {
+                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
+                                countCompleted++;
+                                logAction(jm, id, syncName);
+                            } else {
+                                countError++;
+                                logActionError(jm, id, null);
+                            }
+                        }
+                    } else {
+                        logShouldAction(jm, id, syncName);
+                    }
+                }
+            } catch (RuntimeException e) {
+                countError++;
+                logActionError(jm, id, e);
+            } catch (Exception e) {
+                countError++;
+                logActionError(jm, id, e);
+            } catch (Throwable e) {
+                countError++;
+                logActionError(jm, id, e);
+            }
+        }
 
         LSCStructuralLogger.GLOBAL.info("# Ended synchronization task " + syncName);
         LSCStructuralLogger.GLOBAL.info(

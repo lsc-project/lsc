@@ -403,6 +403,8 @@ public final class JndiServices {
                 ctx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
                 break;
             case MODRDN_ENTRY:
+		//We do not display this warning if we do not apply the modification with the option modrdn = false
+                LOGGER.warn("WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
                 ctx.rename(
                         new LdapName(rewriteBase(jm.getDistinguishName())),
                         new LdapName(rewriteBase(jm.getNewDistinguishName()))

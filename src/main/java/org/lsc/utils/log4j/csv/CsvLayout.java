@@ -121,7 +121,7 @@ public class CsvLayout extends Layout {
 
 
             if(operations.contains(jm.getOperation()) && 
-            		(taskNamesList == null || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
+            		(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
                 StringBuffer sb = new StringBuffer(1024);
 
                 Iterator<String> iterator = attributes.iterator();

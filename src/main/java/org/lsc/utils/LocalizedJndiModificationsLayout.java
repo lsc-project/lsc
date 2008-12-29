@@ -45,7 +45,6 @@
  */
 package org.lsc.utils;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -63,11 +62,9 @@ import javax.naming.ldap.LdapName;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
-import org.lsc.utils.I18n;
 import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-import org.lsc.utils.log4j.csv.CsvLayout;
 
 /**
  * Provides a localized Log4J layout for LDAP entries.

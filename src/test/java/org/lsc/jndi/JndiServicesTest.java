@@ -57,6 +57,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 
+import org.lsc.LscAttributes;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -78,11 +79,13 @@ public class JndiServicesTest extends TestCase {
     }
 
     public final void testGetAttrList() {
-        Map values = null;
+        Map<String, LscAttributes> values = null;
         try {
-            values = JndiServices.getDstInstance().getAttrList("",
-                    JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE,
-            "objectClass");
+        	List<String> attrsName = new ArrayList<String>();
+        	attrsName.add("objectClass");
+            values = JndiServices.getDstInstance().getAttrsList("",
+                    JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName
+            );
             assertEquals(1, values.size());
             assertNotNull(values.get(values.keySet().iterator().next()));
             assertNotNull(JndiServices.getDstInstance().getSchema(
@@ -97,7 +100,7 @@ public class JndiServicesTest extends TestCase {
     public final void testSup() {
         try {
             assertEquals(null, JndiServices.getDstInstance().sup("", -1));
-            assertEquals(new ArrayList(), JndiServices.getDstInstance().sup(
+            assertEquals(new ArrayList<String>(), JndiServices.getDstInstance().sup(
                     "ou=People", 1));
             List<String> test2list = new ArrayList<String>();
             test2list.add("ou=test2,ou=test3");
@@ -135,12 +138,15 @@ public class JndiServicesTest extends TestCase {
 
     public final void testApplyModifications() {
         try {
-            Map values = JndiServices.getDstInstance().getAttrList("ou=People",
-                    JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE,
-            "description");
-            Attribute descAttr = new BasicAttribute("description");
+        	String attrName = "description";
+        	List<String> attrsName = new ArrayList<String>();
+        	attrsName.add(attrName);
+        	Map<String, LscAttributes> values = JndiServices.getDstInstance().getAttrsList("ou=People",
+                    JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName
+            );
+            Attribute descAttr = new BasicAttribute(attrName);
             String descValue = (String) values.get(values.keySet().iterator()
-                    .next());
+                    .next()).getStringValueAttribute(attrName);
             try {
                 int n = Integer.parseInt(descValue
                         .substring(descValue.length() - 1));
@@ -170,16 +176,18 @@ public class JndiServicesTest extends TestCase {
      */
     public final void testAttrPagedResultsList() {
         try {
+        	String attrName = "objectClass"; 
             System.out.println("Counting all the directory entries ...");
-            Map<String, String> results = JndiServices.getDstInstance().
-            getAttrList("", "objectClass=*", SearchControls.ONELEVEL_SCOPE,
-            "objectClass");
-            Iterator iter = results.keySet().iterator();
+        	List<String> attrsName = new ArrayList<String>();
+        	attrsName.add(attrName);
+            Map<String, LscAttributes> results = JndiServices.getDstInstance().
+            getAttrsList("", attrName + "=*", SearchControls.ONELEVEL_SCOPE, attrsName);
+            Iterator<String> iter = results.keySet().iterator();
             int i = 0;
             for (; iter.hasNext(); i++) {
                 String key = (String) iter.next();
-                String value = results.get(key);
-                System.out.println("key=" + key + ", value=" + value);
+                LscAttributes value = results.get(key);
+                System.out.println("key=" + key + ", value=" + value.getStringValueAttribute(attrName));
             }
             System.out.println(" Final count : " + i);
         } catch (NamingException e) {

@@ -293,6 +293,11 @@
 			<artifactId>ldapbp</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.novell.ldap</groupId>
+			<artifactId>jldap</artifactId>
+			<version>4.3</version>
+		</dependency>
 	</dependencies>
 	<reporting>
 		<outputDirectory>${basedir}/target/site</outputDirectory>

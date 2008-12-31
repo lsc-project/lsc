@@ -46,6 +46,7 @@
 package org.lsc.jndi;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,10 +73,9 @@ import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
 
 import org.apache.log4j.Logger;
+import org.ietf.ldap.LDAPUrl;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
-
-import com.sun.jndi.ldap.LdapURL;
 
 /**
  * General LDAP services wrapper.
@@ -104,6 +104,8 @@ public final class JndiServices {
 
     /** Number of results per page (through PagedResults extended control). */
     private int pageSize;
+    
+    private LDAPUrl namingContext;
 
     //	/** Attribute name to sort on. */
     //	private String sortedBy;
@@ -117,7 +119,13 @@ public final class JndiServices {
      */
     private JndiServices(final Properties connProps) throws NamingException {
         ctx = new InitialLdapContext(connProps, null);
-        contextDn = new LdapURL((String) ctx.getEnvironment().get("java.naming.provider.url")).getDN().toString();
+        try {
+        	namingContext = new LDAPUrl((String) ctx.getEnvironment().get("java.naming.provider.url"));
+		} catch (MalformedURLException e) {
+			LOGGER.error(e,e);
+			throw new NamingException(e.getMessage());
+		}
+		contextDn = namingContext.getDN().toString();
         String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
         if (pageSizeStr != null) {
             pageSize = Integer.parseInt(pageSizeStr);
@@ -286,25 +294,19 @@ public final class JndiServices {
     }
 
     public String rewriteBase(final String base) {
-        try {
-            String contextDn = new LdapURL((String) ctx.getEnvironment().get(
-            "java.naming.provider.url")).getDN().toString();
-            String rewrittenBase = null;
-            if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
-                if (!base.equalsIgnoreCase(contextDn)) {
-                    rewrittenBase = base.substring(0, base.toLowerCase()
-                            .lastIndexOf(contextDn.toLowerCase()) - 1);
-                } else {
-                    rewrittenBase = "";
-                }
+        String contextDn = namingContext.getDN().toString();
+        String rewrittenBase = null;
+        if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
+            if (!base.equalsIgnoreCase(contextDn)) {
+                rewrittenBase = base.substring(0, base.toLowerCase()
+                        .lastIndexOf(contextDn.toLowerCase()) - 1);
             } else {
-                rewrittenBase = base;
+                rewrittenBase = "";
             }
-            return rewrittenBase;
-        } catch (NamingException nex) {
-            LOGGER.error("Error rewriting LDAP DN " + base + " : " + nex, nex);
-            return null;
+        } else {
+            rewrittenBase = base;
         }
+        return rewrittenBase;
     }
 
     public SearchResult readEntry(final String base, final String filter,

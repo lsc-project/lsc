@@ -86,8 +86,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
         LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
                 Logger.getLogger(""), Level.INFO, jm, null);
 
-        LocalizedJndiModificationsLayout layout = 
-            new LocalizedJndiModificationsLayout();
+        LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
         layout.setConversionPattern("%m%n");
         I18n.setLocale(Locale.US);
         assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\n", 
@@ -116,7 +115,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
             new LocalizedJndiModificationsLayout();
         layout.setConversionPattern("%m%n");
         I18n.setLocale(Locale.US);
-        assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n--\ndelete: uid\nuid: old_id\n", 
+        assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n", 
                 layout.format(loggingEvent));
     }
 

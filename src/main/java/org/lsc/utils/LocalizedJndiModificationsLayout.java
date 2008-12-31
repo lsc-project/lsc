@@ -90,6 +90,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
      */
     public LocalizedJndiModificationsLayout() {
         super();
+        activateOptions();
     }
 
     /**

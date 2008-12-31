@@ -56,7 +56,6 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 

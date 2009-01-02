@@ -1,4 +1,4 @@
-<project name="lsc-sample" default="lsc::help" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="lsc-sample" default="lsc::help" basedir=".." xmlns:artifact="urn:maven-artifact-ant">
     
     <!-- look for properties in ~/.lsc-build.properties, ~/lsc.properties -->
     <property file="${user.home}/.${ant.project.name}-build.properties" />

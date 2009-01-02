@@ -55,19 +55,22 @@ public class ScriptableJndiServicesTest extends TestCase {
 
 	public void testValuesOutOfRange() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-//		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "-1"), null);
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "5").size(), 0);
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "4").size(), 0);
+		sjs.setJndiServices(JndiServices.getDstInstance());
+//		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "-1"), null);
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "5").size(), 0);
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "4").size(), 0);
 	}
 	
 	public void testValidNonNullValues() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "3").get(0), "dc=org");
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "2").get(0), "dc=interldap,dc=org");
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "1").get(0), "ou=People,dc=interldap,dc=org");
+		sjs.setJndiServices(JndiServices.getDstInstance());
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "3").get(0), "dc=org");
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "2").get(0), "dc=lsc-project,dc=org");
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "1").get(0), "ou=People,dc=lsc-project,dc=org");
 	}
 	public void testSup0() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-		assertEquals(sjs.sup("uid=seb,ou=People,dc=interldap,dc=org", "0").size(), 3);
+		sjs.setJndiServices(JndiServices.getDstInstance());
+		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "0").size(), 3);
 	}
 }

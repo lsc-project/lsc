@@ -148,8 +148,11 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *                 getting the identifiers list
 	 */
     public Map<String, LscAttributes> getListPivots() throws NamingException {
-        return JndiServices.getSrcInstance().getAttrsList(getBaseDn(), 
-                getFilterAll(), SearchControls.SUBTREE_SCOPE, 
+    	Map<String, LscAttributes> res = JndiServices.getSrcInstance().getAttrsList(
+    		getBaseDn(), 
+                getFilterAll(),
+                SearchControls.SUBTREE_SCOPE,
                 getAttrsId());
+    	return res;
     }
 }

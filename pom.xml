@@ -172,6 +172,8 @@
 					<instrumentation>
 						<ignores>
 							<ignore>org.lsc.*Test*</ignore>
+							<ignore>org.lsc.opends.EmbeddedOpenDS</ignore>
+							<ignore>org.lsc.utils.LdapServer</ignore>
 						</ignores>
 						<excludes>
 							<exclude>**/*Test.class</exclude>

@@ -55,10 +55,6 @@ import java.util.Map;
  * @author rschermesser
  *
  */
-/**
- * @author rschermesser
- *
- */
 public class LscAttributes {
     
     protected Map<String, ?> values;

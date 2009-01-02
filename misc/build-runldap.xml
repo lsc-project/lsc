@@ -35,7 +35,7 @@
                 <arg line="-a" />
             </java>
         </forget>
-	<waitfor maxwait="100" maxwaitunit="second" checkevery="5000">
+	<waitfor maxwait="100" maxwaitunit="second" checkevery="5" checkeveryunit="second">
             <socket server="127.0.0.1" port="33389"/>
 	</waitfor>
 

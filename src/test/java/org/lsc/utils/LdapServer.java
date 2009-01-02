@@ -59,7 +59,7 @@ import org.lsc.Configuration;
 import org.lsc.opends.EmbeddedOpenDS;
 import org.opends.server.api.Backend;
 import org.opends.server.core.DirectoryServer;
-import org.opends.server.types.CanceledOperationException;
+import org.opends.server.types.CancelledOperationException;
 import org.opends.server.types.DN;
 import org.opends.server.types.DirectoryException;
 import org.opends.server.types.InitializationException;
@@ -75,7 +75,7 @@ public class LdapServer {
 	/** The local logger */
 	private static Logger LOGGER = Logger.getLogger(LdapServer.class);
 	
-	public final static void start() throws InitializationException, IOException, DirectoryException, LDIFException, CanceledOperationException {
+	public final static void start() throws InitializationException, IOException, DirectoryException, LDIFException, CancelledOperationException {
 		EmbeddedOpenDS.startServer();
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
@@ -100,11 +100,11 @@ public class LdapServer {
 			LOGGER.error(e,e);
 		} catch (DirectoryException e) {
 			LOGGER.error(e,e);
+		} catch (CancelledOperationException e) {
+			LOGGER.error(e,e);
 		} catch (LDIFException e) {
 			LOGGER.error(e,e);
 		} catch (IOException e) {
-			LOGGER.error(e,e);
-		} catch (CanceledOperationException e) {
 			LOGGER.error(e,e);
 		}
 		if (retCode != 0) {
@@ -121,9 +121,8 @@ public class LdapServer {
 	 * @throws CancelledOperationException 
 	 * @throws DirectoryException 
 	 * @throws InitializationException 
-	 * @throws CanceledOperationException 
 	 */
-	private static int usage(String[] args) throws InitializationException, DirectoryException, LDIFException, IOException, CanceledOperationException {
+	private static int usage(String[] args) throws InitializationException, DirectoryException, CancelledOperationException, LDIFException, IOException {
 		Options options = new Options();
 		options.addOption("a", "start", false, "Start the embedded directory");
 		options.addOption("o", "stop", false, "Stop the embedded directory");

@@ -191,7 +191,11 @@
 				</executions>
 			</plugin>
 		</plugins>
+		<extensions>
+		</extensions>
 	</build>
+	<profiles>
+	</profiles>
 	<repositories>
 		<repository>
 			<id>IBiblio</id>
@@ -220,6 +224,12 @@
 		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
+		</repository>
+		<repository>
+			<id>JBoss</id>
+			<url>http://repository.jboss.com/maven2/</url>
+			<releases>
+			</releases>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -298,6 +308,12 @@
 			<artifactId>jldap</artifactId>
 			<version>4.3</version>
 		</dependency>
+		<dependency>
+			<groupId>sun-opends</groupId>
+			<artifactId>OpenDS</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<reporting>
 		<outputDirectory>${basedir}/target/site</outputDirectory>
@@ -351,6 +367,10 @@
 			</releases>
 		</pluginRepository>
 	</pluginRepositories>
+	<dependencyManagement>
+		<dependencies>
+		</dependencies>
+	</dependencyManagement>
 	<distributionManagement>
 		<repository>
 			<id>lsc-project.org</id>

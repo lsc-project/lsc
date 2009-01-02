@@ -1,0 +1,18 @@
+dn: dc=lsc-project,dc=org
+dc: lsc-project
+objectClass: dcObject
+objectClass: top
+description: lsc-project naming context
+
+dn: ou=People,dc=lsc-project,dc=org
+ou: People
+objectClass: organizationalUnit
+objectClass: top
+description: People subtree
+
+dn: ou=Groups,dc=lsc-project,dc=org
+ou: Groups
+objectClass: organizationalUnit
+objectClass: top
+description: Groups subtree
+

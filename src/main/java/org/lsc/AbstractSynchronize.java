@@ -135,7 +135,7 @@ public abstract class AbstractSynchronize {
                 countAll++;
 
                 Entry<String, LscAttributes> id = ids.next();
-                fTop object = (fTop) jdbcService.getObject(id.getValue());
+                fTop object = (fTop) jdbcService.getObject(id);
 
                 try {
                     if (object == null) {
@@ -219,7 +219,7 @@ public abstract class AbstractSynchronize {
             Entry<String, LscAttributes> id = ids.next();
 
             try {
-                object = (top) srcJndiService.getObject(id.getValue());
+                object = (top) srcJndiService.getObject(id);
                 if (object == null) {
                     countInitiated++;
 
@@ -314,7 +314,7 @@ public abstract class AbstractSynchronize {
                 LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
 
                 try {
-                    LscObject lscObject = srcService.getObject(id.getValue());
+                    LscObject lscObject = srcService.getObject(id);
 
                     if(lscObject == null) {
                         countError++;
@@ -328,7 +328,7 @@ public abstract class AbstractSynchronize {
                         newObject.setUpFromObject((fTop)lscObject);
                     } else {
                         // Specific LDAP
-                        newObject = (top)srcService.getObject(id.getValue());
+                        newObject = (top)srcService.getObject(id);
                     }
 
                     AbstractBean srcBean = null;

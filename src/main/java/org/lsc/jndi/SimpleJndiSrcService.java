@@ -47,6 +47,7 @@ package org.lsc.jndi;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -108,11 +109,11 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final LscObject getObject(final LscAttributes ids) throws NamingException {
+	public final LscObject getObject(final Entry<String, LscAttributes> ids) throws NamingException {
 		try {
 		    LscObject topObject = objectClass.newInstance();
 
-			return this.getObjectFromSR(get(ids), topObject);
+			return this.getObjectFromSR(get(ids.getValue()), topObject);
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to instanciate simple object "
 					+ objectClass.getName()

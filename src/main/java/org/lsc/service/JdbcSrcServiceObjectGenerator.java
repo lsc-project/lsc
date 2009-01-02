@@ -236,46 +236,17 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
         // Content
         ctn += ("package " + this.getPackageName() + ";\n\n");
 
-        ctn += "import java.sql.SQLException;\n";
-        ctn += "import java.util.Iterator;\n\n";
-        ctn += "import org.apache.log4j.Logger;\n";
-        ctn += "import org.lsc.persistence.DaoConfig;\n\n";
-        ctn += "import org.lsc.objects.flat.fTop;\n";
-        ctn += ("import org.lsc.objects.flat." + flatName + ";\n\n");
-        ctn += "import com.ibatis.sqlmap.client.SqlMapClient;\n\n";
-
         ctn += ("public class " + serviceClassName
-               + " implements IJdbcSrcService {\n\n");
-        ctn += ("	private Logger LOGGER = Logger.getLogger("
-               + serviceClassName + ".class);\n\n");
-        ctn += ("	private static " + serviceClassName + " INSTANCE;\n");
-        ctn += "	private SqlMapClient sqlMapper;\n\n";
+               + " extends AbstractJdbcService {\n\n");
 
-        ctn += ("	public " + serviceClassName + "() {\n"
-               + "		sqlMapper = DaoConfig.getSqlMapClient();\n" + "	}\n\n");
-
-        ctn += ("	public static " + serviceClassName + " getInstance() {\n"
-               + "		if(INSTANCE == null) {\n\t\t\tINSTANCE = new "
-               + serviceClassName + "();\n"
-               + "			INSTANCE.sqlMapper = DaoConfig.getSqlMapClient();\n"
-               + "\t\t}\n" + "			return INSTANCE;\n" + "	}\n\n");
-
-        ctn += ("	public final fTop getFlatObject(final String id) {\n"
-               + "		try {\n" + "			return (" + this.flatName
-               + ") sqlMapper.queryForObject(\"get" + this.objectName
-               + "\", id);\n" + "		} catch (SQLException e) {\n"
-               + "			LOGGER.warn(\"Unable to found " + getClassName()
-               + " with id=\" + id + \" (\" + e + \")\", e);\n" + "		}\n"
-               + "		return null;\n" + "	}\n\n");
-
-        ctn += ("		@SuppressWarnings(\"unchecked\")\n"
-               + "	public final Iterator<String> getIdsList() {\n"
-               + "		try {\n" + "			return sqlMapper.queryForList(\"get"
-               + this.objectName + "List\", null).iterator();\n"
-               + "		} catch (SQLException e) {\n"
-               + "			LOGGER.warn(\"Unable to return objects list (\" + e + \")\", e);\n"
-               + "		}\n" + "		return null;\n" + "	}\n\n");
-
+        ctn += ("	@Override\n"
+        	   + "	public String getRequestNameForList() {\n"
+        	   + "		return \"get" + this.objectName + "List\";\n" + "	}\n\n");
+        	   
+        ctn += ("	@Override\n"
+         	   + "	public String getRequestNameForObject() {\n"
+         	   + "		return \"get" + this.objectName + "\";\n" + "	}\n\n");
+         	   
         ctn += "}";
 
         return ctn;
@@ -435,7 +406,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
         } catch (FileNotFoundException fnfe) {
             LOGGER.error(fnfe, fnfe);
         } catch (IOException e) {
-            LOGGER.error(e, e);
+            LOGGER.error(e + " (" + fileName + ")", e);
         }
 
         return false;

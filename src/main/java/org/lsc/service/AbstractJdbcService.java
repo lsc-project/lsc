@@ -45,29 +45,74 @@
  */
 package org.lsc.service;
 
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
+import org.apache.log4j.Logger;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
+import org.lsc.persistence.DaoConfig;
+
+import com.ibatis.sqlmap.client.SqlMapClient;
 
 /**
- * @author rschermesser
- *
+ * Generic JDBC iBatis Service
+ * Manage retrieving of list and object according t
+ * Can be override by a specific implementation in the final class if needed :
+ * Get a look at org.lsc.service.StructureJdbcService class
+ * @author Sebastien Bahloul <seb@lsc-project.org>
  */
-public interface ISrcService {
-    /**
-     * This method is a simple object getter.
-     * @param ids the object identifiers
-     * @return the object or null if not found
-     */
-    LscObject getObject(Entry<String, LscAttributes> obj) throws NamingException;
+public abstract class AbstractJdbcService implements ISrcService {
 
-    /**
-     * Returns a list of all the objects identifiers.
-     * @return the list of ids
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
+	protected static Logger LOGGER = Logger.getLogger(AbstractJdbcService.class);
+	
+	protected SqlMapClient sqlMapper;
+	
+	public abstract String getRequestNameForList();
+	
+	public abstract String getRequestNameForObject();
+
+	public AbstractJdbcService() {
+		sqlMapper = DaoConfig.getSqlMapClient();
+	}
+
+	public LscObject getObject(Entry<String, LscAttributes> ids) throws NamingException {
+		String id = ids.getKey();
+		try {
+
+			return (LscObject) sqlMapper.queryForObject(getRequestNameForObject(), id);
+		} catch (SQLException e) {
+			LOGGER.warn("Unable to found InetOrgPersonJDBCService with id="
+					+ id + " (" + e + ")", e);
+		}
+		return null;
+	}
+	
+	/**
+	 * Execute a database request to get a list of object identifiers. This request
+	 * must be a very simple and efficient request because it will get all the requested
+	 * identifier. Map values, LscAttributes, will be returned empty 
+	 * @return a corresponding map indexed by id.
+	 */
+	public Map<String, LscAttributes> getListPivots() {
+        try {
+            List<?> ids = sqlMapper.queryForList(getRequestNameForList(), null);
+            Iterator<?> idsIter = ids.iterator();
+            Map<String,LscAttributes> ret = new HashMap<String, LscAttributes>();
+            while(idsIter.hasNext()) {
+            	String id = (String) idsIter.next();
+                LscAttributes la = new LscAttributes();
+               	ret.put(id, la);
+            }
+        } catch (SQLException e) {
+            LOGGER.warn("Unable to return activity list (" + e + ")", e);
+        }
+		return null;
+	}
 }

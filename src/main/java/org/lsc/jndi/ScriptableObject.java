@@ -77,21 +77,16 @@ public class ScriptableObject {
 
             if (listable) {
                 method = this.getClass()
-                             .getDeclaredMethod( methodName,
-                                        new Class[] { List.class, List.class });
+                             .getDeclaredMethod( methodName, List.class, List.class );
 
-                return (List<String>) method.invoke(this,
-                                                    new Object[] { aList, bList });
+                return (List<String>) method.invoke(this, aList, bList );
             } else {
                 if ((aList == null) || (bList == null)) {
                     return null;
                 }
 
                 method = this.getClass()
-                             .getDeclaredMethod(methodName,
-                                                new Class[] {
-                                                    String.class, String.class
-                                                });
+                             .getDeclaredMethod(methodName, String.class, String.class);
 
                 List<String> results = new ArrayList<String>();
                 Iterator<String> aListIter = aList.iterator();
@@ -102,11 +97,7 @@ public class ScriptableObject {
 
                     while (bListIter.hasNext()) {
                         String bValue = bListIter.next();
-                        List<String> res = (List<String>) method.invoke(this,
-                                                                        new Object[] {
-                                                                            aValue,
-                                                                            bValue
-                                                                        });
+                        List<String> res = (List<String>) method.invoke(this, aValue, bValue);
 
                         if (res != null) {
                             results.addAll(res);

@@ -113,7 +113,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 		try {
 		    LscObject topObject = objectClass.newInstance();
 
-			return this.getObjectFromSR(get(ids.getValue()), topObject);
+			return this.getObjectFromSR(get(ids), topObject);
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to instanciate simple object "
 					+ objectClass.getName()
@@ -148,11 +148,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *                 getting the identifiers list
 	 */
     public Map<String, LscAttributes> getListPivots() throws NamingException {
-    	Map<String, LscAttributes> res = JndiServices.getSrcInstance().getAttrsList(
-    		getBaseDn(), 
-                getFilterAll(),
-                SearchControls.SUBTREE_SCOPE,
+        return JndiServices.getSrcInstance().getAttrsList(getBaseDn(), 
+                getFilterAll(), SearchControls.SUBTREE_SCOPE, 
                 getAttrsId());
-    	return res;
     }
 }

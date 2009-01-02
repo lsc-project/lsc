@@ -88,7 +88,7 @@ public abstract class AbstractJdbcService implements ISrcService {
 
 			return (LscObject) sqlMapper.queryForObject(getRequestNameForObject(), id);
 		} catch (SQLException e) {
-			LOGGER.warn("Unable to found InetOrgPersonJDBCService with id="
+			LOGGER.warn("Error while looking for a specific entry with id="
 					+ id + " (" + e + ")", e);
 		}
 		return null;
@@ -110,8 +110,9 @@ public abstract class AbstractJdbcService implements ISrcService {
                 LscAttributes la = new LscAttributes();
                	ret.put(id, la);
             }
+            return ret;
         } catch (SQLException e) {
-            LOGGER.warn("Unable to return activity list (" + e + ")", e);
+            LOGGER.warn("Error while looking for the entries list: " + e, e);
         }
 		return null;
 	}

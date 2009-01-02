@@ -139,7 +139,7 @@ public abstract class AbstractSynchronize {
 
                 try {
                     if (object == null) {
-                        AbstractBean bean = dstJndiService.getBean(id.getValue());
+                        AbstractBean bean = dstJndiService.getBean(id);
                         jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
                         jm.setDistinguishName(bean.getDistinguishName());
 
@@ -223,7 +223,7 @@ public abstract class AbstractSynchronize {
                 if (object == null) {
                     countInitiated++;
 
-                    AbstractBean bean = dstJndiService.getBean(id.getValue());
+                    AbstractBean bean = dstJndiService.getBean(id);
                     jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
                     jm.setDistinguishName(id.getKey());
 
@@ -286,10 +286,15 @@ public abstract class AbstractSynchronize {
 
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {
-            ids = srcService.getListPivots().entrySet().iterator();
+        	Map<String, LscAttributes>entries = srcService.getListPivots();
+            if(entries == null) {
+                LOGGER.fatal("Unable to find any object for service "
+                        + srcService.getClass().getName());
+                return;
+            }
+            ids = entries.entrySet().iterator();
         } catch(Exception e) {
-            LOGGER.fatal("Unable to find any object for service "
-                    + srcService.getClass().getName());
+            LOGGER.fatal("Unknown error: " + e, e);
             return;
         }
 
@@ -323,7 +328,7 @@ public abstract class AbstractSynchronize {
                     }
 
                     // Specific JDBC 
-                    if(lscObject.getClass().isAssignableFrom(fTop.class)) {
+                    if(fTop.class.isAssignableFrom(lscObject.getClass())) {
                         newObject = object.getClass().newInstance();
                         newObject.setUpFromObject((fTop)lscObject);
                     } else {
@@ -344,7 +349,7 @@ public abstract class AbstractSynchronize {
                         throw ite.getCause();
                     }
 
-                    dstBean = dstService.getBean(id.getValue());
+                    dstBean = dstService.getBean(id);
                     jm = BeanComparator.calculateModifications(syncOptions, srcBean,
                             dstBean, customLibrary);
 

@@ -49,6 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -97,14 +98,14 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param id the data identifier in the directory - must return a unique directory entry
+	 * @param ids the data identifier in the directory - must return a unique directory entry
 	 * @return the corresponding bean or null if failed
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final AbstractBean getBean(final LscAttributes id) throws NamingException {
+	public final AbstractBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
 		try {
-			SearchResult srObject = get(id);
+			SearchResult srObject = get(ids);
 			Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
 					Class.class });
 			return (AbstractBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });

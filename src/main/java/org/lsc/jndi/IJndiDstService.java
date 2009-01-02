@@ -46,6 +46,7 @@
 package org.lsc.jndi;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
@@ -63,7 +64,7 @@ public interface IJndiDstService {
      * @return the object or null if not found
      * @throws NamingException when a directory exception is encountered
      */
-    AbstractBean getBean(final LscAttributes ids) throws NamingException;
+    AbstractBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
 
     /**
      * Returns a list of all the objects identifiers.

@@ -47,6 +47,7 @@ package org.lsc.jndi;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
@@ -80,7 +81,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final AbstractBean getBean(final LscAttributes id) throws NamingException {
+	public AbstractBean getBean(Entry<String, LscAttributes> id) throws NamingException {
 		return null;
 	}
 
@@ -102,6 +103,5 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
         return null;
-    }
-
+	}
 }

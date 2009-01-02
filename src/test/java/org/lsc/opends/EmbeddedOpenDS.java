@@ -60,7 +60,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opends.messages.Message;
 import org.opends.server.api.Backend;
 import org.opends.server.backends.MemoryBackend;
 import org.opends.server.core.AddOperation;
@@ -173,8 +172,8 @@ public final class EmbeddedOpenDS {
      */
     public static void shutdownServer(String reason) {
         if (SERVER_STARTED) {
-            Message msg = Message.EMPTY;
-            DirectoryServer.shutDown("org.lsc.opends.EmbeddedOpenDS", msg);
+            //		    new Message();
+            DirectoryServer.shutDown("org.lsc.opends.EmbeddedOpenDS", reason);
             SERVER_STARTED = false;
         }
     }

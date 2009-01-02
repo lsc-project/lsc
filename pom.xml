@@ -190,6 +190,37 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>startLdapServer</id>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <tasks>
+                                <property name="execution.path" refid="maven.runtime.classpath"></property>
+                                <ant antfile="${basedir}/misc/build-runldap.xml" target="startLdapServer"></ant>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stopLdapServer</id>
+                        <phase>test</phase>
+                        <configuration>
+                            <tasks>
+                                <property name="execution.path" refid="maven.runtime.classpath"></property>
+                                <ant antfile="${basedir}/misc/build-runldap.xml" target="stopLdapServer"></ant>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 		<extensions>
 		</extensions>
@@ -224,12 +255,6 @@
 		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
-		</repository>
-		<repository>
-			<id>JBoss</id>
-			<url>http://repository.jboss.com/maven2/</url>
-			<releases>
-			</releases>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -309,10 +334,16 @@
 			<version>4.3</version>
 		</dependency>
 		<dependency>
-			<groupId>sun-opends</groupId>
-			<artifactId>OpenDS</artifactId>
-			<version>1.0.0</version>
-			<scope>test</scope>
+			<groupId>sun</groupId>
+			<artifactId>opends</artifactId>
+			<version>0.9</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>berkeleydb</groupId>
+			<artifactId>je</artifactId>
+			<version>3.2.23</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 	<reporting>

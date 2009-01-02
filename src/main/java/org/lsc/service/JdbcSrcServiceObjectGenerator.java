@@ -329,12 +329,8 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
                         }
                     }
 
-                    superClass = superClassObj.getSuperclass().getSimpleName();
-
-                    if ((superClassObj.getPackage().getName() != null)
-                            && (superClassObj.getPackage().getName().length() > 0)) {
-                        superClass = superClassObj.getPackage().getName()
-                                     + "." + superClass;
+                    if(superClassObj.getSuperclass() != null) {
+                    	superClass = superClassObj.getSuperclass().getCanonicalName();
                     }
                 } catch (Exception e) {
                     LOGGER.error("Reflective Exception : " + e, e);

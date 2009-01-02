@@ -176,8 +176,8 @@ public class BeanGenerator extends AbstractGenerator {
         // + "import org.lsc.Configuration;\n"
         content += "import javax.naming.NamingException;\n\n"
             + "import org.lsc.jndi.JndiModifications;\n"
-            + "import org.lsc.objects." + initialClassName
-            + ";\n\n";
+            + "import org.lsc.objects." + initialClassName + ";\n"
+            + "import org.lsc.objects.top;\n\n";
 
         content += "public class " + beanClassName
         + " extends AbstractBean implements IBean {\n\n";

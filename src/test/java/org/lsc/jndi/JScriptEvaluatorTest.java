@@ -98,6 +98,6 @@ public class JScriptEvaluatorTest extends TestCase {
 
 //	public void testOkLdap() throws IllegalAccessException, InstantiationException, InvocationTargetException {
 //		Map<String, Object> table = new HashMap<String, Object>();
-//		assertEquals(JScriptEvaluator.eval("ldap.or(ldap.attribute('ou=People,dc=interldap,dc=org','ou'), ldap.fsup('ou=People,dc=interldap,dc=org','dc=*'))", table), "[People,interldap]");
+//		assertEquals(JScriptEvaluator.eval("ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table), "[People,lsc-project]");
 //	}
 }

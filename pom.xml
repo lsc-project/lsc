@@ -117,15 +117,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>
-			scm:svn:svn+ssh://anonymouslsc-project.org/var/lib/svn/lsc-project
-		</connection>
-		<developerConnection>
-			scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-project
-		</developerConnection>
-		<url>
-			http://lsc-project.org/svn/lsc/
-		</url>
+		<connection>scm:svn:https://lsc-project.org/svn/lsc-core</connection>
+		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core</developerConnection>
+		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc</url>
 	</scm>
 	<organization>
 		<name>LSC project</name>

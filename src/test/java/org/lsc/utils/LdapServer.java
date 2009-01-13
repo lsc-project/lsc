@@ -79,7 +79,12 @@ public class LdapServer {
 		EmbeddedOpenDS.startServer();
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
-		EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").getFile());
+		if(EmbeddedOpenDS.class.getResource("test.ldif") == null || EmbeddedOpenDS.class.getResource("test.ldif").getFile() == null) {
+			LOGGER.error("Unable to load LDIF sample content !");
+		} else {
+			EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").getFile());
+			LOGGER.error("LDIF sample content loaded successfully");
+		}
 	}
 	
 	public final static void stop() {

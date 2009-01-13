@@ -191,7 +191,7 @@ public class JndiServicesTest extends TestCase {
             }
             System.out.println(" Final count : " + i);
         } catch (NamingException e) {
-            // TODO Auto-generated catch block
+            System.err.println(e);
             e.printStackTrace();
         }
     }

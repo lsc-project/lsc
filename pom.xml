@@ -408,7 +408,7 @@
 	</distributionManagement>
 	<ciManagement>
 		<system>hudson</system>
-		<url>http://seb.homelinux.org/hudson/</url>
+		<url>http://build.lsc-project.org/</url>
 		<notifiers>
 			<notifier>
 				<type>mail</type>

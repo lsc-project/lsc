@@ -152,7 +152,6 @@ public abstract class Configuration {
 					if(confDir.isDirectory()) {
 						FilenameFilter ff = new FilenameFilter() {
 							public boolean accept(File arg0, String arg1) {
-								// TODO Auto-generated method stub
 								return false;
 							}
 						};

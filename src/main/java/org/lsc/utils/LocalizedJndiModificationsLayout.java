@@ -183,8 +183,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
                         sb.append("delete: ").append(attr.getID()).append("\n");
                         break;
                     case DirContext.REPLACE_ATTRIBUTE:
-                        sb.append("replace: ").append(attr.getID())
-                        .append("\n");
+                        sb.append("replace: ").append(attr.getID()).append("\n");
                         break;
                     case DirContext.ADD_ATTRIBUTE:
                     default:

@@ -234,6 +234,8 @@ public final class JndiServices {
             if (ne.hasMoreElements()) {
                 LOGGER.error("Too many entries returned (base: \"" + base
                         + "\", filter: \"" + filter + "\"");
+                throw new NamingException("Too many entries returned (base: \"" + base
+                        + "\", filter: \"" + filter + "\"");
             } else {
                 return sr;
             }

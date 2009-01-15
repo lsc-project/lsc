@@ -390,7 +390,10 @@ public final class BeanComparator {
 
                     Iterator<String> createValuesModifiedIter = createValuesModified.iterator();
                     while(createValuesModifiedIter.hasNext()) {
-                        srcJdbcAttribute.add(createValuesModifiedIter.next());
+                    	String value = createValuesModifiedIter.next();
+                    	if (value != null && value.length() > 0) {
+                    		srcJdbcAttribute.add(value);
+                    	}
                     }
                 }
                 modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, srcJdbcAttribute));

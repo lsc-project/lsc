@@ -139,22 +139,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
         while (tasksSt.hasMoreTokens()) {
             String taskName = tasksSt.nextToken();
-
-            // Get the task properties
-            String taskType = lscProperties.getProperty(TASKS_PROPS_PREFIX
-                    + "." + taskName + "." + TYPE_PROPS_PREFIX);
-            TaskType task = null;
-            try {
-                if(taskType == null) {
-                    //To have only one error
-                    throw new IllegalArgumentException();
-                }
-                task = TaskType.valueOf(taskType.toLowerCase());
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Missing '" + taskName + "' task parameter !");
-                return false;
-            }
-
+            TaskType taskType = null;
+            
             // Launch the task either if explicitly
             // specified or if "all" magic keyword used
             boolean isSyncTask = syncTasks.contains(taskName.toString());
@@ -162,15 +148,32 @@ public class SimpleSynchronize extends AbstractSynchronize {
             boolean isCleanTask = cleanTasks.contains(taskName.toString());
             boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
             
+            // If this task should be run
+            if (isSyncTask || isSyncTaskAll || isCleanTask || isCleanTaskAll) {
+            	foundATask = true;
+
+	            // Get the task properties
+	            String taskTypeString = lscProperties.getProperty(TASKS_PROPS_PREFIX
+	                    + "." + taskName + "." + TYPE_PROPS_PREFIX);
+	            try {
+	                if(taskTypeString == null) {
+	                    //To have only one error
+	                    throw new IllegalArgumentException();
+	                }
+	                taskType = TaskType.valueOf(taskTypeString.toLowerCase());
+	            } catch (IllegalArgumentException e) {
+	                LOGGER.error("Missing '" + taskName + "' task type parameter !");
+	                return false;
+	            }
+            }
+            
             if (isSyncTask || isSyncTaskAll) {
-                foundATask = true;
-                if (!launchTask(task, taskName, TaskMode.sync)) {
+                if (!launchTask(taskType, taskName, TaskMode.sync)) {
                     return false;
                 }
             }
             if(isCleanTask || isCleanTaskAll) {
-                foundATask = true;
-                if (!launchTask(task, taskName, TaskMode.clean)) {
+                if (!launchTask(taskType, taskName, TaskMode.clean)) {
                     return false;
                 }
             }

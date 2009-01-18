@@ -62,213 +62,205 @@ import org.lsc.Generator;
  */
 public class PropertiesGenerator extends AbstractGenerator {
 
-    /** The local LOG4J logger. */
-    private static final Logger LOGGER = Logger
-	    .getLogger(PropertiesGenerator.class);
+	/** The local LOG4J logger. */
+	private static final Logger LOGGER = Logger.getLogger(PropertiesGenerator.class);
 
-    /** The generator type. */
-    private Generator.GEN_TYPE genType;
+	/** The generator type. */
+	private Generator.GEN_TYPE genType;
 
-    /** This property contains the bean class name. */
-    private String beanClassName;
+	/** This property contains the bean class name. */
+	private String beanClassName;
 
-    /** This property contains the object class name. */
-    private String objectClassName;
+	/** This property contains the object class name. */
+	private String objectClassName;
 
-    /** This property contains the jdbc source service class name. */
-    private String jdbcSrcServiceClassName;
+	/** This property contains the jdbc source service class name. */
+	private String jdbcSrcServiceClassName;
 
-    /**
-         * Generate the file.
-         * 
-         * @param taskName the task name
-         * @return the generation status
-         * @throws NamingException
-         *                 thrown if an directory exception is encountered while
-         *                 extending properties
-         */
-    @Override
-    public final boolean generate(final String taskName) throws NamingException {
-	String prefix = "lsc";
-	Properties props = Configuration.getAsProperties(prefix);
-	props = checkAndAdd(props, "tasks", taskName);
-	props = replace(props, "tasks." + taskName + ".bean", beanClassName);
-	props = replace(props, "tasks." + taskName + ".object", objectClassName);
-	switch (genType) {
-	case CSV2LDAP:
-	case DATABASE2LDAP:
-	    props = replace(props, "tasks." + taskName + ".type", "db2ldap");
-	    props = replace(props, "tasks." + taskName + ".srcService",
-		    jdbcSrcServiceClassName);
-	    break;
-	case LDAP2LDAP:
-	    props = replace(props, "tasks." + taskName + ".type", "ldap2ldap");
-	    props = replace(props, "tasks." + taskName + ".srcService",
-		    "org.lsc.jndi.SimpleJndiSrcService");
-	    props = replaceDefaultSimpleJndiService(props, "tasks." + taskName
-		    + ".srcService");
-	    break;
-	default:
-	    throw new UnsupportedOperationException("Must never be here !");
-	}
-	props = replace(props, "tasks." + taskName + ".dstService",
-		"org.lsc.jndi.SimpleJndiDstService");
-	props = replaceDefaultSimpleJndiService(props, "tasks." + taskName
-		+ ".dstService");
-	try {
-	    Configuration.setProperties(prefix, props);
-	} catch (ConfigurationException e) {
-	    LOGGER.fatal("Unable to save configuration file: " + e, e);
-	    return false;
-	}
-	return true;
-    }
-
-    /**
-         * This method initiate all required Jndi properties.
-         * 
-         * @param props
-         *                the properties table
-         * @param propertyPrefix
-         *                the property prefix
-         * @return the updated properties
-         */
-    private Properties replaceDefaultSimpleJndiService(final Properties props,
-	    final String propertyPrefix) {
-	Properties localProps = props;
-	localProps = replace(localProps, propertyPrefix + ".baseDn",
-		"ou=People");
-	localProps = replace(localProps, propertyPrefix + ".attrId",
-		"employeeNumber");
-	localProps = replace(localProps, propertyPrefix + ".filterId",
-		"(&(objectClass=inetOrgPerson)(employeeNumber={0}))");
-	localProps = replace(localProps, propertyPrefix + ".filterAll",
-		"(objectClass=inetOrgPerson)");
-	return localProps;
-    }
-
-    /**
-         * Replace the property value in the properties.
-         * 
-         * @param props
-         *                the properties table
-         * @param property
-         *                the property name
-         * @param value
-         *                the value to set
-         * @return the updated properties
-         */
-    private Properties replace(final Properties props, final String property,
-	    final String value) {
-	props.setProperty(property, value);
-	return props;
-    }
-
-    /**
-         * Set the specified value to the attribute, existing or not, in the
-         * specified table.
-         * 
-         * @param props
-         *                the properties table
-         * @param property
-         *                the property name
-         * @param value
-         *                the value to set
-         * @return the updated properties
-         */
-    private Properties checkAndAdd(final Properties props,
-	    final String property, final String value) {
-	String propertyStr = props.getProperty(property);
-	if (propertyStr == null) {
-	    propertyStr = value;
-	} else {
-	    propertyStr = propertyStr.trim();
-	    if (propertyStr.indexOf(value) < 0) {
-		if (propertyStr.length() > 0) {
-		    propertyStr += "," + value;
-		} else {
-		    propertyStr = value;
+	/**
+	 * Generate the file.
+	 * 
+	 * @param taskName the task name
+	 * @return the generation status
+	 * @throws NamingException
+	 *                 thrown if an directory exception is encountered while
+	 *                 extending properties
+	 */
+	@Override
+	public final boolean generate(final String taskName) throws NamingException {
+		String prefix = "lsc";
+		Properties props = Configuration.getAsProperties(prefix);
+		props = checkAndAdd(props, "tasks", taskName);
+		props = replace(props, "tasks." + taskName + ".bean", beanClassName);
+		props = replace(props, "tasks." + taskName + ".object", objectClassName);
+		switch (genType) {
+			case CSV2LDAP:
+			case DATABASE2LDAP:
+				props = replace(props, "tasks." + taskName + ".type", "db2ldap");
+				props = replace(props, "tasks." + taskName + ".srcService",
+						jdbcSrcServiceClassName);
+				break;
+			case LDAP2LDAP:
+				props = replace(props, "tasks." + taskName + ".type", "ldap2ldap");
+				props = replace(props, "tasks." + taskName + ".srcService",
+				"org.lsc.jndi.SimpleJndiSrcService");
+				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName
+						+ ".srcService");
+				break;
+			default:
+				throw new UnsupportedOperationException("Must never be here !");
 		}
-	    }
+		props = replace(props, "tasks." + taskName + ".dstService", "org.lsc.jndi.SimpleJndiDstService");
+		props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".dstService");
+		try {
+			Configuration.setProperties(prefix, props);
+		} catch (ConfigurationException e) {
+			LOGGER.fatal("Unable to save configuration file: " + e, e);
+			return false;
+		}
+		return true;
 	}
-	props.setProperty(property, propertyStr);
-	return props;
-    }
 
-    /**
-     * Unused.
-     * @return nothing
-     */
-    @Override
-    protected final String generateContent() {
-	throw new UnsupportedOperationException();
-    }
+	/**
+	 * This method initiate all required Jndi properties.
+	 * 
+	 * @param props
+	 *                the properties table
+	 * @param propertyPrefix
+	 *                the property prefix
+	 * @return the updated properties
+	 */
+	private Properties replaceDefaultSimpleJndiService(final Properties props,
+			final String propertyPrefix) {
+		Properties localProps = props;
+		localProps = replace(localProps, propertyPrefix + ".baseDn", "ou=People");
+		localProps = replace(localProps, propertyPrefix + ".attrId", "employeeNumber");
+		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=inetOrgPerson)(employeeNumber={0}))");
+		localProps = replace(localProps, propertyPrefix + ".filterAll", "(objectClass=inetOrgPerson)");
+		return localProps;
+	}
 
-    /**
-     * Unused.
-     * @return nothing
-     */
-    @Override
-    public final String getGenericPackageName() {
-	throw new UnsupportedOperationException();
-    }
+	/**
+	 * Replace the property value in the properties.
+	 * 
+	 * @param props
+	 *                the properties table
+	 * @param property
+	 *                the property name
+	 * @param value
+	 *                the value to set
+	 * @return the updated properties
+	 */
+	private Properties replace(final Properties props, final String property,
+			final String value) {
+		props.setProperty(property, value);
+		return props;
+	}
 
-    /**
-         * Run the CSV2SQL generator.
-         * 
-         * @param taskName
-         *                the task name
-         * @param destination
-         *                the destination directory
-         * @param genType
-         *                the Generation type
-         * @param beanClassName
-         *                the bean class name
-         * @param objectClassName
-         *                the object class name
-         * @param jdbcSrcServiceClassName
-         *                the jdbc source service name
-         * @throws NamingException
-         *                 thrown if an directory exception is encountered while
-         *                 generating the new bean
-         */
-    public static void run(final String taskName, final String destination,
-	    final Generator.GEN_TYPE genType, final String beanClassName,
-	    final String objectClassName, final String jdbcSrcServiceClassName)
-	    throws NamingException {
-	PropertiesGenerator pg = new PropertiesGenerator();
-	pg.init(genType, beanClassName, objectClassName,
-		jdbcSrcServiceClassName);
-	pg.setDestination(destination);
-	pg.generate(taskName);
-    }
+	/**
+	 * Set the specified value to the attribute, existing or not, in the
+	 * specified table.
+	 * 
+	 * @param props
+	 *                the properties table
+	 * @param property
+	 *                the property name
+	 * @param value
+	 *                the value to set
+	 * @return the updated properties
+	 */
+	private Properties checkAndAdd(final Properties props,
+			final String property, final String value) {
+		String propertyStr = props.getProperty(property);
+		if (propertyStr == null) {
+			propertyStr = value;
+		} else {
+			propertyStr = propertyStr.trim();
+			if (propertyStr.indexOf(value) < 0) {
+				if (propertyStr.length() > 0) {
+					propertyStr += "," + value;
+				} else {
+					propertyStr = value;
+				}
+			}
+		}
+		props.setProperty(property, propertyStr);
+		return props;
+	}
 
-    /**
-         * Initialized all required parameters.
-         * 
-         * @param lgenType
-         *                the Generation type
-         * @param lbeanClassName
-         *                the bean class name
-         * @param lobjectClassName
-         *                the object class name
-         * @param ljdbcSrcServiceClassName
-         *                the jdbc source service name
-         */
-    private void init(final Generator.GEN_TYPE lgenType,
-	    final String lbeanClassName, final String lobjectClassName,
-	    final String ljdbcSrcServiceClassName) {
-	genType = lgenType;
-	beanClassName = lbeanClassName;
-	objectClassName = lobjectClassName;
-	jdbcSrcServiceClassName = ljdbcSrcServiceClassName;
-    }
+	/**
+	 * Unused.
+	 * @return nothing
+	 */
+	@Override
+	protected final String generateContent() {
+		throw new UnsupportedOperationException();
+	}
 
-    /**
-     * Return a generic file name for latest generated file.
-     * @return A java generic file name.
-     */
-    public final String getFileName() {
-	return getStandardFileName();
-    }
+	/**
+	 * Unused.
+	 * @return nothing
+	 */
+	@Override
+	public final String getGenericPackageName() {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Run the CSV2SQL generator.
+	 * 
+	 * @param taskName
+	 *                the task name
+	 * @param destination
+	 *                the destination directory
+	 * @param genType
+	 *                the Generation type
+	 * @param beanClassName
+	 *                the bean class name
+	 * @param objectClassName
+	 *                the object class name
+	 * @param jdbcSrcServiceClassName
+	 *                the jdbc source service name
+	 * @throws NamingException
+	 *                 thrown if an directory exception is encountered while
+	 *                 generating the new bean
+	 */
+	public static void run(final String taskName, final String destination,
+			final Generator.GEN_TYPE genType, final String beanClassName,
+			final String objectClassName, final String jdbcSrcServiceClassName)
+	throws NamingException {
+		PropertiesGenerator pg = new PropertiesGenerator();
+		pg.init(genType, beanClassName, objectClassName, jdbcSrcServiceClassName);
+		pg.setDestination(destination);
+		pg.generate(taskName);
+	}
+
+	/**
+	 * Initialized all required parameters.
+	 * 
+	 * @param lgenType
+	 *                the Generation type
+	 * @param lbeanClassName
+	 *                the bean class name
+	 * @param lobjectClassName
+	 *                the object class name
+	 * @param ljdbcSrcServiceClassName
+	 *                the jdbc source service name
+	 */
+	private void init(final Generator.GEN_TYPE lgenType,
+			final String lbeanClassName, final String lobjectClassName,
+			final String ljdbcSrcServiceClassName) {
+		genType = lgenType;
+		beanClassName = lbeanClassName;
+		objectClassName = lobjectClassName;
+		jdbcSrcServiceClassName = ljdbcSrcServiceClassName;
+	}
+
+	/**
+	 * Return a generic file name for latest generated file.
+	 * @return A java generic file name.
+	 */
+	public final String getFileName() {
+		return getStandardFileName();
+	}
 }

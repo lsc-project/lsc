@@ -137,11 +137,12 @@ public final class Generator {
         }
 
         LOGGER.info("Generating Java class for LDAP objectclass \"" + dstClassName + "\" from target directory...");
-        String objectClassName = ObjectClassGenerator.run(dstClassName, destination, false);
+        String dstObjectClassName = ObjectClassGenerator.run(dstClassName, destination, false);
 
+        String srcObjectClassName = null;
         if (genType == GEN_TYPE.LDAP2LDAP) {
             LOGGER.info("Generating Java class for LDAP objectclass \"" + srcClassName + "\" from source directory...");
-            ObjectClassGenerator.run(srcClassName, destination, true);
+            srcObjectClassName = ObjectClassGenerator.run(srcClassName, destination, true);
         }
 
         if (genType == GEN_TYPE.CSV2LDAP) {
@@ -150,8 +151,8 @@ public final class Generator {
 
         LOGGER.info("Writing properties file...");
         PropertiesGenerator.run(taskName, destination, genType,
-                                beanClassName, objectClassName,
-                                srcServiceClassName);
+                                beanClassName, dstObjectClassName,
+                                srcObjectClassName, srcServiceClassName);
     }
 
     /**

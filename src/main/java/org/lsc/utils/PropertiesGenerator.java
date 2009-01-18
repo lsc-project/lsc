@@ -71,8 +71,11 @@ public class PropertiesGenerator extends AbstractGenerator {
 	/** This property contains the bean class name. */
 	private String beanClassName;
 
-	/** This property contains the object class name. */
-	private String objectClassName;
+	/** This property contains the destination object class name. */
+	private String dstObjectClassName;
+
+	/** This property contains the source object class name. */
+	private String srcObjectClassName;
 
 	/** This property contains the jdbc source service class name. */
 	private String jdbcSrcServiceClassName;
@@ -92,26 +95,34 @@ public class PropertiesGenerator extends AbstractGenerator {
 		Properties props = Configuration.getAsProperties(prefix);
 		props = checkAndAdd(props, "tasks", taskName);
 		props = replace(props, "tasks." + taskName + ".bean", beanClassName);
-		props = replace(props, "tasks." + taskName + ".object", objectClassName);
+
+		// Add default DN generation configuration parameter
+		props = replace(props, "tasks." + taskName + ".dn", 
+				"\"uid=\" + srcBean.getAttributeValueById(\"uid\") + \",ou=People\"");
+		
 		switch (genType) {
 			case CSV2LDAP:
 			case DATABASE2LDAP:
+				// the POJO object used in db2ldap syncs seems to be used directly as a destination object
+				props = replace(props, "tasks." + taskName + ".object", dstObjectClassName);
 				props = replace(props, "tasks." + taskName + ".type", "db2ldap");
-				props = replace(props, "tasks." + taskName + ".srcService",
-						jdbcSrcServiceClassName);
+				props = replace(props, "tasks." + taskName + ".srcService", jdbcSrcServiceClassName);
 				break;
 			case LDAP2LDAP:
+				// the POJO object used in ldap2ldap syncs is to store original object from the source directory
+				props = replace(props, "tasks." + taskName + ".object", srcObjectClassName);
 				props = replace(props, "tasks." + taskName + ".type", "ldap2ldap");
 				props = replace(props, "tasks." + taskName + ".srcService",
 						"org.lsc.jndi.SimpleJndiSrcService");
-				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName
-						+ ".srcService");
+				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".srcService",
+						srcObjectClassName.substring(srcObjectClassName.lastIndexOf(".")+1));
 				break;
 			default:
 				throw new UnsupportedOperationException("Must never be here !");
 		}
 		props = replace(props, "tasks." + taskName + ".dstService", "org.lsc.jndi.SimpleJndiDstService");
-		props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".dstService");
+		props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".dstService",
+				dstObjectClassName.substring(dstObjectClassName.lastIndexOf(".")+1));
 		try {
 			Configuration.setProperties(prefix, props);
 		} catch (ConfigurationException e) {
@@ -131,12 +142,13 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 * @return the updated properties
 	 */
 	private Properties replaceDefaultSimpleJndiService(final Properties props,
-			final String propertyPrefix) {
+			final String propertyPrefix, final String objectClassName) {
 		Properties localProps = props;
 		localProps = replace(localProps, propertyPrefix + ".baseDn", "ou=People");
-		localProps = replace(localProps, propertyPrefix + ".pivotAttrs", "employeeNumber");
-		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=" + objectClassName + ")(employeeNumber={0}))");
+		localProps = replace(localProps, propertyPrefix + ".pivotAttrs", "uid");
+		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=" + objectClassName + ")(uid={uid}))");
 		localProps = replace(localProps, propertyPrefix + ".filterAll", "(objectClass=" + objectClassName + ")");
+		localProps = replace(localProps, propertyPrefix + ".attrs", "uid cn sn givenName mail objectClass");
 		return localProps;
 	}
 
@@ -217,8 +229,10 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 *                the Generation type
 	 * @param beanClassName
 	 *                the bean class name
-	 * @param objectClassName
-	 *                the object class name
+	 * @param dstObjectClassName
+	 *                the destination object class name
+	 * @param srcObjectClassName
+	 *                the source object class name, or null if there is none
 	 * @param jdbcSrcServiceClassName
 	 *                the jdbc source service name
 	 * @throws NamingException
@@ -227,10 +241,11 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 */
 	public static void run(final String taskName, final String destination,
 			final Generator.GEN_TYPE genType, final String beanClassName,
-			final String objectClassName, final String jdbcSrcServiceClassName)
+			final String dstObjectClassName, final String srcObjectClassName, 
+			final String jdbcSrcServiceClassName)
 	throws NamingException {
 		PropertiesGenerator pg = new PropertiesGenerator();
-		pg.init(genType, beanClassName, objectClassName, jdbcSrcServiceClassName);
+		pg.init(genType, beanClassName, dstObjectClassName, srcObjectClassName, jdbcSrcServiceClassName);
 		pg.setDestination(destination);
 		pg.generate(taskName);
 	}
@@ -242,17 +257,20 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 *                the Generation type
 	 * @param lbeanClassName
 	 *                the bean class name
-	 * @param lobjectClassName
-	 *                the object class name
+	 * @param dstObjectClassName
+	 *                the destination object class name
+	 * @param srcObjectClassName
+	 *                the source object class name or null if there is none
 	 * @param ljdbcSrcServiceClassName
 	 *                the jdbc source service name
 	 */
 	private void init(final Generator.GEN_TYPE lgenType,
-			final String lbeanClassName, final String lobjectClassName,
-			final String ljdbcSrcServiceClassName) {
+			final String lbeanClassName, final String dstObjectClassName,
+			final String srcObjectClassName, final String ljdbcSrcServiceClassName) {
 		genType = lgenType;
 		beanClassName = lbeanClassName;
-		objectClassName = lobjectClassName;
+		this.dstObjectClassName = dstObjectClassName;
+		this.srcObjectClassName = srcObjectClassName;
 		jdbcSrcServiceClassName = ljdbcSrcServiceClassName;
 	}
 

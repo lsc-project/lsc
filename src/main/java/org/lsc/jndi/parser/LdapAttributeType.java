@@ -53,7 +53,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Define an ldap attribute type representation. Successfully tested with
- * OpenLDAP 2.3
+ * OpenLDAP 2.3 and 2.4
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
@@ -74,6 +74,9 @@ public class LdapAttributeType {
 	/** The directory reversed this attribute for its internals. */
 	private boolean dSAOperation;
 
+	/** Attribute that should no longer be used. */
+	private boolean obsolete;
+	
 	/** @TODO */
 	private boolean distributedOperation;
 
@@ -247,6 +250,12 @@ public class LdapAttributeType {
 			ret = LdapObjectClass.execRegex(rest, "\\s*(distributedOperation)\\s*(.*)\\s*");
 			if (ret != null) {
 				lat.distributedOperation = true;
+				rest = ret[1];
+			}
+			
+			ret = LdapObjectClass.execRegex(rest, "\\s*(OBSOLETE)\\s*(.*)\\s*");
+			if (ret != null) {
+				lat.obsolete = true;
 				rest = ret[1];
 			}
 		}
@@ -562,5 +571,19 @@ public class LdapAttributeType {
 	 */
 	public final String getName() {
 		return name;
+	}
+
+	/**
+	 * @return the obsolete flag
+	 */
+	public boolean isObsolete() {
+		return obsolete;
+	}
+
+	/**
+	 * @param obsolete the obsolete flag to set
+	 */
+	public void setObsolete(boolean obsolete) {
+		this.obsolete = obsolete;
 	}
 }

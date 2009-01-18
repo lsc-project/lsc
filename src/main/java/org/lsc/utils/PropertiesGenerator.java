@@ -103,7 +103,7 @@ public class PropertiesGenerator extends AbstractGenerator {
 			case LDAP2LDAP:
 				props = replace(props, "tasks." + taskName + ".type", "ldap2ldap");
 				props = replace(props, "tasks." + taskName + ".srcService",
-				"org.lsc.jndi.SimpleJndiSrcService");
+						"org.lsc.jndi.SimpleJndiSrcService");
 				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName
 						+ ".srcService");
 				break;
@@ -134,9 +134,9 @@ public class PropertiesGenerator extends AbstractGenerator {
 			final String propertyPrefix) {
 		Properties localProps = props;
 		localProps = replace(localProps, propertyPrefix + ".baseDn", "ou=People");
-		localProps = replace(localProps, propertyPrefix + ".attrId", "employeeNumber");
-		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=inetOrgPerson)(employeeNumber={0}))");
-		localProps = replace(localProps, propertyPrefix + ".filterAll", "(objectClass=inetOrgPerson)");
+		localProps = replace(localProps, propertyPrefix + ".pivotAttrs", "employeeNumber");
+		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=" + objectClassName + ")(employeeNumber={0}))");
+		localProps = replace(localProps, propertyPrefix + ".filterAll", "(objectClass=" + objectClassName + ")");
 		return localProps;
 	}
 

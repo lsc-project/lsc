@@ -59,14 +59,17 @@ import org.lsc.LscObject;
  */
 public interface ISrcService {
     /**
-     * This method is a simple object getter.
-     * @param ids the object identifiers
+     * The simple object getter according to its identifier.
+     * @param obj The data identifier in the directory - must return a unique
+	 *        directory entry
      * @return the object or null if not found
+     * @throws May throw a NamingException if the object is not found in the directory,
+     * 			or if more than one object would be returned.
      */
     LscObject getObject(Entry<String, LscAttributes> obj) throws NamingException;
 
     /**
-     * Returns a list of all the objects identifiers.
+     * Returns a list of all the objects' identifiers.
      * @return the list of ids
      */
     Map<String, LscAttributes> getListPivots() throws NamingException;

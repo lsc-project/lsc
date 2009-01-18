@@ -292,11 +292,21 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         }
         return result;
     }
-
+    
+    /**
+     * Get the setting to generate a DN
+     * 
+     * @return String The script to generate a DN
+     */
     public String getDn() {
         return Configuration.getString("lsc.tasks." + syncName + ".dn");
     }
 
+    /**
+     * Get the task name
+     * 
+     * @return String The current task name. 
+     */
 	public String getTaskName() {
 		return syncName;
 	}    

@@ -85,7 +85,7 @@ public class JndiModifications {
     
     /**
      * Standard constructor.
-     * @param loperation the main modification type defining this object 
+     * @param operation the main modification type defining this object 
      */
     public JndiModifications(final JndiModificationType operation) {
         this.operation = operation;
@@ -128,7 +128,7 @@ public class JndiModifications {
 
     /**
      * Default operation setter.
-     * @param loperation the operation type
+     * @param operation the operation type
      */
     public final void setOperation(final JndiModificationType operation) {
         this.operation = operation;

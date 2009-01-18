@@ -101,7 +101,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	/**
 	 * The simple object getter according to its identifier.
 	 *
-	 * @param id the data identifier in the directory - must return a unique
+	 * @param ids the data identifier in the directory - must return a unique
 	 *        directory entry
 	 *
 	 * @return the corresponding top derivated object or null if failed
@@ -130,9 +130,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	}
 
 	/**
-	 * Destination LDAP Services getter.
+	 * Source LDAP Services getter.
 	 *
-	 * @return the Destination JndiServices object used to apply directory
+	 * @return the Source JndiServices object used to apply directory
 	 *         operations
 	 */
 	public final JndiServices getJndiServices() {

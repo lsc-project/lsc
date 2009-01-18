@@ -154,7 +154,8 @@ public class I18n {
 	}
 
 	/**
-	 * @param locales
+	 * Simple setter for the locale to use.
+	 * @param locale the locale to use.
 	 */
 	public static void setLocale(Locale locale) throws IOException {
 		getInstance(locale);

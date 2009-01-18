@@ -172,16 +172,16 @@ public interface ISyncOptions {
     String getCondition(JndiModificationType operation);
     
     /**
-     * Get the dn
+     * Get the setting to generate a DN
      * 
-     * @return
+     * @return String The script to generate a DN
      */
     String getDn();
     
     /**
      * Get the task name
      * 
-     * @return
+     * @return String The current task name. 
      */
     String getTaskName();
     

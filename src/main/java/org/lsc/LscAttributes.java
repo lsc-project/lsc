@@ -52,11 +52,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Class used to represent a set of attributes and their values.
+ * 
  * @author rschermesser
- *
  */
 public class LscAttributes {
     
+	/** The heart of this class - a map of attribute names to values */
     protected Map<String, ?> values;
     
     public LscAttributes() {
@@ -104,8 +106,8 @@ public class LscAttributes {
     
     
     /**
-     * Java is really weird ...
-     * @return
+     * Get the attributes' values
+     * @return Map of the attributes, indexed by name
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> getAttributes() {

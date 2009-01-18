@@ -534,7 +534,7 @@ public abstract class AbstractSynchronize {
 
     /**
      * @param syncName
-     * @return
+     * @return ISyncOptions syncoptions object for the specified syncName
      */
     protected ISyncOptions getSyncOptions(final String syncName) { 
         ISyncOptions syncOptions = SyncOptionsFactory.getInstance(syncName);

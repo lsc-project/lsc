@@ -70,6 +70,7 @@ public class top extends LscObject {
 
 	public top() {
 		objectClass = new ArrayList<String>();
+		objectClass.add("top");
 	}
 	
 	public static String getDn(String uidValue) {

@@ -107,6 +107,9 @@ public final class JndiServices {
     
     private LDAPUrl namingContext;
 
+    /** Support for recursive deletion (default to false) */
+	private boolean recursiveDelete;
+
     //	/** Attribute name to sort on. */
     //	private String sortedBy;
 
@@ -131,6 +134,12 @@ public final class JndiServices {
             pageSize = Integer.parseInt(pageSizeStr);
         } else {
             pageSize = -1;
+        }
+        String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
+        if(recursiveDeleteStr != null) {
+            recursiveDelete = Boolean.getBoolean(recursiveDeleteStr);
+        } else {
+        	recursiveDelete = false;
         }
         //		sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
     }
@@ -396,7 +405,11 @@ public final class JndiServices {
                 );
                 break;
             case DELETE_ENTRY:
-                ctx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
+            	if(recursiveDelete) {
+            		deleteChildrenRecursively(rewriteBase(jm.getDistinguishName()));
+            	} else {
+                    ctx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
+            	}
                 break;
             case MODIFY_ENTRY:
                 Object[] table = jm.getModificationItems().toArray();
@@ -428,6 +441,23 @@ public final class JndiServices {
     }
 
     /**
+     * Delete children recursively
+     * @param distinguishName the tree head to delete
+     * @throws NamingException thrown if an error is encountered
+     */
+    private void deleteChildrenRecursively(String distinguishName) throws NamingException {
+    	SearchControls sc = new SearchControls();
+    	sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+    	NamingEnumeration ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
+    	while(ne.hasMore()) {
+    		SearchResult sr = (SearchResult) ne.next();
+    		String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
+    		deleteChildrenRecursively(childrenDn);
+    	}
+        ctx.destroySubcontext(new LdapName(distinguishName));
+	}
+
+	/**
      * Return the modificationItems in the javax.naming.directory.Attributes
      * format.
      * 

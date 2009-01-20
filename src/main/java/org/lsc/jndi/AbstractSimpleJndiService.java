@@ -249,6 +249,11 @@ public abstract class AbstractSimpleJndiService {
 	            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
 	        }
 			return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
+		} else if (attrsId.size() == 1) {
+            String searchString = filterId;
+            searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(entry.getKey());
+			return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
+//			return getJndiServices().getEntry(baseDn, filterId.replaceAll("\\{" + attrsId.get(0) + "\\}", entry.getKey()), _filteredSc);
 		} else {
 			return getJndiServices().getEntry(baseDn, filterId.replaceAll("\\{0\\}", entry.getKey()), _filteredSc);
 		}

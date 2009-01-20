@@ -145,8 +145,8 @@ public class PropertiesGenerator extends AbstractGenerator {
 			final String propertyPrefix, final String objectClassName) {
 		Properties localProps = props;
 		localProps = replace(localProps, propertyPrefix + ".baseDn", "ou=People");
-		localProps = replace(localProps, propertyPrefix + ".pivotAttrs", "uid");
-		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=" + objectClassName + ")(uid={uid}))");
+		localProps = replace(localProps, propertyPrefix + ".pivotAttrs", "employeeNumber");
+		localProps = replace(localProps, propertyPrefix + ".filterId", "(&(objectClass=" + objectClassName + ")(employeeNumber={employeeNumber}))");
 		localProps = replace(localProps, propertyPrefix + ".filterAll", "(objectClass=" + objectClassName + ")");
 		localProps = replace(localProps, propertyPrefix + ".attrs", "uid cn sn givenName mail objectClass");
 		return localProps;

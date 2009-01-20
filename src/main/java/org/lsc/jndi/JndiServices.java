@@ -550,6 +550,11 @@ public final class JndiServices {
             throws NamingException {
 
         Map<String, LscAttributes> res = new HashMap<String, LscAttributes>();
+    	
+    	if (attrsNames == null || attrsNames.size() == 0) {
+    		LOGGER.error("No attribute names to read! Check configuration.");
+    		return res;
+    	}
 
         String[] attributes = new String[attrsNames.size()];
         attributes = attrsNames.toArray(attributes);

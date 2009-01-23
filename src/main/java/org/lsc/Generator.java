@@ -186,7 +186,7 @@ public final class Generator {
             + "-csvf ../../sample/csvtosql/sample.csv "
             + "-csvsep ';'\" lsc::generator\n");
         System.err.println(cmn
-            + "-ldap2ldap -soc='sourceObjectClass'\" lsc::generator\n");
+            + "-ldap2ldap -soc 'sourceObjectClass'\" lsc::generator\n");
     }
 
     /**

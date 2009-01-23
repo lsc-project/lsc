@@ -512,7 +512,7 @@ public final class FrenchFilters {
         String tmp = aString.trim().replace('.', '-').toLowerCase();
 
         while (tmp.lastIndexOf('-') == (tmp.length() - 1)) {
-            if (tmp.length() != 1) {
+            if (tmp.length() > 1) {
                 tmp = tmp.substring(0, tmp.length() - 1);
             } else {
                 tmp = "UNKNOWN";

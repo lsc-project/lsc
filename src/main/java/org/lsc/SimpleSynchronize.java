@@ -198,17 +198,16 @@ public class SimpleSynchronize extends AbstractSynchronize {
     
 
     /**
-     * Launch the tasks.
+     * Launch a task. Call this for once each task type and task mode.
      * 
      * @param taskType
      *                the task type (db2ldap, ldap2ldap, ...)
      * @param taskName
-     *                the task name (generally the LDAP object class name,
-     *                but every time)
+     *                the task name (historically the LDAP object class name, but can be any string)
      *  @param taskMode
-     *                  the mode of the task (clean or sync)
+     *                the task mode (clean or sync)
      * 
-     * @return the cleaning status
+     * @return boolean true on success, false if an error occurred
      * @throws Exception 
      */
     @SuppressWarnings("unchecked")
@@ -220,71 +219,56 @@ public class SimpleSynchronize extends AbstractSynchronize {
             String objectClassName = lscProperties.getProperty(prefix + OBJECT_PROPS_PREFIX);
             String beanClassName = lscProperties.getProperty(prefix + BEAN_PROPS_PREFIX);
             Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
+            String srcServiceClass = lscProperties.getProperty(prefix + SRCSERVICE_PROPS_PREFIX);
             String dstServiceClass = lscProperties.getProperty(prefix + DSTSERVICE_PROPS_PREFIX);
 
+            // Instantiate the destination service from properties
             Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[] { Properties.class, String.class });
+            IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[] { dstServiceProperties, beanClassName });
             
+            // Instantiate custom JavaScript library from properties
             String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);
             Object customLibrary = null;
             if (customLibraryName != null) {
                 customLibrary = Class.forName(customLibraryName).newInstance();
             }
-            
-            top taskObject = null;
-            Class<? extends AbstractBean> taskBean = null;
-            if(taskMode == TaskMode.sync) {
-                //Common objects
-                taskObject = (top) Class.forName(objectClassName).newInstance();
-                taskBean = (Class<? extends AbstractBean>) Class.forName(beanClassName);
-            }
-            
-            IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[] { dstServiceProperties, beanClassName });
-            
+
+            // Instantiate source service according to task type (JDBC database or JNDI directory) 
+            ISrcService srcService = null;
             switch(taskType) {
-                case ldap2ldap :
+                case ldap2ldap:
                     Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "."
                             + prefix + SRCSERVICE_PROPS_PREFIX);
                     
-                    String srcJndiServiceClass = lscProperties.getProperty(prefix + SRCSERVICE_PROPS_PREFIX);
-                    Constructor<?> constrSrcJndiService = Class.forName(srcJndiServiceClass).getConstructor(new Class[] { Properties.class, String.class });
-                    ISrcService srcJndiService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties, objectClassName });
+                    Constructor<?> constrSrcJndiService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class, String.class });
+                    srcService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties, objectClassName });
 
-                    switch(taskMode) {
-                        case clean:
-                            cleanLdap2Ldap(taskName, srcJndiService, dstJndiService);
-                            break;
-                        case sync:
-                            synchronize2Ldap(taskName, srcJndiService, dstJndiService, taskObject, taskBean, customLibrary);
-                            break;
-                        default :
-                            //Should not happen
-                            LOGGER.error("Unknown task mode type " + taskMode.toString());
-                            return false;
-                    }
                     break;
-                case db2ldap :
-                    String srcServiceClass = lscProperties.getProperty(prefix   + SRCSERVICE_PROPS_PREFIX);
-                    ISrcService jdbcService = (ISrcService) Class.forName(srcServiceClass).newInstance();
-                    
-                    switch(taskMode) {
-                        case clean:
-                            cleanDb2Ldap(taskName, jdbcService, dstJndiService);
-                            break;
-                        case sync:
-                            synchronize2Ldap(taskName, jdbcService, dstJndiService, taskObject, taskBean, customLibrary);
-                            break;
-                        default :        
-                            //Should not happen
-                            LOGGER.error("Unknown task mode type " + taskMode.toString());
-                            return false;
-                    }
+                case db2ldap:
+                	srcService = (ISrcService) Class.forName(srcServiceClass).newInstance();
                     break;
-                default :
+                default:
                     LOGGER.warn("Unknown task type : " + taskType + " (must be one of ldap2ldap or db2ldap)");
                     return false;
             }
+
+            // Do the work!
+            switch(taskMode) {
+                case clean:
+                    clean2Ldap(taskName, srcService, dstJndiService);
+                    break;
+                case sync:
+                    top taskObject = (top) Class.forName(objectClassName).newInstance();
+                    Class<? extends AbstractBean> taskBean = (Class<? extends AbstractBean>) Class.forName(beanClassName);
+                    synchronize2Ldap(taskName, srcService, dstJndiService, taskObject, taskBean, customLibrary);
+                    break;
+                default:        
+                    //Should not happen
+                    LOGGER.error("Unknown task mode type " + taskMode.toString());
+                    return false;
+            }
             
-            // Manage exceptions
+        // Manage exceptions
         } catch (Exception e) {
             Class<?>[] exceptionsCaught = {InstantiationException.class, IllegalAccessException.class,
                     ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,

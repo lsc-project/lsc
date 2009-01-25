@@ -107,86 +107,17 @@ public abstract class AbstractSynchronize {
     }
 
     /**
-     * This method is used to clean different type of data.
+     * Clean the destination LDAP directory (delete objects not present in source).
      * 
      * @param syncName
      *                the synchronization name
-     * @param jdbcService
-     *                the jdbc source service
+     * @param srcService
+     *                the source service (JDBC or JNDI)
      * @param dstJndiService
      *                the jndi destination service
      */
-    protected final void cleanDb2Ldap(final String syncName,
-            final ISrcService jdbcService,
-            final IJndiDstService dstJndiService) {
-
-        LOGGER.info("Starting clean for " + syncName);
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
-
-        try {
-            int countAll = 0;
-            int countError = 0;
-            int countInitiated = 0;
-            int countCompleted = 0;
-            JndiModifications jm = null;
-            Iterator<Entry<String, LscAttributes>> ids = dstJndiService.getListPivots().entrySet().iterator();
-
-            while (ids.hasNext()) {
-                countAll++;
-
-                Entry<String, LscAttributes> id = ids.next();
-                fTop object = (fTop) jdbcService.getObject(id);
-
-                try {
-                    if (object == null) {
-                        AbstractBean bean = dstJndiService.getBean(id);
-                        jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                        jm.setDistinguishName(bean.getDistinguishName());
-
-                        /* Evaluate if you have to do something */
-                        Map<String, Object> table = new HashMap<String, Object>();
-                        table.put("dstBean", bean);
-                        String condition = syncOptions.getDeleteCondition();
-                        Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
-
-                        if (jm != null) {
-                            if(doDelete) {
-                                countInitiated++;
-                                if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
-                                    countCompleted++;
-                                    logAction(jm, id, syncName);
-                                } else {
-                                    countError++;
-                                    logActionError(jm, id, null);
-                                }
-                            } else {
-                                logShouldAction(jm, id, syncName);
-                            }
-                        }
-                    }
-                } catch (NamingException e) {
-                    LOGGER.error("Unable to clean objects (" + e.toString() + ")", e);
-                    countError++;
-                    logActionError(jm, id, e);
-                }
-            }
-        } catch (NamingException e) {
-            LOGGER.error("Unable to clean objects (" + e.toString() + ")", e);
-        }
-    }
-
-    /**
-     * Clean data objects.
-     * 
-     * @param syncName
-     *                the synchronization name
-     * @param srcJndiService
-     *                the jndi source service
-     * @param dstJndiService
-     *                the jndi destination service
-     */
-    protected final void cleanLdap2Ldap(final String syncName,
-            final ISrcService srcJndiService,
+    protected final void clean2Ldap(final String syncName,
+            final ISrcService srcService,
             final IJndiDstService dstJndiService) {
 
         LOGGER.info("Starting clean for " + syncName);
@@ -200,7 +131,7 @@ public abstract class AbstractSynchronize {
             LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
             return;
         }
-
+        
         if (!ids.hasNext()) {
             LOGGER.error("Empty or non existant destination (no IDs found)");
             return;
@@ -211,21 +142,20 @@ public abstract class AbstractSynchronize {
         int countInitiated = 0;
         int countCompleted = 0;
         JndiModifications jm = null;
-        top object = null;
-
+        LscObject srcObject = null;
+        
         while (ids.hasNext()) {
             countAll++;
 
             Entry<String, LscAttributes> id = ids.next();
 
             try {
-                object = (top) srcJndiService.getObject(id);
-                if (object == null) {
-                    countInitiated++;
+                srcObject = srcService.getObject(id);
 
+                if (srcObject == null) {
                     AbstractBean bean = dstJndiService.getBean(id);
                     jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                    jm.setDistinguishName(id.getKey());
+                    jm.setDistinguishName(bean.getDistinguishName());
 
                     /* Evaluate if you have to do something */
                     Map<String, Object> table = new HashMap<String, Object>();
@@ -250,17 +180,17 @@ public abstract class AbstractSynchronize {
                 }
             } catch (CommunicationException e) { 
                 // we lost the connection to the directory
-                LOGGER.fatal("Connection to directory lost! Aborting.");
                 countError++;
+                LOGGER.fatal("Connection to directory lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
             } catch (NamingException e) {
                 countError++;
-                LOGGER.error("Unable to delete object " + id + " (" + e.toString()	+ ")", e);
+                LOGGER.error("Unable to delete object " + id.getKey() + " (" + e.toString() + ")", e);
                 logActionError(jm, id, e);
             }
         }
-
+        
         LSCStructuralLogger.GLOBAL.info(I18n.getMessage(null,
                 "org.lsc.messages.NB_CHANGES", new Object[] {
                 countAll, countInitiated, countCompleted,

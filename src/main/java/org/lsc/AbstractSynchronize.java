@@ -419,7 +419,7 @@ public abstract class AbstractSynchronize {
 
         LOGGER.error(I18n.getMessage(null,
                 "org.lsc.messages.SYNC_ERROR", new Object[] {
-                identifier, str, "", except }), except);
+                identifier.getKey(), str, "", except }), except);
 
         if (jm != null) {
             LOGGER.error(jm);
@@ -441,7 +441,7 @@ public abstract class AbstractSynchronize {
         switch (jm.getOperation()) {
         case ADD_ENTRY:
             LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.ADD_ENTRY", new Object[] { id,
+                    "org.lsc.messages.ADD_ENTRY", new Object[] { id.getKey(),
                     syncName }));
 
             break;
@@ -449,28 +449,28 @@ public abstract class AbstractSynchronize {
         case MODIFY_ENTRY:
             LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
                     "org.lsc.messages.UPDATE_ENTRY", new Object[] {
-                    id, syncName }));
+                    id.getKey(), syncName }));
 
             break;
 
         case MODRDN_ENTRY:
             LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
                     "org.lsc.messages.RENAME_ENTRY", new Object[] {
-                    id, syncName }));
+                    id.getKey(), syncName }));
 
             break;
 
         case DELETE_ENTRY:
             LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
                     "org.lsc.messages.REMOVE_ENTRY", new Object[] {
-                    id, syncName }));
+                    id.getKey(), syncName }));
 
             break;
 
         default:
             LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
                     "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
-                    id, syncName }));
+                    id.getKey(), syncName }));
         }
 
         LSCStructuralLogger.DESTINATION.info(jm);
@@ -487,25 +487,25 @@ public abstract class AbstractSynchronize {
             final String syncName) {
         switch (jm.getOperation()) {
         case ADD_ENTRY:
-            LOGGER.debug("Create condition false. Should have added object " + id);
+            LOGGER.debug("Create condition false. Should have added object " + id.getKey());
             break;
 
         case MODIFY_ENTRY:
-            LOGGER.debug("Update condition false. Should have modified object " + id);
+            LOGGER.debug("Update condition false. Should have modified object " + id.getKey());
             break;
 
         case MODRDN_ENTRY:
-            LOGGER.debug("ModRDN condition false. Should have renamed object " + id);
+            LOGGER.debug("ModRDN condition false. Should have renamed object " + id.getKey());
             break;
 
         case DELETE_ENTRY:
-            LOGGER.debug("Delete condition false. Should have removed object " + id);
+            LOGGER.debug("Delete condition false. Should have removed object " + id.getKey());
             break;
 
         default:
             LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
                     "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
-                    id, syncName }));
+                    id.getKey(), syncName }));
         }
 
         LSCStructuralLogger.DESTINATION.debug(jm);

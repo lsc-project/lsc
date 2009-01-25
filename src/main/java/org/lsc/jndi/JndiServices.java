@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.ContextNotEmptyException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -137,7 +138,7 @@ public final class JndiServices {
         }
         String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
         if(recursiveDeleteStr != null) {
-            recursiveDelete = Boolean.getBoolean(recursiveDeleteStr);
+        	recursiveDelete = Boolean.parseBoolean(recursiveDeleteStr);
         } else {
         	recursiveDelete = false;
         }
@@ -432,6 +433,10 @@ public final class JndiServices {
             return false;
             }
             return true;
+        } catch (ContextNotEmptyException e) {
+        	LOGGER.error("Object " + jm.getDistinguishName() + " not deleted because it has children (LDAP error code 66 received)."
+        			+ " To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true");
+        	return false;
         } catch (NamingException ne) {
             LOGGER.error("Error while modifying directory on entry "
                     + jm.getDistinguishName() + " / "

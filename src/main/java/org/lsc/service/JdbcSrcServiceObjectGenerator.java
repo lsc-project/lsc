@@ -354,7 +354,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
         }
 
         xml += "\t\t\t...\n";
-        xml += "\t\tFROM ...\n\t\t\tWHERE ...\n\t</select>\n\n";
+        xml += "\t\tFROM ...\n\t\t\tWHERE ... = #value#\n\t</select>\n\n";
         xml += ("\t<select id=\"get" + this.objectName
                + "List\" resultClass=\"string\">\n");
         xml += "\t\t<!-- FILL IT, BE CAREFULL AT SPECIAL CHARACTER REPRESENTATION -->\n";

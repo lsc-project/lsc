@@ -43,84 +43,107 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc;
+package org.lsc.utils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import org.lsc.utils.CaseIgnoreStringHashMap;
-
 /**
- * Class used to represent a set of attributes and their values.
  * 
- * @author rschermesser
+ * 
+ * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
+ *
  */
-public class LscAttributes {
-    
-	/** The heart of this class - a map of attribute names to values */
-    protected Map<String, ?> values;
-    
-    public LscAttributes() {
-        values = new CaseIgnoreStringHashMap<String, Object>();
-    }
-    
-    public LscAttributes(Map<String, ?> values) {
-    	this.values = new CaseIgnoreStringHashMap<String, Object>(values);
-    }
-    
-    public String getStringValueAttribute(String attribute) {
-        return (String)values.get(attribute);
-    }
-    
-    public Integer getIntegerValueAttribute(String attribute) {
-        return (Integer)values.get(attribute);
-    }
-    
-    public Boolean getBooleanValueAttribute(String attribute) {
-        return (Boolean)values.get(attribute);
-    }
-    
-    public List<?> getListValueAttribute(String attribute) {
-        return (List<?>)values.get(attribute);  
-    }
-    
-    @SuppressWarnings("unchecked")
-    public List<String> getListStringValueAttribute(String attribute) {
-        return (List<String>)values.get(attribute);  
-    }
-    
-    @SuppressWarnings("unchecked")
-    public List<Integer> getListIntegerValueAttribute(String attribute) {
-        return (List<Integer>)values.get(attribute);  
-    }
-    
-    public List<String> getAttributesNames() {
-        List<String> attributesNames = new ArrayList<String>();
-        Iterator<String> it = values.keySet().iterator();
-        while (it.hasNext()) {
-            attributesNames.add(it.next());
-        }
-        return attributesNames;
-    }
-    
-    
-    /**
-     * Get the attributes' values
-     * @return Map of the attributes, indexed by name
-     */
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getAttributes() {
-        return (Map<String, Object>) values;
-    }
-    
-    public void setAttributes(Map<String, ?> values) {
-        this.values = values; 
-    }
-    
-    public String toString() {
-        return null;
-    }
+@SuppressWarnings("unchecked")
+public class CaseIgnoreStringHashMap<T extends String, T2> extends HashMap {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 
+	 */
+	public CaseIgnoreStringHashMap() {
+		super();
+	}
+
+	/**
+	 * @param initialCapacity
+	 * @param loadFactor
+	 */
+	public CaseIgnoreStringHashMap(int initialCapacity, float loadFactor) {
+		super(initialCapacity, loadFactor);
+	}
+
+	/**
+	 * @param initialCapacity
+	 */
+	public CaseIgnoreStringHashMap(int initialCapacity) {
+		super(initialCapacity);
+	}
+
+	/**
+	 * @param m
+	 */
+	public CaseIgnoreStringHashMap(Map m) {
+		this.putAll(m);
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.HashMap#containsKey(java.lang.Object)
+	 */
+	@Override
+	public boolean containsKey(Object key) {
+		if (key instanceof String) {
+			return super.containsKey(((String) key).toLowerCase());
+		} else return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.HashMap#get(java.lang.Object)
+	 */
+	@Override
+	public Object get(Object key) {
+		if (key instanceof String) {
+			return super.get(((String) key).toLowerCase());
+		} else return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public Object put(Object key, Object value) {
+		if (key instanceof String) {
+			return super.put(((String) key).toLowerCase(), value);
+		} else return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.HashMap#putAll(java.util.Map)
+	 */
+	@Override
+	public void putAll(Map m) {
+		Iterator keys = m.keySet().iterator();
+		while (keys.hasNext()) {
+			Object key = keys.next();
+			if (key instanceof String) {
+				put(((String) key).toLowerCase(), m.get(key));
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.HashMap#remove(java.lang.Object)
+	 */
+	@Override
+	public Object remove(Object key) {
+		if (key instanceof String) {
+			return super.remove(((String) key).toLowerCase());
+		} else return null;
+	}
+
 }

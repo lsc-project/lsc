@@ -342,7 +342,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 
         // Fixe select :
         xml += ("\t<select id=\"get" + this.objectName + "\" resultMap=\""
-               + this.objectName + "Result\" parameterClass=\"string\">\n");
+               + this.objectName + "Result\" parameterClass=\"java.util.Map\">\n");
         xml += "\t\t<!-- FILL IT, BE CAREFULL AT SPECIAL CHARACTER REPRESENTATION -->\n";
         xml += "\t\tSelect\n";
 
@@ -356,7 +356,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
         xml += "\t\t\t...\n";
         xml += "\t\tFROM ...\n\t\t\tWHERE ... = #value#\n\t</select>\n\n";
         xml += ("\t<select id=\"get" + this.objectName
-               + "List\" resultClass=\"string\">\n");
+               + "List\" resultClass=\"java.util.HashMap\">\n");
         xml += "\t\t<!-- FILL IT, BE CAREFULL AT SPECIAL CHARACTER REPRESENTATION -->\n";
         xml += "\t\tSelect ...\n\t\tFROM ...\n\t\t\tWHERE ...\n\t</select>\n\n</sqlMap>";
 

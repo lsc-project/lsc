@@ -84,9 +84,10 @@ public abstract class AbstractJdbcService implements ISrcService {
 
 	public LscObject getObject(Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
+		Map<String,Object> attributeMap = ids.getValue().getAttributes();
+		
 		try {
-
-			return (LscObject) sqlMapper.queryForObject(getRequestNameForObject(), id);
+			return (LscObject) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id="
 					+ id + " (" + e + ")", e);
@@ -102,13 +103,13 @@ public abstract class AbstractJdbcService implements ISrcService {
 	 */
 	public Map<String, LscAttributes> getListPivots() {
         try {
-            List<?> ids = sqlMapper.queryForList(getRequestNameForList(), null);
-            Iterator<?> idsIter = ids.iterator();
+            List<HashMap<String,Object>> ids = (List<HashMap<String,Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
+            Iterator<HashMap<String,Object>> idsIter = ids.iterator();
             Map<String,LscAttributes> ret = new HashMap<String, LscAttributes>();
             while(idsIter.hasNext()) {
-            	String id = (String) idsIter.next();
-                LscAttributes la = new LscAttributes();
-               	ret.put(id, la);
+            	HashMap<String,Object> idMap = idsIter.next();
+            	LscAttributes la = new LscAttributes(idMap);
+            	ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
             }
             return ret;
         } catch (SQLException e) {

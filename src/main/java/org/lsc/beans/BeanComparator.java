@@ -122,7 +122,7 @@ public final class BeanComparator {
         } else if (srcBean == null && destBean != null) {
             jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncOptions.getTaskName());
             jm.setDistinguishName(destBean.getDistinguishName());
-            LOGGER.info("Deleting entry : \"" + destBean.getDistinguishName() + "\"");
+            LOGGER.debug("Deleting entry : \"" + destBean.getDistinguishName() + "\"");
         } else if (srcBean != null && destBean == null) {
             jm = getAddEntry(syncOptions, srcBean, customLibrary);
         } else { /* srcBean != null && destBean != null */
@@ -309,7 +309,7 @@ public final class BeanComparator {
 
         if (modificationItems.size() != 0) {
             jm.setModificationItems(modificationItems);
-            LOGGER.info("Modifying entry \"" + destBean.getDistinguishName() + "\"");
+            LOGGER.debug("Modifying entry \"" + destBean.getDistinguishName() + "\"");
         } else {
             LOGGER.debug("Entry \"" + destBean.getDistinguishName()
                     + "\" is the same in the source and in the destination");

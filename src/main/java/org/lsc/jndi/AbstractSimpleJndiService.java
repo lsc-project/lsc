@@ -246,6 +246,7 @@ public abstract class AbstractSimpleJndiService {
 			while (ite.hasNext()) {
 	            String id = ite.next().toLowerCase();
 	            String valueId =  entry.getValue().getStringValueAttribute(id);
+	            valueId = valueId == null ? "" : valueId;
 	            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
 	        }
 			return getJndiServices().getEntry(baseDn, searchString, _filteredSc);

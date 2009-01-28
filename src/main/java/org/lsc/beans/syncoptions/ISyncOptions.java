@@ -138,28 +138,28 @@ public interface ISyncOptions {
     /**
      * Returns the condition for a creation
      * 
-     * @return the condition
+     * @return the condition or "true" if none is specified (default)
      */
     String getCreateCondition();
     
     /**
      * Returns the condition for an update
      * 
-     * @return the condition
+     * @return the condition or "true" if none is specified (default)
      */
     String getUpdateCondition();
     
     /**
      * Returns the condition for a delete 
      * 
-     * @return the condition
+     * @return the condition or "true" if none is specified (default)
      */
     String getDeleteCondition();
     
     /**
      * Returns the condition for a modrdn 
      * 
-     * @return the condition
+     * @return the condition or "true" if none is specified (default)
      */
     String getModrdnCondition();
     
@@ -167,7 +167,7 @@ public interface ISyncOptions {
      * Returns the condition for this operation
      * 
      * @param operation The operation type
-     * @return the condition
+     * @return the condition or "true" if none is specified (default)
      */
     String getCondition(JndiModificationType operation);
     

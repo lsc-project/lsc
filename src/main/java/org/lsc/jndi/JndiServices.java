@@ -640,7 +640,7 @@ public final class JndiServices {
                             }
                         }
                         
-                        res.put(ldapResult.getName(), new LscAttributes(attrsValues));
+                        res.put(ldapResult.getNameInNamespace(), new LscAttributes(attrsValues));
                     }
                 }
                 Control[] respCtls = ctx.getResponseControls();

@@ -150,19 +150,39 @@ public abstract class AbstractSynchronize {
             Entry<String, LscAttributes> id = ids.next();
 
             try {
+                // Search for the corresponding object in the source
                 srcObject = srcService.getObject(id);
 
+                // If we didn't find the object in the source, delete it in the destination
                 if (srcObject == null) {
-                    AbstractBean bean = dstJndiService.getBean(id);
                     jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                    jm.setDistinguishName(bean.getDistinguishName());
+                    jm.setDistinguishName(id.getKey());
 
-                    /* Evaluate if you have to do something */
-                    Map<String, Object> table = new HashMap<String, Object>();
-                    table.put("dstBean", bean);
+                    // Retrieve condition to evaluate before deleting
+                    Boolean doDelete = true;
                     String condition = syncOptions.getDeleteCondition();
-                    Boolean doDelete = JScriptEvaluator.evalToBoolean(condition, table);
+                    if (!condition.matches("true")) {
+                        // hash table to pass objects into JavaScript condition
+                        Map<String, Object> table = new HashMap<String, Object>();
 
+                        // If condition is based on dstBean, retrieve the full object from destination
+	                    if (condition.contains("dstBean")) {
+	                        AbstractBean bean = dstJndiService.getBean(id);
+
+	                        // Log an error if the bean could not be retrieved!
+	                        if (bean == null) {
+	                            LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
+	                            countError++;
+	                            continue;
+	                        }
+	                        
+	                        table.put("dstBean", bean);	                    	
+	                    }
+
+	                    /* Evaluate if you have to do something */
+	                    doDelete = JScriptEvaluator.evalToBoolean(condition, table);
+                    }
+                    
                     if (jm != null) {
                         if(doDelete) {
                             countInitiated++;

@@ -120,7 +120,7 @@ public abstract class AbstractSynchronize {
             final ISrcService srcService,
             final IJndiDstService dstJndiService) {
 
-        LOGGER.info("Starting clean for " + syncName);
+    	LSCStructuralLogger.DESTINATION.warn("Starting clean for " + syncName);
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
         Iterator<Entry<String, LscAttributes>> ids = null;
@@ -211,10 +211,15 @@ public abstract class AbstractSynchronize {
             }
         }
         
-        LSCStructuralLogger.GLOBAL.info(I18n.getMessage(null,
+        String totalsLogMessage = I18n.getMessage(null,
                 "org.lsc.messages.NB_CHANGES", new Object[] {
                 countAll, countInitiated, countCompleted,
-                countError }));
+                countError });
+        if (countError > 0) {
+        	LSCStructuralLogger.GLOBAL.error(totalsLogMessage);
+        } else {
+        	LSCStructuralLogger.GLOBAL.warn(totalsLogMessage);
+        }
     }
 
     /**
@@ -232,7 +237,7 @@ public abstract class AbstractSynchronize {
             final Class<? extends AbstractBean> objectBean,
             final Object customLibrary) {
 
-        LOGGER.info("Starting synchronization for " + syncName);
+        LSCStructuralLogger.DESTINATION.warn("Starting synchronization for " + syncName);
 
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {
@@ -341,10 +346,15 @@ public abstract class AbstractSynchronize {
             }
         }
 
-        LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+        String totalsLogMessage = I18n.getMessage(null,
                 "org.lsc.messages.NB_CHANGES", new Object[] {
                 countAll, countInitiated, countCompleted,
-                countError }));
+                countError });
+        if (countError > 0) {
+        	LSCStructuralLogger.DESTINATION.error(totalsLogMessage);
+        } else {
+        	LSCStructuralLogger.DESTINATION.warn(totalsLogMessage);
+        }
     }
 
     /**
@@ -453,12 +463,12 @@ public abstract class AbstractSynchronize {
             break;
 
         default:
-            LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
+        	LOGGER.debug(I18n.getMessage(null,
                     "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
                     id.getKey(), syncName }));
         }
 
-        LSCStructuralLogger.DESTINATION.debug(jm);
+        LOGGER.debug(jm);
     }
 
     /**

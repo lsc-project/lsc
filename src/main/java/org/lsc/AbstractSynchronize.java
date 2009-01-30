@@ -165,11 +165,17 @@ public abstract class AbstractSynchronize {
                     jm.setDistinguishName(id.getKey());
 
                     // Retrieve condition to evaluate before deleting
-                    Boolean doDelete = true;
-                    String condition = syncOptions.getDeleteCondition();
-                    if (!condition.matches("true")) {
+                    Boolean doDelete = null;
+                    String conditionString = syncOptions.getDeleteCondition();
+ 
+                    /* Don't use JavaScript evaluator for primitive cases */
+                    if (conditionString.matches("true")) {
+                    	doDelete = true;
+                    } else if (conditionString.matches("false")) {
+                    	doDelete = false;
+                    } else {
                         // If condition is based on dstBean, retrieve the full object from destination
-	                    if (condition.contains("dstBean")) {
+	                    if (conditionString.contains("dstBean")) {
 	                        AbstractBean bean = dstJndiService.getBean(id);
 
 	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
@@ -185,7 +191,7 @@ public abstract class AbstractSynchronize {
 	                    }
 
 	                    /* Evaluate if we have to do something */
-	                    doDelete = JScriptEvaluator.evalToBoolean(condition, conditionObjects);
+	                    doDelete = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
                     }
                     
                     if (doDelete) {
@@ -275,7 +281,12 @@ public abstract class AbstractSynchronize {
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
         // store method to obtain source bean
         Method beanGetInstanceMethod = null;
+        AbstractBean srcBean = null;
+        AbstractBean dstBean = null;
 
+        /** Hash table to pass objects into JavaScript condition */
+        Map<String, Object> conditionObjects = null;
+        
         /* Loop on all entries in the source and add or update them in the destination */
         while (ids.hasNext()) {
             countAll++;
@@ -286,13 +297,14 @@ public abstract class AbstractSynchronize {
             try {
                 LscObject lscObject = srcService.getObject(id);
 
+                /* Log an error if the source object could not be retrieved! This shouldn't happen. */
                 if(lscObject == null) {
                     countError++;
                     LOGGER.error("Unable to get object for id=" + id);
                     continue;
                 }
 
-                // Specific JDBC 
+                // Specific JDBC - transform flat object into a normal object
                 if(fTop.class.isAssignableFrom(lscObject.getClass())) {
                     srcObject = object.getClass().newInstance();
                     srcObject.setUpFromObject((fTop)lscObject);
@@ -300,9 +312,6 @@ public abstract class AbstractSynchronize {
                     // Specific LDAP
                     srcObject = (top)srcService.getObject(id);
                 }
-
-                AbstractBean srcBean = null;
-                AbstractBean dstBean = null;
 
                 if (beanGetInstanceMethod == null) {
                     beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
@@ -315,18 +324,28 @@ public abstract class AbstractSynchronize {
                 }
 
                 dstBean = dstService.getBean(id);
-                jm = BeanComparator.calculateModifications(syncOptions, srcBean,
-                        dstBean, customLibrary);
+                jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
 
-                // Apply modifications to the directory
+                // Apply any modifications to the directory
                 if (jm != null) {
-                    /* Evaluate if you have to do something */
-                    Map<String, Object> table = new HashMap<String, Object>();
-                    table.put("dstBean", dstBean);
-                    table.put("srcBean", srcBean);
+                    /* Retrieve condition to evaluate before creating/updating */ 
+                    Boolean condition = null;
                     String conditionString = syncOptions.getCondition(jm.getOperation());
-                    Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
 
+                    /* Don't use JavaScript evaluator for primitive cases */
+                    if (conditionString.matches("true")) {
+                    	condition = true;
+                    } else if (conditionString.matches("false")) {
+                    	condition = false;
+                    } else {
+	                    conditionObjects = new HashMap<String, Object>();
+	                    conditionObjects.put("dstBean", dstBean);
+	                    conditionObjects.put("srcBean", srcBean);
+	                    
+	                    /* Evaluate if we have to do something */
+	                    condition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
+                    }
+                    
                     if(condition) {
                         countInitiated++;
                         JndiModifications jmFiltered = jmFilter.filter(jm);
@@ -340,9 +359,16 @@ public abstract class AbstractSynchronize {
                             }
                         }
                     } else {
+                    	/* If the condition is false, log action for debugging purposes */
                         logShouldAction(jm, id, syncName);
                     }
                 }
+            } catch (CommunicationException e) { 
+                // we lost the connection to the directory, stop everything!
+                countError++;
+                LOGGER.fatal("Connection to directory lost! Aborting.");
+                logActionError(jm, id, e);
+                return;
             } catch (RuntimeException e) {
                 countError++;
                 logActionError(jm, id, e);

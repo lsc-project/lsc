@@ -57,6 +57,7 @@ import org.lsc.beans.AbstractBean;
 import org.lsc.jndi.IJndiDstService;
 import org.lsc.objects.top;
 import org.lsc.service.ISrcService;
+import org.lsc.utils.LSCStructuralLogger;
 
 /**
  * Extends AbstractSynchronize to instantiate a simple synchronization engine
@@ -213,6 +214,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
     @SuppressWarnings("unchecked")
     private boolean launchTask(final TaskType taskType, final String taskName, final TaskMode taskMode) throws Exception {
         try {
+            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName);
+        	
             String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 
             // Get all properties

@@ -120,8 +120,6 @@ public abstract class AbstractSynchronize {
             final ISrcService srcService,
             final IJndiDstService dstJndiService) {
 
-    	LSCStructuralLogger.DESTINATION.warn("Starting clean for " + syncName);
-        
     	// Get list of all entries from the destination
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {
@@ -248,8 +246,6 @@ public abstract class AbstractSynchronize {
             final top object,
             final Class<? extends AbstractBean> objectBean,
             final Object customLibrary) {
-
-        LSCStructuralLogger.DESTINATION.warn("Starting synchronization for " + syncName);
 
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {

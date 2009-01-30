@@ -98,23 +98,24 @@ public abstract class AbstractJdbcService implements ISrcService {
 	/**
 	 * Execute a database request to get a list of object identifiers. This request
 	 * must be a very simple and efficient request because it will get all the requested
-	 * identifier. Map values, LscAttributes, will be returned empty 
-	 * @return a corresponding map indexed by id.
+	 * identifiers.
+	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
 	 */
 	public Map<String, LscAttributes> getListPivots() {
+        Map<String,LscAttributes> ret = new HashMap<String, LscAttributes>();
+
         try {
             List<HashMap<String,Object>> ids = (List<HashMap<String,Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
             Iterator<HashMap<String,Object>> idsIter = ids.iterator();
-            Map<String,LscAttributes> ret = new HashMap<String, LscAttributes>();
             while(idsIter.hasNext()) {
             	HashMap<String,Object> idMap = idsIter.next();
             	LscAttributes la = new LscAttributes(idMap);
             	ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
             }
-            return ret;
         } catch (SQLException e) {
             LOGGER.warn("Error while looking for the entries list: " + e, e);
         }
-		return null;
+
+        return ret;
 	}
 }

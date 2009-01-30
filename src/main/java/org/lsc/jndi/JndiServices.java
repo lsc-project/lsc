@@ -577,7 +577,7 @@ public final class JndiServices {
      * @param filter the filter of the search operation
      * @param scope the scope of the search operation
      * @param attrsNames table of attribute names to get
-     * @return the dn of each entry that are returned by the directory and a map of attribute names and values
+     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
      * @throws NamingException thrown if something goes wrong
      */
     public Map<String, LscAttributes> getAttrsList(final String base, 

@@ -68,7 +68,7 @@ public interface IJndiDstService {
 
     /**
      * Returns a list of all the objects identifiers.
-     * @return the list of ids
+     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
      */
     Map<String, LscAttributes> getListPivots() throws NamingException;
     

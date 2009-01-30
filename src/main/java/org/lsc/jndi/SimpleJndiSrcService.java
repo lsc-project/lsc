@@ -142,7 +142,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	/**
 	 * Get the identifiers list.
 	 * 
-	 * @return the string iterator
+	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values, never null
 	 * @throws NamingException
 	 *                 thrown if an directory exception is encountered while
 	 *                 getting the identifiers list

@@ -124,8 +124,9 @@ public abstract class AbstractSynchronize {
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {
             ids = dstJndiService.getListPivots().entrySet().iterator();
-        } catch (NamingException e1) {
+        } catch (NamingException e) {
             LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
+            LOGGER.debug(e);
             return;
         }
         
@@ -141,6 +142,7 @@ public abstract class AbstractSynchronize {
         int countError = 0;
         int countInitiated = 0;
         int countCompleted = 0;
+        
         JndiModifications jm = null;
         LscObject srcObject = null;
         
@@ -247,17 +249,19 @@ public abstract class AbstractSynchronize {
             final Class<? extends AbstractBean> objectBean,
             final Object customLibrary) {
 
+        // Get list of all entries from the source
         Iterator<Entry<String, LscAttributes>> ids = null;
         try {
-        	Map<String, LscAttributes>entries = srcService.getListPivots();
-            if(entries == null) {
-                LOGGER.fatal("Unable to find any object for service "
-                        + srcService.getClass().getName());
-                return;
-            }
-            ids = entries.entrySet().iterator();
+        	ids = srcService.getListPivots().entrySet().iterator();
         } catch(Exception e) {
-            LOGGER.fatal("Unknown error: " + e, e);
+            LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
+            LOGGER.debug(e);
+            return;
+        }
+
+        // Make sure we have at least one entry to work on
+        if (!ids.hasNext()) {
+            LOGGER.error("Empty or non existant data source : " + srcService);
             return;
         }
 
@@ -266,91 +270,88 @@ public abstract class AbstractSynchronize {
         int countInitiated = 0;
         int countCompleted = 0;
 
-        if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant data source : " + srcService);
-        } else {
-            JndiModifications jm = null;
-            top newObject = null;
-            ISyncOptions syncOptions = this.getSyncOptions(syncName);
-            // store method to obtain source bean
-            Method beanGetInstanceMethod = null;
+        JndiModifications jm = null;
+        top srcObject = null;
+        ISyncOptions syncOptions = this.getSyncOptions(syncName);
+        // store method to obtain source bean
+        Method beanGetInstanceMethod = null;
 
-            while (ids.hasNext()) {
-                countAll++;
+        /* Loop on all entries in the source and add or update them in the destination */
+        while (ids.hasNext()) {
+            countAll++;
 
-                Entry<String, LscAttributes> id = ids.next();
-                LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
+            Entry<String, LscAttributes> id = ids.next();
+            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
+
+            try {
+                LscObject lscObject = srcService.getObject(id);
+
+                if(lscObject == null) {
+                    countError++;
+                    LOGGER.error("Unable to get object for id=" + id);
+                    continue;
+                }
+
+                // Specific JDBC 
+                if(fTop.class.isAssignableFrom(lscObject.getClass())) {
+                    srcObject = object.getClass().newInstance();
+                    srcObject.setUpFromObject((fTop)lscObject);
+                } else {
+                    // Specific LDAP
+                    srcObject = (top)srcService.getObject(id);
+                }
+
+                AbstractBean srcBean = null;
+                AbstractBean dstBean = null;
+
+                if (beanGetInstanceMethod == null) {
+                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
+                }
 
                 try {
-                    LscObject lscObject = srcService.getObject(id);
-
-                    if(lscObject == null) {
-                        countError++;
-                        LOGGER.error("Unable to get object for id=" + id);
-                        continue;
-                    }
-
-                    // Specific JDBC 
-                    if(fTop.class.isAssignableFrom(lscObject.getClass())) {
-                        newObject = object.getClass().newInstance();
-                        newObject.setUpFromObject((fTop)lscObject);
-                    } else {
-                        // Specific LDAP
-                        newObject = (top)srcService.getObject(id);
-                    }
-
-                    AbstractBean srcBean = null;
-                    AbstractBean dstBean = null;
-
-                    if (beanGetInstanceMethod == null) {
-                        beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
-                    }
-
-                    try {
-                        srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { newObject });
-                    } catch (InvocationTargetException ite) {
-                        throw ite.getCause();
-                    }
-
-                    dstBean = dstService.getBean(id);
-                    jm = BeanComparator.calculateModifications(syncOptions, srcBean,
-                            dstBean, customLibrary);
-
-                    // Apply modifications to the directory
-                    if (jm != null) {
-                        /* Evaluate if you have to do something */
-                        Map<String, Object> table = new HashMap<String, Object>();
-                        table.put("dstBean", dstBean);
-                        table.put("srcBean", srcBean);
-                        String conditionString = syncOptions.getCondition(jm.getOperation());
-                        Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
-
-                        if(condition) {
-                            countInitiated++;
-                            JndiModifications jmFiltered = jmFilter.filter(jm);
-                            if (jmFiltered != null) {
-                                if (JndiServices.getDstInstance().apply(jmFiltered)) {
-                                    countCompleted++;
-                                    logAction(jmFiltered, id, syncName);
-                                } else {
-                                    countError++;
-                                    logActionError(jmFiltered, id, null);
-                                }
-                            }
-                        } else {
-                            logShouldAction(jm, id, syncName);
-                        }
-                    }
-                } catch (RuntimeException e) {
-                    countError++;
-                    logActionError(jm, id, e);
-                } catch (Exception e) {
-                    countError++;
-                    logActionError(jm, id, e);
-                } catch (Throwable e) {
-                    countError++;
-                    logActionError(jm, id, e);
+                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { srcObject });
+                } catch (InvocationTargetException ite) {
+                    throw ite.getCause();
                 }
+
+                dstBean = dstService.getBean(id);
+                jm = BeanComparator.calculateModifications(syncOptions, srcBean,
+                        dstBean, customLibrary);
+
+                // Apply modifications to the directory
+                if (jm != null) {
+                    /* Evaluate if you have to do something */
+                    Map<String, Object> table = new HashMap<String, Object>();
+                    table.put("dstBean", dstBean);
+                    table.put("srcBean", srcBean);
+                    String conditionString = syncOptions.getCondition(jm.getOperation());
+                    Boolean condition = JScriptEvaluator.evalToBoolean(conditionString, table);
+
+                    if(condition) {
+                        countInitiated++;
+                        JndiModifications jmFiltered = jmFilter.filter(jm);
+                        if (jmFiltered != null) {
+                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
+                                countCompleted++;
+                                logAction(jmFiltered, id, syncName);
+                            } else {
+                                countError++;
+                                logActionError(jmFiltered, id, null);
+                            }
+                        }
+                    } else {
+                        logShouldAction(jm, id, syncName);
+                    }
+                }
+            } catch (RuntimeException e) {
+                countError++;
+                logActionError(jm, id, e);
+            } catch (Exception e) {
+                countError++;
+                logActionError(jm, id, e);
+            } catch (Throwable e) {
+                countError++;
+                logActionError(jm, id, e);
             }
         }
 

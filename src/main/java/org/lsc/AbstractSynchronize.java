@@ -121,10 +121,9 @@ public abstract class AbstractSynchronize {
             final IJndiDstService dstJndiService) {
 
     	LSCStructuralLogger.DESTINATION.warn("Starting clean for " + syncName);
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
-
+        
+    	// Get list of all entries from the destination
         Iterator<Entry<String, LscAttributes>> ids = null;
-
         try {
             ids = dstJndiService.getListPivots().entrySet().iterator();
         } catch (NamingException e1) {
@@ -132,10 +131,13 @@ public abstract class AbstractSynchronize {
             return;
         }
         
+        // Make sure we have at least one entry to work on
         if (!ids.hasNext()) {
             LOGGER.error("Empty or non existant destination (no IDs found)");
             return;
         }
+
+        ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
         int countAll = 0;
         int countError = 0;
@@ -144,6 +146,10 @@ public abstract class AbstractSynchronize {
         JndiModifications jm = null;
         LscObject srcObject = null;
         
+        /** Hash table to pass objects into JavaScript condition */
+        Map<String, Object> conditionObjects = null;
+        
+        // Loop on all entries in the destination and delete them if they're not found in the source
         while (ids.hasNext()) {
             countAll++;
 
@@ -162,44 +168,45 @@ public abstract class AbstractSynchronize {
                     Boolean doDelete = true;
                     String condition = syncOptions.getDeleteCondition();
                     if (!condition.matches("true")) {
-                        // hash table to pass objects into JavaScript condition
-                        Map<String, Object> table = new HashMap<String, Object>();
-
                         // If condition is based on dstBean, retrieve the full object from destination
 	                    if (condition.contains("dstBean")) {
 	                        AbstractBean bean = dstJndiService.getBean(id);
 
-	                        // Log an error if the bean could not be retrieved!
+	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
 	                        if (bean == null) {
 	                            LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
 	                            countError++;
 	                            continue;
 	                        }
-	                        
-	                        table.put("dstBean", bean);	                    	
+
+	                        // Put the bean in a map to pass to JavaScript evaluator
+	                        conditionObjects = new HashMap<String, Object>();
+	                        conditionObjects.put("dstBean", bean);	                    	
 	                    }
 
-	                    /* Evaluate if you have to do something */
-	                    doDelete = JScriptEvaluator.evalToBoolean(condition, table);
+	                    /* Evaluate if we have to do something */
+	                    doDelete = JScriptEvaluator.evalToBoolean(condition, conditionObjects);
                     }
                     
-                    if (jm != null) {
-                        if(doDelete) {
-                            countInitiated++;
-                            if (JndiServices.getDstInstance().apply(jmFilter.filter(jm))) {
+                    if (doDelete) {
+                        countInitiated++;
+                        JndiModifications jmFiltered = jmFilter.filter(jm);
+                        if (jmFiltered != null) {
+                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
                                 countCompleted++;
-                                logAction(jm, id, syncName);
+                                logAction(jmFiltered, id, syncName);
                             } else {
                                 countError++;
-                                logActionError(jm, id, null);
+                                logActionError(jmFiltered, id, null);
                             }
-                        } else {
-                            logShouldAction(jm, id, syncName);
                         }
+                    } else {
+                    	// If the delete condition is false, log action for debugging purposes
+                        logShouldAction(jm, id, syncName);
                     }
                 }
             } catch (CommunicationException e) { 
-                // we lost the connection to the directory
+                // we lost the connection to the directory, stop everything!
                 countError++;
                 LOGGER.fatal("Connection to directory lost! Aborting.");
                 logActionError(jm, id, e);
@@ -223,9 +230,14 @@ public abstract class AbstractSynchronize {
     }
 
     /**
+     * Synchronize the destination LDAP directory (create and update objects from source).
+     * 
      * @param syncName
+     *                the synchronization name
      * @param srcService
+     *                the source service (JDBC or JNDI)
      * @param dstService
+     *                the JNDI destination service
      * @param object
      * @param objectBean
      * @param customLibrary
@@ -323,10 +335,10 @@ public abstract class AbstractSynchronize {
                             if (jmFiltered != null) {
                                 if (JndiServices.getDstInstance().apply(jmFiltered)) {
                                     countCompleted++;
-                                    logAction(jm, id, syncName);
+                                    logAction(jmFiltered, id, syncName);
                                 } else {
                                     countError++;
-                                    logActionError(jm, id, null);
+                                    logActionError(jmFiltered, id, null);
                                 }
                             }
                         } else {

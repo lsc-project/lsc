@@ -260,14 +260,14 @@ public abstract class AbstractSynchronize {
         try {
         	ids = srcService.getListPivots().entrySet().iterator();
         } catch(Exception e) {
-            LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
+            LOGGER.fatal("Error getting list of IDs in the source for task " + syncName);
             LOGGER.debug(e);
             return;
         }
 
         // Make sure we have at least one entry to work on
         if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant data source : " + srcService);
+            LOGGER.error("Empty or non existant source (no IDs found)");
             return;
         }
 

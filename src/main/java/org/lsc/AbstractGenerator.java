@@ -95,6 +95,9 @@ public abstract class AbstractGenerator {
     /** This is the list of attribute types available in the directory. */
     private List<String> attributeTypes;
 
+    /** This generator apply to source (or destination) directory ? */
+	private boolean fromSource;
+
     /**
      * Create a new AbstractGenerator for a new object from a basic class
      * name.
@@ -131,6 +134,14 @@ public abstract class AbstractGenerator {
      */
     public abstract String getFileName();
 
+    /**
+     * Is this generator applying to source directory (false = target) ?
+     * @return applied to source ?
+     */
+    public boolean isFromSource() {
+    	return fromSource;
+    }
+    
     /**
      * Get the default standard filename.
      *
@@ -205,6 +216,8 @@ public abstract class AbstractGenerator {
     throws NamingException {
         JndiServices js = null;
 
+        this.fromSource = fromSource;
+        
         if (fromSource) {
             js = JndiServices.getSrcInstance();
         } else {

@@ -70,43 +70,40 @@ import org.apache.log4j.Logger;
  */
 public class Configuration {
 
-    /**
-     * Logger of this class
-     */
+    //Logger
     private static final Logger LOGGER = Logger.getLogger(Configuration.class);
 
-
-    /**
-     * Filename of the <code>lsc.properties</code>
-     */
+    //Filename of the <code>lsc.properties</code>
     public static final String PROPERTIES_FILENAME = "lsc.properties";
+
+    //Directory of the <code>lsc.properties</code>
     public static final String PROPERTIES_DIRECTORY = "lsc.d";
 
-    /** People DN. */
+    //People DN
     public static final String DN_PEOPLE =
             Configuration.getString("dn.people", "ou=People");
 
-    /** LDAP schema DN. */
+    //LDAP schema DN
     public static final String DN_LDAP_SCHEMA =
             Configuration.getString("dn.ldap_schema", "cn=Subschema");
 
-    /** Enhanced schema DN. */
+    //Enhanced schema DN
     public static final String DN_ENHANCED_SCHEMA =
             Configuration.getString("dn.ldap_schema", "ou=Schema,ou=System");
 
-    /** Structures DN. */
+    //Structures DN
     public static final String DN_STRUCTURES =
             Configuration.getString("dn.structures", "ou=Structures");
 
-    /** Accounts DN. */
+    //Accounts DN
     public static final String DN_ACCOUNTS =
             Configuration.getString("dn.accounts", "ou=Accounts");
 
-    /** objectClass for a person. */
+    //objectClass for a person
     public static final String OBJECTCLASS_PERSON =
             Configuration.getString("objectclass.person", "inetOrgPerson");
 
-    /** objectClass for an employee. */
+    //objectClass for an employee
     public static final String OBJECTCLASS_EMPLOYEE =
             Configuration.getString("objectclass.employee", "inetOrgPerson");
     
@@ -117,23 +114,18 @@ public class Configuration {
     public static final int DAYS_BEFORE_SUPPRESSION =
             Configuration.getInt("suppression.MARQUAGE_NOMBRE_DE_JOURS", 90);
 
-    /** The real LDAP base DN. */
+    //The real LDAP base DN
     public static final String DN_REAL_ROOT =
             Configuration.getString("dn.real_root", "dc=lsc-project,dc=org");
 
-    /** The maximum user identifier length. */
+    //The maximum user identifier length
     public static final int UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", 8);
     
-    /**
-     * LSC configuration of the application
-     */
+    //LSC configuration of the application
     private static PropertiesConfiguration config = null;
 
-    /**
-     * Default constructor.
-     */
-    protected Configuration() {
-    }
+    //Default constructor.
+    protected Configuration() {}
 
     /**
      * Get data source connection properties.
@@ -179,9 +171,11 @@ public class Configuration {
         }
         Iterator<?> it = conf.getKeys();
         Properties result = new Properties();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = asString(conf.getProperty(key));
+        String key = null;
+        Object value = null;
+        while(it.hasNext()) {
+            key = (String) it.next();
+            value = asString(conf.getProperty(key));
             result.put(key, value);
         }
         return result;
@@ -209,8 +203,7 @@ public class Configuration {
      */
     public static String getString(final String key) {
         // beware of List problems, so get the object and convert it to a string
-        Object o = getConfiguration().getProperty(key);
-        return asString(o);
+        return asString(getConfiguration().getProperty(key));
     }
 
     /**
@@ -241,7 +234,8 @@ public class Configuration {
             try {
                 URL url = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
                 if (url == null) {
-                    url = new java.io.File(PROPERTIES_FILENAME).toURL();
+                    //We call toURI().toURL() because the method to URL does not automatically escape characters that are illegal in URLs
+                    url = new java.io.File(PROPERTIES_FILENAME).toURI().toURL();
                 }
                 setConfiguration(url);
                 URL dirUrl = Configuration.class.getClassLoader().getResource(PROPERTIES_DIRECTORY);
@@ -257,8 +251,9 @@ public class Configuration {
                             }
                         };
                         File[] files = confDir.listFiles(ff);
-                        for (int i = 0; i < files.length; i++) {
-                            addConfiguration(files[i].toURL());
+                        for(int i = 0; i < files.length; i++) {
+                            //We call toURI().toURL() because the method to URL does not automatically escape characters that are illegal in URLs
+                            addConfiguration(files[i].toURI().toURL());
                         }
                     }
                 }
@@ -289,7 +284,7 @@ public class Configuration {
     private static String asString(Object value) {
         if (value instanceof List) {
             List<?> list = (List<?>) value;
-            value = StringUtils.join(list.iterator(), ',');
+            value = StringUtils.join(list.iterator(), ",");
         }
         return (String) value;
     }

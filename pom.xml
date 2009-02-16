@@ -12,38 +12,38 @@
 		simplifies synchronizations between relation databases and LDAP
 		directories.
 	</description>
-	<url>http://lsc-project/</url>
+	<url>http://lsc-project.org/</url>
 	<issueManagement>
-		<system>Bugtracker</system>
-		<url>http://forge.objectweb.org/tracker/?group_id=162</url>
+		<system>Redmine</system>
+		<url>http://tools.lsc-project.org/</url>
 	</issueManagement>
 	<inceptionYear>2005</inceptionYear>
 	<mailingLists>
 		<mailingList>
-			<name>LSC Project Announcements</name>
-			<subscribe>lsc-announce-subscribe@objectweb.org</subscribe>
-			<unsubscribe>lsc-announce-unsubscribe@objectweb.org</unsubscribe>
+			<name>Announcements about Ldap Synchronization Project (LSC) - low-volume</name>
+			<subscribe>lsc-announce-subscribe@lists.lsc-project.org</subscribe>
+			<unsubscribe>lsc-announce-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-announce@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-announce</archive>
 		</mailingList>
 		<mailingList>
-			<name>LSC Project Users</name>
-			<subscribe>lsc-users-subscribe@objectweb.org</subscribe>
-			<unsubscribe>lsc-users-unsubscribe@objectweb.org</unsubscribe>
+			<name>General discussions and help for Ldap Synchronization Connector (LSC) - Start here!</name>
+			<subscribe>lsc-users-subscribe@lists.lsc-project.org</subscribe>
+			<unsubscribe>lsc-users-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-users@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-users</archive>
 		</mailingList>
 		<mailingList>
-			<name>LSC Project Dev</name>
-			<subscribe>lsc-dev-subscribe@objectweb.org</subscribe>
-			<unsubscribe>lsc-dev-unsubscribe@objectweb.org</unsubscribe>
+			<name>Development and project discussions about Ldap Synchronization Connector (LSC)</name>
+			<subscribe>lsc-dev-subscribe@lists.lsc-project.org</subscribe>
+			<unsubscribe>lsc-dev-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-dev@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-dev</archive>
 		</mailingList>
 		<mailingList>
-			<name>LSC Project Changes and commitsd</name>
-			<subscribe>lsc-changes-subscribe@objectweb.org</subscribe>
-			<unsubscribe>lsc-changes-unsubscribe@objectweb.org</unsubscribe>
+			<name>A commit-list that receives all updates to the code and the wiki (website) for Ldap Synchronization Connector (LSC)</name>
+			<subscribe>lsc-changes-subscribe@lists.lsc-project.org</subscribe>
+			<unsubscribe>lsc-changes-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-changes@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-changes</archive>
 		</mailingList>
@@ -60,7 +60,7 @@
 				<role>Architect</role>
 				<role>Developer</role>
 			</roles>
-			<timezone>+2</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>jclarke</id>
@@ -71,7 +71,7 @@
 			<roles>
 				<role>Developer</role>
 			</roles>
-			<timezone>+2</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>tchemineau</id>
@@ -82,7 +82,7 @@
 			<roles>
 				<role>Developer</role>
 			</roles>
-			<timezone>+2</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>rschermesser</id>
@@ -93,7 +93,7 @@
 			<roles>
 				<role>Developer</role>
 			</roles>
-			<timezone>+2</timezone>
+			<timezone>+1</timezone>
 		</developer>
 	</developers>
 	<contributors>
@@ -105,7 +105,7 @@
 				<role>Integrator</role>
 				<role>Tests &amp; Q/A</role>
 			</roles>
-			<timezone>+2</timezone>
+			<timezone>+1</timezone>
 		</contributor>
 	</contributors>
 	<licenses>
@@ -117,7 +117,7 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:https://lsc-project.org/svn/lsc-core</connection>
+		<connection>scm:svn:https://lsc-project.org/svn/lsc/</connection>
 		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core</developerConnection>
 		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc</url>
 	</scm>

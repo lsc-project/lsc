@@ -65,276 +65,276 @@ import org.apache.log4j.Logger;
  */
 public class LdapObjectClass {
 
-    /** This is the maximum number of parser pass before considering failing. */
-    private static final int MAX_PASS_BEFORE_FAILING = 100;
+	/** This is the maximum number of parser pass before considering failing. */
+	private static final int MAX_PASS_BEFORE_FAILING = 100;
 
-    /** The attribute object identifier. */
-    private String oid;
+	/** The attribute object identifier. */
+	private String oid;
 
-    /** The main attribute name. */
-    private String name;
+	/** The main attribute name. */
+	private String name;
 
-    /** The attribute extensions. */
-    private Map<String, String> x;
+	/** The attribute extensions. */
+	private Map<String, String> x;
 
-    /** The attribute parent type - may be null. */
-    private String inheritFrom;
+	/** The attribute parent type - may be null. */
+	private String inheritFrom;
 
-    /** The attribute description. */
-    private String description;
+	/** The attribute description. */
+	private String description;
 
-    /** Object class type (structural, auxiliary, ...). */
-    private String type;
+	/** Object class type (structural, auxiliary, ...). */
+	private String type;
 
-    /** List of mono valued attributes. */
-    private List<String> monoAttrs;
+	/** List of mono valued attributes. */
+	private List<String> monoAttrs;
 
-    /** List of multi valued attributes. */
-    private List<String> multiAttrs;
+	/** List of multi valued attributes. */
+	private List<String> multiAttrs;
 
-    /** The local LOG4J logger. */
-    private static final Logger LOGGER = Logger
-	    .getLogger(LdapAttributeType.class);
+	/** The local LOG4J logger. */
+	private static final Logger LOGGER = Logger
+	.getLogger(LdapAttributeType.class);
 
-    /**
-         * The default constructor.
-         */
-    public LdapObjectClass() {
-	x = new HashMap<String, String>();
-	monoAttrs = new ArrayList<String>();
-	multiAttrs = new ArrayList<String>();
-    }
-
-    /**
-     * 
-     * @param value
-     * @param pattern
-     * @return the matched values array
-     */
-    public static String[] execRegex(String value, String pattern) {
-	Pattern ocPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-	Matcher ocMatcher = ocPattern.matcher(value);
-	if (ocMatcher.matches()) {
-	    return new String[] { ocMatcher.group(1), ocMatcher.group(2) };
-	}
-	return null;
-    }
-
-    public static String[] execRegex3(String value, String pattern) {
-	Pattern ocPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
-	Matcher ocMatcher = ocPattern.matcher(value);
-	if (ocMatcher.matches()) {
-	    return new String[] { ocMatcher.group(1), ocMatcher.group(2),
-		    ocMatcher.group(3) };
-	}
-	return null;
-    }
-
-    /**
-     * Parse the object class description.
-     * @param ocStr object class description
-     * @param ats attribute types
-     * @return the completed object
-     */
-    public static LdapObjectClass parse(final String ocStr,
-	    final Map<String, LdapAttributeType> ats) {
-	LdapObjectClass loc = new LdapObjectClass();
-	String rest = ocStr;
-	List<String> attrs = new ArrayList<String>();
-
-	String[] ret = execRegex(rest, "\\(\\s+([0-9\\.]+)(.*)\\s*\\)\\s*");
-	if (ret != null) {
-	    loc.oid = ret[0];
-	    rest = ret[1];
-	} else {
-	    LOGGER.error("Unable to match the oid in \"" + ocStr + "\"");
-	    return null;
+	/**
+	 * The default constructor.
+	 */
+	public LdapObjectClass() {
+		x = new HashMap<String, String>();
+		monoAttrs = new ArrayList<String>();
+		multiAttrs = new ArrayList<String>();
 	}
 
-	ret = execRegex(rest, "\\s*NAME\\s+(\\([^\\)]+\\)|[^ ]+)(.*)\\s*");
-	if (ret != null) {
-	    if (ret[0].startsWith("(")) {
-		ret[0] = ret[0].substring(1, ret[0].length() - 1);
-	    }
-	    StringTokenizer names = new StringTokenizer(ret[0], " ");
-	    loc.setName(names.nextToken());
-	    if (names.hasMoreElements()) {
-		LOGGER.debug("Multiple names not supported. Using first one ("
-			+ loc.name + ") for \"" + ocStr + "\"");
-	    }
-	    rest = ret[1];
-	} else {
-	    LOGGER.error("Unable to match the name in \"" + ocStr + "\"");
-	    return null;
+	/**
+	 * 
+	 * @param value
+	 * @param pattern
+	 * @return the matched values array
+	 */
+	public static String[] execRegex(String value, String pattern) {
+		Pattern ocPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+		Matcher ocMatcher = ocPattern.matcher(value);
+		if (ocMatcher.matches()) {
+			return new String[] { ocMatcher.group(1), ocMatcher.group(2) };
+		}
+		return null;
 	}
 
-	int maxPass = 0;
-	for (; rest != null && rest.length() > 0
+	public static String[] execRegex3(String value, String pattern) {
+		Pattern ocPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+		Matcher ocMatcher = ocPattern.matcher(value);
+		if (ocMatcher.matches()) {
+			return new String[] { ocMatcher.group(1), ocMatcher.group(2),
+					ocMatcher.group(3) };
+		}
+		return null;
+	}
+
+	/**
+	 * Parse the object class description.
+	 * @param ocStr object class description
+	 * @param ats attribute types
+	 * @return the completed object
+	 */
+	public static LdapObjectClass parse(final String ocStr,
+			final Map<String, LdapAttributeType> ats) {
+		LdapObjectClass loc = new LdapObjectClass();
+		String rest = ocStr;
+		List<String> attrs = new ArrayList<String>();
+
+		String[] ret = execRegex(rest, "\\(\\s+([0-9\\.]+)(.*)\\s*\\)\\s*");
+		if (ret != null) {
+			loc.oid = ret[0];
+			rest = ret[1];
+		} else {
+			LOGGER.error("Unable to match the oid in \"" + ocStr + "\"");
+			return null;
+		}
+
+		ret = execRegex(rest, "\\s*NAME\\s+(\\([^\\)]+\\)|[^ ]+)(.*)\\s*");
+		if (ret != null) {
+			if (ret[0].startsWith("(")) {
+				ret[0] = ret[0].substring(1, ret[0].length() - 1);
+			}
+			StringTokenizer names = new StringTokenizer(ret[0], " ");
+			loc.setName(names.nextToken());
+			if (names.hasMoreElements()) {
+				LOGGER.debug("Multiple names not supported. Using first one ("
+						+ loc.name + ") for \"" + ocStr + "\"");
+			}
+			rest = ret[1];
+		} else {
+			LOGGER.error("Unable to match the name in \"" + ocStr + "\"");
+			return null;
+		}
+
+		int maxPass = 0;
+		for (; rest != null && rest.length() > 0
 		&& maxPass < MAX_PASS_BEFORE_FAILING; maxPass++) {
-	    LOGGER.debug("Re/Starting analysis with rest=\"" + rest + "\"");
-	    ret = execRegex(rest,
-		    "\\s*SUP\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
-	    if (ret != null) {
-		if (ret[0].startsWith("(")) {
-		    ret[0] = ret[0].substring(1, ret[0].length() - 2);
+			LOGGER.debug("Re/Starting analysis with rest=\"" + rest + "\"");
+			ret = execRegex(rest,
+			"\\s*SUP\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
+			if (ret != null) {
+				if (ret[0].startsWith("(")) {
+					ret[0] = ret[0].substring(1, ret[0].length() - 2);
+				}
+				StringTokenizer sups = new StringTokenizer(ret[0], "$");
+				loc.inheritFrom = sups.nextToken();
+				if (sups.hasMoreElements()) {
+					LOGGER
+					.warn("Multiple inheritence not supported. Using first one ("
+							+ loc.inheritFrom
+							+ ") for \""
+							+ ocStr
+							+ "\"");
+				}
+				rest = ret[1];
+			}
+
+			ret = execRegex(rest, "\\s*DESC\\s+('[^']*')\\s*(.*)\\s*");
+			if (ret != null) {
+				loc.description = ret[0];
+				rest = ret[1];
+			}
+
+			ret = execRegex(rest,
+			"\\s*MUST\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
+			if (ret != null) {
+				if (ret[0].startsWith("(")) {
+					ret[0] = ret[0].substring(1, ret[0].length() - 2);
+				}
+				StringTokenizer musts = new StringTokenizer(ret[0], "$");
+				attrs.addAll(toList(musts));
+				rest = ret[1];
+			}
+
+			ret = execRegex(rest,
+			"\\s*MAY\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
+			if (ret != null) {
+				if (ret[0].startsWith("(")) {
+					ret[0] = ret[0].substring(1, ret[0].length() - 2);
+				}
+				StringTokenizer mays = new StringTokenizer(ret[0], "$");
+				attrs.addAll(toList(mays));
+				rest = ret[1];
+			}
+
+			ret = execRegex3(rest, "\\s*X-([^\\s]+)\\s+('[^']+')?\\s*(.*)\\s*");
+			if (ret != null) {
+				loc.x.put(ret[0], ret[1]);
+				rest = ret[2];
+			}
+
+			ret = execRegex(rest,
+			"\\s*(STRUCTURAL|AUXILIARY|ABSTRACT)\\s*(.*)\\s*");
+			if (ret != null) {
+				loc.type = ret[0];
+				rest = ret[1];
+			}
 		}
-		StringTokenizer sups = new StringTokenizer(ret[0], "$");
-		loc.inheritFrom = sups.nextToken();
-		if (sups.hasMoreElements()) {
-		    LOGGER
-			    .warn("Multiple inheritence not supported. Using first one ("
-				    + loc.inheritFrom
-				    + ") for \""
-				    + ocStr
-				    + "\"");
+
+		if (maxPass >= MAX_PASS_BEFORE_FAILING) {
+			LOGGER.error("The parser encountered an error while parsing the "
+					+ "following string : " + rest + " while parsing " + ocStr);
+			return null;
 		}
-		rest = ret[1];
-	    }
 
-	    ret = execRegex(rest, "\\s*DESC\\s+('[^']*')\\s*(.*)\\s*");
-	    if (ret != null) {
-		loc.description = ret[0];
-		rest = ret[1];
-	    }
-
-	    ret = execRegex(rest,
-		    "\\s*MUST\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
-	    if (ret != null) {
-		if (ret[0].startsWith("(")) {
-		    ret[0] = ret[0].substring(1, ret[0].length() - 2);
+		if (loc.inheritFrom == null) {
+			LOGGER.debug("No inheritence found for \"" + ocStr
+					+ "\". Defaulting to top");
+			loc.inheritFrom = "top";
 		}
-		StringTokenizer musts = new StringTokenizer(ret[0], "$");
-		attrs.addAll(toList(musts));
-		rest = ret[1];
-	    }
-
-	    ret = execRegex(rest,
-		    "\\s*MAY\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
-	    if (ret != null) {
-		if (ret[0].startsWith("(")) {
-		    ret[0] = ret[0].substring(1, ret[0].length() - 2);
+		if (loc.description == null) {
+			LOGGER.debug("No description found for \"" + ocStr + "\"");
 		}
-		StringTokenizer mays = new StringTokenizer(ret[0], "$");
-		attrs.addAll(toList(mays));
-		rest = ret[1];
-	    }
+		if (loc.type == null) {
+			loc.type = "AUXILIARY";
+			LOGGER
+			.debug("No structural or abstract type found. Defaulting to auxiliary in \""
+					+ ocStr + "\"");
+		}
 
-	    ret = execRegex3(rest, "\\s*X-([^\\s]+)\\s+('[^']+')?\\s*(.*)\\s*");
-	    if (ret != null) {
-		loc.x.put(ret[0], ret[1]);
-		rest = ret[2];
-	    }
-
-	    ret = execRegex(rest,
-		    "\\s*(STRUCTURAL|AUXILIARY|ABSTRACT)\\s*(.*)\\s*");
-	    if (ret != null) {
-		loc.type = ret[0];
-		rest = ret[1];
-	    }
+		// Managing attributes
+		Iterator<String> attrsIter = attrs.iterator();
+		while (attrsIter.hasNext()) {
+			String attributeName = (String) attrsIter.next();
+			if (ats.get(attributeName) != null
+					&& ats.get(attributeName).isSingleValue()) {
+				loc.monoAttrs.add(attributeName);
+			} else {
+				loc.multiAttrs.add(attributeName);
+			}
+		}
+		LOGGER.debug("Successfully parsed objectclass " + loc.name);
+		return loc;
 	}
 
-	if (maxPass >= MAX_PASS_BEFORE_FAILING) {
-	    LOGGER.error("The parser encountered an error while parsing the "
-		    + "following string : " + rest + " while parsing " + ocStr);
-	    return null;
+	private static List<String> toList(final StringTokenizer names) {
+		List<String> ret = new ArrayList<String>();
+		while (names.hasMoreTokens()) {
+			ret.add(names.nextToken().trim());
+		}
+		return ret;
 	}
 
-	if (loc.inheritFrom == null) {
-	    LOGGER.debug("No inheritence found for \"" + ocStr
-		    + "\". Defaulting to top");
-	    loc.inheritFrom = "top";
-	}
-	if (loc.description == null) {
-	    LOGGER.debug("No description found for \"" + ocStr + "\"");
-	}
-	if (loc.type == null) {
-	    loc.type = "AUXILIARY";
-	    LOGGER
-		    .debug("No structural or abstract type found. Defaulting to auxiliary in \""
-			    + ocStr + "\"");
+	public final String getInheritFrom() {
+		return inheritFrom;
 	}
 
-	// Managing attributes
-	Iterator<String> attrsIter = attrs.iterator();
-	while (attrsIter.hasNext()) {
-	    String attributeName = (String) attrsIter.next();
-	    if (ats.get(attributeName) != null
-		    && ats.get(attributeName).isSingleValue()) {
-		loc.monoAttrs.add(attributeName);
-	    } else {
-		loc.multiAttrs.add(attributeName);
-	    }
+	public final void setInheritFrom(String inheritFrom) {
+		this.inheritFrom = inheritFrom;
 	}
-	LOGGER.debug("Successfully parsed objectclass " + loc.name);
-	return loc;
-    }
 
-    private static List<String> toList(final StringTokenizer names) {
-	List<String> ret = new ArrayList<String>();
-	while (names.hasMoreTokens()) {
-	    ret.add(names.nextToken().trim());
+	public final List<String> getMultiAttrs() {
+		return multiAttrs;
 	}
-	return ret;
-    }
 
-    public final String getInheritFrom() {
-	return inheritFrom;
-    }
-
-    public final void setInheritFrom(String inheritFrom) {
-	this.inheritFrom = inheritFrom;
-    }
-
-    public final List<String> getMultiAttrs() {
-	return multiAttrs;
-    }
-
-    public final void setMultiAttrs(List<String> multiAttrs) {
-	this.multiAttrs = multiAttrs;
-    }
-
-    public final String getName() {
-	return name;
-    }
-
-    public final void setName(String name) {
-	if (name.trim().startsWith("'")) {
-	    this.name = name.trim().substring(1, name.length() - 1);
-	} else {
-	    this.name = name.trim();
+	public final void setMultiAttrs(List<String> multiAttrs) {
+		this.multiAttrs = multiAttrs;
 	}
-    }
 
-    public final String getDescription() {
-	return description;
-    }
+	public final String getName() {
+		return name;
+	}
 
-    public final void setDescription(String description) {
-	this.description = description;
-    }
+	public final void setName(String name) {
+		if (name.trim().startsWith("'")) {
+			this.name = name.trim().substring(1, name.length() - 1);
+		} else {
+			this.name = name.trim();
+		}
+	}
 
-    public final List<String> getMonoAttrs() {
-	return monoAttrs;
-    }
+	public final String getDescription() {
+		return description;
+	}
 
-    public final void setMonoAttrs(List<String> optionalAttrs) {
-	this.monoAttrs = optionalAttrs;
-    }
+	public final void setDescription(String description) {
+		this.description = description;
+	}
 
-    public final String getType() {
-	return type;
-    }
+	public final List<String> getMonoAttrs() {
+		return monoAttrs;
+	}
 
-    public final void setType(String type) {
-	this.type = type;
-    }
+	public final void setMonoAttrs(List<String> optionalAttrs) {
+		this.monoAttrs = optionalAttrs;
+	}
 
-    public final String getOid() {
-	return oid;
-    }
+	public final String getType() {
+		return type;
+	}
 
-    public final void setOid(String oid) {
-	this.oid = oid;
-    }
+	public final void setType(String type) {
+		this.type = type;
+	}
+
+	public final String getOid() {
+		return oid;
+	}
+
+	public final void setOid(String oid) {
+		this.oid = oid;
+	}
 
 }

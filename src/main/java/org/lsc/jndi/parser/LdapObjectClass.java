@@ -258,6 +258,14 @@ public class LdapObjectClass {
 		Iterator<String> attrsIter = attrs.iterator();
 		while (attrsIter.hasNext()) {
 			String attributeName = (String) attrsIter.next();
+			
+			// ignore attributes with names containing a "-"
+			// see http://tools.lsc-project.org/issues/show/31
+			if (attributeName.indexOf("-") != -1) {
+				badAttributeName(attributeName);
+				continue;
+			}
+			
 			if (ats.get(attributeName) != null
 					&& ats.get(attributeName).isSingleValue()) {
 				loc.monoAttrs.add(attributeName);
@@ -336,5 +344,17 @@ public class LdapObjectClass {
 	public final void setOid(String oid) {
 		this.oid = oid;
 	}
+	
+    /**
+     * Handle bad attribute names found during generation.
+     * 
+     * Currently, this applies to names containing "-", which causes
+     * invalid method names in Java. We just log a warning for now.
+     * 
+     * @param name The attribute name that we rejected
+     */
+    protected static final void badAttributeName(String name) {
+    	LOGGER.warn("Ignoring attribute " + name + ". It contains currently unsupported characters. See http://tools.lsc-project.org/issues/show/31");
+    }
 
 }

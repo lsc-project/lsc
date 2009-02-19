@@ -95,7 +95,7 @@ public final class EmbeddedOpenDS {
     /**
      * A default value for the working dir
      */
-    public static final String DEFAULT_WORKING_DIR = "/tmp/opends-test";
+    public static final String DEFAULT_WORKING_DIR_NAME = "opends-test";
 
     public static boolean SERVER_STARTED = false;
 
@@ -107,7 +107,7 @@ public final class EmbeddedOpenDS {
     private static MemoryBackend memoryBackend = null;
 
     /**
-     * Initialize the server. We completly override the super class server set up.
+     * Initialize the server. We completely override the super class server set up.
      * @throws IOException 
      * @throws InitializationException 
      */
@@ -129,7 +129,12 @@ public final class EmbeddedOpenDS {
 
         String workingDirectory = System.getProperty(PROPERTY_WORKING_DIR);
         if (null == workingDirectory) {
-            workingDirectory = DEFAULT_WORKING_DIR;
+        	String tempDir = System.getProperty("java.io.tmpdir");
+        	if ( !(tempDir.endsWith("/") || tempDir.endsWith("\\")) ) {
+        	   tempDir = tempDir + System.getProperty("file.separator");
+        	}
+        	
+        	workingDirectory = tempDir + DEFAULT_WORKING_DIR_NAME;
         }
         // copy to r/w location and init directory structure
         initOpendsDirectory(conf, workingDirectory);

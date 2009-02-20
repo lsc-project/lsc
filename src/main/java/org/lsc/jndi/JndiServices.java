@@ -239,8 +239,8 @@ public final class JndiServices {
             throw nex;
         }
         SearchResult sr = null;
-        if (ne.hasMore()) {
-            sr = (SearchResult) ne.next();
+        if (ne.hasMoreElements()) {
+            sr = (SearchResult) ne.nextElement();
             if (ne.hasMoreElements()) {
                 LOGGER.error("Too many entries returned (base: \"" + base
                         + "\", filter: \"" + filter + "\"");
@@ -249,6 +249,9 @@ public final class JndiServices {
             } else {
                 return sr;
             }
+        } else {
+        	// try hasMore method to throw exceptions if there are any and we didn't get our entry
+        	ne.hasMore();
         }
         return sr;
     }

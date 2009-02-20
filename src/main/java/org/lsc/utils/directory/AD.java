@@ -105,6 +105,25 @@ public class AD {
     }
     
     /**
+     * Encode a password so that it can be updated in Active Directory
+     * in the field unicodePwd.
+     * 
+     * @param password The cleartext password to be encoded
+     * @return The value to write in AD's unicodePwd attribute
+     */
+    public static String getUnicodePwd(String password) {
+    	String quotedPassword = "\"" + password + "\"";
+    	char unicodePwd[] = quotedPassword.toCharArray();
+    	byte pwdArray[] = new byte[unicodePwd.length * 2];
+    	for (int i=0; i<unicodePwd.length; i++) {
+    		pwdArray[i*2 + 1] = (byte) (unicodePwd[i] >>> 8);
+    		pwdArray[i*2 + 0] = (byte) (unicodePwd[i] & 0xff);
+    	}
+    	
+    	return new String(pwdArray);
+	}
+    
+    /**
      * Return the number of weeks since the last logon
      * 
      * @param lastLogonTimestamp

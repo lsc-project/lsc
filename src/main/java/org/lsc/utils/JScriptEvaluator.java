@@ -54,6 +54,7 @@ import java.util.Map;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -79,7 +80,8 @@ public final class JScriptEvaluator {
      */
     private JScriptEvaluator() {
         cache = new HashMap<String, Script>();
-        cx = Context.enter();
+        // When removing 1.5 compatibility prefer enterContext() method
+        cx = new ContextFactory().enter();
     }
 
     /**
@@ -147,7 +149,7 @@ public final class JScriptEvaluator {
      *                the keys are the name used in the
      * @return the evaluation result
      */
-    private Object instanceEval(final String expression,
+	private Object instanceEval(final String expression,
             final Map<String, Object> params) {
         Script script = null;
         Scriptable scope = cx.initStandardObjects();

@@ -1,4 +1,4 @@
-<project name="lsc-project" default="help" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="lsc-core" default="help" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 	<path id="maven-ant-tasks.classpath" path="${basedir}/lib/maven-ant-tasks-2.0.7.jar" />
 	<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
 

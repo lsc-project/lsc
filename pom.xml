@@ -6,7 +6,7 @@
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
 	<name>Ldap Synchronization Connector</name>
-	<version>1.1-beta1</version>
+	<version>1.1-SNAPSHOT</version>
 	<description>
 		This project is the Ldap Synchronization Connector which
 		simplifies synchronizations between relation databases and LDAP
@@ -401,10 +401,13 @@
 	<distributionManagement>
 		<repository>
 			<id>lsc-project.org</id>
-			<url>
-				scp://lsc-project.org:/var/www/lsc-project/maven
-			</url>
+			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
 		</repository>
+		<snapshotRepository>
+			<id>lsc-project.org</id>
+			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
 	</distributionManagement>
 	<ciManagement>
 		<system>hudson</system>

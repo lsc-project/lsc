@@ -101,7 +101,11 @@ public class AD {
      */
     public static int userAccountControlToggle(int value, String constToApply) {
         Integer constValue = Integer.parseInt(constToApply);
-        return (value & constValue);
+        if ((value & constValue) == constValue) {
+        	return (value & ~constValue);
+        } else {
+            return (value & constValue);        	
+        }
     }
     
     /**

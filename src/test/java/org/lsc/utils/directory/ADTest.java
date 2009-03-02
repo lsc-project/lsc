@@ -82,6 +82,10 @@ public class ADTest extends TestCase {
     	// toggle it back to enabled
     	uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
     	assertEquals(512, uACValue);
+
+    	// and toggle back to disabled
+    	uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
+    	assertEquals(514, uACValue);
     }
     
     /**

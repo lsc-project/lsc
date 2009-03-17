@@ -59,8 +59,6 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
-import com.sun.java_cup.internal.production;
-
 /**
  * 
  * 

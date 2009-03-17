@@ -72,7 +72,7 @@ public class LscAttributes {
     }
     
     public String getStringValueAttribute(String attribute) {
-        return (String)values.get(attribute);
+        return values.get(attribute).toString();
     }
     
     public Integer getIntegerValueAttribute(String attribute) {

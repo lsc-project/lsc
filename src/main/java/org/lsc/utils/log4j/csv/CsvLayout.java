@@ -59,6 +59,8 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
+import com.sun.java_cup.internal.production;
+
 /**
  * 
  * 
@@ -81,6 +83,7 @@ public class CsvLayout extends Layout {
     private String attrs;
     private String separator = DEFAULT_SEPARATOR;
     private String taskNames;
+    private String outputHeader = "false";
   
     /* The attributes to write */
     protected List<String> attributes;
@@ -90,6 +93,12 @@ public class CsvLayout extends Layout {
     
     /* The operations to log */
     protected Set<JndiModificationType> operations;
+    
+    /* Output header to a CSV file? */
+    protected Boolean outputCsvHeader;
+    
+    /* Instance variable : have we already output the header? */
+    private Boolean csvHeaderPrinted = false;
     
     /**
      * Default constructor 
@@ -150,6 +159,11 @@ public class CsvLayout extends Layout {
                 result += sb.toString();
                 result += "\n";
             }
+        }
+    
+        if (outputCsvHeader && !csvHeaderPrinted) {
+        	result = attrs + "\n" + result;
+        	csvHeaderPrinted = true;
         }
         
         return result;        
@@ -213,6 +227,9 @@ public class CsvLayout extends Layout {
                 taskNamesList.add(token);
             }
         }
+        
+        /* Parse whether to output header to CSV file */
+        outputCsvHeader = Boolean.parseBoolean(outputHeader);
     }
     
     /**
@@ -279,5 +296,19 @@ public class CsvLayout extends Layout {
 	 */
 	public void setTaskNames(String taskNames) {
 		this.taskNames = taskNames;
+	}
+
+	/**
+	 * @return the outputHeader
+	 */
+	public String getOutputHeader() {
+		return outputHeader;
+	}
+
+	/**
+	 * @param outputHeader the outputHeader to set
+	 */
+	public void setOutputHeader(String outputHeader) {
+		this.outputHeader = outputHeader;
 	}
 }

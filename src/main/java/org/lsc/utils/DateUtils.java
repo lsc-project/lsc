@@ -137,4 +137,20 @@ public final class DateUtils {
 		    return FORMATTER.format(date);
 		}
     }
+    
+    /**
+     * Generate a date string - synchronized call to internal formatter
+     * object to support multi-threaded calls.
+     * 
+     * This uses the simplified format: yyyyMMddHHmmss'Z'
+     * 
+     * @param date date to extract
+     * @return generated date
+     */
+	public static String simpleFormat(final Date date) {
+		synchronized (SIMPLIFIED_FORMATTER) {
+		    return SIMPLIFIED_FORMATTER.format(date);
+		}
+	}
+
 }

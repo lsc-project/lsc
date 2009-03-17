@@ -87,6 +87,8 @@ public class DateUtilsTest extends TestCase {
         time = time - time % 1000;
         gc.setTimeInMillis(time);
         assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
+        assertEquals("20070622192826Z", DateUtils.simpleFormat(gc.getTime()));
+
     }
     /**
      * Launch the format test.

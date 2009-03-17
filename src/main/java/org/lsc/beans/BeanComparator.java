@@ -326,10 +326,35 @@ public final class BeanComparator {
         }
 
         JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY, syncOptions.getTaskName());
+        
         if (srcJdbcBean.getDistinguishName() != null) {
             jm.setDistinguishName(srcJdbcBean.getDistinguishName());
         } else {
-            LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
+        	
+        	/** Hash table to pass objects into JavaScript condition */
+            Map<String, Object> conditionObjects = null;
+        	Boolean condition = null;
+            String conditionString = syncOptions.getCondition(jm.getOperation());
+
+            /* Don't use JavaScript evaluator for primitive cases */
+            if (conditionString.matches("true")) {
+            	condition = true;
+            } else if (conditionString.matches("false")) {
+            	condition = false;
+            } else {
+                conditionObjects = new HashMap<String, Object>();
+                conditionObjects.put("dstBean", null);
+                conditionObjects.put("srcBean", srcJdbcBean);
+                
+                /* Evaluate if we have to do something */
+                condition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
+            }
+            
+        	// don't complain about a missing DN if we're not really going to create the entry
+            if (condition) {
+            	LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
+            }
+            
             if (srcJdbcBean.getAttributeById("uid") == null || srcJdbcBean.getAttributeById("uid").size() == 0) {
                 throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
             }

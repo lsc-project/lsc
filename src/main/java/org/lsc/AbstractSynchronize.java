@@ -482,28 +482,28 @@ public abstract class AbstractSynchronize {
             final String syncName) {
         switch (jm.getOperation()) {
         case ADD_ENTRY:
-            LOGGER.debug("Create condition false. Should have added object " + id.getKey());
+            LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object " + id.getKey());
             break;
 
         case MODIFY_ENTRY:
-            LOGGER.debug("Update condition false. Should have modified object " + id.getKey());
+            LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object " + id.getKey());
             break;
 
         case MODRDN_ENTRY:
-            LOGGER.debug("ModRDN condition false. Should have renamed object " + id.getKey());
+            LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object " + id.getKey());
             break;
 
         case DELETE_ENTRY:
-            LOGGER.debug("Delete condition false. Should have removed object " + id.getKey());
+            LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object " + id.getKey());
             break;
 
         default:
-        	LOGGER.debug(I18n.getMessage(null,
+            LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
                     "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
                     id.getKey(), syncName }));
         }
 
-        LOGGER.debug(jm);
+        LSCStructuralLogger.DESTINATION.debug(jm);
     }
 
     /**

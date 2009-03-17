@@ -324,11 +324,14 @@ public final class FrenchFilters {
      *
      * @param chaine
      *
-     * @return
+     * @return String with caps for all characters after space, "-", etc ...
      */
-    private static String toUpperCaseAllBeginingNames(final String chaine) {
-        String returned = "";
+    public static String toUpperCaseAllBeginningNames(final String chaine) {
+        if (chaine.length() == 0) return "";
+    	
+    	String returned = "";
         String tmp = chaine;
+        
         // La chaine commence forc&eacute;ment par une majuscule!
         tmp = tmp.substring(0, 1).toUpperCase()
               + tmp.substring(1, tmp.length());
@@ -367,7 +370,7 @@ public final class FrenchFilters {
      */
     public static String filterSn(final String sn)
                            throws CharacterUnacceptedException {
-        String tmp = toUpperCaseAllBeginingNames(filterName(sn));
+        String tmp = toUpperCaseAllBeginningNames(filterName(sn));
 
         if (!tmp.matches(REGEXP_FOR_LASTNAME)) {
             throw new CharacterUnacceptedException();
@@ -437,7 +440,7 @@ public final class FrenchFilters {
      */
     public static String filterNomPatronymique(final String name)
                                         throws CharacterUnacceptedException {
-        String tmp = toUpperCaseAllBeginingNames(filterName(name));
+        String tmp = toUpperCaseAllBeginningNames(filterName(name));
 
         if (!tmp.matches(REGEXP_CHARACTERS)) {
             throw new CharacterUnacceptedException(tmp);
@@ -455,7 +458,7 @@ public final class FrenchFilters {
      */
     public static String filterPrenomEtatCivil(final String name)
                                         throws CharacterUnacceptedException {
-        String tmp = toUpperCaseAllBeginingNames(filterName(name));
+        String tmp = toUpperCaseAllBeginningNames(filterName(name));
 
         if (!tmp.matches(REGEXP_FOR_FISRTNAME)) {
             throw new CharacterUnacceptedException(tmp);
@@ -473,7 +476,7 @@ public final class FrenchFilters {
      */
     public static String filterGivenName(final String oldValue)
                                   throws CharacterUnacceptedException {
-        String tmp = toUpperCaseAllBeginingNames(filterName(oldValue));
+        String tmp = toUpperCaseAllBeginningNames(filterName(oldValue));
 
         if (!tmp.matches(REGEXP_FOR_FISRTNAME)) {
             throw new CharacterUnacceptedException(tmp);

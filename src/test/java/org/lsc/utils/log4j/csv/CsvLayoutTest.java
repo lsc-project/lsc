@@ -106,7 +106,7 @@ public class CsvLayoutTest extends TestCase {
 		jm.setModificationItems(mi);
 		
 		// test simple logging of the modifications for a valid task
-		assertEquals("Jon;;cn=test,o=testing;;Tester CN;\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("Jon;;cn=test,o=testing;;Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 		// change the task name to test logging a modification for an excluded task
 		jm.setTaskName("notInList");
@@ -125,10 +125,10 @@ public class CsvLayoutTest extends TestCase {
 		layout.activateOptions();
 		
 		// log one line to check that the outputHeader is prepended
-		assertEquals("givenName%sn%dn%%cn\nJon%%cn=test,o=testing%%Tester CN%\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("givenName%sn%dn%%cn\nJon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 		// log the same line again to check that the outputHeader is not logged again
-		assertEquals("Jon%%cn=test,o=testing%%Tester CN%\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 	}
 	

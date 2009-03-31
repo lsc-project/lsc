@@ -136,7 +136,7 @@ public class CsvLayout extends Layout {
 
                 String attributeName = null;
                 List<String> values = null;
-                while(iterator.hasNext()) {
+                while (iterator.hasNext()) {
 
                     /* Does the modification has the attribute ? */
                     attributeName= iterator.next();
@@ -152,7 +152,7 @@ public class CsvLayout extends Layout {
                         //sb.append(",");
                         //sb.append(Configuration.DN_REAL_ROOT);
                     }
-                    sb.append(this.getSeparator());
+                    if (iterator.hasNext()) sb.append(this.getSeparator());
                 }
                 result += sb.toString();
                 result += "\n";

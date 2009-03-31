@@ -46,7 +46,6 @@
 package org.lsc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,14 +60,14 @@ import org.lsc.utils.CaseIgnoreStringHashMap;
 public class LscAttributes {
     
 	/** The heart of this class - a map of attribute names to values */
-    protected Map<String, ?> values;
+    protected Map<String, Object> values;
     
     public LscAttributes() {
-        values = new CaseIgnoreStringHashMap<String, Object>();
+        values = new CaseIgnoreStringHashMap<Object>();
     }
     
     public LscAttributes(Map<String, ?> values) {
-    	this.values = new CaseIgnoreStringHashMap<String, Object>(values);
+    	this.values = new CaseIgnoreStringHashMap<Object>(values);
     }
     
     public String getStringValueAttribute(String attribute) {
@@ -111,13 +110,16 @@ public class LscAttributes {
      * Get the attributes' values
      * @return Map of the attributes, indexed by name
      */
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getAttributes() {
         return (Map<String, Object>) values;
     }
     
-    public void setAttributes(Map<String, ?> values) {
-        this.values = values; 
+    public void setAttributes(Map<String, Object> values) {
+        this.values = values;
+    }
+    
+    public void put(String key, Object value) {
+    	this.values.put(key, value);
     }
     
     public String toString() {

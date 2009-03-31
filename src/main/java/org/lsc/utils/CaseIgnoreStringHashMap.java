@@ -56,7 +56,7 @@ import java.util.Map;
  *
  */
 @SuppressWarnings("unchecked")
-public class CaseIgnoreStringHashMap<T extends String, T2> extends HashMap {
+public class CaseIgnoreStringHashMap<V> extends HashMap<String, V> {
 
 	/**
 	 * 
@@ -106,20 +106,16 @@ public class CaseIgnoreStringHashMap<T extends String, T2> extends HashMap {
 	 * @see java.util.HashMap#get(java.lang.Object)
 	 */
 	@Override
-	public Object get(Object key) {
-		if (key instanceof String) {
-			return super.get(((String) key).toLowerCase());
-		} else return null;
+	public V get(Object key) {
+		return super.get(((String) key).toLowerCase());
 	}
 
 	/* (non-Javadoc)
 	 * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public Object put(Object key, Object value) {
-		if (key instanceof String) {
-			return super.put(((String) key).toLowerCase(), value);
-		} else return null;
+	public V put(String key, V value) {
+		return super.put(((String) key).toLowerCase(), value);
 	}
 
 	/* (non-Javadoc)
@@ -131,7 +127,8 @@ public class CaseIgnoreStringHashMap<T extends String, T2> extends HashMap {
 		while (keys.hasNext()) {
 			Object key = keys.next();
 			if (key instanceof String) {
-				put(((String) key).toLowerCase(), m.get(key));
+				Object value = m.get(key);
+				put(((String) key).toLowerCase(), (V) value);
 			}
 		}
 	}
@@ -140,10 +137,8 @@ public class CaseIgnoreStringHashMap<T extends String, T2> extends HashMap {
 	 * @see java.util.HashMap#remove(java.lang.Object)
 	 */
 	@Override
-	public Object remove(Object key) {
-		if (key instanceof String) {
-			return super.remove(((String) key).toLowerCase());
-		} else return null;
+	public V remove(Object key) {
+		return super.remove(((String) key).toLowerCase());
 	}
 
 }

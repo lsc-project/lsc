@@ -75,31 +75,24 @@ public class top extends LscObject {
 	
 	public static String getDn(String uidValue) {
 		throw new UnsupportedOperationException();
-//        return "uid=" + uidValue + "," + Configuration.DN_PEOPLE;
 	}
 
 	public final void setUpFromObject(fTop fo) throws IllegalAccessException, InvocationTargetException {
-		AbstractBean.loadLocalMethods(this.getClass(), localMethods,
-				AbstractBean.SET_ACCESSOR_PREFIX);
+		AbstractBean.loadLocalMethods(this.getClass(), localMethods, AbstractBean.SET_ACCESSOR_PREFIX);
 		
 		Method[] methods = fo.getClass().getMethods();
 		
 		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().startsWith(
-					AbstractBean.GET_ACCESSOR_PREFIX)) {
+			if (methods[i].getName().startsWith(AbstractBean.GET_ACCESSOR_PREFIX)) {
 			    
 			    /* Get the name of the parameter */
-				String paramName = methods[i].getName().substring(
-						AbstractBean.GET_ACCESSOR_PREFIX.length());
-				paramName = paramName.substring(0, 1).toLowerCase()
-						+ paramName.substring(1);
+				String paramName = methods[i].getName().substring(AbstractBean.GET_ACCESSOR_PREFIX.length());
+				paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
 				
 				/* Get the name of the local method */
 				Method localMethod = localMethods.get(paramName);
 				Class<?> returnType = methods[i].getReturnType();
 				if (localMethod != null && returnType != null) {
-//					LOGGER.debug("Method invocation : "
-//							+ methods[i].getName());
 					Object returnedObject = methods[i].invoke(fo, new Object[] {});
 					List<Object> paramsToUse = null;
 					Class<?>[] toReturnTypes = localMethod.getParameterTypes();
@@ -109,8 +102,6 @@ public class top extends LscObject {
 						// localMethod.invoke(this, new Object[] {});
 					    LOGGER.debug("No need to call a method with an empty value ... (" + paramName + ")");
 					} else if (returnType == String.class) {
-//						LOGGER.debug("Method invocation : "
-//								+ localMethod.getName());
 						if (toReturnTypes != null && toReturnTypes[0] == String.class) {
 							localMethod.invoke(this, new Object[] { returnedObject });
 						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
@@ -118,13 +109,9 @@ public class top extends LscObject {
 							paramsToUse.add(returnedObject);
 							localMethod.invoke(this, new Object[] { paramsToUse });
 						} else {
-							LOGGER
-									.error("Unable to manager translation from String to "
-											+ toReturnTypes[0] + " !");
+							LOGGER.error("Unable to manage translation from String to "	+ toReturnTypes[0] + " for " + paramName+ "!");
 						}
 					} else if (returnType == Date.class) {
-//						LOGGER.debug("Method invocation : "
-//								+ localMethod.getName());
 						if (toReturnTypes != null && toReturnTypes[0] == Date.class) {
 							localMethod.invoke(this, new Object[] { returnedObject });
 						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
@@ -132,28 +119,21 @@ public class top extends LscObject {
 							paramsToUse.add(returnedObject);
 							localMethod.invoke(this, new Object[] { paramsToUse });
 						} else {
-							LOGGER
-									.error("Unable to manager translation from Date to "
-											+ toReturnTypes[0] + " !");
+							LOGGER.error("Unable to manage translation from Date to " + toReturnTypes[0] + " for " + paramName+ "!");
 						}
 					} else if (returnType == List.class) {
 						if (toReturnTypes != null && toReturnTypes[0] == String.class) {
-							LOGGER
-									.error("Unable to manager translation from List to String !");
+							LOGGER.error("Unable to manage translation from List to String for " + paramName+ "!");
 						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							LOGGER.debug("Method invocation : "
-									+ localMethod.getName());
+							LOGGER.debug("Method invocation : " + localMethod.getName());
 							localMethod.invoke(this, new Object[] { returnedObject });
 						} else {
-							LOGGER
-									.error("Unable to manager translation from List to "
-											+ toReturnTypes[0] + " !");
+							LOGGER.error("Unable to manage translation from List to " + toReturnTypes[0] + " for " + paramName+ "!");
 						}
 					}
 				} else {
 					if (paramName.compareToIgnoreCase("class") != 0) {
-						LOGGER.warn("No corresponding method for original "
-								+ methods[i].getName() + " on " + fo.getClass() + " object !");
+						LOGGER.warn("No corresponding method for original " + methods[i].getName() + " on " + fo.getClass() + " object !");
 					}
 				}
 			}

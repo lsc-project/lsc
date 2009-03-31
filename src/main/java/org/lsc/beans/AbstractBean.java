@@ -61,6 +61,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
 
 import org.apache.log4j.Logger;
+import org.lsc.Configuration;
 import org.lsc.objects.top;
 import org.lsc.utils.DateUtils;
 
@@ -144,10 +145,8 @@ public abstract class AbstractBean implements IBean {
                     (methods[i].getName().substring(GET_ACCESSOR_PREFIX.length())
                             .compareToIgnoreCase("dn") != 0)) {
                 /* Getting parameter name */
-                String paramName = methods[i].getName()
-                    .substring(GET_ACCESSOR_PREFIX.length());
-                paramName = paramName.substring(0, 1).toLowerCase() +
-                paramName.substring(1);
+                String paramName = methods[i].getName().substring(GET_ACCESSOR_PREFIX.length());
+                paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
 
                 Class<?> returnType = methods[i].getReturnType();
 
@@ -179,17 +178,13 @@ public abstract class AbstractBean implements IBean {
                     }
                 } else {
                     if (returnType == String.class) {
-                        mapString(bean, paramName,
-                                (String) methods[i].invoke(o, new Object[] {  }));
+                        mapString(bean, paramName, (String) methods[i].invoke(o, new Object[] { }));
                     } else if (returnType == Integer.class) {
-                        mapString(bean, paramName,
-                                ((Integer) methods[i].invoke(o, new Object[] {  })).toString());
+                        mapString(bean, paramName, ((Integer) methods[i].invoke(o, new Object[] { })).toString());
                     } else if (returnType == Date.class) {
-                        mapString(bean, paramName,
-                                DateUtils.format(((Date) methods[i].invoke(o, new Object[] {  }))));
+                        mapString(bean, paramName, DateUtils.format(((Date) methods[i].invoke(o, new Object[] { }))));
                     } else if (returnType == Boolean.class) {
-                        boolean bValue = ((Boolean) methods[i].invoke(o,
-                                new Object[] {  })).booleanValue();
+                        boolean bValue = ((Boolean) methods[i].invoke(o, new Object[] { })).booleanValue();
 
                         if (bValue) {
                             mapString(bean, paramName, "TRUE");
@@ -197,11 +192,9 @@ public abstract class AbstractBean implements IBean {
                             mapString(bean, paramName, "FALSE");
                         }
                     } else if (List.class.isAssignableFrom(returnType)) {
-                        mapList(bean, paramName,
-                                (List<?>) methods[i].invoke(o, new Object[] {  }));
+                        mapList(bean, paramName, (List<?>) methods[i].invoke(o, new Object[] {  }));
                     } else if (Map.class.isAssignableFrom(returnType)) {
-                        mapMap(bean, paramName,
-                                (Map<?, ?>) methods[i].invoke(o, new Object[] {  }));
+                        mapMap(bean, paramName, (Map<?, ?>) methods[i].invoke(o, new Object[] {  }));
                     }
                 }
             }
@@ -221,10 +214,8 @@ public abstract class AbstractBean implements IBean {
 
         for (int i = 0; i < methods.length; i++) {
             if (methods[i].getName().startsWith(prefix)) {
-                String paramName = methods[i].getName()
-                .substring(prefix.length());
-                paramName = paramName.substring(0, 1).toLowerCase() +
-                paramName.substring(1);
+                String paramName = methods[i].getName().substring(prefix.length());
+                paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
                 lMs.put(paramName, methods[i]);
             }
         }
@@ -440,6 +431,22 @@ public abstract class AbstractBean implements IBean {
     public final String getDistinguishName() {
         return distinguishName;
     }
+    
+    /**
+     * Distinguish name getter that makes sure to return the FULL DN (including suffix).
+     *
+     * @return the distinguishName
+     */
+    public final String getFullDistinguishedName() {
+    	if (!distinguishName.endsWith("," + Configuration.DN_REAL_ROOT)) {
+    		return distinguishName + "," + Configuration.DN_REAL_ROOT;
+    	} else {
+    		return distinguishName;
+    	}
+    }
+    
+    
+    
 
     /**
      * Default distinguishName setter.

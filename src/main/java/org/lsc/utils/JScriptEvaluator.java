@@ -166,26 +166,32 @@ public final class JScriptEvaluator {
             cache.put(expressionImport, script);
         }
 
-	// add LDAP interface for destination
-        ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-        dstSjs.setJndiServices(JndiServices.getDstInstance());
-        params.put("ldap", dstSjs);
+        // add LDAP interface for destination if necessary
+        if (expression.contains("ldap.")) {
+        	ScriptableJndiServices dstSjs = new ScriptableJndiServices();
+        	dstSjs.setJndiServices(JndiServices.getDstInstance());
+        	params.put("ldap", dstSjs);
+        }
 
-	// add LDAP interface for source if available
-	JndiServices srcInstance = JndiServices.getSrcInstance();
-	if (srcInstance != null) {
-		ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-		srcSjs.setJndiServices(srcInstance);
-		params.put("srcLdap", srcSjs);
-	}
+        // add LDAP interface for source if necessary
+        if (expression.contains("srcLdap.")) {
+        	JndiServices srcInstance = JndiServices.getSrcInstance();
+        	if (srcInstance != null) {
+        		ScriptableJndiServices srcSjs = new ScriptableJndiServices();
+        		srcSjs.setJndiServices(srcInstance);
+        		params.put("srcLdap", srcSjs);
+        	}
+        }
 
-        Iterator<String> paramsIter = params.keySet().iterator();
-        while (paramsIter.hasNext()) {
-            String name = paramsIter.next();
-            Object value = params.get(name);
-
-            Object jsObj = Context.javaToJS(value, scope);
-            ScriptableObject.putProperty(scope, name, jsObj);
+        if (params != null) {
+	        Iterator<String> paramsIter = params.keySet().iterator();
+	        while (paramsIter.hasNext()) {
+	            String name = paramsIter.next();
+	            Object value = params.get(name);
+	
+	            Object jsObj = Context.javaToJS(value, scope);
+	            ScriptableObject.putProperty(scope, name, jsObj);
+	        }
         }
 
         return script.exec(cx, scope);

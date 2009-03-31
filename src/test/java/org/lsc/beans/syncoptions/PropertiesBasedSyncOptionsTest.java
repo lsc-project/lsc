@@ -45,8 +45,14 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
+import org.lsc.jndi.JndiServices;
+import org.lsc.utils.JScriptEvaluator;
+import org.mozilla.javascript.EcmaError;
 
 import junit.framework.TestCase;
 
@@ -61,6 +67,32 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
         assertNotNull(iso);
         iso.initialize("sampleTask");
         assertNotSame(iso.getStatus("sampleTask", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
+    }
+
+    public final void testJS() {
+        ISyncOptions iso = new PropertiesBasedSyncOptions();
+        assertNotNull(iso);
+        iso.initialize("sampleTask");
+        
+        // get JavaScript enable default value
+        List<String> defaultValues = iso.getDefaultValues(null, "JsAttribute");
+        assertNotNull(defaultValues);
+        Iterator<String> it = defaultValues.iterator();
+        assertTrue(it.hasNext());
+        String defaultValue = it.next();
+        assertEquals("srcLdap.sup(\"uid=jclarke,ou=people,dc=lsc-project,dc=net\",1)", defaultValue);
+        
+        // evaluate JavaScript
+        try {
+            defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);        	
+        } catch (EcmaError e) {
+        	// srcLdap is not defined, it should not be used
+        	assertEquals("ReferenceError", e.getName());
+        	assertTrue(e.getErrorMessage().startsWith("\"srcLdap\" "));
+        } catch (Exception e) {
+        	// shouldn't happen
+        	assertTrue(false);
+        }
     }
 
     protected final void tearDown() throws Exception {

@@ -45,6 +45,7 @@
  */
 package org.lsc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -59,7 +60,7 @@ public abstract class LscObject {
 
     protected String distinguishName;
 
-    protected List<String> objectClass;
+    protected List<String> objectClass = null;
     
     protected LscAttributes attributeValues;
 
@@ -77,5 +78,12 @@ public abstract class LscObject {
 
     public final void setObjectClass(List<String> objectClass) {
         this.objectClass = objectClass;
+    }
+    
+    public final void setObjectClass(String objectClass) {
+    	if (this.objectClass == null) {
+    		this.objectClass = new ArrayList<String>();
+    	}
+        this.objectClass.add(objectClass);
     }
 }

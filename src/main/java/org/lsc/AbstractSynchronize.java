@@ -261,7 +261,7 @@ public abstract class AbstractSynchronize {
         	ids = srcService.getListPivots().entrySet().iterator();
         } catch(Exception e) {
             LOGGER.fatal("Error getting list of IDs in the source for task " + syncName);
-            LOGGER.debug(e);
+            if (LOGGER.isDebugEnabled()) e.printStackTrace();
             return;
         }
 

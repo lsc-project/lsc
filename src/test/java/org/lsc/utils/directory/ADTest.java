@@ -68,6 +68,9 @@ public class ADTest extends TestCase {
     	int uACValue = AD.userAccountControlSet(0, new String[]{AD.UAC_NORMAL_ACCOUNT.toString()});
     	assertEquals(512, uACValue);
     	
+    	// check it's enabled two ways
+    	assertFalse(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
+
     	// disable the account and set password expired
     	uACValue = AD.userAccountControlSet(uACValue, new String[]{AD.UAC_ACCOUNTDISABLE.toString(), AD.UAC_PASSWORD_EXPIRED.toString()});
     	assertEquals(8389122, uACValue);
@@ -77,7 +80,7 @@ public class ADTest extends TestCase {
     	assertEquals(514, uACValue);
     	
     	// check it's disabled
-    	assertEquals(true, AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
+    	assertTrue(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
     	
     	// toggle it back to enabled
     	uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());

@@ -67,6 +67,7 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
         assertNotNull(iso);
         iso.initialize("sampleTask");
         assertNotSame(iso.getStatus("sampleTask", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
+        assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
     }
 
     public final void testJS() {

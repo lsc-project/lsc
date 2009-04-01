@@ -50,6 +50,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -62,10 +63,10 @@ import org.lsc.objects.flat.fTop;
  */
 public class top extends LscObject {
 
-	protected static Map<String, Method> localMethods;
+	protected static Map<String, List<Method>> localMethods;
 
 	static {
-		localMethods = new HashMap<String, Method>();
+		localMethods = new HashMap<String, List<Method>>();
 	}
 
 	public top() {
@@ -89,9 +90,34 @@ public class top extends LscObject {
 				String paramName = methods[i].getName().substring(AbstractBean.GET_ACCESSOR_PREFIX.length());
 				paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
 				
-				/* Get the name of the local method */
-				Method localMethod = localMethods.get(paramName);
+				/* Get the returnType for the get method */
 				Class<?> returnType = methods[i].getReturnType();
+				
+				/* Get matching local methods for this parameter */
+				Method localMethod = null;
+				List<Method> meths = localMethods.get(paramName);
+				if (meths == null) localMethod = null;
+				else {
+					if (meths.size() == 1) {
+						localMethod = meths.get(0);
+					} else {
+						/* Find method matching returnType */
+						Iterator<Method> methsIt = meths.iterator();
+						Method currentMeth = null;
+						while (methsIt.hasNext()) {
+							currentMeth = methsIt.next();
+							if (currentMeth.getParameterTypes()[0].isAssignableFrom(returnType)) {
+								localMethod = currentMeth;
+							}
+						}
+					
+						/* If no method was found, use a random one and see what we can do... */
+						if (localMethod == null) {
+							localMethod = meths.get(0);
+						}
+					}
+				}
+				
 				if (localMethod != null && returnType != null) {
 					Object returnedObject = methods[i].invoke(fo, new Object[] {});
 					List<Object> paramsToUse = null;

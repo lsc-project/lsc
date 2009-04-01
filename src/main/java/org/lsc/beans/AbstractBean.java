@@ -47,6 +47,7 @@ package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,7 +86,7 @@ public abstract class AbstractBean implements IBean {
 
     /** Initialize the static local methods table contents. */
     static {
-        localMethods = new HashMap<String, Method>();
+        localMethods = new HashMap<String, List<Method>>();
     }
 
     /** The local LOG4J logger. */
@@ -101,7 +102,7 @@ public abstract class AbstractBean implements IBean {
     public static final String SET_ACCESSOR_PREFIX = "set";
 
     /** The list of local methods. */
-    private static Map<String, Method> localMethods;
+    private static Map<String, List<Method>> localMethods;
 
     /** The attributes map. */
     private Map<String, Attribute> attrs;
@@ -114,7 +115,7 @@ public abstract class AbstractBean implements IBean {
      */
     public AbstractBean() {
         attrs = new HashMap<String, Attribute>();
-        localMethods = new HashMap<String, Method>();
+        localMethods = new HashMap<String, List<Method>>();
     }
 
     /**
@@ -135,7 +136,7 @@ public abstract class AbstractBean implements IBean {
      */
     public static void mapper(final Class<?> cl, IBean bean, final Object o)
     throws IllegalAccessException, InvocationTargetException {
-        localMethods = new HashMap<String, Method>();
+        localMethods = new HashMap<String, List<Method>>();
         loadLocalMethods(cl, localMethods, MAP_FUNCTION_PREFIX);
 
         Method[] methods = o.getClass().getMethods();
@@ -150,10 +151,32 @@ public abstract class AbstractBean implements IBean {
 
                 Class<?> returnType = methods[i].getReturnType();
 
-                /* Getting local method */
-                Method localMethod = localMethods.get(paramName);
+				/* Get matching local methods for this parameter */
+				Method localMethod = null;
+				List<Method> meths = localMethods.get(paramName);
+				if (meths == null) localMethod = null;
+				else {
+					if (meths.size() == 1) {
+						localMethod = meths.get(0);
+					} else {
+						/* Find method matching returnType */
+						Iterator<Method> methsIt = meths.iterator();
+						Method currentMeth = null;
+						while (methsIt.hasNext()) {
+							currentMeth = methsIt.next();
+							if (currentMeth.getParameterTypes()[0].isAssignableFrom(returnType)) {
+								localMethod = currentMeth;
+							}
+						}
+					
+						/* If no method was found, use a random one and see what we can do... */
+						if (localMethod == null) {
+							localMethod = meths.get(0);
+						}
+					}
+				}
 
-                if (localMethod != null) {
+				if (localMethod != null) {
                     Object o2 = methods[i].invoke(o, new Object[] {  });
                     Object[] params = new Object[] { o, (IBean) bean, o2 };
                     Class<?>[] paramsType = localMethod.getParameterTypes();
@@ -209,14 +232,23 @@ public abstract class AbstractBean implements IBean {
      * @param prefix the methods prefix to look for
      */
     public static void loadLocalMethods(final Class<?> cl,
-            final Map<String, Method> lMs, final String prefix) {
+            final Map<String, List<Method>> lMs, final String prefix) {
         Method[] methods = cl.getMethods();
 
         for (int i = 0; i < methods.length; i++) {
             if (methods[i].getName().startsWith(prefix)) {
+            	// normalize parameter name
                 String paramName = methods[i].getName().substring(prefix.length());
                 paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
-                lMs.put(paramName, methods[i]);
+                
+                List<Method> meths = null;
+                if (lMs.get(paramName) == null) {
+                	meths = new ArrayList<Method>(1);
+                	lMs.put(paramName, meths);
+                } else {
+                	meths = lMs.get(paramName);
+                }
+                meths.add(methods[i]);
             }
         }
     }
@@ -493,11 +525,11 @@ public abstract class AbstractBean implements IBean {
         return sb.toString();
     }
 
-    public static final Map<String, Method> getLocalMethods() {
+    public static final Map<String, List<Method>> getLocalMethods() {
         return localMethods;
     }
 
-    public static final void setLocalMethods(Map<String, Method> localMethods) {
+    public static final void setLocalMethods(Map<String, List<Method>> localMethods) {
         AbstractBean.localMethods = localMethods;
     }
 }

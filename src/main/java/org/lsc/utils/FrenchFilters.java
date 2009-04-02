@@ -334,7 +334,7 @@ public final class FrenchFilters {
         
         // La chaine commence forc&eacute;ment par une majuscule!
         tmp = tmp.substring(0, 1).toUpperCase()
-              + tmp.substring(1, tmp.length());
+              + tmp.substring(1, tmp.length()).toLowerCase();
 
         for (int j = 0; j < SEPARATORS_FOR_UPPER_BEGINNING_NAME.length; j++) {
             int i = tmp.indexOf(SEPARATORS_FOR_UPPER_BEGINNING_NAME[j]);

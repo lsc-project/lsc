@@ -381,7 +381,10 @@ public final class BeanComparator {
                             List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
                             Iterator<String> valuesIt = values.iterator();
                             while (valuesIt.hasNext()) {
-                                forceAttribute.add(valuesIt.next());
+                            	String value = valuesIt.next();
+                            	if (value != null && value.length() > 0) {                                
+                            		forceAttribute.add(value);
+                            	}
                             }
                         }
 

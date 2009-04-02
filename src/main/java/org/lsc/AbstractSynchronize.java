@@ -212,9 +212,9 @@ public abstract class AbstractSynchronize {
                     }
                 }
             } catch (CommunicationException e) { 
-                // we lost the connection to the directory, stop everything!
+                // we lost the connection to the source or destination, stop everything!
                 countError++;
-                LOGGER.fatal("Connection to directory lost! Aborting.");
+                LOGGER.fatal("Connection lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
             } catch (NamingException e) {
@@ -364,9 +364,9 @@ public abstract class AbstractSynchronize {
                     }
                 }
             } catch (CommunicationException e) { 
-                // we lost the connection to the directory, stop everything!
+                // we lost the connection to the source or destination, stop everything!
                 countError++;
-                LOGGER.fatal("Connection to directory lost! Aborting.");
+                LOGGER.fatal("Connection lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
             } catch (RuntimeException e) {

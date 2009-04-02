@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
@@ -91,8 +92,10 @@ public abstract class AbstractJdbcService implements ISrcService {
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id="
 					+ id + " (" + e + ")", e);
+			// TODO This SQLException may mean we lost the connection to the DB
+			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
+			throw new CommunicationException(e.getMessage());
 		}
-		return null;
 	}
 	
 	/**

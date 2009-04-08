@@ -59,6 +59,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.log4j.Logger;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
@@ -174,7 +175,13 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
         }
         
         // convert to correct return format
-        Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(idList.size());
+        
+		/* TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the list returned,
+		 * since it may be important when cleaning by full DN (for different levels).
+		 * This is really an API bug, getListPivots() should return a List, not a Map.
+		 */
+        Map<String, LscAttributes> ids = new ListOrderedMap();
+        
         Iterator<String> idListIt = idList.iterator();
         while (idListIt.hasNext()) {
         	String dn = idListIt.next();

@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
+import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.log4j.Logger;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
@@ -104,8 +105,13 @@ public abstract class AbstractJdbcService implements ISrcService {
 	 * identifiers.
 	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
 	 */
+	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() {
-        Map<String,LscAttributes> ret = new HashMap<String, LscAttributes>();
+		/* TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the list returned,
+		 * since it may be important when coming from a database.
+		 * This is really an API bug, getListPivots() should return a List, not a Map.
+		 */
+		Map<String,LscAttributes> ret = new ListOrderedMap();
 
         try {
             List<HashMap<String,Object>> ids = (List<HashMap<String,Object>>) sqlMapper.queryForList(getRequestNameForList(), null);

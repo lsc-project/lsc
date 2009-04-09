@@ -45,21 +45,20 @@
  */
 package org.lsc;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-
-import java.net.MalformedURLException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Main launching class This is the main wrapper for generic launcher.
@@ -76,6 +75,9 @@ public final class Launcher {
 
     /** List of the cleaning types. */
     private List<String> cleanType;
+
+    /** Configuration files location */
+    private String configurationLocation;
 
     /** Default synchronize instance. */
     private SimpleSynchronize sync;
@@ -97,9 +99,6 @@ public final class Launcher {
      * @throws MalformedURLException thrown
      */
     public static void main(final String[] args) throws MalformedURLException {
-        //Initiate log4j engine
-        PropertyConfigurator.configure("log4j.properties");
-
         // Create the object and parse options
         Launcher obj = new Launcher();
         int retCode = obj.usage(args);
@@ -117,6 +116,12 @@ public final class Launcher {
      */
     public void run() {
         try {
+        	if(configurationLocation != null) {
+        		Configuration.setLocation(configurationLocation);
+                PropertyConfigurator.configure(new File(configurationLocation, "log4j.properties").toURI().toURL());
+        	} else {
+                PropertyConfigurator.configure("log4j.properties");
+        	}
             sync.launch(syncType, cleanType);
         } catch (Exception e) {
             LOGGER.error(e, e);
@@ -139,6 +144,8 @@ public final class Launcher {
         options.addOption("c", "cleaning", true,
                 "Cleaning type (one of the available "
                 + "tasks or 'all')");
+        options.addOption("f", "cfg", true,
+                "Specify configuration directory" );
         options.addOption("h", "help", false, "Get this text");
 
         CommandLineParser parser = new GnuParser();
@@ -149,6 +156,9 @@ public final class Launcher {
             if (cmdLine.getOptions().length > 0) {
                 if (cmdLine.hasOption("s")) {
                     syncType = parseSyncType(cmdLine.getOptionValue("s"));
+                }
+                if (cmdLine.hasOption("f")) {
+                    configurationLocation = cmdLine.getOptionValue("f");
                 }
                 if (cmdLine.hasOption("c")) {
                     cleanType = parseSyncType(cmdLine.getOptionValue("c"));
@@ -174,7 +184,7 @@ public final class Launcher {
         return 0;
     }
 
-    /**
+	/**
      * Parse the synchronization string to find the right type of
      * synchronization or cleaning.
      * @param syncValue the string comma separated synchronization name

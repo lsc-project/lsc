@@ -45,17 +45,15 @@
  */
 package org.lsc;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -70,270 +68,290 @@ import org.apache.log4j.Logger;
  */
 public class Configuration {
 
-    //Logger
-    private static final Logger LOGGER = Logger.getLogger(Configuration.class);
+	// Logger
+	private static final Logger LOGGER = Logger.getLogger(Configuration.class);
 
-    //Filename of the <code>lsc.properties</code>
-    public static final String PROPERTIES_FILENAME = "lsc.properties";
+	// Filename of the <code>lsc.properties</code>
+	public static final String PROPERTIES_FILENAME = "lsc.properties";
 
-    //Directory of the <code>lsc.properties</code>
-    public static final String PROPERTIES_DIRECTORY = "lsc.d";
+	/** Default location for configuration filename */
+	public static String location = PROPERTIES_FILENAME;
 
-    //People DN
-    public static final String DN_PEOPLE =
-            Configuration.getString("dn.people", "ou=People");
+	// People DN
+	public static String DN_PEOPLE = "ou=People";
 
-    //LDAP schema DN
-    public static final String DN_LDAP_SCHEMA =
-            Configuration.getString("dn.ldap_schema", "cn=Subschema");
+	// LDAP schema DN
+	public static String DN_LDAP_SCHEMA = "cn=Subschema";
 
-    //Enhanced schema DN
-    public static final String DN_ENHANCED_SCHEMA =
-            Configuration.getString("dn.ldap_schema", "ou=Schema,ou=System");
+	// Enhanced schema DN
+	public static String DN_ENHANCED_SCHEMA = "ou=Schema,ou=System";
 
-    //Structures DN
-    public static final String DN_STRUCTURES =
-            Configuration.getString("dn.structures", "ou=Structures");
+	// Structures DN
+	public static String DN_STRUCTURES = "ou=Structures";
 
-    //Accounts DN
-    public static final String DN_ACCOUNTS =
-            Configuration.getString("dn.accounts", "ou=Accounts");
+	// Accounts DN
+	public static String DN_ACCOUNTS = "ou=Accounts";
 
-    //objectClass for a person
-    public static final String OBJECTCLASS_PERSON =
-            Configuration.getString("objectclass.person", "inetOrgPerson");
+	// objectClass for a person
+	public static String OBJECTCLASS_PERSON = "inetOrgPerson";
 
-    //objectClass for an employee
-    public static final String OBJECTCLASS_EMPLOYEE =
-            Configuration.getString("objectclass.employee", "inetOrgPerson");
-    
-    /**
-     * Numbers of days between an entry is set to be deleted and its actual
-     * deletion.
-     */
-    public static final int DAYS_BEFORE_SUPPRESSION =
-            Configuration.getInt("suppression.MARQUAGE_NOMBRE_DE_JOURS", 90);
+	// objectClass for an employee
+	public static String OBJECTCLASS_EMPLOYEE = "inetOrgPerson";
 
-    //The real LDAP base DN
-    public static final String DN_REAL_ROOT =
-            Configuration.getString("dn.real_root", "dc=lsc-project,dc=org");
+	/**
+	 * Numbers of days between an entry is set to be deleted and its actual
+	 * deletion.
+	 */
+	public static int DAYS_BEFORE_SUPPRESSION = 90;
 
-    //The maximum user identifier length
-    public static final int UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", 8);
-    
-    //LSC configuration of the application
-    private static PropertiesConfiguration config = null;
+	// The real LDAP base DN
+	public static String DN_REAL_ROOT = "dc=lsc-project,dc=org";
 
-    //Default constructor.
-    protected Configuration() {}
+	// The maximum user identifier length
+	public static int UID_MAX_LENGTH = 8;
 
-    /**
-     * Get data source connection properties.
-     * @return the data source connection properties
-     */
-    public static Properties getSrcProperties() {
-        return getAsProperties("src");
-    }
+	// LSC configuration of the application
+	private static PropertiesConfiguration config = null;
 
-    /**
-     * Get data destination connection properties.
-     * @return the data destination connection properties
-     */
-    public static Properties getDstProperties() {
-        Properties dst = getAsProperties("dst");
-        if (dst == null || dst.size() == 0) {
-            dst = getAsProperties("ldap");
-        }
-        return dst;
-    }
+	// Default constructor.
+	protected Configuration() {
+	}
 
-    public static List<String> getListFromString(String propertyValue) {
-        List<String> result = new ArrayList<String>();
-        if (propertyValue != null) {
-            StringTokenizer st = new StringTokenizer(propertyValue, " ");
-            for (int i = 0; st.hasMoreTokens(); i++) {
-                result.add(st.nextToken().toLowerCase());
-            }
-        }
-        return result;
-    }
+	/**
+	 * Get data source connection properties.
+	 * 
+	 * @return the data source connection properties
+	 */
+	public static Properties getSrcProperties() {
+		return getAsProperties("src");
+	}
 
-    /**
-     * Create a Properties object that is a subset of this configuration.
-     *
-     * @param prefix
-     *            The prefix used to select the properties.
-     */
-    public static Properties getAsProperties(final String prefix) {
-        org.apache.commons.configuration.Configuration conf = getConfiguration().subset(prefix);
-        if (conf == null) {
-            return null;
-        }
-        Iterator<?> it = conf.getKeys();
-        Properties result = new Properties();
-        String key = null;
-        Object value = null;
-        while(it.hasNext()) {
-            key = (String) it.next();
-            value = asString(conf.getProperty(key));
-            result.put(key, value);
-        }
-        return result;
-    }
+	/**
+	 * Get data destination connection properties.
+	 * 
+	 * @return the data destination connection properties
+	 */
+	public static Properties getDstProperties() {
+		Properties dst = getAsProperties("dst");
+		if (dst == null || dst.size() == 0) {
+			dst = getAsProperties("ldap");
+		}
+		return dst;
+	}
 
-    /**
-     * Get a int associated with the given property key
-     *
-     * @param key
-     *            The property key.
-     * @param defaultValue
-     *            The default value.
-     * @return The associated int.
-     */
-    public static int getInt(final String key, int defaultValue) {
-        return getConfiguration().getInt(key, defaultValue);
-    }
+	public static List<String> getListFromString(String propertyValue) {
+		List<String> result = new ArrayList<String>();
+		if (propertyValue != null) {
+			StringTokenizer st = new StringTokenizer(propertyValue, " ");
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				result.add(st.nextToken().toLowerCase());
+			}
+		}
+		return result;
+	}
 
-    /**
-     * Get a string associated with the given property key
-     *
-     * @param key
-     *            The property key.
-     * @return The associated string.
-     */
-    public static String getString(final String key) {
-        // beware of List problems, so get the object and convert it to a string
-        return asString(getConfiguration().getProperty(key));
-    }
+	/**
+	 * Create a Properties object that is a subset of this configuration.
+	 * 
+	 * @param prefix
+	 *            The prefix used to select the properties.
+	 */
+	public static Properties getAsProperties(final String prefix) {
+		org.apache.commons.configuration.Configuration conf = getConfiguration()
+				.subset(prefix);
+		if (conf == null) {
+			return null;
+		}
+		Iterator<?> it = conf.getKeys();
+		Properties result = new Properties();
+		String key = null;
+		Object value = null;
+		while (it.hasNext()) {
+			key = (String) it.next();
+			value = asString(conf.getProperty(key));
+			result.put(key, value);
+		}
+		return result;
+	}
 
-    /**
-     * Get a string associated with the given property key
-     *
-     * @param key
-     *            The property key.
-     * @param defaultValue
-     *            The default value.
-     * @return The associated string.
-     */
-    public static String getString(final String key, String defaultValue) {
-        // beware of List problems, so get the object and convert it to a string
-        Object o = getConfiguration().getProperty(key);
-        if (o == null) {
-            return defaultValue;
-        }
-        return asString(o);
-    }
+	/**
+	 * Get a int associated with the given property key
+	 * 
+	 * @param key
+	 *            The property key.
+	 * @param defaultValue
+	 *            The default value.
+	 * @return The associated int.
+	 */
+	public static int getInt(final String key, int defaultValue) {
+		return getConfiguration().getInt(key, defaultValue);
+	}
 
-    /**
-     * Helper method to do lazy default configuration. This was mainly done to make this class easily testable.
-     *
-     * @return the configuration instance used by this class.
-     */
-    protected static PropertiesConfiguration getConfiguration() {
-        if (config == null) {
-            try {
-                URL url = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
-                if (url == null) {
-                    //We call toURI().toURL() because the method to URL does not automatically escape characters that are illegal in URLs
-                    url = new java.io.File(PROPERTIES_FILENAME).toURI().toURL();
-                }
-                setConfiguration(url);
-                URL dirUrl = Configuration.class.getClassLoader().getResource(PROPERTIES_DIRECTORY);
-                if (dirUrl != null) {
-                    File confDir = new File(dirUrl.toURI());
-                    if (confDir == null) {
-                        confDir = new java.io.File(PROPERTIES_DIRECTORY);
-                    }
-                    if (confDir.isDirectory()) {
-                        FilenameFilter ff = new FilenameFilter() {
-                            public boolean accept(File arg0, String arg1) {
-                                return false;
-                            }
-                        };
-                        File[] files = confDir.listFiles(ff);
-                        for(int i = 0; i < files.length; i++) {
-                            //We call toURI().toURL() because the method to URL does not automatically escape characters that are illegal in URLs
-                            addConfiguration(files[i].toURI().toURL());
-                        }
-                    }
-                }
-            } catch (ConfigurationException e) {
-                LOGGER.error(e, e);
-                throw new ExceptionInInitializerError("Unable to find '" + PROPERTIES_FILENAME + "' file. (" + e + ")");
-            } catch (MalformedURLException e) {
-                LOGGER.error(e, e);
-                throw new ExceptionInInitializerError("Unable to find '" + PROPERTIES_FILENAME + "' file. (" + e + ")");
-            } catch (URISyntaxException e) {
-                LOGGER.error(e, e);
-                throw new ExceptionInInitializerError("Unable to find '" + PROPERTIES_FILENAME + "' file. (" + e + ")");
-            }
-        }
-        return config;
-    }
+	/**
+	 * Get a string associated with the given property key
+	 * 
+	 * @param key
+	 *            The property key.
+	 * @return The associated string.
+	 */
+	public static String getString(final String key) {
+		// beware of List problems, so get the object and convert it to a string
+		return asString(getConfiguration().getProperty(key));
+	}
 
-    /**
-     * commons-configuration automatically parse a comma separated value in key and return a list, that's not what we
-     * want here, we need to conserve the commas. An appropriate method should be added soon to the API.
-     *
-     * @param value
-     *            the value to convert, it should be either a String or a List
-     * @return the object as a string.
-     * @throws ClassCastException
-     *             if the object is not a string nor a list.
-     */
-    private static String asString(Object value) {
-        if (value instanceof List) {
-            List<?> list = (List<?>) value;
-            value = StringUtils.join(list.iterator(), ",");
-        }
-        return (String) value;
-    }
+	/**
+	 * Get a string associated with the given property key
+	 * 
+	 * @param key
+	 *            The property key.
+	 * @param defaultValue
+	 *            The default value.
+	 * @return The associated string.
+	 */
+	public static String getString(final String key, String defaultValue) {
+		// beware of List problems, so get the object and convert it to a string
+		Object o = getConfiguration().getProperty(key);
+		if (o == null) {
+			return defaultValue;
+		}
+		return asString(o);
+	}
 
-    /**
-     * Look for a configuration file in the classpath and set it. This is mainly a hook for testing purposes.
-     *
-     * @param url
-     *            the url of the configuration file to load
-     */
-    static void setConfiguration(URL url) throws ConfigurationException {
-        LOGGER.debug("Loading configuration url : " + url);
-        config = new PropertiesConfiguration(url);
-        config.getKeys();
-    }
+	/**
+	 * Set the configuration properties location
+	 * 
+	 * @param configurationLocation
+	 *            the user defined location
+	 */
+	public static void setLocation(String configurationLocation) {
+		location = configurationLocation;
+	}
 
-    /**
-     * Look for a configuration file in the classpath and add it.
-     *
-     * @param url
-     *            the url of the configuration file to load
-     */
-    static void addConfiguration(URL url) throws ConfigurationException {
-        LOGGER.debug("Adding configuration : " + url);
-        PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
-        Iterator<?> configKeys = configTmp.getKeys();
-        while (configKeys.hasNext()) {
-            String key = (String) configKeys.next();
-            String value = (String) configTmp.getProperty(key);
-            if (config.containsKey(key)) {
-                LOGGER.warn("Property " + key + " (" + configTmp.getProperty(key) + ") in file " + url + " override main value (" + config.getProperty(key) + ")");
-            }
-            config.addProperty(key, value);
-        }
-    }
+	/**
+	 * Helper method to do lazy default configuration. This was mainly done to
+	 * make this class easily testable.
+	 * 
+	 * @return the configuration instance used by this class.
+	 */
+	protected static PropertiesConfiguration getConfiguration() {
+		return getConfiguration(location);
+	}
 
-    /**
-     * Set the new properties
-     * @param prefix the prefix or null
-     * @param props the news properties
-     * @throws ConfigurationException
-     */
-    public static void setProperties(String prefix, Properties props) throws ConfigurationException {
-        Enumeration<Object> propsEnum = props.keys();
-        PropertiesConfiguration conf = Configuration.getConfiguration();
-        while (propsEnum.hasMoreElements()) {
-            String key = (String) propsEnum.nextElement();
-            conf.setProperty((prefix != null ? prefix + "." : "") + key, props.getProperty(key));
-        }
-        conf.save();
-    }
+	protected static PropertiesConfiguration getConfiguration(String path) {
+		if (config == null) {
+			try {
+				URL url = null;
+				if (new File(path).isDirectory()) {
+					// We call toURI().toURL() because the method to URL does
+					// not automatically escape characters that are illegal in
+					// URLs
+					url = new File(path, PROPERTIES_FILENAME).toURI().toURL();
+				} else {
+					url = Configuration.class.getClassLoader()
+							.getResource(path);
+				}
+				setConfiguration(url);
+
+				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
+				DN_LDAP_SCHEMA = Configuration.getString("dn.ldap_schema",
+						DN_LDAP_SCHEMA);
+				DN_ENHANCED_SCHEMA = Configuration.getString("dn.ldap_schema",
+						DN_ENHANCED_SCHEMA);
+				DN_STRUCTURES = Configuration.getString("dn.structures",
+						DN_STRUCTURES);
+				DN_ACCOUNTS = Configuration.getString("dn.accounts",
+						DN_STRUCTURES);
+				OBJECTCLASS_PERSON = Configuration.getString(
+						"objectclass.person", OBJECTCLASS_PERSON);
+				OBJECTCLASS_EMPLOYEE = Configuration.getString(
+						"objectclass.employee", OBJECTCLASS_EMPLOYEE);
+				DAYS_BEFORE_SUPPRESSION = Configuration.getInt(
+						"suppression.MARQUAGE_NOMBRE_DE_JOURS", DAYS_BEFORE_SUPPRESSION);
+				DN_REAL_ROOT = Configuration.getString("dn.real_root",
+						DN_REAL_ROOT);
+				UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", UID_MAX_LENGTH);
+
+			} catch (ConfigurationException e) {
+				LOGGER.error(e, e);
+				throw new ExceptionInInitializerError("Unable to find '" + path
+						+ "' file. (" + e + ")");
+			} catch (MalformedURLException e) {
+				LOGGER.error(e, e);
+				throw new ExceptionInInitializerError("Unable to find '" + path
+						+ "' file. (" + e + ")");
+			}
+		}
+		return config;
+	}
+
+	/**
+	 * commons-configuration automatically parse a comma separated value in key
+	 * and return a list, that's not what we want here, we need to conserve the
+	 * commas. An appropriate method should be added soon to the API.
+	 * 
+	 * @param value
+	 *            the value to convert, it should be either a String or a List
+	 * @return the object as a string.
+	 * @throws ClassCastException
+	 *             if the object is not a string nor a list.
+	 */
+	private static String asString(Object value) {
+		if (value instanceof List) {
+			List<?> list = (List<?>) value;
+			value = StringUtils.join(list.iterator(), ",");
+		}
+		return (String) value;
+	}
+
+	/**
+	 * Look for a configuration file in the classpath and set it. This is mainly
+	 * a hook for testing purposes.
+	 * 
+	 * @param url
+	 *            the url of the configuration file to load
+	 */
+	static void setConfiguration(URL url) throws ConfigurationException {
+		LOGGER.debug("Loading configuration url : " + url);
+		config = new PropertiesConfiguration(url);
+		config.getKeys();
+	}
+
+	/**
+	 * Look for a configuration file in the classpath and add it.
+	 * 
+	 * @param url
+	 *            the url of the configuration file to load
+	 */
+	static void addConfiguration(URL url) throws ConfigurationException {
+		LOGGER.debug("Adding configuration : " + url);
+		PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
+		Iterator<?> configKeys = configTmp.getKeys();
+		while (configKeys.hasNext()) {
+			String key = (String) configKeys.next();
+			String value = (String) configTmp.getProperty(key);
+			if (config.containsKey(key)) {
+				LOGGER.warn("Property " + key + " ("
+						+ configTmp.getProperty(key) + ") in file " + url
+						+ " override main value (" + config.getProperty(key)
+						+ ")");
+			}
+			config.addProperty(key, value);
+		}
+	}
+
+	/**
+	 * Set the new properties
+	 * @param prefix the prefix or null
+	 * @param props the news properties
+	 * @throws ConfigurationException
+	 */
+	public static void setProperties(String prefix, Properties props) throws ConfigurationException {
+		Enumeration<Object> propsEnum = props.keys();
+		PropertiesConfiguration conf = Configuration.getConfiguration();
+		while (propsEnum.hasMoreElements()) {
+			String key = (String) propsEnum.nextElement();
+			conf.setProperty((prefix != null ? prefix + "." : "") + key, props.getProperty(key));
+		}
+		conf.save();
+	}
 }

@@ -45,20 +45,22 @@
  */
 package org.lsc;
 
-import org.apache.log4j.Logger;
-
-import org.lsc.jndi.JndiServices;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
+
+import org.apache.log4j.Logger;
+import org.lsc.jndi.JndiServices;
 
 
 /**
@@ -238,13 +240,50 @@ public abstract class AbstractGenerator {
             return false;
         }
 
-        objectClasses = ocsTemp.values().iterator().next();
-        attributeTypes = atsTemp.values().iterator().next();
+        objectClasses = filterNames(ocsTemp.values().iterator().next());
+        attributeTypes = filterNames(atsTemp.values().iterator().next());
 
         return true;
     }
 
     /**
+     * Filter the attribute and object classes names
+     * @param names List of names
+     * @return list of filtered names
+     */
+    private List<String> filterNames(List<String> names) {
+    	List<String> filteredNames = new ArrayList<String>();
+    	Iterator<String> namesIter = names.iterator();
+    	while(namesIter.hasNext()) {
+    		String name = namesIter.next();
+    		String filteredName = filterName(name);
+    		if(filteredName != null) {
+    			filteredNames.add(filteredName);
+    		} else {
+    			LOGGER.error("Name invalid: " + name + ". Attributes or object class not generated !!!");
+    		}
+    	}
+    	return filteredNames;
+    	
+	}
+
+    /**
+     * Filter name according to attribute or object class 
+     * @param name the originale name
+     * @return the filtered name or null if not matching
+     */
+	public String filterName(String name) {
+		String REGEX = "^\\p{Alpha}[\\w]*$";
+		Pattern p = Pattern.compile(REGEX);
+		Matcher m = p.matcher(name);
+		if(m.matches()) {
+			return null;
+		} else {
+			return name;
+		}
+	}
+
+	/**
      * Default setter for the package name.
      *
      * @param lpackageName the package name to use in this generator

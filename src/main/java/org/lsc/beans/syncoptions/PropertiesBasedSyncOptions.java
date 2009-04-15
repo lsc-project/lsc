@@ -239,7 +239,12 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         if(property == null) {
             return null;
         }
-        return Configuration.getListFromString(property);
+        
+        List<String> writeAttributes = Configuration.getListFromString(property);
+        if (writeAttributes.size() == 0) {
+        	LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update lsc.tasks." + syncName + ".dstService.attrs to change this.");
+        }
+        return writeAttributes;
     }
 
     public String getCreateCondition() {

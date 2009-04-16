@@ -48,6 +48,7 @@ package org.lsc.persistence;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -140,7 +141,8 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 	StreamResult result = new StreamResult(new StringWriter());
 
 	try {
-	    if (!(new File(sqlMapConfigFullFilename).exists())) {
+	    File sqlMapConfigFile = new File(sqlMapConfigFullFilename);
+	    if (!(sqlMapConfigFile.exists())) {
 		throw new RuntimeException(
 			sqlMapConfigFullFilename
 				+ " missing ! Please copy the default file structure before launching generation.");
@@ -151,8 +153,9 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 	    parser.setFeature(
 		    "http://apache.org/xml/features/nonvalidating/load-external-dtd",
 		    false);
-
-	    parser.parse(sqlMapConfigFullFilename);
+	    
+	    // make sure any special characters are encoded in URI format
+	    parser.parse(sqlMapConfigFile.toURI().toASCIIString());
 	    Document doc = parser.getDocument();
 	    // docBuilder.parse();
 

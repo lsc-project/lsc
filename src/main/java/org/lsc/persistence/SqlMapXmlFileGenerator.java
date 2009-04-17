@@ -77,185 +77,185 @@ import org.xml.sax.SAXException;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SqlMapXmlFileGenerator extends AbstractGenerator {
-    /** The private local LOG4J logger. */
-    private static final Logger LOGGER = Logger
-	    .getLogger(SqlMapXmlFileGenerator.class);
+	/** The private local LOG4J logger. */
+	private static final Logger LOGGER = Logger
+	.getLogger(SqlMapXmlFileGenerator.class);
 
-    /**  */
-    private static final String SQL_MAP_CONFIG_FILENAME = "org/lsc/persistence/xml/sql-map-config.xml";
+	/**  */
+	private static final String SQL_MAP_CONFIG_FILENAME = "org/lsc/persistence/xml/sql-map-config.xml";
 
-    /** The full filename (with destination prefix if needed). */
-    private String sqlMapConfigFullFilename;
+	/** The full filename (with destination prefix if needed). */
+	private String sqlMapConfigFullFilename;
 
-    /** The xml file resource to add to sql Map. */
-    private String xmlFilename;
+	/** The xml file resource to add to sql Map. */
+	private String xmlFilename;
 
-    /**
-         * Initialize class parameters.
-         * 
-         * @param filename
-         *                the xml filen resource to add
-         */
-    protected final void init(final String filename) {
-	xmlFilename = filename;
-    }
-
-    /**
-         * This method launch the xml map generation.
-         * 
-         * @param unused
-         *                not used
-         * @return the generation status
-         */
-    protected final boolean generate(final String unused) {
-	if (getDestination() != null && getDestination().length() > 0) {
-	    sqlMapConfigFullFilename = getDestination() + getSeparator()
-		    + SQL_MAP_CONFIG_FILENAME;
-	    // Then remove the destination from the filename
-	    if(xmlFilename.indexOf(getDestination()) == 0) {
-		xmlFilename = xmlFilename.substring(getDestination().length()+1);
-	    }
-	} else {
-	    sqlMapConfigFullFilename = SQL_MAP_CONFIG_FILENAME;
+	/**
+	 * Initialize class parameters.
+	 * 
+	 * @param filename
+	 *                the xml filen resource to add
+	 */
+	protected final void init(final String filename) {
+		xmlFilename = filename;
 	}
 
-	String content = generateContent();
+	/**
+	 * This method launch the xml map generation.
+	 * 
+	 * @param unused
+	 *                not used
+	 * @return the generation status
+	 */
+	protected final boolean generate(final String unused) {
+		if (getDestination() != null && getDestination().length() > 0) {
+			sqlMapConfigFullFilename = getDestination() + getSeparator()
+			+ SQL_MAP_CONFIG_FILENAME;
+			// Then remove the destination from the filename
+			if(xmlFilename.indexOf(getDestination()) == 0) {
+				xmlFilename = xmlFilename.substring(getDestination().length()+1);
+			}
+		} else {
+			sqlMapConfigFullFilename = SQL_MAP_CONFIG_FILENAME;
+		}
 
-	if (content != null) {
-	    return writeContent(content, true);
+		String content = generateContent();
+
+		if (content != null) {
+			return writeContent(content, true);
+		}
+
+		return false;
 	}
 
-	return false;
-    }
+	/**
+	 * Generate the file content.
+	 * 
+	 * @return the generated content
+	 */
+	protected final String generateContent() {
 
-    /**
-         * Generate the file content.
-         * 
-         * @return the generated content
-         */
-    protected final String generateContent() {
+		DOMParser parser = new DOMParser();
 
-	DOMParser parser = new DOMParser();
+		// initialize StreamResult with File object to save to file
+		StreamResult result = new StreamResult(new StringWriter());
 
-	// initialize StreamResult with File object to save to file
-	StreamResult result = new StreamResult(new StringWriter());
+		try {
+			File sqlMapConfigFile = new File(sqlMapConfigFullFilename);
+			if (!(sqlMapConfigFile.exists())) {
+				throw new RuntimeException(
+						sqlMapConfigFullFilename
+						+ " missing ! Please copy the default file structure before launching generation.");
+			}
 
-	try {
-	    File sqlMapConfigFile = new File(sqlMapConfigFullFilename);
-	    if (!(sqlMapConfigFile.exists())) {
-		throw new RuntimeException(
-			sqlMapConfigFullFilename
-				+ " missing ! Please copy the default file structure before launching generation.");
-	    }
+			// Setting the external DTD/Xschema location
+			//	    parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.setFeature(
+					"http://apache.org/xml/features/nonvalidating/load-external-dtd",
+					false);
 
-	    // Setting the external DTD/Xschema location
-//	    parser.setFeature("http://xml.org/sax/features/validation", false);
-	    parser.setFeature(
-		    "http://apache.org/xml/features/nonvalidating/load-external-dtd",
-		    false);
-	    
-	    // make sure any special characters are encoded in URI format
-	    parser.parse(sqlMapConfigFile.toURI().toASCIIString());
-	    Document doc = parser.getDocument();
-	    // docBuilder.parse();
+			// make sure any special characters are encoded in URI format
+			parser.parse(sqlMapConfigFile.toURI().toASCIIString());
+			Document doc = parser.getDocument();
+			// docBuilder.parse();
 
-	    // Get the last node
-	    Node last = doc.getLastChild();
+			// Get the last node
+			Node last = doc.getLastChild();
 
-	    // Create a new sqlMap entry
-	    Node newSqlMapEntry = doc.createElement("sqlMap");
+			// Create a new sqlMap entry
+			Node newSqlMapEntry = doc.createElement("sqlMap");
 
-	    // Create the new sqlMap object attributes
-	    NamedNodeMap newSqlMapAttributes = newSqlMapEntry.getAttributes();
+			// Create the new sqlMap object attributes
+			NamedNodeMap newSqlMapAttributes = newSqlMapEntry.getAttributes();
 
-	    // Create a new resource attribute ...
-	    Attr resource = doc.createAttribute("resource");
-	    // ... with the xml ibatis description filename as value
-	    resource.setValue(xmlFilename);
-	    // Set the attribute in the new object attributes
-	    newSqlMapAttributes.setNamedItem(resource);
-	    // Append the new node as the new last node
-	    try {
-		    last.appendChild(newSqlMapEntry);
-	    } catch (DOMException e) {
-		LOGGER.error("Please check your xerces version. Consider upgrading to Java 6 or to Xerces 2.0 ! (" + e + ")", e);
+			// Create a new resource attribute ...
+			Attr resource = doc.createAttribute("resource");
+			// ... with the xml ibatis description filename as value
+			resource.setValue(xmlFilename);
+			// Set the attribute in the new object attributes
+			newSqlMapAttributes.setNamedItem(resource);
+			// Append the new node as the new last node
+			try {
+				last.appendChild(newSqlMapEntry);
+			} catch (DOMException e) {
+				LOGGER.error("Please check your xerces version. Consider upgrading to Java 6 or to Xerces 2.0 ! (" + e + ")", e);
+				return null;
+			}
+
+			Transformer transformer = TransformerFactory.newInstance()
+			.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//iBATIS.com//DTD SQL Map Config 2.0//EN");
+			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.ibatis.com/dtd/sql-map-config-2.dtd");
+			DOMSource source = new DOMSource(doc);
+			transformer.transform(source, result);
+		} catch (SAXException e) {
+			LOGGER.fatal("Failed to parse XML file : " + e, e);
+
+			return null;
+		} catch (IOException e) {
+			LOGGER.fatal("Failed to read XML file : " + e, e);
+
+			return null;
+		} catch (TransformerConfigurationException e) {
+			LOGGER.fatal("Failed to read XML transformation "
+					+ "configuration : " + e, e);
+
+			return null;
+		} catch (TransformerFactoryConfigurationError e) {
+			LOGGER.fatal("Failed to read XML transformation "
+					+ "configuration : " + e, e);
+
+			return null;
+		} catch (TransformerException e) {
+			LOGGER.fatal("Failed to transform XML structure : " + e, e);
+			e.printStackTrace();
+		}
+
+		return result.getWriter().toString();
+	}
+
+	/**
+	 * Default filename getter.
+	 * 
+	 * @return the filename
+	 */
+	@Override
+	public final String getFileName() {
+		return sqlMapConfigFullFilename;
+	}
+
+	/**
+	 * Unused.
+	 * 
+	 * @return the package name - unused
+	 */
+	@Override
+	protected final String getGenericPackageName() {
 		return null;
-	    }
-
-	    Transformer transformer = TransformerFactory.newInstance()
-		    .newTransformer();
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-	    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-	    transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//iBATIS.com//DTD SQL Map Config 2.0//EN");
-	    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.ibatis.com/dtd/sql-map-config-2.dtd");
-	    DOMSource source = new DOMSource(doc);
-	    transformer.transform(source, result);
-	} catch (SAXException e) {
-	    LOGGER.fatal("Failed to parse XML file : " + e, e);
-
-	    return null;
-	} catch (IOException e) {
-	    LOGGER.fatal("Failed to read XML file : " + e, e);
-
-	    return null;
-	} catch (TransformerConfigurationException e) {
-	    LOGGER.fatal("Failed to read XML transformation "
-		    + "configuration : " + e, e);
-
-	    return null;
-	} catch (TransformerFactoryConfigurationError e) {
-	    LOGGER.fatal("Failed to read XML transformation "
-		    + "configuration : " + e, e);
-
-	    return null;
-	} catch (TransformerException e) {
-	    LOGGER.fatal("Failed to transform XML structure : " + e, e);
-	    e.printStackTrace();
 	}
 
-	return result.getWriter().toString();
-    }
+	/**
+	 * Run the sql map completion.
+	 * 
+	 * @param xmlDatasourceDescriptionFilename
+	 *                the xml ibatis resource to reference
+	 * @param destination
+	 *                the base location
+	 * @return the file name that has been updated
+	 */
+	public static String run(final String xmlDatasourceDescriptionFilename,
+			final String destination) {
+		SqlMapXmlFileGenerator generator = new SqlMapXmlFileGenerator();
+		generator.setDestination(destination);
+		generator.init(xmlDatasourceDescriptionFilename);
 
-    /**
-         * Default filename getter.
-         * 
-         * @return the filename
-         */
-    @Override
-    public final String getFileName() {
-	return sqlMapConfigFullFilename;
-    }
-
-    /**
-         * Unused.
-         * 
-         * @return the package name - unused
-         */
-    @Override
-    protected final String getGenericPackageName() {
-	return null;
-    }
-
-    /**
-         * Run the sql map completion.
-         * 
-         * @param xmlDatasourceDescriptionFilename
-         *                the xml ibatis resource to reference
-         * @param destination
-         *                the base location
-         * @return the file name that has been updated
-         */
-    public static String run(final String xmlDatasourceDescriptionFilename,
-	    final String destination) {
-	SqlMapXmlFileGenerator generator = new SqlMapXmlFileGenerator();
-	generator.setDestination(destination);
-	generator.init(xmlDatasourceDescriptionFilename);
-
-	if (generator.generate(null)) {
-	    return generator.getFileName();
-	} else {
-	    return null;
+		if (generator.generate(null)) {
+			return generator.getFileName();
+		} else {
+			return null;
+		}
 	}
-    }
 }

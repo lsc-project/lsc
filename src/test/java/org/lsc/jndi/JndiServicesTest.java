@@ -77,6 +77,10 @@ public class JndiServicesTest extends TestCase {
     public final void testConnection() {
         assertEquals(true, JndiServices.getDstInstance().exists(""));
     }
+    
+    public final void testConnectionCache() {
+        assertEquals(JndiServices.getDstInstance(), JndiServices.getDstInstance());
+    }
 
     public final void testGetAttrList() {
         Map<String, LscAttributes> values = null;

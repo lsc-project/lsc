@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -72,6 +73,8 @@ import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
+import javax.naming.ldap.StartTlsRequest;
+import javax.naming.ldap.StartTlsResponse;
 
 import org.apache.log4j.Logger;
 import org.ietf.ldap.LDAPUrl;
@@ -96,6 +99,9 @@ public final class JndiServices {
 
     /** the ldap ctx. */
     private LdapContext ctx;
+    
+    /** TLSResponse in case we use StartTLS */
+    private StartTlsResponse tlsResponse;
 
     /** The context base dn. */
     private String contextDn;
@@ -120,29 +126,76 @@ public final class JndiServices {
      * @param connProps the connection properties to use to instantiate 
      * connection
      * @throws NamingException thrown if a directory error is encountered
+     * @throws IOException thrown if an error occurs negotiating StartTLS operation
      */
-    private JndiServices(final Properties connProps) throws NamingException {
-        ctx = new InitialLdapContext(connProps, null);
+    private JndiServices(final Properties connProps) throws NamingException, IOException {
+    	
+		/* should we negotiate TLS? */
+		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
+			LOGGER.info("Connecting with STARTTLS extended operation to LDAP server " + connProps.getProperty("java.naming.provider.url"));
+			
+			/* if we're going to do TLS, we mustn't BIND before the STARTTLS operation
+			 * so we remove credentials from the properties to stop JNDI from binding */
+			/* duplicate properties to avoid changing them (they are used as a cache key in getInstance() */
+			Properties localConnProps = new Properties();
+			localConnProps.putAll(connProps);
+			String jndiContextAuthentication = localConnProps.getProperty(Context.SECURITY_AUTHENTICATION);
+			String jndiContextPrincipal = localConnProps.getProperty(Context.SECURITY_PRINCIPAL);
+			String jndiContextCredentials = localConnProps.getProperty(Context.SECURITY_CREDENTIALS);
+			localConnProps.remove(Context.SECURITY_AUTHENTICATION);
+			localConnProps.remove(Context.SECURITY_PRINCIPAL);
+			localConnProps.remove(Context.SECURITY_CREDENTIALS);
+			
+			/* open the connection */
+			ctx = new InitialLdapContext(localConnProps, null);	
+			
+			/* initiate the STARTTLS extended operation */
+			try {
+				tlsResponse = (StartTlsResponse) ctx.extendedOperation(new StartTlsRequest());
+				tlsResponse.negotiate();
+			} catch (IOException e) {
+				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty("java.naming.provider.url"), e);
+				throw e;
+			} catch (NamingException e) {
+				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty("java.naming.provider.url"), e);
+				throw e;
+			}
+			
+			/* now we add the credentials back to the context, to BIND once TLS is started */
+			ctx.addToEnvironment(Context.SECURITY_AUTHENTICATION, jndiContextAuthentication);
+			ctx.addToEnvironment(Context.SECURITY_PRINCIPAL, jndiContextPrincipal);
+			ctx.addToEnvironment(Context.SECURITY_CREDENTIALS, jndiContextCredentials);
+
+		} else {
+			/* don't start TLS, just connect normally (this can be on ldap:// or ldaps://) */
+			LOGGER.info("Connecting to LDAP server " + connProps.getProperty("java.naming.provider.url"));
+	        ctx = new InitialLdapContext(connProps, null);	
+		}
+		
+		/* get LDAP naming context */
         try {
         	namingContext = new LDAPUrl((String) ctx.getEnvironment().get("java.naming.provider.url"));
 		} catch (MalformedURLException e) {
 			LOGGER.error(e,e);
 			throw new NamingException(e.getMessage());
 		}
+		
+		/* handle options */
 		contextDn = namingContext.getDN().toString();
+		
         String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
         if (pageSizeStr != null) {
             pageSize = Integer.parseInt(pageSizeStr);
         } else {
             pageSize = -1;
         }
+        
         String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
         if(recursiveDeleteStr != null) {
         	recursiveDelete = Boolean.parseBoolean(recursiveDeleteStr);
         } else {
         	recursiveDelete = false;
         }
-        //		sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
     }
 
     /**
@@ -685,4 +738,21 @@ public final class JndiServices {
     public String getContextDn() {
         return contextDn;
     }
+
+	/**
+	 * Close connection before this object is deleted by the garbage collector.
+	 * @see java.lang.Object#finalize()
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		// Close the TLS connection (revert back to the underlying LDAP association)
+		tlsResponse.close();
+		
+		// Close the connection to the LDAP server
+		ctx.close();
+		
+		super.finalize();
+	}
+    
+    
 }

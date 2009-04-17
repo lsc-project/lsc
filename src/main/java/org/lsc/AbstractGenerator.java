@@ -105,7 +105,7 @@ public abstract class AbstractGenerator {
      * name.
      */
     public AbstractGenerator() {
-        separator = "/";
+        this.separator = System.getProperty("file.separator");
     }
 
     /**
@@ -185,7 +185,7 @@ public abstract class AbstractGenerator {
         }
 
         return mainLocation + separator
-        + packageName.replaceAll("\\.", separator);
+                + packageName.replaceAll("\\.", "\\" + separator);
     }
 
     /**

@@ -272,7 +272,13 @@ public final class BeanComparator {
                     } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 )) {
                         LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");
-                        mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, srcBean.getAttributeById(srcAttrName));
+                        // By default, if we try to modify an attribute in
+                        // the destination entry, we have to care to replace all
+                        // values in the following conditions:
+                        // - FORCE action is used;
+                        // - A value is specified by the create_value parameter.
+                        // So, instead of add the attribute, we replace it.
+                        mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, srcBean.getAttributeById(srcAttrName));
                     } else if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr == null || destAttr.size() == 0 ) ) {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");

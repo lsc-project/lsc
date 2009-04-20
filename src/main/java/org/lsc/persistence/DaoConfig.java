@@ -45,24 +45,40 @@
  */
 package org.lsc.persistence;
 
-import com.ibatis.common.resources.Resources;
-
-import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.client.SqlMapClientBuilder;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+import org.lsc.Configuration;
+import org.lsc.beans.BeanComparator;
+
+import com.ibatis.common.resources.Resources;
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.ibatis.sqlmap.client.SqlMapClientBuilder;
 
 
 /**
  * This class is used to interface IBatis Direct Access Object engine.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author Thomas Chemineau &lt;thomas@lsc-project.org&gt;
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public final class DaoConfig {
+    /** Log4J local logger. */
+    private static final Logger LOGGER = Logger.getLogger(BeanComparator.class);
+	
+    /** The base name of the iBatis configuration file */
+    public static final String IBATIS_SQLMAP_CONFIGURATION_FILENAME = "sql-map-config.xml";
+	
     /** The localization of the iBatis configuration file. */
     public static final String IBATIS_SQLMAP_CONFIGURATION_FILE = 
-	"org/lsc/persistence/xml/sql-map-config.xml";
+    	"org/lsc/persistence/xml/" + IBATIS_SQLMAP_CONFIGURATION_FILENAME;
 
+    /** iBatis sqlMap configuration file directory for sqlMap files */
+    public static final String IBATIS_SQLMAP_FILES_DIRNAME = "sql-map-config.d";
+    
     /**
      * SqlMapClient instances are thread safe, so you only need one.
      * In this case, we'll use a static singleton.  So sue me.  ;-)
@@ -78,11 +94,32 @@ public final class DaoConfig {
      * @return the data accessor manager
      */
     public static SqlMapClient getSqlMapClient() {
-        if (sqlMapper == null) {
+    	 if (sqlMapper == null) {
             try {
-                Reader reader = Resources.getResourceAsReader(
-                	IBATIS_SQLMAP_CONFIGURATION_FILE);
-                sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader);
+            	Reader reader = null;
+            	
+            	// test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the config dir
+            	File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+            	if (configFile.exists()) {
+            		// read the file from the configuration directory
+            		String pathToFile = configFile.toURI().toURL().toString();
+            		LOGGER.debug("Reading " + IBATIS_SQLMAP_CONFIGURATION_FILENAME + " from " + pathToFile);
+            		reader = Resources.getUrlAsReader(pathToFile);
+            	} else {
+            		// read the file from the classpath (it's in a JAR file)
+            		reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
+            	}
+            	
+            	// read the database configuration file to pass to sql-map-config XML file
+            	Properties props = Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME);
+            	
+            	// add the configuration directory to properties 
+            	// so that sql-map-config can use relative paths
+            	props.put("lsc.config.sqlmapdir", Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_FILES_DIRNAME);
+            	
+               	sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, props);
+               	
+                // clean up
                 reader.close();
             } catch (IOException e) {
                 throw new RuntimeException("Something bad happened while "

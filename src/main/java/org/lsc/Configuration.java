@@ -46,6 +46,9 @@
 package org.lsc;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -59,6 +62,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
+import com.ibatis.sqlmap.client.SqlMapClientBuilder;
 
 /**
  * Ldap Synchronization Connector Configuration.
@@ -74,6 +79,9 @@ public class Configuration {
 	// Filename of the <code>lsc.properties</code>
 	public static final String PROPERTIES_FILENAME = "lsc.properties";
 
+	// Filename of the <code>database.properties</code>
+	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
+	
 	/** Default location for configuration filename */
 	public static String location = PROPERTIES_FILENAME;
 
@@ -224,9 +232,41 @@ public class Configuration {
 	 *            the user defined location
 	 */
 	public static void setLocation(String configurationLocation) {
-		location = configurationLocation;
+		location = appendDirSeperator(configurationLocation);
+	}
+	
+	private static String appendDirSeperator(String path) {
+		String seperator = System.getProperty("file.separator");
+		if (!path.endsWith(seperator)) {
+			return path + seperator;
+		}
+		return path;
 	}
 
+	/**
+	 * Get the path to the directory where configuration files
+	 * are stored, with a "/" at the end (or "\" on Windows).
+	 * 
+	 * All configuration files MUST be read from this directory.
+	 * 
+	 * If no directory is specified when launching LSC, this returns 
+	 * the user's current directory.
+	 * @return Path to configuration directory
+	 */
+	public static String getConfigurationDirectory() {
+		if (new File(location).isDirectory()) {
+			return location;
+		}
+		
+		/* Backward compatibility: if no directory was specified,
+		 * we must find the directory where configuration files are.
+		 * This is in the classpath, so we look for "lsc.properties"
+		 * in the classpath and use that directory.
+		 */
+		URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
+		return appendDirSeperator(new File(propertiesURL.getPath()).getParent());
+	}
+	
 	/**
 	 * Helper method to do lazy default configuration. This was mainly done to
 	 * make this class easily testable.
@@ -234,22 +274,10 @@ public class Configuration {
 	 * @return the configuration instance used by this class.
 	 */
 	protected static PropertiesConfiguration getConfiguration() {
-		return getConfiguration(location);
-	}
-
-	protected static PropertiesConfiguration getConfiguration(String path) {
 		if (config == null) {
+			URL url = null;
 			try {
-				URL url = null;
-				if (new File(path).isDirectory()) {
-					// We call toURI().toURL() because the method to URL does
-					// not automatically escape characters that are illegal in
-					// URLs
-					url = new File(path, PROPERTIES_FILENAME).toURI().toURL();
-				} else {
-					url = Configuration.class.getClassLoader()
-							.getResource(path);
-				}
+				url = new File(getConfigurationDirectory(), PROPERTIES_FILENAME).toURI().toURL();
 				setConfiguration(url);
 
 				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
@@ -273,11 +301,11 @@ public class Configuration {
 
 			} catch (ConfigurationException e) {
 				LOGGER.error(e, e);
-				throw new ExceptionInInitializerError("Unable to find '" + path
+				throw new ExceptionInInitializerError("Unable to find '" + url
 						+ "' file. (" + e + ")");
 			} catch (MalformedURLException e) {
 				LOGGER.error(e, e);
-				throw new ExceptionInInitializerError("Unable to find '" + path
+				throw new ExceptionInInitializerError("Unable to find '" + url
 						+ "' file. (" + e + ")");
 			}
 		}
@@ -353,5 +381,32 @@ public class Configuration {
 			conf.setProperty((prefix != null ? prefix + "." : "") + key, props.getProperty(key));
 		}
 		conf.save();
+	}
+	
+	/**
+	 * Helper method to read a file from the filesystem and return it as Properties.
+	 * 
+	 * @param pathToFile Absolute filename on the filesystem to read.
+	 * @return Properties from the file
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static Properties getPropertiesFromFile(String pathToFile) throws FileNotFoundException, IOException {
+		File propertiesFile = new File(pathToFile);
+		Properties props = new Properties();
+		props.load(new FileInputStream(propertiesFile));
+		return props;
+	}
+	
+	/**
+	 * Helper method to read a file from the configuration directory and return it as Properties.
+
+	 * @param fileName Filename relative to the configuration directory.
+	 * @return Properties from the file
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static Properties getPropertiesFromFileInConfigDir(String fileName) throws FileNotFoundException, IOException {
+		return getPropertiesFromFile(Configuration.getConfigurationDirectory() + fileName);
 	}
 }

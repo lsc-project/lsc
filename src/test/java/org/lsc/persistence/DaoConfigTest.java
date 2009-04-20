@@ -50,12 +50,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.lsc.Configuration;
 
 /**
  * Public class to test the DAO engine loader
@@ -79,16 +81,16 @@ public class DaoConfigTest extends TestCase {
      */
     public final void testConnection() {
         try {
-            PropertiesConfiguration pc = new PropertiesConfiguration("database.properties");
-
+            Properties pc = Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME);
+            
             /* Test loading driver */
             LOGGER.info("=> loading driver:");
-            Class.forName(pc.getString("driver")).newInstance();
+            Class.forName((String) pc.get("driver")).newInstance();
             LOGGER.info("OK");
 
             /* Test the connection */
             LOGGER.info("=> connecting:");
-            con = DriverManager.getConnection(pc.getString("url"));
+            con = DriverManager.getConnection((String) pc.get("url"));
             LOGGER.info("OK");
         } catch (ClassNotFoundException y) {
             LOGGER.error("ERR: driver not found. Please check your CLASSPATH !");
@@ -114,6 +116,15 @@ public class DaoConfigTest extends TestCase {
             LOGGER.error(e.toString(), e);
         }
         assertNotNull(rs);
+    }
+    
+    public final void testGetSqlMapClient() {
+    	// this is useless but breaks the test otherwise :)
+        if(con == null) {
+            testConnection();
+        }
+    	
+    	assertNotNull(DaoConfig.getSqlMapClient());
     }
 
     /**

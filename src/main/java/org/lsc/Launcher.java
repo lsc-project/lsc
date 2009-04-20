@@ -116,12 +116,15 @@ public final class Launcher {
      */
     public void run() {
         try {
+        	/* if a configuration directory was set on command line, save it to Configuration */
         	if(configurationLocation != null) {
         		Configuration.setLocation(configurationLocation);
-                PropertyConfigurator.configure(new File(configurationLocation, "log4j.properties").toURI().toURL());
-        	} else {
-                PropertyConfigurator.configure("log4j.properties");
         	}
+        	
+        	/* load LOG4J properties */
+        	PropertyConfigurator.configure(new File(Configuration.getConfigurationDirectory(), "log4j.properties").toURI().toURL());
+        	
+        	/* do the work! */
             sync.launch(syncType, cleanType);
         } catch (Exception e) {
             LOGGER.error(e, e);

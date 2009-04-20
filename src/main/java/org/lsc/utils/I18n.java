@@ -45,7 +45,10 @@
  */
 package org.lsc.utils;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -55,6 +58,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.lsc.Configuration;
 
 /**
  * Support different languages
@@ -167,7 +171,12 @@ public class I18n {
 			logger.debug("Setting locale to " + locale);
 		try {
 			// this.getClass().getClassLoader().getResource(".");
-			messages = ResourceBundle.getBundle(localeDirectory + sep + PROJECT_NAME, currentLocale);
+			// messages = ResourceBundle.getBundle(localeDirectory + sep + PROJECT_NAME, currentLocale);
+                        messages = ResourceBundle.getBundle(
+                                localeDirectory + sep + PROJECT_NAME,
+                                currentLocale,
+                                new I18nCustomClassLoader()
+                            );
 		} catch (MissingResourceException mre) {
 			logger.fatal(mre, mre);
 			if (logger.isDebugEnabled()) {
@@ -253,5 +262,21 @@ public class I18n {
 	public static Map<String, String> getKeysStartingWith(String prefix) {
 		return getInstance().getKeysStarting(prefix);
 	}
-    
+
+        /**
+         * Private ClassLoader to load locales from disk.
+         */
+        private class I18nCustomClassLoader extends ClassLoader {
+            @Override
+            protected URL findResource(String arg0) {
+                File f = new File(Configuration.getConfigurationDirectory() + arg0) ;
+                try
+                {
+                    return f.toURI().toURL();
+                }
+                catch (MalformedURLException e) {}
+                return super.findResource(arg0);
+            }
+        }
+        
 }

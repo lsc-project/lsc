@@ -96,8 +96,8 @@ public abstract class AbstractSynchronize {
      * Default constructor.
      */
     protected AbstractSynchronize() {
-        PropertyConfigurator.configure(this.getClass().getClassLoader()
-                .getResource(LOG4J_CONFIGURATION_FILE));
+        //PropertyConfigurator.configure(this.getClass().getClassLoader()
+        //        .getResource(LOG4J_CONFIGURATION_FILE));
         options = new Options();
         options.addOption("nc", "nocreate", false, "Don't create any entry");
         options.addOption("nu", "noupdate", false, "Don't update");

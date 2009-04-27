@@ -292,7 +292,7 @@ public abstract class AbstractSynchronize {
             countAll++;
 
             Entry<String, LscAttributes> id = ids.next();
-            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id);
+            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id.getKey());
 
             try {
                 LscObject lscObject = srcService.getObject(id);
@@ -300,7 +300,7 @@ public abstract class AbstractSynchronize {
                 /* Log an error if the source object could not be retrieved! This shouldn't happen. */
                 if(lscObject == null) {
                     countError++;
-                    LOGGER.error("Unable to get object for id=" + id);
+                    LOGGER.error("Unable to get object for id=" + id.getKey());
                     continue;
                 }
 

@@ -746,7 +746,9 @@ public final class JndiServices {
 	@Override
 	protected void finalize() throws Throwable {
 		// Close the TLS connection (revert back to the underlying LDAP association)
-		tlsResponse.close();
+		if (tlsResponse != null) {
+			tlsResponse.close();	
+		}
 		
 		// Close the connection to the LDAP server
 		ctx.close();

@@ -233,7 +233,7 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
                + "\t\t<param name=\"driver\"   "
                + "value=\"org.hsqldb.jdbcDriver\"/>\n"
                + "\t\t<param name=\"url\"      "
-               + "value=\"jdbc:hsqldb:file:hsqldb/lsc\"/>\n"
+               + "value=\"jdbc:hsqldb:file:target/hsqldb/lsc\"/>\n"
                + "\t\t<param name=\"username\" " + "value=\"sa\"/>\n"
                + "\t\t<param name=\"password\" " + "value=\"\"/>\n\n"
                + "\t\t<!--optional-->\n"

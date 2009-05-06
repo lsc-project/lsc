@@ -55,7 +55,11 @@ import java.util.Map.Entry;
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.lsc.beans.AbstractBean;
@@ -86,12 +90,29 @@ public abstract class AbstractSynchronize {
     /** The local LOG4J logger. */
     private static final Logger LOGGER = Logger.getLogger(AbstractSynchronize.class);
 
-    /** The directory modifications filter. */
-    private JndiModificationsFilter jmFilter;
-
     /** List of configured options. */
     private Options options;
 
+    /**
+     * This is the flag to prevent entries add operation in the target
+     * directory.
+     */
+    private boolean nocreate;
+
+    /**
+     * This is the flag to prevent entries update operation in the target
+     * directory.
+     */
+    private boolean noupdate;
+
+    /**
+     * This is the flag to prevent entries delete operation in the target
+     * directory.
+     */
+    private boolean nodelete;
+
+
+    
     /**
      * Default constructor.
      */
@@ -103,7 +124,6 @@ public abstract class AbstractSynchronize {
         options.addOption("nu", "noupdate", false, "Don't update");
         options.addOption("nd", "nodelete", false, "Don't delete");
         options.addOption("n", "dryrun", false, "Don't update the directory at all");
-        jmFilter = new JndiModificationsFilter();
     }
 
     /**
@@ -161,14 +181,11 @@ public abstract class AbstractSynchronize {
 
                 // If we didn't find the object in the source, delete it in the destination
                 if (srcObject == null) {
-                    jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                    jm.setDistinguishName(id.getKey());
-
                     // Retrieve condition to evaluate before deleting
                     Boolean doDelete = null;
                     String conditionString = syncOptions.getDeleteCondition();
  
-                    /* Don't use JavaScript evaluator for primitive cases */
+                    // Don't use JavaScript evaluator for primitive cases
                     if (conditionString.matches("true")) {
                     	doDelete = true;
                     } else if (conditionString.matches("false")) {
@@ -190,25 +207,39 @@ public abstract class AbstractSynchronize {
 	                        conditionObjects.put("dstBean", bean);	                    	
 	                    }
 
-	                    /* Evaluate if we have to do something */
+	                    // Evaluate if we have to do something
 	                    doDelete = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
                     }
                     
-                    if (doDelete) {
-                        countInitiated++;
-                        JndiModifications jmFiltered = jmFilter.filter(jm);
-                        if (jmFiltered != null) {
-                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
-                                countCompleted++;
-                                logAction(jmFiltered, id, syncName);
-                            } else {
-                                countError++;
-                                logActionError(jmFiltered, id, null);
-                            }
-                        }
+                    // Only create delete modification object if (or):
+                    // 	1)	the condition is true (obviously)
+                    //	2)	the condition is false and we would delete an object 
+                    //		and "nodelete" was specified in command line options
+                    // Case 2 is for debugging purposes.
+                    if (doDelete || nodelete) {
+                        jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
+                        jm.setDistinguishName(id.getKey());
                     } else {
-                    	// If the delete condition is false, log action for debugging purposes
+                    	jm = null;
+                    }
+                    
+                    // if "nodelete" was specified in command line options,
+                    // or if the condition is false,
+                    // log action for debugging purposes and forget
+                    if (nodelete || !doDelete) {
                         logShouldAction(jm, id, syncName);
+                        jm = null;
+                    }
+                    
+                    if (jm != null) {
+                        countInitiated++;
+                        if (JndiServices.getDstInstance().apply(jm)) {
+                            countCompleted++;
+                            logAction(jm, id, syncName);
+                        } else {
+                            countError++;
+                            logActionError(jm, id, null);
+                        }
                     }
                 }
             } catch (CommunicationException e) { 
@@ -323,44 +354,55 @@ public abstract class AbstractSynchronize {
                     throw ite.getCause();
                 }
 
+                // Search destination for matching object
                 dstBean = dstService.getBean(id);
-                jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
+                
+                // Retrieve condition to evaluate before creating/updating 
+                Boolean applyCondition = null;
+                String conditionString = syncOptions.getCondition(jm.getOperation());
+
+                // Don't use JavaScript evaluator for primitive cases
+                if (conditionString.matches("true")) {
+                	applyCondition = true;
+                } else if (conditionString.matches("false")) {
+                	applyCondition = false;
+                } else {
+                    conditionObjects = new HashMap<String, Object>();
+                    conditionObjects.put("dstBean", dstBean);
+                    conditionObjects.put("srcBean", srcBean);
+                    
+                    // Evaluate if we have to do something
+                    applyCondition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
+                }
+                
+                // Only evaluate modifications if (or):
+                // 	1) the condition is true (obviously)
+                //	2) the condition is false and
+                //		a) we would create an object and "nocreate" was specified in command line options
+                //		b) we would update an object and "noupdate" was specified in command line options
+                // Case 2 is for debugging purposes.
+                Boolean calculateForDebugOnly = (dstBean == null && nocreate) || (dstBean != null && noupdate);
+                if (applyCondition || calculateForDebugOnly) {
+                	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
+                	
+                	// apply condition is false, log action for debugging purposes and forget
+                	if (!applyCondition || calculateForDebugOnly) {
+                		logShouldAction(jm, id, syncName);
+                		jm = null;
+                	}
+                } else {
+                	jm = null;
+                }
 
                 // Apply any modifications to the directory
                 if (jm != null) {
-                    /* Retrieve condition to evaluate before creating/updating */ 
-                    Boolean condition = null;
-                    String conditionString = syncOptions.getCondition(jm.getOperation());
-
-                    /* Don't use JavaScript evaluator for primitive cases */
-                    if (conditionString.matches("true")) {
-                    	condition = true;
-                    } else if (conditionString.matches("false")) {
-                    	condition = false;
+                    countInitiated++;
+                    if (JndiServices.getDstInstance().apply(jm)) {
+                        countCompleted++;
+                        logAction(jm, id, syncName);
                     } else {
-	                    conditionObjects = new HashMap<String, Object>();
-	                    conditionObjects.put("dstBean", dstBean);
-	                    conditionObjects.put("srcBean", srcBean);
-	                    
-	                    /* Evaluate if we have to do something */
-	                    condition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
-                    }
-                    
-                    if(condition) {
-                        countInitiated++;
-                        JndiModifications jmFiltered = jmFilter.filter(jm);
-                        if (jmFiltered != null) {
-                            if (JndiServices.getDstInstance().apply(jmFiltered)) {
-                                countCompleted++;
-                                logAction(jmFiltered, id, syncName);
-                            } else {
-                                countError++;
-                                logActionError(jmFiltered, id, null);
-                            }
-                        }
-                    } else {
-                    	/* If the condition is false, log action for debugging purposes */
-                        logShouldAction(jm, id, syncName);
+                        countError++;
+                        logActionError(jm, id, null);
                     }
                 }
             } catch (CommunicationException e) { 
@@ -515,7 +557,32 @@ public abstract class AbstractSynchronize {
      * @return the parsing status
      */
     public final boolean parseOptions(final String[] args) {
-        return jmFilter.parseCommandLine(args, options);
+        CommandLineParser parser = new GnuParser();
+        try {
+            CommandLine cmdLine = parser.parse(options, args);
+            if (cmdLine.getOptions().length > 0) {
+                if (cmdLine.hasOption("nc")) {
+                    nocreate = true;
+                }
+                if (cmdLine.hasOption("nu")) {
+                    noupdate = true;
+                }
+                if (cmdLine.hasOption("nd")) {
+                    nodelete = true;
+                }
+                if (cmdLine.hasOption("n")) {
+                    nocreate = true;
+                    noupdate = true;
+                    nodelete = true;
+                }
+            } else {
+                return false;
+            }
+        } catch (final ParseException e) {
+            LOGGER.fatal("Unable to parse options : " + args + " (" + e + ")", e);
+            return false;
+        }
+        return true;
     }
 
     /**

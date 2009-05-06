@@ -97,21 +97,19 @@ public abstract class AbstractSynchronize {
      * This is the flag to prevent entries add operation in the target
      * directory.
      */
-    private boolean nocreate;
+    private boolean nocreate = false;
 
     /**
      * This is the flag to prevent entries update operation in the target
      * directory.
      */
-    private boolean noupdate;
+    private boolean noupdate = false;
 
     /**
      * This is the flag to prevent entries delete operation in the target
      * directory.
      */
-    private boolean nodelete;
-
-
+    private boolean nodelete = false;
     
     /**
      * Default constructor.

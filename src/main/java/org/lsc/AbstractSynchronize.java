@@ -112,6 +112,13 @@ public abstract class AbstractSynchronize {
     private boolean nodelete = false;
     
     /**
+     * This is the flag to prevent entries modrdn operation in the target
+     * directory.
+     */
+    private boolean nomodrdn = false;
+
+    
+    /**
      * Default constructor.
      */
     protected AbstractSynchronize() {
@@ -121,6 +128,7 @@ public abstract class AbstractSynchronize {
         options.addOption("nc", "nocreate", false, "Don't create any entry");
         options.addOption("nu", "noupdate", false, "Don't update");
         options.addOption("nd", "nodelete", false, "Don't delete");
+        options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
         options.addOption("n", "dryrun", false, "Don't update the directory at all");
     }
 
@@ -355,9 +363,12 @@ public abstract class AbstractSynchronize {
                 // Search destination for matching object
                 dstBean = dstService.getBean(id);
                 
+                // Calculate operation that would be performed
+                JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean);
+                
                 // Retrieve condition to evaluate before creating/updating 
                 Boolean applyCondition = null;
-                String conditionString = syncOptions.getCondition(jm.getOperation());
+                String conditionString = syncOptions.getCondition(modificationType);
 
                 // Don't use JavaScript evaluator for primitive cases
                 if (conditionString.matches("true")) {
@@ -379,7 +390,10 @@ public abstract class AbstractSynchronize {
                 //		a) we would create an object and "nocreate" was specified in command line options
                 //		b) we would update an object and "noupdate" was specified in command line options
                 // Case 2 is for debugging purposes.
-                Boolean calculateForDebugOnly = (dstBean == null && nocreate) || (dstBean != null && noupdate);
+                Boolean calculateForDebugOnly = (modificationType==JndiModificationType.ADD_ENTRY && nocreate) 
+                		|| (modificationType==JndiModificationType.MODIFY_ENTRY && noupdate)
+                		|| (modificationType==JndiModificationType.MODRDN_ENTRY && (nomodrdn || noupdate));
+                
                 if (applyCondition || calculateForDebugOnly) {
                 	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
                 	
@@ -568,10 +582,14 @@ public abstract class AbstractSynchronize {
                 if (cmdLine.hasOption("nd")) {
                     nodelete = true;
                 }
+                if (cmdLine.hasOption("nr")) {
+                    nomodrdn = true;
+                }
                 if (cmdLine.hasOption("n")) {
                     nocreate = true;
                     noupdate = true;
                     nodelete = true;
+                    nomodrdn = true;
                 }
             } else {
                 return false;

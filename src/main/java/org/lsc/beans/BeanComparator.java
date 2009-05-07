@@ -90,6 +90,31 @@ public final class BeanComparator {
     private static final Logger LOGGER = Logger.getLogger(BeanComparator.class);
 
     /**
+     * Static method to return the kind of operation that would happen
+     * 
+     * @param syncOptions SyncOptions object from properties
+     * @param srcBean JDBC bean
+     * @param destBean JNDI bean
+     * @return
+     */
+    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean destBean) {
+    	if (srcBean == null && destBean == null) {
+    		return null;
+    	} else if (srcBean == null && destBean != null) {
+    		return JndiModificationType.DELETE_ENTRY;
+    	} else if (srcBean != null && destBean == null) {
+    		return JndiModificationType.ADD_ENTRY;
+    	} else { /* srcBean != null && destBean != null */
+    		if (srcBean.getDistinguishName() == null
+    				|| destBean.getDistinguishName().compareToIgnoreCase(srcBean.getDistinguishName()) == 0) {
+    			return JndiModificationType.MODIFY_ENTRY;
+    		} else {
+    			return JndiModificationType.MODRDN_ENTRY;
+    		}
+    	}
+    }
+    
+    /**
      * Static comparison method.
      * 
      * By default, source information override destination 
@@ -116,26 +141,31 @@ public final class BeanComparator {
             }
             srcBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
         }
-
-        if (srcBean == null && destBean == null) {
-            return null;
-        } else if (srcBean == null && destBean != null) {
-            jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncOptions.getTaskName());
-            jm.setDistinguishName(destBean.getDistinguishName());
-            LOGGER.debug("Deleting entry : \"" + destBean.getDistinguishName() + "\"");
-        } else if (srcBean != null && destBean == null) {
-            jm = getAddEntry(syncOptions, srcBean, customLibrary);
-        } else { /* srcBean != null && destBean != null */
-            if (srcBean.getDistinguishName() == null
-                    || destBean.getDistinguishName().compareToIgnoreCase(srcBean.getDistinguishName()) == 0) {
-                jm = getModifyEntry(syncOptions, srcBean, destBean, customLibrary);
-            } else {
-                //WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update
-                jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY, syncOptions.getTaskName());
-                jm.setDistinguishName(destBean.getDistinguishName());
-                jm.setNewDistinguishName(srcBean.getDistinguishName());
-            }
+        
+        // get modification type to perform
+        JndiModificationType modificationType = calculateModificationType(syncOptions, srcBean, destBean);
+        if (modificationType==JndiModificationType.DELETE_ENTRY)
+        {
+        	jm = new JndiModifications(modificationType, syncOptions.getTaskName());
+        	jm.setDistinguishName(destBean.getDistinguishName());
+        	LOGGER.debug("Deleting entry : \"" + destBean.getDistinguishName() + "\"");
         }
+        else if (modificationType==JndiModificationType.ADD_ENTRY) 
+        {
+        	jm = getAddEntry(syncOptions, srcBean, customLibrary);
+        }
+        else if (modificationType==JndiModificationType.MODIFY_ENTRY)
+        {
+        	jm = getModifyEntry(syncOptions, srcBean, destBean, customLibrary);
+        }
+        else if (modificationType==JndiModificationType.MODRDN_ENTRY)
+        {
+        	//WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update
+        	jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY, syncOptions.getTaskName());
+        	jm.setDistinguishName(destBean.getDistinguishName());
+        	jm.setNewDistinguishName(srcBean.getDistinguishName());
+        }
+
         if (jm.getOperation() == JndiModificationType.MODRDN_ENTRY
                 || (jm.getModificationItems() != null && jm.getModificationItems().size() != 0)) {            
             return jm;

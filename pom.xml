@@ -341,6 +341,17 @@
 			<version>3.2.23</version>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- Bouncycastle dependencies -->
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk15</artifactId>
+            <version>140</version>
+        </dependency>
+        <dependency>
+            <groupId>bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>140</version>
+        </dependency>
 	</dependencies>
 	<reporting>
 		<outputDirectory>${basedir}/target/site</outputDirectory>

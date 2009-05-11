@@ -95,7 +95,7 @@ public final class BeanComparator {
      * @param syncOptions SyncOptions object from properties
      * @param srcBean JDBC bean
      * @param destBean JNDI bean
-     * @return
+     * @return JndiModificationType
      */
     public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean destBean) {
     	if (srcBean == null && destBean == null) {

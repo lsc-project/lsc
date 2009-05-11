@@ -216,7 +216,7 @@ public class SymmetricEncryption
 	 * Return the default encryption strength.
 	 * The encryption strength could be specified in the configuration file
 	 * through the lsc.security.encryption.strength property.
-	 * @return
+	 * @return int
 	 */
 	public static int getDefaultStrength()
 	{

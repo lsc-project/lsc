@@ -60,6 +60,7 @@ import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttributes;
@@ -121,8 +122,8 @@ public final class JndiServices {
     //	private String sortedBy;
 
     /**
-     * Initiate the object and the connection according to the properties
-     * files.
+     * Initiate the object and the connection according to the properties.
+     * 
      * @param connProps the connection properties to use to instantiate 
      * connection
      * @throws NamingException thrown if a directory error is encountered
@@ -168,8 +169,18 @@ public final class JndiServices {
 
 		} else {
 			/* don't start TLS, just connect normally (this can be on ldap:// or ldaps://) */
-			LOGGER.info("Connecting to LDAP server " + connProps.getProperty("java.naming.provider.url"));
-	        ctx = new InitialLdapContext(connProps, null);	
+			StringBuffer sb = new StringBuffer();
+			sb.append("Connecting to LDAP server ");
+			sb.append(connProps.getProperty("java.naming.provider.url"));
+			if (connProps.getProperty(Context.SECURITY_AUTHENTICATION)==null
+				|| connProps.getProperty(Context.SECURITY_AUTHENTICATION)=="none") {
+				sb.append(" anonymously");
+			} else {
+				sb.append(" as " + connProps.getProperty(Context.SECURITY_PRINCIPAL));
+			}
+			LOGGER.info(sb.toString());
+
+			ctx = new InitialLdapContext(connProps, null);	
 		}
 		
 		/* get LDAP naming context */
@@ -181,7 +192,7 @@ public final class JndiServices {
 		}
 		
 		/* handle options */
-		contextDn = namingContext.getDN().toString();
+		contextDn = namingContext.getDN() != null ? namingContext.getDN().toString() : "";
 		
         String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
         if (pageSizeStr != null) {
@@ -203,11 +214,16 @@ public final class JndiServices {
      * @return the source directory connected service
      */
     public static JndiServices getSrcInstance() {
-        Properties srcProperties = Configuration.getSrcProperties();
-        if (srcProperties != null && srcProperties.size() > 0) {
-            return getInstance(Configuration.getSrcProperties());
-        }
-        return null;
+    	try {
+    		Properties srcProperties = Configuration.getSrcProperties();
+    		if (srcProperties != null && srcProperties.size() > 0) {
+    			return getInstance(Configuration.getSrcProperties());
+    		}
+    		return null;
+    	} catch (Exception e) {
+    		LOGGER.error("Error opening the LDAP connection to the source!");
+    		throw new ExceptionInInitializerError(e);
+    	}
     }
 
     /**
@@ -215,27 +231,29 @@ public final class JndiServices {
      * @return the target directory connected service
      */
     public static JndiServices getDstInstance() {
-        return getInstance(Configuration.getDstProperties());
+    	try {
+    		return getInstance(Configuration.getDstProperties());
+    	} catch (Exception e) {
+    		LOGGER.error("Error opening the LDAP connection to the destination!");
+    		throw new ExceptionInInitializerError(e);
+    	}
     }
 
     /**
      * Instance getter. Manage a connections cache and return the good service
      * @param props the connection properties
      * @return the instance
+     * @throws IOException 
+     * @throws NamingException 
      */
-    private static JndiServices getInstance(final Properties props) {
-        try {
-            if (cache == null) {
-                cache = new HashMap<Properties, JndiServices>();
-            }
-            if (!cache.containsKey(props)) {
-                cache.put(props, new JndiServices(props));
-            }
-            return (JndiServices) cache.get(props);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ExceptionInInitializerError(e);
-        }
+    public static JndiServices getInstance(final Properties props) throws NamingException, IOException {
+    	if (cache == null) {
+    		cache = new HashMap<Properties, JndiServices>();
+    	}
+    	if (!cache.containsKey(props)) {
+    		cache.put(props, new JndiServices(props));
+    	}
+    	return (JndiServices) cache.get(props);
     }
 
     /**
@@ -272,9 +290,30 @@ public final class JndiServices {
      */
     public SearchResult getEntry(final String base, final String filter, 
             final SearchControls sc) throws NamingException {
+        return getEntry(base, filter, sc, SearchControls.SUBTREE_SCOPE);
+    }
+    
+    /**
+     * Search for an entry.
+     * 
+     * This method is a simple LDAP search operation with SUBTREE search
+     * control
+     * 
+     * @param base the base of the search operation
+     * @param filter  the filter of the search operation
+     * @param sc the search controls
+     * @param scope the search scope to use
+     * @return the entry or null if not found
+     * @throws SizeLimitExceededException
+     * 					thrown if more than one entry is returned by the search
+     * @throws NamingException
+     *                 thrown if something goes wrong
+     */
+    public SearchResult getEntry(final String base, final String filter, 
+            final SearchControls sc, final int scope) throws NamingException {
         NamingEnumeration<SearchResult> ne = null;
         try {
-            sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            sc.setSearchScope(scope);
             String rewrittenBase = null;
             if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
                 if (!base.equalsIgnoreCase(contextDn)) {
@@ -297,7 +336,7 @@ public final class JndiServices {
             if (ne.hasMoreElements()) {
                 LOGGER.error("Too many entries returned (base: \"" + base
                         + "\", filter: \"" + filter + "\"");
-                throw new NamingException("Too many entries returned (base: \"" + base
+                throw new SizeLimitExceededException("Too many entries returned (base: \"" + base
                         + "\", filter: \"" + filter + "\"");
             } else {
                 return sr;
@@ -439,6 +478,7 @@ public final class JndiServices {
             }
         } catch (NamingException nex) {
             LOGGER.error(nex, nex);
+            throw nex;
         }
         return l;
     }
@@ -754,6 +794,15 @@ public final class JndiServices {
 		ctx.close();
 		
 		super.finalize();
+	}
+
+	/**
+	 * Get the JNDI context.
+	 * @return The LDAP context object in use by this class.
+	 */
+	public LdapContext getContext()
+	{
+		return ctx;
 	}
     
     

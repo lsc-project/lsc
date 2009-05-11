@@ -258,16 +258,19 @@ public class Configuration {
 		
 		if (new File(location).isDirectory()) {
 			ret = location;
+		} else {
+			/* Backward compatibility: if no directory was specified,
+			 * we must find the directory where configuration files are.
+			 * This is in the classpath, so we look for "lsc.properties"
+			 * in the classpath and use that directory.
+			 */
+			URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
+			if (propertiesURL == null) {
+				throw new ExceptionInInitializerError("No configuration file found!");
+			}
+			
+			ret = appendDirSeperator(new File(propertiesURL.getPath()).getParent());
 		}
-		
-		/* Backward compatibility: if no directory was specified,
-		 * we must find the directory where configuration files are.
-		 * This is in the classpath, so we look for "lsc.properties"
-		 * in the classpath and use that directory.
-		 */
-		URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
-		ret = appendDirSeperator(new File(propertiesURL.getPath()).getParent());
-		
 		LOGGER.debug("Configuration directory is " + ret);
 		return ret;
 	}

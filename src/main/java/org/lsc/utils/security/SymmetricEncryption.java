@@ -106,7 +106,7 @@ public class SymmetricEncryption
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public SymmetricEncryption() throws GeneralSecurityException, IOException
+	public SymmetricEncryption() throws GeneralSecurityException
 	{
 		this(SymmetricEncryption.getDefaultKeyPath(),
 				SymmetricEncryption.getDefaultAlgorithm(),
@@ -122,7 +122,7 @@ public class SymmetricEncryption
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException, IOException
+	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException
 	{
 		this.securityProvider = new BouncyCastleProvider();
 		this.algorithm = algo;
@@ -285,8 +285,6 @@ public class SymmetricEncryption
 			{
 				System.out.println("Key generated: " + SymmetricEncryption.getDefaultKeyPath());
 			}
-		} catch (IOException ex) {
-			System.out.println(ex);
 		} catch (GeneralSecurityException ex) {
 			System.out.println(ex);
 		}

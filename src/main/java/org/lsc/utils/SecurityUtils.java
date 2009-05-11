@@ -70,7 +70,7 @@ public class SecurityUtils
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public static String decrypt(String value) throws GeneralSecurityException, IOException
+	public static String base64Decrypt(String value) throws GeneralSecurityException, IOException
 	{
 		SymmetricEncryption se = new SymmetricEncryption();
 		se.initialize();
@@ -84,7 +84,7 @@ public class SecurityUtils
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public static String encrypt(String value) throws GeneralSecurityException, IOException
+	public static String base64Encrypt(String value) throws GeneralSecurityException, IOException
 	{
 		SymmetricEncryption se = new SymmetricEncryption();
 		se.initialize();

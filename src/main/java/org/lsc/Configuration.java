@@ -254,8 +254,10 @@ public class Configuration {
 	 * @return Path to configuration directory
 	 */
 	public static String getConfigurationDirectory() {
+		String ret;
+		
 		if (new File(location).isDirectory()) {
-			return location;
+			ret = location;
 		}
 		
 		/* Backward compatibility: if no directory was specified,
@@ -264,7 +266,10 @@ public class Configuration {
 		 * in the classpath and use that directory.
 		 */
 		URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
-		return appendDirSeperator(new File(propertiesURL.getPath()).getParent());
+		ret = appendDirSeperator(new File(propertiesURL.getPath()).getParent());
+		
+		LOGGER.debug("Configuration directory is " + ret);
+		return ret;
 	}
 	
 	/**

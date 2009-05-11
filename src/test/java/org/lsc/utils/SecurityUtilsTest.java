@@ -92,8 +92,8 @@ public class SecurityUtilsTest extends TestCase {
 			for (int i = 0; i < 20; i++)
 				buf[i] = chars.charAt(r.nextInt(chars.length()));
 			String randomValue = new String(buf);
-			String encryptedValue = SecurityUtils.encrypt(randomValue);
-			String decryptedValue = SecurityUtils.decrypt(encryptedValue);
+			String encryptedValue = SecurityUtils.base64Encrypt(randomValue);
+			String decryptedValue = SecurityUtils.base64Decrypt(encryptedValue);
 			assertTrue(randomValue.equals(decryptedValue));
 		}
 		catch (GeneralSecurityException ex)

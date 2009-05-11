@@ -125,6 +125,11 @@ public class JndiServicesTest extends TestCase {
         try {
             assertEquals(test2list, JndiServices.getDstInstance().getDnList("",
                     JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE));
+            
+            test2list = new ArrayList<String>();
+            test2list.add("uid=00000001,ou=People");
+            assertEquals(test2list, JndiServices.getDstInstance().getDnList("ou=People",
+                    "objectclass=person", SearchControls.SUBTREE_SCOPE));
         } catch (NamingException ne) {
             System.err.println(ne);
             assertNotNull(null);

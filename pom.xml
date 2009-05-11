@@ -222,6 +222,24 @@
 		</extensions>
 	</build>
 	<profiles>
+		<profile>
+			<id>jdk15</id>
+			<activation>
+				<jdk>1.5</jdk>
+			</activation>
+			<properties>
+				<jdk-version>jdk15</jdk-version>
+			</properties>
+		</profile>
+		<profile>
+			<id>jdk16</id>
+			<activation>
+				<jdk>1.6</jdk>
+			</activation>
+			<properties>
+				<jdk-version>jdk16</jdk-version>
+			</properties>
+		</profile>
 	</profiles>
 	<repositories>
 		<repository>
@@ -341,17 +359,11 @@
 			<version>3.2.23</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- Bouncycastle dependencies -->
-        <dependency>
-            <groupId>bouncycastle</groupId>
-            <artifactId>bcprov-jdk15</artifactId>
-            <version>140</version>
-        </dependency>
-        <dependency>
-            <groupId>bouncycastle</groupId>
-            <artifactId>bcprov-jdk16</artifactId>
-            <version>140</version>
-        </dependency>
+		<dependency>
+			<groupId>bouncycastle</groupId>
+			<artifactId>bcprov</artifactId>
+			<version>${jdk-version}-140</version>
+		</dependency>
 	</dependencies>
 	<reporting>
 		<outputDirectory>${basedir}/target/site</outputDirectory>

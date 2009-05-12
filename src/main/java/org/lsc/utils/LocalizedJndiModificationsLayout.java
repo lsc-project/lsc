@@ -154,6 +154,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	            default:
 	            }
 	            
+	            msgBuffer.append("\n");	            
 	            msg = msgBuffer.toString();
             }
         }

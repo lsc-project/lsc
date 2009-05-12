@@ -93,7 +93,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\n\n", layout.format(loggingEvent));
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n-\nreplace: sn\nsn:: Tm9tIGFjY2VudHXDqQ==\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n-\nreplace: sn\nsn:: Tm9tIGFjY2VudHXDqQ==\n\n", layout.format(loggingEvent));
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n", layout.format(loggingEvent));
+		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n", layout.format(loggingEvent));
 	}
 
 	/**

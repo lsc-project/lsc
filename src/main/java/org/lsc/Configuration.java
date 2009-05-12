@@ -50,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -269,7 +270,17 @@ public class Configuration {
 				throw new ExceptionInInitializerError("No configuration file found!");
 			}
 			
-			ret = appendDirSeperator(new File(propertiesURL.getPath()).getParent());
+			try
+			{
+				// convert the URL to a URI to reverse any character encoding (" " -> "%20" for example)
+				ret = appendDirSeperator(new File(propertiesURL.toURI().getPath()).getParent());
+			}
+			catch (URISyntaxException e)
+			{
+				String errorMessage = "Could not understand where the configuration is! Try using -f option.";
+				LOGGER.fatal(errorMessage);
+				throw new ExceptionInInitializerError(errorMessage);
+			}
 		}
 		LOGGER.debug("Configuration directory is " + ret);
 		return ret;

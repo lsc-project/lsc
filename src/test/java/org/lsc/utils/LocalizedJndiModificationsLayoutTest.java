@@ -66,91 +66,88 @@ import org.lsc.utils.LocalizedJndiModificationsLayout;
 
 /**
  * Provide a complete test.
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LocalizedJndiModificationsLayoutTest extends TestCase {
+public class LocalizedJndiModificationsLayoutTest extends TestCase
+{
 
-    /**
-     * Launch a add entry layout test.
-     * @throws IOException 
-     */
-    public final void testAdd() throws IOException {
-        List<ModificationItem> mi = new ArrayList<ModificationItem>();
-        mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, 
-                new BasicAttribute("cn", "name")));
+	/**
+	 * Launch a add entry layout test.
+	 * 
+	 * @throws IOException
+	 */
+	public final void testAdd() throws IOException
+	{
+		List<ModificationItem> mi = new ArrayList<ModificationItem>();
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
 
-        JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
-        jm.setDistinguishName("");
-        jm.setModificationItems(mi);
+		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("");
+		jm.setModificationItems(mi);
 
-        LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
-                Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
 
-        LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-        layout.setConversionPattern("%m%n");
-        I18n.setLocale(Locale.US);
-        assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\n", 
-                layout.format(loggingEvent));
-    }
+		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		layout.setConversionPattern("%m%n");
+		I18n.setLocale(Locale.US);
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\n", layout.format(loggingEvent));
+	}
 
-    /**
-     * Launch a modify entry layout test.
-     * @throws IOException 
-     */
-    public final void testModify() throws IOException {
-        List<ModificationItem> mi = new ArrayList<ModificationItem>();
-        mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, 
-                new BasicAttribute("cn", "new_name")));
-        mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, 
-                new BasicAttribute("uid", "old_id")));
+	/**
+	 * Launch a modify entry layout test.
+	 * 
+	 * @throws IOException
+	 */
+	public final void testModify() throws IOException
+	{
+		List<ModificationItem> mi = new ArrayList<ModificationItem>();
+		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
+		mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute("uid", "old_id")));
 
-        JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
-        jm.setDistinguishName("");
-        jm.setModificationItems(mi);
+		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+		jm.setDistinguishName("");
+		jm.setModificationItems(mi);
 
-        LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
-                Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
 
-        LocalizedJndiModificationsLayout layout = 
-            new LocalizedJndiModificationsLayout();
-        layout.setConversionPattern("%m%n");
-        I18n.setLocale(Locale.US);
-        assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n", 
-                layout.format(loggingEvent));
-    }
+		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		layout.setConversionPattern("%m%n");
+		I18n.setLocale(Locale.US);
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n", layout.format(loggingEvent));
+	}
 
-    /**
-     * Launch a remove entry layout test.
-     * @throws IOException 
-     */
-    public final void testRemove() throws IOException {
-        //	List<ModificationItem> mi = new ArrayList<ModificationItem>();
-        JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
-        jm.setDistinguishName("uid=a");
+	/**
+	 * Launch a remove entry layout test.
+	 * 
+	 * @throws IOException
+	 */
+	public final void testRemove() throws IOException
+	{
+		// List<ModificationItem> mi = new ArrayList<ModificationItem>();
+		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
+		jm.setDistinguishName("uid=a");
 
-        LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
-                Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
 
-        LocalizedJndiModificationsLayout layout = 
-            new LocalizedJndiModificationsLayout();
-        layout.setConversionPattern("%m%n");
-        I18n.setLocale(Locale.US);
-        assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n", 
-                layout.format(loggingEvent));
-    }
+		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		layout.setConversionPattern("%m%n");
+		I18n.setLocale(Locale.US);
+		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n", layout.format(loggingEvent));
+	}
 
-    /**
-     * Launch a neutral layout test.
-     * @throws IOException 
-     */
-    public final void testNeutral() throws IOException {
-        LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
-                Logger.getLogger(""), Level.INFO, "a simple string", null);
+	/**
+	 * Launch a neutral layout test.
+	 * 
+	 * @throws IOException
+	 */
+	public final void testNeutral() throws IOException
+	{
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, "a simple string", null);
 
-        LocalizedJndiModificationsLayout layout = 
-            new LocalizedJndiModificationsLayout();
-        layout.setConversionPattern("%m%n");
-        I18n.setLocale(Locale.US);
-        assertEquals("a simple string\n", layout.format(loggingEvent));
-    }
+		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		layout.setConversionPattern("%m%n");
+		I18n.setLocale(Locale.US);
+		assertEquals("a simple string\n", layout.format(loggingEvent));
+	}
 }

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
 import javax.naming.NamingEnumeration;
@@ -490,8 +491,9 @@ public final class JndiServices {
      * 
      * @param jm modifications to apply
      * @return operation status
+     * @throws CommunicationException If the connection to the directory is lost
      */
-    public boolean apply(final JndiModifications jm) {
+    public boolean apply(final JndiModifications jm) throws CommunicationException {
         if (jm==null) return true;
         try {
             switch (jm.getOperation()) {
@@ -533,6 +535,9 @@ public final class JndiServices {
         	LOGGER.error("Object " + jm.getDistinguishName() + " not deleted because it has children (LDAP error code 66 received)."
         			+ " To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true");
         	return false;
+        } catch (CommunicationException e) {
+            // we lost the connection to the source or destination, stop everything!
+        	throw e;
         } catch (NamingException ne) {
             LOGGER.error("Error while modifying directory on entry "
                     + jm.getDistinguishName() + " / "

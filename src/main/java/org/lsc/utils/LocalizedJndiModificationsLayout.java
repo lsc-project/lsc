@@ -59,6 +59,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.ldap.LdapName;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
@@ -113,6 +114,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
             JndiModifications jm = (JndiModifications) message;
 
             if(operations.contains(jm.getOperation())) {
+            	StringBuffer msgBuffer = new StringBuffer();
 	            String baseUrl = (String) Configuration.getDstProperties().get(
 	            "java.naming.provider.url");
 	            baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
@@ -127,29 +129,32 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	                dn = baseUrl;
 	            }
 	            
+	            // print dn and base64 encode if it's not a SAFE-STRING
+	            msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
+	            
 	            switch (jm.getOperation()) {
 	            case ADD_ENTRY:
-	                msg = I18n.getMessage(this, "ADD_ENTRY", new Object[] { dn, listToLdif(jm.getModificationItems(), true) });
+	            	msgBuffer.append("changetype: add\n" + listToLdif(jm.getModificationItems(), true));
 	                break;
 	            case MODRDN_ENTRY:
 	                LdapName ln;
 	                try {
 	                    ln = new LdapName(jm.getNewDistinguishName());
-	                    msg = I18n.getMessage(this, "MODRDN_ENTRY", new Object[] { dn, ln.get(0), ln.getSuffix(1) });
+	                    msgBuffer.append("changetype: modrdn\nnewrdn: " + ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " + ln.getSuffix(1) + "\n");
 	                } catch (InvalidNameException e) {
-	                    msg = I18n.getMessage(this, "MODRDN_ENTRY", new Object[] {
-	                            dn, jm.getNewDistinguishName(),
-	                            jm.getNewDistinguishName() + "," + baseUrl });
+	                	msgBuffer.append("changetype: modrdn\nnewrdn: " + jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " + jm.getNewDistinguishName() + "," + baseUrl + "\n");
 	                }
 	                break;
 	            case MODIFY_ENTRY:
-	                msg = I18n.getMessage(this, "MODIFY_ENTRY", new Object[] { dn, listToLdif(jm.getModificationItems(), false) });
+	            	msgBuffer.append("changetype: modify\n" + listToLdif(jm.getModificationItems(), false));
 	                break;
 	            case DELETE_ENTRY:
-	                msg = I18n.getMessage(this, "REMOVE_ENTRY", new Object[] { dn });
+	            	msgBuffer.append("changetype: delete\n");
 	                break;
 	            default:
 	            }
+	            
+	            msg = msgBuffer.toString();
             }
         }
         return msg;
@@ -192,9 +197,17 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
                 }
                 NamingEnumeration<?> ne = attr.getAll();
                 while (ne.hasMore()) {
-                    Object value = ne.next();
-                    sb.append(attr.getID()).append(": ").append(value).append("\n");
-                }
+					// print attribute name
+					sb.append(attr.getID());
+
+					// print value and base64 encode it if it's not a
+					// SAFE-STRING per RFC2849
+					String value = ne.next().toString();
+					sb.append((isLdifSafeString(value) ? ": " + value : ":: " + toBase64(value)));
+
+					// new line
+					sb.append("\n");
+				}
             } catch (NamingException e) {
                 sb.append(attr.getID()).append(": ").append("!!! Unable to print value !!!\n");
             }
@@ -203,6 +216,129 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
         return sb.toString();
     }
 
+	private String toBase64(String value)
+	{
+		return new String(new Base64().encode(value.getBytes()));
+	}
+
+	/**
+	 * <P>
+	 * Test if a character is a SAFE-CHAR in a SAFE-STRING for LDIF attribute
+	 * value format, as defined in RFC2849. This method should not be used for
+	 * the first character of a string, see isLdifSafeInitChar(char c).
+	 * </P>
+	 * <P>
+	 * In detail, this checks that the character is:
+	 * <ul>
+	 * <li>Less than or equal to ASCII 127 decimal character</li>
+	 * <li>Not NUL</li>
+	 * <li>Not LF</li>
+	 * <li>Not CR</li>
+	 * </ul>
+	 * </P>
+	 * 
+	 * @param c
+	 *            The character to test
+	 * @return true if char is a SAFE-CHAR, false otherwise
+	 */
+	private boolean isLdifSafeChar(char c)
+	{
+		if ((int) c > 127)
+		{
+			return false;
+		}
+		switch ((int) c)
+		{
+			case 0x00: // NUL
+			case 0x0A: // LF
+			case 0x0D: // CR
+				return false;
+			default:
+				return true;
+		}
+	}
+
+	/**
+	 * <P>
+	 * Test if a character is a SAFE-INIT-CHAR for a SAFE-STRING for LDIF
+	 * attribute value format, as defined in RFC2849. This method should only be
+	 * used for the first character of a string, see isLdifSafeChar(char c).
+	 * </P>
+	 * <P>
+	 * In detail, this checks that the character is:
+	 * <ul>
+	 * <li>Less than or equal to ASCII 127 decimal character</li>
+	 * <li>Not NUL</li>
+	 * <li>Not LF</li>
+	 * <li>Not CR</li>
+	 * <li>Not SPACE</li>
+	 * <li>Not colon ":"</li>
+	 * <li>Not less-than "<"</li>
+	 * </ul>
+	 * </P>
+	 * 
+	 * @param c
+	 *            The character to test
+	 * @return true if char is SAFE-INIT-CHAR, false otherwise
+	 */
+	private boolean isLdifSafeInitChar(char c)
+	{
+		if ((int) c > 127)
+		{
+			return false;
+		}
+		switch ((int) c)
+		{
+			case 0x00: // NUL
+			case 0x0A: // LF
+			case 0x0D: // CR
+			case 0x20: // SPACE
+			case 0x3A: // colon ":"
+			case 0x3C: // less-than "<"
+				return false;
+			default:
+				return true;
+		}
+	}
+
+	/**
+	 * <P>
+	 * Test if a string is a valid SAFE-STRING for LDIF attribute value format,
+	 * as defined in RFC2849.
+	 * </P>
+	 * <P>
+	 * In detail, this checks that:
+	 * <ul>
+	 * <li>The string's first character is a safe init char</li>
+	 * <li>The string's subsequent characters are a safe chars</li>
+	 * </ul>
+	 * </P>
+	 * 
+	 * @param s
+	 *            The string to test
+	 * @return true if is a SAFE-STRING, false otherwise
+	 */
+	private boolean isLdifSafeString(String s)
+	{
+		// check if first character is a SAFE-INIT-CHAR
+		if (!isLdifSafeInitChar(s.charAt(0)))
+		{
+			return false;
+		}
+
+		// fail if any subsequent characters are not SAFE-CHARs
+		for (int i = 1; i < s.length(); i++)
+		{
+			if (!isLdifSafeChar(s.charAt(i)))
+			{
+				return false;
+			}
+		}
+
+		// if we got here, there are no bad chars
+		return true;
+	}
+    
     /**
      * Parse options
      * 

@@ -81,6 +81,8 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	{
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("sn", "<non safe string>")));
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Sébastien")));
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
 		jm.setDistinguishName("");
@@ -91,7 +93,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\n", layout.format(loggingEvent));
 	}
 
 	/**
@@ -104,6 +106,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
 		mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute("uid", "old_id")));
+		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("sn", "Nom accentué")));
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
 		jm.setDistinguishName("");
@@ -114,7 +117,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n-\nreplace: sn\nsn:: Tm9tIGFjY2VudHXDqQ==\n", layout.format(loggingEvent));
 	}
 
 	/**

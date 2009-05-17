@@ -61,7 +61,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
@@ -232,7 +231,7 @@ public abstract class AbstractSynchronize {
                     // if "nodelete" was specified in command line options,
                     // or if the condition is false,
                     // log action for debugging purposes and forget
-                    if (nodelete || !doDelete) {
+                    if (jm != null & (nodelete || !doDelete)) {
                         logShouldAction(jm, id, syncName);
                         jm = null;
                     }

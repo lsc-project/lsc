@@ -285,7 +285,7 @@
 Ldap Synchronization Connector Buildfile
 
 As an end user, you might not waste your time here. To create new synchronization tasks, download and use
-the lsc-sample project directory.
+the lsc-sample project directory from http://tools.lsc-project.org/files.
 
 But if you want to improve the LSC software, you are in the good place :).
 		</echo>

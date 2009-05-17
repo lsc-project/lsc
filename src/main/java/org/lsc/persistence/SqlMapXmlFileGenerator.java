@@ -48,7 +48,6 @@ package org.lsc.persistence;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URI;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;

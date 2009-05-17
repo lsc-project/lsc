@@ -54,7 +54,6 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.lsc.Configuration;

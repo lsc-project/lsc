@@ -45,12 +45,6 @@
  */
 package org.lsc.utils.directory;
 
-import java.text.ParseException;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import org.lsc.utils.directory.AD;
-
 import junit.framework.TestCase;
 
 /**

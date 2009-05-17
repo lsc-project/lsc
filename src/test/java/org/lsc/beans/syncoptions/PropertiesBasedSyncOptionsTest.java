@@ -48,13 +48,10 @@ package org.lsc.beans.syncoptions;
 import java.util.Iterator;
 import java.util.List;
 
-import org.lsc.beans.syncoptions.ISyncOptions;
-import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
-import org.lsc.jndi.JndiServices;
+import junit.framework.TestCase;
+
 import org.lsc.utils.JScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
-
-import junit.framework.TestCase;
 
 public class PropertiesBasedSyncOptionsTest extends TestCase {
 

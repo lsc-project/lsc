@@ -64,8 +64,6 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import com.ibatis.sqlmap.client.SqlMapClientBuilder;
-
 /**
  * Ldap Synchronization Connector Configuration.
  * 

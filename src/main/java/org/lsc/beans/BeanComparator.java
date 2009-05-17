@@ -93,20 +93,20 @@ public final class BeanComparator {
      * Static method to return the kind of operation that would happen
      * 
      * @param syncOptions SyncOptions object from properties
-     * @param srcBean JDBC bean
+     * @param itmBean Modified bean from source
      * @param destBean JNDI bean
      * @return JndiModificationType the modification type that would happen
      */
-    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean destBean) {
-    	if (srcBean == null && destBean == null) {
+    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean itmBean, IBean destBean) {
+    	if (itmBean == null && destBean == null) {
     		return null;
-    	} else if (srcBean == null && destBean != null) {
+    	} else if (itmBean == null && destBean != null) {
     		return JndiModificationType.DELETE_ENTRY;
-    	} else if (srcBean != null && destBean == null) {
+    	} else if (itmBean != null && destBean == null) {
     		return JndiModificationType.ADD_ENTRY;
     	} else { /* srcBean != null && destBean != null */
-    		if (srcBean.getDistinguishName() == null
-    				|| destBean.getDistinguishName().compareToIgnoreCase(srcBean.getDistinguishName()) == 0) {
+    		if (itmBean.getDistinguishName() == null
+    				|| destBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
     			return JndiModificationType.MODIFY_ENTRY;
     		} else {
     			return JndiModificationType.MODRDN_ENTRY;
@@ -121,14 +121,24 @@ public final class BeanComparator {
      * (i.e. Database => Directory) But if a piece of information is
      * present only in the destination, it remains
      * 
-     * @param srcBean JDBC bean
+     * @param srcBean Source bean from JDBC or JNDI
      * @param destBean JNDI bean
      * @return modifications to apply to the directory
      * @throws NamingException an exception may be thrown if an LDAP data
      * access error is encountered
      */
     public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
-            Object customLibrary)	throws NamingException {
+            Object customLibrary)	throws NamingException, CloneNotSupportedException {
+
+		//
+		// We clone the source object, because syncoptions should not be used
+		// on modified values of the source object :)
+		//
+		IBean itmBean = null;
+		if (srcBean != null)
+		{
+			itmBean = srcBean.clone();
+		}
 
         JndiModifications jm = null;
 
@@ -139,11 +149,11 @@ public final class BeanComparator {
             if(customLibrary != null) {
                 table.put("custom", customLibrary);
             }
-            srcBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
+            itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
         }
         
         // get modification type to perform
-        JndiModificationType modificationType = calculateModificationType(syncOptions, srcBean, destBean);
+        JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, destBean);
         if (modificationType==JndiModificationType.DELETE_ENTRY)
         {
         	jm = new JndiModifications(modificationType, syncOptions.getTaskName());
@@ -152,18 +162,18 @@ public final class BeanComparator {
         }
         else if (modificationType==JndiModificationType.ADD_ENTRY) 
         {
-        	jm = getAddEntry(syncOptions, srcBean, customLibrary);
+        	jm = getAddEntry(syncOptions, srcBean, itmBean, customLibrary);
         }
         else if (modificationType==JndiModificationType.MODIFY_ENTRY)
         {
-        	jm = getModifyEntry(syncOptions, srcBean, destBean, customLibrary);
+        	jm = getModifyEntry(syncOptions, srcBean, itmBean, destBean, customLibrary);
         }
         else if (modificationType==JndiModificationType.MODRDN_ENTRY)
         {
         	//WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update
         	jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY, syncOptions.getTaskName());
         	jm.setDistinguishName(destBean.getDistinguishName());
-        	jm.setNewDistinguishName(srcBean.getDistinguishName());
+        	jm.setNewDistinguishName(itmBean.getDistinguishName());
         }
 
         if (jm.getOperation() == JndiModificationType.MODRDN_ENTRY
@@ -174,8 +184,8 @@ public final class BeanComparator {
         }
     }
 
-    private static JndiModifications getModifyEntry(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
-            Object customLibrary) throws NamingException {
+    private static JndiModifications getModifyEntry(ISyncOptions syncOptions, IBean srcBean, IBean itmBean, IBean destBean, 
+            Object customLibrary) throws NamingException, CloneNotSupportedException {
 
         JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY, syncOptions.getTaskName());
         jm.setDistinguishName(destBean.getDistinguishName());
@@ -201,7 +211,7 @@ public final class BeanComparator {
 
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String> forceValues = syncOptions.getForceValues(srcBean.getDistinguishName(), attrName);
+                    List<String> forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
                     if ( forceValues != null ) {
                         Attribute forceAttribute = new BasicAttribute(attrName);
                         Iterator<String> forceValuesIt = forceValues.iterator();
@@ -213,7 +223,7 @@ public final class BeanComparator {
                                 forceAttribute.add(valuesIt.next());
                             }
                         }
-                        srcBean.setAttribute(forceAttribute);
+                        itmBean.setAttribute(forceAttribute);
                     }
                 }
             }
@@ -229,8 +239,8 @@ public final class BeanComparator {
 
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String> defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(), attrName);
-                    if ( defaultValues != null && srcBean.getAttributeById(attrName) == null ) {
+                    List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(), attrName);
+                    if ( defaultValues != null && itmBean.getAttributeById(attrName) == null ) {
                         Attribute defaultAttribute = new BasicAttribute(attrName);
                         List<String> defaultValuesModified = new ArrayList<String>();
                         Iterator<String> defaultValuesIt = defaultValues.iterator();
@@ -243,13 +253,13 @@ public final class BeanComparator {
                             defaultAttribute.add(defaultValuesModifiedIter.next());
                         }
 
-                        srcBean.setAttribute(defaultAttribute);
+                        itmBean.setAttribute(defaultAttribute);
                     }
                 }
             }
         }
 
-        Iterator<String> srcBeanAttrsNameIter = srcBean.getAttributesNames().iterator();
+        Iterator<String> srcBeanAttrsNameIter = itmBean.getAttributesNames().iterator();
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
         while (srcBeanAttrsNameIter.hasNext()) {
             String srcAttrName = srcBeanAttrsNameIter.next();
@@ -258,7 +268,7 @@ public final class BeanComparator {
             if(writeAttributes == null || writeAttributes.contains(srcAttrName)) {
 
                 ModificationItem mi = null;
-                Attribute srcAttr = srcBean.getAttributeById(srcAttrName);
+                Attribute srcAttr = itmBean.getAttributeById(srcAttrName);
                 Attribute destAttr = destBean.getAttributeById(srcAttrName);
                 table.put("srcAttr", srcAttr);
                 table.put("dstAttr", destAttr);
@@ -272,7 +282,7 @@ public final class BeanComparator {
                 }
 
                 // Manage default values
-                List<String> defaultValues = syncOptions.getDefaultValues(srcBean.getDistinguishName(),	srcAttrName);
+                List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(),	srcAttrName);
                 List<String> defaultValuesModified = new ArrayList<String>();
                 if (defaultValues != null) {
                     Iterator<String> defaultValuesIt = defaultValues.iterator();
@@ -283,7 +293,7 @@ public final class BeanComparator {
                 }
 
                 if (defaultValuesModified.size() > 0 &&
-                        (syncOptions.getStatus(srcBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE ||
+                        (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE ||
                                 (srcAttr == null || srcAttr.size() == 0) )) {
                     Iterator<String> defaultValuesIter = defaultValuesModified.iterator();
                     while(defaultValuesIter.hasNext()) {
@@ -294,7 +304,7 @@ public final class BeanComparator {
                     }
                 }
 
-                if (syncOptions.getStatus(srcBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.FORCE) {
+                if (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.FORCE) {
                     if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr != null && destAttr.size() > 0 ) ) {
                         LOGGER.debug("Deleting attribute  \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");
@@ -308,7 +318,7 @@ public final class BeanComparator {
                         // - FORCE action is used;
                         // - A value is specified by the create_value parameter.
                         // So, instead of add the attribute, we replace it.
-                        mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, srcBean.getAttributeById(srcAttrName));
+                        mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, itmBean.getAttributeById(srcAttrName));
                     } else if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr == null || destAttr.size() == 0 ) ) {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");
@@ -319,14 +329,14 @@ public final class BeanComparator {
                     if (mi != null) {
                         modificationItems.add(mi);
                     }
-                } else if (syncOptions.getStatus(srcBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE) {
+                } else if (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE) {
                     if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr != null && destAttr.size() > 0 ) ) {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");
                     } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 ) ) {
                         LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");
-                        mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, srcBean.getAttributeById(srcAttrName));
+                        mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, itmBean.getAttributeById(srcAttrName));
                     } else if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr == null || destAttr.size() == 0 ) ) {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");
@@ -353,7 +363,7 @@ public final class BeanComparator {
         return jm;
     }
 
-    private static JndiModifications getAddEntry(ISyncOptions syncOptions, IBean srcJdbcBean, Object customLibrary) throws NamingException {
+    private static JndiModifications getAddEntry(ISyncOptions syncOptions, IBean srcJdbcBean, IBean itmBean, Object customLibrary) throws NamingException, CloneNotSupportedException {
         /* table used for JScript interpretation of creation values */
         Map<String, Object> table = new HashMap<String, Object>();
         table.put("srcBean", srcJdbcBean);
@@ -363,8 +373,8 @@ public final class BeanComparator {
 
         JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY, syncOptions.getTaskName());
         
-        if (srcJdbcBean.getDistinguishName() != null) {
-            jm.setDistinguishName(srcJdbcBean.getDistinguishName());
+        if (itmBean.getDistinguishName() != null) {
+            jm.setDistinguishName(itmBean.getDistinguishName());
         } else {
         	
         	/** Hash table to pass objects into JavaScript condition */
@@ -391,10 +401,10 @@ public final class BeanComparator {
             	LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
             }
             
-            if (srcJdbcBean.getAttributeById("uid") == null || srcJdbcBean.getAttributeById("uid").size() == 0) {
+            if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
                 throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
             }
-            jm.setDistinguishName("uid=" + srcJdbcBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE);
+            jm.setDistinguishName("uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE);
         }
 
         // Force attribute values for forced attributes in syncoptions
@@ -408,7 +418,7 @@ public final class BeanComparator {
 
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String>forceValues = syncOptions.getForceValues(srcJdbcBean.getDistinguishName(), attrName);
+                    List<String>forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
                     if ( forceValues != null ) {
                         Attribute forceAttribute = new BasicAttribute(attrName);
                         Iterator<String> forceValuesIt = forceValues.iterator();
@@ -424,25 +434,25 @@ public final class BeanComparator {
                             }
                         }
 
-                        srcJdbcBean.setAttribute(forceAttribute);
+                        itmBean.setAttribute(forceAttribute);
                     }
                 }
             }
         }
 
-        Iterator<String> jdbcAttrsName = srcJdbcBean.getAttributesNames().iterator();
+        Iterator<String> jdbcAttrsName = itmBean.getAttributesNames().iterator();
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
         while (jdbcAttrsName.hasNext()) {
             String jdbcAttrName = jdbcAttrsName.next();
 
             /* We do something only if we have to write */
             if(writeAttributes == null || writeAttributes.contains(jdbcAttrName)) {
-                Attribute srcJdbcAttribute = srcJdbcBean.getAttributeById(jdbcAttrName);
-                List<String> createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), srcJdbcAttribute.getID());
+                Attribute srcJdbcAttribute = itmBean.getAttributeById(jdbcAttrName);
+                List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), srcJdbcAttribute.getID());
 
                 if ( ( createValues != null ) 
                         && (srcJdbcAttribute.getAll() == null || !srcJdbcAttribute.getAll().hasMore() ||
-                                syncOptions.getStatus(srcJdbcBean.getDistinguishName(), jdbcAttrName)==STATUS_TYPE.MERGE)) {
+                                syncOptions.getStatus(itmBean.getDistinguishName(), jdbcAttrName)==STATUS_TYPE.MERGE)) {
                     // interpret JScript in createValue
                     table.put("srcAttr", srcJdbcAttribute);
                     List<String> createValuesModified = new ArrayList<String>();
@@ -470,8 +480,8 @@ public final class BeanComparator {
             Iterator<String> createAttrsNameIt = createAttrsNameSet.iterator();
             while (createAttrsNameIt.hasNext()) {
                 String attrName = (String) createAttrsNameIt.next();
-                List<String> createValues = syncOptions.getCreateValues(srcJdbcBean.getDistinguishName(), attrName);
-                if ( createValues != null && srcJdbcBean.getAttributeById(attrName) == null ) {
+                List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), attrName);
+                if ( createValues != null && itmBean.getAttributeById(attrName) == null ) {
                     Attribute createdAttribute = new BasicAttribute(attrName);
                     List<String> createValuesModified = new ArrayList<String>();
                     Iterator<String> createValuesIt = createValues.iterator();

@@ -58,7 +58,7 @@ import javax.naming.directory.Attribute;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public interface IBean extends Serializable {
+public interface IBean extends Cloneable, Serializable {
 
     /**
          * Get an attribute from its name.
@@ -108,4 +108,11 @@ public interface IBean extends Serializable {
          *                 generating the new distinguish name
          */
     void generateDn() throws NamingException;
+
+	/**
+	 * Clone this object.
+	 * @return Object
+	 */
+	IBean clone() throws CloneNotSupportedException;
+
 }

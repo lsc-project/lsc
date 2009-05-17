@@ -543,4 +543,36 @@ public abstract class AbstractBean implements IBean {
     public static final void setLocalMethods(Map<String, List<Method>> localMethods) {
         AbstractBean.localMethods = localMethods;
     }
+
+	/**
+	 * Clone this AbstractBean object.
+	 * @return Object
+	 * @throws java.lang.CloneNotSupportedException
+	 */
+	@Override
+	public AbstractBean clone() throws CloneNotSupportedException
+	{
+		try
+		{
+			AbstractBean bean = (AbstractBean) this.getClass().newInstance();
+			bean.setDistinguishName(this.getDistinguishName());
+			Iterator<String> attributesIt = this.getAttributesNames().iterator();
+
+			while (attributesIt.hasNext())
+			{
+				String attributeName = attributesIt.next();
+				bean.setAttribute((Attribute) this.getAttributeById(attributeName).clone());
+			}
+			return bean;
+		}
+		catch (InstantiationException ex)
+		{
+			throw new CloneNotSupportedException(ex.getLocalizedMessage());
+		}
+		catch (IllegalAccessException ex)
+		{
+			throw new CloneNotSupportedException(ex.getLocalizedMessage());
+		}
+	}
+
 }

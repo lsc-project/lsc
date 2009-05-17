@@ -198,6 +198,19 @@ public class SimpleSynchronize extends AbstractSynchronize {
     }
     
 
+    private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
+    	String value = props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
+    	
+    	if (value == null)
+    	{
+    		String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
+    		LOGGER.fatal(errorMessage);
+    		throw new ExceptionInInitializerError(errorMessage);
+    	}
+    	
+    	return value;
+    }
+    
     /**
      * Launch a task. Call this for once each task type and task mode.
      * 
@@ -219,13 +232,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
             String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 
             // Get all properties
-            String objectClassName = lscProperties.getProperty(prefix + OBJECT_PROPS_PREFIX);
-            String beanClassName = lscProperties.getProperty(prefix + BEAN_PROPS_PREFIX);
-            Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
-            String srcServiceClass = lscProperties.getProperty(prefix + SRCSERVICE_PROPS_PREFIX);
-            String dstServiceClass = lscProperties.getProperty(prefix + DSTSERVICE_PROPS_PREFIX);
+            // TODO : nice error message if a class name is specified but doesn't exist
+            String objectClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, OBJECT_PROPS_PREFIX);
+            String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
+            String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
+            String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
 
             // Instantiate the destination service from properties
+            Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
             Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[] { Properties.class, String.class });
             IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[] { dstServiceProperties, beanClassName });
             

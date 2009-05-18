@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
+import javax.naming.ServiceUnavailableException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -224,27 +225,26 @@ public abstract class AbstractSynchronize {
                     if (doDelete || nodelete) {
                         jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
                         jm.setDistinguishName(id.getKey());
-                    } else {
-                    	jm = null;
-                    }
-                    
-                    // if "nodelete" was specified in command line options,
-                    // or if the condition is false,
-                    // log action for debugging purposes and forget
-                    if (jm != null & (nodelete || !doDelete)) {
-                        logShouldAction(jm, id, syncName);
-                        jm = null;
-                    }
-                    
-                    if (jm != null) {
-                        countInitiated++;
-                        if (JndiServices.getDstInstance().apply(jm)) {
-                            countCompleted++;
-                            logAction(jm, id, syncName);
-                        } else {
-                            countError++;
-                            logActionError(jm, id, null);
+                        
+                        // if "nodelete" was specified in command line options,
+                        // or if the condition is false,
+                        // log action for debugging purposes and continue
+                        if (nodelete) {
+                            logShouldAction(jm, id, syncName);
+                            continue;
                         }
+                    } else {
+                    	continue;
+                    }
+                    
+                    // if we got here, we have a modification to apply - let's do it!
+                    countInitiated++;
+                    if (JndiServices.getDstInstance().apply(jm)) {
+                        countCompleted++;
+                        logAction(jm, id, syncName);
+                    } else {
+                        countError++;
+                        logActionError(jm, id, null);
                     }
                 }
             } catch (CommunicationException e) { 
@@ -396,25 +396,29 @@ public abstract class AbstractSynchronize {
                 if (applyCondition || calculateForDebugOnly) {
                 	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
                 	
+                	// if there's nothing to do, skip to the next object
+                	if (jm==null)
+                	{
+                		continue;
+                	}
+                	
                 	// apply condition is false, log action for debugging purposes and forget
                 	if (!applyCondition || calculateForDebugOnly) {
                 		logShouldAction(jm, id, syncName);
-                		jm = null;
+                		continue;
                 	}
                 } else {
-                	jm = null;
+                	continue;
                 }
 
-                // Apply any modifications to the directory
-                if (jm != null) {
-                    countInitiated++;
-                    if (JndiServices.getDstInstance().apply(jm)) {
-                        countCompleted++;
-                        logAction(jm, id, syncName);
-                    } else {
-                        countError++;
-                        logActionError(jm, id, null);
-                    }
+                // if we got here, we have a modification to apply - let's do it!
+                countInitiated++;
+                if (JndiServices.getDstInstance().apply(jm)) {
+                    countCompleted++;
+                    logAction(jm, id, syncName);
+                } else {
+                    countError++;
+                    logActionError(jm, id, null);
                 }
             } catch (CommunicationException e) { 
                 // we lost the connection to the source or destination, stop everything!
@@ -422,6 +426,11 @@ public abstract class AbstractSynchronize {
                 LOGGER.fatal("Connection lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
+            } catch (ExceptionInInitializerError e) { 
+                // this type of exception should top everything, too
+                countError++;
+                logActionError(jm, id, e);
+                throw e;
             } catch (RuntimeException e) {
                 countError++;
                 logActionError(jm, id, e);

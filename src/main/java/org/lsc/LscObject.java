@@ -65,8 +65,6 @@ public abstract class LscObject
 
 	protected List<String> objectClass = null;
 
-	protected LscAttributes attributeValues;
-
 	/**
 	 * Returns the full distinguished name of this object.
 	 * 

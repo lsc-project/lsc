@@ -48,8 +48,6 @@ package org.lsc.utils.directory;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
-import javax.naming.directory.BasicAttribute;
-import org.lsc.beans.IBean;
 
 /**
  * Utility class to manage specific entries for a Microsoft ActiveDirectory

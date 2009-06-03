@@ -308,7 +308,8 @@ public final class BeanComparator {
                     if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr != null && destAttr.size() > 0 ) ) {
                         LOGGER.debug("Deleting attribute  \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");
-                        mi = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, destBean.getAttributeById(srcAttrName));
+                        // delete all values of the attribute - to do this we must create an empty Attribute
+                        mi = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(srcAttrName));
                     } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 )) {
                         LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");

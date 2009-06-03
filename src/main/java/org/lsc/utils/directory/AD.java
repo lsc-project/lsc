@@ -45,8 +45,11 @@
  */
 package org.lsc.utils.directory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
+import javax.naming.directory.BasicAttribute;
+import org.lsc.beans.IBean;
 
 /**
  * Utility class to manage specific entries for a Microsoft ActiveDirectory
@@ -115,18 +118,11 @@ public class AD {
      * @param password The cleartext password to be encoded
      * @return The value to write in AD's unicodePwd attribute
      */
-    public static String getUnicodePwd(String password) {
+    public static String getUnicodePwd(String password) throws UnsupportedEncodingException {
     	String quotedPassword = "\"" + password + "\"";
-    	char unicodePwd[] = quotedPassword.toCharArray();
-    	byte pwdArray[] = new byte[unicodePwd.length * 2];
-    	for (int i=0; i<unicodePwd.length; i++) {
-    		pwdArray[i*2 + 1] = (byte) (unicodePwd[i] >>> 8);
-    		pwdArray[i*2 + 0] = (byte) (unicodePwd[i] & 0xff);
-    	}
-    	
-    	return new String(pwdArray);
+		return new String(quotedPassword.getBytes("UTF-16LE"));
 	}
-    
+
     /**
      * Return the number of weeks since the last logon
      * 

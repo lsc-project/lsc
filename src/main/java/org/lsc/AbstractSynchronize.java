@@ -313,7 +313,7 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
 
         JndiModifications jm = null;
-        top srcObject = null;
+        LscObject srcObject = null;
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
         // store method to obtain source bean
         Method beanGetInstanceMethod = null;
@@ -331,22 +331,20 @@ public abstract class AbstractSynchronize {
             LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id.getKey());
 
             try {
-                LscObject lscObject = srcService.getObject(id);
+                srcObject = (top) srcService.getObject(id);
 
                 /* Log an error if the source object could not be retrieved! This shouldn't happen. */
-                if(lscObject == null) {
+                if(srcObject == null) {
                     countError++;
                     LOGGER.error("Unable to get object for id=" + id.getKey());
                     continue;
                 }
 
                 // Specific JDBC - transform flat object into a normal object
-                if(fTop.class.isAssignableFrom(lscObject.getClass())) {
-                    srcObject = object.getClass().newInstance();
-                    srcObject.setUpFromObject((fTop)lscObject);
-                } else {
-                    // Specific LDAP
-                    srcObject = (top)srcService.getObject(id);
+                if (fTop.class.isAssignableFrom(srcObject.getClass())) {
+                	top normalObject = object.getClass().newInstance();
+                	normalObject.setUpFromObject((fTop)srcObject);
+                	srcObject = normalObject;
                 }
 
                 if (beanGetInstanceMethod == null) {

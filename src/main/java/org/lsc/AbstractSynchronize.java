@@ -331,7 +331,7 @@ public abstract class AbstractSynchronize {
             LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id.getKey());
 
             try {
-                srcObject = (top) srcService.getObject(id);
+                srcObject = srcService.getObject(id);
 
                 /* Log an error if the source object could not be retrieved! This shouldn't happen. */
                 if(srcObject == null) {

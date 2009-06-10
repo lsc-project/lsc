@@ -143,7 +143,7 @@ public final class BeanComparator {
         JndiModifications jm = null;
 
         String dn = syncOptions.getDn();
-        if(srcBean != null && syncOptions.getDn() != null) {
+        if(srcBean != null && dn != null) {
             Map<String, Object> table = new HashMap<String, Object>();
             table.put("srcBean", srcBean);
             if(customLibrary != null) {

@@ -126,9 +126,33 @@ public final class BeanComparator {
      * @return modifications to apply to the directory
      * @throws NamingException an exception may be thrown if an LDAP data
      * access error is encountered
+     * @deprecated
      */
     public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
             Object customLibrary)	throws NamingException, CloneNotSupportedException {
+
+    	// this method is deprecated so no need for optimizations
+    	// set condition to true, since using false is only useful for some optimizations after here
+    	boolean condition = true;
+    	return calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+    }
+    
+    /**
+     * Static comparison method.
+     * 
+     * By default, source information override destination 
+     * (i.e. Database => Directory) But if a piece of information is
+     * present only in the destination, it remains
+     * 
+     * @param srcBean Source bean from JDBC or JNDI
+     * @param destBean JNDI bean
+     * @param condition 
+     * @return modifications to apply to the directory
+     * @throws NamingException an exception may be thrown if an LDAP data
+     * access error is encountered
+     */
+    public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
+            Object customLibrary, boolean condition)	throws NamingException, CloneNotSupportedException {
 
 		//
 		// We clone the source object, because syncoptions should not be used
@@ -162,7 +186,7 @@ public final class BeanComparator {
         }
         else if (modificationType==JndiModificationType.ADD_ENTRY) 
         {
-        	jm = getAddEntry(syncOptions, srcBean, itmBean, customLibrary);
+        	jm = getAddEntry(syncOptions, srcBean, itmBean, customLibrary, condition);
         }
         else if (modificationType==JndiModificationType.MODIFY_ENTRY)
         {
@@ -364,7 +388,18 @@ public final class BeanComparator {
         return jm;
     }
 
-    private static JndiModifications getAddEntry(ISyncOptions syncOptions, IBean srcJdbcBean, IBean itmBean, Object customLibrary) throws NamingException, CloneNotSupportedException {
+    /**
+     * 
+     * @param syncOptions
+     * @param srcJdbcBean
+     * @param itmBean
+     * @param customLibrary
+     * @param condition The create condition to avoid recalculating it in the method.
+     * @return
+     * @throws NamingException
+     * @throws CloneNotSupportedException
+     */
+    private static JndiModifications getAddEntry(ISyncOptions syncOptions, IBean srcJdbcBean, IBean itmBean, Object customLibrary, boolean condition) throws NamingException, CloneNotSupportedException {
         /* table used for JScript interpretation of creation values */
         Map<String, Object> table = new HashMap<String, Object>();
         table.put("srcBean", srcJdbcBean);
@@ -376,36 +411,23 @@ public final class BeanComparator {
         
         if (itmBean.getDistinguishName() != null) {
             jm.setDistinguishName(itmBean.getDistinguishName());
-        } else {
-        	
-        	/** Hash table to pass objects into JavaScript condition */
-            Map<String, Object> conditionObjects = null;
-        	Boolean condition = null;
-            String conditionString = syncOptions.getCondition(jm.getOperation());
-
-            /* Don't use JavaScript evaluator for primitive cases */
-            if (conditionString.matches("true")) {
-            	condition = true;
-            } else if (conditionString.matches("false")) {
-            	condition = false;
-            } else {
-                conditionObjects = new HashMap<String, Object>();
-                conditionObjects.put("dstBean", null);
-                conditionObjects.put("srcBean", srcJdbcBean);
-                
-                /* Evaluate if we have to do something */
-                condition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
-            }
-            
-        	// don't complain about a missing DN if we're not really going to create the entry
+        } else {            
+            // only complain about a missing DN if we're really going to create the entry
             if (condition) {
             	LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
+
+            	if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
+                    throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
+            	}
+            	jm.setDistinguishName("uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE);
+            }
+            else
+            {
+            	// condition is false, we're not really going to create the entry
+            	// set a pseudo DN to use for display purposes
+            	jm.setDistinguishName("No DN set! Read it from the source or set lsc.tasks.NAME.dn");
             }
             
-            if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
-                throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
-            }
-            jm.setDistinguishName("uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE);
         }
 
         // Force attribute values for forced attributes in syncoptions

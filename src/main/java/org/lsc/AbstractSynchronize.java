@@ -392,7 +392,7 @@ public abstract class AbstractSynchronize {
                 		|| (modificationType==JndiModificationType.MODRDN_ENTRY && (nomodrdn || noupdate));
                 
                 if (applyCondition || calculateForDebugOnly) {
-                	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary);
+                	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
                 	
                 	// if there's nothing to do, skip to the next object
                 	if (jm==null)

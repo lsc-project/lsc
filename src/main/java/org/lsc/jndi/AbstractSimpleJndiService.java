@@ -162,6 +162,10 @@ public abstract class AbstractSimpleJndiService {
 		if (sr == null)
 			return null;
 
+		// get dn
+		objToFill.setDistinguishName(sr.getNameInNamespace());
+		
+		// get attributes
 		for (int i = 0; i < methods.length; i++) {
 			localMethods.put(methods[i].getName(), methods[i]);
 		}

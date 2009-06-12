@@ -84,6 +84,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
     /** When nothing else is available, use the default status */
     private STATUS_TYPE defaultStatus;
+    
+    /** Default separator is ";" */
+    private String defaultDelimiter = ";";
 
     private static Logger LOGGER = Logger.getLogger(PropertiesBasedSyncOptions.class);
     
@@ -138,7 +141,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                     status.put(attributeName.toLowerCase(), st);
                 }
             } else if (typeName.equalsIgnoreCase("default_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
+                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
                 StringTokenizer st = new StringTokenizer(value, delimiter);
                 List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
@@ -148,7 +151,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 /* TODO: don't wipe out existing createValue */
                 createValues.put(attributeName.toLowerCase(), values);
             } else if (typeName.equalsIgnoreCase("create_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
+                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
                 StringTokenizer st = new StringTokenizer(value, delimiter);
                 List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
@@ -156,7 +159,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 }
                 createValues.put(attributeName.toLowerCase(), values);
             } else if (typeName.equalsIgnoreCase("force_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : ";";
+                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
                 StringTokenizer st = new StringTokenizer(value, delimiter);
                 List<String> values = new ArrayList<String>();
                 for (int i = 0; st.hasMoreTokens(); i++) {
@@ -164,7 +167,11 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 }
                 forceValues.put(attributeName.toLowerCase(), values);
             } else if (typeName.equalsIgnoreCase("delimiter")) {
-                delimiters.put(attributeName.toLowerCase(), value);
+                if(attributeName.equalsIgnoreCase("default")) {
+                    defaultDelimiter = value;
+                } else {
+                	delimiters.put(attributeName.toLowerCase(), value);
+                }               
             } else {
                 LOGGER.error("Unable to identify attribute option \"" + typeName + "\" in this name : lsc." + syncName
                         + "." + key + " ! Bypassing ...");

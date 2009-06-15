@@ -149,8 +149,8 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, "a simple string", null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m%n");
+		layout.setConversionPattern("%m");
 		I18n.setLocale(Locale.US);
-		assertEquals("a simple string\n", layout.format(loggingEvent));
+		assertEquals("a simple string", layout.format(loggingEvent));
 	}
 }

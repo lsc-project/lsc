@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +111,9 @@ public final class EmbeddedOpenDS {
      * Initialize the server. We completely override the super class server set up.
      * @throws IOException 
      * @throws InitializationException 
+     * @throws URISyntaxException 
      */
-    public static void startServer() throws IOException, InitializationException {
+    public static void startServer() throws IOException, InitializationException, URISyntaxException {
         if (SERVER_STARTED) {
             return;
         }
@@ -121,7 +123,7 @@ public final class EmbeddedOpenDS {
         URL configUrl = EmbeddedOpenDS.class.getResource(CONFIG_DIR);
         String conf = null;
         if (configUrl != null) {
-            conf = configUrl.getFile();
+            conf = configUrl.toURI().getPath();
         }
         if (configUrl == null || conf == null || "".equals(conf)) {
             throw new RuntimeException("The config directory template " + conf + "(from " + configUrl + ") has not been found");

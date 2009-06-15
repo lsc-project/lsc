@@ -46,6 +46,7 @@
 package org.lsc.utils;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -75,14 +76,14 @@ public class LdapServer {
 	/** The local logger */
 	private static Logger LOGGER = Logger.getLogger(LdapServer.class);
 	
-	public final static void start() throws InitializationException, IOException, DirectoryException, LDIFException, CancelledOperationException {
+	public final static void start() throws InitializationException, IOException, DirectoryException, LDIFException, CancelledOperationException, URISyntaxException {
 		EmbeddedOpenDS.startServer();
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
-		if(EmbeddedOpenDS.class.getResource("test.ldif") == null || EmbeddedOpenDS.class.getResource("test.ldif").getFile() == null) {
+		if(EmbeddedOpenDS.class.getResource("test.ldif") == null || EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath() == null) {
 			LOGGER.error("Unable to load LDIF sample content !");
 		} else {
-			EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").getFile());
+			EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath());
 			LOGGER.error("LDIF sample content loaded successfully");
 		}
 	}
@@ -111,6 +112,8 @@ public class LdapServer {
 			LOGGER.error(e,e);
 		} catch (IOException e) {
 			LOGGER.error(e,e);
+		} catch (URISyntaxException e) {
+			LOGGER.error(e,e);
 		}
 		if (retCode != 0) {
 			System.exit(retCode);
@@ -126,8 +129,9 @@ public class LdapServer {
 	 * @throws CancelledOperationException 
 	 * @throws DirectoryException 
 	 * @throws InitializationException 
+	 * @throws URISyntaxException 
 	 */
-	private static int usage(String[] args) throws InitializationException, DirectoryException, CancelledOperationException, LDIFException, IOException {
+	private static int usage(String[] args) throws InitializationException, DirectoryException, CancelledOperationException, LDIFException, IOException, URISyntaxException {
 		Options options = new Options();
 		options.addOption("a", "start", false, "Start the embedded directory");
 		options.addOption("o", "stop", false, "Stop the embedded directory");

@@ -193,7 +193,7 @@ public final class JndiServices {
 		}
 		
 		/* handle options */
-		contextDn = namingContext.getDN() != null ? namingContext.getDN().toString() : "";
+		contextDn = namingContext.getDN() != null ? namingContext.getDN().toString() : null;
 		
         String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
         if (pageSizeStr != null) {
@@ -316,7 +316,7 @@ public final class JndiServices {
         try {
             sc.setSearchScope(scope);
             String rewrittenBase = null;
-            if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
+            if (contextDn != null && base.toLowerCase().endsWith(contextDn.toLowerCase())) {
                 if (!base.equalsIgnoreCase(contextDn)) {
                     rewrittenBase = base.substring(0, base.toLowerCase()
                             .lastIndexOf(contextDn.toLowerCase()) - 1);

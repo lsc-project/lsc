@@ -268,9 +268,10 @@ public class LDAP
 
 		// transform to a relative DN for our JndiServices...
 		String baseDn = urlInstance.getDN();
-		if (baseDn.endsWith(bindJndiServices.getContextDn()))
+		String contextDn = bindJndiServices.getContextDn();
+		if (contextDn != null && baseDn.endsWith(contextDn))
 		{
-			baseDn = baseDn.substring(0, baseDn.length() - bindJndiServices.getContextDn().length());
+			baseDn = baseDn.substring(0, baseDn.length() - contextDn.length());
 		}
 
 		// perform the search and get back matching DNS

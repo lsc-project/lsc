@@ -361,7 +361,7 @@ public abstract class AbstractSynchronize {
                 dstBean = dstService.getBean(id);
                 
                 // Calculate operation that would be performed
-                JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean);
+                JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, customLibrary);
                 
                 // Retrieve condition to evaluate before creating/updating 
                 Boolean applyCondition = null;

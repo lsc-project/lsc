@@ -96,8 +96,12 @@ public final class BeanComparator {
      * @param itmBean Modified bean from source
      * @param destBean JNDI bean
      * @return JndiModificationType the modification type that would happen
+     * @throws CloneNotSupportedException 
      */
-    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean itmBean, IBean destBean) {
+    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean destBean, Object customLibrary) throws CloneNotSupportedException {
+    	// clone the source bean
+    	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+    	
     	if (itmBean == null && destBean == null) {
     		return null;
     	} else if (itmBean == null && destBean != null) {
@@ -154,30 +158,13 @@ public final class BeanComparator {
     public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
             Object customLibrary, boolean condition)	throws NamingException, CloneNotSupportedException {
 
-		//
-		// We clone the source object, because syncoptions should not be used
-		// on modified values of the source object :)
-		//
-		IBean itmBean = null;
-		if (srcBean != null)
-		{
-			itmBean = srcBean.clone();
-		}
-
         JndiModifications jm = null;
-
-        String dn = syncOptions.getDn();
-        if(srcBean != null && dn != null) {
-            Map<String, Object> table = new HashMap<String, Object>();
-            table.put("srcBean", srcBean);
-            if(customLibrary != null) {
-                table.put("custom", customLibrary);
-            }
-            itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
-        }
-        
+    	
+    	// clone the source bean to work on it
+    	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+    	
         // get modification type to perform
-        JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, destBean);
+        JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, destBean, customLibrary);
         if (modificationType==JndiModificationType.DELETE_ENTRY)
         {
         	jm = new JndiModifications(modificationType, syncOptions.getTaskName());
@@ -703,4 +690,51 @@ public final class BeanComparator {
         }
         return new JndiModifications[] {};
     }
+        
+    /**
+	 * <p>
+	 * Clone the source bean and return a new object that is a copy of the
+	 * srcBean and includes any modifications on the DN.
+	 * </p>
+	 * <p>
+	 * Always use this method for source/destination compares, and make sure to
+	 * only change the result intermediary bean, never the original source bean
+	 * </p>
+	 * 
+	 * @param srcBean
+	 *            Original bean from source
+	 * @param syncOptions
+	 * @param customLibrary
+	 * @return New bean cloned from srcBean
+	 * @throws CloneNotSupportedException
+	 */
+	private static IBean cloneSrcBean(IBean srcBean, ISyncOptions syncOptions,
+			Object customLibrary) throws CloneNotSupportedException
+	{
+		//
+		// We clone the source object, because syncoptions should not be used
+		// on modified values of the source object :)
+		//
+		IBean itmBean = null;
+		if (srcBean != null)
+		{
+			itmBean = srcBean.clone();
+		}
+
+		// apply any new DN from properties to this intermediary bean
+		String dn = syncOptions.getDn();
+		if (srcBean != null && dn != null)
+		{
+			Map<String, Object> table = new HashMap<String, Object>();
+			table.put("srcBean", srcBean);
+			if (customLibrary != null)
+			{
+				table.put("custom", customLibrary);
+			}
+			itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
+		}
+
+		return itmBean;
+	}
+
 }

@@ -110,6 +110,7 @@ public final class BeanComparator {
     		return JndiModificationType.ADD_ENTRY;
     	} else { /* srcBean != null && destBean != null */
     		if (itmBean.getDistinguishName() == null
+    				|| itmBean.getDistinguishName().length() == 0
     				|| destBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
     			return JndiModificationType.MODIFY_ENTRY;
     		} else {

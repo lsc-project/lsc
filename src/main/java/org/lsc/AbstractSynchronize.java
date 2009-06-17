@@ -425,7 +425,7 @@ public abstract class AbstractSynchronize {
                 logActionError(jm, id, e);
                 return;
             } catch (ExceptionInInitializerError e) { 
-                // this type of exception should top everything, too
+                // this type of exception should stop everything, too
                 countError++;
                 logActionError(jm, id, e);
                 throw e;

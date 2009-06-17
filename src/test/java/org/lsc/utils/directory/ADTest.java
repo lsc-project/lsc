@@ -45,6 +45,9 @@
  */
 package org.lsc.utils.directory;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import junit.framework.TestCase;
 
 /**
@@ -87,9 +90,24 @@ public class ADTest extends TestCase {
     
     /**
      * Test number of weeks calculation for lastLogon or lastLogonTimestamp attribute in AD.
+     * 
+     * With this value:
+     * lastLogonTimestamp: 128673223549843750
+     * The last logon was recorded at 01/10/08 10:12:34.
      */
     public final void testNumberWeeksLastLogon() {
-    	// TODO	
-	}
+    	// get result from tested class
+    	int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon("128673223549843750");
+    	
+    	// calculate result from known date to now
+    	Calendar now = Calendar.getInstance();
+    	Calendar then = Calendar.getInstance();
+    	then.set(2008, 10-1, 01, 10, 12, 34);
+    	
+    	long secondsSinceReference = (now.getTimeInMillis() - then.getTimeInMillis()) / 1000;
+    	int numWeeksFromReference = (int)(secondsSinceReference / (60 * 60 * 24 * 7));
+    	
+    	assertEquals(numWeeksFromReference, numWeeksFromLastLogon);
+    }
 
 }

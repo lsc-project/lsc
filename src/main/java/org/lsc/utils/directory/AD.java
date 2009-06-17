@@ -134,8 +134,8 @@ public class AD {
         Long ts = Long.parseLong(lastLogonTimestamp);
         //We divide the ts by 10⁷ for seconds, 60 seconds, 60 minutes, 24 hours, 7 days
         long llastLogonAdjust=116444736000000000L;  // adjust factor for converting it to java   
-        long secondsToUnixTimeStamp =  (ts-llastLogonAdjust) / 10^7 ;
-        long lastLogonTime = (new Date().getTime()) - secondsToUnixTimeStamp;
+        long secondsToUnixTimeStamp = (ts-llastLogonAdjust) / (long) Math.pow(10,7);
+        long lastLogonTime = (new Date().getTime() / 1000) - secondsToUnixTimeStamp;
                 
         return (int)(lastLogonTime / (60 * 60 * 24 * 7)); 
     }

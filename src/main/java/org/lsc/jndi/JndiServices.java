@@ -132,10 +132,11 @@ public final class JndiServices {
      */
     private JndiServices(final Properties connProps) throws NamingException, IOException {
     	
+    	// log new connection with it's details
+    	logConnectingTo(connProps);
+    	
 		/* should we negotiate TLS? */
-		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
-			LOGGER.info("Connecting with STARTTLS extended operation to LDAP server " + connProps.getProperty("java.naming.provider.url"));
-			
+		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {			
 			/* if we're going to do TLS, we mustn't BIND before the STARTTLS operation
 			 * so we remove credentials from the properties to stop JNDI from binding */
 			/* duplicate properties to avoid changing them (they are used as a cache key in getInstance() */
@@ -170,17 +171,6 @@ public final class JndiServices {
 
 		} else {
 			/* don't start TLS, just connect normally (this can be on ldap:// or ldaps://) */
-			StringBuffer sb = new StringBuffer();
-			sb.append("Connecting to LDAP server ");
-			sb.append(connProps.getProperty("java.naming.provider.url"));
-			if (connProps.getProperty(Context.SECURITY_AUTHENTICATION)==null
-				|| connProps.getProperty(Context.SECURITY_AUTHENTICATION)=="none") {
-				sb.append(" anonymously");
-			} else {
-				sb.append(" as " + connProps.getProperty(Context.SECURITY_PRINCIPAL));
-			}
-			LOGGER.info(sb.toString());
-
 			ctx = new InitialLdapContext(connProps, null);	
 		}
 		
@@ -210,6 +200,29 @@ public final class JndiServices {
         }
     }
 
+    private void logConnectingTo(Properties connProps)
+    {
+		StringBuffer sb = new StringBuffer();
+		sb.append("Connecting to LDAP server ");
+		sb.append(connProps.getProperty("java.naming.provider.url"));
+		
+		// log identity used to connect
+		if (connProps.getProperty(Context.SECURITY_AUTHENTICATION)==null
+			|| connProps.getProperty(Context.SECURITY_AUTHENTICATION)=="none") {
+			sb.append(" anonymously");
+		} else {
+			sb.append(" as " + connProps.getProperty(Context.SECURITY_PRINCIPAL));
+		}
+		
+		// using TLS ?
+		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls")))
+		{
+			sb.append(" with STARTTLS extended operation");
+		}
+		
+		LOGGER.info(sb.toString());
+    }
+    
     /**
      * Get the source directory connected service.
      * @return the source directory connected service
@@ -328,7 +341,7 @@ public final class JndiServices {
             }
             ne = ctx.search(rewrittenBase, filter, sc);
         } catch (NamingException nex) {
-            LOGGER.error("Error while looking for " + filter + " in " + base + ": " + nex, nex);
+            LOGGER.error("Error while looking for " + filter + " in " + base + ": " + nex);
             throw nex;
         }
         SearchResult sr = null;

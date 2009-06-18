@@ -185,6 +185,14 @@ public final class JndiServices {
 		/* handle options */
 		contextDn = namingContext.getDN() != null ? namingContext.getDN().toString() : null;
 		
+		// sanity check
+		if (contextDn == null || contextDn.length() == 0)
+		{
+			String errorMessage = "No context DN specified in LDAP provider url (" + ctx.getEnvironment().get("java.naming.provider.url") + "). Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+		
         String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
         if (pageSizeStr != null) {
             pageSize = Integer.parseInt(pageSizeStr);

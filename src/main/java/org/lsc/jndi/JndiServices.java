@@ -380,8 +380,7 @@ public final class JndiServices {
     /**
      * Search for an entry.
      * 
-     * This method is a simple LDAP search operation with SUBTREE search
-     * control
+     * This method is a simple LDAP search operation with BASE search scope
      * 
      * @param base
      *                the base of the search operation

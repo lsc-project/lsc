@@ -102,16 +102,20 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
      * @param syncName
      */
     public final void initialize(String syncName) {
+        this.syncName = syncName;
+    	
         status = new HashMap<String, STATUS_TYPE>();
-        defaultValues = new HashMap<String, List<String>>();
-        createValues = new HashMap<String, List<String>>();
-        forceValues = new HashMap<String, List<String>>();
         defaultStatus = STATUS_TYPE.FORCE;
-        this.syncName = syncName; 
 
-        /* temporary cache to store delimiters for each attribute to read {default,create}_value */
+        // temporary cache to store values read from properties
+        Map<String, String> defaultValueStrings = new HashMap<String, String>();
+        Map<String, String> createValueStrings = new HashMap<String, String>();
+        Map<String, String> forceValueStrings = new HashMap<String, String>();
+        
+        // temporary cache to store delimiters for each attribute to read {default,create,force}_value
         Map<String, String> delimiters = new HashMap<String, String>();
 
+        // first, just read in all the properties (they are read in a random order, not the order in the file)
         Properties props = Configuration.getAsProperties("lsc.syncoptions." + syncName);
         Enumeration<Object> en = props.keys();
         while (en.hasMoreElements()) {
@@ -127,45 +131,26 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             String attributeName = stok.nextToken();
             String typeName = stok.nextToken();
             if (typeName.equalsIgnoreCase("action")) {
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Adding '" + value + "' sync type for attribute name " + attributeName + ".");
                 STATUS_TYPE st = parseSyncType(value);
                 if(st == STATUS_TYPE.UNKNOWN) {
                     LOGGER.error("Unable to analyze action type \"" + value + "\" for the following attribute : lsc."
                             + syncName + "." + key + " ! Bypassing ...");
                     continue;
                 }
+            	LOGGER.debug("Adding '" + value + "' sync type for attribute name " + attributeName + ".");
                 if(attributeName.equalsIgnoreCase("default")) {
                     defaultStatus = st;
                 } else {
                     status.put(attributeName.toLowerCase(), st);
                 }
             } else if (typeName.equalsIgnoreCase("default_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
-                StringTokenizer st = new StringTokenizer(value, delimiter);
-                List<String> values = new ArrayList<String>();
-                for (int i = 0; st.hasMoreTokens(); i++) {
-                    values.add(st.nextToken());
-                }
-                defaultValues.put(attributeName.toLowerCase(), values);
+            	defaultValueStrings.put(attributeName.toLowerCase(), value);
                 /* TODO: don't wipe out existing createValue */
-                createValues.put(attributeName.toLowerCase(), values);
+            	createValueStrings.put(attributeName.toLowerCase(), value);
             } else if (typeName.equalsIgnoreCase("create_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
-                StringTokenizer st = new StringTokenizer(value, delimiter);
-                List<String> values = new ArrayList<String>();
-                for (int i = 0; st.hasMoreTokens(); i++) {
-                    values.add(st.nextToken());
-                }
-                createValues.put(attributeName.toLowerCase(), values);
+                createValueStrings.put(attributeName.toLowerCase(), value);
             } else if (typeName.equalsIgnoreCase("force_value")) {
-                String delimiter = delimiters.get(attributeName.toLowerCase()) != null ? delimiters.get(attributeName.toLowerCase()) : defaultDelimiter;
-                StringTokenizer st = new StringTokenizer(value, delimiter);
-                List<String> values = new ArrayList<String>();
-                for (int i = 0; st.hasMoreTokens(); i++) {
-                    values.add(st.nextToken());
-                }
-                forceValues.put(attributeName.toLowerCase(), values);
+                forceValueStrings.put(attributeName.toLowerCase(), value);
             } else if (typeName.equalsIgnoreCase("delimiter")) {
                 if(attributeName.equalsIgnoreCase("default")) {
                     defaultDelimiter = value;
@@ -178,8 +163,45 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 continue;
             }
         }
+        
+        // now we've read everything, cut up multiple values using the delimiters
+        defaultValues = cutUpValues(defaultValueStrings, delimiters);
+        createValues = cutUpValues(createValueStrings, delimiters);
+        forceValues = cutUpValues(forceValueStrings, delimiters);                
+        
     }
 
+    private Map<String, List<String>> cutUpValues(Map<String, String> originalValues, Map<String, String> delimiters)
+    {
+    	Map<String, List<String>> res = new HashMap<String, List<String>>(originalValues.size());
+    	
+    	for (String key : originalValues.keySet())
+		{
+            String delimiter = getDelimiter(delimiters, key);
+            
+            // cut up the existing string on the delimiter
+            StringTokenizer st = new StringTokenizer(originalValues.get(key), delimiter);
+            List<String> values = new ArrayList<String>();
+            while (st.hasMoreTokens()) {
+            	values.add(st.nextToken());
+            }
+            
+            // store the result
+            res.put(key, values);
+		}
+    	
+    	return res;
+    }
+    
+    private String getDelimiter(Map<String, String> delimiters, String attributeName)
+    {
+    	String delimiter = delimiters.get(attributeName.toLowerCase());
+    	if (delimiter == null || delimiter.length() == 0) {
+    		delimiter = defaultDelimiter;
+    	}
+    	return delimiter;
+    }
+    
     protected final STATUS_TYPE parseSyncType(String value) {
         if(value.equalsIgnoreCase("K")) {
             return STATUS_TYPE.KEEP;

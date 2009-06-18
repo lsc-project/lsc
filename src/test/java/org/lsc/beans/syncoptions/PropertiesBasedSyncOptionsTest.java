@@ -88,4 +88,17 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
         	assertTrue(e.toString(), false);
         }
     }
+    
+    public final void testDelimiters()
+    {
+        ISyncOptions iso = new PropertiesBasedSyncOptions();
+        assertNotNull(iso);
+        iso.initialize("sampleTask");
+        
+        List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
+        
+        assertEquals(2, forceValues.size());
+        assertEquals("\"a\"", forceValues.get(0));
+        assertEquals("\"b\"", forceValues.get(1));
+    }
 }

@@ -231,7 +231,7 @@ public final class JndiServices {
     	try {
     		Properties srcProperties = Configuration.getSrcProperties();
     		if (srcProperties != null && srcProperties.size() > 0) {
-    			return getInstance(Configuration.getSrcProperties());
+    			return getInstance(srcProperties);
     		}
     		return null;
     	} catch (Exception e) {

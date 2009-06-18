@@ -132,7 +132,10 @@ public class Configuration {
 	 */
 	public static Properties getSrcProperties() {
 		Properties srcProps = getAsProperties("src");
-		checkLdapProperties(srcProps);
+		if (srcProps.size() > 0)
+		{
+			checkLdapProperties(srcProps);
+		}
 		return srcProps;
 	}
 
@@ -140,9 +143,18 @@ public class Configuration {
 	{
 		// sanity check
 		String contextDn = null;
+		String ldapUrl = (String) props.get("java.naming.provider.url");
+		
+		if (ldapUrl == null)
+		{
+			String errorMessage = "No LDAP provider url specified. Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+		
 		try
 		{
-			contextDn = new LDAPUrl((String) props.get("java.naming.provider.url")).getDN();
+			contextDn = new LDAPUrl(ldapUrl).getDN();				
 		}
 		catch (MalformedURLException e)
 		{

@@ -127,7 +127,7 @@ public final class JScriptEvaluator {
     public static List<String> evalToStringList(final String expression,
             final Map<String, Object> params) {
         Object result = getInstance().instanceEval(expression, params);
-        if(result.getClass().isAssignableFrom(List.class)) {
+        if(result != null && result.getClass().isAssignableFrom(List.class)) {
             return (List<String>)result;
         } else {
             List<String> resultsArray = new ArrayList<String>();
@@ -154,6 +154,9 @@ public final class JScriptEvaluator {
         Script script = null;
         Scriptable scope = cx.initStandardObjects();
 
+       	Map<String, Object> localParams = new HashMap<String, Object>();
+       	if (params != null) localParams.putAll(params);
+        
         /* Allow to have shorter names for function in the package org.lsc.utils.directory */
         String expressionImport = 
             "with (new JavaImporter(Packages.org.lsc.utils.directory)) {" + 
@@ -167,27 +170,27 @@ public final class JScriptEvaluator {
         }
 
         // add LDAP interface for destination if necessary
-        if (expression.contains("ldap.")) {
+        if (expression.contains("ldap.") && !localParams.containsKey("ldap")) {
         	ScriptableJndiServices dstSjs = new ScriptableJndiServices();
         	dstSjs.setJndiServices(JndiServices.getDstInstance());
-        	params.put("ldap", dstSjs);
+        	localParams.put("ldap", dstSjs);
         }
 
         // add LDAP interface for source if necessary
-        if (expression.contains("srcLdap.")) {
+        if (expression.contains("srcLdap.") && !localParams.containsKey("srcLdap")) {
         	JndiServices srcInstance = JndiServices.getSrcInstance();
         	if (srcInstance != null) {
         		ScriptableJndiServices srcSjs = new ScriptableJndiServices();
         		srcSjs.setJndiServices(srcInstance);
-        		params.put("srcLdap", srcSjs);
+        		localParams.put("srcLdap", srcSjs);
         	}
         }
 
-        if (params != null) {
-	        Iterator<String> paramsIter = params.keySet().iterator();
+        if (localParams != null) {
+	        Iterator<String> paramsIter = localParams.keySet().iterator();
 	        while (paramsIter.hasNext()) {
 	            String name = paramsIter.next();
-	            Object value = params.get(name);
+	            Object value = localParams.get(name);
 	
 	            Object jsObj = Context.javaToJS(value, scope);
 	            ScriptableObject.putProperty(scope, name, jsObj);

@@ -50,14 +50,12 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.Logger;
+import org.lsc.jndi.JndiServices;
 import org.lsc.utils.JScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
 
 public class PropertiesBasedSyncOptionsTest extends TestCase {
-
-    protected final void setUp() throws Exception {
-        super.setUp();
-    }
 
     public final void test1() {
         ISyncOptions iso = new PropertiesBasedSyncOptions();
@@ -78,23 +76,16 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
         Iterator<String> it = defaultValues.iterator();
         assertTrue(it.hasNext());
         String defaultValue = it.next();
-        assertEquals("srcLdap.sup(\"uid=jclarke,ou=people,dc=lsc-project,dc=net\",1)", defaultValue);
+        assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
         
         // evaluate JavaScript
         try {
-            defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);        	
-        } catch (EcmaError e) {
-        	// srcLdap is not defined, it should not be used
-        	assertEquals("ReferenceError", e.getName());
-        	assertTrue(e.getErrorMessage().startsWith("\"srcLdap\" "));
+            defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
+            assertEquals(1, defaultValues.size());
+            assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
         } catch (Exception e) {
         	// shouldn't happen
-        	assertTrue(false);
+        	assertTrue(e.toString(), false);
         }
     }
-
-    protected final void tearDown() throws Exception {
-        super.tearDown();
-    }
-
 }

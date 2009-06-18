@@ -63,6 +63,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.ietf.ldap.LDAPUrl;
 
 /**
  * Ldap Synchronization Connector Configuration.
@@ -130,7 +131,31 @@ public class Configuration {
 	 * @return the data source connection properties
 	 */
 	public static Properties getSrcProperties() {
-		return getAsProperties("src");
+		Properties srcProps = getAsProperties("src");
+		checkLdapProperties(srcProps);
+		return srcProps;
+	}
+
+	private static void checkLdapProperties(Properties props)
+	{
+		// sanity check
+		String contextDn = null;
+		try
+		{
+			contextDn = new LDAPUrl((String) props.get("java.naming.provider.url")).getDN();
+		}
+		catch (MalformedURLException e)
+		{
+			LOGGER.error(e);
+			throw new ExceptionInInitializerError(e);
+		}
+		
+		if (contextDn == null || contextDn.length() == 0)
+		{
+			String errorMessage = "No context DN specified in LDAP provider url (" + props.get("java.naming.provider.url") + "). Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
 	}
 
 	/**
@@ -143,6 +168,7 @@ public class Configuration {
 		if (dst == null || dst.size() == 0) {
 			dst = getAsProperties("ldap");
 		}
+		checkLdapProperties(dst);
 		return dst;
 	}
 

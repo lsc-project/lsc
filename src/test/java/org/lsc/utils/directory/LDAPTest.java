@@ -49,6 +49,7 @@ import java.net.MalformedURLException;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
+import javax.naming.SizeLimitExceededException;
 
 import org.lsc.utils.JScriptEvaluator;
 
@@ -62,7 +63,6 @@ import junit.framework.TestCase;
 public class LDAPTest extends TestCase {
 
 	public final void testCanBind() {
-		// these should work
 		try
 		{
 			assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));
@@ -89,6 +89,11 @@ public class LDAPTest extends TestCase {
 					"cn=Directory Manager", "secret", "public"));
 			assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=nonexistant",
 					"cn=Directory Manager", "secret", "secret"));
+
+			// this should fail since there are two cn=CN0001 entries
+			assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?cn=CN0001",
+					"cn=Directory Manager", "secret", "secret"));
+
 		}
 		catch (NamingException e)
 		{
@@ -115,5 +120,22 @@ public class LDAPTest extends TestCase {
 		{
 			assertTrue(false);
 		}
+				
+		// this should fail with a NamingException (no such object)
+		try
+		{
+			assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?cn=CN0001",
+					"cn=Directory Manager", "secret", "secret"));
+		}
+		catch (MalformedURLException e)
+		{
+			assertTrue(false);
+		}
+		catch (NamingException e)
+		{
+			assertTrue(true);
+		} 
+
+
 	}
 }

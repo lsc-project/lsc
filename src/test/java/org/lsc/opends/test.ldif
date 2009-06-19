@@ -25,3 +25,60 @@ objectClass: top
 sn: Test 00000001
 cn: Test 00000001
 userPassword: secret
+
+dn: ou=Test Data,dc=lsc-project,dc=org
+ou: Test Data
+objectClass: organizationalUnit
+objectClass: top
+
+dn: ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldap2TestTaskSrc
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: person
+objectClass: top
+userPassword: secret0001
+description: Number one's descriptive text
+
+dn: cn=CN0002,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0002
+sn: SN0002
+objectClass: person
+objectClass: top
+userPassword: secret0002
+description: Number two's descriptive text
+
+dn: cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0003
+sn: SN0003
+objectClass: person
+objectClass: top
+description: Number three's descriptive text
+
+dn: ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldap2TestTaskDst
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: person
+objectClass: top
+
+dn: cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CommonName0002
+sn: SN0002
+objectClass: person
+objectClass: top
+
+dn: cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0004
+sn: SN0004
+objectClass: person
+objectClass: top
+

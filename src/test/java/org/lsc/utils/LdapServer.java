@@ -84,7 +84,7 @@ public class LdapServer {
 			LOGGER.error("Unable to load LDIF sample content !");
 		} else {
 			EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath());
-			LOGGER.error("LDIF sample content loaded successfully");
+			LOGGER.info("LDIF sample content loaded successfully");
 		}
 	}
 	

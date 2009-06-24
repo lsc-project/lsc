@@ -540,7 +540,7 @@ public final class JndiServices {
                 break;
             default:
                 LOGGER.error("Unable to identify the right modification type: " + jm.getOperation());
-            return false;
+            	return false;
             }
             return true;
         } catch (ContextNotEmptyException e) {
@@ -551,9 +551,26 @@ public final class JndiServices {
             // we lost the connection to the source or destination, stop everything!
         	throw e;
         } catch (NamingException ne) {
-            LOGGER.error("Error while modifying directory on entry "
-                    + jm.getDistinguishName() + " / "
-                    + jm.getModificationItems(), ne);
+        	String errorMessage = "Error while ";
+        	switch (jm.getOperation())
+        	{
+        		case ADD_ENTRY:
+        			errorMessage += "adding";
+        			break;
+        		case MODIFY_ENTRY:
+        			errorMessage += "modifying";
+        			break;
+        		case MODRDN_ENTRY:
+        			errorMessage += "renaming";
+        			break;
+        		case DELETE_ENTRY:
+        			if (recursiveDelete) errorMessage += "recursively deleting";
+        			else errorMessage += "deleting";
+        			break;
+        	}
+        	errorMessage += " entry " + jm.getDistinguishName() + " in directory " + jm.getModificationItems();
+        	
+            LOGGER.error(errorMessage);
             return false;
         }
     }

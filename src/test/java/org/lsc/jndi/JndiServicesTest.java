@@ -173,7 +173,18 @@ public class JndiServicesTest extends TestCase {
             List<ModificationItem> mis = new ArrayList<ModificationItem>();
             mis.add(mi);
             jm.setModificationItems(mis);
-            assertNotNull(JndiServices.getDstInstance().apply(jm));
+            assertTrue(JndiServices.getDstInstance().apply(jm));
+            
+            // this should fail
+            Attribute illegalAttr = new BasicAttribute("creatorsName");
+            illegalAttr.add("Myself");
+            jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+            jm.setDistinguishName("ou=People");
+            mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, illegalAttr);
+            mis = new ArrayList<ModificationItem>();
+            mis.add(mi);
+            jm.setModificationItems(mis);
+            assertFalse(JndiServices.getDstInstance().apply(jm));	
         } catch (NamingException ne) {
             System.err.println(ne);
             assertNotNull(null);

@@ -568,7 +568,7 @@ public final class JndiServices {
         			else errorMessage += "deleting";
         			break;
         	}
-        	errorMessage += " entry " + jm.getDistinguishName() + " in directory " + jm.getModificationItems();
+        	errorMessage += " entry " + jm.getDistinguishName() + " in directory " + ": " + ne;
         	
             LOGGER.error(errorMessage);
             return false;

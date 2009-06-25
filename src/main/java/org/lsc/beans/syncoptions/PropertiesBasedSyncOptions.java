@@ -145,8 +145,6 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 }
             } else if (typeName.equalsIgnoreCase("default_value")) {
             	defaultValueStrings.put(attributeName.toLowerCase(), value);
-                /* TODO: don't wipe out existing createValue */
-            	createValueStrings.put(attributeName.toLowerCase(), value);
             } else if (typeName.equalsIgnoreCase("create_value")) {
                 createValueStrings.put(attributeName.toLowerCase(), value);
             } else if (typeName.equalsIgnoreCase("force_value")) {
@@ -167,7 +165,16 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         // now we've read everything, cut up multiple values using the delimiters
         defaultValues = cutUpValues(defaultValueStrings, delimiters);
         createValues = cutUpValues(createValueStrings, delimiters);
-        forceValues = cutUpValues(forceValueStrings, delimiters);                
+        forceValues = cutUpValues(forceValueStrings, delimiters);       
+        
+        // use default values for create values if there aren't specific ones
+        for (String attributeName : defaultValues.keySet())
+        {
+        	if (createValues.get(attributeName) == null)
+        	{
+        		createValues.put(attributeName, defaultValues.get(attributeName));
+        	}
+        }
         
     }
 

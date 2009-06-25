@@ -62,6 +62,7 @@ import javax.naming.directory.SearchResult;
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.personBean;
 import org.lsc.jndi.JndiServices;
+import org.lsc.jndi.ScriptableJndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.objects.top;
 import org.lsc.service.ISrcService;
@@ -131,7 +132,6 @@ public class Ldap2LdapSyncTest extends TestCase
 
 	public final void testSyncLdap2Ldap() throws Exception
 	{
-		List<String> attributeValues = null;
 		
 		// make sure the contents of the directory are as we expect to begin with
 
@@ -164,7 +164,72 @@ public class Ldap2LdapSyncTest extends TestCase
 		launchSyncCleanTask(TASK_NAME, true, false);
 
 		// check the results of the synchronization
+		checkSyncResultsFirstPass();
+		
+		// sync again to confirm convergence
+		launchSyncCleanTask(TASK_NAME, true, false);
 
+		// check the results of the synchronization
+		checkSyncResultsSecondPass();		
+	}
+
+	private final void checkSyncResultsFirstPass() throws Exception
+	{
+		List<String> attributeValues = null;
+		
+		checkSyncResultsCommon();
+		
+		// check ADD
+
+		// the telephoneNumber was created
+		attributeValues = new ArrayList<String>(2);
+		attributeValues.add("000000");
+		attributeValues.add("11111");
+		checkAttributeValues(DN_ADD_DST, "telephoneNumber", attributeValues);
+
+	}
+	
+	private final void checkSyncResultsSecondPass() throws Exception
+	{
+		List<String> attributeValues = null;
+		
+		checkSyncResultsCommon();
+		
+		// check MODRDN
+		
+		// the password was set and can be used
+		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_MODRDN_DST_AFTER, "secretCN0002"));
+
+		// the description was copied over since this is an existing object and it description is set to MERGE
+		attributeValues = new ArrayList<String>(2);
+		attributeValues.add("Number two's descriptive text");
+		attributeValues.add(new String((byte[]) JndiServices.getSrcInstance().getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+		checkAttributeValues(DN_MODRDN_DST_AFTER, "description", attributeValues);
+
+		// the telephoneNumber was added
+		attributeValues = new ArrayList<String>(2);
+		attributeValues.add("123456");
+		attributeValues.add("789987");
+		checkAttributeValues(DN_MODRDN_DST_AFTER, "telephoneNumber", attributeValues);
+
+		
+		// check ADD
+
+		// the telephoneNumber was merged
+		attributeValues = new ArrayList<String>(4);
+		attributeValues.add("000000");
+		attributeValues.add("11111");
+		attributeValues.add("123456");
+		attributeValues.add("789987");
+		checkAttributeValues(DN_ADD_DST, "telephoneNumber", attributeValues);
+
+	}
+
+	
+	private final void checkSyncResultsCommon() throws Exception
+	{
+		List<String> attributeValues = null;
+		
 		// check MODRDN
 		assertTrue(JndiServices.getDstInstance().exists(DN_MODRDN_DST_AFTER));
 		assertFalse(JndiServices.getDstInstance().exists(DN_MODRDN_DST_BEFORE));
@@ -176,11 +241,6 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeValue(DN_ADD_DST, "description", "Number three's descriptive text");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_ADD_DST, "secretCN0003"));
-		// the telephoneNumber was created
-		attributeValues = new ArrayList<String>(2);
-		attributeValues.add("000000");
-		attributeValues.add("11111");
-		checkAttributeValues(DN_ADD_DST, "telephoneNumber", attributeValues);
 		// the objectClass contains organizationalPerson, since this object wasn't created
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("top");
@@ -192,17 +252,24 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeValue(DN_MODIFY_DST, "sn", "SN0001");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_MODIFY_DST, "secretCN0001"));
-		// the description was copied over since this is an existing object and it description is set to FORCE
-		checkAttributeValue(DN_MODIFY_DST, "description", "Number one's descriptive text");
-		// the telephoneNumber was not written, since we didn't create this object
-		checkAttributeIsEmpty(DN_MODIFY_DST, "telephoneNumber");
+		// the description was copied over since this is an existing object and it description is set to MERGE
+		attributeValues = new ArrayList<String>(2);
+		attributeValues.add("Number one's descriptive text");
+		attributeValues.add(new String((byte[]) JndiServices.getSrcInstance().getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+		checkAttributeValues(DN_MODIFY_DST, "description", attributeValues);
+		// the telephoneNumber was merged with existing values
+		attributeValues = new ArrayList<String>(3);
+		attributeValues.add("123456");
+		attributeValues.add("456789");
+		attributeValues.add("789987");
+		checkAttributeValues(DN_MODIFY_DST, "telephoneNumber", attributeValues);
 		// the objectClass wasn't changed
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("top");
 		attributeValues.add("person");
 		checkAttributeValues(DN_MODIFY_DST, "objectClass", attributeValues);
 	}
-
+	
 	public final void testCleanLdap2Ldap() throws Exception
 	{
 		// make sure the contents of the directory are as we expect to begin with

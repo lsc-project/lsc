@@ -69,6 +69,8 @@ cn: CN0001
 sn: SN0001
 objectClass: person
 objectClass: top
+telephoneNumber: 123456
+telephoneNumber: 456789
 
 dn: cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002

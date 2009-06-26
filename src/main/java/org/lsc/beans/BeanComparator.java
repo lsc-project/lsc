@@ -47,6 +47,7 @@ package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,7 +94,7 @@ public final class BeanComparator {
      * Static method to return the kind of operation that would happen
      * 
      * @param syncOptions SyncOptions object from properties
-     * @param itmBean Modified bean from source
+     * @param srcBean Bean from source
      * @param destBean JNDI bean
      * @return JndiModificationType the modification type that would happen
      * @throws CloneNotSupportedException 
@@ -289,8 +290,10 @@ public final class BeanComparator {
                 if (srcAttr == null) {
                     srcAttr = new BasicAttribute(srcAttrName);
                 }
-                while (srcAttr.size() >= 1 && ((String)srcAttr.get(0)).length() == 0) {
-                    srcAttr.remove(0);
+                while (srcAttr.size() >= 1 &&
+                		((srcAttr.get(0).getClass().equals(String.class) && ((String)srcAttr.get(0)).length() == 0) ||
+        				(srcAttr.get(0) == null))) {
+                	srcAttr.remove(0);
                 }
 
                 // Manage default values
@@ -336,23 +339,22 @@ public final class BeanComparator {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");
                     } else {
+                        LOGGER.debug("Checking if attribute " + srcAttrName + " is modified.");
                         mi = compareAttribute(srcAttr, destAttr);
                     }
 
                     if (mi != null) {
+                        LOGGER.debug("Adding modification for attribute " + srcAttrName + ".");
                         modificationItems.add(mi);
                     }
                 } else if (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE) {
-                    if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr != null && destAttr.size() > 0 ) ) {
+                    if ( srcAttr == null || srcAttr.size() == 0 ) {
                         // Do nothing
                         LOGGER.debug("Do nothing (" + srcAttrName + ")");
                     } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 ) ) {
                         LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
                                 + destBean.getDistinguishName() + "\"");
                         mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, itmBean.getAttributeById(srcAttrName));
-                    } else if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr == null || destAttr.size() == 0 ) ) {
-                        // Do nothing
-                        LOGGER.debug("Do nothing (" + srcAttrName + ")");
                     } else {
                         mi = mergeAttributes(srcAttr, destAttr);
                     }
@@ -530,57 +532,84 @@ public final class BeanComparator {
         boolean differs = false;
 
         // read in all values from dstAttr
-        List<String> dstAttrValues = new ArrayList<String>(dstAttr.size());
+        List<Object> dstAttrValues = new ArrayList<Object>(dstAttr.size());
         NamingEnumeration<?> dstNe = dstAttr.getAll();			
         while (dstNe.hasMore()) {
-            Object o = dstNe.next();
-            if (o.getClass() == String.class) {
-                dstAttrValues.add((String) o);
-            } else if (o.getClass().isAssignableFrom(byte[].class)) {
-                dstAttrValues.add(new String((byte[]) o));
-            } else if (o.getClass().isAssignableFrom(List.class)) {
-                /* FIXME: can this really happen? */
-                List<?> values = ((List<?>) o);
-                if (compare(values, srcAttr) != 0) {
-                    differs = true;
-                }
-            } 
+        	dstAttrValues.add(dstNe.next());
         }
 
         // check if there are any values in srcAttr not in dstAttr
         // and build up replacement attribute, in case
         Attribute toReplaceAttr = new BasicAttribute(srcAttr.getID());
         NamingEnumeration<?> srcNe = srcAttr.getAll();
-        String value = null;
         while (srcNe.hasMore()) {
-            Object o = srcNe.next();
-            if (o.getClass() == String.class) {
-                value = (String) o;
-            } else if (o.getClass().isAssignableFrom(byte[].class)) {
-                value = new String((byte[]) o);
-            } else if (o.getClass().isAssignableFrom(List.class)) {
-                /* FIXME: can this really happen? */
-                List<?> values = ((List<?>) o);
-                if (compare(values, srcAttr) != 0) {
-                    differs = true;
-                }
-            }
+        	Object value = srcNe.next();
 
-            if (value != null) toReplaceAttr.add(value);
+        	if (value != null) {
+        		toReplaceAttr.add(value);
 
-            if (!dstAttrValues.contains(value)) {
-                differs = true;
-            }
+        		// Handle binary attribute specifically
+        		if (value.getClass().isAssignableFrom(byte[].class)) {
+        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) value);
+        			for (Object dstValue : dstAttrValues) {
+        				// make sure destination value is a byte[] too
+        				if (dstValue.getClass().isAssignableFrom(String.class)) {
+        					dstValue = ((String) dstValue).getBytes();
+        				}
+        				if (!dstValue.getClass().isAssignableFrom(byte[].class)) {
+        					differs = true;
+        					break;
+        				}
+
+        				ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
+        				if (srcBuff.compareTo(destBuff) != 0) {
+        					differs = true;
+        					break;
+        				}
+        			}
+        		} else {
+        			if (!dstAttrValues.contains(value)) {
+        				differs = true;
+        			}
+        		}
+        	}
         }
 
         // check if there are any values in dstAttr not in srcAttr
-        Iterator<String> dstIt = dstAttrValues.iterator(); 
+        Iterator<Object> dstIt = dstAttrValues.iterator(); 
         while (dstIt.hasNext()) {
-            value = dstIt.next();
-            if (!toReplaceAttr.contains(value)) {
-                differs = true;
-                break;
-            }
+        	Object value = dstIt.next();
+
+        	// Handle binary attribute specifically
+        	if (value.getClass().isAssignableFrom(byte[].class)) {
+        		ByteBuffer destBuff = ByteBuffer.wrap((byte[]) value);
+
+        		NamingEnumeration<?> toReplaceAttrValues = toReplaceAttr.getAll();      
+
+        		while (toReplaceAttrValues.hasMore()) {
+        			Object o = toReplaceAttrValues.next();
+
+        			// make sure source value is a byte[] too
+        			if (o.getClass().isAssignableFrom(String.class)) {
+        				o = ((String) o).getBytes();
+        			}
+        			if (!o.getClass().isAssignableFrom(byte[].class)) {
+        				differs = true;
+        				break;
+        			}
+
+        			ByteBuffer toReplaceBuff = ByteBuffer.wrap((byte[]) o);
+        			if (toReplaceBuff.compareTo(destBuff) != 0) {
+        				differs = true;
+        				break;
+        			}
+        		}
+        	} else {
+        		if (!toReplaceAttr.contains(value)) {
+        			differs = true;
+        			break;
+        		}
+        	}
         }
 
         if (differs) {
@@ -603,35 +632,36 @@ public final class BeanComparator {
     private static ModificationItem mergeAttributes(Attribute srcAttr, Attribute dstAttr) throws NamingException {
 
         // read in all values from dstAttr
-        List<String> dstAttrValues = new ArrayList<String>(dstAttr.size());
+        List<Object> dstAttrValues = new ArrayList<Object>(dstAttr.size());
         NamingEnumeration<?> dstNe = dstAttr.getAll();			
         while (dstNe.hasMore()) {
             Object o = dstNe.next();
-            if (o.getClass() == String.class) {
                 dstAttrValues.add((String) o);
-            } else if (o.getClass().isAssignableFrom(byte[].class)) {
-                dstAttrValues.add(new String((byte[]) o));
-            }
         }
 
         // check if there are any extra values to be added from the source attribute
         Attribute addValuesAttr = new BasicAttribute(srcAttr.getID());
         NamingEnumeration<?> srcNe = srcAttr.getAll();
-        String value;
+        Object value;
         while (srcNe.hasMore()) {
-            value = null;
-            Object o = srcNe.next();
-            if (o.getClass() == String.class) {
-                value = (String) o;
-            } else if (o.getClass().isAssignableFrom(byte[].class)) {
-                value = new String((byte[]) o);
-            }
+        	value = srcNe.next();
 
-            if (value != null) {
-                if (!dstAttrValues.contains(value)) {
-                    addValuesAttr.add(value);
-                }
-            }
+        	if (value != null) {
+        		if (value.getClass().isAssignableFrom(byte[].class)) {
+        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) value);      
+
+        			for (Object dstValue : dstAttrValues) {
+        				ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
+        				if (srcBuff.compareTo(destBuff) != 0) {
+        					addValuesAttr.add(value);
+        				} 
+        			}
+        		} else {
+        			if (!dstAttrValues.contains(value)) {
+        				addValuesAttr.add(value);
+        			}
+        		}
+        	}
         }
 
         if (addValuesAttr.size() > 0) {
@@ -639,25 +669,6 @@ public final class BeanComparator {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Compare the bean as requested by the comparator interface.
-     * @param l the values
-     * @param attr
-     * @return
-     */
-    private static int compare(final List<?> l, final Attribute attr) {
-        if (l.size() != attr.size()) {
-            return l.size() - attr.size();
-        }
-        Iterator<?> lIter = l.iterator();
-        while (lIter.hasNext()) {
-            if (!attr.contains(lIter.next())) {
-                return -1;
-            }
-        }
-        return 0;
     }
 
     /**

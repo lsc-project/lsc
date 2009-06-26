@@ -126,35 +126,28 @@ public class top extends LscObject {
 						// TODO: check the following : no need to call a method
 						// on a empty value ?
 						// localMethod.invoke(this, new Object[] {});
-					    LOGGER.debug("No need to call a method with an empty value ... (" + paramName + ")");
-					} else if (returnType == String.class) {
-						if (toReturnTypes != null && toReturnTypes[0] == String.class) {
-							localMethod.invoke(this, new Object[] { returnedObject });
+						LOGGER.debug("No need to call a method with an empty value ... (" + paramName + ")");
+					} else {
+						if (toReturnTypes != null && toReturnTypes[0] == returnType) {
+							LOGGER.debug("Method invocation: " + localMethod.getName());
+							try {
+								localMethod.invoke(this, new Object[] { returnedObject });
+							} catch (IllegalArgumentException e) {
+								LOGGER.error("Bad argument invoking " + localMethod.getName() + " for attribute " + paramName);
+								e.printStackTrace();
+							}
 						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							paramsToUse = new ArrayList<Object>();
-							paramsToUse.add(returnedObject);
-							localMethod.invoke(this, new Object[] { paramsToUse });
+							LOGGER.debug("Method invocation: " + localMethod.getName());
+							try {
+								paramsToUse = new ArrayList<Object>();
+								paramsToUse.add(returnedObject);
+								localMethod.invoke(this, new Object[] { paramsToUse });
+							} catch (IllegalArgumentException e) {
+								LOGGER.error("Bad argument invoking " + localMethod.getName() + " for attribute " + paramName);
+								e.printStackTrace();
+							}
 						} else {
-							LOGGER.error("Unable to manage translation from String to "	+ toReturnTypes[0] + " for " + paramName+ "!");
-						}
-					} else if (returnType == Date.class) {
-						if (toReturnTypes != null && toReturnTypes[0] == Date.class) {
-							localMethod.invoke(this, new Object[] { returnedObject });
-						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							paramsToUse = new ArrayList<Object>();
-							paramsToUse.add(returnedObject);
-							localMethod.invoke(this, new Object[] { paramsToUse });
-						} else {
-							LOGGER.error("Unable to manage translation from Date to " + toReturnTypes[0] + " for " + paramName+ "!");
-						}
-					} else if (returnType == List.class) {
-						if (toReturnTypes != null && toReturnTypes[0] == String.class) {
-							LOGGER.error("Unable to manage translation from List to String for " + paramName+ "!");
-						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							LOGGER.debug("Method invocation : " + localMethod.getName());
-							localMethod.invoke(this, new Object[] { returnedObject });
-						} else {
-							LOGGER.error("Unable to manage translation from List to " + toReturnTypes[0] + " for " + paramName+ "!");
+							LOGGER.error("Unable to manage translation from " + returnType + " to " + toReturnTypes[0] + " for " + paramName+ "!");
 						}
 					}
 				} else {

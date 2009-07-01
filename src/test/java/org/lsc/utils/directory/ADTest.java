@@ -107,7 +107,7 @@ public class ADTest extends TestCase {
     	long secondsSinceReference = (now.getTimeInMillis() - then.getTimeInMillis()) / 1000;
     	int numWeeksFromReference = (int)(secondsSinceReference / (60 * 60 * 24 * 7));
     	
-    	assertEquals(numWeeksFromReference, numWeeksFromLastLogon);
+    	assertTrue(numWeeksFromReference <= numWeeksFromLastLogon + 1 && numWeeksFromReference >= numWeeksFromLastLogon - 1);
     }
 
 }

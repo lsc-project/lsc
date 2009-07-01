@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.ScriptableJndiServices;
@@ -125,17 +126,35 @@ public final class JScriptEvaluator {
 
     @SuppressWarnings("unchecked")
     public static List<String> evalToStringList(final String expression,
-            final Map<String, Object> params) {
-        Object result = getInstance().instanceEval(expression, params);
-        if(result != null && result.getClass().isAssignableFrom(List.class)) {
-            return (List<String>)result;
-        } else {
-            List<String> resultsArray = new ArrayList<String>();
-            resultsArray.add(Context.toString(result));
-            return resultsArray;
-        }
-    }
-    
+			final Map<String, Object> params)
+	{
+		Object result = getInstance().instanceEval(expression, params);
+		
+		// First try to convert to Array, else to List, and finally to String
+		try
+		{
+			Object[] resultsRealArray = (Object[]) Context.jsToJava(result, Object[].class);
+			List<String> resultsArray = new ArrayList<String>();
+			for (Object resultValue : resultsRealArray)
+			{
+				resultsArray.add(resultValue.toString());
+			}
+			return resultsArray;
+		}
+		catch (Exception e) {} // try next approach
+		
+		try
+		{
+			Object resultsArray = Context.jsToJava(result, List.class);
+			return (List<String>) resultsArray;
+		}
+		catch (Exception e) {} // try next approach
+
+		List<String> resultsArray = new ArrayList<String>();
+		resultsArray.add(Context.toString(result));
+		return resultsArray;
+	}
+
     public static Boolean evalToBoolean(final String expression, final Map<String, Object> params) {
         return Context.toBoolean(getInstance().instanceEval(expression, params));
     }

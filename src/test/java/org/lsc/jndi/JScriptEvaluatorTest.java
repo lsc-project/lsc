@@ -47,57 +47,106 @@ package org.lsc.jndi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
-
-import org.lsc.utils.JScriptEvaluator;
 
 import junit.framework.TestCase;
 
+import org.lsc.beans.AbstractBean;
+import org.lsc.beans.personBean;
+import org.lsc.utils.JScriptEvaluator;
+
 /**
  * Test different use cases of this JScript evaluator
+ * 
  * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
-public class JScriptEvaluatorTest extends TestCase {
+public class JScriptEvaluatorTest extends TestCase
+{
 
-	public void testOk() throws IllegalAccessException, InstantiationException, InvocationTargetException {
+	public void testOk()
+	{
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
-		assertEquals(JScriptEvaluator.evalToString("srcAttr.get()", table), "b");
+		assertEquals("b", JScriptEvaluator.evalToString("srcAttr.get()", table));
 	}
 
-	public void testNk() throws IllegalAccessException, InstantiationException, InvocationTargetException {
+	public void testNk()
+	{
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
-		try {
+		try
+		{
 			assertEquals(JScriptEvaluator.evalToString("src.get()", table), "b");
 			assertTrue(false);
-		} catch(org.mozilla.javascript.EcmaError e) {
+		}
+		catch (org.mozilla.javascript.EcmaError e)
+		{
 			assertTrue(true);
 		}
+
+		try
+		{
+			assertEquals(JScriptEvaluator.evalToStringList("src.get()", table), "b");
+			assertTrue(false);
+		}
+		catch (org.mozilla.javascript.EcmaError e)
+		{
+			assertTrue(true);
+		}
+
 	}
 
-	public void testOk2() throws IllegalAccessException, InstantiationException, InvocationTargetException {
+	public void testOk2()
+	{
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("sn", new BasicAttribute("sn", "Doe"));
 		table.put("givenName", new BasicAttribute("givenName", "John"));
 		assertEquals(JScriptEvaluator.evalToString("givenName.get() + ' ' + sn.get()", table), "John Doe");
 	}
 
-//	public void testOk3() throws IllegalAccessException, InstantiationException, InvocationTargetException {
-//		Map<String, Object> table = new HashMap<String, Object>();
-//		Attribute sn = new BasicAttribute("sn", "Doe");
-//		Attribute givenName = new BasicAttribute("givenName", "John");
-//		inetOrgPersonBean srcIopb = new inetOrgPersonBean();
-//		srcIopb.setAttribute(sn);
-//		srcIopb.setAttribute(givenName);
-//		table.put("srcBean", srcIopb);
-//		assertEquals(JScriptEvaluator.eval("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table), "John Doe");
-//	}
+	public void testList()
+	{
+		Map<String, Object> table = new HashMap<String, Object>();
+		Attribute sn = new BasicAttribute("sn", "Doe");
+		Attribute givenName = new BasicAttribute("givenName", "John");
+		Attribute cn = new BasicAttribute("cn");
+		cn.add("John Doe");
+		cn.add("DOE John");
+		AbstractBean bean = (AbstractBean) new personBean();
+		bean.setAttribute(sn);
+		bean.setAttribute(givenName);
+		bean.setAttribute(cn);
 
-//	public void testOkLdap() throws IllegalAccessException, InstantiationException, InvocationTargetException {
-//		Map<String, Object> table = new HashMap<String, Object>();
-//		assertEquals(JScriptEvaluator.eval("ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table), "[People,lsc-project]");
-//	}
+		table.put("srcBean", bean);
+
+		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
+		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeValueById('sn')", table));
+
+		List<String> res = JScriptEvaluator.evalToStringList("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table);
+		assertNotNull(res);
+		assertEquals("John Doe", res.get(0));
+
+		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValuesById('cn')", table);
+		assertNotNull(res);
+		assertEquals(2, res.size());
+		assertTrue(res.contains("John Doe"));
+		assertTrue(res.contains("DOE John"));
+
+		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValuesById('nonexistent')", table);
+		assertNotNull(res);
+		assertEquals(0, res.size());
+	}
+
+	public void testOkLdap()
+	{
+		Map<String, Object> table = new HashMap<String, Object>();
+
+		List<String> res = JScriptEvaluator.evalToStringList("ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
+		assertEquals("[People, dc=lsc-project,dc=org]", res.toString());
+	}
 }

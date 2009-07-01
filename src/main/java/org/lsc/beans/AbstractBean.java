@@ -431,19 +431,53 @@ public abstract class AbstractBean implements IBean {
     /**
      * Get the <b>first</b> value of an attribute from its name
      * 
-     * @param id the name
-     * @return the LDAP attribute
+     * @param id The attribute name (case insensitive)
+     * @return String The first value of the attribute, or the empty string ("")
      * @throws NamingException
+     * @deprecated
      */
-    public final String getAttributeValueById(final String id) throws NamingException {
-        // use lower case since attribute names are case-insensitive
-        Attribute attribute = attrs.get(id.toLowerCase());
-        String result = "";
-        if (attribute != null && attribute.size() > 0) {
-            result = attribute.get(0).toString();
-        }
-        return result;
-    }
+    public final String getAttributeValueById(final String id)
+			throws NamingException
+	{
+		return getAttributeFirstValueById(id);
+	}
+
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 */
+	public final String getAttributeFirstValueById(final String id)
+			throws NamingException
+	{
+		List<String> allValues = getAttributeValuesById(id);
+		return allValues.size() >= 1 ? allValues.get(0) : "";
+	}
+
+	/**
+	 * Get all values of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return List<String> List of attribute values, or an empty list
+	 * @throws NamingException
+	 */
+	public final List<String> getAttributeValuesById(final String id)
+			throws NamingException
+	{
+		List<String> resultsArray = new ArrayList<String>();
+
+		Attribute attribute = getAttributeById(id);
+		for (int i = 0; attribute != null && i < attribute.size(); i++)
+		{
+			resultsArray.add(attribute.get(i).toString());
+		}
+
+		return resultsArray;
+	}
 
 
     /**

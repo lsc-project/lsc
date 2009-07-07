@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
@@ -66,6 +67,7 @@ import org.apache.log4j.Logger;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
+import org.lsc.beans.AbstractBean;
 
 /**
  * This class is an abstract generic but configurable implementation to get data
@@ -210,6 +212,36 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		return objToFill;
+	}
+
+	/**
+	 * Map the ldap search result into a abstractbean inherited object.
+	 * 
+	 * @param sr the ldap search result
+	 * @param objToFill
+	 *            the original object to fill
+	 * 
+	 * @return the object modified
+	 * 
+	 * @throws NamingException
+	 *             thrown if a directory exception is encountered while
+	 *             switching to the Java POJO
+	 */
+	public final AbstractBean getBeanFromSR(final SearchResult sr,
+			final AbstractBean beanToFill) throws NamingException {
+
+		if (sr == null)
+			return null;
+
+		// get dn
+		beanToFill.setDistinguishName(sr.getNameInNamespace());
+		
+		NamingEnumeration<?> ne = sr.getAttributes().getAll();
+		while (ne.hasMore()) {
+			Attribute attr = (Attribute) ne.next();
+			beanToFill.setAttribute(attr);
+		}
+		return beanToFill;
 	}
 
 	/**

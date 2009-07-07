@@ -42,36 +42,43 @@
  *         Jonathan Clarke <jon@lsc-project.org>
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
- */
-package org.lsc.service;
+ */package org.lsc.service;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.sql.SQLException;
 
-import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
 
-import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 
-/**
- * @author rschermesser
- *
- */
-public interface ISrcService {
-    /**
-     * The simple object getter according to its identifier.
-     * @param bean base object
-     * @param obj The data identifier in the directory - must return a unique
-	 *        directory entry
-     * @return the object or null if not found
-     * @throws May throw a NamingException if the object is not found in the directory,
-     * 			or if more than one object would be returned.
-     */
-    AbstractBean getBean(AbstractBean bean, Entry<String, LscAttributes> obj) throws NamingException;
+import com.ibatis.sqlmap.client.extensions.ParameterSetter;
+import com.ibatis.sqlmap.client.extensions.ResultGetter;
+import com.ibatis.sqlmap.client.extensions.TypeHandlerCallback;
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
+/**
+ * This class provides handling of all types to AbstractBean
+ * Must add &lt;typeHandler javaType="abstractBean" callback="org.lsc.service.AbstractBeanTypeHandler"/&gt;
+ * in SqlMap config file
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ */
+public class AttributeTypeHandler implements TypeHandlerCallback {
+
+	public Object getResult(ResultGetter getter) throws SQLException {
+		if(!getter.wasNull()) {
+			AbstractBean.setMetadata(getter.getResultSet().getMetaData());
+			Attribute attribute = new BasicAttribute(getter.getColumnName(), getter.getObject());
+			return attribute;
+		} else 
+			return null;
+	}
+
+	public void setParameter(ParameterSetter setter, Object parameter)
+			throws SQLException {
+        setter.setObject(parameter);
+	}
+
+	public Object valueOf(String value) {
+		return value;
+	}
+
 }

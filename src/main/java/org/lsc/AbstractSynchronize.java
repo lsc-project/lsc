@@ -45,8 +45,6 @@
  */
 package org.lsc;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,7 +52,6 @@ import java.util.Map.Entry;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
-import javax.naming.ServiceUnavailableException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -71,8 +68,6 @@ import org.lsc.jndi.IJndiDstService;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
-import org.lsc.objects.top;
-import org.lsc.objects.flat.fTop;
 import org.lsc.service.ISrcService;
 import org.lsc.utils.I18n;
 import org.lsc.utils.JScriptEvaluator;
@@ -170,7 +165,8 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
         
         JndiModifications jm = null;
-        LscObject srcObject = null;
+//        LscObject srcObject = null;
+        AbstractBean bean = null;
         
         /** Hash table to pass objects into JavaScript condition */
         Map<String, Object> conditionObjects = null;
@@ -183,10 +179,10 @@ public abstract class AbstractSynchronize {
 
             try {
                 // Search for the corresponding object in the source
-                srcObject = srcService.getObject(id);
+            	bean = srcService.getBean(bean, id);
 
                 // If we didn't find the object in the source, delete it in the destination
-                if (srcObject == null) {
+                if (bean == null) {
                     // Retrieve condition to evaluate before deleting
                     Boolean doDelete = null;
                     String conditionString = syncOptions.getDeleteCondition();
@@ -199,7 +195,7 @@ public abstract class AbstractSynchronize {
                     } else {
                         // If condition is based on dstBean, retrieve the full object from destination
 	                    if (conditionString.contains("dstBean")) {
-	                        AbstractBean bean = dstJndiService.getBean(id);
+//	                        AbstractBean bean = dstJndiService.getBean(id);
 
 	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
 	                        if (bean == null) {
@@ -280,15 +276,13 @@ public abstract class AbstractSynchronize {
      *                the source service (JDBC or JNDI)
      * @param dstService
      *                the JNDI destination service
-     * @param object
      * @param objectBean
      * @param customLibrary
      */
     protected final void synchronize2Ldap(final String syncName,
             final ISrcService srcService,
             final IJndiDstService dstService,
-            final top object,
-            final Class<? extends AbstractBean> objectBean,
+            final Class<AbstractBean> objectBean,
             final Object customLibrary) {
 
         // Get list of all entries from the source
@@ -313,10 +307,10 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
 
         JndiModifications jm = null;
-        LscObject srcObject = null;
+//        LscObject srcObject = null;
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
         // store method to obtain source bean
-        Method beanGetInstanceMethod = null;
+//        Method beanGetInstanceMethod = null;
         AbstractBean srcBean = null;
         AbstractBean dstBean = null;
 
@@ -328,34 +322,34 @@ public abstract class AbstractSynchronize {
             countAll++;
 
             Entry<String, LscAttributes> id = ids.next();
-            LOGGER.debug("Synchronizing " + object.getClass().getName() + " for " + id.getKey());
+            LOGGER.debug("Synchronizing " + syncName + " for " + id.getKey());
 
             try {
-                srcObject = srcService.getObject(id);
+                srcBean = srcService.getBean(objectBean.newInstance(), id);
 
                 /* Log an error if the source object could not be retrieved! This shouldn't happen. */
-                if(srcObject == null) {
+                if(srcBean == null) {
                     countError++;
                     LOGGER.error("Unable to get object for id=" + id.getKey());
                     continue;
                 }
 
-                // Specific JDBC - transform flat object into a normal object
-                if (fTop.class.isAssignableFrom(srcObject.getClass())) {
-                	top normalObject = object.getClass().newInstance();
-                	normalObject.setUpFromObject((fTop)srcObject);
-                	srcObject = normalObject;
-                }
+//                // Specific JDBC - transform flat object into a normal object
+//                if (fTop.class.isAssignableFrom(srcObject.getClass())) {
+//                	top normalObject = object.getClass().newInstance();
+//                	normalObject.setUpFromObject((fTop)srcObject);
+//                	srcObject = normalObject;
+//                }
 
-                if (beanGetInstanceMethod == null) {
-                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
-                }
+//                if (beanGetInstanceMethod == null) {
+//                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
+//                }
 
-                try {
-                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { srcObject });
-                } catch (InvocationTargetException ite) {
-                    throw ite.getCause();
-                }
+//                try {
+//                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { srcObject });
+//                } catch (InvocationTargetException ite) {
+//                    throw ite.getCause();
+//                }
 
                 // Search destination for matching object
                 dstBean = dstService.getBean(id);
@@ -473,7 +467,7 @@ public abstract class AbstractSynchronize {
 
         LOGGER.error(I18n.getMessage(null,
                 "org.lsc.messages.SYNC_ERROR", new Object[] {
-                jm.getDistinguishName(), str, "", except }), except);
+                (jm != null ? jm.getDistinguishName() : ""), str, "", except }), except);
 
         if (jm != null) {
             LOGGER.error(jm);

@@ -45,33 +45,60 @@
  */
 package org.lsc.service;
 
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.naming.NamingException;
-
-import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.apache.log4j.Logger;
+import org.lsc.AbstractGenerator;
 
 /**
- * @author rschermesser
- *
+ * This class provides the data schema by reading the request schema
+ * via iBatis
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public interface ISrcService {
-    /**
-     * The simple object getter according to its identifier.
-     * @param bean base object
-     * @param obj The data identifier in the directory - must return a unique
-	 *        directory entry
-     * @return the object or null if not found
-     * @throws May throw a NamingException if the object is not found in the directory,
-     * 			or if more than one object would be returned.
-     */
-    AbstractBean getBean(AbstractBean bean, Entry<String, LscAttributes> obj) throws NamingException;
+public class IBatisDataSchemaProvider implements DataSchemaProvider {
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
+	private ResultSetMetaData metadata;
+	
+	private Map<String, String> metadataCache;
+	
+    /** This is the local logger. */
+    public static final Logger LOGGER = 
+        Logger.getLogger(AbstractGenerator.class);
+
+    public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
+    	this.metadata = metadata;
+    	metadataCache = new HashMap<String, String>();
+    	try {
+    		for(int i = 1; i <= metadata.getColumnCount(); i++) {
+    			metadataCache.put(metadata.getColumnLabel(i), metadata.getColumnTypeName(i));
+    		}
+    	} catch (SQLException e) {
+    		
+    	}
+    }
+    
+    
+	public Collection<String> getElementsName() {
+		return metadataCache.keySet();
+	}
+
+	public Class<?> getElementSingleType(String elementName) {
+		return String.class;
+	}
+
+	public boolean isElementMandatory(String elementName) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * Never return true, or maybe in a 3D database implementation :)
+	 * @return false 
+	 */
+	public boolean isElementMultivalued(String elementName) {
+		return false;
+	}
 }

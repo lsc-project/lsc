@@ -43,35 +43,15 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.service;
-
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.naming.NamingException;
-
-import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+package org.lsc.beans;
 
 /**
- * @author rschermesser
+ * Empty simple bean
  *
- */
-public interface ISrcService {
-    /**
-     * The simple object getter according to its identifier.
-     * @param bean base object
-     * @param obj The data identifier in the directory - must return a unique
-	 *        directory entry
-     * @return the object or null if not found
-     * @throws May throw a NamingException if the object is not found in the directory,
-     * 			or if more than one object would be returned.
-     */
-    AbstractBean getBean(AbstractBean bean, Entry<String, LscAttributes> obj) throws NamingException;
+ * May be override by any subclass if neede
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ */
+public class SimpleBean extends AbstractBean {
+
 }

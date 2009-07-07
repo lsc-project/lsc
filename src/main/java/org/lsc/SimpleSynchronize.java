@@ -55,7 +55,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.lsc.beans.AbstractBean;
 import org.lsc.jndi.IJndiDstService;
-import org.lsc.objects.top;
 import org.lsc.service.ISrcService;
 import org.lsc.utils.LSCStructuralLogger;
 
@@ -198,6 +197,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
     }
     
 
+    private void checkTaskOldProperty(String taskName, String propertyName, String message) {
+   		String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
+   		LOGGER.fatal(errorMessage);
+   		throw new ExceptionInInitializerError(errorMessage);
+    }
+    
     private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
     	String value = props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
     	
@@ -233,7 +238,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
             // Get all properties
             // TODO : nice error message if a class name is specified but doesn't exist
-            String objectClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, OBJECT_PROPS_PREFIX);
+            checkTaskOldProperty(taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
             String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
             String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
             String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
@@ -258,7 +263,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
                             + prefix + SRCSERVICE_PROPS_PREFIX);
                     
                     Constructor<?> constrSrcJndiService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class, String.class });
-                    srcService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties, objectClassName });
+                    srcService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties });
 
                     break;
                 case db2ldap:
@@ -275,9 +280,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     clean2Ldap(taskName, srcService, dstJndiService);
                     break;
                 case sync:
-                    top taskObject = (top) Class.forName(objectClassName).newInstance();
-                    Class<? extends AbstractBean> taskBean = (Class<? extends AbstractBean>) Class.forName(beanClassName);
-                    synchronize2Ldap(taskName, srcService, dstJndiService, taskObject, taskBean, customLibrary);
+                    Class<AbstractBean> taskBean = (Class<AbstractBean>) Class.forName(beanClassName);
+                    synchronize2Ldap(taskName, srcService, dstJndiService, taskBean, customLibrary);
                     break;
                 default:        
                     //Should not happen

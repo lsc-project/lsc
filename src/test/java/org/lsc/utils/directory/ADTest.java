@@ -46,7 +46,6 @@
 package org.lsc.utils.directory;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import junit.framework.TestCase;
 

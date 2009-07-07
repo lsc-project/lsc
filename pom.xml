@@ -165,7 +165,7 @@
 				<configuration>
 					<instrumentation>
 						<ignores>
-							<ignore>org.lsc.*Test*</ignore>
+							<ignore>*Test</ignore>
 							<ignore>org.lsc.opends.EmbeddedOpenDS</ignore>
 							<ignore>org.lsc.utils.LdapServer</ignore>
 						</ignores>
@@ -271,21 +271,21 @@
 			<url>http://lsc-project.org/maven</url>
 		</repository>
 	</repositories>
-	<dependencies>
+	<dependencies><!--
 		<dependency>
-			<groupId>com.ibatis</groupId>
-			<artifactId>ibatis2-common</artifactId>
-			<version>2.1.7.597</version>
+			<groupId>org.apache.ibatis</groupId>
+			<artifactId>ibatis-common</artifactId>
+			<version>2.3.4.726</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ibatis</groupId>
-			<artifactId>ibatis2-dao</artifactId>
-			<version>2.1.7.597</version>
+			<groupId>org.apache.ibatis</groupId>
+			<artifactId>ibatis-dao</artifactId>
+			<version>2.3.4.726</version>
 		</dependency>
-		<dependency>
-			<groupId>com.ibatis</groupId>
-			<artifactId>ibatis2-sqlmap</artifactId>
-			<version>2.1.7.597</version>
+		--><dependency>
+			<groupId>org.apache.ibatis</groupId>
+			<artifactId>ibatis-sqlmap</artifactId>
+			<version>2.3.4.726</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
@@ -417,10 +417,6 @@
 			</releases>
 		</pluginRepository>
 	</pluginRepositories>
-	<dependencyManagement>
-		<dependencies>
-		</dependencies>
-	</dependencyManagement>
 	<distributionManagement>
 		<repository>
 			<id>lsc-project.org</id>

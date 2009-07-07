@@ -4,8 +4,7 @@
 package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
+
 import javax.naming.NamingException;
 
 import org.lsc.jndi.JndiModifications;

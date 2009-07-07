@@ -50,10 +50,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
-import org.lsc.jndi.JndiServices;
 import org.lsc.utils.JScriptEvaluator;
-import org.mozilla.javascript.EcmaError;
 
 public class PropertiesBasedSyncOptionsTest extends TestCase {
 

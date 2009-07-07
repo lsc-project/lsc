@@ -49,11 +49,10 @@ import java.net.MalformedURLException;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
-import javax.naming.SizeLimitExceededException;
-
-import org.lsc.utils.JScriptEvaluator;
 
 import junit.framework.TestCase;
+
+import org.lsc.utils.JScriptEvaluator;
 
 /**
  * Test LDAP function library.

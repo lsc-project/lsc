@@ -45,31 +45,26 @@
  */
 package org.lsc;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import junit.framework.TestCase;
+
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.personBean;
 import org.lsc.jndi.JndiServices;
-import org.lsc.jndi.ScriptableJndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
-import org.lsc.objects.top;
 import org.lsc.service.ISrcService;
 import org.lsc.utils.I18n;
 import org.lsc.utils.directory.LDAP;
-
-import junit.framework.TestCase;
 
 /**
  * This test case attempts to reproduce a typical ldap2ldap setup via
@@ -118,10 +113,8 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues.put("sn", "SN0001");
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
-		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." +  TASK_NAME + ".srcService"), "org.lsc.objects.person");
-		LscObject srcObject = srcService.getObject(ids.entrySet().iterator().next());
-		
-		AbstractBean srcBean = personBean.getInstance((top) srcObject);
+		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." +  TASK_NAME + ".srcService"));
+		AbstractBean srcBean = srcService.getBean(new personBean(), ids.entrySet().iterator().next());
 		String userPassword = srcBean.getAttributeValueById("userPassword");
 		
 		// OpenDS automatically hashes the password using seeded SHA,

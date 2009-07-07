@@ -59,6 +59,7 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.log4j.Logger;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
+import org.lsc.beans.AbstractBean;
 import org.lsc.persistence.DaoConfig;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
@@ -79,17 +80,23 @@ public abstract class AbstractJdbcService implements ISrcService {
 	public abstract String getRequestNameForList();
 	
 	public abstract String getRequestNameForObject();
+	
+	private DataSchemaProvider cb;
 
 	public AbstractJdbcService() {
 		sqlMapper = DaoConfig.getSqlMapClient();
 	}
+	
+	public void setCallback(DataSchemaProvider cb) {
+		this.cb = cb;
+	}
 
-	public LscObject getObject(Entry<String, LscAttributes> ids) throws NamingException {
+	public AbstractBean getBean(AbstractBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
 		Map<String,Object> attributeMap = ids.getValue().getAttributes();
-		
 		try {
-			return (LscObject) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
+			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
+			return (AbstractBean) o;
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id="
 					+ id + " (" + e + ")", e);

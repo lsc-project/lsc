@@ -47,6 +47,7 @@ package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ import javax.naming.directory.SearchResult;
 import org.apache.log4j.Logger;
 import org.lsc.Configuration;
 import org.lsc.objects.top;
+import org.lsc.service.DataSchemaProvider;
 import org.lsc.utils.DateUtils;
 
 
@@ -109,6 +111,9 @@ public abstract class AbstractBean implements IBean {
 
     /** The distinguish name. */
     private String distinguishName;
+    
+    /** Data schema related to this bean - must always be set just after initiating the bean */
+    private DataSchemaProvider dataSchemaProvider;
 
     /**
      * The default constructor.
@@ -490,14 +495,17 @@ public abstract class AbstractBean implements IBean {
     }
 
     /**
-     * Set an attribute.
+     * Set an attribute. 
+     * API CHANGE: Do nothing if attribute is empty 
      *
      * @param attr
      *                the attribute to set
      */
     public final void setAttribute(final Attribute attr) {
         // use lower case since attribute names are case-insensitive
-        attrs.put(attr.getID().toLowerCase(), attr);
+    	if(attr != null && attr.size() > 0) {
+            attrs.put(attr.getID().toLowerCase(), attr);
+    	}
     }
 
     /**
@@ -609,4 +617,20 @@ public abstract class AbstractBean implements IBean {
 		}
 	}
 
+	public void setDataSchema(DataSchemaProvider dataSchema) {
+		this.dataSchemaProvider = dataSchema;
+	}
+
+	public DataSchemaProvider getDataSchema() {
+		return dataSchemaProvider;
+	}
+
+	/**
+	 * Manage something there !
+	 * @param metaData
+	 */
+	public static void setMetadata(ResultSetMetaData metaData) {
+		// TODO Auto-generated method stub
+		
+	}
 }

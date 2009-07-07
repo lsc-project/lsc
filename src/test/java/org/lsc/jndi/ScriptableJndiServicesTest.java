@@ -49,8 +49,6 @@ import javax.naming.NamingException;
 
 import junit.framework.TestCase;
 
-import org.lsc.jndi.ScriptableJndiServices;
-
 public class ScriptableJndiServicesTest extends TestCase {
 
 	public void testValuesOutOfRange() throws NamingException {

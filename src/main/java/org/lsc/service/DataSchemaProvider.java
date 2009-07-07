@@ -45,33 +45,41 @@
  */
 package org.lsc.service;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.naming.NamingException;
-
-import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import java.util.Collection;
 
 /**
- * @author rschermesser
- *
+ * This class represents the data schema, that is a list of element name and their Java types
+ * 
+ * In this class, elements may be either directory attributes or SQL request columns or any
+ * single format data subtype returned by the data source
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public interface ISrcService {
-    /**
-     * The simple object getter according to its identifier.
-     * @param bean base object
-     * @param obj The data identifier in the directory - must return a unique
-	 *        directory entry
-     * @return the object or null if not found
-     * @throws May throw a NamingException if the object is not found in the directory,
-     * 			or if more than one object would be returned.
-     */
-    AbstractBean getBean(AbstractBean bean, Entry<String, LscAttributes> obj) throws NamingException;
+public interface DataSchemaProvider {
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
+	/**
+	 * Return the list of elements name
+	 * @return the list of elements name
+	 */
+	public Collection<String> getElementsName();
+	
+	/**
+	 * Return the Java type of the specified element
+	 * @param elementName
+	 * @return
+	 */
+	public Class<?> getElementSingleType(String elementName);
+	
+	/**
+	 * Must the abstract bean include a value for the following attributes
+	 * Binded to SINGLE-VALUE directory attributes. Default for SQL columns  
+	 * @return element mandatory character
+	 */
+	public boolean isElementMultivalued(String elementName);
+	
+	/**
+	 * Must the abstract bean include a value for the following attributes
+	 * Binded to mandatory directory attributes or non null SQL columns  
+	 * @return element mandatory character
+	 */
+	public boolean isElementMandatory(String elementName);
 }

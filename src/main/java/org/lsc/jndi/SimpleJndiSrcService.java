@@ -54,8 +54,7 @@ import javax.naming.directory.SearchControls;
 
 import org.apache.log4j.Logger;
 import org.lsc.LscAttributes;
-import org.lsc.LscObject;
-import org.lsc.objects.top;
+import org.lsc.beans.AbstractBean;
 import org.lsc.service.ISrcService;
 
 
@@ -73,12 +72,6 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	private static final Logger LOGGER = Logger.getLogger(SimpleJndiSrcService.class);
 
 	/**
-	 * Preceding the object feeding, it will be instantiated from this
-	 * class.
-	 */
-	private Class<top> objectClass;
-
-	/**
 	 * Constructor adapted to the context properties and the bean class name
 	 * to instantiate.
 	 * 
@@ -88,14 +81,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * and feed up
 	 */
 	@SuppressWarnings("unchecked")
-	public SimpleJndiSrcService(final Properties props, final String objectClassName) {
+	public SimpleJndiSrcService(final Properties props) {
 		super(props);
-
-		try {
-			this.objectClass = (Class<top>) Class.forName(objectClassName);
-		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
-		}
 	}
 
 	/**
@@ -109,24 +96,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final LscObject getObject(final Entry<String, LscAttributes> ids) throws NamingException {
-		try {
-		    LscObject topObject = objectClass.newInstance();
-
-			return this.getObjectFromSR(get(ids), topObject);
-		} catch (InstantiationException e) {
-			LOGGER.error("Unable to instanciate simple object "
-					+ objectClass.getName()
-					+ " ! This is probably a programmer's error (" + e
-					+ ")", e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Unable to instanciate simple object "
-					+ objectClass.getName()
-					+ " ! This is probably a programmer's error (" + e
-					+ ")", e);
-		}
-
-		return null;
+	public final AbstractBean getBean(AbstractBean bean, final Entry<String, LscAttributes> ids) throws NamingException {
+		return this.getBeanFromSR(get(ids), bean);
 	}
 
 	/**

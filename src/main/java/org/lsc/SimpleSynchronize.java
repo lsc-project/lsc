@@ -197,10 +197,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
     }
     
 
-    private void checkTaskOldProperty(String taskName, String propertyName, String message) {
-   		String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
-   		LOGGER.fatal(errorMessage);
-   		throw new ExceptionInInitializerError(errorMessage);
+    private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
+    	if(props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
+       		String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
+       		LOGGER.fatal(errorMessage);
+       		throw new ExceptionInInitializerError(errorMessage);
+    	}
     }
     
     private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
@@ -238,7 +240,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
             // Get all properties
             // TODO : nice error message if a class name is specified but doesn't exist
-            checkTaskOldProperty(taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
+            checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
             String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
             String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
             String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
@@ -262,7 +264,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "."
                             + prefix + SRCSERVICE_PROPS_PREFIX);
                     
-                    Constructor<?> constrSrcJndiService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class, String.class });
+                    Constructor<?> constrSrcJndiService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class });
                     srcService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties });
 
                     break;
@@ -274,13 +276,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     return false;
             }
 
+            Class<AbstractBean> taskBean = (Class<AbstractBean>) Class.forName(beanClassName);
             // Do the work!
             switch(taskMode) {
                 case clean:
-                    clean2Ldap(taskName, srcService, dstJndiService);
+                    clean2Ldap(taskName, taskBean, srcService, dstJndiService);
                     break;
                 case sync:
-                    Class<AbstractBean> taskBean = (Class<AbstractBean>) Class.forName(beanClassName);
                     synchronize2Ldap(taskName, srcService, dstJndiService, taskBean, customLibrary);
                     break;
                 default:        

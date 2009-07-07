@@ -138,6 +138,7 @@ public abstract class AbstractSynchronize {
      *                the jndi destination service
      */
     protected final void clean2Ldap(final String syncName,
+    		final Class<AbstractBean> taskBeanClass,
             final ISrcService srcService,
             final IJndiDstService dstJndiService) {
 
@@ -166,10 +167,20 @@ public abstract class AbstractSynchronize {
         
         JndiModifications jm = null;
 //        LscObject srcObject = null;
-        AbstractBean bean = null;
         
         /** Hash table to pass objects into JavaScript condition */
         Map<String, Object> conditionObjects = null;
+        
+        AbstractBean taskBean;
+		try {
+			taskBean = taskBeanClass.newInstance();
+		} catch (InstantiationException e) {
+            LOGGER.error("Error while instanciating taskbean class: " + e, e);
+            return;
+		} catch (IllegalAccessException e) {
+            LOGGER.error("Error while instanciating taskbean class: " + e, e);
+            return;
+		}
         
         // Loop on all entries in the destination and delete them if they're not found in the source
         while (ids.hasNext()) {
@@ -179,10 +190,10 @@ public abstract class AbstractSynchronize {
 
             try {
                 // Search for the corresponding object in the source
-            	bean = srcService.getBean(bean, id);
+            	taskBean = srcService.getBean(taskBean, id);
 
                 // If we didn't find the object in the source, delete it in the destination
-                if (bean == null) {
+                if (taskBean == null) {
                     // Retrieve condition to evaluate before deleting
                     Boolean doDelete = null;
                     String conditionString = syncOptions.getDeleteCondition();
@@ -198,7 +209,7 @@ public abstract class AbstractSynchronize {
 //	                        AbstractBean bean = dstJndiService.getBean(id);
 
 	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
-	                        if (bean == null) {
+	                        if (taskBean == null) {
 	                            LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
 	                            countError++;
 	                            continue;
@@ -206,7 +217,7 @@ public abstract class AbstractSynchronize {
 
 	                        // Put the bean in a map to pass to JavaScript evaluator
 	                        conditionObjects = new HashMap<String, Object>();
-	                        conditionObjects.put("dstBean", bean);	                    	
+	                        conditionObjects.put("dstBean", taskBean);	                    	
 	                    }
 
 	                    // Evaluate if we have to do something

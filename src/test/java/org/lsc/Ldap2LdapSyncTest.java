@@ -115,7 +115,7 @@ public class Ldap2LdapSyncTest extends TestCase
 
 		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." +  TASK_NAME + ".srcService"));
 		AbstractBean srcBean = srcService.getBean(new personBean(), ids.entrySet().iterator().next());
-		String userPassword = srcBean.getAttributeValueById("userPassword");
+		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
 		
 		// OpenDS automatically hashes the password using seeded SHA,
 		// so we can't test the full value, just the beginning.

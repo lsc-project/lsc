@@ -172,15 +172,6 @@ public abstract class AbstractSynchronize {
         Map<String, Object> conditionObjects = null;
         
         AbstractBean taskBean;
-		try {
-			taskBean = taskBeanClass.newInstance();
-		} catch (InstantiationException e) {
-            LOGGER.error("Error while instanciating taskbean class: " + e, e);
-            return;
-		} catch (IllegalAccessException e) {
-            LOGGER.error("Error while instanciating taskbean class: " + e, e);
-            return;
-		}
         
         // Loop on all entries in the destination and delete them if they're not found in the source
         while (ids.hasNext()) {
@@ -189,6 +180,15 @@ public abstract class AbstractSynchronize {
             Entry<String, LscAttributes> id = ids.next();
 
             try {
+        		try {
+        			taskBean = taskBeanClass.newInstance();
+        		} catch (InstantiationException e) {
+                    LOGGER.error("Error while instanciating taskbean class: " + e, e);
+                    return;
+        		} catch (IllegalAccessException e) {
+                    LOGGER.error("Error while instanciating taskbean class: " + e, e);
+                    return;
+        		}
                 // Search for the corresponding object in the source
             	taskBean = srcService.getBean(taskBean, id);
 

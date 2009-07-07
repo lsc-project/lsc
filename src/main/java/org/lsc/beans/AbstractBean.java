@@ -478,7 +478,14 @@ public abstract class AbstractBean implements IBean {
 		Attribute attribute = getAttributeById(id);
 		for (int i = 0; attribute != null && i < attribute.size(); i++)
 		{
-			resultsArray.add(attribute.get(i).toString());
+			Object value = attribute.get(i);
+			if( value instanceof String) {
+				resultsArray.add((String)value);
+			} else if ( value instanceof byte[]) {
+				resultsArray.add(new String((byte[])value));
+			} else {
+				resultsArray.add(value.toString());
+			}
 		}
 
 		return resultsArray;

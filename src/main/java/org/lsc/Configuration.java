@@ -269,10 +269,10 @@ public class Configuration {
 	 *            the user defined location
 	 */
 	public static void setLocation(String configurationLocation) {
-		location = appendDirSeperator(configurationLocation);
+		location = appendDirSeparator(configurationLocation);
 	}
 	
-	private static String appendDirSeperator(String path) {
+	private static String appendDirSeparator(String path) {
 		String seperator = System.getProperty("file.separator");
 		if (!path.endsWith(seperator)) {
 			return path + seperator;
@@ -309,7 +309,7 @@ public class Configuration {
 			try
 			{
 				// convert the URL to a URI to reverse any character encoding (" " -> "%20" for example)
-				ret = appendDirSeperator(new File(propertiesURL.toURI().getPath()).getParent());
+				ret = appendDirSeparator(new File(propertiesURL.toURI().getPath()).getParent());
 			}
 			catch (URISyntaxException e)
 			{

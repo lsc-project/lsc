@@ -267,22 +267,7 @@ public abstract class AbstractBean implements IBean {
             Iterator<?> iter = values.iterator();
 
             while (iter.hasNext()) {
-            	Object valueObject = iter.next();
-            	
-            	// get a String from the value, whatever syntax it is in
-            	String value = null;
-            	if (valueObject instanceof byte[]) {
-            		value = new String((byte[])valueObject);
-            	} else {
-            		value = (String) valueObject;
-            	}
-                
-            	// clean up value
-            	value = value.trim();
-
-                if (value.length() > 0) {
-                    attr.add(value);
-                }
+                attr.add(iter.next());
             }
         }
 
@@ -473,7 +458,14 @@ public abstract class AbstractBean implements IBean {
 		Attribute attribute = getAttributeById(id);
 		for (int i = 0; attribute != null && i < attribute.size(); i++)
 		{
-			resultsArray.add(attribute.get(i).toString());
+			Object value = attribute.get(i);
+			String stringValue;
+			
+			// convert to String because this method only returns Strings
+			if (value instanceof byte[]) stringValue = new String((byte[]) value);
+			else stringValue = value.toString();
+				
+			resultsArray.add(stringValue);
 		}
 
 		return resultsArray;

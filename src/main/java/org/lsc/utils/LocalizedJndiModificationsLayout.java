@@ -203,7 +203,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 
 					// print value and base64 encode it if it's not a
 					// SAFE-STRING per RFC2849
-					String value = ne.next().toString();
+					String value = getStringValue(ne.next());
 					sb.append((isLdifSafeString(value) ? ": " + value : ":: " + toBase64(value)));
 
 					// new line
@@ -216,6 +216,17 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
         }
         return sb.toString();
     }
+
+	private String getStringValue(Object value) {
+		if (value instanceof byte[])
+		{
+			return new String((byte[]) value);
+		}
+		else
+		{
+			return value.toString();
+		}
+	}
 
 	private String toBase64(String value)
 	{

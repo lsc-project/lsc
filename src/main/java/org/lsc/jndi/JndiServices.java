@@ -325,33 +325,37 @@ public final class JndiServices {
      */
     public SearchResult getEntry(final String base, final String filter, 
             final SearchControls sc, final int scope) throws NamingException {
+    	//sanity checks
+    	String searchBase = base == null ? "" : base;
+    	String searchFilter = filter == null ? DEFAULT_FILTER : filter;
+    	
         NamingEnumeration<SearchResult> ne = null;
         try {
             sc.setSearchScope(scope);
             String rewrittenBase = null;
-            if (contextDn != null && base.toLowerCase().endsWith(contextDn.toLowerCase())) {
-                if (!base.equalsIgnoreCase(contextDn)) {
-                    rewrittenBase = base.substring(0, base.toLowerCase()
+            if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toLowerCase())) {
+                if (!searchBase.equalsIgnoreCase(contextDn)) {
+                    rewrittenBase = searchBase.substring(0, searchBase.toLowerCase()
                             .lastIndexOf(contextDn.toLowerCase()) - 1);
                 } else {
                     rewrittenBase = "";
                 }
             } else {
-                rewrittenBase = base;
+                rewrittenBase = searchBase;
             }
-            ne = ctx.search(rewrittenBase, filter, sc);
+            ne = ctx.search(rewrittenBase, searchFilter, sc);
         } catch (NamingException nex) {
-            LOGGER.error("Error while looking for " + filter + " in " + base + ": " + nex);
+            LOGGER.error("Error while looking for " + searchFilter + " in " + searchBase + ": " + nex);
             throw nex;
         }
         SearchResult sr = null;
         if (ne.hasMoreElements()) {
             sr = (SearchResult) ne.nextElement();
             if (ne.hasMoreElements()) {
-                LOGGER.error("Too many entries returned (base: \"" + base
-                        + "\", filter: \"" + filter + "\"");
-                throw new SizeLimitExceededException("Too many entries returned (base: \"" + base
-                        + "\", filter: \"" + filter + "\"");
+                LOGGER.error("Too many entries returned (base: \"" + searchBase
+                        + "\", filter: \"" + searchFilter + "\"");
+                throw new SizeLimitExceededException("Too many entries returned (base: \"" + searchBase
+                        + "\", filter: \"" + searchFilter + "\"");
             } else {
                 return sr;
             }
@@ -714,6 +718,10 @@ public final class JndiServices {
             final String filter, final int scope, final List<String> attrsNames) 
             throws NamingException {
 
+        // sanity checks
+        String searchBase = base == null ? "" : base;
+        String searchFilter = filter == null ? DEFAULT_FILTER : filter;
+    	
         Map<String, LscAttributes> res = new HashMap<String, LscAttributes>();
     	
     	if (attrsNames == null || attrsNames.size() == 0) {
@@ -750,7 +758,7 @@ public final class JndiServices {
 
             byte[] pagedResultsResponse = null;
             do {
-                NamingEnumeration<SearchResult> results = ctx.search(base, filter, constraints);
+                NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
 
                 if (results != null) {
                     Map<String, String> attrsValues = null;

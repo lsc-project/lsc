@@ -529,97 +529,155 @@ public final class BeanComparator {
      */
     private static ModificationItem compareAttribute(Attribute srcAttr, Attribute dstAttr) throws NamingException {
 
-        boolean differs = false;
+		// convert to easily comparable type
+		List<Object> srcAttrValues = attributeToList(srcAttr);
+		List<Object> dstAttrValues = attributeToList(dstAttr);
 
-        // read in all values from dstAttr
-        List<Object> dstAttrValues = new ArrayList<Object>(dstAttr.size());
-        NamingEnumeration<?> dstNe = dstAttr.getAll();			
-        while (dstNe.hasMore()) {
-        	dstAttrValues.add(dstNe.next());
-        }
+		if (!doAttributesMatch(srcAttrValues, dstAttrValues))
+		{
+			// build up replacement attribute
+			Attribute toReplaceAttr = new BasicAttribute(srcAttr.getID());
+			for (Object srcValue : srcAttrValues)
+			{
+				toReplaceAttr.add(srcValue);
+			}
 
-        // check if there are any values in srcAttr not in dstAttr
-        // and build up replacement attribute, in case
-        Attribute toReplaceAttr = new BasicAttribute(srcAttr.getID());
-        NamingEnumeration<?> srcNe = srcAttr.getAll();
-        while (srcNe.hasMore()) {
-        	Object srcValue = srcNe.next();
+			LOGGER.debug("Attribute " + dstAttr.getID() + ": source values are " + srcAttr + ", old values were " + dstAttr + ", new values are " + toReplaceAttr);
 
-        	if (srcValue != null) {
-        		toReplaceAttr.add(srcValue);
+			return new ModificationItem(DirContext.REPLACE_ATTRIBUTE, toReplaceAttr);
+		}
+		else return null;
 
-        		// Handle binary attribute specifically
-        		if (srcValue.getClass().isAssignableFrom(byte[].class)) {
-        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) srcValue);
-        			for (Object dstValue : dstAttrValues) {
-        				// make sure destination value is a byte[] too
-        				if (dstValue.getClass().isAssignableFrom(String.class)) {
-        					dstValue = ((String) dstValue).getBytes();
-        				}
-        				if (!dstValue.getClass().isAssignableFrom(byte[].class)) {
-        					differs = true;
-        					break;
-        				}
-
-        				ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
-        				if (srcBuff.compareTo(destBuff) != 0) {
-        					differs = true;
-        					break;
-        				}
-        			}
-        		} else {
-        			if (!dstAttrValues.contains(srcValue)) {
-        				differs = true;
-        			}
-        		}
-        	}
-        }
-
-        // check if there are any values in dstAttr not in srcAttr
-        Iterator<Object> dstIt = dstAttrValues.iterator(); 
-        while (dstIt.hasNext()) {
-        	Object dstValue = dstIt.next();
-
-        	// Handle binary attribute specifically
-        	if (dstValue.getClass().isAssignableFrom(byte[].class)) {
-        		ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
-
-        		NamingEnumeration<?> toReplaceAttrValues = toReplaceAttr.getAll();      
-
-        		while (toReplaceAttrValues.hasMore()) {
-        			Object o = toReplaceAttrValues.next();
-
-        			// make sure source value is a byte[] too
-        			if (o.getClass().isAssignableFrom(String.class)) {
-        				o = ((String) o).getBytes();
-        			}
-        			if (!o.getClass().isAssignableFrom(byte[].class)) {
-        				differs = true;
-        				break;
-        			}
-
-        			ByteBuffer toReplaceBuff = ByteBuffer.wrap((byte[]) o);
-        			if (toReplaceBuff.compareTo(destBuff) != 0) {
-        				differs = true;
-        				break;
-        			}
-        		}
-        	} else {
-        		if (!toReplaceAttr.contains(dstValue)) {
-        			differs = true;
-        			break;
-        		}
-        	}
-        }
-
-        if (differs) {
-            LOGGER.debug("Attribute " + dstAttr.getID() + ": source values are " + srcAttr + ", old values were " + dstAttr + ", new values are " + toReplaceAttr);
-            return new ModificationItem(DirContext.REPLACE_ATTRIBUTE, toReplaceAttr);
-        } else {
-            return null;
-        }
     }
 
+	/**
+	 * Compare two lists of values to see if they contain the same values. This
+	 * method is type-aware and will intelligently compare byte[], String, etc.
+	 * 
+	 * @param srcAttrValues
+	 * @param dstAttrValues
+	 * @return
+	 */
+	private static boolean doAttributesMatch(List<Object> srcAttrValues, List<Object> dstAttrValues)
+	{
+		// make sure value counts are the same
+		if (srcAttrValues.size() != dstAttrValues.size()) return false;
+
+		// check if there are any values in srcAttr not in dstAttr
+		if (!listContainsAll(dstAttrValues, srcAttrValues)) return false;
+
+		// check if there are any values in dstAttr not in srcAttr
+		if (!listContainsAll(srcAttrValues, dstAttrValues)) return false;
+
+		// looks ok!
+		return true;
+    }
+
+	/**
+	 * Check to make sure all needles are in the haystack. In other words each
+	 * value from the list needles must be in the list haystack. This method is
+	 * type-aware and will intelligently compare byte[], String, etc.
+	 * 
+	 * @param haystack
+	 *            List of Objects to find the needles in.
+	 * @param needles
+	 *            List of Objects to search for in the haystack.
+	 */
+	private static boolean listContainsAll(List<Object> haystack, List<Object> needles)
+	{
+		return (findMissingNeedles(haystack, needles).size() == 0);
+	}
+
+	/**
+	 * Find missing needles from a haystack. In other words, identify values in
+	 * the list of needles that are not in the haystack, and return them in a
+	 * new List. This method is type-aware and will intelligently compare
+	 * byte[], String, etc.
+	 * 
+	 * @param haystack
+	 *            List of Objects to find the needles in.
+	 * @param needles
+	 *            List of Objects to search for in the haystack.
+	 * @return
+	 */
+	private static List<Object> findMissingNeedles(List<Object> haystack, List<Object> needles)
+	{
+		List<Object> missingNeedles = new ArrayList<Object>();
+
+		for (Object needle : needles)
+		{
+			ByteBuffer needleBuff = null;
+
+			// use a byte buffer is needle is binary
+			if (needle.getClass().isAssignableFrom(byte[].class)) needleBuff = ByteBuffer.wrap((byte[]) needle);
+
+			boolean foundInHaystack = false;
+			for (Object haystackValue : haystack)
+			{
+				ByteBuffer haystackValueBuff = null;
+
+				// use a byte buffer if haystack value is binary
+				if (haystackValue.getClass().isAssignableFrom(byte[].class))
+				{
+					haystackValueBuff = ByteBuffer.wrap((byte[]) haystackValue);
+
+					// make sure we have a byte buffer for the needle too
+					if (needleBuff == null)
+					{
+						// if needle is binary, make this haystack value binary
+						if (needle.getClass().isAssignableFrom(String.class)) needleBuff = ByteBuffer.wrap(((String) needle).getBytes());
+						else continue;
+					}
+				}
+
+				// needleBuff is set if either needle or haystack value are binary
+				// do a binary comparison
+				if (needleBuff != null)
+				{
+					// make sure we have a byte buffer for haystack value too
+					if (haystackValueBuff == null)
+					{
+						if (haystackValue.getClass().isAssignableFrom(String.class)) haystackValueBuff = ByteBuffer.wrap(((String) haystackValue).getBytes());
+						else continue;
+					}
+
+					// binary comparison
+					if (haystackValueBuff.compareTo(needleBuff) == 0) foundInHaystack = true;
+				}
+				else
+				{
+					// fall back to standard compare (works well for String, int, boolean, etc)
+					if (haystackValue.equals(needle)) foundInHaystack = true;
+				}
+			}
+
+			if (!foundInHaystack) missingNeedles.add(needle);
+		}
+
+		return missingNeedles;
+	}
+
+	/**
+	 * Return an ArrayList containing all the Objects that are an Attribute's
+	 * values.
+	 * 
+	 * @param attr
+	 *            An Attribute containing values to extract.
+	 * @return ArrayList<Object> values as an array.
+	 * @throws NamingException
+	 */
+	private static List<Object> attributeToList(Attribute attr)
+			throws NamingException
+	{
+		List<Object> attrValues = new ArrayList<Object>(attr.size());
+		NamingEnumeration<?> ne = attr.getAll();
+		while (ne.hasMore())
+		{
+			attrValues.add(ne.next());
+		}
+		return attrValues;
+	}
+    
     /**
      * Merge two attributes and compute a modification item
      * 
@@ -633,39 +691,19 @@ public final class BeanComparator {
     private static ModificationItem mergeAttributes(Attribute srcAttr, Attribute dstAttr) throws NamingException {
 
         // read in all values from dstAttr
-        List<Object> dstAttrValues = new ArrayList<Object>(dstAttr.size());
-        NamingEnumeration<?> dstNe = dstAttr.getAll();			
-        while (dstNe.hasMore()) {
-            Object o = dstNe.next();
-                dstAttrValues.add((String) o);
-        }
+        List<Object> dstAttrValues = attributeToList(dstAttr);
+        List<Object> srcAttrValues = attributeToList(srcAttr);
 
         // check if there are any extra values to be added from the source attribute
-        Attribute addValuesAttr = new BasicAttribute(srcAttr.getID());
-        NamingEnumeration<?> srcNe = srcAttr.getAll();
-        Object value;
-        while (srcNe.hasMore()) {
-        	value = srcNe.next();
+        List<Object> missingValues = findMissingNeedles(dstAttrValues, srcAttrValues);
+        
+        if (missingValues.size() > 0) {
+        	// build an attribute to add missing values
+            Attribute addValuesAttr = new BasicAttribute(dstAttr.getID());
+            for (Object missingValue : missingValues) {
+				addValuesAttr.add(missingValue);
+			}
 
-        	if (value != null) {
-        		if (value.getClass().isAssignableFrom(byte[].class)) {
-        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) value);      
-
-        			for (Object dstValue : dstAttrValues) {
-        				ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
-        				if (srcBuff.compareTo(destBuff) != 0) {
-        					addValuesAttr.add(value);
-        				} 
-        			}
-        		} else {
-        			if (!dstAttrValues.contains(value)) {
-        				addValuesAttr.add(value);
-        			}
-        		}
-        	}
-        }
-
-        if (addValuesAttr.size() > 0) {
             return new ModificationItem(DirContext.ADD_ATTRIBUTE, addValuesAttr);
         } else {
             return null;

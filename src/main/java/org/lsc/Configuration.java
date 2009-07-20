@@ -62,7 +62,9 @@ import java.util.StringTokenizer;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.ietf.ldap.LDAPUrl;
 
 /**
@@ -465,5 +467,30 @@ public class Configuration {
 
 	public static String getSeparator() {
 		return System.getProperty("file.separator");
+	}
+	
+	/**
+	 * Set up configuration for the given location, including log4j.
+	 * IMPORTANT: don't log ANYTHING before calling this method!
+	 * @param configurationLocation
+	 */
+	public static void setUp(String configurationLocation)
+	{
+		if (configurationLocation != null)
+		{
+			Configuration.setLocation(configurationLocation);
+		}
+
+		// setup LOG4J
+		// first, reset the configuration because LOG4J automatically loads it from properties
+		// while this may be the Java way, it's not our way, we like real text files, not JARs.
+		LogManager.resetConfiguration();
+
+		String log4jPropertiesFile = Configuration.getConfigurationDirectory() + "log4j.properties";
+		PropertyConfigurator.configure(log4jPropertiesFile);
+
+		// WARNING: don't log anything before HERE!
+
+		LOGGER.debug("Reading configuration from " + Configuration.getConfigurationDirectory());
 	}
 }

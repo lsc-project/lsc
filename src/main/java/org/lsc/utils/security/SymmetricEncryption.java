@@ -257,12 +257,8 @@ public class SymmetricEncryption
 
 			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f"))
 			{
-				String configurationLocation = cmdLine.getOptionValue("f");
-				if(configurationLocation != null)
-				{
-					Configuration.setLocation(configurationLocation);
-				}
-				PropertyConfigurator.configure(new File(Configuration.getConfigurationDirectory(), "log4j.properties").toURI().toURL());
+				// if a configuration directory was set on command line, use it to set up Configuration
+				Configuration.setUp(cmdLine.getOptionValue("f"));
             }
 			else
 			{
@@ -270,9 +266,6 @@ public class SymmetricEncryption
 				formatter.printHelp("lsc", options);
                 System.exit(1);
             }
-        } catch (MalformedURLException ex) {
-			System.out.println("Unable to load configuration file : " + argv + " (" + ex + ")");
-            System.exit(1);
 		} catch (ParseException e) {
             System.out.println("Unable to parse options : " + argv + " (" + e + ")");
             System.exit(1);

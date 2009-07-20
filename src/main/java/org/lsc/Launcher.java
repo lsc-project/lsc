@@ -118,22 +118,8 @@ public final class Launcher {
      */
     public void run() {
         try {
-        	// if a configuration directory was set on command line, save it to Configuration
-        	if(configurationLocation != null) {
-        		Configuration.setLocation(configurationLocation);
-        	}
-        	        	
-        	// setup LOG4J
-        	// first, reset the configuration because LOG4J automatically loads it from properties
-        	// while this may be the Java way, it's not our way, we like real text files, not JARs.
-        	LogManager.resetConfiguration();
-
-        	String log4jPropertiesFile = Configuration.getConfigurationDirectory() + "log4j.properties";
-        	PropertyConfigurator.configure(log4jPropertiesFile);
-        	
-        	// WARNING: don't log anything before HERE!
-        	
-    		LOGGER.debug("Reading configuration from " + Configuration.getConfigurationDirectory());
+        	// if a configuration directory was set on command line, use it to set up Configuration
+        	Configuration.setUp(configurationLocation);
         	
         	// do the work!
     		sync.launch(syncType, cleanType);

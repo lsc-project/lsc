@@ -45,6 +45,8 @@
  */
 package org.lsc;
 
+import java.io.File;
+
 import javax.naming.NamingException;
 
 import org.apache.commons.cli.CommandLine;
@@ -208,6 +210,7 @@ public final class Generator {
         options.addOption("csvf", "csvfilename", true,
                           "Specify the csv filename");
         options.addOption("name", "taskName", true, "Specify the task name");
+		options.addOption("f", "cfg", true, "Specify configuration directory" );
 
         OptionGroup genTypeOption = new OptionGroup();
         genTypeOption.setRequired(true);
@@ -252,6 +255,11 @@ public final class Generator {
                     taskName = cmdLine.getOptionValue("name");
                 }
 
+                if (cmdLine.hasOption("f")) {
+                	// if a configuration directory was set on command line, use it to set up Configuration
+                	Configuration.setUp(cmdLine.getOptionValue("f"));
+                }
+                
                 if (cmdLine.hasOption("ldap2ldap")) {
                     genType = GEN_TYPE.LDAP2LDAP;
                 } else if (cmdLine.hasOption("db2ldap")) {

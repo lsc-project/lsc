@@ -47,6 +47,7 @@ package org.lsc;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -57,6 +58,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -116,16 +118,25 @@ public final class Launcher {
      */
     public void run() {
         try {
-        	/* if a configuration directory was set on command line, save it to Configuration */
+        	// if a configuration directory was set on command line, save it to Configuration
         	if(configurationLocation != null) {
         		Configuration.setLocation(configurationLocation);
         	}
+        	        	
+        	// setup LOG4J
+        	// first, reset the configuration because LOG4J automatically loads it from properties
+        	// while this may be the Java way, it's not our way, we like real text files, not JARs.
+        	LogManager.resetConfiguration();
+
+        	String log4jPropertiesFile = Configuration.getConfigurationDirectory() + "log4j.properties";
+        	PropertyConfigurator.configure(log4jPropertiesFile);
         	
-        	/* load LOG4J properties */
-        	PropertyConfigurator.configure(new File(Configuration.getConfigurationDirectory(), "log4j.properties").toURI().toURL());
+        	// WARNING: don't log anything before HERE!
         	
-        	/* do the work! */
-            sync.launch(syncType, cleanType);
+    		LOGGER.debug("Reading configuration from " + Configuration.getConfigurationDirectory());
+        	
+        	// do the work!
+    		sync.launch(syncType, cleanType);
         } catch (Exception e) {
             LOGGER.error(e, e);
         }

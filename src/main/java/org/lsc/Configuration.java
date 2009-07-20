@@ -273,9 +273,8 @@ public class Configuration {
 	}
 	
 	private static String appendDirSeparator(String path) {
-		String seperator = System.getProperty("file.separator");
-		if (!path.endsWith(seperator)) {
-			return path + seperator;
+		if (!path.endsWith(getSeparator())) {
+			return path + getSeparator();
 		}
 		return path;
 	}
@@ -318,7 +317,6 @@ public class Configuration {
 				throw new ExceptionInInitializerError(errorMessage);
 			}
 		}
-		LOGGER.debug("Configuration directory is " + ret);
 		return ret;
 	}
 	
@@ -394,7 +392,7 @@ public class Configuration {
 	 *            the url of the configuration file to load
 	 */
 	static void setConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Loading configuration url : " + url);
+		LOGGER.debug("Loading configuration url: " + url);
 		config = new PropertiesConfiguration(url);
 		config.getKeys();
 	}
@@ -406,7 +404,7 @@ public class Configuration {
 	 *            the url of the configuration file to load
 	 */
 	static void addConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Adding configuration : " + url);
+		LOGGER.debug("Adding configuration: " + url);
 		PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
 		Iterator<?> configKeys = configTmp.getKeys();
 		while (configKeys.hasNext()) {
@@ -463,5 +461,9 @@ public class Configuration {
 	 */
 	public static Properties getPropertiesFromFileInConfigDir(String fileName) throws FileNotFoundException, IOException {
 		return getPropertiesFromFile(Configuration.getConfigurationDirectory() + fileName);
+	}
+
+	public static String getSeparator() {
+		return System.getProperty("file.separator");
 	}
 }

@@ -543,14 +543,14 @@ public final class BeanComparator {
         Attribute toReplaceAttr = new BasicAttribute(srcAttr.getID());
         NamingEnumeration<?> srcNe = srcAttr.getAll();
         while (srcNe.hasMore()) {
-        	Object value = srcNe.next();
+        	Object srcValue = srcNe.next();
 
-        	if (value != null) {
-        		toReplaceAttr.add(value);
+        	if (srcValue != null) {
+        		toReplaceAttr.add(srcValue);
 
         		// Handle binary attribute specifically
-        		if (value.getClass().isAssignableFrom(byte[].class)) {
-        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) value);
+        		if (srcValue.getClass().isAssignableFrom(byte[].class)) {
+        			ByteBuffer srcBuff = ByteBuffer.wrap((byte[]) srcValue);
         			for (Object dstValue : dstAttrValues) {
         				// make sure destination value is a byte[] too
         				if (dstValue.getClass().isAssignableFrom(String.class)) {
@@ -568,7 +568,7 @@ public final class BeanComparator {
         				}
         			}
         		} else {
-        			if (!dstAttrValues.contains(value)) {
+        			if (!dstAttrValues.contains(srcValue)) {
         				differs = true;
         			}
         		}
@@ -578,11 +578,11 @@ public final class BeanComparator {
         // check if there are any values in dstAttr not in srcAttr
         Iterator<Object> dstIt = dstAttrValues.iterator(); 
         while (dstIt.hasNext()) {
-        	Object value = dstIt.next();
+        	Object dstValue = dstIt.next();
 
         	// Handle binary attribute specifically
-        	if (value.getClass().isAssignableFrom(byte[].class)) {
-        		ByteBuffer destBuff = ByteBuffer.wrap((byte[]) value);
+        	if (dstValue.getClass().isAssignableFrom(byte[].class)) {
+        		ByteBuffer destBuff = ByteBuffer.wrap((byte[]) dstValue);
 
         		NamingEnumeration<?> toReplaceAttrValues = toReplaceAttr.getAll();      
 
@@ -605,7 +605,7 @@ public final class BeanComparator {
         			}
         		}
         	} else {
-        		if (!toReplaceAttr.contains(value)) {
+        		if (!toReplaceAttr.contains(dstValue)) {
         			differs = true;
         			break;
         		}
@@ -613,6 +613,7 @@ public final class BeanComparator {
         }
 
         if (differs) {
+            LOGGER.debug("Attribute " + dstAttr.getID() + ": source values are " + srcAttr + ", old values were " + dstAttr + ", new values are " + toReplaceAttr);
             return new ModificationItem(DirContext.REPLACE_ATTRIBUTE, toReplaceAttr);
         } else {
             return null;

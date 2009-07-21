@@ -46,6 +46,7 @@
 package org.lsc.persistence;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Properties;
@@ -121,12 +122,23 @@ public final class DaoConfig
 					reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
 				}
 
+				Properties props = new Properties();
+				
 				// read the database configuration file to pass to sql-map-config XML file
-				Properties props = Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME);
-
+				// this is maintained for backwards compatibility, although the database.properties file no longer exists
+				try
+				{
+					props.putAll(Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME));
+				}
+				catch (FileNotFoundException e) {} 
+				// ignore this, it probably just means that we're not using database.properties file anymore
+				
+				// add the database configuration properties from lsc.properties
+				props.putAll(Configuration.getAsProperties("src.database"));
+				
 				// add the configuration directory to properties so that sql-map-config can use relative paths
-				props.put("lsc.config.sqlmapdir", Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_FILES_DIRNAME);
-
+				props.put("lsc.config", Configuration.getConfigurationDirectory());
+				
 				sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, props);
 
 				// clean up

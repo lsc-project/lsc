@@ -48,6 +48,7 @@ package org.lsc.persistence;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -61,6 +62,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.lsc.AbstractGenerator;
+import org.lsc.Configuration;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -107,15 +109,39 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 	 * @return the generation status
 	 */
 	protected final boolean generate(final String unused) {
-		if (getDestination() != null && getDestination().length() > 0) {
-			sqlMapConfigFullFilename = getDestination() + getSeparator()
-			+ SQL_MAP_CONFIG_FILENAME;
-			// Then remove the destination from the filename
-			if(xmlFilename.indexOf(getDestination()) == 0) {
-				xmlFilename = xmlFilename.substring(getDestination().length()+1);
+		
+		// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
+		// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
+		// file always used to be in a JAR file. It should be removed in the future.
+		try
+		{
+			File configFile = new File(Configuration.getConfigurationDirectory() + DaoConfig.IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+			if (configFile.exists())
+			{
+				// set sql-map-config.xml file path
+				sqlMapConfigFullFilename = configFile.toURI().toURL().getPath();
+				
+				// adapt the generated .xml file name to be relative to the config dir
+				xmlFilename = xmlFilename.substring(Configuration.getConfigurationDirectory().length());
+			} else {
+				// revert back to old behavior - this should be removed soon!
+				LOGGER.warn("Falling back to old-style configuration files");
+
+				if (getDestination() != null && getDestination().length() > 0) {
+					sqlMapConfigFullFilename = getDestination() + getSeparator()
+					+ SQL_MAP_CONFIG_FILENAME;
+					// Then remove the destination from the filename
+					if(xmlFilename.indexOf(getDestination()) == 0) {
+						xmlFilename = xmlFilename.substring(getDestination().length()+1);
+					}
+				} else {
+					sqlMapConfigFullFilename = SQL_MAP_CONFIG_FILENAME;
+				}
 			}
-		} else {
-			sqlMapConfigFullFilename = SQL_MAP_CONFIG_FILENAME;
+		}
+		catch (MalformedURLException e)
+		{
+			throw new ExceptionInInitializerError("Error reading the IBatis SQLMap configuration file");
 		}
 
 		String content = generateContent();
@@ -168,11 +194,11 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 			NamedNodeMap newSqlMapAttributes = newSqlMapEntry.getAttributes();
 
 			// Create a new resource attribute ...
-			Attr resource = doc.createAttribute("resource");
+			Attr url = doc.createAttribute("url");
 			// ... with the xml ibatis description filename as value
-			resource.setValue(xmlFilename);
+			url.setValue("file://${lsc.config}/" + xmlFilename);
 			// Set the attribute in the new object attributes
-			newSqlMapAttributes.setNamedItem(resource);
+			newSqlMapAttributes.setNamedItem(url);
 			// Append the new node as the new last node
 			try {
 				last.appendChild(newSqlMapEntry);

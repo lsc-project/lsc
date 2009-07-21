@@ -46,8 +46,10 @@
 package org.lsc.service;
 
 import org.lsc.AbstractGenerator;
+import org.lsc.Configuration;
 import org.lsc.jndi.parser.LdapAttributeType;
 import org.lsc.jndi.parser.LdapObjectClass;
+import org.lsc.persistence.DaoConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -55,6 +57,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -205,23 +208,36 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
      * @return the xml persistence filename
      */
     public final String getMyXMLFileName() {
-        String myXMLPackage = this.getClass().getPackage().getName();
-        myXMLPackage = myXMLPackage.substring(0, myXMLPackage.lastIndexOf("."))
-                       + ".persistence.xml";
-
-        String mainLocation = null;
-
-        if (getDestination() != null) {
-            mainLocation = getDestination();
-        } else {
-            mainLocation = System.getProperty("user.dir") + getSeparator()
-                           + "src" + getSeparator() + "main" + getSeparator()
-                           + "java";
-        }
-
-        return mainLocation + getSeparator()
-               + myXMLPackage.replaceAll("\\.", getSeparator())
-               + getSeparator() + this.objectName + ".xml";
+    	
+		// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
+		// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
+		// file always used to be in a JAR file. It should be removed in the future.
+		File configFile = new File(Configuration.getConfigurationDirectory() + DaoConfig.IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+		if (configFile.exists())
+		{
+			String xmlFileName = Configuration.getConfigurationDirectory() + DaoConfig.IBATIS_SQLMAP_FILES_DIRNAME + Configuration.getSeparator() + this.objectName + ".xml";
+			return xmlFileName;
+		} else {
+			// revert back to old behavior - this should be removed soon!
+			LOGGER.warn("Falling back to old-style configuration files");
+			
+			String myXMLPackage = this.getClass().getPackage().getName();
+			myXMLPackage = myXMLPackage.substring(0, myXMLPackage.lastIndexOf(".")) + ".persistence.xml";
+			
+			String mainLocation = null;
+			
+			if (getDestination() != null) {
+			    mainLocation = getDestination();
+			} else {
+			    mainLocation = System.getProperty("user.dir") + getSeparator()
+			                   + "src" + getSeparator() + "main" + getSeparator()
+			                   + "java";
+			}
+			
+			return mainLocation + getSeparator()
+			       + myXMLPackage.replaceAll("\\.", getSeparator())
+			       + getSeparator() + this.objectName + ".xml";
+		}
     }
 
     /**

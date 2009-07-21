@@ -105,7 +105,7 @@ public abstract class AbstractGenerator {
      * name.
      */
     public AbstractGenerator() {
-        this.separator = System.getProperty("file.separator");
+        this.separator = Configuration.getSeparator();
     }
 
     /**

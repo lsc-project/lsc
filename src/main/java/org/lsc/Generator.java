@@ -165,8 +165,6 @@ public final class Generator {
      * @throws NamingException DOCUMENT ME!
      */
     public static void main(final String[] args) throws NamingException {
-        PropertyConfigurator.configure(LOG4J_CONFIGURATION_FILE);
-
         Generator instance = new Generator();
 
         if (instance.parseArgs(args) == 0) {

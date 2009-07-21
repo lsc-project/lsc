@@ -271,6 +271,7 @@ public class Configuration {
 	 *            the user defined location
 	 */
 	public static void setLocation(String configurationLocation) {
+		configurationLocation = cleanup(configurationLocation);
 		location = appendDirSeparator(configurationLocation);
 	}
 	
@@ -281,6 +282,15 @@ public class Configuration {
 		return path;
 	}
 
+	private static String cleanup(String path) {
+		String ret = path.trim();
+		if (ret.charAt(0) == '\'' && ret.charAt(ret.length()-1) == '\'')
+		{
+			ret = ret.substring(1, ret.length() - 1);
+		}
+		return ret;
+	}
+	
 	/**
 	 * Get the path to the directory where configuration files
 	 * are stored, with a "/" at the end (or "\" on Windows).

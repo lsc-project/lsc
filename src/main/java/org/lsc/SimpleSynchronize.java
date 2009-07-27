@@ -227,7 +227,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
     @SuppressWarnings("unchecked")
     private boolean launchTask(final TaskType taskType, final String taskName, final TaskMode taskMode) throws Exception {
         try {
-            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName);
+            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName + " (" + taskType + ")");
         	
             String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 

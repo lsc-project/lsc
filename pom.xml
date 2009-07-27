@@ -348,15 +348,9 @@
 			<version>4.3</version>
 		</dependency>
 		<dependency>
-			<groupId>sun</groupId>
-			<artifactId>opends</artifactId>
-			<version>0.9</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>berkeleydb</groupId>
-			<artifactId>je</artifactId>
-			<version>3.2.23</version>
+			<groupId>org.opends</groupId>
+			<artifactId>opends-core</artifactId>
+			<version>2.0</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

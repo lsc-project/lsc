@@ -269,7 +269,7 @@
             ===================================================================
         -->
         <target name="startLdapServer" description="Start the ldap server" depends="compile-app">
-                <java classname="org.lsc.utils.LdapServer" classpathref="execution.path" fork="true" maxmemory="32M" dir="${build.classes.dir}">
+                <java classname="org.lsc.utils.LdapServer" classpathref="execution.path" fork="true" maxmemory="64M" dir="${build.classes.dir}">
                         <arg line="-a" />
                 </java>
         </target>

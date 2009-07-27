@@ -59,8 +59,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.lsc.Configuration;
 import org.lsc.opends.EmbeddedOpenDS;
 import org.opends.server.api.Backend;
+import org.opends.server.config.ConfigException;
 import org.opends.server.core.DirectoryServer;
-import org.opends.server.types.CancelledOperationException;
+import org.opends.server.types.CanceledOperationException;
 import org.opends.server.types.DN;
 import org.opends.server.types.DirectoryException;
 import org.opends.server.types.InitializationException;
@@ -76,8 +77,9 @@ public class LdapServer {
 	/** The local logger */
 	private static Logger LOGGER = Logger.getLogger(LdapServer.class);
 	
-	public final static void start() throws InitializationException, IOException, DirectoryException, LDIFException, CancelledOperationException, URISyntaxException {
+	public final static void start() throws InitializationException, IOException, URISyntaxException, DirectoryException, ConfigException, CanceledOperationException, LDIFException {
 		EmbeddedOpenDS.startServer();
+		EmbeddedOpenDS.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
 		if(EmbeddedOpenDS.class.getResource("test.ldif") == null || EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath() == null) {
@@ -106,13 +108,15 @@ public class LdapServer {
 			LOGGER.error(e,e);
 		} catch (DirectoryException e) {
 			LOGGER.error(e,e);
-		} catch (CancelledOperationException e) {
+		} catch (CanceledOperationException e) {
 			LOGGER.error(e,e);
 		} catch (LDIFException e) {
 			LOGGER.error(e,e);
 		} catch (IOException e) {
 			LOGGER.error(e,e);
 		} catch (URISyntaxException e) {
+			LOGGER.error(e,e);
+		} catch (ConfigException e) {
 			LOGGER.error(e,e);
 		}
 		if (retCode != 0) {
@@ -130,8 +134,9 @@ public class LdapServer {
 	 * @throws DirectoryException 
 	 * @throws InitializationException 
 	 * @throws URISyntaxException 
+	 * @throws ConfigException 
 	 */
-	private static int usage(String[] args) throws InitializationException, DirectoryException, CancelledOperationException, LDIFException, IOException, URISyntaxException {
+	private static int usage(String[] args) throws InitializationException, DirectoryException, CanceledOperationException, LDIFException, IOException, URISyntaxException, ConfigException {
 		Options options = new Options();
 		options.addOption("a", "start", false, "Start the embedded directory");
 		options.addOption("o", "stop", false, "Stop the embedded directory");

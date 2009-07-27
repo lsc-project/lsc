@@ -158,7 +158,7 @@ public final class Launcher {
                     syncType = parseSyncType(cmdLine.getOptionValue("s"));
                 }
                 if (cmdLine.hasOption("f")) {
-                    configurationLocation = cmdLine.getOptionValue("f");
+                    configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
                 }
                 if (cmdLine.hasOption("c")) {
                     cleanType = parseSyncType(cmdLine.getOptionValue("c"));

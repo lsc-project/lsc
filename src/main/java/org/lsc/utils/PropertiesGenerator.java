@@ -68,15 +68,6 @@ public class PropertiesGenerator extends AbstractGenerator {
 	/** The generator type. */
 	private Generator.GEN_TYPE genType;
 
-	/** This property contains the bean class name. */
-	private String beanClassName;
-
-	/** This property contains the destination object class name. */
-	private String dstObjectClassName;
-
-	/** This property contains the source object class name. */
-	private String srcObjectClassName;
-
 	/** This property contains the jdbc source service class name. */
 	private String jdbcSrcServiceClassName;
 
@@ -94,7 +85,7 @@ public class PropertiesGenerator extends AbstractGenerator {
 		String prefix = "lsc";
 		Properties props = Configuration.getAsProperties(prefix);
 		props = checkAndAdd(props, "tasks", taskName);
-		props = replace(props, "tasks." + taskName + ".bean", beanClassName);
+		props = replace(props, "tasks." + taskName + ".bean", "org.lsc.beans.SimpleBean");
 
 		// Add default DN generation configuration parameter
 		props = replace(props, "tasks." + taskName + ".dn", 
@@ -103,26 +94,22 @@ public class PropertiesGenerator extends AbstractGenerator {
 		switch (genType) {
 			case CSV2LDAP:
 			case DATABASE2LDAP:
-				// the POJO object used in db2ldap syncs seems to be used directly as a destination object
-				props = replace(props, "tasks." + taskName + ".object", dstObjectClassName);
+				// the POJO object used in db2ldap sync seems to be used directly as a destination object
 				props = replace(props, "tasks." + taskName + ".type", "db2ldap");
 				props = replace(props, "tasks." + taskName + ".srcService", jdbcSrcServiceClassName);
 				break;
 			case LDAP2LDAP:
-				// the POJO object used in ldap2ldap syncs is to store original object from the source directory
-				props = replace(props, "tasks." + taskName + ".object", srcObjectClassName);
+				// the POJO object used in ldap2ldap sync is to store original object from the source directory
 				props = replace(props, "tasks." + taskName + ".type", "ldap2ldap");
 				props = replace(props, "tasks." + taskName + ".srcService",
 						"org.lsc.jndi.SimpleJndiSrcService");
-				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".srcService",
-						srcObjectClassName.substring(srcObjectClassName.lastIndexOf(".")+1));
+				props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".srcService", taskName);
 				break;
 			default:
 				throw new UnsupportedOperationException("Must never be here !");
 		}
 		props = replace(props, "tasks." + taskName + ".dstService", "org.lsc.jndi.SimpleJndiDstService");
-		props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".dstService",
-				dstObjectClassName.substring(dstObjectClassName.lastIndexOf(".")+1));
+		props = replaceDefaultSimpleJndiService(props, "tasks." + taskName + ".dstService", taskName);
 		try {
 			Configuration.setProperties(prefix, props);
 		} catch (ConfigurationException e) {
@@ -240,12 +227,10 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 *                 generating the new bean
 	 */
 	public static void run(final String taskName, final String destination,
-			final Generator.GEN_TYPE genType, final String beanClassName,
-			final String dstObjectClassName, final String srcObjectClassName, 
-			final String jdbcSrcServiceClassName)
+			final Generator.GEN_TYPE genType, final String jdbcSrcServiceClassName)
 	throws NamingException {
 		PropertiesGenerator pg = new PropertiesGenerator();
-		pg.init(genType, beanClassName, dstObjectClassName, srcObjectClassName, jdbcSrcServiceClassName);
+		pg.init(genType, jdbcSrcServiceClassName);
 		pg.setDestination(destination);
 		pg.generate(taskName);
 	}
@@ -264,13 +249,8 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 * @param ljdbcSrcServiceClassName
 	 *                the jdbc source service name
 	 */
-	private void init(final Generator.GEN_TYPE lgenType,
-			final String lbeanClassName, final String dstObjectClassName,
-			final String srcObjectClassName, final String ljdbcSrcServiceClassName) {
+	private void init(final Generator.GEN_TYPE lgenType, final String ljdbcSrcServiceClassName) {
 		genType = lgenType;
-		beanClassName = lbeanClassName;
-		this.dstObjectClassName = dstObjectClassName;
-		this.srcObjectClassName = srcObjectClassName;
 		jdbcSrcServiceClassName = ljdbcSrcServiceClassName;
 	}
 

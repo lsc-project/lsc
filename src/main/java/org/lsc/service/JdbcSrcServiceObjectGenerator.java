@@ -55,10 +55,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +63,10 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.naming.NamingException;
+
+import org.lsc.AbstractGenerator;
+import org.lsc.jndi.parser.LdapAttributeType;
+import org.lsc.jndi.parser.LdapObjectClass;
 
 
 /**
@@ -285,8 +286,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
         xml += "<!DOCTYPE sqlMap PUBLIC \"-//iBATIS.com//DTD SQL Map 2.0//EN\" \"http://www.ibatis.com/dtd/sql-map-2.dtd\">\n\n";
         xml += ("<sqlMap namespace=\"" + getClassName() + "\">\n\n");
         xml += ("\t<typeAlias alias=\"" + objectName
-               + "\" type=\"org.lsc.objects.flat." + flatName
-               + "\" />\n\n");
+               + "\" type=\"org.lsc.beans.SimpleBean\" />\n\n");
 
         // Fixe resultMap :
         if ((multiAttrs.size() != 0) || (monoAttrs.size() != 0)) {
@@ -349,7 +349,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 
             while (allInheritAttrsIter.hasNext()) {
                 String attr = allInheritAttrsIter.next();
-                xml += ("\t\t<result property=\"" + attr + "\" column=\""
+                xml += ("\t\t<result property=\"attribute\" column=\""
                        + attr + "\"/>\n");
             }
 

@@ -60,7 +60,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.lsc.beans.BeanGenerator;
-import org.lsc.objects.ObjectClassGenerator;
 import org.lsc.persistence.SqlMapXmlFileGenerator;
 import org.lsc.service.JdbcSrcServiceObjectGenerator;
 import org.lsc.utils.Csv2SqlObjectGenerator;
@@ -138,23 +137,21 @@ public final class Generator {
             SqlMapXmlFileGenerator.run(xmlFilename, destination);
         }
 
-        LOGGER.info("Generating Java class for LDAP objectclass \"" + dstClassName + "\" from target directory...");
-        String dstObjectClassName = ObjectClassGenerator.run(dstClassName, destination, false);
-
-        String srcObjectClassName = null;
-        if (genType == GEN_TYPE.LDAP2LDAP) {
-            LOGGER.info("Generating Java class for LDAP objectclass \"" + srcClassName + "\" from source directory...");
-            srcObjectClassName = ObjectClassGenerator.run(srcClassName, destination, true);
-        }
+//        LOGGER.info("Generating Java class for LDAP objectclass \"" + dstClassName + "\" from target directory...");
+//        String dstObjectClassName = ObjectClassGenerator.run(dstClassName, destination, false);
+//
+//        String srcObjectClassName = null;
+//        if (genType == GEN_TYPE.LDAP2LDAP) {
+//            LOGGER.info("Generating Java class for LDAP objectclass \"" + srcClassName + "\" from source directory...");
+//            srcObjectClassName = ObjectClassGenerator.run(srcClassName, destination, true);
+//        }
 
         if (genType == GEN_TYPE.CSV2LDAP) {
             Csv2SqlObjectGenerator.run(dstClassName, destination, csvFilename,  csvSeparator);
         }
 
         LOGGER.info("Writing properties file...");
-        PropertiesGenerator.run(taskName, destination, genType,
-                                beanClassName, dstObjectClassName,
-                                srcObjectClassName, srcServiceClassName);
+        PropertiesGenerator.run(taskName, destination, genType, srcServiceClassName);
     }
 
     /**

@@ -47,6 +47,7 @@ package org.lsc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -77,9 +78,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
     /** lsc.tasks property. */
     public static final String TASKS_PROPS_PREFIX = "tasks";
 
-    /** lsc.tasks.TASKNAME.type property. */
-    public static final String TYPE_PROPS_PREFIX = "type";
-
     /** lsc.tasks.TASKNAME.srcService property. */
     public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
 
@@ -103,6 +101,18 @@ public class SimpleSynchronize extends AbstractSynchronize {
     private Properties lscProperties;
 
     /**
+	 * Default constructor
+	 */
+	public SimpleSynchronize() {
+		super();
+		lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
+		if (lscProperties == null) {
+			LOGGER.fatal("Unable to get LSC properties! Exiting ...");
+			throw new ExceptionInInitializerError("Unable to get LSC properties!");
+		}
+	}
+
+	/**
      * Main method Check properties, and for each task, launch the
      * synchronization and the cleaning phases.
      * 
@@ -111,69 +121,40 @@ public class SimpleSynchronize extends AbstractSynchronize {
      * @param cleanTasks
      *                string list of the cleaning tasks to launch
      * 
-     * @return the launch status
+     * @return the launch status - true if all tasks executed succesfully, false if no tasks were executed or any failed
      * @throws Exception 
      */
     public final boolean launch(final List<String> syncTasks, 
             final List<String> cleanTasks) throws Exception {
         Boolean foundATask = false;
 
-        // Get the "lsc" prefixed properties
-        lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
-
-        if (lscProperties == null) {
-            LOGGER.fatal("Unable to get LSC properties ! Exiting ...");
-            return false;
-        }
-
-        // Get the "lsc.tasks" property
-        String tasks = lscProperties.getProperty(TASKS_PROPS_PREFIX);
-
-        if (tasks == null) {
-            LOGGER.fatal("Unable to get tasks in LSC properties ! Exiting ...");
-            return false;
-        }
-
-        // Iterate on each task
+        // Get the list of defined tasks from LSC properties
+		String tasks = lscProperties.getProperty(TASKS_PROPS_PREFIX);
+		if (tasks == null) {
+			LOGGER.fatal("No tasks defined in LSC properties! Exiting ...");
+			return false;
+		}
+        
+        // Iterate on each task        
         StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
+        boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
+        boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 
         while (tasksSt.hasMoreTokens()) {
             String taskName = tasksSt.nextToken();
-            TaskType taskType = null;
             
-            // Launch the task either if explicitly
-            // specified or if "all" magic keyword used
-            boolean isSyncTask = syncTasks.contains(taskName.toString());
-            boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
-            boolean isCleanTask = cleanTasks.contains(taskName.toString());
-            boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
-            
-            // If this task should be run
-            if (isSyncTask || isSyncTaskAll || isCleanTask || isCleanTaskAll) {
+            // Launch the task either if explicitly specified or if "all" magic keyword used
+            if (isSyncTaskAll || syncTasks.contains(taskName.toString())) {
             	foundATask = true;
 
-	            // Get the task properties
-	            String taskTypeString = lscProperties.getProperty(TASKS_PROPS_PREFIX
-	                    + "." + taskName + "." + TYPE_PROPS_PREFIX);
-	            try {
-	                if(taskTypeString == null) {
-	                    //To have only one error
-	                    throw new IllegalArgumentException();
-	                }
-	                taskType = TaskType.valueOf(taskTypeString.toLowerCase());
-	            } catch (IllegalArgumentException e) {
-	                LOGGER.error("Missing '" + taskName + "' task type parameter !");
-	                return false;
-	            }
-            }
-            
-            if (isSyncTask || isSyncTaskAll) {
-                if (!launchTask(taskType, taskName, TaskMode.sync)) {
+                if (!launchTask(taskName, TaskMode.sync)) {
                     return false;
                 }
             }
-            if(isCleanTask || isCleanTaskAll) {
-                if (!launchTask(taskType, taskName, TaskMode.clean)) {
+            if (isCleanTaskAll || cleanTasks.contains(taskName.toString())) {
+            	foundATask = true;
+
+                if (!launchTask(taskName, TaskMode.clean)) {
                     return false;
                 }
             }
@@ -221,8 +202,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
     /**
      * Launch a task. Call this for once each task type and task mode.
      * 
-     * @param taskType
-     *                the task type (db2ldap, ldap2ldap, ...)
      * @param taskName
      *                the task name (historically the LDAP object class name, but can be any string)
      *  @param taskMode
@@ -232,9 +211,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
      * @throws Exception 
      */
     @SuppressWarnings("unchecked")
-    private boolean launchTask(final TaskType taskType, final String taskName, final TaskMode taskMode) throws Exception {
+    private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
         try {
-            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName + " (" + taskType + ")");
+            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName);
         	
             String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 
@@ -257,23 +236,19 @@ public class SimpleSynchronize extends AbstractSynchronize {
                 customLibrary = Class.forName(customLibraryName).newInstance();
             }
 
-            // Instantiate source service according to task type (JDBC database or JNDI directory) 
+            // Instantiate source service and pass any properties
             ISrcService srcService = null;
-            switch(taskType) {
-                case ldap2ldap:
-                    Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "."
-                            + prefix + SRCSERVICE_PROPS_PREFIX);
-                    
-                    Constructor<?> constrSrcJndiService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class });
-                    srcService = (ISrcService) constrSrcJndiService.newInstance(new Object[] { srcServiceProperties });
+            Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "."
+                    + prefix + SRCSERVICE_PROPS_PREFIX);
+            try {
+            	Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class });
+            	srcService = (ISrcService) constrSrcService.newInstance(new Object[] { srcServiceProperties });
 
-                    break;
-                case db2ldap:
-                	srcService = (ISrcService) Class.forName(srcServiceClass).newInstance();
-                    break;
-                default:
-                    LOGGER.warn("Unknown task type : " + taskType + " (must be one of ldap2ldap or db2ldap)");
-                    return false;
+            } catch (NoSuchMethodException e) {
+            	// backwards compatibility: if the source service doesn't take any properties,
+            	// use the parameter less constructor
+            	Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[] {});
+            	srcService = (ISrcService) constrSrcService.newInstance();
             }
 
             Class<AbstractBean> taskBean = (Class<AbstractBean>) Class.forName(beanClassName);

@@ -284,7 +284,7 @@ public abstract class AbstractSynchronize {
      * @param syncName
      *                the synchronization name
      * @param srcService
-     *                the source service (JDBC or JNDI)
+     *                the source service (JDBC or JNDI or anything else)
      * @param dstService
      *                the JNDI destination service
      * @param objectBean
@@ -333,7 +333,7 @@ public abstract class AbstractSynchronize {
             countAll++;
 
             Entry<String, LscAttributes> id = ids.next();
-            LOGGER.debug("Synchronizing " + syncName + " for " + id.getKey());
+            LOGGER.debug("Synchronizing " + syncName + " for " + id.getValue());
 
             try {
                 srcBean = srcService.getBean(objectBean.newInstance(), id);

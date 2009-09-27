@@ -137,6 +137,6 @@ public class LscAttributes
 
 	public String toString()
 	{
-		return null;
+		return values.toString();
 	}
 }

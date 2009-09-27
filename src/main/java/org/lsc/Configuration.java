@@ -199,6 +199,8 @@ public class Configuration {
 
 	/**
 	 * Create a Properties object that is a subset of this configuration.
+	 * If there are no properties matching the prefix, an empty Properties
+	 * object is returned.
 	 * 
 	 * @param prefix
 	 *            The prefix used to select the properties.

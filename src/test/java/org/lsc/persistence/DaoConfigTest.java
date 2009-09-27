@@ -56,7 +56,6 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.lsc.Configuration;
 
 /**
  * Public class to test the DAO engine loader
@@ -80,7 +79,8 @@ public class DaoConfigTest extends TestCase {
      */
     public final void testConnection() {
         try {
-            Properties pc = Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME);
+            Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
+            pc.put("url", "jdbc:hsqldb:file:target/hsqldb/lsc");
             
             /* Test loading driver */
             LOGGER.info("=> loading driver:");

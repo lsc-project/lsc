@@ -83,9 +83,10 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("sn", "<non safe string>")));
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Sébastien")));
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("description", "")));
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
-		jm.setDistinguishName("");
+		jm.setDistinguishName("givenName=Sébastien");
 		jm.setModificationItems(mi);
 
 		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
@@ -93,7 +94,10 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\n\n", layout.format(loggingEvent));
+		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n", layout.format(loggingEvent));
+		
+		jm.setDistinguishName(null);
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n", layout.format(loggingEvent));
 	}
 
 	/**
@@ -106,7 +110,9 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
 		mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute("uid", "old_id")));
-		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("sn", "Nom accentué")));
+		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("sn", "À là bas")));
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("description", "Multi-line\ndescription")));
+
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
 		jm.setDistinguishName("");
@@ -117,7 +123,21 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: modify\nreplace: cn\ncn: new_name\n-\ndelete: uid\nuid: old_id\n-\nreplace: sn\nsn:: Tm9tIGFjY2VudHXDqQ==\n\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\n" +
+				"changetype: modify\n" +
+				"replace: cn\n" +
+				"cn: new_name\n" +
+				"-\n" +
+				"delete: uid\n" +
+				"uid: old_id\n" +
+				"-\n" +
+				"replace: sn\n" +
+				"sn:: w4AgbMOgIGJhcw==\n" +
+				"-\n" +
+				"add: description\n" +
+				"description:: TXVsdGktbGluZQpkZXNjcmlwdGlvbg==\n" +
+				"\n",
+				layout.format(loggingEvent));
 	}
 
 	/**
@@ -153,4 +173,20 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		I18n.setLocale(Locale.US);
 		assertEquals("a simple string", layout.format(loggingEvent));
 	}
+	
+	/**
+	 * Launch a null layout test.
+	 * 
+	 * @throws IOException
+	 */
+	public final void testNull() throws IOException
+	{
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, null, null);
+
+		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		layout.setConversionPattern("%m");
+		I18n.setLocale(Locale.US);
+		assertEquals("", layout.format(loggingEvent));
+	}
+
 }

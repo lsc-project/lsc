@@ -333,7 +333,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	private boolean isLdifSafeString(String s)
 	{
 		// check if first character is a SAFE-INIT-CHAR
-		if (!isLdifSafeInitChar(s.charAt(0)))
+		if (s.length() > 0 && !isLdifSafeInitChar(s.charAt(0)))
 		{
 			return false;
 		}

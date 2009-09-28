@@ -283,7 +283,10 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 
         // Init XML document.
         xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
-        xml += "<!DOCTYPE sqlMap PUBLIC \"-//iBATIS.com//DTD SQL Map 2.0//EN\" \"http://www.ibatis.com/dtd/sql-map-2.dtd\">\n\n";
+        xml += "<!DOCTYPE sqlMap";
+        xml += "    PUBLIC \"-//ibatis.apache.org//DTD SQL Map 2.0//EN\"";
+        xml += "    \"http://ibatis.apache.org/dtd/sql-map-2.dtd\">";
+        xml += "\n\n";
         xml += ("<sqlMap namespace=\"" + getClassName() + "\">\n\n");
         xml += ("\t<typeAlias alias=\"" + objectName
                + "\" type=\"org.lsc.beans.SimpleBean\" />\n\n");

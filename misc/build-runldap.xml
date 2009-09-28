@@ -20,7 +20,6 @@
     <target name="startLdapServer" description="Start the ldap server">
         <echo message="Starting OpenDS embedded server from ${build.test-classes.dir}"/>
         <copy todir="${build.test-classes.dir}">
-            <fileset dir="${build.classes.dir}" includes="**/*"/>
             <fileset dir="${src.test.dir}/java" includes="**/*.ldif*"/>
         </copy>
         
@@ -31,7 +30,7 @@
 	<fail unless="execution.path" message="'execution.path' must be set"/>
         
         <forget daemon="true">
-            <java classname="org.lsc.utils.LdapServer" classpath="${execution.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+            <java classname="org.lsc.utils.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
                 <arg line="-a" />
             </java>
         </forget>

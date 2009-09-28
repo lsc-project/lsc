@@ -174,14 +174,14 @@
 						</excludes>
 					</instrumentation>
 				</configuration>
-				<executions>
+				<!--<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
 							<goal>cobertura</goal>
 						</goals>
 					</execution>
-				</executions>
+				</executions>-->
 			</plugin>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>

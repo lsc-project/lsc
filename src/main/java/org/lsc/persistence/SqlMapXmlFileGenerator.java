@@ -212,8 +212,8 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-			transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//iBATIS.com//DTD SQL Map Config 2.0//EN");
-			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.ibatis.com/dtd/sql-map-config-2.dtd");
+			transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//ibatis.apache.org//DTD SQL Map 2.0//EN");
+			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://ibatis.apache.org/dtd/sql-map-2.dtd");
 			DOMSource source = new DOMSource(doc);
 			transformer.transform(source, result);
 		} catch (SAXException e) {

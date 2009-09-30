@@ -45,7 +45,6 @@
  */
 package org.lsc.jndi;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,26 +78,8 @@ public class JScriptEvaluatorTest extends TestCase
 	{
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
-		try
-		{
-			assertEquals(JScriptEvaluator.evalToString("src.get()", table), "b");
-			assertTrue(false);
-		}
-		catch (org.mozilla.javascript.EcmaError e)
-		{
-			assertTrue(true);
-		}
-
-		try
-		{
-			assertEquals(JScriptEvaluator.evalToStringList("src.get()", table), "b");
-			assertTrue(false);
-		}
-		catch (org.mozilla.javascript.EcmaError e)
-		{
-			assertTrue(true);
-		}
-
+		assertNull(JScriptEvaluator.evalToString("src.get()", table));
+		assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
 	}
 
 	public void testOk2()

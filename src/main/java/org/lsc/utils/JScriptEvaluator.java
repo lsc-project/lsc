@@ -58,6 +58,7 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.apache.log4j.Logger;
 
 /**
  * This is the Rhino Java Script evaluation context.
@@ -65,6 +66,9 @@ import org.mozilla.javascript.ScriptableObject;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public final class JScriptEvaluator {
+
+    // Logger
+    private static final Logger LOGGER = Logger.getLogger(JScriptEvaluator.class);
 
     /** The private unique instance. */
     private static JScriptEvaluator instance;
@@ -120,7 +124,13 @@ public final class JScriptEvaluator {
      */
     public static String evalToString(final String expression,
             final Map<String, Object> params) {
-        return Context.toString(getInstance().instanceEval(expression, params));
+	Object result = getInstance().instanceEval(expression, params);
+
+	if (result == null) {
+		return null;
+	}
+
+        return Context.toString(result);
     }
 
     @SuppressWarnings("unchecked")
@@ -215,6 +225,14 @@ public final class JScriptEvaluator {
 	        }
         }
 
-        return script.exec(cx, scope);
+        Object ret = null;
+        try {
+                ret = script.exec(cx, scope);
+        } catch (Exception e) {
+                LOGGER.error(e);
+		return null;
+        }
+
+        return ret;
     }
 }

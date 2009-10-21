@@ -313,7 +313,7 @@ public final class BeanComparator {
                     Iterator<String> defaultValuesIter = defaultValuesModified.iterator();
                     while(defaultValuesIter.hasNext()) {
                         String value = defaultValuesIter.next();
-                        if (value != null & value.length() > 0) {
+                        if (value != null && value.length() > 0) {
                             srcAttr.add(value);
                         }
                     }

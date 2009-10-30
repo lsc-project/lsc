@@ -50,7 +50,6 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -213,57 +212,43 @@ public final class BeanComparator {
             table.put("custom", customLibrary);
         }
 
-        // Force attribute values for forced attributes in syncoptions
-        Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
-        List<String> writeAttributes = syncOptions.getWriteAttributes();
-        if (forceAttrsNameSet != null) {
-
-            Iterator<String> forceAttrsNameIt = forceAttrsNameSet.iterator();
-            while (forceAttrsNameIt.hasNext()) {
-                String attrName = forceAttrsNameIt.next();
-
-                /* We do something only if we have to write */
-                if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String> forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
-                    if ( forceValues != null ) {
-                        Attribute forceAttribute = new BasicAttribute(attrName);
-                        Iterator<String> forceValuesIt = forceValues.iterator();
-                        while (forceValuesIt.hasNext()) {
-                            String forceValue = forceValuesIt.next();
-                            List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
-                            Iterator<String> valuesIt = values.iterator();
-                            while (valuesIt.hasNext()) {
-                                forceAttribute.add(valuesIt.next());
-                            }
-                        }
-                        itmBean.setAttribute(forceAttribute);
-                    }
-                }
-            }
-        }
+		// Force attribute values for forced attributes in syncoptions
+		Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
+		List<String> writeAttributes = syncOptions.getWriteAttributes();
+		if (forceAttrsNameSet != null) {
+			for (String attrName : forceAttrsNameSet) {
+				/* We do something only if we have to write */
+				if (writeAttributes == null || writeAttributes.contains(attrName)) {
+					List<String> forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
+					if (forceValues != null) {
+						Attribute forceAttribute = new BasicAttribute(attrName);
+						for (String forceValue : forceValues) {
+							List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
+							for (String value : values) {
+								forceAttribute.add(value);
+							}
+						}
+						itmBean.setAttribute(forceAttribute);
+					}
+				}
+			}
+		}
 
         // Use default attributes values specified by syncOptions but not present in srcJdbcBean
         Set<String> defaultAttrsNameSet = syncOptions.getDefaultValuedAttributeNames();
         if (defaultAttrsNameSet != null) {
-
-            Iterator<String> defaultAttrsNameIt = defaultAttrsNameSet.iterator();
-            while (defaultAttrsNameIt.hasNext()) {
-                String attrName = defaultAttrsNameIt.next();
-
+        	for (String attrName : defaultAttrsNameSet) {
                 /* We do something only if we have to write */
-                if(writeAttributes == null || writeAttributes.contains(attrName)) {
+                if (writeAttributes == null || writeAttributes.contains(attrName)) {
                     List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(), attrName);
                     if ( defaultValues != null && itmBean.getAttributeById(attrName) == null ) {
                         Attribute defaultAttribute = new BasicAttribute(attrName);
                         List<String> defaultValuesModified = new ArrayList<String>();
-                        Iterator<String> defaultValuesIt = defaultValues.iterator();
-                        while(defaultValuesIt.hasNext()) {
-                            String defaultValue = defaultValuesIt.next();
+                        for (String defaultValue : defaultValues) {
                             defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
                         }
-                        Iterator<String> defaultValuesModifiedIter = defaultValuesModified.iterator();
-                        while(defaultValuesModifiedIter.hasNext()) {
-                            defaultAttribute.add(defaultValuesModifiedIter.next());
+                        for (String value : defaultValuesModified) {
+                            defaultAttribute.add(value);
                         }
 
                         itmBean.setAttribute(defaultAttribute);
@@ -272,13 +257,12 @@ public final class BeanComparator {
             }
         }
 
-        Iterator<String> srcBeanAttrsNameIter = itmBean.getAttributesNames().iterator();
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
-        while (srcBeanAttrsNameIter.hasNext()) {
-            String srcAttrName = srcBeanAttrsNameIter.next();
+
+        for (String srcAttrName : itmBean.getAttributesNames()) {
 
             /* We do something only if we have to write */
-            if(writeAttributes == null || writeAttributes.contains(srcAttrName)) {
+            if (writeAttributes == null || writeAttributes.contains(srcAttrName)) {
 
                 ModificationItem mi = null;
                 Attribute srcAttr = itmBean.getAttributeById(srcAttrName);
@@ -300,9 +284,7 @@ public final class BeanComparator {
                 List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(),	srcAttrName);
                 List<String> defaultValuesModified = new ArrayList<String>();
                 if (defaultValues != null) {
-                    Iterator<String> defaultValuesIt = defaultValues.iterator();
-                    while(defaultValuesIt.hasNext()) {
-                        String defaultValue = defaultValuesIt.next();
+                	for (String defaultValue : defaultValues) {
                         defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
                     }
                 }
@@ -310,9 +292,7 @@ public final class BeanComparator {
                 if (defaultValuesModified.size() > 0 &&
                         (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE ||
                                 (srcAttr == null || srcAttr.size() == 0) )) {
-                    Iterator<String> defaultValuesIter = defaultValuesModified.iterator();
-                    while(defaultValuesIter.hasNext()) {
-                        String value = defaultValuesIter.next();
+                	for (String value : defaultValuesModified) {
                         if (value != null && value.length() > 0) {
                             srcAttr.add(value);
                         }
@@ -424,23 +404,16 @@ public final class BeanComparator {
         Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
         List<String> writeAttributes = syncOptions.getWriteAttributes();
         if (forceAttrsNameSet != null) {
-
-            Iterator<String> forceAttrsNameIt = forceAttrsNameSet.iterator();
-            while (forceAttrsNameIt.hasNext()) {
-                String attrName = forceAttrsNameIt.next();
+        	for (String attrName : forceAttrsNameSet) {
 
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
                     List<String>forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
                     if ( forceValues != null ) {
                         Attribute forceAttribute = new BasicAttribute(attrName);
-                        Iterator<String> forceValuesIt = forceValues.iterator();
-                        while (forceValuesIt.hasNext()) {
-                            String forceValue = forceValuesIt.next();
+                        for (String forceValue : forceValues) {
                             List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
-                            Iterator<String> valuesIt = values.iterator();
-                            while (valuesIt.hasNext()) {
-                            	String value = valuesIt.next();
+                            for (String value : values) {
                             	if (value != null && value.length() > 0) {                                
                             		forceAttribute.add(value);
                             	}
@@ -453,10 +426,8 @@ public final class BeanComparator {
             }
         }
 
-        Iterator<String> jdbcAttrsName = itmBean.getAttributesNames().iterator();
         List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
-        while (jdbcAttrsName.hasNext()) {
-            String jdbcAttrName = jdbcAttrsName.next();
+        for (String jdbcAttrName : itmBean.getAttributesNames()) {
 
             /* We do something only if we have to write */
             if(writeAttributes == null || writeAttributes.contains(jdbcAttrName)) {
@@ -469,15 +440,10 @@ public final class BeanComparator {
                     // interpret JScript in createValue
                     table.put("srcAttr", srcJdbcAttribute);
                     List<String> createValuesModified = new ArrayList<String>();
-                    Iterator<String> createValuesIt = createValues.iterator();
-                    while (createValuesIt.hasNext()) {
-                        String createValue = (String) createValuesIt.next();
+                    for (String createValue : createValues) {
                         createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
                     }
-
-                    Iterator<String> createValuesModifiedIter = createValuesModified.iterator();
-                    while(createValuesModifiedIter.hasNext()) {
-                    	String value = createValuesModifiedIter.next();
+                    for (String value : createValuesModified) {
                     	if (value != null && value.length() > 0) {
                     		srcJdbcAttribute.add(value);
                     	}
@@ -490,22 +456,17 @@ public final class BeanComparator {
         // create extra attributes specified by syncOptions but not present in srcJdbcBean
         Set<String> createAttrsNameSet = syncOptions.getCreateAttributeNames();
         if (createAttrsNameSet != null) {
-            Iterator<String> createAttrsNameIt = createAttrsNameSet.iterator();
-            while (createAttrsNameIt.hasNext()) {
-                String attrName = (String) createAttrsNameIt.next();
+        	for (String attrName : createAttrsNameSet) {
                 List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), attrName);
                 if ( createValues != null && itmBean.getAttributeById(attrName) == null ) {
                     Attribute createdAttribute = new BasicAttribute(attrName);
                     List<String> createValuesModified = new ArrayList<String>();
-                    Iterator<String> createValuesIt = createValues.iterator();
-                    while (createValuesIt.hasNext()) {
-                        String createValue = (String) createValuesIt.next();
+                    for (String createValue : createValues) {
                         createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
                     }
 
-                    Iterator<String> createValuesModifiedIter = createValuesModified.iterator();
-                    while(createValuesModifiedIter.hasNext()) {
-                        createdAttribute.add(createValuesModifiedIter.next());
+                    for (String value : createValuesModified) {
+                        createdAttribute.add(value);
                     }
                     modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, createdAttribute));
                 }

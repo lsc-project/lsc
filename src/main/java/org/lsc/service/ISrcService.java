@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008, 2009 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,16 +54,26 @@ import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 
 /**
- * @author rschermesser
- *
+ * Interface used by source services.
+ * 
+ * <p>This interface must be implemented by a class to be considered a source
+ * service.</P>
+ * 
+ * <P>Optionally, the source service may also implement a constructor, which
+ * will be called once before a synchronization begins. This constructor may
+ * accept a Properties object as a parameter, which will be filled with
+ * properties from the lsc.properties file.</P>
+ * 
+ * @author R&eacute;my-Christophe Schermesser
  */
 public interface ISrcService {
     /**
      * The simple object getter according to its identifier.
-     * @param bean base object
-     * @param obj The data identifier in the directory - must return a unique
-	 *        directory entry
-     * @return the object or null if not found
+     * @param bean Base object to fill
+     * @param obj
+     * 		The data identifier in the source such as returned by getListPivots().
+     * 		It must identify a unique entry in the source.
+     * @return The bean, or null if not found
      * @throws May throw a NamingException if the object is not found in the directory,
      * 			or if more than one object would be returned.
      */

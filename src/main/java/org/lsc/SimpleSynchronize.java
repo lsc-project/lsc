@@ -121,7 +121,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
      * @param cleanTasks
      *                string list of the cleaning tasks to launch
      * 
-     * @return the launch status - true if all tasks executed succesfully, false if no tasks were executed or any failed
+     * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
      * @throws Exception 
      */
     public final boolean launch(final List<String> syncTasks, 

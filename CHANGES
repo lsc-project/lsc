@@ -1,0 +1,21 @@
+===== Ldap Synchronization Connector (LSC) Change Log =====
+
+This file contains a summary of changes between releases. Please refer to
+individual issues on http://tools.lsc-project.org/ for details.
+
+Please note that this file contains changes for both the lsc-sample and lsc-core
+components.
+
+
+=== LSC release 1.1.1 (01/11/2009) ===
+
+- Fixed Bug #118: LDIF logger throws exception on zero length value
+- Fixed Bug #119: SQLMap url in example sql-map-config.xml is wrong
+- Fixed Bug #128: Bad value checking for default values in BeanComparator
+- Added Feature #97: Explicit error message when Rhino fails
+
+
+=== LSC release 1.1.0 (27/07/2009) ===
+
+- Initial release of LSC 1.1.
+- Changes from the 1.0 branch are too numerous to list.

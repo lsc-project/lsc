@@ -1,7 +1,0 @@
-@TODO include JUnit test cases
-@TODO include different (simplier and more complex) models
-@TODO include "from database request" generators
-@TODO manage transaction
-@TODO Update website documentation
-@TODO Improve documentation
-@TODO Rename default LDAP POJO to fit the standard Java classnames

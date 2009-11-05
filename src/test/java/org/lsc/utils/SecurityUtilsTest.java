@@ -125,7 +125,6 @@ public class SecurityUtilsTest extends TestCase {
 		//
 		try {
 			String result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
-			System.out.println(result);
 			assertTrue(result.equals(hashedValueSHA1));
 		} catch (NoSuchAlgorithmException ex) {
 			assertTrue(false);

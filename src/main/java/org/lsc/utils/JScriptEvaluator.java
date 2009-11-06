@@ -160,7 +160,10 @@ public final class JScriptEvaluator {
 		catch (Exception e) {} // try next approach
 
 		List<String> resultsArray = new ArrayList<String>();
-		resultsArray.add(Context.toString(result));
+		String resultAsString = Context.toString(result);
+		if (resultAsString != null && resultAsString.length() > 0) {
+			resultsArray.add(resultAsString);
+		}
 		return resultsArray;
 	}
 

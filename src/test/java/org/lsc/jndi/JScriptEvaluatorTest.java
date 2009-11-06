@@ -121,6 +121,11 @@ public class JScriptEvaluatorTest extends TestCase
 		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValuesById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
+		
+		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValueById('nonexistent')", table);
+		assertNotNull(res);
+		assertEquals(0, res.size());
+
 	}
 
 	public void testOkLdap()

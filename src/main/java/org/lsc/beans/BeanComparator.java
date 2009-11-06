@@ -47,14 +47,13 @@ package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
@@ -68,6 +67,7 @@ import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.JScriptEvaluator;
+import org.lsc.utils.SetUtils;
 
 /**
  * Bean comparison to generate the JndiModification array
@@ -94,24 +94,24 @@ public final class BeanComparator {
      * 
      * @param syncOptions SyncOptions object from properties
      * @param srcBean Bean from source
-     * @param destBean JNDI bean
+     * @param dstBean JNDI bean
      * @return JndiModificationType the modification type that would happen
      * @throws CloneNotSupportedException 
      */
-    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean destBean, Object customLibrary) throws CloneNotSupportedException {
+    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
     	// clone the source bean
     	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
     	
-    	if (itmBean == null && destBean == null) {
+    	if (itmBean == null && dstBean == null) {
     		return null;
-    	} else if (itmBean == null && destBean != null) {
+    	} else if (itmBean == null && dstBean != null) {
     		return JndiModificationType.DELETE_ENTRY;
-    	} else if (itmBean != null && destBean == null) {
+    	} else if (itmBean != null && dstBean == null) {
     		return JndiModificationType.ADD_ENTRY;
     	} else { /* srcBean != null && destBean != null */
     		if (itmBean.getDistinguishName() == null
     				|| itmBean.getDistinguishName().length() == 0
-    				|| destBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
+    				|| dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
     			return JndiModificationType.MODIFY_ENTRY;
     		} else {
     			return JndiModificationType.MODRDN_ENTRY;
@@ -142,536 +142,333 @@ public final class BeanComparator {
     	return calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
     }
     
-    /**
-     * Static comparison method.
-     * 
-     * By default, source information override destination 
-     * (i.e. Database => Directory) But if a piece of information is
-     * present only in the destination, it remains
-     * 
-     * @param srcBean Source bean from JDBC or JNDI
-     * @param destBean JNDI bean
-     * @param condition 
-     * @return modifications to apply to the directory
-     * @throws NamingException an exception may be thrown if an LDAP data
-     * access error is encountered
-     */
-    public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
-            Object customLibrary, boolean condition)	throws NamingException, CloneNotSupportedException {
-
-        JndiModifications jm = null;
-    	
-    	// clone the source bean to work on it
-    	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
-    	
-        // get modification type to perform
-        JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, destBean, customLibrary);
-        if (modificationType==JndiModificationType.DELETE_ENTRY)
-        {
-        	jm = new JndiModifications(modificationType, syncOptions.getTaskName());
-        	jm.setDistinguishName(destBean.getDistinguishName());
-        	LOGGER.debug("Deleting entry : \"" + destBean.getDistinguishName() + "\"");
-        }
-        else if (modificationType==JndiModificationType.ADD_ENTRY) 
-        {
-        	jm = getAddEntry(syncOptions, srcBean, itmBean, customLibrary, condition);
-        }
-        else if (modificationType==JndiModificationType.MODIFY_ENTRY)
-        {
-        	jm = getModifyEntry(syncOptions, srcBean, itmBean, destBean, customLibrary);
-        }
-        else if (modificationType==JndiModificationType.MODRDN_ENTRY)
-        {
-        	//WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update
-        	jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY, syncOptions.getTaskName());
-        	jm.setDistinguishName(destBean.getDistinguishName());
-        	jm.setNewDistinguishName(itmBean.getDistinguishName());
-        }
-
-        if (jm.getOperation() == JndiModificationType.MODRDN_ENTRY
-                || (jm.getModificationItems() != null && jm.getModificationItems().size() != 0)) {            
-            return jm;
-        } else {
-            return null;
-        }
-    }
-
-    private static JndiModifications getModifyEntry(ISyncOptions syncOptions, IBean srcBean, IBean itmBean, IBean destBean, 
-            Object customLibrary) throws NamingException, CloneNotSupportedException {
-
-        JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY, syncOptions.getTaskName());
-        jm.setDistinguishName(destBean.getDistinguishName());
-
-        /*
-         * If attributes are in the request, we put them in the directory. But if they are not, we forget
-         */
-        Map<String, Object> table = new HashMap<String, Object>();
-        table.put("srcBean", srcBean);
-        table.put("dstBean", destBean);
-        if(customLibrary != null) {
-            table.put("custom", customLibrary);
-        }
-
-		// Force attribute values for forced attributes in syncoptions
-		Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
-		List<String> writeAttributes = syncOptions.getWriteAttributes();
-		if (forceAttrsNameSet != null) {
-			for (String attrName : forceAttrsNameSet) {
-				/* We do something only if we have to write */
-				if (writeAttributes == null || writeAttributes.contains(attrName)) {
-					List<String> forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
-					if (forceValues != null) {
-						Attribute forceAttribute = new BasicAttribute(attrName);
-						for (String forceValue : forceValues) {
-							List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
-							for (String value : values) {
-								forceAttribute.add(value);
-							}
-						}
-						itmBean.setAttribute(forceAttribute);
-					}
-				}
-			}
-		}
-
-        // Use default attributes values specified by syncOptions but not present in srcJdbcBean
-        Set<String> defaultAttrsNameSet = syncOptions.getDefaultValuedAttributeNames();
-        if (defaultAttrsNameSet != null) {
-        	for (String attrName : defaultAttrsNameSet) {
-                /* We do something only if we have to write */
-                if (writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(), attrName);
-                    if ( defaultValues != null && itmBean.getAttributeById(attrName) == null ) {
-                        Attribute defaultAttribute = new BasicAttribute(attrName);
-                        List<String> defaultValuesModified = new ArrayList<String>();
-                        for (String defaultValue : defaultValues) {
-                            defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
-                        }
-                        for (String value : defaultValuesModified) {
-                            defaultAttribute.add(value);
-                        }
-
-                        itmBean.setAttribute(defaultAttribute);
-                    }
-                }
-            }
-        }
-
-        List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
-
-        for (String srcAttrName : itmBean.getAttributesNames()) {
-
-            /* We do something only if we have to write */
-            if (writeAttributes == null || writeAttributes.contains(srcAttrName)) {
-
-                ModificationItem mi = null;
-                Attribute srcAttr = itmBean.getAttributeById(srcAttrName);
-                Attribute destAttr = destBean.getAttributeById(srcAttrName);
-                table.put("srcAttr", srcAttr);
-                table.put("dstAttr", destAttr);
-
-                // Clean up srcAttr
-                if (srcAttr == null) {
-                    srcAttr = new BasicAttribute(srcAttrName);
-                }
-                while (srcAttr.size() >= 1 &&
-                		((srcAttr.get(0).getClass().equals(String.class) && ((String)srcAttr.get(0)).length() == 0) ||
-        				(srcAttr.get(0) == null))) {
-                	srcAttr.remove(0);
-                }
-
-                // Manage default values
-                List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(),	srcAttrName);
-                List<String> defaultValuesModified = new ArrayList<String>();
-                if (defaultValues != null) {
-                	for (String defaultValue : defaultValues) {
-                        defaultValuesModified.addAll(JScriptEvaluator.evalToStringList(defaultValue, table));
-                    }
-                }
-
-                if (defaultValuesModified.size() > 0 &&
-                        (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE ||
-                                (srcAttr == null || srcAttr.size() == 0) )) {
-                	for (String value : defaultValuesModified) {
-                        if (value != null && value.length() > 0) {
-                            srcAttr.add(value);
-                        }
-                    }
-                }
-
-                if (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.FORCE) {
-                    if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr != null && destAttr.size() > 0 ) ) {
-                        LOGGER.debug("Deleting attribute  \"" + srcAttrName + "\" in entry \""
-                                + destBean.getDistinguishName() + "\"");
-                        // delete all values of the attribute - to do this we must create an empty Attribute
-                        mi = new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute(srcAttrName));
-                    } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 )) {
-                        LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
-                                + destBean.getDistinguishName() + "\"");
-                        // By default, if we try to modify an attribute in
-                        // the destination entry, we have to care to replace all
-                        // values in the following conditions:
-                        // - FORCE action is used;
-                        // - A value is specified by the create_value parameter.
-                        // So, instead of add the attribute, we replace it.
-                        mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, itmBean.getAttributeById(srcAttrName));
-                    } else if ( ( srcAttr == null || srcAttr.size() == 0) && (destAttr == null || destAttr.size() == 0 ) ) {
-                        // Do nothing
-                        LOGGER.debug("Do nothing (" + srcAttrName + ")");
-                    } else {
-                        LOGGER.debug("Checking if attribute " + srcAttrName + " is modified.");
-                        mi = compareAttribute(srcAttr, destAttr);
-                    }
-
-                    if (mi != null) {
-                        LOGGER.debug("Adding modification for attribute " + srcAttrName + ".");
-                        modificationItems.add(mi);
-                    }
-                } else if (syncOptions.getStatus(itmBean.getDistinguishName(), srcAttrName) == STATUS_TYPE.MERGE) {
-                    if ( srcAttr == null || srcAttr.size() == 0 ) {
-                        // Do nothing
-                        LOGGER.debug("Do nothing (" + srcAttrName + ")");
-                    } else if ( ( srcAttr != null && srcAttr.size() > 0) && (destAttr == null || destAttr.size() == 0 ) ) {
-                        LOGGER.debug("Adding attribute \"" + srcAttrName + "\" in entry \""
-                                + destBean.getDistinguishName() + "\"");
-                        mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, itmBean.getAttributeById(srcAttrName));
-                    } else {
-                        mi = mergeAttributes(srcAttr, destAttr);
-                    }
-
-                    if (mi != null) {
-                        modificationItems.add(mi);
-                    }
-                } else {
-                    LOGGER.debug("Forget any modifications because of the 'Keep' status (" + srcAttrName + ")");
-                }
-            }
-        }
-
-        if (modificationItems.size() != 0) {
-            jm.setModificationItems(modificationItems);
-            LOGGER.debug("Modifying entry \"" + destBean.getDistinguishName() + "\"");
-        } else {
-            LOGGER.debug("Entry \"" + destBean.getDistinguishName()
-                    + "\" is the same in the source and in the destination");
-        }
-        return jm;
-    }
-
-    /**
-     * 
-     * @param syncOptions
-     * @param srcJdbcBean
-     * @param itmBean
-     * @param customLibrary
-     * @param condition The create condition to avoid recalculating it in the method.
-     * @return
-     * @throws NamingException
-     * @throws CloneNotSupportedException
-     */
-    private static JndiModifications getAddEntry(ISyncOptions syncOptions, IBean srcJdbcBean, IBean itmBean, Object customLibrary, boolean condition) throws NamingException, CloneNotSupportedException {
-        /* table used for JScript interpretation of creation values */
-        Map<String, Object> table = new HashMap<String, Object>();
-        table.put("srcBean", srcJdbcBean);
-        if(customLibrary != null) {
-            table.put("custom", customLibrary);
-        }
-
-        JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY, syncOptions.getTaskName());
-        
-        if (itmBean.getDistinguishName() != null) {
-            jm.setDistinguishName(itmBean.getDistinguishName());
-        } else {            
-            // only complain about a missing DN if we're really going to create the entry
-            if (condition) {
-            	LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
-
-            	if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
-                    throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
-            	}
-            	jm.setDistinguishName("uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE);
-            }
-            else
-            {
-            	// condition is false, we're not really going to create the entry
-            	// set a pseudo DN to use for display purposes
-            	jm.setDistinguishName("No DN set! Read it from the source or set lsc.tasks.NAME.dn");
-            }
-            
-        }
-
-        // Force attribute values for forced attributes in syncoptions
-        Set<String> forceAttrsNameSet = syncOptions.getForceValuedAttributeNames();
-        List<String> writeAttributes = syncOptions.getWriteAttributes();
-        if (forceAttrsNameSet != null) {
-        	for (String attrName : forceAttrsNameSet) {
-
-                /* We do something only if we have to write */
-                if(writeAttributes == null || writeAttributes.contains(attrName)) {
-                    List<String>forceValues = syncOptions.getForceValues(itmBean.getDistinguishName(), attrName);
-                    if ( forceValues != null ) {
-                        Attribute forceAttribute = new BasicAttribute(attrName);
-                        for (String forceValue : forceValues) {
-                            List<String> values = JScriptEvaluator.evalToStringList(forceValue, table);
-                            for (String value : values) {
-                            	if (value != null && value.length() > 0) {                                
-                            		forceAttribute.add(value);
-                            	}
-                            }
-                        }
-
-                        itmBean.setAttribute(forceAttribute);
-                    }
-                }
-            }
-        }
-
-        List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
-        for (String jdbcAttrName : itmBean.getAttributesNames()) {
-
-            /* We do something only if we have to write */
-            if(writeAttributes == null || writeAttributes.contains(jdbcAttrName)) {
-                Attribute srcJdbcAttribute = itmBean.getAttributeById(jdbcAttrName);
-                List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), srcJdbcAttribute.getID());
-
-                if ( ( createValues != null ) 
-                        && (srcJdbcAttribute.getAll() == null || !srcJdbcAttribute.getAll().hasMore() ||
-                                syncOptions.getStatus(itmBean.getDistinguishName(), jdbcAttrName)==STATUS_TYPE.MERGE)) {
-                    // interpret JScript in createValue
-                    table.put("srcAttr", srcJdbcAttribute);
-                    List<String> createValuesModified = new ArrayList<String>();
-                    for (String createValue : createValues) {
-                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
-                    }
-                    for (String value : createValuesModified) {
-                    	if (value != null && value.length() > 0) {
-                    		srcJdbcAttribute.add(value);
-                    	}
-                    }
-                }
-                modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, srcJdbcAttribute));
-            }
-        }
-
-        // create extra attributes specified by syncOptions but not present in srcJdbcBean
-        Set<String> createAttrsNameSet = syncOptions.getCreateAttributeNames();
-        if (createAttrsNameSet != null) {
-        	for (String attrName : createAttrsNameSet) {
-                List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), attrName);
-                if ( createValues != null && itmBean.getAttributeById(attrName) == null ) {
-                    Attribute createdAttribute = new BasicAttribute(attrName);
-                    List<String> createValuesModified = new ArrayList<String>();
-                    for (String createValue : createValues) {
-                        createValuesModified.addAll(JScriptEvaluator.evalToStringList(createValue, table));
-                    }
-
-                    for (String value : createValuesModified) {
-                        createdAttribute.add(value);
-                    }
-                    modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, createdAttribute));
-                }
-            }
-        }
-
-        jm.setModificationItems(modificationItems);
-        LOGGER.debug("Adding new entry \"" + jm.getDistinguishName() + "\"");
-        return jm;
-    }
-
-    /**
-     * Compare two attributes and compute a modification item
-     * 
-     * @param srcAttr
-     *            the source attribute
-     * @param dstAttr
-     *            the destination attribute
-     * @return the modification item or null if not needed
-     * @throws NamingException
-     */
-    private static ModificationItem compareAttribute(Attribute srcAttr, Attribute dstAttr) throws NamingException {
-
-		// convert to easily comparable type
-		List<Object> srcAttrValues = attributeToList(srcAttr);
-		List<Object> dstAttrValues = attributeToList(dstAttr);
-
-		if (!doAttributesMatch(srcAttrValues, dstAttrValues))
-		{
-			// build up replacement attribute
-			Attribute toReplaceAttr = new BasicAttribute(srcAttr.getID());
-			for (Object srcValue : srcAttrValues)
-			{
-				toReplaceAttr.add(srcValue);
-			}
-
-			LOGGER.debug("Attribute " + dstAttr.getID() + ": source values are " + srcAttr + ", old values were " + dstAttr + ", new values are " + toReplaceAttr);
-
-			return new ModificationItem(DirContext.REPLACE_ATTRIBUTE, toReplaceAttr);
-		}
-		else return null;
-
-    }
-
 	/**
-	 * Compare two lists of values to see if they contain the same values. This
-	 * method is type-aware and will intelligently compare byte[], String, etc.
+	 * Static comparison method. By default, source information override
+	 * destination (i.e. Database => Directory) But if a piece of information is
+	 * present only in the destination, it remains
 	 * 
-	 * @param srcAttrValues
-	 * @param dstAttrValues
-	 * @return
-	 */
-	private static boolean doAttributesMatch(List<Object> srcAttrValues, List<Object> dstAttrValues)
-	{
-		// make sure value counts are the same
-		if (srcAttrValues.size() != dstAttrValues.size()) return false;
-
-		// check if there are any values in srcAttr not in dstAttr
-		if (!listContainsAll(dstAttrValues, srcAttrValues)) return false;
-
-		// check if there are any values in dstAttr not in srcAttr
-		if (!listContainsAll(srcAttrValues, dstAttrValues)) return false;
-
-		// looks ok!
-		return true;
-    }
-
-	/**
-	 * Check to make sure all needles are in the haystack. In other words each
-	 * value from the list needles must be in the list haystack. This method is
-	 * type-aware and will intelligently compare byte[], String, etc.
-	 * 
-	 * @param haystack
-	 *            List of Objects to find the needles in.
-	 * @param needles
-	 *            List of Objects to search for in the haystack.
-	 */
-	private static boolean listContainsAll(List<Object> haystack, List<Object> needles)
-	{
-		return (findMissingNeedles(haystack, needles).size() == 0);
-	}
-
-	/**
-	 * Find missing needles from a haystack. In other words, identify values in
-	 * the list of needles that are not in the haystack, and return them in a
-	 * new List. This method is type-aware and will intelligently compare
-	 * byte[], String, etc.
-	 * 
-	 * @param haystack
-	 *            List of Objects to find the needles in.
-	 * @param needles
-	 *            List of Objects to search for in the haystack.
-	 * @return
-	 */
-	private static List<Object> findMissingNeedles(List<Object> haystack, List<Object> needles)
-	{
-		List<Object> missingNeedles = new ArrayList<Object>();
-
-		for (Object needle : needles)
-		{
-			ByteBuffer needleBuff = null;
-
-			// use a byte buffer is needle is binary
-			if (needle.getClass().isAssignableFrom(byte[].class)) needleBuff = ByteBuffer.wrap((byte[]) needle);
-
-			boolean foundInHaystack = false;
-			for (Object haystackValue : haystack)
-			{
-				ByteBuffer haystackValueBuff = null;
-
-				// use a byte buffer if haystack value is binary
-				if (haystackValue.getClass().isAssignableFrom(byte[].class))
-				{
-					haystackValueBuff = ByteBuffer.wrap((byte[]) haystackValue);
-
-					// make sure we have a byte buffer for the needle too
-					if (needleBuff == null)
-					{
-						// if needle is binary, make this haystack value binary
-						if (needle.getClass().isAssignableFrom(String.class)) needleBuff = ByteBuffer.wrap(((String) needle).getBytes());
-						else continue;
-					}
-				}
-
-				// needleBuff is set if either needle or haystack value are binary
-				// do a binary comparison
-				if (needleBuff != null)
-				{
-					// make sure we have a byte buffer for haystack value too
-					if (haystackValueBuff == null)
-					{
-						if (haystackValue.getClass().isAssignableFrom(String.class)) haystackValueBuff = ByteBuffer.wrap(((String) haystackValue).getBytes());
-						else continue;
-					}
-
-					// binary comparison
-					if (haystackValueBuff.compareTo(needleBuff) == 0) foundInHaystack = true;
-				}
-				else
-				{
-					// fall back to standard compare (works well for String, int, boolean, etc)
-					if (haystackValue.equals(needle)) foundInHaystack = true;
-				}
-			}
-
-			if (!foundInHaystack) missingNeedles.add(needle);
-		}
-
-		return missingNeedles;
-	}
-
-	/**
-	 * Return an ArrayList containing all the Objects that are an Attribute's
-	 * values.
-	 * 
-	 * @param attr
-	 *            An Attribute containing values to extract.
-	 * @return ArrayList<Object> values as an array.
+	 * @param srcBean
+	 *            Source bean
+	 * @param dstBean
+	 *            JNDI bean
+	 * @param condition
+	 * @return modifications to apply to the directory
 	 * @throws NamingException
+	 *             an exception may be thrown if an LDAP data access error is
+	 *             encountered
 	 */
-	private static List<Object> attributeToList(Attribute attr)
-			throws NamingException
+	public static JndiModifications calculateModifications(
+			ISyncOptions syncOptions, IBean srcBean, IBean dstBean,
+			Object customLibrary, boolean condition) throws NamingException,
+			CloneNotSupportedException
 	{
-		List<Object> attrValues = new ArrayList<Object>(attr.size());
-		NamingEnumeration<?> ne = attr.getAll();
-		while (ne.hasMore())
+
+		JndiModifications jm = null;
+
+		// clone the source bean to work on it
+		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+
+		// get modification type to perform
+		JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, dstBean, customLibrary);
+
+		// if there's nothing to do, just return
+		if (modificationType == null)
+			return null;
+
+		// prepare JndiModifications object
+		jm = new JndiModifications(modificationType, syncOptions.getTaskName());
+		jm.setDistinguishName(getDstDN(itmBean, dstBean, condition));
+
+		switch (modificationType)
 		{
-			attrValues.add(ne.next());
+			case DELETE_ENTRY:
+				break;
+
+			case ADD_ENTRY:
+			case MODIFY_ENTRY:
+				jm = getAddModifyEntry(jm, syncOptions, srcBean, itmBean, dstBean, customLibrary, condition);
+				break;
+
+			case MODRDN_ENTRY:
+				// WARNING: updating the RDN of the entry will cancel other
+				// modifications! Relaunch synchronization to complete update
+				jm.setNewDistinguishName(itmBean.getDistinguishName());
+				break;
+
+			default:
+				break;
 		}
-		return attrValues;
+
+		return jm;
 	}
-    
-    /**
-     * Merge two attributes and compute a modification item
-     * 
-     * @param srcAttr
-     *            the source attribute
-     * @param dstAttr
-     *            the destination attribute
-     * @return the modification item or null if not needed
-     * @throws NamingException
-     */
-    private static ModificationItem mergeAttributes(Attribute srcAttr, Attribute dstAttr) throws NamingException {
 
-        // read in all values from dstAttr
-        List<Object> dstAttrValues = attributeToList(dstAttr);
-        List<Object> srcAttrValues = attributeToList(srcAttr);
+	private static String getDstDN(IBean itmBean, IBean dstBean,
+			boolean condition) throws NamingException
+	{
+		// If we already know which object we're aiming for in the destination,
+		// we have the DN
+		if (dstBean != null)
+			return dstBean.getDistinguishName();
 
-        // check if there are any extra values to be added from the source attribute
-        List<Object> missingValues = findMissingNeedles(dstAttrValues, srcAttrValues);
-        
-        if (missingValues.size() > 0) {
-        	// build an attribute to add missing values
-            Attribute addValuesAttr = new BasicAttribute(dstAttr.getID());
-            for (Object missingValue : missingValues) {
-				addValuesAttr.add(missingValue);
+		// If the itmBean has a DN set, use that (this is where JavaScript
+		// generated DNs come from)
+		if (itmBean != null && itmBean.getDistinguishName() != null)
+			return itmBean.getDistinguishName();
+
+		// At this stage, we don't have a real DN to use.
+
+		// If we're not really going to create the entry, silently return a
+		// pseudo value
+		if (!condition) {
+			// condition is false, we're not really going to create the entry
+			// set a pseudo DN to use for display purposes
+			return "No DN set! Read it from the source or set lsc.tasks.NAME.dn";
+		}
+
+		// still no DN? Try last resort, but complain about it loudly, this is
+		// probably not what the user wants!
+		LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
+
+		if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
+			throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
+		}
+		return "uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE;
+	}
+
+	/**
+	 * Compare attributes and values to build a list of modifications to apply
+	 * to the destination for one object.
+	 * 
+	 * @param modOperation
+	 *            Operation to be done on the entry (should only be of type ADD or MODIFY)
+	 * @param syncOptions
+	 *            Instance of {@link ISyncOptions} to provide transformation configuration
+	 * @param srcBean
+	 *            The original bean read from the source
+	 * @param itmBean
+	 *            The source bean with local modifications (default and force values, DN renaming)
+	 * @param dstBean
+	 *            The original bean read from the destination
+	 * @param customLibrary
+	 *            An optional class to pass into the JavaScript interpreter
+	 * @return {@link JndiModifications} List of modifications to apply to the destination
+	 * @throws NamingException
+	 * @throws CloneNotSupportedException
+	 */
+	private static JndiModifications getAddModifyEntry(
+			JndiModifications modOperation, ISyncOptions syncOptions,
+			IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary,
+			boolean condition) throws NamingException,
+			CloneNotSupportedException
+	{
+
+		String dn = modOperation.getDistinguishName();
+		String logPrefix = "In entry \"" + dn + "\": ";
+
+		// This method only handles ADD or MODIFY
+		JndiModificationType modType = modOperation.getOperation();
+		if (modType != JndiModificationType.ADD_ENTRY && modType != JndiModificationType.MODIFY_ENTRY)
+			return null;
+
+		// Set up JavaScript objects
+		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
+		if (srcBean != null)
+			javaScriptObjects.put("srcBean", srcBean);
+		if (dstBean != null)
+			javaScriptObjects.put("dstBean", dstBean);
+		if (customLibrary != null)
+			javaScriptObjects.put("custom", customLibrary);
+
+		// We're going to iterate over the list of attributes we may write
+		Set<String> writeAttributes = getWriteAttributes(syncOptions, itmBean);
+		LOGGER.debug(logPrefix + "List of attributes considered for writing in destination: " + writeAttributes);
+
+		// Iterate over attributes we may write
+		List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
+		for (String attrName : writeAttributes) {
+			// Get attribute status type
+			STATUS_TYPE attrStatus = syncOptions.getStatus(dn, attrName);
+			LOGGER.debug(logPrefix + "Attribute \"" + attrName + "\" is in " + attrStatus + " status");
+
+			// Get the current attribute values from source and destination
+			Attribute srcAttr = (itmBean != null ? itmBean.getAttributeById(attrName) : null);
+			Attribute dstAttr = (dstBean != null ? dstBean.getAttributeById(attrName) : null);
+
+			// Add attributes to JavaScript objects
+			if (srcAttr != null)
+				javaScriptObjects.put("srcAttr", srcAttr);
+			if (dstAttr != null)
+				javaScriptObjects.put("dstAttr", dstAttr);
+
+			// Use a list of values for easier handling
+			Set<Object> srcAttrValues = SetUtils.attributeToSet(srcAttr);
+			Set<Object> dstAttrValues = SetUtils.attributeToSet(dstAttr);
+
+			// Get list of values that the attribute should be set to in the destination
+			Set<Object> toSetAttrValues = getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, modType);
+
+			// What operation do we need to do on this attribute?
+			int operationType = getRequiredOperationForAttribute(toSetAttrValues, dstAttrValues);
+
+			// Build the modification
+			ModificationItem mi = null;
+			switch (operationType)
+			{
+				case DirContext.REMOVE_ATTRIBUTE:
+					if (attrStatus == STATUS_TYPE.FORCE) {
+						LOGGER.debug(logPrefix + "Deleting attribute  \"" + attrName + "\"");
+						mi = new ModificationItem(operationType, new BasicAttribute(attrName));
+					}
+
+					break;
+
+				case DirContext.ADD_ATTRIBUTE:
+					LOGGER.debug(logPrefix + "Adding attribute \"" + attrName + "\" with values " + toSetAttrValues);
+
+					if (modType != JndiModificationType.ADD_ENTRY && attrStatus == STATUS_TYPE.FORCE) {
+						// By default, if we try to modify an attribute in
+						// the destination entry, we have to care to replace all
+						// values in the following conditions:
+						// - FORCE action is used;
+						// - A value is specified by the create_value parameter.
+						// So, instead of add the attribute, we replace it.
+						operationType = DirContext.REPLACE_ATTRIBUTE;
+					}
+
+					mi = new ModificationItem(operationType, SetUtils.setToAttribute(attrName, toSetAttrValues));
+
+					break;
+
+				case DirContext.REPLACE_ATTRIBUTE:
+					if (attrStatus == STATUS_TYPE.FORCE) {
+						if (!SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues)) {
+							Attribute replaceAttr = SetUtils.setToAttribute(dstAttr.getID(), toSetAttrValues);
+
+							LOGGER.debug(logPrefix + "Replacing attribute \"" + attrName + "\": source values are " + srcAttrValues + ", old values were " + dstAttrValues + ", new values are " + toSetAttrValues);
+							mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, replaceAttr);
+						}
+					}
+					else if (attrStatus == STATUS_TYPE.MERGE) {
+						// check if there are any extra values to be added
+						Set<?> missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
+
+						if (missingValues.size() > 0) {
+							Attribute addValuesAttr = SetUtils.setToAttribute(dstAttr.getID(), missingValues);
+
+							LOGGER.debug(logPrefix + "Adding values to attribute \"" + attrName + "\": new values are " + missingValues);
+							mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, addValuesAttr);
+						}
+					}
+
+					break;
+
 			}
 
-            return new ModificationItem(DirContext.ADD_ATTRIBUTE, addValuesAttr);
-        } else {
-            return null;
-        }
-    }
+			if (mi == null) {
+				LOGGER.debug(logPrefix + "Attribute \"" + attrName + "\" will not be written to the destination");
+			}
+			else {
+				modificationItems.add(mi);
+			}
 
-    /**
+			// Remove attributes from JavaScript objects
+			if (srcAttr != null)
+				javaScriptObjects.remove("srcAttr");
+			if (dstAttr != null)
+				javaScriptObjects.remove("dstAttr");
+		}
+
+		if (modificationItems.size() != 0) {
+			modOperation.setModificationItems(modificationItems);
+		}
+		else {
+			modOperation = null;
+			LOGGER.debug("Entry \"" + dn + "\" will not be written to the destination");
+		}
+
+		return modOperation;
+	}
+
+	/**
+	 * <P>
+	 * Return the operation to perform on a set of current values, so that they
+	 * match the set of values wanted.
+	 * </P>
+	 * 
+	 * <P>
+	 * The result returned is an integer representing the operation type from
+	 * DirContext: ADD_ATTRIBUTE, REPLACE_ATTRIBUTE or REMOVE_ATTRIBUTE. As a
+	 * convention, a return value of 0 means "do nothing".
+	 * </P>
+	 * 
+	 * @param toSetAttrValues
+	 *            Target set of values
+	 * @param currentAttrValues
+	 *            Current set of values
+	 * @return Operation to perform: {@link DirContext} constants, or 0 for no operation.
+	 */
+	private static int getRequiredOperationForAttribute(
+			Set<Object> toSetAttrValues, Set<Object> currentAttrValues)
+	{
+		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0)
+			return DirContext.REMOVE_ATTRIBUTE;
+		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0)
+			return DirContext.ADD_ATTRIBUTE;
+		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0)
+			return DirContext.REPLACE_ATTRIBUTE;
+		else
+			return 0;
+	}
+
+	/**
+	 * <P>
+	 * Return the set of attribute names that may be updated in the destination
+	 * </P>
+	 * <P>
+	 * This list is read from the destination server configuration property
+	 * "lsc.tasks.taskname.dstService.attrs", if it is defined. If it is not
+	 * defined, then the list of attributes returned contains all source
+	 * attributes, and all force valued/default valued/create valued attributes.
+	 * </P>
+	 * 
+	 * @param syncOptions
+	 *            Instance of {@link ISyncOptions} to provide transformation
+	 *            configuration
+	 * @param srcBean
+	 *            The original bean read from the source
+	 * @return Set of attribute names to be updated
+	 */
+	private static Set<String> getWriteAttributes(ISyncOptions syncOptions, IBean srcBean)
+	{
+		Set<String> res = new HashSet<String>();
+
+		// Check if an explicit list was configured
+		List<String> syncOptionsWriteAttributes = syncOptions.getWriteAttributes();
+
+		if (syncOptionsWriteAttributes != null) {
+			for (String attrName : syncOptionsWriteAttributes) {
+				res.add(attrName);
+			}
+		}
+
+		// If no explicit list of attribute types to write is specified,
+		// we build a list from all source attributes, all force and default values
+		if (res.size() == 0) {
+			Set<String> itmBeanAttrsList = srcBean.getAttributesNames();
+			Set<String> forceAttrsList = syncOptions.getForceValuedAttributeNames();
+			Set<String> defaultAttrsList = syncOptions.getDefaultValuedAttributeNames();
+			Set<String> createAttrsList = syncOptions.getCreateAttributeNames();
+
+			res.addAll(itmBeanAttrsList);
+			res.addAll(forceAttrsList);
+			res.addAll(defaultAttrsList);
+			res.addAll(createAttrsList);
+		}
+
+		return res;
+	}
+
+	/**
      * Check modifications across other directory objects - Never used at this time : implementation may be buggy
      * 
      * While adding, deleting or modifying an entry, specific treatments must be done like removing a member from all
@@ -747,6 +544,96 @@ public final class BeanComparator {
 		}
 
 		return itmBean;
+	}
+
+	/**
+	 * <P>
+	 * Build a set of values for a given attribute, that should be set in the
+	 * destination repository.
+	 * </P>
+	 * <P>
+	 * This method implements logic regarding precedence of:
+	 * <ol>
+	 * <li>Force values</li>
+	 * <li>Original source values</li>
+	 * <li>Default values and create values</li>
+	 * </ol>
+	 * </P>
+	 * <P>
+	 * It also handles the special case of MERGE attributes. In this case, the
+	 * resulting list of values is the union of:
+	 * <ul>
+	 * <li>Original source values</li>
+	 * <li>Original destination values</li>
+	 * <li>Default values or create values</li>
+	 * </ul>
+	 * </P>
+	 * 
+	 * @param attrName
+	 *            {@link String} Name of the attribute to be considered. Used to
+	 *            read default/force values from syncoptions.
+	 * @param srcAttrValues
+	 *            {@link Set}<Object> All values of the considered attribute
+	 *            read from the source.
+	 * @param syncOptions
+	 *            {@link ISyncOptions} Object to read syncoptions from
+	 *            configuration.
+	 * @param javaScriptObjects
+	 *            {@link Map}<String, Object> Object map to pass objects into
+	 *            JavaScript environment.
+	 * @param create
+	 *            {@link boolean} If the object is being newly created (causes
+	 *            create values to be used instead of default values)
+     * @param modType Type of operation to be done on the entry (should only be ADD or MODIFY)
+	 * @return List<Object> The list of values that should be set in the
+	 *         destination. Never null.
+	 * @throws NamingException
+	 */
+	protected static Set<Object> getValuesToSet(String attrName,
+			Set<Object> srcAttrValues, ISyncOptions syncOptions,
+			Map<String, Object> javaScriptObjects, JndiModificationType modType)
+			throws NamingException
+	{
+		// Result
+		Set<Object> attrValues = new HashSet<Object>();
+
+		// If we have force values, they take precedence over anything else, just use them
+		List<String> forceValueDefs = syncOptions.getForceValues(null, attrName);
+		if (forceValueDefs != null) {
+			for (String forceValueDef : forceValueDefs) {
+				List<String> forceValues = JScriptEvaluator.evalToStringList(forceValueDef, javaScriptObjects);
+				attrValues.addAll(forceValues);
+			}
+
+			return attrValues;
+		}
+
+		// No force values
+		// If we have source values, use them
+		if (srcAttrValues != null && srcAttrValues.size() > 0) {
+			attrValues.addAll(srcAttrValues);
+		}
+
+		// Add default or create values if:
+		// a) there are no values yet, or
+		// b) attribute is in Merge status
+		if (attrValues.size() == 0 || syncOptions.getStatus(null, attrName) == STATUS_TYPE.MERGE)
+		{
+			List<String> newValuesDefs;
+			if (modType == JndiModificationType.ADD_ENTRY) {
+				newValuesDefs = syncOptions.getCreateValues(null, attrName);
+			} else {
+				newValuesDefs = syncOptions.getDefaultValues(null, attrName);
+			}
+			if (newValuesDefs != null) {
+				for (String defaultValueDef : newValuesDefs) {
+					List<String> defaultValues = JScriptEvaluator.evalToStringList(defaultValueDef, javaScriptObjects);
+					attrValues.addAll(defaultValues);
+				}
+			}
+		}
+		
+		return attrValues;
 	}
 
 }

@@ -164,6 +164,12 @@ public class Ldap2LdapSyncTest extends TestCase
 
 		// check the results of the synchronization
 		checkSyncResultsSecondPass();		
+
+		// sync a third time to make sure nothing changed
+		launchSyncCleanTask(TASK_NAME, true, false);
+
+		// check the results of the synchronization
+		checkSyncResultsSecondPass();		
 	}
 
 	private final void checkSyncResultsFirstPass() throws Exception
@@ -200,7 +206,8 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "description", attributeValues);
 
 		// the telephoneNumber was added
-		attributeValues = new ArrayList<String>(2);
+		attributeValues = new ArrayList<String>(3);
+		attributeValues.add("987987");
 		attributeValues.add("123456");
 		attributeValues.add("789987");
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "telephoneNumber", attributeValues);
@@ -261,6 +268,9 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues.add("top");
 		attributeValues.add("person");
 		checkAttributeValues(DN_MODIFY_DST, "objectClass", attributeValues);
+		// the givenName was deleted
+		attributeValues = new ArrayList<String>();
+		checkAttributeValues(DN_MODIFY_DST, "seeAlso", attributeValues);
 	}
 	
 	public final void testCleanLdap2Ldap() throws Exception
@@ -344,7 +354,14 @@ public class Ldap2LdapSyncTest extends TestCase
 	{
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
-		assertNotNull(at);
+		if (expectedValues.size() > 0) {
+			assertNotNull(at);
+		} else {
+			if (at==null) {
+				assertEquals(0, expectedValues.size());
+				return;
+			}
+		}
 		assertEquals(expectedValues.size(), at.size());
 		
 		// check that each value matches one on one

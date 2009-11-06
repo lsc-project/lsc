@@ -51,6 +51,7 @@ objectClass: person
 objectClass: top
 userPassword: secret0002
 description: Number two's descriptive text
+telephoneNumber: 987987
 
 dn: cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0003
@@ -71,6 +72,7 @@ objectClass: person
 objectClass: top
 telephoneNumber: 123456
 telephoneNumber: 456789
+seeAlso: cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 
 dn: cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002
@@ -82,5 +84,10 @@ dn: cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0004
 sn: SN0004
 objectClass: person
+objectClass: top
+
+dn: ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: db2ldap2TestTaskDst
+objectClass: organizationalUnit
 objectClass: top
 

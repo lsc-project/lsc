@@ -63,71 +63,69 @@ import org.slf4j.LoggerFactory;
  */
 public class DaoConfigTest extends TestCase {
 
-    private Connection con;
+	private Connection con;
+	private Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
-    private Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
+	/**
+	 * Test the JDBC connection.
+	 */
+	public final void testConnection() {
+		try {
+			Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
+			pc.put("url", "jdbc:hsqldb:file:target/hsqldb/lsc");
 
-    /**
-     * Test the JDBC connection.
-     */
-    public final void testConnection() {
-        try {
-            Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
-            pc.put("url", "jdbc:hsqldb:file:target/hsqldb/lsc");
+			/* Test loading driver */
+			LOGGER.info("=> loading driver:");
+			Class.forName((String) pc.get("driver")).newInstance();
+			LOGGER.info("OK");
 
-            /* Test loading driver */
-            LOGGER.info("=> loading driver:");
-            Class.forName((String) pc.get("driver")).newInstance();
-            LOGGER.info("OK");
+			/* Test the connection */
+			LOGGER.info("=> connecting:");
+			con = DriverManager.getConnection((String) pc.get("url"));
+			LOGGER.info("OK");
+		} catch (ClassNotFoundException y) {
+			LOGGER.error("ERR: driver not found. Please check your CLASSPATH !");
+		} catch (Exception x) {
+			LOGGER.error(x.toString(), x);
+		}
+	}
 
-            /* Test the connection */
-            LOGGER.info("=> connecting:");
-            con = DriverManager.getConnection((String) pc.get("url"));
-            LOGGER.info("OK");
-        } catch (ClassNotFoundException y) {
-            LOGGER.error("ERR: driver not found. Please check your CLASSPATH !");
-        } catch (Exception x) {
-            LOGGER.error(x.toString(), x);
-        }
-    }
+	public final void testRequest() {
+		ResultSet rs = null;
+		try {
+			if (con == null) {
+				testConnection();
+			}
+			Statement stm = con.createStatement();
+			String sql = "DROP TABLE test IF EXISTS; CREATE TABLE test (id INTEGER PRIMARY KEY)";
+			rs = stm.executeQuery(sql);
+			//
+			while (rs.next()) {
+				System.out.println("Table has " + rs.getInt(1) + " rows.");
+			}
+		} catch (SQLException e) {
+			LOGGER.error(e.toString(), e);
+		}
+		assertNotNull(rs);
+	}
 
-    public final void testRequest() {
-        ResultSet rs = null;
-        try {
-            if(con == null) {
-                testConnection();
-            }
-            Statement stm = con.createStatement();
-            String sql = "DROP TABLE test IF EXISTS; CREATE TABLE test (id INTEGER PRIMARY KEY)";
-            rs = stm.executeQuery(sql);
-            //
-            while (rs.next()) {
-                System.out.println("Table has " + rs.getInt(1) + " rows.");
-            }
-        } catch (SQLException e) {
-            LOGGER.error(e.toString(), e);
-        }
-        assertNotNull(rs);
-    }
+	public final void testGetSqlMapClient() {
+		// this is useless but breaks the test otherwise :)
+		if (con == null) {
+			testConnection();
+		}
+		assertNotNull(DaoConfig.getSqlMapClient());
+	}
 
-    public final void testGetSqlMapClient() {
-    	// this is useless but breaks the test otherwise :)
-        if(con == null) {
-            testConnection();
-        }
-
-    	assertNotNull(DaoConfig.getSqlMapClient());
-    }
-
-    /**
-     * Close DB connection
-     */
+	/**
+	 * Close DB connection
+	 */
 	@Override
-    public final void tearDown() {
-        try {
-            con.close();
-        } catch (SQLException e) {
-            LOGGER.error(e.toString(), e);
-        }
-    }
+	public final void tearDown() {
+		try {
+			con.close();
+		} catch (SQLException e) {
+			LOGGER.error(e.toString(), e);
+		}
+	}
 }

@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -54,11 +54,6 @@ import junit.framework.TestCase;
  */
 public class LdapAttributeTypeTest extends TestCase {
 
-	@Override
-	public final void setUp() {
-		PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-	}
-	
 	public final void testParsing() {
 		assertNotNull(LdapAttributeType.parse(
 				"( 1.3.6.1.4.1.4203.666.11.1.3.2.1.3 NAME 'olcDbConfig' DESC 'BerkeleyDB DB_CONFIG configuration directives' SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORDERED 'VALUES' )"));
@@ -67,5 +62,5 @@ public class LdapAttributeTypeTest extends TestCase {
 		assertNotNull(LdapAttributeType.parse(
 				"( 1.3.6.1.4.1.3317.4.3.1.57 NAME 'dialupAccess' DESC '' EQUALITY caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )"));
 	}
-	
+
 }

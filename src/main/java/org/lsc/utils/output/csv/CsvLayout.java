@@ -45,6 +45,8 @@
  */
 package org.lsc.utils.output.csv;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.LayoutBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,248 +66,174 @@ import org.lsc.jndi.JndiModifications;
  * @author RŽmy-Christophe Schermesser <remy-christophe@schermesser.com>
  *
  */
-public class CsvLayout extends Layout {
+public class CsvLayout extends LayoutBase<ILoggingEvent> {
 
-    /* The logger */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvLayout.class);
-    
-    /* Default values for the parameters */
-    protected static String DEFAULT_SEPARATOR = ";";
- 
-    /* The separator of the log operations */
-    protected static String OPTIONS_SEPARATOR = ",";
-    
-    /* Configurations from the log4j.properties */
-    private String logOperation;
-    private String attrs;
-    private String separator = DEFAULT_SEPARATOR;
-    private String taskNames;
-    private String outputHeader = "false";
-  
-    /* The attributes to write */
-    protected List<String> attributes;
-    
-    /* The taskNames to log for */
-    protected Set<String> taskNamesList;
-    
-    /* The operations to log */
-    protected Set<JndiModificationType> operations;
-    
-    /* Output header to a CSV file? */
-    protected Boolean outputCsvHeader;
-    
-    /* Instance variable : have we already output the header? */
-    private Boolean csvHeaderPrinted = false;
-    
-    /**
-     * Default constructor 
-     */
-    public CsvLayout() {
-        super();
-    }
-    
-    /**
-     * Name of the attribute for the dn
-     */
-    private final static String DN_STRING = "dn";
+	/* The logger */
+	private static final Logger LOGGER = LoggerFactory.getLogger(CsvLayout.class);
 
-    /**
-     * 
-     * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
-     *  
-     * @see org.apache.log4j.PatternLayout#format(org.apache.log4j.spi.LoggingEvent)
-     */
-    @Override
-    public String format(LoggingEvent event) {
-        Object message = event.getMessage();
-        
-        String result = "";
-        
-        if(message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
-            JndiModifications jm = (JndiModifications) message;
+	/* Default values for the parameters */
+	protected static String DEFAULT_SEPARATOR = ";";
 
-
-            if(operations.contains(jm.getOperation()) && 
-            		(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
-                StringBuffer sb = new StringBuffer(1024);
-
-                Iterator<String> iterator = attributes.iterator();
-
-                HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
-
-                String attributeName = null;
-                List<String> values = null;
-                while (iterator.hasNext()) {
-
-                    /* Does the modification has the attribute ? */
-                    attributeName= iterator.next();
-                    if(modifications.containsKey(attributeName)) {
-                        values = modifications.get(attributeName);
-                        if(values.size() > 0) {
-                            sb.append(values.get(0));
-                        }
-                    } else if (attributeName.equalsIgnoreCase(DN_STRING)) {
-                        sb.append(jm.getDistinguishName());
-                        
-                        //Get the full DN
-                        //sb.append(",");
-                        //sb.append(Configuration.DN_REAL_ROOT);
-                    }
-                    if (iterator.hasNext()) sb.append(this.getSeparator());
-                }
-                result += sb.toString();
-                result += "\n";
-            }
-        }
-    
-        if (outputCsvHeader && !csvHeaderPrinted) {
-        	result = attrs + "\n" + result;
-        	csvHeaderPrinted = true;
-        }
-        
-        return result;        
-    }
-    
-    /**
-     * Parse options
-     * 
-     * @see org.apache.log4j.Layout#activateOptions()
-     */
-    @Override
-    public void activateOptions() {
-        /* Parse logOperations */
-        operations = new HashSet<JndiModificationType>();
-        String logOperations = this.getLogOperation();
-        if(logOperations != null) {
-            /* We only add valid options */
-            StringTokenizer st = new StringTokenizer(logOperations, CsvLayout.OPTIONS_SEPARATOR);
-            String token = null;
-            for (int i = 0 ; st.hasMoreTokens() ; i++) {
-                token = st.nextToken().toLowerCase();
-                JndiModificationType op = JndiModificationType.getFromDescription(token);
-                if(op != null) {
-                    operations.add(op);
-                } else {
-                    LOGGER.error("Invalid operation in the CSV export (" + token + ")");                    
-                }
-            }
-        } else { 
-            /* Add all the operations */
-            JndiModificationType[] values = JndiModificationType.values();
-            for (int i = 0; i < values.length; i++) {
-                operations.add(values[i]);
-            }
-        }
-        
-        /* Parse attributes to log */
-        attributes = new ArrayList<String>();
-        String attrs = this.getAttrs();
-        if(attrs != null) {
-            String[] st = attrs.split(this.getSeparator());
-            String token = null;
-            for (int i = 0 ; i < st.length ; i++) {
-                token = st[i].toLowerCase();
-                attributes.add(token);
-            }
-        } else {
-            LOGGER.warn("There is no attributes to write in the CSV file.\nSet the " +
-            		"log4j.appender.NAME.layout.attrs property.");
-        }
-        
-        /* Parse task names to log for */
-        taskNamesList = new HashSet<String>();
-        String taskNames = this.getTaskNames();
-        if(taskNames != null) {
-            /* We only add valid options */
-            StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
-            String token = null;
-            for (int i = 0 ; st.hasMoreTokens() ; i++) {
-                token = st.nextToken().toLowerCase();
-                taskNamesList.add(token);
-            }
-        }
-        
-        /* Parse whether to output header to CSV file */
-        outputCsvHeader = Boolean.parseBoolean(outputHeader);
-    }
-    
-    /**
-     * We do not ignore Throwable
-     * 
-     * @see org.apache.log4j.Layout#ignoresThrowable()
-     */
-    @Override
-    public boolean ignoresThrowable() {
-        return false;
-    }
-
-    /**
-     * @return the logOperation
-     */
-    public String getLogOperation() {
-        return logOperation;
-    }
-
-    /**
-     * @param logOperation the logOperation to set
-     */
-    public void setLogOperation(String logOperation) {
-        this.logOperation = logOperation;
-    }
-
-    /**
-     * @return the attrs
-     */
-    public String getAttrs() {
-        return attrs;
-    }
-
-    /**
-     * @param attrs the attrs to set
-     */
-    public void setAttrs(String attrs) {
-        this.attrs = attrs;
-    }
-
-    /**
-     * @return the separator
-     */
-    public String getSeparator() {
-        return separator;
-    }
-
-    /**
-     * @param separator the separator to set
-     */
-    public void setSeparator(String separator) {
-        this.separator = separator;
-    }
+	/* The separator of the log operations */
+	protected static String OPTIONS_SEPARATOR = ",";
 
 	/**
-	 * @return the taskNames
+	 * Name of the attribute for the dn
 	 */
-	public String getTaskNames() {
-		return taskNames;
+	private final static String DN_STRING = "dn";
+
+	/* Configurations from the log4j.properties */
+	protected String attrs;
+	protected String separator = DEFAULT_SEPARATOR;
+	protected Boolean outputHeader = false;
+
+	/* The attributes to write */
+	protected List<String> attributes;
+
+	/* The taskNames to log for */
+	protected Set<String> taskNamesList;
+
+	/* The operations to log */
+	protected Set<JndiModificationType> operations;
+
+	/**
+	 * Default constructor
+	 */
+	public CsvLayout() {
+		super();
+	}
+
+	/**
+	 *
+	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
+	 *
+	 */
+	@Override
+	public String doLayout(ILoggingEvent event) {
+		Object message = event.getMessage();
+
+		String result = "";
+
+		if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
+			JndiModifications jm = (JndiModifications) message;
+
+
+			if (operations.contains(jm.getOperation()) &&
+							(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
+				StringBuffer sb = new StringBuffer(1024);
+
+				Iterator<String> iterator = attributes.iterator();
+
+				HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
+
+				String attributeName = null;
+				List<String> values = null;
+				while (iterator.hasNext()) {
+
+					/* Does the modification has the attribute ? */
+					attributeName = iterator.next();
+					if (modifications.containsKey(attributeName)) {
+						values = modifications.get(attributeName);
+						if (values.size() > 0) {
+							sb.append(values.get(0));
+						}
+					} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
+						sb.append(jm.getDistinguishName());
+					}
+					if (iterator.hasNext()) {
+						sb.append(this.separator);
+					}
+				}
+				result += sb.toString();
+				result += "\n";
+			}
+		}
+
+		return result;
+	}
+
+	public String getHeader() {
+		String result = "";
+		if (outputHeader) {
+			result = attrs + "\n";
+		}
+		return result;
+	}
+
+	/**
+	 * @param logOperation the logOperation to set
+	 */
+	public void setLogOperation(String logOperation) {
+		/* Parse logOperations */
+		operations = new HashSet<JndiModificationType>();
+		if (logOperation != null) {
+			/* We only add valid options */
+			StringTokenizer st = new StringTokenizer(logOperation, CsvLayout.OPTIONS_SEPARATOR);
+			String token = null;
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				token = st.nextToken().toLowerCase();
+				JndiModificationType op = JndiModificationType.getFromDescription(token);
+				if (op != null) {
+					operations.add(op);
+				} else {
+					LOGGER.error("Invalid operation in the CSV export (" + token + ")");
+				}
+			}
+		} else {
+			/* Add all the operations */
+			JndiModificationType[] values = JndiModificationType.values();
+			for (int i = 0; i < values.length; i++) {
+				operations.add(values[i]);
+			}
+		}
+	}
+
+	/**
+	 * @param attrs the attrs to set
+	 */
+	public void setAttrs(String attrs) {
+		/* Parse attributes to log */
+		attributes = new ArrayList<String>();
+		if (attrs != null) {
+			String[] st = attrs.split(this.separator);
+			String token = null;
+			for (int i = 0; i < st.length; i++) {
+				token = st[i].toLowerCase();
+				attributes.add(token);
+			}
+		} else {
+			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the " +
+							"log4j.appender.NAME.layout.attrs property.");
+		}
+	}
+
+	/**
+	 * @param separator the separator to set
+	 */
+	public void setSeparator(String separator) {
+		this.separator = separator;
 	}
 
 	/**
 	 * @param taskNames the taskNames to set
 	 */
 	public void setTaskNames(String taskNames) {
-		this.taskNames = taskNames;
-	}
-
-	/**
-	 * @return the outputHeader
-	 */
-	public String getOutputHeader() {
-		return outputHeader;
+		taskNamesList = new HashSet<String>();
+		if (taskNames != null) {
+			/* We only add valid options */
+			StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
+			String token = null;
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				token = st.nextToken().toLowerCase();
+				taskNamesList.add(token);
+			}
+		}
 	}
 
 	/**
 	 * @param outputHeader the outputHeader to set
 	 */
-	public void setOutputHeader(String outputHeader) {
+	public void setOutputHeader(Boolean outputHeader) {
 		this.outputHeader = outputHeader;
 	}
 }

@@ -253,7 +253,8 @@ public final class BeanComparator {
                 /* We do something only if we have to write */
                 if(writeAttributes == null || writeAttributes.contains(attrName)) {
                     List<String> defaultValues = syncOptions.getDefaultValues(itmBean.getDistinguishName(), attrName);
-                    if ( defaultValues != null && itmBean.getAttributeById(attrName) == null ) {
+                    Attribute srcAttr = itmBean.getAttributeById(attrName);
+                    if ( defaultValues != null && (srcAttr == null || srcAttr.size() == 0)) {
                         Attribute defaultAttribute = new BasicAttribute(attrName);
                         List<String> defaultValuesModified = new ArrayList<String>();
                         Iterator<String> defaultValuesIt = defaultValues.iterator();
@@ -493,8 +494,13 @@ public final class BeanComparator {
             Iterator<String> createAttrsNameIt = createAttrsNameSet.iterator();
             while (createAttrsNameIt.hasNext()) {
                 String attrName = (String) createAttrsNameIt.next();
+                
+                /* We do something only if we have to write */
+                if(writeAttributes == null || writeAttributes.contains(attrName)) {
+	
                 List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), attrName);
-                if ( createValues != null && itmBean.getAttributeById(attrName) == null ) {
+                Attribute srcAttr = itmBean.getAttributeById(attrName);
+                if ( createValues != null && (srcAttr == null || srcAttr.size() == 0)) {
                     Attribute createdAttribute = new BasicAttribute(attrName);
                     List<String> createValuesModified = new ArrayList<String>();
                     Iterator<String> createValuesIt = createValues.iterator();
@@ -508,6 +514,7 @@ public final class BeanComparator {
                         createdAttribute.add(createValuesModifiedIter.next());
                     }
                     modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, createdAttribute));
+                }
                 }
             }
         }

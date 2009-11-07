@@ -45,31 +45,27 @@
  */
 package org.lsc;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import junit.framework.TestCase;
+
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.personBean;
 import org.lsc.jndi.JndiServices;
-import org.lsc.jndi.ScriptableJndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.objects.top;
 import org.lsc.service.ISrcService;
 import org.lsc.utils.I18n;
 import org.lsc.utils.directory.LDAP;
-
-import junit.framework.TestCase;
 
 /**
  * This test case attempts to reproduce a typical ldap2ldap setup via
@@ -187,6 +183,15 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues.add("11111");
 		checkAttributeValues(DN_ADD_DST, "telephoneNumber", attributeValues);
 
+		// initials wasn't created, since it's not in the write attributes list
+		attributeValues = new ArrayList<String>();
+		checkAttributeValues(DN_ADD_DST, "initials", attributeValues);
+		
+		// mail was created, although it's not in the source object
+		attributeValues = new ArrayList<String>();
+		attributeValues.add("ok@domain.net");
+		checkAttributeValues(DN_ADD_DST, "mail", attributeValues);
+
 	}
 	
 	private final void checkSyncResultsSecondPass() throws Exception
@@ -241,10 +246,13 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeValue(DN_ADD_DST, "description", "Number three's descriptive text");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_ADD_DST, "secretCN0003"));
-		// the objectClass contains organizationalPerson, since this object wasn't created
+
+		// objectClass has inetOrgPerson and all above classes, since it was created with a create_value and MERGE status
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("top");
 		attributeValues.add("person");
+		attributeValues.add("organizationalPerson");
+		attributeValues.add("inetOrgPerson");
 		checkAttributeValues(DN_ADD_DST, "objectClass", attributeValues);
 
 		// check MODIFY
@@ -351,7 +359,14 @@ public class Ldap2LdapSyncTest extends TestCase
 	{
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
-		assertNotNull(at);
+		if (expectedValues.size() > 0) {
+			assertNotNull(at);
+		} else {
+			if (at==null) {
+				assertEquals(0, expectedValues.size());
+				return;
+			}
+		}
 		assertEquals(expectedValues.size(), at.size());
 		
 		// check that each value matches one on one

@@ -6,22 +6,22 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
 
- *Â  Â  * Redistributions of source code must retain the above copyright
+ *Ê Ê * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * Â  Â  * Redistributions in binary form must reproduce the above copyright
+ * Ê Ê * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * Â  Â  * Neither the name of the LSC Project nor the names of its
+ * Ê Ê * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -55,14 +55,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 
- * 
+ *
+ *
  * @author RŽmy-Christophe Schermesser <remy-christophe@schermesser.com>
  *
  */
@@ -77,15 +77,11 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/* The separator of the log operations */
 	protected static String OPTIONS_SEPARATOR = ",";
 
-	/**
-	 * Name of the attribute for the dn
-	 */
-	private final static String DN_STRING = "dn";
-
 	/* Configurations from the log4j.properties */
-	protected String attrs;
-	protected String separator = DEFAULT_SEPARATOR;
-	protected Boolean outputHeader = false;
+	private String logOperations;
+	private String attrs;
+	private String separator = DEFAULT_SEPARATOR;
+	private String taskNames;
 
 	/* The attributes to write */
 	protected List<String> attributes;
@@ -96,60 +92,62 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/* The operations to log */
 	protected Set<JndiModificationType> operations;
 
+	/* Output header to a CSV file? */
+	private Boolean outputHeader = false;
+	
 	/**
-	 * Default constructor
+	 * Name of the attribute for the dn
 	 */
-	public CsvLayout() {
-		super();
-	}
+	private final static String DN_STRING = "dn";
 
 	/**
 	 *
 	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
 	 *
+	 * @see org.apache.log4j.PatternLayout#format(org.apache.log4j.spi.LoggingEvent)
 	 */
 	@Override
 	public String doLayout(ILoggingEvent event) {
-		//We take only the first argument
 		Object[] messages = event.getArgumentArray();
 		String result = "";
 
+		if (messages != null &&
+						messages.length != 0 &&
+						messages[0] != null &&
+						JndiModifications.class.isAssignableFrom(messages[0].getClass()) ) {
+			JndiModifications jm = (JndiModifications) messages[0];
 
-		if (null != messages && messages.length > 0) {
-			Object message = messages[0];
 
-			if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
-				JndiModifications jm = (JndiModifications) message;
+			if (operations.contains(jm.getOperation()) && 
+							( taskNamesList.size() == 0 ||
+							  taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
+				StringBuffer sb = new StringBuffer(1024);
 
-				if (operations.contains(jm.getOperation()) &&
-								(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
-					StringBuffer sb = new StringBuffer(1024);
+				Iterator<String> iterator = attributes.iterator();
 
-					Iterator<String> iterator = attributes.iterator();
+				HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
 
-					HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
+				String attributeName = null;
+				List<String> values = null;
+				while (iterator.hasNext()) {
 
-					String attributeName = null;
-					List<String> values = null;
-					while (iterator.hasNext()) {
-
-						/* Does the modification has the attribute ? */
-						attributeName = iterator.next();
-						if (modifications.containsKey(attributeName)) {
-							values = modifications.get(attributeName);
-							if (values.size() > 0) {
-								sb.append(values.get(0));
-							}
-						} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
-							sb.append(jm.getDistinguishName());
+					/* Does the modification has the attribute ? */
+					attributeName = iterator.next();
+					if (modifications.containsKey(attributeName)) {
+						values = modifications.get(attributeName);
+						if (values.size() > 0) {
+							sb.append(values.get(0));
 						}
-						if (iterator.hasNext()) {
-							sb.append(this.separator);
-						}
+					} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
+						sb.append(jm.getDistinguishName());
 					}
-					result += sb.toString();
-					result += "\n";
+					
+					if (iterator.hasNext()) {
+						sb.append(separator);
+					}
 				}
+				result += sb.toString();
+				result += "\n";
 			}
 		}
 		return result;
@@ -164,14 +162,17 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
-	 * @param logOperation the logOperation to set
+	 * Parse options
+	 *
+	 * @see org.apache.log4j.Layout#activateOptions()
 	 */
-	public void setLogOperation(String logOperation) {
+	@Override
+	public void start() {
 		/* Parse logOperations */
 		operations = new HashSet<JndiModificationType>();
-		if (logOperation != null) {
+		if (logOperations != null) {
 			/* We only add valid options */
-			StringTokenizer st = new StringTokenizer(logOperation, CsvLayout.OPTIONS_SEPARATOR);
+			StringTokenizer st = new StringTokenizer(logOperations, CsvLayout.OPTIONS_SEPARATOR);
 			String token = null;
 			for (int i = 0; st.hasMoreTokens(); i++) {
 				token = st.nextToken().toLowerCase();
@@ -189,17 +190,11 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				operations.add(values[i]);
 			}
 		}
-	}
 
-	/**
-	 * @param attrs the attrs to set
-	 */
-	public void setAttrs(String attrs) {
 		/* Parse attributes to log */
 		attributes = new ArrayList<String>();
-		this.attrs = attrs;
 		if (attrs != null) {
-			String[] st = attrs.split(this.separator);
+			String[] st = attrs.split(separator);
 			String token = null;
 			for (int i = 0; i < st.length; i++) {
 				token = st[i].toLowerCase();
@@ -209,6 +204,32 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the " +
 							"log4j.appender.NAME.layout.attrs property.");
 		}
+
+		/* Parse task names to log for */
+		taskNamesList = new HashSet<String>();
+		if (taskNames != null) {
+			/* We only add valid options */
+			StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
+			String token = null;
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				token = st.nextToken().toLowerCase();
+				taskNamesList.add(token);
+			}
+		}
+	}
+
+	/**
+	 * @param logOperation the logOperation to set
+	 */
+	public void setLogOperation(String logOperations) {
+		this.logOperations = logOperations;
+	}
+
+	/**
+	 * @param attrs the attrs to set
+	 */
+	public void setAttrs(String attrs) {
+		this.attrs = attrs;
 	}
 
 	/**
@@ -222,16 +243,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 * @param taskNames the taskNames to set
 	 */
 	public void setTaskNames(String taskNames) {
-		taskNamesList = new HashSet<String>();
-		if (taskNames != null) {
-			/* We only add valid options */
-			StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
-			String token = null;
-			for (int i = 0; st.hasMoreTokens(); i++) {
-				token = st.nextToken().toLowerCase();
-				taskNamesList.add(token);
-			}
-		}
+		this.taskNames = taskNames;
 	}
 
 	/**

@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.lsc.utils.LdapServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opends.messages.Message;
@@ -103,8 +104,6 @@ public final class EmbeddedOpenDS {
 	 * A default value for the working dir
 	 */
 	public static final String DEFAULT_WORKING_DIR_NAME = "opends-test";
-
-	public static boolean SERVER_STARTED = false;
 
 	private static final String CONFIG_DIR = "config";
 
@@ -155,30 +154,20 @@ public final class EmbeddedOpenDS {
 		environmentConfig.setServerRoot(new File(workingDirectory));
 		environmentConfig.setConfigFile(new File(new File(workingDirectory,
 				CONFIG_DIR), CONFIG_FILE_NAME));
-		// environmentConfig.setConfigClass(); //use the default
-		// environmentConfig.setSchemaDirectory(new
-		// File(ROOT_CONFIG_DIR,SCHEMAS_DIR));
-		// File locks = new File(LOCK_TMP_DIR);
-		// locks.mkdirs();
-		// environmentConfig.setLockDirectory(locks);
-		// do not save working file automatically
-		environmentConfig.setUseLastKnownGoodConfiguration(false);
+
+		// Set only specific configuration, i.e. not the default in OpenDS 2.0
+		
 		// do not archive config files
 		environmentConfig.setMaintainConfigArchive(false);
 		// we want to use standard LDAP connections
 		environmentConfig.setDisableConnectionHandlers(false);
-		// do not ensure that all thread are started as deamon thread, which is
-		// an option use for debugging opends
-		environmentConfig.setForceDaemonThreads(false);
 
 		try {
 			EmbeddedUtils.startServer(environmentConfig);
 		} catch (Exception e) {
-			throw new RuntimeException("Error when starting the server: " + e,
-					e);
+			throw new RuntimeException("Error when starting the server: " + e, e);
 		}
-		SERVER_STARTED = true;
-
+		
 		if (LOGGER.isDebugEnabled()) {
 			StringBuffer sb = new StringBuffer("");
 			for (Backend b : DirectoryServer.getBackends().values()) {
@@ -192,7 +181,6 @@ public final class EmbeddedOpenDS {
 			}
 			LOGGER.debug(sb.toString());
 		}
-		SERVER_STARTED = true;
 	}
 
 	/**
@@ -201,8 +189,8 @@ public final class EmbeddedOpenDS {
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	public static void shutdownServer(String reason) {
-		EmbeddedUtils.stopServer("org.interldap.ldap.opends.EmbeddedOpenDS",
-				Message.fromObject(reason, (Object[]) null));
+		EmbeddedUtils.stopServer(LdapServer.class.getName(),
+						Message.fromObject(reason));
 	}
 
 	/**
@@ -454,14 +442,6 @@ public final class EmbeddedOpenDS {
 		}
 	}
 
-	// /**
-	// * Retrieve the back-end used for testing pupose
-	// * @return
-	// */
-	// public static Backend getTestBackend() {
-	// return DirectoryServer.getBackend(TEST_BACKEND);
-	// }
-	//
 	public static void initializeTestBackend(boolean createBaseEntry, String dn) throws DirectoryException, ConfigException, InitializationException {
 
 		DN baseDN = DN.decode(dn);

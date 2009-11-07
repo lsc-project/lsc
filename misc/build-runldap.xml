@@ -1,66 +1,68 @@
 <project name="lsc-sample" default="lsc::help" basedir=".." xmlns:artifact="urn:maven-artifact-ant">
     
     <!-- look for properties in ~/.lsc-build.properties, ~/lsc.properties -->
-    <property file="${user.home}/.${ant.project.name}-build.properties" />
-    <property file="${user.home}/build.properties" />
-    <property file="build.properties" />
-    <property environment="env" />
+	<property file="${user.home}/.${ant.project.name}-build.properties" />
+	<property file="${user.home}/build.properties" />
+	<property file="build.properties" />
+	<property environment="env" />
     
-    <property name="build.dir" value="${basedir}/target" />
-    <property name="build.classes.dir" value="${build.dir}/classes" />
-    <property name="src.main.dir" value="${basedir}/src/main" />
-    <property name="src.test.dir" value="${basedir}/src/test" />
-    <property name="build.test-classes.dir" value="${build.dir}/test-classes" />
+	<property name="build.dir" value="${basedir}/target" />
+	<property name="build.classes.dir" value="${build.dir}/classes" />
+	<property name="src.main.dir" value="${basedir}/src/main" />
+	<property name="src.test.dir" value="${basedir}/src/test" />
+	<property name="build.test-classes.dir" value="${build.dir}/test-classes" />
     
-    <!--
+  <!--
 	    ===================================================================
 	      Start the ldap server
 	    ===================================================================
 	-->
-    <target name="startLdapServer" description="Start the ldap server">
-        <echo message="Starting OpenDS embedded server from ${build.test-classes.dir}"/>
-        <copy todir="${build.test-classes.dir}">
-            <fileset dir="${src.test.dir}/java" includes="**/*.ldif*"/>
-        </copy>
+	<target name="startLdapServer" description="Start the ldap server">
+		<echo message="Starting OpenDS embedded server from ${build.test-classes.dir}"/>
+		<copy todir="${build.test-classes.dir}">
+			<fileset dir="${src.test.dir}/java" includes="**/*.ldif*"/>
+		</copy>
         
-        <taskdef resource="net/sf/antcontrib/antlib.xml">
-            <classpath><fileset dir="${basedir}/lib" includes="**/ant-contrib*.jar"/></classpath>
-        </taskdef>
+		<taskdef resource="net/sf/antcontrib/antlib.xml">
+			<classpath>
+				<fileset dir="${basedir}/lib" includes="**/ant-contrib*.jar"/>
+			</classpath>
+		</taskdef>
        
-	<fail unless="execution.path" message="'execution.path' must be set"/>
+		<fail unless="execution.path" message="'execution.path' must be set"/>
         
-        <forget daemon="true">
-            <java classname="org.lsc.utils.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
-                <arg line="-a" />
-            </java>
-        </forget>
-	<waitfor maxwait="100" maxwaitunit="second" checkevery="5" checkeveryunit="second">
-            <socket server="127.0.0.1" port="33389"/>
-	</waitfor>
+		<forget daemon="true">
+			<java classname="org.lsc.utils.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+				<arg line="-a" />
+			</java>
+		</forget>
+		<waitfor maxwait="100" maxwaitunit="second" checkevery="5" checkeveryunit="second">
+			<socket server="127.0.0.1" port="33389"/>
+		</waitfor>
 
-    </target>
+	</target>
 
     <!--
 	    ===================================================================
 	      Stop the ldap server
 	    ===================================================================
 	-->
-    <target name="stopLdapServer" description="Start the ldap server">
-        <echo message="Stopping OpenDS embedded server"/>
+	<target name="stopLdapServer" description="Start the ldap server">
+		<echo message="Stopping OpenDS embedded server"/>
 
-	<fail unless="execution.path" message="'execution.path' must be set"/>
-        <java classname="org.lsc.utils.LdapServer" classpath="${execution.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
-            <arg line="-o" />
-        </java>
-    </target>
+		<fail unless="execution.path" message="'execution.path' must be set"/>
+		<java classname="org.lsc.utils.LdapServer" classpath="${execution.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+			<arg line="-o" />
+		</java>
+	</target>
 
     <!--
         ===================================================================
           Print the help message
         ===================================================================
 	-->
-    <target name="lsc::help">
-        <echo>
+	<target name="lsc::help">
+		<echo>
             *****************************************
             Ldap Synchronization Connector project
             *****************************************
@@ -71,8 +73,8 @@
             To get a graphical / command line installer, use 
             &gt; ant lsc::installer
             
-        </echo>
-    </target>
+		</echo>
+	</target>
     
 </project>
 

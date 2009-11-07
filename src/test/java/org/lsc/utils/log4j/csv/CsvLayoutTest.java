@@ -45,6 +45,7 @@
  */
 package org.lsc.utils.log4j.csv;
 
+import org.lsc.utils.output.csv.CsvLayout;
 import java.util.ArrayList;
 import java.util.List;
 

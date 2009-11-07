@@ -43,7 +43,7 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.utils.log4j.csv;
+package org.lsc.utils.output.csv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,17 +55,13 @@ import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
 /**
  * 
  * 
- * @author RÃ©my-Christophe Schermesser <remy-christophe@schermesser.com>
+ * @author RŽmy-Christophe Schermesser <remy-christophe@schermesser.com>
  *
  */
 public class CsvLayout extends Layout {

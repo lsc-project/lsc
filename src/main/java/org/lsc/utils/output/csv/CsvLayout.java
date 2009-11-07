@@ -110,45 +110,48 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 */
 	@Override
 	public String doLayout(ILoggingEvent event) {
-		Object message = event.getMessage();
-
+		//We take only the first argument
+		Object[] messages = event.getArgumentArray();
 		String result = "";
 
-		if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
-			JndiModifications jm = (JndiModifications) message;
 
+		if (messages.length > 0) {
+			Object message = messages[0];
 
-			if (operations.contains(jm.getOperation()) &&
-							(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
-				StringBuffer sb = new StringBuffer(1024);
+			if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
+				JndiModifications jm = (JndiModifications) message;
 
-				Iterator<String> iterator = attributes.iterator();
+				if (operations.contains(jm.getOperation()) &&
+								(taskNamesList.size() == 0 || taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
+					StringBuffer sb = new StringBuffer(1024);
 
-				HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
+					Iterator<String> iterator = attributes.iterator();
 
-				String attributeName = null;
-				List<String> values = null;
-				while (iterator.hasNext()) {
+					HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
 
-					/* Does the modification has the attribute ? */
-					attributeName = iterator.next();
-					if (modifications.containsKey(attributeName)) {
-						values = modifications.get(attributeName);
-						if (values.size() > 0) {
-							sb.append(values.get(0));
+					String attributeName = null;
+					List<String> values = null;
+					while (iterator.hasNext()) {
+
+						/* Does the modification has the attribute ? */
+						attributeName = iterator.next();
+						if (modifications.containsKey(attributeName)) {
+							values = modifications.get(attributeName);
+							if (values.size() > 0) {
+								sb.append(values.get(0));
+							}
+						} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
+							sb.append(jm.getDistinguishName());
 						}
-					} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
-						sb.append(jm.getDistinguishName());
+						if (iterator.hasNext()) {
+							sb.append(this.separator);
+						}
 					}
-					if (iterator.hasNext()) {
-						sb.append(this.separator);
-					}
+					result += sb.toString();
+					result += "\n";
 				}
-				result += sb.toString();
-				result += "\n";
 			}
 		}
-
 		return result;
 	}
 
@@ -194,6 +197,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	public void setAttrs(String attrs) {
 		/* Parse attributes to log */
 		attributes = new ArrayList<String>();
+		this.attrs = attrs;
 		if (attrs != null) {
 			String[] st = attrs.split(this.separator);
 			String token = null;

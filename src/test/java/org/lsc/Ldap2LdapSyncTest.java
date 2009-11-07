@@ -186,6 +186,15 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues.add("11111");
 		checkAttributeValues(DN_ADD_DST, "telephoneNumber", attributeValues);
 
+		// initials wasn't created, since it's not in the write attributes list
+		attributeValues = new ArrayList<String>();
+		checkAttributeValues(DN_ADD_DST, "initials", attributeValues);
+		
+		// mail was created, although it's not in the source object
+		attributeValues = new ArrayList<String>();
+		attributeValues.add("ok@domain.net");
+		checkAttributeValues(DN_ADD_DST, "mail", attributeValues);
+
 	}
 	
 	private final void checkSyncResultsSecondPass() throws Exception
@@ -241,10 +250,13 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeValue(DN_ADD_DST, "description", "Number three's descriptive text");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_ADD_DST, "secretCN0003"));
-		// the objectClass contains organizationalPerson, since this object wasn't created
+
+		// objectClass has inetOrgPerson and all above classes, since it was created with a create_value and MERGE status
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("top");
 		attributeValues.add("person");
+		attributeValues.add("organizationalPerson");
+		attributeValues.add("inetOrgPerson");
 		checkAttributeValues(DN_ADD_DST, "objectClass", attributeValues);
 
 		// check MODIFY

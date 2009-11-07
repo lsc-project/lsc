@@ -93,7 +93,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
     /** lsc.tasks.TASKNAME.bean property. */
     public static final String BEAN_PROPS_PREFIX = "bean";
 
-    /** The local LOG4J Logger. */
     private static final Logger LOGGER = 
         LoggerFactory.getLogger(SimpleSynchronize.class);
 

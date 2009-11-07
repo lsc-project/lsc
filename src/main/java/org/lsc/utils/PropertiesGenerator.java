@@ -63,7 +63,6 @@ import org.lsc.Generator;
  */
 public class PropertiesGenerator extends AbstractGenerator {
 
-	/** The local LOG4J logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesGenerator.class);
 
 	/** The generator type. */

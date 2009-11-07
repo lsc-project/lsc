@@ -69,7 +69,6 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
     /** This is the maximum first line length read in the CSV file. */
     private static final int MAX_LINE_LENGTH = 3000;
 
-    /** This is the local LOG4J logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Csv2SqlObjectGenerator.class);
 
     /** This is the CSV filename. */

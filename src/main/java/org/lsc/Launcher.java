@@ -45,6 +45,7 @@
  */
 package org.lsc;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -67,145 +68,141 @@ import org.slf4j.LoggerFactory;
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
 public final class Launcher {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Launcher.class);
 
-    /** List of the synchronizing types. */
-    private List<String> syncType;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Launcher.class);
 
-    /** List of the cleaning types. */
-    private List<String> cleanType;
+	/** List of the synchronizing types. */
+	private List<String> syncType;
 
-    /** Configuration files location */
-    private String configurationLocation;
+	/** List of the cleaning types. */
+	private List<String> cleanType;
 
-    /** Default synchronize instance. */
-    private SimpleSynchronize sync;
+	/** Configuration files location */
+	private String configurationLocation;
 
-    /**
-     * Default constructor - instantiate objects.
-     */
-    public Launcher() {
-        syncType = new ArrayList<String>();
-        cleanType = new ArrayList<String>();
-        sync = new SimpleSynchronize();
-    }
-
-    /**
-     * Main launcher.
-     *
-     * @param args parameters passed by the JRE
-     *
-     * @throws MalformedURLException thrown
-     */
-    public static void main(final String[] args) throws MalformedURLException {
-        // Create the object and parse options
-        Launcher obj = new Launcher();
-        int retCode = obj.usage(args);
-
-        if (retCode != 0) {
-            System.exit(retCode);
-        }
-
-        // Wrap the launcher
-        obj.run();
-    }
-
-    /**
-     * Launch the synchronization and cleaning process.
-     */
-    public void run() {
-        try {
-        	// if a configuration directory was set on command line, use it to set up Configuration
-        	Configuration.setUp(configurationLocation);
-        	
-        	// do the work!
-    		sync.launch(syncType, cleanType);
-        } catch (Exception e) {
-            LOGGER.error(e.toString());
-        }
-    }
-
-    /**
-     * Manage command line options.
-     * @param args command line
-     * @return the status code (0: OK, >=1 : failed)
-     */
-    private int usage(final String[] args) {
-        Options options = sync.getOptions();
-        options.addOption("l", "startLdapServer", false,
-                "Start the embedded OpenDS LDAP server "
-                + "(will be shutdown at the end)");
-        options.addOption("s", "synchronization", true,
-                "Synchronization type (one of the available "
-                + "tasks or 'all')");
-        options.addOption("c", "cleaning", true,
-                "Cleaning type (one of the available "
-                + "tasks or 'all')");
-        options.addOption("f", "cfg", true,
-                "Specify configuration directory" );
-        options.addOption("h", "help", false, "Get this text");
-
-        CommandLineParser parser = new GnuParser();
-
-        try {
-            CommandLine cmdLine = parser.parse(options, args);
-
-            if (cmdLine.getOptions().length > 0) {
-                if (cmdLine.hasOption("s")) {
-                    syncType = parseSyncType(cmdLine.getOptionValue("s"));
-                }
-                if (cmdLine.hasOption("f")) {
-                    configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
-                }
-                if (cmdLine.hasOption("c")) {
-                    cleanType = parseSyncType(cmdLine.getOptionValue("c"));
-                }
-                if (!sync.parseOptions(args)) {
-                    printHelp(options);
-                    return 1;
-                }
-                if (cmdLine.hasOption("h")
-                        || ((syncType.size() == 0) 
-                                && (cleanType.size() == 0))) {
-                    printHelp(options);
-                    return 1;
-                }
-            } else {
-                printHelp(options);
-                return 1;
-            }
-        } catch (ParseException e) {
-            LOGGER.error("Unable to parse options : " + args + " (" + e + ")",  e);
-            return 1;
-        }
-        return 0;
-    }
+	/** Default synchronize instance. */
+	private SimpleSynchronize sync;
 
 	/**
-     * Parse the synchronization string to find the right type of
-     * synchronization or cleaning.
-     * @param syncValue the string comma separated synchronization name
-     * @return the synchronizations name
-     */
-    private List<String> parseSyncType(final String syncValue) {
-        List<String> ret = new ArrayList<String>();
+	 * Default constructor - instantiate objects.
+	 */
+	public Launcher() {
+		syncType = new ArrayList<String>();
+		cleanType = new ArrayList<String>();
+		sync = new SimpleSynchronize();
+	}
 
-        // Add each value to returned strings list
-        StringTokenizer st = new StringTokenizer(syncValue, ",");
+	/**
+	 * Main launcher.
+	 *
+	 * @param args parameters passed by the JRE
+	 *
+	 * @throws MalformedURLException thrown
+	 */
+	public static void main(final String[] args) throws MalformedURLException {
+		// Create the object and parse options
+		Launcher obj = new Launcher();
+		int retCode = obj.usage(args);
 
-        while (st.hasMoreTokens()) {
-            ret.add(st.nextToken());
-        }
+		if (retCode != 0) {
+			System.exit(retCode);
+		}
 
-        return ret;
-    }
+		// Wrap the launcher
+		obj.run();
+	}
 
-    /**
-     * Print the command line help.
-     * @param options specified options to manage
-     */
-    private static void printHelp(final Options options) {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("lsc", options);
-    }
+	/**
+	 * Launch the synchronization and cleaning process.
+	 */
+	public void run() {
+		try {
+			// if a configuration directory was set on command line, use it to set up Configuration
+			Configuration.setUp(configurationLocation);
+
+			// do the work!
+			sync.launch(syncType, cleanType);
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+		}
+	}
+
+	/**
+	 * Manage command line options.
+	 * @param args command line
+	 * @return the status code (0: OK, >=1 : failed)
+	 */
+	private int usage(final String[] args) {
+		Options options = sync.getOptions();
+		options.addOption("l", "startLdapServer", false,
+						"Start the embedded OpenDS LDAP server " + "(will be shutdown at the end)");
+		options.addOption("s", "synchronization", true,
+						"Synchronization type (one of the available " + "tasks or 'all')");
+		options.addOption("c", "cleaning", true,
+						"Cleaning type (one of the available " + "tasks or 'all')");
+		options.addOption("f", "cfg", true,
+						"Specify configuration directory");
+		options.addOption("h", "help", false, "Get this text");
+
+		CommandLineParser parser = new GnuParser();
+
+		try {
+			CommandLine cmdLine = parser.parse(options, args);
+
+			if (cmdLine.getOptions().length > 0) {
+				if (cmdLine.hasOption("s")) {
+					syncType = parseSyncType(cmdLine.getOptionValue("s"));
+				}
+				if (cmdLine.hasOption("f")) {
+					configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
+				}
+				if (cmdLine.hasOption("c")) {
+					cleanType = parseSyncType(cmdLine.getOptionValue("c"));
+				}
+				if (!sync.parseOptions(args)) {
+					printHelp(options);
+					return 1;
+				}
+				if (cmdLine.hasOption("h") || ((syncType.size() == 0) && (cleanType.size() == 0))) {
+					printHelp(options);
+					return 1;
+				}
+			} else {
+				printHelp(options);
+				return 1;
+			}
+		} catch (ParseException e) {
+			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			return 1;
+		}
+		return 0;
+	}
+
+	/**
+	 * Parse the synchronization string to find the right type of
+	 * synchronization or cleaning.
+	 * @param syncValue the string comma separated synchronization name
+	 * @return the synchronizations name
+	 */
+	private List<String> parseSyncType(final String syncValue) {
+		List<String> ret = new ArrayList<String>();
+
+		// Add each value to returned strings list
+		StringTokenizer st = new StringTokenizer(syncValue, ",");
+
+		while (st.hasMoreTokens()) {
+			ret.add(st.nextToken());
+		}
+
+		return ret;
+	}
+
+	/**
+	 * Print the command line help.
+	 * @param options specified options to manage
+	 */
+	private static void printHelp(final Options options) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("lsc", options);
+	}
 }

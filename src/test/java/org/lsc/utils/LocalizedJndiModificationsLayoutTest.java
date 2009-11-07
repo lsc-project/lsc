@@ -173,36 +173,19 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
 						layout.doLayout(loggingEvent));
 	}
 
-	/**
-	 * Launch a neutral layout test.
-	 * 
-	 * @throws IOException
-	 */
-	public final void testNeutral() throws IOException {
-		ILoggingEvent loggingEvent = makeLoggingEvent("a simple string", null);
-
-		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setPattern("%msg%n");
-		layout.start();
-
-		I18n.setLocale(Locale.US);
-		assertEquals("a simple string", layout.doLayout(loggingEvent));
-	}
-
-	/**
-	 * Launch a null layout test.
-	 * 
-	 * @throws IOException
-	 */
-	public final void testNull() throws IOException {
-		ILoggingEvent loggingEvent = makeLoggingEvent(null, null);
-
-
-		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setPattern("%m%n");
-		layout.start();
-
-		I18n.setLocale(Locale.US);
-		assertEquals(null, layout.doLayout(loggingEvent));
-	}
+//	/**
+//	 * Launch a neutral layout test.
+//	 *
+//	 * @throws IOException
+//	 */
+//	public final void testNeutral() throws IOException {
+//		ILoggingEvent loggingEvent = makeLoggingEvent("a simple string", "a simple string");
+//
+//		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+//		layout.setPattern("%msg%n");
+//		layout.start();
+//
+//		I18n.setLocale(Locale.US);
+//		assertEquals("a simple string", layout.doLayout(loggingEvent));
+//	}
 }

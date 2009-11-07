@@ -82,7 +82,7 @@ public class Configuration {
 
 	// Filename of the <code>database.properties</code>
 	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
-	
+
 	/** Default location for configuration filename */
 	public static String location = PROPERTIES_FILENAME;
 
@@ -123,7 +123,8 @@ public class Configuration {
 	private static PropertiesConfiguration config = null;
 
 	// Default constructor.
-	protected Configuration() {}
+	protected Configuration() {
+	}
 
 	/**
 	 * Get data source connection properties.
@@ -132,38 +133,31 @@ public class Configuration {
 	 */
 	public static Properties getSrcProperties() {
 		Properties srcProps = getAsProperties("src");
-		if (srcProps.size() > 0)
-		{
+		if (srcProps.size() > 0) {
 			checkLdapProperties(srcProps);
 		}
 		return srcProps;
 	}
 
-	private static void checkLdapProperties(Properties props)
-	{
+	private static void checkLdapProperties(Properties props) {
 		// sanity check
 		String contextDn = null;
 		String ldapUrl = (String) props.get("java.naming.provider.url");
-		
-		if (ldapUrl == null)
-		{
+
+		if (ldapUrl == null) {
 			String errorMessage = "No LDAP provider url specified. Aborting.";
 			LOGGER.error(errorMessage);
 			throw new ExceptionInInitializerError(errorMessage);
 		}
-		
-		try
-		{
-			contextDn = new LDAPUrl(ldapUrl).getDN();				
-		}
-		catch (MalformedURLException e)
-		{
+
+		try {
+			contextDn = new LDAPUrl(ldapUrl).getDN();
+		} catch (MalformedURLException e) {
 			LOGGER.error(e.toString());
 			throw new ExceptionInInitializerError(e);
 		}
-		
-		if (contextDn == null || contextDn.length() == 0)
-		{
+
+		if (contextDn == null || contextDn.length() == 0) {
 			String errorMessage = "No context DN specified in LDAP provider url (" + props.get("java.naming.provider.url") + "). Aborting.";
 			LOGGER.error(errorMessage);
 			throw new ExceptionInInitializerError(errorMessage);
@@ -204,8 +198,7 @@ public class Configuration {
 	 *            The prefix used to select the properties.
 	 */
 	public static Properties getAsProperties(final String prefix) {
-		org.apache.commons.configuration.Configuration conf = getConfiguration()
-				.subset(prefix);
+		org.apache.commons.configuration.Configuration conf = getConfiguration().subset(prefix);
 		if (conf == null) {
 			return null;
 		}
@@ -274,7 +267,7 @@ public class Configuration {
 		configurationLocation = cleanup(configurationLocation);
 		location = appendDirSeparator(configurationLocation);
 	}
-	
+
 	private static String appendDirSeparator(String path) {
 		if (!path.endsWith(getSeparator())) {
 			return path + getSeparator();
@@ -284,13 +277,12 @@ public class Configuration {
 
 	private static String cleanup(String path) {
 		String ret = path.trim();
-		if (ret.charAt(0) == '\'' && ret.charAt(ret.length()-1) == '\'')
-		{
+		if (ret.charAt(0) == '\'' && ret.charAt(ret.length() - 1) == '\'') {
 			ret = ret.substring(1, ret.length() - 1);
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Get the path to the directory where configuration files
 	 * are stored, with a "/" at the end (or "\" on Windows).
@@ -303,7 +295,7 @@ public class Configuration {
 	 */
 	public static String getConfigurationDirectory() {
 		String ret;
-		
+
 		if (new File(location).isDirectory()) {
 			ret = location;
 		} else {
@@ -316,14 +308,11 @@ public class Configuration {
 			if (propertiesURL == null) {
 				throw new ExceptionInInitializerError("No configuration file found!");
 			}
-			
-			try
-			{
+
+			try {
 				// convert the URL to a URI to reverse any character encoding (" " -> "%20" for example)
 				ret = appendDirSeparator(new File(propertiesURL.toURI().getPath()).getParent());
-			}
-			catch (URISyntaxException e)
-			{
+			} catch (URISyntaxException e) {
 				String errorMessage = "Could not understand where the configuration is! Try using -f option.";
 				LOGGER.error(errorMessage);
 				throw new ExceptionInInitializerError(errorMessage);
@@ -331,7 +320,7 @@ public class Configuration {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Helper method to do lazy default configuration. This was mainly done to
 	 * make this class easily testable.
@@ -347,31 +336,29 @@ public class Configuration {
 
 				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
 				DN_LDAP_SCHEMA = Configuration.getString("dn.ldap_schema",
-						DN_LDAP_SCHEMA);
+								DN_LDAP_SCHEMA);
 				DN_ENHANCED_SCHEMA = Configuration.getString("dn.ldap_schema",
-						DN_ENHANCED_SCHEMA);
+								DN_ENHANCED_SCHEMA);
 				DN_STRUCTURES = Configuration.getString("dn.structures",
-						DN_STRUCTURES);
+								DN_STRUCTURES);
 				DN_ACCOUNTS = Configuration.getString("dn.accounts",
-						DN_STRUCTURES);
+								DN_STRUCTURES);
 				OBJECTCLASS_PERSON = Configuration.getString(
-						"objectclass.person", OBJECTCLASS_PERSON);
+								"objectclass.person", OBJECTCLASS_PERSON);
 				OBJECTCLASS_EMPLOYEE = Configuration.getString(
-						"objectclass.employee", OBJECTCLASS_EMPLOYEE);
+								"objectclass.employee", OBJECTCLASS_EMPLOYEE);
 				DAYS_BEFORE_SUPPRESSION = Configuration.getInt(
-						"suppression.MARQUAGE_NOMBRE_DE_JOURS", DAYS_BEFORE_SUPPRESSION);
+								"suppression.MARQUAGE_NOMBRE_DE_JOURS", DAYS_BEFORE_SUPPRESSION);
 				DN_REAL_ROOT = Configuration.getString("dn.real_root",
-						DN_REAL_ROOT);
+								DN_REAL_ROOT);
 				UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", UID_MAX_LENGTH);
 
 			} catch (ConfigurationException e) {
 				LOGGER.error(e.toString());
-				throw new ExceptionInInitializerError("Unable to find '" + url
-						+ "' file. (" + e + ")");
+				throw new ExceptionInInitializerError("Unable to find '" + url + "' file. (" + e + ")");
 			} catch (MalformedURLException e) {
 				LOGGER.error(e.toString());
-				throw new ExceptionInInitializerError("Unable to find '" + url
-						+ "' file. (" + e + ")");
+				throw new ExceptionInInitializerError("Unable to find '" + url + "' file. (" + e + ")");
 			}
 		}
 		return config;
@@ -423,10 +410,7 @@ public class Configuration {
 			String key = (String) configKeys.next();
 			String value = (String) configTmp.getProperty(key);
 			if (config.containsKey(key)) {
-				LOGGER.warn("Property " + key + " ("
-						+ configTmp.getProperty(key) + ") in file " + url
-						+ " override main value (" + config.getProperty(key)
-						+ ")");
+				LOGGER.warn("Property " + key + " (" + configTmp.getProperty(key) + ") in file " + url + " override main value (" + config.getProperty(key) + ")");
 			}
 			config.addProperty(key, value);
 		}
@@ -447,7 +431,7 @@ public class Configuration {
 		}
 		conf.save();
 	}
-	
+
 	/**
 	 * Helper method to read a file from the filesystem and return it as Properties.
 	 * 
@@ -462,7 +446,7 @@ public class Configuration {
 		props.load(new FileInputStream(propertiesFile));
 		return props;
 	}
-	
+
 	/**
 	 * Helper method to read a file from the configuration directory and return it as Properties.
 
@@ -478,16 +462,14 @@ public class Configuration {
 	public static String getSeparator() {
 		return System.getProperty("file.separator");
 	}
-	
+
 	/**
 	 * Set up configuration for the given location, including log4j.
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 * @param configurationLocation
 	 */
-	public static void setUp(String configurationLocation)
-	{
-		if (configurationLocation != null)
-		{
+	public static void setUp(String configurationLocation) {
+		if (configurationLocation != null) {
 			Configuration.setLocation(configurationLocation);
 		}
 

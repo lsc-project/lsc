@@ -45,6 +45,10 @@
  */
 package org.lsc.utils;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,15 +89,22 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		jm.setDistinguishName("givenName=Sébastien");
 		jm.setModificationItems(mi);
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
+		ILoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
+						(Logger)LoggerFactory.getLogger(""),
+						Level.INFO, jm.toString(),
+						null, new Object[] { jm });
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m%n");
+//		layout.setConversionPattern("%m%n");
+		layout.setLogOperation(null);
+
 		I18n.setLocale(Locale.US);
-		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n", layout.format(loggingEvent));
+		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
+						layout.doLayout(loggingEvent));
 		
 		jm.setDistinguishName(null);
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n", layout.format(loggingEvent));
+		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
+						layout.doLayout(loggingEvent));
 	}
 
 	/**
@@ -114,10 +125,15 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		jm.setDistinguishName("");
 		jm.setModificationItems(mi);
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
+						(Logger)LoggerFactory.getLogger(""),
+						Level.INFO, jm.toString(),
+						null, new Object[] { jm });
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m%n");
+//		layout.setConversionPattern("%m%n");
+		layout.setLogOperation(null);
+
 		I18n.setLocale(Locale.US);
 		assertEquals("dn: dc=lsc-project,dc=org\n" +
 				"changetype: modify\n" +
@@ -133,7 +149,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 				"add: description\n" +
 				"description:: TXVsdGktbGluZQpkZXNjcmlwdGlvbg==\n" +
 				"\n",
-				layout.format(loggingEvent));
+				layout.doLayout(loggingEvent));
 	}
 
 	/**
@@ -146,12 +162,18 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("uid=a");
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
+						(Logger)LoggerFactory.getLogger(""),
+						Level.INFO, jm.toString(),
+						null, new Object[] { jm });
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m%n");
+//		layout.setConversionPattern("%m%n");
+		layout.setLogOperation(null);
+
 		I18n.setLocale(Locale.US);
-		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n", layout.format(loggingEvent));
+		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n",
+						layout.doLayout(loggingEvent));
 	}
 
 	/**
@@ -161,12 +183,17 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 */
 	public final void testNeutral() throws IOException
 	{
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, "a simple string", null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
+						(Logger)LoggerFactory.getLogger(""),
+						Level.INFO, "a simple string",
+						null, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m");
+//		layout.setConversionPattern("%m");
+		layout.setLogOperation(null);
+
 		I18n.setLocale(Locale.US);
-		assertEquals("a simple string", layout.format(loggingEvent));
+		assertEquals("", layout.doLayout(loggingEvent));
 	}
 	
 	/**
@@ -176,12 +203,17 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 */
 	public final void testNull() throws IOException
 	{
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, null, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", 
+						(Logger)LoggerFactory.getLogger(""),
+						Level.INFO, null,
+						null, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-		layout.setConversionPattern("%m");
+//		layout.setConversionPattern("%m");
+		layout.setLogOperation(null);
+
 		I18n.setLocale(Locale.US);
-		assertEquals("", layout.format(loggingEvent));
+		assertEquals("", layout.doLayout(loggingEvent));
 	}
 
 }

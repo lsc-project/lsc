@@ -100,54 +100,65 @@ public class LocalizedJndiModificationsLayout extends LayoutBase<ILoggingEvent> 
 	 * @return the formatted string
 	 */
 	public final String doLayout(final ILoggingEvent le) {
-		Object message = le.getMessage();
+		Object[] messages = le.getArgumentArray();
 		String msg = "";
 
-		if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
-			JndiModifications jm = (JndiModifications) message;
+		if (null != messages && messages.length > 0) {
+			//We take only the first object
+			Object message = messages[0];
 
-			if (operations.contains(jm.getOperation())) {
-				StringBuffer msgBuffer = new StringBuffer();
-				String baseUrl = (String) Configuration.getDstProperties().get(
-								"java.naming.provider.url");
-				baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
-				String dn = "";
-				if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
-					dn = jm.getDistinguishName();
-					if (!dn.endsWith(baseUrl)) {
-						dn += "," + baseUrl;
-					}
-				} else {
-					dn = baseUrl;
-				}
+			if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
+				JndiModifications jm = (JndiModifications) message;
 
-				// print dn and base64 encode if it's not a SAFE-STRING
-				msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
-
-				switch (jm.getOperation()) {
-					case ADD_ENTRY:
-						msgBuffer.append("changetype: add\n" + listToLdif(jm.getModificationItems(), true));
-						break;
-					case MODRDN_ENTRY:
-						LdapName ln;
-						try {
-							ln = new LdapName(jm.getNewDistinguishName());
-							msgBuffer.append("changetype: modrdn\nnewrdn: " + ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " + ln.getSuffix(1) + "\n");
-						} catch (InvalidNameException e) {
-							msgBuffer.append("changetype: modrdn\nnewrdn: " + jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " + jm.getNewDistinguishName() + "," + baseUrl + "\n");
+				if (operations.contains(jm.getOperation())) {
+					StringBuffer msgBuffer = new StringBuffer();
+					String baseUrl = (String) Configuration.getDstProperties()
+									.get("java.naming.provider.url");
+					baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
+					String dn = "";
+					if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
+						dn = jm.getDistinguishName();
+						if (!dn.endsWith(baseUrl)) {
+							dn += "," + baseUrl;
 						}
-						break;
-					case MODIFY_ENTRY:
-						msgBuffer.append("changetype: modify\n" + listToLdif(jm.getModificationItems(), false));
-						break;
-					case DELETE_ENTRY:
-						msgBuffer.append("changetype: delete\n");
-						break;
-					default:
-				}
+					} else {
+						dn = baseUrl;
+					}
 
-				msgBuffer.append("\n");
-				msg = msgBuffer.toString();
+					// print dn and base64 encode if it's not a SAFE-STRING
+					msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
+
+					switch (jm.getOperation()) {
+						case ADD_ENTRY:
+							msgBuffer.append("changetype: add\n" +
+											listToLdif(jm.getModificationItems(), true));
+							break;
+						case MODRDN_ENTRY:
+							LdapName ln;
+							try {
+								ln = new LdapName(jm.getNewDistinguishName());
+								msgBuffer.append("changetype: modrdn\nnewrdn: " + 
+												ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " +
+												ln.getSuffix(1) + "\n");
+							} catch (InvalidNameException e) {
+								msgBuffer.append("changetype: modrdn\nnewrdn: " + 
+												jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " +
+												jm.getNewDistinguishName() + "," + baseUrl + "\n");
+							}
+							break;
+						case MODIFY_ENTRY:
+							msgBuffer.append("changetype: modify\n" +
+											listToLdif(jm.getModificationItems(), false));
+							break;
+						case DELETE_ENTRY:
+							msgBuffer.append("changetype: delete\n");
+							break;
+						default:
+					}
+
+					msgBuffer.append("\n");
+					msg = msgBuffer.toString();
+				}
 			}
 		}
 		return msg;

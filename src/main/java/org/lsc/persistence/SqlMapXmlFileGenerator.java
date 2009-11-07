@@ -79,7 +79,6 @@ import org.xml.sax.SAXException;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SqlMapXmlFileGenerator extends AbstractGenerator {
-	/** The private local LOG4J logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(SqlMapXmlFileGenerator.class);
 
 	/**  */

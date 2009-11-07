@@ -69,7 +69,6 @@ import com.ibatis.sqlmap.client.SqlMapClientBuilder;
  */
 public final class DaoConfig
 {
-	/** Log4J local logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
 	/** The base name of the iBatis configuration file */

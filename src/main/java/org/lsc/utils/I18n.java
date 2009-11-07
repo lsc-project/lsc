@@ -148,11 +148,11 @@ public class I18n {
 				try {
 					setLocaleAndLoadMessages(currentLocale);
 				} catch (IOException e) {
-					logger.fatal("Unable to open the locale message file for " + currentLocale + " ! Exiting...");
+					logger.error("Unable to open the locale message file for " + currentLocale + " ! Exiting...");
 					throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 				}
 			} else {
-				logger.fatal("Unable to find locale : " + lang + " ! Exiting ...");
+				logger.error("Unable to find locale : " + lang + " ! Exiting ...");
 				throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 			}
 		}
@@ -171,15 +171,13 @@ public class I18n {
 		if (logger.isDebugEnabled())
 			logger.debug("Setting locale to " + locale);
 		try {
-			// this.getClass().getClassLoader().getResource(".");
-			// messages = ResourceBundle.getBundle(localeDirectory + sep + PROJECT_NAME, currentLocale);
                         messages = ResourceBundle.getBundle(
                                 localeDirectory + sep + PROJECT_NAME,
                                 currentLocale,
                                 new I18nCustomClassLoader()
                             );
 		} catch (MissingResourceException mre) {
-			logger.fatal(mre, mre);
+			logger.error(mre.toString(), mre);
 			if (logger.isDebugEnabled()) {
 				logger.debug(System.getenv("CLASSPATH"));
 			}
@@ -192,9 +190,6 @@ public class I18n {
 	}
 
 	public String getMessage(String code) {
-		// if (code == null) {
-		// return "I18n layer: Unknown null code !";
-		// }
 		try {
 			return messages.getString(code);
 		} catch (MissingResourceException mre) {
@@ -226,8 +221,8 @@ public class I18n {
 				if (objs[i] != null && message.indexOf("{" + i + "}") >= 0) {
 					try {
 						message = StringUtils.replace(message, "{" + i + "}", objs[i].toString());
-					} catch (java.lang.IllegalArgumentException e) {
-						logger.fatal(e, e);
+					} catch (IllegalArgumentException e) {
+						logger.error(e.toString(), e);
 					}
 				}
 			}

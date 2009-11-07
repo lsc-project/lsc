@@ -47,10 +47,6 @@ package org.lsc.jndi.parser;
 
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.lsc.jndi.parser.LdapAttributeType;
-
 /**
  * Test an ldap attribute type representation
  * Successfully tested with OpenLDAP 2.3
@@ -58,6 +54,7 @@ import org.lsc.jndi.parser.LdapAttributeType;
  */
 public class LdapAttributeTypeTest extends TestCase {
 
+	@Override
 	public final void setUp() {
 		PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
 	}

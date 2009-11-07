@@ -94,8 +94,7 @@ public class LdapObjectClass {
 	private List<String> multiAttrs;
 
 	/** The local LOG4J logger. */
-	private static final Logger LOGGER = Logger
-	.getLogger(LdapAttributeType.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LdapAttributeType.class);
 
 	/**
 	 * The default constructor.

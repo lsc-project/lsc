@@ -148,8 +148,8 @@ public abstract class AbstractSynchronize {
         try {
             ids = dstJndiService.getListPivots().entrySet().iterator();
         } catch (NamingException e) {
-            LOGGER.fatal("Error getting list of IDs in the destination for task " + syncName);
-            LOGGER.debug(e);
+            LOGGER.error("Error getting list of IDs in the destination for task " + syncName);
+            LOGGER.debug(e.toString(), e);
             return;
         }
         
@@ -167,7 +167,6 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
         
         JndiModifications jm = null;
-//        LscObject srcObject = null;
         
         /** Hash table to pass objects into JavaScript condition */
         Map<String, Object> conditionObjects = null;
@@ -207,7 +206,6 @@ public abstract class AbstractSynchronize {
                     } else {
                         // If condition is based on dstBean, retrieve the full object from destination
 	                    if (conditionString.contains("dstBean")) {
-//	                        AbstractBean bean = dstJndiService.getBean(id);
 
 	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
 	                        if (taskBean == null) {
@@ -258,7 +256,7 @@ public abstract class AbstractSynchronize {
             } catch (CommunicationException e) { 
                 // we lost the connection to the source or destination, stop everything!
                 countError++;
-                LOGGER.fatal("Connection lost! Aborting.");
+                LOGGER.error("Connection lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
             } catch (NamingException e) {
@@ -302,7 +300,7 @@ public abstract class AbstractSynchronize {
         try {
         	ids = srcService.getListPivots().entrySet().iterator();
         } catch(Exception e) {
-            LOGGER.fatal("Error getting list of IDs in the source for task " + syncName);
+            LOGGER.error("Error getting list of IDs in the source for task " + syncName);
             if (LOGGER.isDebugEnabled()) e.printStackTrace();
             return;
         }
@@ -319,10 +317,8 @@ public abstract class AbstractSynchronize {
         int countCompleted = 0;
 
         JndiModifications jm = null;
-//        LscObject srcObject = null;
         ISyncOptions syncOptions = this.getSyncOptions(syncName);
         // store method to obtain source bean
-//        Method beanGetInstanceMethod = null;
         AbstractBean srcBean = null;
         AbstractBean dstBean = null;
 
@@ -345,23 +341,6 @@ public abstract class AbstractSynchronize {
                     LOGGER.error("Unable to get object for id=" + id.getKey());
                     continue;
                 }
-
-//                // Specific JDBC - transform flat object into a normal object
-//                if (fTop.class.isAssignableFrom(srcObject.getClass())) {
-//                	top normalObject = object.getClass().newInstance();
-//                	normalObject.setUpFromObject((fTop)srcObject);
-//                	srcObject = normalObject;
-//                }
-
-//                if (beanGetInstanceMethod == null) {
-//                    beanGetInstanceMethod = objectBean.getMethod("getInstance", new Class[] { top.class });
-//                }
-
-//                try {
-//                    srcBean = (AbstractBean) beanGetInstanceMethod.invoke(null, new Object[] { srcObject });
-//                } catch (InvocationTargetException ite) {
-//                    throw ite.getCause();
-//                }
 
                 // Search destination for matching object
                 dstBean = dstService.getBean(id);
@@ -427,7 +406,7 @@ public abstract class AbstractSynchronize {
             } catch (CommunicationException e) { 
                 // we lost the connection to the source or destination, stop everything!
                 countError++;
-                LOGGER.fatal("Connection lost! Aborting.");
+                LOGGER.error("Connection lost! Aborting.");
                 logActionError(jm, id, e);
                 return;
             } catch (ExceptionInInitializerError e) { 
@@ -606,7 +585,7 @@ public abstract class AbstractSynchronize {
                 return false;
             }
         } catch (final ParseException e) {
-            LOGGER.fatal("Unable to parse options : " + args + " (" + e + ")", e);
+            LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
             return false;
         }
         return true;

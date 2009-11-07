@@ -70,8 +70,7 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
     private static final int MAX_LINE_LENGTH = 3000;
 
     /** This is the local LOG4J logger. */
-    private static final Logger LOGGER = 
-	LoggerFactory.getLogger(Csv2SqlObjectGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Csv2SqlObjectGenerator.class);
 
     /** This is the CSV filename. */
     private String csvFilename;
@@ -130,7 +129,7 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
         try {
             is = new FileInputStream(new File(csvFilename));
         } catch (FileNotFoundException e) {
-            LOGGER.fatal(I18n.getMessage(null,
+            LOGGER.error(I18n.getMessage(null,
                              "org.lsc.messages.SYNC_ERROR",
                              new Object[] { e.getMessage() }), e);
 
@@ -142,7 +141,7 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
         try {
             is.read(bytes);
         } catch (IOException e) {
-            LOGGER.fatal(I18n.getMessage(null,
+            LOGGER.error(I18n.getMessage(null,
                              "org.lsc.messages.SYNC_ERROR",
                              new Object[] { e.getMessage() }), e);
 

@@ -80,8 +80,7 @@ import org.xml.sax.SAXException;
  */
 public class SqlMapXmlFileGenerator extends AbstractGenerator {
 	/** The private local LOG4J logger. */
-	private static final Logger LOGGER = Logger
-	.getLogger(SqlMapXmlFileGenerator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SqlMapXmlFileGenerator.class);
 
 	/**  */
 	private static final String SQL_MAP_CONFIG_FILENAME = "org/lsc/persistence/xml/sql-map-config.xml";
@@ -218,25 +217,25 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 			DOMSource source = new DOMSource(doc);
 			transformer.transform(source, result);
 		} catch (SAXException e) {
-			LOGGER.fatal("Failed to parse XML file : " + e, e);
+			LOGGER.error("Failed to parse XML file : " + e, e);
 
 			return null;
 		} catch (IOException e) {
-			LOGGER.fatal("Failed to read XML file : " + e, e);
+			LOGGER.error("Failed to read XML file : " + e, e);
 
 			return null;
 		} catch (TransformerConfigurationException e) {
-			LOGGER.fatal("Failed to read XML transformation "
+			LOGGER.error("Failed to read XML transformation "
 					+ "configuration : " + e, e);
 
 			return null;
 		} catch (TransformerFactoryConfigurationError e) {
-			LOGGER.fatal("Failed to read XML transformation "
+			LOGGER.error("Failed to read XML transformation "
 					+ "configuration : " + e, e);
 
 			return null;
 		} catch (TransformerException e) {
-			LOGGER.fatal("Failed to transform XML structure : " + e, e);
+			LOGGER.error("Failed to transform XML structure : " + e, e);
 			e.printStackTrace();
 		}
 

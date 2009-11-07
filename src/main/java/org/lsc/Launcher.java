@@ -122,7 +122,7 @@ public final class Launcher {
         	// do the work!
     		sync.launch(syncType, cleanType);
         } catch (Exception e) {
-            LOGGER.error(e, e);
+            LOGGER.error(e.toString());
         }
     }
 
@@ -176,7 +176,7 @@ public final class Launcher {
                 return 1;
             }
         } catch (ParseException e) {
-            LOGGER.fatal("Unable to parse options : " + args + " (" + e + ")",  e);
+            LOGGER.error("Unable to parse options : " + args + " (" + e + ")",  e);
             return 1;
         }
         return 0;

@@ -45,10 +45,7 @@
  */
 package org.lsc.service;
 
-import org.lsc.AbstractGenerator;
 import org.lsc.Configuration;
-import org.lsc.jndi.parser.LdapAttributeType;
-import org.lsc.jndi.parser.LdapObjectClass;
 import org.lsc.persistence.DaoConfig;
 
 import java.io.File;
@@ -423,7 +420,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
                        + ") could not be created (probably a rights issue).");
             }
         } catch (FileNotFoundException fnfe) {
-            LOGGER.error(fnfe, fnfe);
+            LOGGER.error(fnfe.toString(), fnfe);
         } catch (IOException e) {
             LOGGER.error(e + " (" + fileName + ")", e);
         }

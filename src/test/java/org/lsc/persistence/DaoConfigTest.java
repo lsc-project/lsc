@@ -56,8 +56,6 @@ import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Public class to test the DAO engine loader
@@ -72,6 +70,7 @@ public class DaoConfigTest extends TestCase {
     /**
      * Load the DB driver and initialize the connection.final 
      */
+	@Override
     public final void setUp() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
     }

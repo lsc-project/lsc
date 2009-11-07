@@ -47,7 +47,6 @@ package org.lsc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -108,7 +107,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		super();
 		lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
 		if (lscProperties == null) {
-			LOGGER.fatal("Unable to get LSC properties! Exiting ...");
+			LOGGER.error("Unable to get LSC properties! Exiting ...");
 			throw new ExceptionInInitializerError("Unable to get LSC properties!");
 		}
 	}
@@ -132,7 +131,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
         // Get the list of defined tasks from LSC properties
 		String tasks = lscProperties.getProperty(TASKS_PROPS_PREFIX);
 		if (tasks == null) {
-			LOGGER.fatal("No tasks defined in LSC properties! Exiting ...");
+			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
 			return false;
 		}
         
@@ -162,7 +161,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
         }
 
         if (!foundATask) {
-            LOGGER.fatal("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
+            LOGGER.error("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
             return false;
         }
 
@@ -182,7 +181,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
     private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
     	if(props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
        		String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
-       		LOGGER.fatal(errorMessage);
+       		LOGGER.error(errorMessage);
        		throw new ExceptionInInitializerError(errorMessage);
     	}
     }
@@ -193,7 +192,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
     	if (value == null)
     	{
     		String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
-    		LOGGER.fatal(errorMessage);
+    		LOGGER.error(errorMessage);
     		throw new ExceptionInInitializerError(errorMessage);
     	}
     	
@@ -274,7 +273,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     IllegalArgumentException.class, InvocationTargetException.class};
 
             if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-                LOGGER.fatal("Error while launching the following task: "
+                LOGGER.error("Error while launching the following task: "
                         + taskName + ". Please check your code ! (" + e + ")", e);
                 return false;
             }

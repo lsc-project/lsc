@@ -59,8 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.opends.messages.Message;
@@ -93,7 +91,7 @@ public final class EmbeddedOpenDS {
 	/**
 	 * A logger for the class
 	 */
-	private static Log logger = LogFactory.getLog(EmbeddedOpenDS.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(EmbeddedOpenDS.class);
 
 	/**
 	 * The of the system property that specifies the target working directory,
@@ -181,7 +179,7 @@ public final class EmbeddedOpenDS {
 		}
 		SERVER_STARTED = true;
 
-		if (logger.isDebugEnabled()) {
+		if (LOGGER.isDebugEnabled()) {
 			StringBuffer sb = new StringBuffer("");
 			for (Backend b : DirectoryServer.getBackends().values()) {
 				sb.append("[ ").append(b.getBackendID()).append(" => ");
@@ -192,7 +190,7 @@ public final class EmbeddedOpenDS {
 				}
 				sb.append(" ]");
 			}
-			logger.debug(sb.toString());
+			LOGGER.debug(sb.toString());
 		}
 		SERVER_STARTED = true;
 	}

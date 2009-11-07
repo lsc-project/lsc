@@ -59,7 +59,6 @@ import java.util.regex.Pattern;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
-import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
@@ -82,8 +81,8 @@ import org.lsc.beans.AbstractBean;
 public abstract class AbstractSimpleJndiService {
 
 	/** This is the local LOG4J logger. */
-	protected static final Logger LOGGER = Logger
-			.getLogger(AbstractSimpleJndiService.class);
+	protected static final Logger LOGGER = LoggerFactory.
+					getLogger(AbstractSimpleJndiService.class);
 
 	/**
 	 * The filter to be completed by replacing {0} by the id to find a unique

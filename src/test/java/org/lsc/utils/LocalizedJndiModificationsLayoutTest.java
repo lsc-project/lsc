@@ -56,16 +56,9 @@ import javax.naming.directory.ModificationItem;
 
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.lsc.utils.I18n;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-import org.lsc.utils.LocalizedJndiModificationsLayout;
 
 /**
  * Provide a complete test.
@@ -150,7 +143,6 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 */
 	public final void testRemove() throws IOException
 	{
-		// List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("uid=a");
 

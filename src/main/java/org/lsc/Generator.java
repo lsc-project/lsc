@@ -45,8 +45,6 @@
  */
 package org.lsc;
 
-import java.io.File;
-
 import javax.naming.NamingException;
 
 import org.apache.commons.cli.CommandLine;
@@ -57,8 +55,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.beans.BeanGenerator;
@@ -291,7 +287,7 @@ public final class Generator {
             
             return 1;
         } catch (ParseException e) {
-            LOGGER.fatal("Unable to parse options : " + args + " (" + e + ")", e);
+            LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
             printHelp(options);
 
             return 1;

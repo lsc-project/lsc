@@ -400,9 +400,9 @@ public abstract class AbstractBean implements IBean {
                 return null;
             }
         } catch (InstantiationException ie) {
-            LOGGER.error(ie, ie);
+            LOGGER.error(ie.toString(), ie);
         } catch (IllegalAccessException iae) {
-            LOGGER.error(iae, iae);
+            LOGGER.error(iae.toString(), iae);
         }
 
         return null;
@@ -543,6 +543,7 @@ public abstract class AbstractBean implements IBean {
      *
      * @return the pretty formatted string to display
      */
+		@Override
     public final String toString() {
         StringBuffer sb = new StringBuffer();
         Iterator<String> keySetIter = attrs.keySet().iterator();

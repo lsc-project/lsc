@@ -62,9 +62,6 @@ import java.util.StringTokenizer;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ietf.ldap.LDAPUrl;
@@ -126,8 +123,7 @@ public class Configuration {
 	private static PropertiesConfiguration config = null;
 
 	// Default constructor.
-	protected Configuration() {
-	}
+	protected Configuration() {}
 
 	/**
 	 * Get data source connection properties.
@@ -162,7 +158,7 @@ public class Configuration {
 		}
 		catch (MalformedURLException e)
 		{
-			LOGGER.error(e);
+			LOGGER.error(e.toString());
 			throw new ExceptionInInitializerError(e);
 		}
 		
@@ -329,7 +325,7 @@ public class Configuration {
 			catch (URISyntaxException e)
 			{
 				String errorMessage = "Could not understand where the configuration is! Try using -f option.";
-				LOGGER.fatal(errorMessage);
+				LOGGER.error(errorMessage);
 				throw new ExceptionInInitializerError(errorMessage);
 			}
 		}
@@ -369,11 +365,11 @@ public class Configuration {
 				UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", UID_MAX_LENGTH);
 
 			} catch (ConfigurationException e) {
-				LOGGER.error(e, e);
+				LOGGER.error(e.toString());
 				throw new ExceptionInInitializerError("Unable to find '" + url
 						+ "' file. (" + e + ")");
 			} catch (MalformedURLException e) {
-				LOGGER.error(e, e);
+				LOGGER.error(e.toString());
 				throw new ExceptionInInitializerError("Unable to find '" + url
 						+ "' file. (" + e + ")");
 			}

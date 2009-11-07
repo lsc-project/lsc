@@ -49,12 +49,7 @@ import java.util.HashMap;
 
 import junit.framework.TestCase;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.lsc.jndi.parser.LdapAttributeType;
-import org.lsc.jndi.parser.LdapObjectClass;
 
 /**
  * Test an ldap object class representation
@@ -63,6 +58,7 @@ import org.lsc.jndi.parser.LdapObjectClass;
  */
 public class LdapObjectClassTest extends TestCase {
 
+	@Override
     public final void setUp() {
         PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
     }

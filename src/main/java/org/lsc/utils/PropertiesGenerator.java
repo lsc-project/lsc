@@ -114,7 +114,7 @@ public class PropertiesGenerator extends AbstractGenerator {
 		try {
 			Configuration.setProperties(prefix, props);
 		} catch (ConfigurationException e) {
-			LOGGER.fatal("Unable to save configuration file: " + e, e);
+			LOGGER.error("Unable to save configuration file: " + e, e);
 			return false;
 		}
 		return true;

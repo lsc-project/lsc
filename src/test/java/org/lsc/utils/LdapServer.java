@@ -56,8 +56,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.opends.EmbeddedOpenDS;
 import org.opends.server.api.Backend;
@@ -107,19 +105,19 @@ public class LdapServer {
 		try {
 			retCode = usage(args);
 		} catch (InitializationException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (DirectoryException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (CanceledOperationException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (LDIFException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (IOException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (URISyntaxException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		} catch (ConfigException e) {
-			LOGGER.error(e,e);
+			LOGGER.error(e.toString(), e);
 		}
 		if (retCode != 0) {
 			System.exit(retCode);
@@ -161,7 +159,7 @@ public class LdapServer {
 				return 1;
 			}
 		} catch (ParseException e) {
-			LOGGER.fatal("Unable to parse options : " + args + " (" + e + ")", e);
+			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
 			return 1;
 		}
 		return 0;

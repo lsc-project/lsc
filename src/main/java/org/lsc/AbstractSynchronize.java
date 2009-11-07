@@ -461,7 +461,7 @@ public abstract class AbstractSynchronize {
                 (jm != null ? jm.getDistinguishName() : ""), str, "", except }), except);
 
         if (jm != null) {
-            LOGGER.error(jm);
+            LOGGER.error(jm.toString());
         }
     }
 
@@ -512,7 +512,7 @@ public abstract class AbstractSynchronize {
                     jm.getDistinguishName(), syncName }));
         }
 
-        LSCStructuralLogger.DESTINATION.info(jm);
+        LSCStructuralLogger.DESTINATION.info(jm.toString());
     }
 
 
@@ -547,7 +547,7 @@ public abstract class AbstractSynchronize {
                     jm.getDistinguishName(), syncName }));
         }
 
-        LSCStructuralLogger.DESTINATION.debug(jm);
+        LSCStructuralLogger.DESTINATION.debug(jm.toString());
     }
 
     /**

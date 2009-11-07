@@ -58,13 +58,13 @@ import org.slf4j.LoggerFactory;
  */
 public class LdapObjectClassTest extends TestCase {
 
-    public final void testParsing() {
-        LoggerFactory.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
-        assertNotNull(LdapObjectClass.parse(
-                "( 1.3.6.1.4.1.7135.1.3.201.1.4.1.14 NAME 'objectclassToTest' DESC 'ObjectClass to test' SUP ( firstAttribute $ secondAttribute $ thirdAttribute $ organizationalUnit ) STRUCTURAL MUST ( description $ domaineMessagerie ) MAY ( adressePrincipaleService $ facsimileTelephoneNumber $ labeledURI $ mail $ mailLocalAddress $ mailRoutingAddress $ telephoneNumber ) )",
-                new HashMap<String, LdapAttributeType>()));
-        assertNotNull(LdapObjectClass.parse(
-                "( 1.3.6.1.4.1.3317.4.3.2.1 NAME 'radiusprofile' DESC '' SUP top AUXILIARY MUST cn MAY ( radiusArapFeatures $ radiusArapSecurity $ radiusArapZoneAccess $ radiusAuthType $ radiusCallbackId $ radiusCallbackNumber $ radiusCalledStationId $ radiusCallingStationId $ radiusClass $ radiusClientIPAddress $ radiusFilterId $ radiusFramedAppleTalkLink $ radiusFramedAppleTalkNetwork $ radiusFramedAppleTalkZone $ radiusFramedCompression $ radiusFramedIPAddress $ radiusFramedIPNetmask $ radiusFramedIPXNetwork $ radiusFramedMTU $ radiusFramedProtocol $ radiusCheckItem $ radiusReplyItem $ radiusFramedRoute $ radiusFramedRouting $ radiusIdleTimeout $ radiusGroupName $ radiusHint $ radiusHuntgroupName $ radiusLoginIPHost $ radiusLoginLATGroup $ radiusLoginLATNode $ radiusLoginLATPort $ radiusLoginLATService $ radiusLoginService $ radiusLoginTCPPort $ radiusLoginTime $ radiusPasswordRetry $ radiusPortLimit $ radiusPrompt $ radiusProxyToRealm $ radiusRealm $ radiusReplicateToRealm $ radiusServiceType $ radiusSessionTimeout $ radiusStripUserName $ radiusTerminationAction $ radiusTunnelClientEndpoint $ radiusProfileDn $ radiusSimultaneousUse $ radiusTunnelAssignmentId $ radiusTunnelMediumType $ radiusTunnelPassword $ radiusTunnelPreference $ radiusTunnelPrivateGroupId $ radiusTunnelServerEndpoint $ radiusTunnelType $ radiusUserCategory $ radiusVSA $ radiusExpiration $ dialupAccess $ radiusNASIpAddress $ radiusReplyMessage ) )",
-                new HashMap<String, LdapAttributeType>()));
-    }
+	public final void testParsing() {
+		LoggerFactory.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
+		assertNotNull(LdapObjectClass.parse(
+						"( 1.3.6.1.4.1.7135.1.3.201.1.4.1.14 NAME 'objectclassToTest' DESC 'ObjectClass to test' SUP ( firstAttribute $ secondAttribute $ thirdAttribute $ organizationalUnit ) STRUCTURAL MUST ( description $ domaineMessagerie ) MAY ( adressePrincipaleService $ facsimileTelephoneNumber $ labeledURI $ mail $ mailLocalAddress $ mailRoutingAddress $ telephoneNumber ) )",
+						new HashMap<String, LdapAttributeType>()));
+		assertNotNull(LdapObjectClass.parse(
+						"( 1.3.6.1.4.1.3317.4.3.2.1 NAME 'radiusprofile' DESC '' SUP top AUXILIARY MUST cn MAY ( radiusArapFeatures $ radiusArapSecurity $ radiusArapZoneAccess $ radiusAuthType $ radiusCallbackId $ radiusCallbackNumber $ radiusCalledStationId $ radiusCallingStationId $ radiusClass $ radiusClientIPAddress $ radiusFilterId $ radiusFramedAppleTalkLink $ radiusFramedAppleTalkNetwork $ radiusFramedAppleTalkZone $ radiusFramedCompression $ radiusFramedIPAddress $ radiusFramedIPNetmask $ radiusFramedIPXNetwork $ radiusFramedMTU $ radiusFramedProtocol $ radiusCheckItem $ radiusReplyItem $ radiusFramedRoute $ radiusFramedRouting $ radiusIdleTimeout $ radiusGroupName $ radiusHint $ radiusHuntgroupName $ radiusLoginIPHost $ radiusLoginLATGroup $ radiusLoginLATNode $ radiusLoginLATPort $ radiusLoginLATService $ radiusLoginService $ radiusLoginTCPPort $ radiusLoginTime $ radiusPasswordRetry $ radiusPortLimit $ radiusPrompt $ radiusProxyToRealm $ radiusRealm $ radiusReplicateToRealm $ radiusServiceType $ radiusSessionTimeout $ radiusStripUserName $ radiusTerminationAction $ radiusTunnelClientEndpoint $ radiusProfileDn $ radiusSimultaneousUse $ radiusTunnelAssignmentId $ radiusTunnelMediumType $ radiusTunnelPassword $ radiusTunnelPreference $ radiusTunnelPrivateGroupId $ radiusTunnelServerEndpoint $ radiusTunnelType $ radiusUserCategory $ radiusVSA $ radiusExpiration $ dialupAccess $ radiusNASIpAddress $ radiusReplyMessage ) )",
+						new HashMap<String, LdapAttributeType>()));
+	}
 }

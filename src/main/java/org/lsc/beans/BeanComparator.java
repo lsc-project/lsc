@@ -87,7 +87,6 @@ public final class BeanComparator {
      */
     private BeanComparator() {}
 
-    /** LOG4J local logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
     /**

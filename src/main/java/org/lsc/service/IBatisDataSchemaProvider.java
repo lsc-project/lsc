@@ -51,7 +51,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.AbstractGenerator;
 
 /**
@@ -67,7 +68,7 @@ public class IBatisDataSchemaProvider implements DataSchemaProvider {
 	
     /** This is the local logger. */
     public static final Logger LOGGER = 
-        Logger.getLogger(AbstractGenerator.class);
+        LoggerFactory.getLogger(AbstractGenerator.class);
 
     public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
     	this.metadata = metadata;

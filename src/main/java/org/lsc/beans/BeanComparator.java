@@ -60,7 +60,8 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
@@ -87,7 +88,7 @@ public final class BeanComparator {
     private BeanComparator() {}
 
     /** LOG4J local logger. */
-    private static final Logger LOGGER = Logger.getLogger(BeanComparator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
     /**
      * Static method to return the kind of operation that would happen

@@ -53,7 +53,8 @@ import java.util.List;
 
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mozilla.javascript.NativeJavaObject;
 
 
@@ -64,7 +65,7 @@ import org.mozilla.javascript.NativeJavaObject;
 public class ScriptableObject {
     /** The local static LOG4J logger. */
     private static final Logger LOGGER = 
-	Logger.getLogger(ScriptableObject.class);
+	LoggerFactory.getLogger(ScriptableObject.class);
     
     @SuppressWarnings("unchecked")
     public List<String> wrap(String methodName, final Object a, final Object b,

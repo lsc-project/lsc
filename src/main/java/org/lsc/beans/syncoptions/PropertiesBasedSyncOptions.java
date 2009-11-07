@@ -54,7 +54,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 
@@ -88,7 +89,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
     /** Default separator is ";" */
     private String defaultDelimiter = ";";
 
-    private static Logger LOGGER = Logger.getLogger(PropertiesBasedSyncOptions.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
     
     private String syncName;
 

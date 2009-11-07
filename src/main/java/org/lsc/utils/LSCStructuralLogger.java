@@ -1,6 +1,7 @@
 package org.lsc.utils;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is done to reference all the structural loggers which
@@ -8,14 +9,14 @@ import org.apache.log4j.Logger;
  */
 public interface LSCStructuralLogger {
 
-	public static final Logger DESTINATION = Logger.getLogger("lsc.destination");
+	public static final Logger DESTINATION = LoggerFactory.getLogger("lsc.destination");
 
-	public static final Logger GLOBAL = Logger.getLogger("lsc.global");
+	public static final Logger GLOBAL = LoggerFactory.getLogger("lsc.global");
 
-	public static final Logger GENERATION = Logger.getLogger("lsc.generation");
+	public static final Logger GENERATION = LoggerFactory.getLogger("lsc.generation");
 
-	public static final Logger SOURCE = Logger.getLogger("lsc.source");
+	public static final Logger SOURCE = LoggerFactory.getLogger("lsc.source");
 
-	public static final Logger TESTS = Logger.getLogger("lsc.tests");
+	public static final Logger TESTS = LoggerFactory.getLogger("lsc.tests");
 
 }

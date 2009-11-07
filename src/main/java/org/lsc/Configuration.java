@@ -62,9 +62,11 @@ import java.util.StringTokenizer;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ietf.ldap.LDAPUrl;
 
 /**
@@ -76,7 +78,7 @@ import org.ietf.ldap.LDAPUrl;
 public class Configuration {
 
 	// Logger
-	private static final Logger LOGGER = Logger.getLogger(Configuration.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
 	// Filename of the <code>lsc.properties</code>
 	public static final String PROPERTIES_FILENAME = "lsc.properties";

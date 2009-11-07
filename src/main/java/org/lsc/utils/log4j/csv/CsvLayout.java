@@ -53,9 +53,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Layout;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
@@ -68,7 +71,7 @@ import org.lsc.jndi.JndiModifications;
 public class CsvLayout extends Layout {
 
     /* The logger */
-    private static final Logger LOGGER = Logger.getLogger(CsvLayout.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvLayout.class);
     
     /* Default values for the parameters */
     protected static String DEFAULT_SEPARATOR = ";";

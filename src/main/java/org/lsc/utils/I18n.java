@@ -57,7 +57,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 
 /**
@@ -68,7 +69,7 @@ import org.lsc.Configuration;
 public class I18n {
 
 	/** The logger */
-	private static Logger logger = Logger.getLogger(I18n.class);
+	private static Logger logger = LoggerFactory.getLogger(I18n.class);
 
 	/** The messages in the current language */
 	private ResourceBundle messages;

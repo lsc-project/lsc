@@ -62,7 +62,8 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.objects.top;
 import org.lsc.service.DataSchemaProvider;
@@ -92,7 +93,7 @@ public abstract class AbstractBean implements IBean {
     }
 
     /** The local LOG4J logger. */
-    private static final Logger LOGGER = Logger.getLogger(AbstractBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBean.class);
 
     /** The accessor getter prefix. */
     public static final String GET_ACCESSOR_PREFIX = "get";

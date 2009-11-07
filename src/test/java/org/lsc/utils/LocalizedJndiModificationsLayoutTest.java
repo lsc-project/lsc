@@ -56,9 +56,12 @@ import javax.naming.directory.ModificationItem;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.utils.I18n;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
@@ -89,7 +92,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		jm.setDistinguishName("givenName=Sébastien");
 		jm.setModificationItems(mi);
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
@@ -118,7 +121,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		jm.setDistinguishName("");
 		jm.setModificationItems(mi);
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
@@ -151,7 +154,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("uid=a");
 
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, jm, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, jm, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m%n");
@@ -166,7 +169,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 */
 	public final void testNeutral() throws IOException
 	{
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, "a simple string", null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, "a simple string", null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m");
@@ -181,7 +184,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 */
 	public final void testNull() throws IOException
 	{
-		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", Logger.getLogger(""), Level.INFO, null, null);
+		LoggingEvent loggingEvent = new LoggingEvent("org.lsc", LoggerFactory.getLogger(""), Level.INFO, null, null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
 		layout.setConversionPattern("%m");

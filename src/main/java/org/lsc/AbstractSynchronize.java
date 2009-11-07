@@ -58,7 +58,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
@@ -83,7 +84,7 @@ public abstract class AbstractSynchronize {
     public static final String LOG4J_CONFIGURATION_FILE = "log4j.properties";
 
     /** The local LOG4J logger. */
-    private static final Logger LOGGER = Logger.getLogger(AbstractSynchronize.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
     /** List of configured options. */
     private Options options;

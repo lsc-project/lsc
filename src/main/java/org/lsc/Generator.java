@@ -57,8 +57,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.beans.BeanGenerator;
 import org.lsc.persistence.SqlMapXmlFileGenerator;
 import org.lsc.service.JdbcSrcServiceObjectGenerator;
@@ -76,7 +78,7 @@ public final class Generator {
     public static final String LOG4J_CONFIGURATION_FILE = "log4j.properties";
 
     /** This is the local Log4j logger. */
-    private static final Logger LOGGER = Logger.getLogger(Generator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
     /** When the CSV separator is rounded by ' or ", just remove them. */
     private static final int CSV_SEPARATOR_ROUNDED = 3;

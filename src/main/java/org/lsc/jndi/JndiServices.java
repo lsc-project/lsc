@@ -78,7 +78,8 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.ietf.ldap.LDAPUrl;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
@@ -97,7 +98,7 @@ public final class JndiServices {
     public static final String DEFAULT_FILTER = "objectClass=*";
 
     /** the Log4J instance. */
-    private static final Logger LOGGER = Logger.getLogger(JndiServices.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JndiServices.class);
 
     /** the ldap ctx. */
     private LdapContext ctx;

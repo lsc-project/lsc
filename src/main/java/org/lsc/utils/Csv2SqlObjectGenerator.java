@@ -54,7 +54,8 @@ import java.util.StringTokenizer;
 
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.AbstractGenerator;
 
 
@@ -70,7 +71,7 @@ public class Csv2SqlObjectGenerator extends AbstractGenerator {
 
     /** This is the local LOG4J logger. */
     private static final Logger LOGGER = 
-	Logger.getLogger(Csv2SqlObjectGenerator.class);
+	LoggerFactory.getLogger(Csv2SqlObjectGenerator.class);
 
     /** This is the CSV filename. */
     private String csvFilename;

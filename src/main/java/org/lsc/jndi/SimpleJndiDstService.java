@@ -55,7 +55,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 
@@ -75,7 +76,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	private Class<AbstractBean> beanClass;
 
 	/** The local LOG4J logger. */
-	private static final Logger LOGGER = Logger.getLogger(SimpleJndiDstService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiDstService.class);
 
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.

@@ -54,9 +54,12 @@ import javax.naming.directory.ModificationItem;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
@@ -95,7 +98,7 @@ public class CsvLayoutTest extends TestCase {
 		assertEquals(true, layout.operations.contains(JndiModificationType.ADD_ENTRY));
 	
 		// test logging
-		assertEquals("", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, "random string", new UnknownError())));
+		assertEquals("", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, "random string", new UnknownError())));
 
 		// create a JndiModifications object to test logging
 		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
@@ -106,16 +109,16 @@ public class CsvLayoutTest extends TestCase {
 		jm.setModificationItems(mi);
 		
 		// test simple logging of the modifications for a valid task
-		assertEquals("Jon;;cn=test,o=testing;;Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("Jon;;cn=test,o=testing;;Tester CN\n", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 		// change the task name to test logging a modification for an excluded task
 		jm.setTaskName("notInList");
-		assertEquals("", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 
 		// go back to a valid task, but try an excluded operation
 		jm.setTaskName("otherTestTask");
 		jm.setOperation(JndiModificationType.MODIFY_ENTRY);
-		assertEquals("", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 		// change options and reactivate them
 		layout.setLogOperation("create,update");
@@ -125,10 +128,10 @@ public class CsvLayoutTest extends TestCase {
 		layout.activateOptions();
 		
 		// log one line to check that the outputHeader is prepended
-		assertEquals("givenName%sn%dn%%cn\nJon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("givenName%sn%dn%%cn\nJon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 		// log the same line again to check that the outputHeader is not logged again
-		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", Logger.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
+		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.format(new LoggingEvent("dunno", LoggerFactory.getLogger(CsvLayoutTest.class), Level.INFO, jm, new UnknownError())));
 		
 	}
 	

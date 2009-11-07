@@ -58,7 +58,8 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is the Rhino Java Script evaluation context.
@@ -68,7 +69,7 @@ import org.apache.log4j.Logger;
 public final class JScriptEvaluator {
 
     // Logger
-    private static final Logger LOGGER = Logger.getLogger(JScriptEvaluator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
     /** The private unique instance. */
     private static JScriptEvaluator instance;

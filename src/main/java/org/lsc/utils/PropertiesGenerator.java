@@ -50,7 +50,8 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.AbstractGenerator;
 import org.lsc.Configuration;
 import org.lsc.Generator;
@@ -63,7 +64,7 @@ import org.lsc.Generator;
 public class PropertiesGenerator extends AbstractGenerator {
 
 	/** The local LOG4J logger. */
-	private static final Logger LOGGER = Logger.getLogger(PropertiesGenerator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesGenerator.class);
 
 	/** The generator type. */
 	private Generator.GEN_TYPE genType;

@@ -48,7 +48,8 @@ package org.lsc;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * All objects in LSC inherit from this class, both pure-LDAP style objects
@@ -59,7 +60,7 @@ import org.apache.log4j.Logger;
 public abstract class LscObject
 {
 	/* The local logger */
-	protected static Logger LOGGER = Logger.getLogger(LscObject.class);
+	protected static Logger LOGGER = LoggerFactory.getLogger(LscObject.class);
 
 	protected String distinguishName;
 

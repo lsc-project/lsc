@@ -49,7 +49,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 
 public final class SyncOptionsFactory {
@@ -58,7 +59,7 @@ public final class SyncOptionsFactory {
 
     private Map<String, ISyncOptions> cache; 
 
-    private static Logger LOGGER = Logger.getLogger(SyncOptionsFactory.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
 
     private SyncOptionsFactory() {
         cache = new HashMap<String, ISyncOptions>();

@@ -63,7 +63,8 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;

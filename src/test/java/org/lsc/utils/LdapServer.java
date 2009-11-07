@@ -54,8 +54,10 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.opends.EmbeddedOpenDS;
 import org.opends.server.api.Backend;
@@ -75,7 +77,7 @@ import org.opends.server.util.StaticUtils;
 public class LdapServer {
 
 	/** The local logger */
-	private static Logger LOGGER = Logger.getLogger(LdapServer.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
 	
 	public final static void start() throws InitializationException, IOException, URISyntaxException, DirectoryException, ConfigException, CanceledOperationException, LDIFException {
 		EmbeddedOpenDS.startServer();

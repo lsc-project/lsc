@@ -55,7 +55,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.ModificationItem;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -81,7 +82,7 @@ public class JndiModifications {
     private String taskName;
 
     /* Logger */
-    private static Logger LOGGER = Logger.getLogger(JndiModifications.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(JndiModifications.class);
     
     /**
      * Standard constructor.

@@ -57,7 +57,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Main launching class This is the main wrapper for generic launcher.
@@ -67,7 +68,7 @@ import org.apache.log4j.Logger;
  */
 public final class Launcher {
     /** The local LOG4J logger. */
-    private static final Logger LOGGER = Logger.getLogger(Launcher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Launcher.class);
 
     /** List of the synchronizing types. */
     private List<String> syncType;

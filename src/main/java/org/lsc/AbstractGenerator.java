@@ -59,7 +59,8 @@ import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiServices;
 
 
@@ -71,7 +72,7 @@ import org.lsc.jndi.JndiServices;
 public abstract class AbstractGenerator {
     /** This is the local logger. */
     public static final Logger LOGGER = 
-        Logger.getLogger(AbstractGenerator.class);
+        LoggerFactory.getLogger(AbstractGenerator.class);
 
     /** Where to store generated classes. */
     private String destination;

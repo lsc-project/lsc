@@ -57,7 +57,8 @@ import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.AbstractGenerator;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.parser.LdapAttributeType;
@@ -71,7 +72,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
     /** This is the local logger. */
     public static final Logger LOGGER = 
-        Logger.getLogger(AbstractGenerator.class);
+        LoggerFactory.getLogger(AbstractGenerator.class);
 
     /** This is the list of object classes available in the directory. */
     private List<String> objectClasses;

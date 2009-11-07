@@ -56,7 +56,8 @@ import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
 import org.lsc.beans.AbstractBean;
@@ -73,7 +74,7 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  */
 public abstract class AbstractJdbcService implements ISrcService {
 
-	protected static Logger LOGGER = Logger.getLogger(AbstractJdbcService.class);
+	protected static Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
 	
 	protected SqlMapClient sqlMapper;
 	

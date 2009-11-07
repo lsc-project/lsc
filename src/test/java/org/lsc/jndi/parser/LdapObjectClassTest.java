@@ -49,8 +49,10 @@ import java.util.HashMap;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.jndi.parser.LdapAttributeType;
 import org.lsc.jndi.parser.LdapObjectClass;
 
@@ -66,7 +68,7 @@ public class LdapObjectClassTest extends TestCase {
     }
 
     public final void testParsing() {
-        Logger.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
+        LoggerFactory.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
         assertNotNull(LdapObjectClass.parse(
                 "( 1.3.6.1.4.1.7135.1.3.201.1.4.1.14 NAME 'objectclassToTest' DESC 'ObjectClass to test' SUP ( firstAttribute $ secondAttribute $ thirdAttribute $ organizationalUnit ) STRUCTURAL MUST ( description $ domaineMessagerie ) MAY ( adressePrincipaleService $ facsimileTelephoneNumber $ labeledURI $ mail $ mailLocalAddress $ mailRoutingAddress $ telephoneNumber ) )",
                 new HashMap<String, LdapAttributeType>()));

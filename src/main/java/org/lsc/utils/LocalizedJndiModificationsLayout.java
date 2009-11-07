@@ -60,9 +60,12 @@ import javax.naming.directory.ModificationItem;
 import javax.naming.ldap.LdapName;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.spi.LoggingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
@@ -75,7 +78,7 @@ import org.lsc.jndi.JndiModifications;
 public class LocalizedJndiModificationsLayout extends PatternLayout {
 
     /* The logger */
-    private static final Logger LOGGER = Logger.getLogger(LocalizedJndiModificationsLayout.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizedJndiModificationsLayout.class);
 	
     /* The separator of the log operations */
     protected static String LOG_OPERATIONS_SEPARATOR = ",";

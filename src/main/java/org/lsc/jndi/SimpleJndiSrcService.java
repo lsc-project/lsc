@@ -52,7 +52,8 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 import org.lsc.service.ISrcService;
@@ -69,7 +70,7 @@ import org.lsc.service.ISrcService;
 public class SimpleJndiSrcService extends AbstractSimpleJndiService implements ISrcService {
 
 	/** The local LOG4J logger. */
-	private static final Logger LOGGER = Logger.getLogger(SimpleJndiSrcService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiSrcService.class);
 
 	/**
 	 * Constructor adapted to the context properties and the bean class name

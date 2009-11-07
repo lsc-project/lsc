@@ -67,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
 public final class Launcher {
-    /** The local LOG4J logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Launcher.class);
 
     /** List of the synchronizing types. */

@@ -92,7 +92,6 @@ public abstract class AbstractBean implements IBean {
         localMethods = new HashMap<String, List<Method>>();
     }
 
-    /** The local LOG4J logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBean.class);
 
     /** The accessor getter prefix. */

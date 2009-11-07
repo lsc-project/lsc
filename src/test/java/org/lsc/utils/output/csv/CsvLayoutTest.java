@@ -47,6 +47,7 @@ package org.lsc.utils.output.csv;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import java.util.ArrayList;
@@ -63,20 +64,44 @@ import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
 /**
- * Test CSV layout for log4j.
+ * Test CSV layout for sfl4j.
  * 
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class CsvLayoutTest extends TestCase {
 
-	public final void testParameterHandling() {
-		CsvLayout layout = new CsvLayout();
+	private LoggerContext lc = new LoggerContext();
+	private Logger logger = lc.getLogger(CsvLayout.class);
 
-		// set some initial options and activate them
+	private ILoggingEvent makeLoggingEvent(String message, Object object) {
+		return new LoggingEvent("org.lsc",
+						logger, Level.INFO, message,
+						new Exception(), new Object[]{object});
+	}
+
+	private CsvLayout getDefaultOptionsLayout() {
+		CsvLayout layout = new CsvLayout();
 		layout.setSeparator(";");
 		layout.setLogOperation("create");
 		layout.setTaskNames("testTask,otherTestTask");
 		layout.setAttrs("givenName;sn;dn;;cn");
+		layout.start();
+		return layout;
+	}
+
+	private JndiModifications makeJndiModifications(JndiModificationType type, String task) {
+		JndiModifications jm = new JndiModifications(type, task);
+		jm.setDistinguishName("cn=test,o=testing");
+		List<ModificationItem> mi = new ArrayList<ModificationItem>();
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Jon")));
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "Tester CN")));
+		jm.setModificationItems(mi);
+		return jm;
+	}
+
+	public void testParameterHandling() {
+		// set some initial options and activate them
+		CsvLayout layout = getDefaultOptionsLayout();
 
 		// test that all attributes passed as a string have been interpreted
 		assertEquals(5, layout.attributes.size());
@@ -93,69 +118,64 @@ public class CsvLayoutTest extends TestCase {
 		// test that all task names passed as a string have been interpreted		
 		assertEquals(1, layout.operations.size());
 		assertEquals(true, layout.operations.contains(JndiModificationType.ADD_ENTRY));
+	}
 
-		// test logging
-		ILoggingEvent event = new LoggingEvent("dunno", 
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO,
-						"random string",
-						new UnknownError(),
-						new Object[0]);
+	public void testEmptyLogging() {
+		CsvLayout layout = getDefaultOptionsLayout();
+		ILoggingEvent event = makeLoggingEvent("random string", null);		
 		assertEquals("", layout.doLayout(event));
+	}
+
+	public void testBasicLogging() {
+		CsvLayout layout = getDefaultOptionsLayout();
 
 		// create a JndiModifications object to test logging
-		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
-		jm.setDistinguishName("cn=test,o=testing");
-		List<ModificationItem> mi = new ArrayList<ModificationItem>();
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Jon")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "Tester CN")));
-		jm.setModificationItems(mi);
+		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
 
 		// test simple logging of the modifications for a valid task
-		event = new LoggingEvent("dunno", 
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO,
-						jm.toString(),
-						new UnknownError(),
-						new Object[] { jm });
+		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("Jon;;cn=test,o=testing;;Tester CN\n", layout.doLayout(event));
+	}
+
+	public void testExcludedTaskLogging() {
+		CsvLayout layout = getDefaultOptionsLayout();
 
 		// change the task name to test logging a modification for an excluded task
-		jm.setTaskName("notInList");
+		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "notInList");
 
-		event = new LoggingEvent("dunno",
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO, jm.toString(), new UnknownError(), new Object[] { jm });
+		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("", layout.doLayout(event));
+	}
+
+	public void testExcludedOperationLogging() {
+		CsvLayout layout = getDefaultOptionsLayout();
 
 		// go back to a valid task, but try an excluded operation
-		jm.setTaskName("otherTestTask");
-		jm.setOperation(JndiModificationType.MODIFY_ENTRY);
-
-		event = new LoggingEvent("dunno", 
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO, jm.toString(), new UnknownError(), new Object[] { jm });
+		JndiModifications jm = makeJndiModifications(JndiModificationType.MODIFY_ENTRY, "testTask");
+		
+		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("", layout.doLayout(event));
+	}
+
+	public void testHeader() {
+		CsvLayout layout = getDefaultOptionsLayout();
 
 		// change options and reactivate them
 		layout.setLogOperation("create,update");
 		layout.setSeparator("%");
 		layout.setAttrs("givenName%sn%dn%%cn");
 		layout.setOutputHeader(true);
+		layout.start();
+
+		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
 
 		// log one line to check that the outputHeader is prepended
-		event = new LoggingEvent("dunno",
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO, jm.toString(), new UnknownError(), new Object[] { jm });
+		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("givenName%sn%dn%%cn\n", layout.getHeader());
-		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n",
-						 layout.doLayout(event));
-
-		// log the same line again to check that the outputHeader is not logged again
-		event = new LoggingEvent("dunno",
-						(Logger) LoggerFactory.getLogger(CsvLayoutTest.class),
-						Level.INFO, jm.toString(), new UnknownError(), new Object[] { jm });
 		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.doLayout(event));
 
+		// log the same line again to check that the outputHeader is not logged again
+		event = makeLoggingEvent(jm.toString(), jm);
+		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.doLayout(event));
 	}
 }

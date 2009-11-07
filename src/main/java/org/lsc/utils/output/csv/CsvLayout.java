@@ -115,7 +115,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		String result = "";
 
 
-		if (messages.length > 0) {
+		if (null != messages && messages.length > 0) {
 			Object message = messages[0];
 
 			if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {

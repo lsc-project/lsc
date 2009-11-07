@@ -82,7 +82,6 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
      */
     private Class<AbstractBean> beanClass;
 
-    /** The local LOG4J logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiDstService.class);
 
     /**

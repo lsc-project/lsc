@@ -93,7 +93,6 @@ public class LdapObjectClass {
 	/** List of multi valued attributes. */
 	private List<String> multiAttrs;
 
-	/** The local LOG4J logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdapAttributeType.class);
 
 	/**

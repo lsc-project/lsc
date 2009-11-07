@@ -97,7 +97,6 @@ public final class JndiServices {
     /** Default LDAP filter. */
     public static final String DEFAULT_FILTER = "objectClass=*";
 
-    /** the Log4J instance. */
     private static final Logger LOGGER = LoggerFactory.getLogger(JndiServices.class);
 
     /** the ldap ctx. */

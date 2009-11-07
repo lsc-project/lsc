@@ -69,9 +69,6 @@ import org.lsc.service.ISrcService;
  */
 public class SimpleJndiSrcService extends AbstractSimpleJndiService implements ISrcService {
 
-	/** The local LOG4J logger. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiSrcService.class);
-
 	/**
 	 * Constructor adapted to the context properties and the bean class name
 	 * to instantiate.

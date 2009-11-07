@@ -80,7 +80,6 @@ import org.lsc.beans.AbstractBean;
  */
 public abstract class AbstractSimpleJndiService {
 
-	/** This is the local LOG4J logger. */
 	protected static final Logger LOGGER = LoggerFactory.
 					getLogger(AbstractSimpleJndiService.class);
 

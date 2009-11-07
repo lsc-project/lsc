@@ -111,7 +111,6 @@ public class LdapAttributeType {
 	/** The ordering rule applying to this attribute - or null. */
 	private String orderingRule;
 
-	/** The local LOG4J logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdapAttributeType.class);
 
 	/**

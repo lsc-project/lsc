@@ -57,110 +57,107 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.mozilla.javascript.NativeJavaObject;
 
-
 /**
  * Based on rhino, this class is able to understand your LQL requests.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class ScriptableObject {
-    /** The local static LOG4J logger. */
-    private static final Logger LOGGER = 
-	LoggerFactory.getLogger(ScriptableObject.class);
-    
-    @SuppressWarnings("unchecked")
-    public List<String> wrap(String methodName, final Object a, final Object b,
-                              boolean listable) throws NamingException {
-        Method method = null;
 
-        try {
-            List<String> aList = getList(a);
-            List<String> bList = getList(b);
+	private static final Logger LOGGER =
+					LoggerFactory.getLogger(ScriptableObject.class);
 
-            if (listable) {
-                method = this.getClass()
-                             .getDeclaredMethod( methodName, List.class, List.class );
+	@SuppressWarnings("unchecked")
+	public List<String> wrap(String methodName, final Object a, final Object b,
+					boolean listable) throws NamingException {
+		Method method = null;
 
-                return (List<String>) method.invoke(this, aList, bList );
-            } else {
-                if ((aList == null) || (bList == null)) {
-                    return null;
-                }
+		try {
+			List<String> aList = getList(a);
+			List<String> bList = getList(b);
 
-                method = this.getClass()
-                             .getDeclaredMethod(methodName, String.class, String.class);
+			if (listable) {
+				method = this.getClass().getDeclaredMethod(methodName, List.class, List.class);
 
-                List<String> results = new ArrayList<String>();
-                Iterator<String> aListIter = aList.iterator();
+				return (List<String>) method.invoke(this, aList, bList);
+			} else {
+				if ((aList == null) || (bList == null)) {
+					return null;
+				}
 
-                while (aListIter.hasNext()) {
-                    String aValue = aListIter.next();
-                    Iterator<String> bListIter = bList.iterator();
+				method = this.getClass().getDeclaredMethod(methodName, String.class, String.class);
 
-                    while (bListIter.hasNext()) {
-                        String bValue = bListIter.next();
-                        List<String> res = (List<String>) method.invoke(this, aValue, bValue);
+				List<String> results = new ArrayList<String>();
+				Iterator<String> aListIter = aList.iterator();
 
-                        if (res != null) {
-                            results.addAll(res);
-                        }
-                    }
-                }
+				while (aListIter.hasNext()) {
+					String aValue = aListIter.next();
+					Iterator<String> bListIter = bList.iterator();
 
-                return results;
-            }
-        } catch (SecurityException e) {
-            LOGGER.error("Programmatic error : " + e, e);
-        } catch (NoSuchMethodException e) {
-            LOGGER.error("Programmatic error : " + e, e);
-        } catch (IllegalArgumentException e) {
-            LOGGER.error("Programmatic error : " + e, e);
-        } catch (IllegalAccessException e) {
-            LOGGER.error("Programmatic error : " + e, e);
-        } catch (InvocationTargetException e) {
-            LOGGER.error("Programmatic error : " + e, e);
-        }
+					while (bListIter.hasNext()) {
+						String bValue = bListIter.next();
+						List<String> res = (List<String>) method.invoke(this, aValue, bValue);
 
-        return null;
-    }
+						if (res != null) {
+							results.addAll(res);
+						}
+					}
+				}
 
-    /**
-     * Convert objects to Strings list
-     *
-     * @param a the original object
-     *
-     * @return the strings list
-     */
-    @SuppressWarnings("unchecked")
-    public List<String> getList(final Object a) {
-        List<String> aList = null;
+				return results;
+			}
+		} catch (SecurityException e) {
+			LOGGER.error("Programmatic error : " + e, e);
+		} catch (NoSuchMethodException e) {
+			LOGGER.error("Programmatic error : " + e, e);
+		} catch (IllegalArgumentException e) {
+			LOGGER.error("Programmatic error : " + e, e);
+		} catch (IllegalAccessException e) {
+			LOGGER.error("Programmatic error : " + e, e);
+		} catch (InvocationTargetException e) {
+			LOGGER.error("Programmatic error : " + e, e);
+		}
 
-        if (a == null) {
-            return null;
-        } else if (String.class.isAssignableFrom(a.getClass())) {
-            aList = new ArrayList<String>();
-            aList.add((String) a);
+		return null;
+	}
 
-            return aList;
-        } else if (List.class.isAssignableFrom(a.getClass())) {
-            aList = (List<String>) a;
+	/**
+	 * Convert objects to Strings list
+	 *
+	 * @param a the original object
+	 *
+	 * @return the strings list
+	 */
+	@SuppressWarnings("unchecked")
+	public List<String> getList(final Object a) {
+		List<String> aList = null;
 
-            return aList;
-        } else if (NativeJavaObject.class.isAssignableFrom(a.getClass())) {
-            aList = getList(((NativeJavaObject) a).unwrap());
+		if (a == null) {
+			return null;
+		} else if (String.class.isAssignableFrom(a.getClass())) {
+			aList = new ArrayList<String>();
+			aList.add((String) a);
 
-            return aList;
-        }
+			return aList;
+		} else if (List.class.isAssignableFrom(a.getClass())) {
+			aList = (List<String>) a;
 
-        return null;
-    }
+			return aList;
+		} else if (NativeJavaObject.class.isAssignableFrom(a.getClass())) {
+			aList = getList(((NativeJavaObject) a).unwrap());
 
-    public List<String> wrapList(String methodName, final Object a, final Object b)
-                           throws NamingException {
-        return wrap(methodName, a, b, true);
-    }
+			return aList;
+		}
 
-    public List<String> wrapString(String methodName, final Object a, final Object b)
-                             throws NamingException {
-        return wrap(methodName, a, b, false);
-    }
+		return null;
+	}
+
+	public List<String> wrapList(String methodName, final Object a, final Object b)
+					throws NamingException {
+		return wrap(methodName, a, b, true);
+	}
+
+	public List<String> wrapString(String methodName, final Object a, final Object b)
+					throws NamingException {
+		return wrap(methodName, a, b, false);
+	}
 }

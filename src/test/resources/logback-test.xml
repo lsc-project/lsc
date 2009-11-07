@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+  <!--Errors were reported during translation.-->
+  <!--Could not find transformer for org.lsc.utils.LocalizedJndiModificationsLayout-->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <layout class="org.lsc.utils.LocalizedJndiModificationsLayout">
+      <ConversionPattern>%-4r [%t] %-5p %l - %m%n</ConversionPattern>
+    </layout>
+  </appender>
+  <root level="DEBUG">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>

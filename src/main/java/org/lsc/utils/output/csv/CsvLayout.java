@@ -77,7 +77,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/* The separator of the log operations */
 	protected static String OPTIONS_SEPARATOR = ",";
 
-	/* Configurations from the log4j.properties */
+	/* Configurations from the log configuration */
 	private String logOperations;
 	private String attrs;
 	private String separator = DEFAULT_SEPARATOR;
@@ -104,7 +104,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 *
 	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
 	 *
-	 * @see org.apache.log4j.PatternLayout#format(org.apache.log4j.spi.LoggingEvent)
 	 */
 	@Override
 	public String doLayout(ILoggingEvent event) {
@@ -164,7 +163,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/**
 	 * Parse options
 	 *
-	 * @see org.apache.log4j.Layout#activateOptions()
 	 */
 	@Override
 	public void start() {
@@ -202,7 +200,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 			}
 		} else {
 			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the " +
-							"log4j.appender.NAME.layout.attrs property.");
+							"attrs property in the logback configuration file");
 		}
 
 		/* Parse task names to log for */

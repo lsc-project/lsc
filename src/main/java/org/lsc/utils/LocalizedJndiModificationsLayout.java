@@ -68,7 +68,7 @@ import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
 /**
- * Provides a localized Log4J layout for LDAP entries.
+ * Provides a localized logback layout for LDAP entries.
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
@@ -339,7 +339,6 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	/**
 	 * Parse options
 	 *
-	 * @see org.apache.log4j.Layout#activateOptions()
 	 */
 	@Override
 	public void start() {

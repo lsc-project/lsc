@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.LayoutBase;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -71,132 +73,123 @@ import org.lsc.jndi.JndiModifications;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LocalizedJndiModificationsLayout extends PatternLayout {
+public class LocalizedJndiModificationsLayout extends LayoutBase<ILoggingEvent> {
 
-    /* The logger */
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizedJndiModificationsLayout.class);
-	
-    /* The separator of the log operations */
-    protected static String LOG_OPERATIONS_SEPARATOR = ",";
-    
-    /* Configurations from the log4j.properties */
-    private String logOperation;
-    
-    /* The operations to log */
-    protected Set<JndiModificationType> operations;
-	
-    /**
-     * Default constructor.
-     */
-    public LocalizedJndiModificationsLayout() {
-        super();
-        activateOptions();
-    }
+	/* The logger */
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizedJndiModificationsLayout.class);
 
-    /**
-     * Format the logging event. This formatter will use the default formatter
-     * or a LDIF pretty printer
-     * 
-     * @param le
-     *            the logging event to format
-     * @return the formatted string
-     */
-    public final String format(final LoggingEvent le) {
-        Object message = le.getMessage();
-        String msg = "";
+	/* The separator of the log operations */
+	protected static String LOG_OPERATIONS_SEPARATOR = ",";
 
-        if (message == null || !(JndiModifications.class.isAssignableFrom(message.getClass()))) {
-            if(!onlyLdif) {
-                msg = super.format(le);
-            }
-        } else {
-            JndiModifications jm = (JndiModifications) message;
+	/* The operations to log */
+	protected Set<JndiModificationType> operations;
 
-            if(operations.contains(jm.getOperation())) {
-            	StringBuffer msgBuffer = new StringBuffer();
-	            String baseUrl = (String) Configuration.getDstProperties().get(
-	            "java.naming.provider.url");
-	            baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
-	            String dn = "";
-	            if (jm.getDistinguishName() != null
-	                    && jm.getDistinguishName().length() > 0) {
-	                dn = jm.getDistinguishName();
-	                if (!dn.endsWith(baseUrl)) {
-	                    dn += "," + baseUrl;
-	                }
-	            } else {
-	                dn = baseUrl;
-	            }
-	            
-	            // print dn and base64 encode if it's not a SAFE-STRING
-	            msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
-	            
-	            switch (jm.getOperation()) {
-	            case ADD_ENTRY:
-	            	msgBuffer.append("changetype: add\n" + listToLdif(jm.getModificationItems(), true));
-	                break;
-	            case MODRDN_ENTRY:
-	                LdapName ln;
-	                try {
-	                    ln = new LdapName(jm.getNewDistinguishName());
-	                    msgBuffer.append("changetype: modrdn\nnewrdn: " + ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " + ln.getSuffix(1) + "\n");
-	                } catch (InvalidNameException e) {
-	                	msgBuffer.append("changetype: modrdn\nnewrdn: " + jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " + jm.getNewDistinguishName() + "," + baseUrl + "\n");
-	                }
-	                break;
-	            case MODIFY_ENTRY:
-	            	msgBuffer.append("changetype: modify\n" + listToLdif(jm.getModificationItems(), false));
-	                break;
-	            case DELETE_ENTRY:
-	            	msgBuffer.append("changetype: delete\n");
-	                break;
-	            default:
-	            }
-	            
-	            msgBuffer.append("\n");	            
-	            msg = msgBuffer.toString();
-            }
-        }
-        return msg;
-    }
+	/**
+	 * Default constructor.
+	 */
+	public LocalizedJndiModificationsLayout() {
+		super();
+	}
 
-    /**
-     * Pretty print the modification items.
-     * 
-     * @param modificationItems
-     *            the modification items to pretty print
-     * @param addEntry
-     *            is this a new entry
-     * @return the string to log
-     */
-    private String listToLdif(final List<?> modificationItems,
-            final boolean addEntry) {
-        StringBuffer sb = new StringBuffer();
-        Iterator<?> miIter = modificationItems.iterator();
-        boolean first = true;
-        
-        while (miIter.hasNext()) {
-            ModificationItem mi = (ModificationItem) miIter.next();
-            Attribute attr = mi.getAttribute();
-            try {
-                if (!addEntry) {
-                    if (!first) {
-                        sb.append("-\n");
-                    }
-                    switch (mi.getModificationOp()) {
-                    case DirContext.REMOVE_ATTRIBUTE:
-                        sb.append("delete: ").append(attr.getID()).append("\n");
-                        break;
-                    case DirContext.REPLACE_ATTRIBUTE:
-                        sb.append("replace: ").append(attr.getID()).append("\n");
-                        break;
-                    case DirContext.ADD_ATTRIBUTE:
-                    default:
-                        sb.append("add: ").append(attr.getID()).append("\n");
-                    }
-                }
-                NamingEnumeration<?> ne = attr.getAll();
-                while (ne.hasMore()) {
+	/**
+	 * Format the logging event. This formatter will use the default formatter
+	 * or a LDIF pretty printer
+	 *
+	 * @param le
+	 *            the logging event to format
+	 * @return the formatted string
+	 */
+	public final String doLayout(final ILoggingEvent le) {
+		Object message = le.getMessage();
+		String msg = "";
+
+		if (message != null && JndiModifications.class.isAssignableFrom(message.getClass())) {
+			JndiModifications jm = (JndiModifications) message;
+
+			if (operations.contains(jm.getOperation())) {
+				StringBuffer msgBuffer = new StringBuffer();
+				String baseUrl = (String) Configuration.getDstProperties().get(
+								"java.naming.provider.url");
+				baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
+				String dn = "";
+				if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
+					dn = jm.getDistinguishName();
+					if (!dn.endsWith(baseUrl)) {
+						dn += "," + baseUrl;
+					}
+				} else {
+					dn = baseUrl;
+				}
+
+				// print dn and base64 encode if it's not a SAFE-STRING
+				msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
+
+				switch (jm.getOperation()) {
+					case ADD_ENTRY:
+						msgBuffer.append("changetype: add\n" + listToLdif(jm.getModificationItems(), true));
+						break;
+					case MODRDN_ENTRY:
+						LdapName ln;
+						try {
+							ln = new LdapName(jm.getNewDistinguishName());
+							msgBuffer.append("changetype: modrdn\nnewrdn: " + ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " + ln.getSuffix(1) + "\n");
+						} catch (InvalidNameException e) {
+							msgBuffer.append("changetype: modrdn\nnewrdn: " + jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " + jm.getNewDistinguishName() + "," + baseUrl + "\n");
+						}
+						break;
+					case MODIFY_ENTRY:
+						msgBuffer.append("changetype: modify\n" + listToLdif(jm.getModificationItems(), false));
+						break;
+					case DELETE_ENTRY:
+						msgBuffer.append("changetype: delete\n");
+						break;
+					default:
+				}
+
+				msgBuffer.append("\n");
+				msg = msgBuffer.toString();
+			}
+		}
+		return msg;
+	}
+
+	/**
+	 * Pretty print the modification items.
+	 *
+	 * @param modificationItems
+	 *            the modification items to pretty print
+	 * @param addEntry
+	 *            is this a new entry
+	 * @return the string to log
+	 */
+	private String listToLdif(final List<?> modificationItems,
+					final boolean addEntry) {
+		StringBuffer sb = new StringBuffer();
+		Iterator<?> miIter = modificationItems.iterator();
+		boolean first = true;
+
+		while (miIter.hasNext()) {
+			ModificationItem mi = (ModificationItem) miIter.next();
+			Attribute attr = mi.getAttribute();
+			try {
+				if (!addEntry) {
+					if (!first) {
+						sb.append("-\n");
+					}
+					switch (mi.getModificationOp()) {
+						case DirContext.REMOVE_ATTRIBUTE:
+							sb.append("delete: ").append(attr.getID()).append("\n");
+							break;
+						case DirContext.REPLACE_ATTRIBUTE:
+							sb.append("replace: ").append(attr.getID()).append("\n");
+							break;
+						case DirContext.ADD_ATTRIBUTE:
+						default:
+							sb.append("add: ").append(attr.getID()).append("\n");
+					}
+				}
+				NamingEnumeration<?> ne = attr.getAll();
+				while (ne.hasMore()) {
 					// print attribute name
 					sb.append(attr.getID());
 
@@ -208,27 +201,23 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 					// new line
 					sb.append("\n");
 				}
-            } catch (NamingException e) {
-                sb.append(attr.getID()).append(": ").append("!!! Unable to print value !!!\n");
-            }
-            first = false;
-        }
-        return sb.toString();
-    }
+			} catch (NamingException e) {
+				sb.append(attr.getID()).append(": ").append("!!! Unable to print value !!!\n");
+			}
+			first = false;
+		}
+		return sb.toString();
+	}
 
 	private String getStringValue(Object value) {
-		if (value instanceof byte[])
-		{
+		if (value instanceof byte[]) {
 			return new String((byte[]) value);
-		}
-		else
-		{
+		} else {
 			return value.toString();
 		}
 	}
 
-	private String toBase64(String value)
-	{
+	private String toBase64(String value) {
 		return new String(new Base64().encode(value.getBytes()));
 	}
 
@@ -252,14 +241,11 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	 *            The character to test
 	 * @return true if char is a SAFE-CHAR, false otherwise
 	 */
-	private boolean isLdifSafeChar(char c)
-	{
-		if ((int) c > 127)
-		{
+	private boolean isLdifSafeChar(char c) {
+		if ((int) c > 127) {
 			return false;
 		}
-		switch ((int) c)
-		{
+		switch ((int) c) {
 			case 0x00: // NUL
 			case 0x0A: // LF
 			case 0x0D: // CR
@@ -292,14 +278,11 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	 *            The character to test
 	 * @return true if char is SAFE-INIT-CHAR, false otherwise
 	 */
-	private boolean isLdifSafeInitChar(char c)
-	{
-		if ((int) c > 127)
-		{
+	private boolean isLdifSafeInitChar(char c) {
+		if ((int) c > 127) {
 			return false;
 		}
-		switch ((int) c)
-		{
+		switch ((int) c) {
 			case 0x00: // NUL
 			case 0x0A: // LF
 			case 0x0D: // CR
@@ -329,19 +312,15 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 	 *            The string to test
 	 * @return true if is a SAFE-STRING, false otherwise
 	 */
-	private boolean isLdifSafeString(String s)
-	{
+	private boolean isLdifSafeString(String s) {
 		// check if first character is a SAFE-INIT-CHAR
-		if (s.length() > 0 && !isLdifSafeInitChar(s.charAt(0)))
-		{
+		if (s.length() > 0 && !isLdifSafeInitChar(s.charAt(0))) {
 			return false;
 		}
 
 		// fail if any subsequent characters are not SAFE-CHARs
-		for (int i = 1; i < s.length(); i++)
-		{
-			if (!isLdifSafeChar(s.charAt(i)))
-			{
+		for (int i = 1; i < s.length(); i++) {
+			if (!isLdifSafeChar(s.charAt(i))) {
 				return false;
 			}
 		}
@@ -349,66 +328,47 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 		// if we got here, there are no bad chars
 		return true;
 	}
-    
-    /**
-     * Parse options
-     * 
-     * @see org.apache.log4j.Layout#activateOptions()
-     */
-    @Override
-    public void activateOptions() {
-        /* Parse logOperations */
-        operations = new HashSet<JndiModificationType>();
-        if(logOperation != null) {
-            /* We only add valid options */
-            StringTokenizer st = new StringTokenizer(logOperation, LOG_OPERATIONS_SEPARATOR);
-            String token = null;
-            for (int i = 0 ; st.hasMoreTokens() ; i++) {
-                token = st.nextToken().toLowerCase();
-                JndiModificationType op = JndiModificationType.getFromDescription(token);
-                if(op != null) {
-                    operations.add(op);
-                } else {
-                    LOGGER.error("Invalid operation in the LDIF logger (" + token + ")");                    
-                }
-            }
-        } else { 
-            /* Add all the operations */
-            JndiModificationType[] values = JndiModificationType.values();
-            for (int i = 0; i < values.length; i++) {
-                operations.add(values[i]);
-            }
-        }
-    }
-    
-    private boolean onlyLdif = false;
+	
+	private boolean onlyLdif = false;
 
-    /**
-     * @return the onlyLdif
-     */
-    public boolean isOnlyLdif() {
-        return onlyLdif;
-    }
+	/**
+	 * @return the onlyLdif
+	 */
+	public boolean isOnlyLdif() {
+		return onlyLdif;
+	}
 
-    /**
-     * @param onlyLdif the onlyLdif to set
-     */
-    public void setOnlyLdif(boolean onlyLdif) {
-        this.onlyLdif = onlyLdif;
-    }
-    
-    /**
-     * @return the logOperation
-     */
-    public String getLogOperation() {
-        return logOperation;
-    }
+	/**
+	 * @param onlyLdif the onlyLdif to set
+	 */
+	public void setOnlyLdif(boolean onlyLdif) {
+		this.onlyLdif = onlyLdif;
+	}
 
-    /**
-     * @param logOperation the logOperation to set
-     */
-    public void setLogOperation(String logOperation) {
-        this.logOperation = logOperation;
-    }
-
+	/**
+	 * @param logOperation the logOperation to set
+	 */
+	public void setLogOperation(String logOperation) {
+		operations = new HashSet<JndiModificationType>();
+		if (logOperation != null) {
+			/* We only add valid options */
+			StringTokenizer st = new StringTokenizer(logOperation, LOG_OPERATIONS_SEPARATOR);
+			String token = null;
+			for (int i = 0; st.hasMoreTokens(); i++) {
+				token = st.nextToken().toLowerCase();
+				JndiModificationType op = JndiModificationType.getFromDescription(token);
+				if (op != null) {
+					operations.add(op);
+				} else {
+					LOGGER.error("Invalid operation in the LDIF logger (" + token + ")");
+				}
+			}
+		} else {
+			/* Add all the operations */
+			JndiModificationType[] values = JndiModificationType.values();
+			for (int i = 0; i < values.length; i++) {
+				operations.add(values[i]);
+			}
+		}
+	}
 }

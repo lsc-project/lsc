@@ -6,22 +6,22 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
 
- *Â  Â  * Redistributions of source code must retain the above copyright
+ *Ê Ê * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * Â  Â  * Redistributions in binary form must reproduce the above copyright
+ * Ê Ê * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * Â  Â  * Neither the name of the LSC Project nor the names of its
+ * Ê Ê * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -60,8 +60,6 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
@@ -69,39 +67,42 @@ import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.SetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bean comparison to generate the JndiModification array
- * 
- * This class is used to generate the modifications to be applied to the 
+ *
+ * This class is used to generate the modifications to be applied to the
  * directory according the differences between two beans.
- * 
+ *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
  */
 
 public final class BeanComparator {
 
-    /** 
+    /**
      * This class must not be called as an instance.
      */
     private BeanComparator() {}
 
+    /** LOG4J local logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
     /**
      * Static method to return the kind of operation that would happen
-     * 
+     *
      * @param syncOptions SyncOptions object from properties
      * @param srcBean Bean from source
      * @param dstBean JNDI bean
      * @return JndiModificationType the modification type that would happen
-     * @throws CloneNotSupportedException 
+     * @throws CloneNotSupportedException
      */
     public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
     	// clone the source bean
     	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
-    	
+
     	if (itmBean == null && dstBean == null) {
     		return null;
     	} else if (itmBean == null && dstBean != null) {
@@ -118,14 +119,14 @@ public final class BeanComparator {
     		}
     	}
     }
-    
+
     /**
      * Static comparison method.
-     * 
-     * By default, source information override destination 
+     *
+     * By default, source information override destination
      * (i.e. Database => Directory) But if a piece of information is
      * present only in the destination, it remains
-     * 
+     *
      * @param srcBean Source bean from JDBC or JNDI
      * @param destBean JNDI bean
      * @return modifications to apply to the directory
@@ -133,7 +134,7 @@ public final class BeanComparator {
      * access error is encountered
      * @deprecated
      */
-    public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean, 
+    public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
             Object customLibrary)	throws NamingException, CloneNotSupportedException {
 
     	// this method is deprecated so no need for optimizations
@@ -141,12 +142,12 @@ public final class BeanComparator {
     	boolean condition = true;
     	return calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
     }
-    
+
 	/**
 	 * Static comparison method. By default, source information override
 	 * destination (i.e. Database => Directory) But if a piece of information is
 	 * present only in the destination, it remains
-	 * 
+	 *
 	 * @param srcBean
 	 *            Source bean
 	 * @param dstBean
@@ -238,7 +239,7 @@ public final class BeanComparator {
 	/**
 	 * Compare attributes and values to build a list of modifications to apply
 	 * to the destination for one object.
-	 * 
+	 *
 	 * @param modOperation
 	 *            Operation to be done on the entry (should only be of type ADD or MODIFY)
 	 * @param syncOptions
@@ -394,13 +395,13 @@ public final class BeanComparator {
 	 * Return the operation to perform on a set of current values, so that they
 	 * match the set of values wanted.
 	 * </P>
-	 * 
+	 *
 	 * <P>
 	 * The result returned is an integer representing the operation type from
 	 * DirContext: ADD_ATTRIBUTE, REPLACE_ATTRIBUTE or REMOVE_ATTRIBUTE. As a
 	 * convention, a return value of 0 means "do nothing".
 	 * </P>
-	 * 
+	 *
 	 * @param toSetAttrValues
 	 *            Target set of values
 	 * @param currentAttrValues
@@ -430,7 +431,7 @@ public final class BeanComparator {
 	 * defined, then the list of attributes returned contains all source
 	 * attributes, and all force valued/default valued/create valued attributes.
 	 * </P>
-	 * 
+	 *
 	 * @param syncOptions
 	 *            Instance of {@link ISyncOptions} to provide transformation
 	 *            configuration
@@ -470,11 +471,11 @@ public final class BeanComparator {
 
 	/**
      * Check modifications across other directory objects - Never used at this time : implementation may be buggy
-     * 
+     *
      * While adding, deleting or modifying an entry, specific treatments must be done like removing a member from all
      * the remaining inscription, modifying an attribute in the person entry while the original modification has been
      * done on a inscription.
-     * 
+     *
      * @param srcBean database object bean
      * @param destBean directory object bean
      * @param jm modification to apply on the main object
@@ -499,7 +500,7 @@ public final class BeanComparator {
         }
         return new JndiModifications[] {};
     }
-        
+
     /**
 	 * <p>
 	 * Clone the source bean and return a new object that is a copy of the
@@ -509,7 +510,7 @@ public final class BeanComparator {
 	 * Always use this method for source/destination compares, and make sure to
 	 * only change the result intermediary bean, never the original source bean
 	 * </p>
-	 * 
+	 *
 	 * @param srcBean
 	 *            Original bean from source
 	 * @param syncOptions
@@ -568,7 +569,7 @@ public final class BeanComparator {
 	 * <li>Default values or create values</li>
 	 * </ul>
 	 * </P>
-	 * 
+	 *
 	 * @param attrName
 	 *            {@link String} Name of the attribute to be considered. Used to
 	 *            read default/force values from syncoptions.
@@ -632,7 +633,7 @@ public final class BeanComparator {
 				}
 			}
 		}
-		
+
 		return attrValues;
 	}
 

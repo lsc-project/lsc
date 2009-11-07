@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -68,21 +68,13 @@ public class DaoConfigTest extends TestCase {
     private Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
     /**
-     * Load the DB driver and initialize the connection.final 
-     */
-	@Override
-    public final void setUp() {
-        PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-    }
-
-    /**
      * Test the JDBC connection.
      */
     public final void testConnection() {
         try {
             Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
             pc.put("url", "jdbc:hsqldb:file:target/hsqldb/lsc");
-            
+
             /* Test loading driver */
             LOGGER.info("=> loading driver:");
             Class.forName((String) pc.get("driver")).newInstance();
@@ -117,19 +109,20 @@ public class DaoConfigTest extends TestCase {
         }
         assertNotNull(rs);
     }
-    
+
     public final void testGetSqlMapClient() {
     	// this is useless but breaks the test otherwise :)
         if(con == null) {
             testConnection();
         }
-    	
+
     	assertNotNull(DaoConfig.getSqlMapClient());
     }
 
     /**
      * Close DB connection
      */
+	@Override
     public final void tearDown() {
         try {
             con.close();

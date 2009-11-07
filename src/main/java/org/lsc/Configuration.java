@@ -45,6 +45,9 @@
  */
 package org.lsc;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -464,7 +467,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Set up configuration for the given location, including log4j.
+	 * Set up configuration for the given location, including logback.
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 * @param configurationLocation
 	 */
@@ -473,13 +476,21 @@ public class Configuration {
 			Configuration.setLocation(configurationLocation);
 		}
 
-		// setup LOG4J
-		// first, reset the configuration because LOG4J automatically loads it from properties
+		// setup LogBack
+		// first, reset the configuration because LogBack automatically loads it from xml
 		// while this may be the Java way, it's not our way, we like real text files, not JARs.
-		LogManager.resetConfiguration();
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		JoranConfigurator configurator = new JoranConfigurator();
+		configurator.setContext(context);
+		context.reset(); //reset configuration
 
-		String log4jPropertiesFile = Configuration.getConfigurationDirectory() + "log4j.properties";
-		PropertyConfigurator.configure(log4jPropertiesFile);
+		String logBackXMLPropertiesFile = Configuration.getConfigurationDirectory() + "logback.xml";
+
+		try {
+			configurator.doConfigure(logBackXMLPropertiesFile);
+		} catch (JoranException je) {
+			System.err.println("Can not find LogBack configuration file");
+		}
 
 		// WARNING: don't log anything before HERE!
 

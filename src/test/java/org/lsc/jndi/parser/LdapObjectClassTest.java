@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -58,11 +58,6 @@ import org.slf4j.LoggerFactory;
  */
 public class LdapObjectClassTest extends TestCase {
 
-	@Override
-    public final void setUp() {
-        PropertyConfigurator.configure(this.getClass().getClassLoader().getResource("log4j.properties"));
-    }
-
     public final void testParsing() {
         LoggerFactory.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
         assertNotNull(LdapObjectClass.parse(
@@ -71,5 +66,5 @@ public class LdapObjectClassTest extends TestCase {
         assertNotNull(LdapObjectClass.parse(
                 "( 1.3.6.1.4.1.3317.4.3.2.1 NAME 'radiusprofile' DESC '' SUP top AUXILIARY MUST cn MAY ( radiusArapFeatures $ radiusArapSecurity $ radiusArapZoneAccess $ radiusAuthType $ radiusCallbackId $ radiusCallbackNumber $ radiusCalledStationId $ radiusCallingStationId $ radiusClass $ radiusClientIPAddress $ radiusFilterId $ radiusFramedAppleTalkLink $ radiusFramedAppleTalkNetwork $ radiusFramedAppleTalkZone $ radiusFramedCompression $ radiusFramedIPAddress $ radiusFramedIPNetmask $ radiusFramedIPXNetwork $ radiusFramedMTU $ radiusFramedProtocol $ radiusCheckItem $ radiusReplyItem $ radiusFramedRoute $ radiusFramedRouting $ radiusIdleTimeout $ radiusGroupName $ radiusHint $ radiusHuntgroupName $ radiusLoginIPHost $ radiusLoginLATGroup $ radiusLoginLATNode $ radiusLoginLATPort $ radiusLoginLATService $ radiusLoginService $ radiusLoginTCPPort $ radiusLoginTime $ radiusPasswordRetry $ radiusPortLimit $ radiusPrompt $ radiusProxyToRealm $ radiusRealm $ radiusReplicateToRealm $ radiusServiceType $ radiusSessionTimeout $ radiusStripUserName $ radiusTerminationAction $ radiusTunnelClientEndpoint $ radiusProfileDn $ radiusSimultaneousUse $ radiusTunnelAssignmentId $ radiusTunnelMediumType $ radiusTunnelPassword $ radiusTunnelPreference $ radiusTunnelPrivateGroupId $ radiusTunnelServerEndpoint $ radiusTunnelType $ radiusUserCategory $ radiusVSA $ radiusExpiration $ dialupAccess $ radiusNASIpAddress $ radiusReplyMessage ) )",
                 new HashMap<String, LdapAttributeType>()));
-    }	
+    }
 }

@@ -45,6 +45,9 @@
  */
 package org.lsc.utils;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -100,7 +103,20 @@ public class LdapServer {
 	 * @param args parameters passed by the JRE
 	 */
 	public static void main(final String[] args) {
-		PropertyConfigurator.configure("log4j.properties");
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		JoranConfigurator configurator = new JoranConfigurator();
+		configurator.setContext(context);
+		context.reset(); //reset configuration
+
+		String logBackXMLPropertiesFile = Configuration.getConfigurationDirectory() + "logback-opends.xml";
+
+		try {
+			configurator.doConfigure(logBackXMLPropertiesFile);
+		} catch (JoranException je) {
+			System.err.println("Can not find LogBack configuration file");
+			System.exit(1);
+		}
+
 		int retCode = 1;
 		try {
 			retCode = usage(args);

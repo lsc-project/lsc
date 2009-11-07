@@ -80,10 +80,7 @@ import org.lsc.utils.LSCStructuralLogger;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public abstract class AbstractSynchronize {
-    /** Log4j configuration file. */
-    public static final String LOG4J_CONFIGURATION_FILE = "log4j.properties";
 
-    /** The local LOG4J logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
     /** List of configured options. */
@@ -118,8 +115,6 @@ public abstract class AbstractSynchronize {
      * Default constructor.
      */
     protected AbstractSynchronize() {
-        //PropertyConfigurator.configure(this.getClass().getClassLoader()
-        //        .getResource(LOG4J_CONFIGURATION_FILE));
         options = new Options();
         options.addOption("nc", "nocreate", false, "Don't create any entry");
         options.addOption("nu", "noupdate", false, "Don't update");

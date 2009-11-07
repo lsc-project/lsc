@@ -70,24 +70,23 @@ import org.lsc.jndi.JndiModifications;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LocalizedJndiModificationsLayoutTest extends TestCase
-{
+public class LocalizedJndiModificationsLayoutTest extends TestCase {
+
 	private LoggerContext lc = new LoggerContext();
 	private Logger logger = lc.getLogger(LocalizedJndiModificationsLayout.class);
 
 	private ILoggingEvent makeLoggingEvent(String message, Object object) {
 		return new LoggingEvent("org.lsc",
-			logger, Level.INFO, message,
-			new Exception(), new Object[] { object });
-  }
+						logger, Level.INFO, message,
+						new Exception(), new Object[]{object});
+	}
 
 	/**
 	 * Launch a add entry layout test.
 	 * 
 	 * @throws IOException
 	 */
-	public final void testAdd() throws IOException
-	{
+	public final void testAdd() throws IOException {
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("sn", "<non safe string>")));
@@ -107,7 +106,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		I18n.setLocale(Locale.US);
 		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
-		
+
 		jm.setDistinguishName(null);
 		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
@@ -118,8 +117,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 * 
 	 * @throws IOException
 	 */
-	public final void testModify() throws IOException
-	{
+	public final void testModify() throws IOException {
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
 		mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute("uid", "old_id")));
@@ -139,20 +137,20 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 
 		I18n.setLocale(Locale.US);
 		assertEquals("dn: dc=lsc-project,dc=org\n" +
-				"changetype: modify\n" +
-				"replace: cn\n" +
-				"cn: new_name\n" +
-				"-\n" +
-				"delete: uid\n" +
-				"uid: old_id\n" +
-				"-\n" +
-				"replace: sn\n" +
-				"sn:: w4AgbMOgIGJhcw==\n" +
-				"-\n" +
-				"add: description\n" +
-				"description:: TXVsdGktbGluZQpkZXNjcmlwdGlvbg==\n" +
-				"\n",
-				layout.doLayout(loggingEvent));
+						"changetype: modify\n" +
+						"replace: cn\n" +
+						"cn: new_name\n" +
+						"-\n" +
+						"delete: uid\n" +
+						"uid: old_id\n" +
+						"-\n" +
+						"replace: sn\n" +
+						"sn:: w4AgbMOgIGJhcw==\n" +
+						"-\n" +
+						"add: description\n" +
+						"description:: TXVsdGktbGluZQpkZXNjcmlwdGlvbg==\n" +
+						"\n",
+						layout.doLayout(loggingEvent));
 	}
 
 	/**
@@ -160,8 +158,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 * 
 	 * @throws IOException
 	 */
-	public final void testRemove() throws IOException
-	{
+	public final void testRemove() throws IOException {
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("uid=a");
 
@@ -181,8 +178,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 	 * 
 	 * @throws IOException
 	 */
-	public final void testNeutral() throws IOException
-	{
+	public final void testNeutral() throws IOException {
 		ILoggingEvent loggingEvent = makeLoggingEvent("a simple string", null);
 
 		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
@@ -192,14 +188,13 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		I18n.setLocale(Locale.US);
 		assertEquals("a simple string", layout.doLayout(loggingEvent));
 	}
-	
+
 	/**
 	 * Launch a null layout test.
 	 * 
 	 * @throws IOException
 	 */
-	public final void testNull() throws IOException
-	{
+	public final void testNull() throws IOException {
 		ILoggingEvent loggingEvent = makeLoggingEvent(null, null);
 
 
@@ -210,5 +205,4 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase
 		I18n.setLocale(Locale.US);
 		assertEquals(null, layout.doLayout(loggingEvent));
 	}
-
 }

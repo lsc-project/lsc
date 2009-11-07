@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -107,7 +107,7 @@ public final class EmbeddedOpenDS {
 	public static boolean SERVER_STARTED = false;
 
 	private static final String CONFIG_DIR = "config";
-	
+
 	private static final String CONFIG_FILE_NAME = "config.ldif";
 
 	/**
@@ -118,7 +118,7 @@ public final class EmbeddedOpenDS {
 	/**
 	 * Initialize the server. We completely override the super class server set
 	 * up.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws InitializationException
 	 * @throws URISyntaxException
@@ -197,7 +197,7 @@ public final class EmbeddedOpenDS {
 
 	/**
 	 * Sets the system context root to null.
-	 * 
+	 *
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	public static void shutdownServer(String reason) {
@@ -207,11 +207,10 @@ public final class EmbeddedOpenDS {
 
 	/**
 	 * Test main class
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PropertyConfigurator.configure("log4j.properties");
 		try {
 			startServer();
 		} catch (Exception e) {
@@ -237,11 +236,11 @@ public final class EmbeddedOpenDS {
 	 * config/upgrade/config.ldif.1834 and config/upgrade/schema.ldif.1834 :
 	 * heu... mandotory :) These files are provided if you download a standard
 	 * distrib of OpenDS.
-	 * 
+	 *
 	 * Moreover, we have to create these directories : - db/ : Directory for
 	 * Berkeley BD JE data storage - logs/ : here go logs - locks/ : here go
 	 * locks
-	 * 
+	 *
 	 * @param copyFromConfigDirectory
 	 *            : the source directory which contains config.ldif, schemas,
 	 *            upgrade
@@ -286,7 +285,7 @@ public final class EmbeddedOpenDS {
 	 * <p>
 	 * Also take a look at the makeLdif method below since this makes expressing
 	 * LDIF a little bit cleaner.
-	 * 
+	 *
 	 * @param ldif
 	 *            of the entries to parse.
 	 * @return a List of EntryS parsed from the ldif string.
@@ -316,7 +315,7 @@ public final class EmbeddedOpenDS {
 	 * <p>
 	 * Also take a look at the makeLdif method below since this makes expressing
 	 * LDIF a little bit cleaner.
-	 * 
+	 *
 	 * @return the first Entry parsed from the ldif String
 	 * @see #makeLdif
 	 */
@@ -329,25 +328,25 @@ public final class EmbeddedOpenDS {
 	 * newline character at the end of every line of LDIF in test code. This is
 	 * an admittedly small advantage, but it does make things a little easier
 	 * and less error prone. For example, this
-	 * 
+	 *
 	 * <pre>
 	 * private static final String JOHN_SMITH_LDIF = TestCaseUtils.makeLdif(
 	 * 		&quot;dn: cn=John Smith,dc=example,dc=com&quot;, &quot;objectclass: inetorgperson&quot;,
 	 * 		&quot;cn: John Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: John&quot;);
-	 * 
+	 *
 	 * </pre>
-	 * 
+	 *
 	 * is a <bold>little</bold> easier to work with than
-	 * 
+	 *
 	 * <pre>
 	 * private static final String JOHN_SMITH_LDIF = &quot;dn: cn=John Smith,dc=example,dc=com\n&quot;
 	 * 		+ &quot;objectclass: inetorgperson\n&quot;
 	 * 		+ &quot;cn: John Smith\n&quot;
 	 * 		+ &quot;sn: Smith\n&quot;
 	 * 		+ &quot;givenname: John\n&quot;;
-	 * 
+	 *
 	 * </pre>
-	 * 
+	 *
 	 * @return the concatenation of each line followed by a newline character
 	 */
 	public static String makeLdif(String... lines) {
@@ -363,13 +362,13 @@ public final class EmbeddedOpenDS {
 	/**
 	 * This is a convience method that constructs an Entry from the specified
 	 * lines of LDIF. Here's a sample usage
-	 * 
+	 *
 	 * <pre>
 	 * Entry john = TestCaseUtils.makeEntry(&quot;dn: cn=John Smith,dc=example,dc=com&quot;,
 	 * 		&quot;objectclass: inetorgperson&quot;, &quot;cn: John Smith&quot;, &quot;sn: Smith&quot;,
 	 * 		&quot;givenname: John&quot;);
 	 * </pre>
-	 * 
+	 *
 	 * @see #makeLdif
 	 */
 	public static Entry makeEntry(String... lines) throws Exception {
@@ -379,7 +378,7 @@ public final class EmbeddedOpenDS {
 	/**
 	 * This is a convience method that constructs an List of EntryS from the
 	 * specified lines of LDIF. Here's a sample usage
-	 * 
+	 *
 	 * <pre>
 	 * List&lt;Entry&gt; smiths = TestCaseUtils.makeEntries(
 	 * 		&quot;dn: cn=John Smith,dc=example,dc=com&quot;, &quot;objectclass: inetorgperson&quot;,
@@ -387,10 +386,10 @@ public final class EmbeddedOpenDS {
 	 * 		&quot;dn: cn=Jane Smith,dc=example,dc=com&quot;, &quot;objectclass: inetorgperson&quot;,
 	 * 		&quot;cn: Jane Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: Jane&quot;);
 	 * </pre>
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LDIFException
-	 * 
+	 *
 	 * @see #makeLdif
 	 */
 	public static List<Entry> makeEntries(String... lines)
@@ -401,7 +400,7 @@ public final class EmbeddedOpenDS {
 	/**
 	 * Adds the provided entry to the Directory Server using an internal
 	 * operation.
-	 * 
+	 *
 	 * @param entry
 	 *            The entry to be added.
 	 * @return the error code
@@ -421,10 +420,10 @@ public final class EmbeddedOpenDS {
 	/**
 	 * Adds the provided set of entries to the Directory Server using internal
 	 * operations.
-	 * 
+	 *
 	 * @param entries
 	 *            The entries to be added.
-	 * 
+	 *
 	 * @throws Exception
 	 *             If an unexpected problem occurs.
 	 */
@@ -437,14 +436,14 @@ public final class EmbeddedOpenDS {
 	/**
 	 * Adds the provided set of entries to the Directory Server using internal
 	 * operations.
-	 * 
+	 *
 	 * @param lines
 	 *            The lines defining the entries to add. If there are multiple
 	 *            entries, then they should be separated by blank lines.
 	 * @throws IOException
 	 * @throws LDIFException
 	 * @throws Exception
-	 * 
+	 *
 	 * @throws Exception
 	 *             If an unexpected problem occurs.
 	 */
@@ -481,12 +480,6 @@ public final class EmbeddedOpenDS {
 			memoryBackend.addEntry(e, null);
 		}
 	}
-
-	// public static void clearBackend(boolean createBaseEntry) {
-	// MemoryBackend memoryBackend =
-	// (MemoryBackend)DirectoryServer.getBackend(TEST_BACKEND);
-	// memoryBackend.clearMemoryBackend();
-	// }
 
 	public static void importLdif(String ldif) throws IOException,
 			LDIFException {

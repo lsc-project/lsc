@@ -214,13 +214,13 @@ public abstract class AbstractSimpleJndiService {
 	}
 
 	/**
-	 * Map the ldap search result into a abstractbean inherited object.
+	 * Map the ldap search result into a AbstractBean inherited object.
 	 * 
 	 * @param sr the ldap search result
-	 * @param objToFill
-	 *            the original object to fill
+	 * @param beanToFill
+	 *            the bean to fill
 	 * 
-	 * @return the object modified
+	 * @return the modified bean
 	 * 
 	 * @throws NamingException
 	 *             thrown if a directory exception is encountered while

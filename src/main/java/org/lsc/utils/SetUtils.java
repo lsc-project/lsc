@@ -86,7 +86,7 @@ public class SetUtils
 	 * 
 	 * @param attrName
 	 *            The name of the attribute to return
-	 * @param Set<Object> Values as a set
+	 * @param Set<?> Values as a set
 	 * @return Attribute An Attribute containing values from the set. Never null.
 	 * @throws NamingException
 	 */
@@ -114,7 +114,7 @@ public class SetUtils
 	 *            Set of Objects to find the needles in.
 	 * @param needles
 	 *            Set of Objects to search for in the haystack.
-	 * @return
+	 * @return {@link Set} of needles that are not in the haystack.
 	 */
 	public static Set<?> findMissingNeedles(Set<?> haystack, Set<?> needles)
 	{
@@ -205,7 +205,7 @@ public class SetUtils
 	 * 
 	 * @param srcAttrValues
 	 * @param dstAttrValues
-	 * @return
+	 * @return true if all values of each set are present in the other set, false otherwise
 	 */
 	public static boolean doSetsMatch(Set<Object> srcAttrValues, Set<Object> dstAttrValues)
 	{

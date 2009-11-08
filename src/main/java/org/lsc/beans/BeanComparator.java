@@ -13,12 +13,12 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
 
- *Ê Ê * Redistributions of source code must retain the above copyright
+ *    * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * Ê Ê * Redistributions in binary form must reproduce the above copyright
+ *    * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * Ê Ê * Neither the name of the LSC Project nor the names of its
+ *    * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -581,8 +581,9 @@ public final class BeanComparator {
 	 * @param javaScriptObjects
 	 *            {@link Map}<String, Object> Object map to pass objects into
 	 *            JavaScript environment.
-	 * @param create
-	 *            {@link boolean} If the object is being newly created (causes
+	 * @param modType
+	 *            {@link JndiModificationType} Modification type, to determine
+	 *            if the object is being newly created (causes
 	 *            create values to be used instead of default values)
      * @param modType Type of operation to be done on the entry (should only be ADD or MODIFY)
 	 * @return List<Object> The list of values that should be set in the

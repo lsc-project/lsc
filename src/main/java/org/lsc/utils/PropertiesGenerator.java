@@ -214,12 +214,6 @@ public class PropertiesGenerator extends AbstractGenerator {
 	 *                the destination directory
 	 * @param genType
 	 *                the Generation type
-	 * @param beanClassName
-	 *                the bean class name
-	 * @param dstObjectClassName
-	 *                the destination object class name
-	 * @param srcObjectClassName
-	 *                the source object class name, or null if there is none
 	 * @param jdbcSrcServiceClassName
 	 *                the jdbc source service name
 	 * @throws NamingException

@@ -179,7 +179,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 	}
 
 	/**
-	 * @TODO Refactor to return the good type
+	 * TODO Refactor to return the good type
 	 */
 	public Class<?> getElementSingleType(String elementName) {
 		return String.class;

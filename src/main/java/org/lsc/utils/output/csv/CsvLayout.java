@@ -13,12 +13,12 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
 
- *Ê Ê * Redistributions of source code must retain the above copyright
+ *    * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * Ê Ê * Redistributions in binary form must reproduce the above copyright
+ *    * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * Ê Ê * Neither the name of the LSC Project nor the names of its
+ *    * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  *
- * @author RŽmy-Christophe Schermesser <remy-christophe@schermesser.com>
+ * @author R&eacute;my-Christophe Schermesser &lt;remy-christophe@schermesser.com&gt;
  *
  */
 public class CsvLayout extends LayoutBase<ILoggingEvent> {
@@ -105,7 +105,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
 	 *
 	 */
-	@Override
 	public String doLayout(ILoggingEvent event) {
 		Object[] messages = event.getArgumentArray();
 		String result = "";

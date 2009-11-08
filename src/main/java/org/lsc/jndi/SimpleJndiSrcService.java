@@ -75,10 +75,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @param props the properties used to identify the directory parameters
 	 * and context
-	 * @param objectClassName the bean class name that will be instantiated
-	 * and feed up
 	 */
-	@SuppressWarnings("unchecked")
 	public SimpleJndiSrcService(final Properties props) {
 		super(props);
 	}

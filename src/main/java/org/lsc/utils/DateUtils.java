@@ -61,96 +61,91 @@ import java.util.TimeZone;
  */
 public final class DateUtils {
 
-    /** This is a tool class which doesn't need to be instantiated. */
-    private DateUtils() {
-    };
+	/**
+	 * This is the standard LDAP date format : yyyyMMddHHmmss.S'Z'.
+	 */
+	public static final String LDAP_DATE_INTERNAL_STORAGE_FORMAT =
+					"yyyyMMddHHmmss.S'Z'";
 
-    /**
-     * This is the standard LDAP date format : yyyyMMddHHmmss.S'Z'.
-     */
-    public static final String LDAP_DATE_INTERNAL_STORAGE_FORMAT = 
-		"yyyyMMddHHmmss.S'Z'";
+	/**
+	 * This is the simplified LDAP date format : yyyyMMddHHmmss'Z'.
+	 */
+	public static final String LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT =
+					"yyyyMMddHHmmss'Z'";
 
-    /**
-     * This is the simplified LDAP date format : yyyyMMddHHmmss'Z'.
-     */
-    public static final String LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT = 
-		"yyyyMMddHHmmss'Z'";
+	/**
+	 * Internal transformation object.
+	 * TODO fix this if there is a performance problem, I did a small
+	 * cleanup and added synchronization as a DateFormat is not
+	 * threadsafe
+	 */
+	private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(
+					LDAP_DATE_INTERNAL_STORAGE_FORMAT);
 
-    /**
-     * Internal transformation object. 
-     * TODO fix this if there is a performance problem, I did a small 
-     * cleanup and added synchronization as a DateFormat is not 
-     * threadsafe
-     */
-    private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(
-	    LDAP_DATE_INTERNAL_STORAGE_FORMAT);
+	/**
+	 * Internal transformation object.
+	 * TODO fix this if there is a performance problem, I did a small
+	 * cleanup and added synchronization as a DateFormat is not
+	 * threadsafe
+	 */
+	private static final SimpleDateFormat SIMPLIFIED_FORMATTER =
+					new SimpleDateFormat(LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT);
 
-    /**
-     * Internal transformation object. 
-     * TODO fix this if there is a performance problem, I did a small 
-     * cleanup and added synchronization as a DateFormat is not 
-     * threadsafe
-     */
-    private static final SimpleDateFormat SIMPLIFIED_FORMATTER = 
-	new SimpleDateFormat(LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT);
+	/** The UTC time zone. */
+	private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault();//getTimeZone("UTC");
 
-    /** The UTC time zone. */
-    private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault();//getTimeZone("UTC");
-
-    static {
-	FORMATTER.setLenient(false);
-	FORMATTER.setTimeZone(UTC_TIME_ZONE);
-    }
-
-    /**
-         * Return a date object corresponding to the LDAP date string.
-         * 
-         * @param date the date to parse
-         * @return the corresponding Java Date object
-         * @throws ParseException
-         *                 thrown if an error occurs in date parsing
-         */
-    public static Date parse(final String date) throws ParseException {
-	synchronized (FORMATTER) {
-	    try {
-		    return FORMATTER.parse(date);
-	    } catch (ParseException pe) {
-		try {
-		    return SIMPLIFIED_FORMATTER.parse(date);
-		} catch (ParseException pe2) {
-		    throw pe;
-		}
-	    }
+	static {
+		FORMATTER.setLenient(false);
+		FORMATTER.setTimeZone(UTC_TIME_ZONE);
 	}
-    }
 
-    /**
-         * Generate a date string - synchronized call to internal formatter
-         * object to support multi-threaded calls.
-         * 
-         * @param date date to extract
-         * @return generated date
-         */
-    public static String format(final Date date) {
+	/**
+	 * Return a date object corresponding to the LDAP date string.
+	 *
+	 * @param date the date to parse
+	 * @return the corresponding Java Date object
+	 * @throws ParseException
+	 *                 thrown if an error occurs in date parsing
+	 */
+	public static Date parse(final String date) throws ParseException {
 		synchronized (FORMATTER) {
-		    return FORMATTER.format(date);
+			try {
+				return FORMATTER.parse(date);
+			} catch (ParseException pe) {
+				try {
+					return SIMPLIFIED_FORMATTER.parse(date);
+				} catch (ParseException pe2) {
+					throw pe;
+				}
+			}
 		}
-    }
-    
-    /**
-     * Generate a date string - synchronized call to internal formatter
-     * object to support multi-threaded calls.
-     * 
-     * This uses the simplified format: yyyyMMddHHmmss'Z'
-     * 
-     * @param date date to extract
-     * @return generated date
-     */
+	}
+
+	/**
+	 * Generate a date string - synchronized call to internal formatter
+	 * object to support multi-threaded calls.
+	 *
+	 * @param date date to extract
+	 * @return generated date
+	 */
+	public static String format(final Date date) {
+		synchronized (FORMATTER) {
+			return FORMATTER.format(date);
+		}
+	}
+
+	/**
+	 * Generate a date string - synchronized call to internal formatter
+	 * object to support multi-threaded calls.
+	 *
+	 * This uses the simplified format: yyyyMMddHHmmss'Z'
+	 *
+	 * @param date date to extract
+	 * @return generated date
+	 */
 	public static String simpleFormat(final Date date) {
 		synchronized (SIMPLIFIED_FORMATTER) {
-		    return SIMPLIFIED_FORMATTER.format(date);
+			return SIMPLIFIED_FORMATTER.format(date);
 		}
 	}
-
 }

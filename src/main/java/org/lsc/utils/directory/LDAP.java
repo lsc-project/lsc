@@ -79,14 +79,8 @@ import org.lsc.jndi.JndiServices;
  * 
  * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
-public class LDAP
-{
+public class LDAP {
 
-	/*
-	 * Utility class, no public constructor.
-	 */
-	private LDAP() {}
-	
 	/**
 	 * Connects to a LDAP server anonymously and tries to rebind with the
 	 * provided DN and password to check.
@@ -105,8 +99,7 @@ public class LDAP
 	 *             failures
 	 */
 	public static boolean canBind(String url, String dnToCheck,
-			String passwordToCheck) throws NamingException
-	{
+					String passwordToCheck) throws NamingException {
 		return canBind(url, null, null, dnToCheck, passwordToCheck);
 	}
 
@@ -132,18 +125,14 @@ public class LDAP
 	 *             failures
 	 */
 	public static boolean canBind(String url, String bindDn,
-			String bindPassword, String dnToCheck, String passwordToCheck)
-			throws NamingException
-	{
+					String bindPassword, String dnToCheck, String passwordToCheck)
+					throws NamingException {
 
 		// get JndiServices for this bindDn/password
 		JndiServices bindJndiServices;
-		try
-		{
+		try {
 			bindJndiServices = getJndiServices(url, bindDn, bindPassword);
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			// any LDAP related error is thrown, since we haven't started
 			// testing the actual bind yet, so this is an unrelated error
 			throw e;
@@ -151,33 +140,25 @@ public class LDAP
 
 		// check bind DN and password
 		LdapContext bindContext = bindJndiServices.getContext();
-		try
-		{
+		try {
 			bindContext.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
 			bindContext.addToEnvironment(Context.SECURITY_PRINCIPAL, dnToCheck);
 			bindContext.addToEnvironment(Context.SECURITY_CREDENTIALS, passwordToCheck);
 			bindContext.reconnect(bindContext.getConnectControls());
-		}
-		catch (AuthenticationException e)
-		{
+		} catch (AuthenticationException e) {
 			// the bind failed
 			return false;
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			// some other LDAP related error occurred
 			// we throw it, since it may be connection related,
 			// and we don't want to return fake results
 			throw e;
-		}
-		finally
-		{
+		} finally {
 			// clean up and replace authentication on the context with original
 			// identity
 			Properties authProps = getJndiAuthenticationProperties(bindDn, bindPassword);
 			Iterator<Object> authPropsit = authProps.keySet().iterator();
-			while (authPropsit.hasNext())
-			{
+			while (authPropsit.hasNext()) {
 				String key = (String) authPropsit.next();
 				bindContext.addToEnvironment(key, authProps.get(key));
 			}
@@ -211,8 +192,7 @@ public class LDAP
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
-			throws NamingException, MalformedURLException
-	{
+					throws NamingException, MalformedURLException {
 		return canBindSearchRebind(url, null, null, passwordToCheck);
 	}
 
@@ -243,9 +223,8 @@ public class LDAP
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,
-			String bindPassword, String passwordToCheck)
-			throws NamingException, MalformedURLException
-	{
+					String bindPassword, String passwordToCheck)
+					throws NamingException, MalformedURLException {
 
 		// interpret the search URL to feed to JndiServices
 		// this is done first to thrown MalformedURLException ASAP, not after
@@ -254,12 +233,9 @@ public class LDAP
 
 		// get JndiServices for this bindDn and bindPassword
 		JndiServices bindJndiServices;
-		try
-		{
+		try {
 			bindJndiServices = getJndiServices(url, bindDn, bindPassword);
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			// any LDAP related error is thrown, since we haven't started
 			// testing
 			// the actual bind yet, so this is an unrelated error
@@ -269,19 +245,15 @@ public class LDAP
 		// transform to a relative DN for our JndiServices...
 		String baseDn = urlInstance.getDN();
 		String contextDn = bindJndiServices.getContextDn();
-		if (contextDn != null && baseDn.endsWith(contextDn))
-		{
+		if (contextDn != null && baseDn.endsWith(contextDn)) {
 			baseDn = baseDn.substring(0, baseDn.length() - contextDn.length());
 		}
 
 		// perform the search and get back matching DNS
 		SearchResult matchingDns;
-		try
-		{
+		try {
 			matchingDns = bindJndiServices.getEntry(baseDn, urlInstance.getFilter(), new SearchControls(), urlInstance.getScope());
-		}
-		catch (SizeLimitExceededException e)
-		{
+		} catch (SizeLimitExceededException e) {
 			// more than one result was returned!
 			// only one user account may match, anything else is an error
 			return false;
@@ -289,8 +261,7 @@ public class LDAP
 
 		// no entry returned
 		// only one user account may match, anything else is an error
-		if (matchingDns == null)
-		{
+		if (matchingDns == null) {
 			return false;
 		}
 
@@ -315,10 +286,8 @@ public class LDAP
 	 *             In case of any error connecting.
 	 */
 	private static JndiServices getJndiServices(String url, String bindDn,
-			String bindPassword) throws NamingException
-	{
-		try
-		{
+					String bindPassword) throws NamingException {
+		try {
 			// load properties to create LDAP connection
 			Properties props = new Properties();
 
@@ -337,16 +306,12 @@ public class LDAP
 			// this takes advantage of the JndiServices cache and will re-use
 			// connections
 			return JndiServices.getInstance(props);
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			// some other LDAP related error occurred
 			// we throw it, since it may be connection related, and we don't
 			// want to return fake results
 			throw e;
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			// error opening the connection
 			throw new CommunicationException(e.toString());
 		}
@@ -364,16 +329,12 @@ public class LDAP
 	 * @return Properties containing authentication information
 	 */
 	private static Properties getJndiAuthenticationProperties(String bindDn,
-			String bindPassword)
-	{
+					String bindPassword) {
 		Properties props = new Properties();
 
-		if (bindDn == null)
-		{
+		if (bindDn == null) {
 			props.put(Context.SECURITY_AUTHENTICATION, "none");
-		}
-		else
-		{
+		} else {
 			props.put(Context.SECURITY_AUTHENTICATION, "simple");
 			props.put(Context.SECURITY_PRINCIPAL, bindDn);
 			props.put(Context.SECURITY_CREDENTIALS, bindPassword);
@@ -381,5 +342,4 @@ public class LDAP
 
 		return props;
 	}
-
 }

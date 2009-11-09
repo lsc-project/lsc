@@ -54,9 +54,11 @@ import javax.naming.directory.BasicAttribute;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
 import org.lsc.beans.AbstractBean;
 import org.lsc.beans.personBean;
 import org.lsc.utils.JScriptEvaluator;
+import org.mozilla.javascript.EcmaError;
 
 /**
  * Test different use cases of this JScript evaluator
@@ -72,16 +74,13 @@ public class JScriptEvaluatorTest extends TestCase {
 		assertEquals("b", JScriptEvaluator.evalToString("srcAttr.get()", table));
 	}
 
-	public void testNk() {
+	@Test(expected=EcmaError.class)
+	public void testNk() throws EcmaError {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
-		try {
-			assertNull(JScriptEvaluator.evalToString("src.get()", table));
-			assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
-		} catch(Exception e) {
-			//Ignore exceptions, so they are not displayed in any output
-		}
+		assertNull(JScriptEvaluator.evalToString("src.get()", table));
+		assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
 	}
 
 	public void testOk2() {

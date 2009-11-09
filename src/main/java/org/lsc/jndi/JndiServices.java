@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008, LSC Project 
+ *
+ * Copyright (c) 2008, LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -86,9 +86,9 @@ import org.lsc.LscAttributes;
 
 /**
  * General LDAP services wrapper.
- * 
+ *
  * This class is designed to manage all the needed operations to the directory
- * 
+ *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
  */
@@ -115,7 +115,7 @@ public final class JndiServices {
 	private int pageSize;
 
 	private LDAPUrl namingContext;
-	
+
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
 

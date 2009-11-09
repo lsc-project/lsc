@@ -48,21 +48,26 @@ package org.lsc.utils;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Manage all common string manipulation.
+ * Manage all common string manipulation for french
  *
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author Sebastien Bahloul <seb@lsc-project.org>;
  */
 public final class FrenchFilters {
 
-	/** La regExp sur les caract&egrave;res autoris&eacute;s. */
+	private static Logger LOGGER = LoggerFactory.getLogger(FrenchFilters.class);
+
+	/** The regexep for authorized characters */
 	private static final String REGEXP_CHARACTERS =
 					"[\\p{Alpha}\\s'\"áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;" + "&egrave;êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç-]+";
 
-	/** Tableau de RegExp pour les accesnts et c&eacute;dilles !. */
+	/** Array of accents and cedillas */
 	private static final String[] REGEXP_ACCENTS_CEDILLES = {
 		"À", "á", "Á",
 		"&agrave;",
@@ -87,8 +92,7 @@ public final class FrenchFilters {
 	};
 	
 	/**
-	 * Tableau des caract&egrave;res de correspondance pour remplacer
-	 * le tableau pr&eacute;c&eacute;dent.
+	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLES
 	 */
 	private static final String[] REGEXP_STRING_ACCENTS_CEDILLES = {
 		"A", "a", "A",
@@ -116,7 +120,8 @@ public final class FrenchFilters {
 		"Y", "y",
 		"c"
 	};
-	/** Caract&egrave;res autoris&eacute;s pour l'espace de mots. */
+	
+	/** Allowed chars for words separator */
 	private static final String[] SEPARATORS_FOR_UPPER_BEGINNING_NAME = {
 		" ",
 		"'",
@@ -124,19 +129,19 @@ public final class FrenchFilters {
 		"-",
 		"_"
 	};
+	
 	/**
-	 * Caract&egrave;res non autoris&eacute;s pour l'espace de mots
-	 * dans une adresse Email.
+	 * Bad word separators chars for emails
 	 */
 	public static final String[] BAD_SEPARATOR_FOR_EMAIL = {" ", "'", "\""};
+
 	/**
-	 * Caracteres autoris&eacute;s pour l'espace des mots ds une
-	 * adresse Email.
+	 * Good words separators for emails
 	 */
 	public static final String[] GOOD_SEPARATOR_FOR_EMAIL = {"_", "_", "_"};
+
 	/**
-	 * Caracteres &agrave; remplacer pour les num&eacute;ros de
-	 * t&eacute;l&eacute;phone.
+	 * Chars to replace in telephone numbers
 	 */
 	public static final String[] BAD_SEPARATOR_FOR_PHONE = {
 		"-", " ", "\\.",
@@ -145,86 +150,74 @@ public final class FrenchFilters {
 		";", ":", "_",
 		","
 	};
+	
 	/**
-	 * Caracteres de remplacement des num&eacute;ros de
-	 * t&eacute;l&eacute;phone.
+	 * Chars of remplactement for telephone numbers
 	 */
 	public static final String[] GOOD_SEPARATOR_FOR_PHONE = {
 		"", "", "", "",
 		"", "", "", "",
 		"", "", ""
 	};
-	/** Expression r&eacute;guli&egrave; pour le formatage du pr&eacute;nom */
+	
+	/** Regexp for formatting first names */
 	private static final String REGEXP_FOR_FISRTNAME =
 					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
 					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç' -]+";
-	/** Expression r&eacute;guli&egrave; pour le formatage du nom ! */
+					
+	/** Regexp for formatting last names */
 	private static final String REGEXP_FOR_LASTNAME =
 					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
 					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç'\"\\s -_]+";
+					
 	/**
-	 * Caract&egrave;res non autoris&eacute;s pour l'espace de mots
-	 * dans les identifiants.
+	 * Bad char separators for IDs
 	 */
 	private static final String[] BAD_SEPARATOR_FOR_ID = {" ", "'", "\"", "-"};
+	
 	/**
-	 * Caract&egrave;res autoris&eacute;s pour l'espace des mots dans
-	 * les identifiants
-	 */
-	// private static final String[] GOOD_SEPARATOR_FOR_ID = {"","","",""};
-	/**
-	 * Liste des caract&egrave;res autoris&eacute;s pour les mots de
-	 * passe (pas de O,0 et I,1,l et .).
+	 * Chars authorized for passwords
+	 * (No O,0 and I,1,l etc.)
 	 */
 	private static final String GOOD_PASSWORD =
 					"abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789/";
+	
 	/** Authorized characters for numerical identifier. */
 	private static final String REGEXP_FOR_NUMERICAL_ID = "-?[0123456789]+";
+	
 	/** Authorized characters for numerical identifier. */
 	private static final String REGEXP_FOR_ALPHA_NUMERICAL_ID =
 					"[\\p{Alpha}0123456789]+";
 
 	/**
-	 * M&eacute;thode permettant de savoir si une chaine est contenue
-	 * dans un tableau de chaines.
+	 * Find if a string is in an array
+	 * @Deprecated because the method is in Java
 	 *
-	 * @param tab le tablean
-	 * @param name la chaine
+	 * @param array the array
+	 * @param name the string
 	 *
-	 * @return oui ou non
+	 * @return boolean
 	 */
-	public static boolean containsInTab(final String[] tab, final String name) {
-		boolean trouve = false;
-		int i = 0;
-
-		while ((i < tab.length) && (!trouve)) {
-			if (tab[i].equals(name)) {
-				trouve = true;
-			}
-
-			i++;
-		}
-
-		return trouve;
+	@Deprecated
+	public static boolean containsInTab(final String[] array, final String name) {
+		return Arrays.asList(array).contains(name);
 	}
 
 	/**
-	 * Normalise les caract&egrave;res accentu&eacute;s divers et
-	 * autres c&eacute;dilles.
+	 * Normalize accents and cedillas
 	 *
-	 * @param src la chaine d'origine
+	 * @param src Source string
 	 *
-	 * @return la chaine filtr&eacute;e
+	 * @return Filtered string
 	 */
 	public static String removeBadChars(final String src) {
-		// Suppression de tous les accents-c&eacute;dilles!
 		return filterRegexp(src, REGEXP_ACCENTS_CEDILLES,
 						REGEXP_STRING_ACCENTS_CEDILLES);
 	}
 
 	/**
-	 * Filtre la chaîne en enlevant les caract&egrave;res de srcRegexp
-	 * pour les remplacer par ceux de destRegexp.
+	 * Filter the string src by removing the chars in srcRegexp
+	 * by the ones in destRegexp
 	 *
 	 * @param src
 	 * @param srcRegexp
@@ -245,21 +238,20 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Methode permettant de supprimer toutes les occurrences d'une
-	 * chaine de caract&egrave;res dans une chaine.
+	 * Remove all the occurences of a string in a string
 	 *
-	 * @param charactere
-	 * @param chaine
+	 * @param chars to remove
+	 * @param string to filter
 	 *
 	 * @return
 	 */
 	private static String filterDelStringIntoString(final String charactere,
-					final String chaine) {
+					final String string) {
 		String returned = "";
-		String tmp = chaine;
+		String tmp = string;
 		int i = tmp.indexOf(charactere);
 
-		while ((i != -1) && (i < chaine.length())) {
+		while ((i != -1) && (i < string.length())) {
 			returned += tmp.substring(0, i);
 			tmp = tmp.substring(i + 1, tmp.length());
 			i = tmp.indexOf(charactere);
@@ -273,15 +265,14 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Filtre pour transformer les t&eacute;l&eacute;phones en
-	 * num&eacute;ro internationnal!
+	 * Transform a telephon number in the international display
 	 *
 	 * @param phone2parse
 	 *
 	 * @return the filtered phone number
 	 */
 	public static String filterPhones(final String phone2parse) {
-		// On supprime les espaces, les points et les tirets
+		// We remove spaces, dots and dashes
 		String phoneResult = filterRegexp(phone2parse,
 						BAD_SEPARATOR_FOR_PHONE,
 						GOOD_SEPARATOR_FOR_PHONE);
@@ -299,23 +290,21 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de mettre tous les mots d'une chaine
-	 * s&eacute;par&eacute;s par un charact&egrave;re tel que espace ou - en
-	 * commençant par une majuscule et le reste en minuscule.
+	 * Uppercased all the words of a string
 	 *
-	 * @param chaine
+	 * @param string
 	 *
 	 * @return String with caps for all characters after space, "-", etc ...
 	 */
-	public static String toUpperCaseAllBeginningNames(final String chaine) {
-		if (chaine.length() == 0) {
+	public static String toUpperCaseAllBeginningNames(final String string) {
+		if (string.length() == 0) {
 			return "";
 		}
 
 		String returned = "";
-		String tmp = chaine;
+		String tmp = string;
 
-		// La chaine commence forc&eacute;ment par une majuscule!
+		// The string must start with a upper case
 		tmp = tmp.substring(0, 1).toUpperCase() + tmp.substring(1, tmp.length()).toLowerCase();
 
 		for (int j = 0; j < SEPARATORS_FOR_UPPER_BEGINNING_NAME.length; j++) {
@@ -327,7 +316,7 @@ public final class FrenchFilters {
 				try {
 					tmp = tmp.substring(i + 1, i + 2).toUpperCase() + tmp.substring(i + 2, tmp.length());
 				} catch (StringIndexOutOfBoundsException e) {
-					System.err.println(e + " caused by '" + chaine + "'");
+					LOGGER.error(e + " caused by '" + string + "'");
 					throw e;
 				}
 
@@ -361,8 +350,8 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Supprime de la chaîne pass&eacute;e en argument tous les
-	 * mauvais caract&egrave;res
+	 * Remove bad chars from a string
+	 *
 	 * @param startString
 	 * @return
 	 */
@@ -373,15 +362,15 @@ public final class FrenchFilters {
 			tmp = filterDelStringIntoString(BAD_SEPARATOR_FOR_ID[i], tmp);
 		}
 
-		// Suppression de tous les accents-c&eacute;dilles!
+		// Remove all accents and cedillas
 		tmp = removeBadChars(tmp);
 
 		return tmp;
 	}
 
 	/**
-	 * Filtre pour r&eacute;cup&eacute;rer l'uid sur 14 caracteres max
-	 * bien format&eacute;.
+	 * Returns the uid on 14 chars and well formatted
+	 *
 	 * @param sn the last name to filter
 	 * @return the filtered uid
 	 */
@@ -396,8 +385,8 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Filtre pour r&eacute;cup&eacute;rer l'uid court sur 8.
-	 * caract&egrave;res max bien format&eacute;
+	 * Returns the uid on 8 chars and well formatted
+	 *
 	 * @param sn the last name to filter
 	 * @return the filtered short uid
 	 */
@@ -412,8 +401,8 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode rassemblant les diff&eacute;rents filtres
-	 * &agrave; appeler sur l'attribut nomPatronymique.
+	 * Filter a string to match a last name
+	 * 
 	 * @param name the last name to filter
 	 * @return the filtered patronimic name
 	 * @throws CharacterUnacceptedException thrown if an rejected character
@@ -431,7 +420,8 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de filtrer le prenom de l'etat civil.
+	 * Filter a string to match a first name
+	 * 
 	 * @param name the first name to filter
 	 * @return the filtered public given name
 	 * @throws CharacterUnacceptedException thrown if an rejected character
@@ -449,7 +439,8 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de filtrer le GivenName.
+	 * Filter a string to match a givenName
+	 * 
 	 * @param oldValue the value to filter
 	 * @return the filtered givenname
 	 * @throws CharacterUnacceptedException thrown if an rejected character
@@ -467,8 +458,7 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode de g&eacute;n&eacute;ration d'un mot de passe: 8
-	 * caract&egrave;res.
+	 * Generate a 8 chars long password
 	 *
 	 * @return Le mot de passe
 	 */
@@ -484,13 +474,12 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de virer les espaces au d&eacute;but
-	 * et en fin de chaîne et de remplacer les espaces et points restant par
-	 * des tirets.
+	 * Remove trailing and starting spaces
+	 * and replace remaining spaces and dots by dashes
 	 *
-	 * @param aString la chaîne &agrave; filtrer
+	 * @param aString the string to filter
 	 *
-	 * @return la chaîne filtr&eacute;e
+	 * @return the filtered string
 	 */
 	public static String filterName(final String aString) {
 		String tmp = aString.trim().replace('.', '-').toLowerCase();
@@ -507,12 +496,13 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de virer les espaces au d&eacute;but
-	 * et en fin de chaîne et de remplacer les espaces et points restant par
-	 * des tirets.
-	 * @param aString la chaîne &agrave; filtrer
-	 * @return la chaîne filtr&eacute;e
+	 * Trim a string
+	 * @deprecated because it is a simple wrapper for a Java method
+	 *
+	 * @param aString the string to filter
+	 * @return the filtered string
 	 */
+	@Deprecated
 	public static String filterString(final String aString) {
 		return aString.trim();
 	}

@@ -294,6 +294,11 @@ public final class FrenchFilters {
 		}
 	}
 
+	@Deprecated
+	public static String filterPhones(final String phone2parse) {
+		return filterPhone(phone2parse);
+	}
+
 	/**
 	 * Uppercased all the words of a string
 	 *
@@ -427,6 +432,11 @@ public final class FrenchFilters {
 		return filterStringRegExp(name, REGEXP_CHARACTERS);
 	}
 
+	@Deprecated
+	public static String filterNomPatronymique(final String name) throws CharacterUnacceptedException {
+		return filterLastName(name);
+	}
+
 	/**
 	 * Filter a string to match a first name
 	 * 
@@ -438,6 +448,11 @@ public final class FrenchFilters {
 	public static String filterFirstName(final String name)
 					throws CharacterUnacceptedException {
 		return filterStringRegExp(name, REGEXP_FOR_FISRTNAME);
+	}
+
+	@Deprecated
+	public static String filterPrenomEtatCivil(final String name) throws CharacterUnacceptedException {
+		return filterFirstName(name);
 	}
 
 	/**

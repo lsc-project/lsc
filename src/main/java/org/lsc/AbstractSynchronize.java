@@ -142,7 +142,7 @@ public abstract class AbstractSynchronize {
 		try {
 			ids = dstJndiService.getListPivots().entrySet().iterator();
 		} catch (NamingException e) {
-			LOGGER.error("Error getting list of IDs in the destination for task " + syncName);
+			LOGGER.error("Error getting list of IDs in the destination for task {}", syncName);
 			LOGGER.debug(e.toString(), e);
 			return;
 		}
@@ -203,7 +203,7 @@ public abstract class AbstractSynchronize {
 
 							// Log an error if the bean could not be retrieved! This shouldn't happen.
 							if (taskBean == null) {
-								LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
+								LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
 								countError++;
 								continue;
 							}
@@ -255,7 +255,7 @@ public abstract class AbstractSynchronize {
 				return;
 			} catch (NamingException e) {
 				countError++;
-				LOGGER.error("Unable to delete object " + id.getKey() + " (" + e.toString() + ")", e);
+				LOGGER.error("Unable to delete object {} ({})", id.getKey(), e.toString());
 				logActionError(jm, id, e);
 			}
 		}
@@ -294,10 +294,8 @@ public abstract class AbstractSynchronize {
 		try {
 			ids = srcService.getListPivots().entrySet().iterator();
 		} catch (Exception e) {
-			LOGGER.error("Error getting list of IDs in the source for task " + syncName);
-			if (LOGGER.isDebugEnabled()) {
-				e.printStackTrace();
-			}
+			LOGGER.error("Error getting list of IDs in the source for task {}", syncName);
+			LOGGER.debug(e.toString(), e);
 			return;
 		}
 
@@ -326,7 +324,7 @@ public abstract class AbstractSynchronize {
 			countAll++;
 
 			Entry<String, LscAttributes> id = ids.next();
-			LOGGER.debug("Synchronizing " + syncName + " for " + id.getValue());
+			LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
 
 			try {
 				srcBean = srcService.getBean(objectBean.newInstance(), id);
@@ -334,7 +332,7 @@ public abstract class AbstractSynchronize {
 				/* Log an error if the source object could not be retrieved! This shouldn't happen. */
 				if (srcBean == null) {
 					countError++;
-					LOGGER.error("Unable to get object for id=" + id.getKey());
+					LOGGER.error("Unable to get object for id={}", id.getKey());
 					continue;
 				}
 
@@ -577,7 +575,8 @@ public abstract class AbstractSynchronize {
 				return false;
 			}
 		} catch (final ParseException e) {
-			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			LOGGER.error("Unable to parse options : {} ({})", args, e.toString());
+			LOGGER.debug(e.toString(), e);
 			return false;
 		}
 		return true;
@@ -601,9 +600,9 @@ public abstract class AbstractSynchronize {
 
 		if (syncOptions == null) {
 			if ((syncName == null) || (syncName.length() == 0)) {
-				LOGGER.info("No SyncOptions configuration. " + "Defaulting to Force policy ...");
+				LOGGER.info("No SyncOptions configuration. Defaulting to Force policy ...");
 			} else {
-				LOGGER.warn("Unknown '" + syncName + "' synchronization task name. " + "Defaulting to Force policy ...");
+				LOGGER.warn("Unknown '{}' synchronization task name. Defaulting to Force policy ...", syncName);
 			}
 			syncOptions = new ForceSyncOptions();
 		}

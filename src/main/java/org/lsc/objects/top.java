@@ -125,33 +125,33 @@ public class top extends LscObject {
 						// TODO: check the following : no need to call a method
 						// on a empty value ?
 						// localMethod.invoke(this, new Object[] {});
-						LOGGER.debug("No need to call a method with an empty value ... (" + paramName + ")");
+						LOGGER.debug("No need to call a method with an empty value ... ({})", paramName);
 					} else {
 						if (toReturnTypes != null && toReturnTypes[0] == returnType) {
-							LOGGER.debug("Method invocation: " + localMethod.getName());
+							LOGGER.debug("Method invocation: {}", localMethod.getName());
 							try {
 								localMethod.invoke(this, new Object[] { returnedObject });
 							} catch (IllegalArgumentException e) {
-								LOGGER.error("Bad argument invoking " + localMethod.getName() + " for attribute " + paramName);
-								e.printStackTrace();
+								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
+								LOGGER.error(e.toString());
 							}
 						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							LOGGER.debug("Method invocation: " + localMethod.getName());
+							LOGGER.debug("Method invocation: {}", localMethod.getName());
 							try {
 								paramsToUse = new ArrayList<Object>();
 								paramsToUse.add(returnedObject);
 								localMethod.invoke(this, new Object[] { paramsToUse });
 							} catch (IllegalArgumentException e) {
-								LOGGER.error("Bad argument invoking " + localMethod.getName() + " for attribute " + paramName);
-								e.printStackTrace();
+								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
+								LOGGER.error(e.toString());
 							}
 						} else {
-							LOGGER.error("Unable to manage translation from " + returnType + " to " + toReturnTypes[0] + " for " + paramName+ "!");
+							LOGGER.error("Unable to manage translation from {} to {} for {} !", new Object[] { returnType, toReturnTypes[0], paramName });
 						}
 					}
 				} else {
 					if (paramName.compareToIgnoreCase("class") != 0) {
-						LOGGER.warn("No corresponding method for original " + methods[i].getName() + " on " + fo.getClass() + " object !");
+						LOGGER.warn("No corresponding method for original {} on {} object !", methods[i].getName(), fo.getClass());
 					}
 				}
 			}

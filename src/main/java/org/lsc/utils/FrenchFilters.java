@@ -68,7 +68,7 @@ public final class FrenchFilters {
 					"[\\p{Alpha}\\s'\"áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;" + "&egrave;êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç-]+";
 
 	/** Array of accents and cedillas */
-	private static final String[] REGEXP_ACCENTS_CEDILLES = {
+	private static final String[] REGEXP_ACCENTS_CEDILLAS = {
 		"À", "á", "Á",
 		"&agrave;",
 		"&agrave;", "â",
@@ -94,7 +94,7 @@ public final class FrenchFilters {
 	/**
 	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLES
 	 */
-	private static final String[] REGEXP_STRING_ACCENTS_CEDILLES = {
+	private static final String[] REGEXP_STRING_ACCENTS_CEDILLAS = {
 		"A", "a", "A",
 		"a", "A",
 		"a", "A",
@@ -211,8 +211,8 @@ public final class FrenchFilters {
 	 * @return Filtered string
 	 */
 	public static String removeBadChars(final String src) {
-		return filterRegexp(src, REGEXP_ACCENTS_CEDILLES,
-						REGEXP_STRING_ACCENTS_CEDILLES);
+		return filterRegexp(src, REGEXP_ACCENTS_CEDILLAS,
+						REGEXP_STRING_ACCENTS_CEDILLAS);
 	}
 
 	/**
@@ -271,7 +271,7 @@ public final class FrenchFilters {
 	 *
 	 * @return the filtered phone number
 	 */
-	public static String filterPhones(final String phone2parse) {
+	public static String filterPhone(final String phone2parse) {
 		// We remove spaces, dots and dashes
 		String phoneResult = filterRegexp(phone2parse,
 						BAD_SEPARATOR_FOR_PHONE,
@@ -408,7 +408,7 @@ public final class FrenchFilters {
 	 * @throws CharacterUnacceptedException thrown if an rejected character
 	 * is encountered during analysis
 	 */
-	public static String filterNomPatronymique(final String name)
+	public static String filterLastName(final String name)
 					throws CharacterUnacceptedException {
 		String tmp = toUpperCaseAllBeginningNames(filterName(name));
 
@@ -427,7 +427,7 @@ public final class FrenchFilters {
 	 * @throws CharacterUnacceptedException thrown if an rejected character
 	 * is encountered during analysis
 	 */
-	public static String filterPrenomEtatCivil(final String name)
+	public static String filterFirstName(final String name)
 					throws CharacterUnacceptedException {
 		String tmp = toUpperCaseAllBeginningNames(filterName(name));
 

@@ -69,7 +69,6 @@ import org.lsc.objects.top;
 import org.lsc.service.DataSchemaProvider;
 import org.lsc.utils.DateUtils;
 
-
 /**
  * Abstract bean used to centralize methods across all beans
  *
@@ -82,85 +81,85 @@ import org.lsc.utils.DateUtils;
  */
 public abstract class AbstractBean implements IBean {
 
-    /**
-     * For eclipse
-     */
-    private static final long serialVersionUID = -3088695839587594711L;
+	/**
+	 * For eclipse
+	 */
+	private static final long serialVersionUID = -3088695839587594711L;
 
-    /** Initialize the static local methods table contents. */
-    static {
-        localMethods = new HashMap<String, List<Method>>();
-    }
+	/** Initialize the static local methods table contents. */
+	static {
+		localMethods = new HashMap<String, List<Method>>();
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBean.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBean.class);
 
-    /** The accessor getter prefix. */
-    public static final String GET_ACCESSOR_PREFIX = "get";
+	/** The accessor getter prefix. */
+	public static final String GET_ACCESSOR_PREFIX = "get";
 
-    /** The mapper method prefix. */
-    public static final String MAP_FUNCTION_PREFIX = "map";
+	/** The mapper method prefix. */
+	public static final String MAP_FUNCTION_PREFIX = "map";
 
-    /** The accessor setter prefix. */
-    public static final String SET_ACCESSOR_PREFIX = "set";
+	/** The accessor setter prefix. */
+	public static final String SET_ACCESSOR_PREFIX = "set";
 
-    /** The list of local methods. */
-    private static Map<String, List<Method>> localMethods;
+	/** The list of local methods. */
+	private static Map<String, List<Method>> localMethods;
 
-    /** The attributes map. */
-    private Map<String, Attribute> attrs;
+	/** The attributes map. */
+	private Map<String, Attribute> attrs;
 
-    /** The distinguish name. */
-    private String distinguishName;
-    
-    /** Data schema related to this bean - must always be set just after initiating the bean */
-    private DataSchemaProvider dataSchemaProvider;
+	/** The distinguish name. */
+	private String distinguishName;
 
-    /**
-     * The default constructor.
-     */
-    public AbstractBean() {
-        attrs = new HashMap<String, Attribute>();
-        localMethods = new HashMap<String, List<Method>>();
-    }
+	/** Data schema related to this bean - must always be set just after initiating the bean */
+	private DataSchemaProvider dataSchemaProvider;
 
-    /**
-     * Load all the object values into the bean by invoking either the
-     * object bean map function or the default mapper.
-     * TODO: Check if loading local methods each time can be improved
-     *
-     * @param cl
-     *                the local class which may be used to check
-     *                Introspection
-     * @param bean
-     *                the object to fill
-     * @param o
-     *                object from which the values will be taken
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
-     */
-    public static void mapper(final Class<?> cl, IBean bean, final Object o)
-    throws IllegalAccessException, InvocationTargetException {
-        localMethods = new HashMap<String, List<Method>>();
-        loadLocalMethods(cl, localMethods, MAP_FUNCTION_PREFIX);
+	/**
+	 * The default constructor.
+	 */
+	public AbstractBean() {
+		attrs = new HashMap<String, Attribute>();
+		localMethods = new HashMap<String, List<Method>>();
+	}
 
-        Method[] methods = o.getClass().getMethods();
+	/**
+	 * Load all the object values into the bean by invoking either the
+	 * object bean map function or the default mapper.
+	 * TODO: Check if loading local methods each time can be improved
+	 *
+	 * @param cl
+	 *                the local class which may be used to check
+	 *                Introspection
+	 * @param bean
+	 *                the object to fill
+	 * @param o
+	 *                object from which the values will be taken
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
+	public static void mapper(final Class<?> cl, IBean bean, final Object o)
+					throws IllegalAccessException, InvocationTargetException {
+		localMethods = new HashMap<String, List<Method>>();
+		loadLocalMethods(cl, localMethods, MAP_FUNCTION_PREFIX);
 
-        for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(GET_ACCESSOR_PREFIX) &&
-                    (methods[i].getName().substring(GET_ACCESSOR_PREFIX.length())
-                            .compareToIgnoreCase("dn") != 0)) {
-                /* Getting parameter name */
-                String paramName = methods[i].getName().substring(GET_ACCESSOR_PREFIX.length());
-                paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
+		Method[] methods = o.getClass().getMethods();
 
-                Class<?> returnType = methods[i].getReturnType();
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].getName().startsWith(GET_ACCESSOR_PREFIX) &&
+							(methods[i].getName().substring(GET_ACCESSOR_PREFIX.length()).compareToIgnoreCase("dn") != 0)) {
+				/* Getting parameter name */
+				String paramName = methods[i].getName().substring(GET_ACCESSOR_PREFIX.length());
+				paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
+
+				Class<?> returnType = methods[i].getReturnType();
 
 				/* Get matching local methods for this parameter */
 				Method localMethod = null;
 				List<Method> meths = localMethods.get(paramName);
-				if (meths == null) localMethod = null;
-				else {
+				if (meths == null) {
+					localMethod = null;
+				} else {
 					if (meths.size() == 1) {
 						localMethod = meths.get(0);
 					} else {
@@ -173,7 +172,7 @@ public abstract class AbstractBean implements IBean {
 								localMethod = currentMeth;
 							}
 						}
-					
+
 						/* If no method was found, use a random one and see what we can do... */
 						if (localMethod == null) {
 							localMethod = meths.get(0);
@@ -182,250 +181,249 @@ public abstract class AbstractBean implements IBean {
 				}
 
 				if (localMethod != null) {
-                    Object o2 = methods[i].invoke(o, new Object[] {  });
-                    Object[] params = new Object[] { o, (IBean) bean, o2 };
-                    Class<?>[] paramsType = localMethod.getParameterTypes();
+					Object o2 = methods[i].invoke(o, new Object[]{});
+					Object[] params = new Object[]{o, (IBean) bean, o2};
+					Class<?>[] paramsType = localMethod.getParameterTypes();
 
-                    try {
-                        localMethod.invoke(bean, params);
-                    } catch (IllegalArgumentException iae) {
-											if(LOGGER.isErrorEnabled()) {
-                        if (o2 != null) {
-                            LOGGER.error(
-                                    "Unable to invoke the method because values class differs : bean wait for {} where as object can provide {} in method {} ({})",
-																		new Object[] { paramsType[2].getName(), o2.getClass().getName(), localMethod.toString(), iae });
-                        } else {
-                            LOGGER.error(
-                                    "Unable to invoke the method because values class differs : bean wait for {} where as object is null in method {} ({})",
-																		new Object[] { paramsType[2].getName(), localMethod.toString(), iae });
-                        }
-											}
-                    }
-                } else {
-                    if (returnType == String.class) {
-                        mapString(bean, paramName, (String) methods[i].invoke(o, new Object[] { }));
-                    } else if (returnType == Integer.class) {
-                        mapString(bean, paramName, ((Integer) methods[i].invoke(o, new Object[] { })).toString());
-                    } else if (returnType == Date.class) {
-                        mapString(bean, paramName, DateUtils.format(((Date) methods[i].invoke(o, new Object[] { }))));
-                    } else if (returnType == Boolean.class) {
-                        boolean bValue = ((Boolean) methods[i].invoke(o, new Object[] { })).booleanValue();
+					try {
+						localMethod.invoke(bean, params);
+					} catch (IllegalArgumentException iae) {
+						if (LOGGER.isErrorEnabled()) {
+							if (o2 != null) {
+								LOGGER.error(
+												"Unable to invoke the method because values class differs : bean wait for {} where as object can provide {} in method {} ({})",
+												new Object[]{paramsType[2].getName(), o2.getClass().getName(), localMethod.toString(), iae});
+							} else {
+								LOGGER.error(
+												"Unable to invoke the method because values class differs : bean wait for {} where as object is null in method {} ({})",
+												new Object[]{paramsType[2].getName(), localMethod.toString(), iae});
+							}
+						}
+					}
+				} else {
+					if (returnType == String.class) {
+						mapString(bean, paramName, (String) methods[i].invoke(o, new Object[]{}));
+					} else if (returnType == Integer.class) {
+						mapString(bean, paramName, ((Integer) methods[i].invoke(o, new Object[]{})).toString());
+					} else if (returnType == Date.class) {
+						mapString(bean, paramName, DateUtils.format(((Date) methods[i].invoke(o, new Object[]{}))));
+					} else if (returnType == Boolean.class) {
+						boolean bValue = ((Boolean) methods[i].invoke(o, new Object[]{})).booleanValue();
 
-                        if (bValue) {
-                            mapString(bean, paramName, "TRUE");
-                        } else {
-                            mapString(bean, paramName, "FALSE");
-                        }
-                    } else if (List.class.isAssignableFrom(returnType)) {
-                        mapList(bean, paramName, (List<?>) methods[i].invoke(o, new Object[] {  }));
-                    } else if (Map.class.isAssignableFrom(returnType)) {
-                        mapMap(bean, paramName, (Map<?, ?>) methods[i].invoke(o, new Object[] {  }));
-                    }
-                }
-            }
-        }
-    }
+						if (bValue) {
+							mapString(bean, paramName, "TRUE");
+						} else {
+							mapString(bean, paramName, "FALSE");
+						}
+					} else if (List.class.isAssignableFrom(returnType)) {
+						mapList(bean, paramName, (List<?>) methods[i].invoke(o, new Object[]{}));
+					} else if (Map.class.isAssignableFrom(returnType)) {
+						mapMap(bean, paramName, (Map<?, ?>) methods[i].invoke(o, new Object[]{}));
+					}
+				}
+			}
+		}
+	}
 
-    /**
-     * Load the prefixed methods of the class into the map
-     *
-     * @param cl the class to introspect
-     * @param lMs the method map
-     * @param prefix the methods prefix to look for
-     */
-    public static void loadLocalMethods(final Class<?> cl,
-            final Map<String, List<Method>> lMs, final String prefix) {
-        Method[] methods = cl.getMethods();
+	/**
+	 * Load the prefixed methods of the class into the map
+	 *
+	 * @param cl the class to introspect
+	 * @param lMs the method map
+	 * @param prefix the methods prefix to look for
+	 */
+	public static void loadLocalMethods(final Class<?> cl,
+					final Map<String, List<Method>> lMs, final String prefix) {
+		Method[] methods = cl.getMethods();
 
-        for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().startsWith(prefix)) {
-            	// normalize parameter name
-                String paramName = methods[i].getName().substring(prefix.length());
-                paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
-                
-                List<Method> meths = null;
-                if (lMs.get(paramName) == null) {
-                	meths = new ArrayList<Method>(1);
-                	lMs.put(paramName, meths);
-                } else {
-                	meths = lMs.get(paramName);
-                }
-                meths.add(methods[i]);
-            }
-        }
-    }
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].getName().startsWith(prefix)) {
+				// normalize parameter name
+				String paramName = methods[i].getName().substring(prefix.length());
+				paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
 
-    /**
-     * Map a list into the bean.
-     * This method is used to include String filtering
-     * @param bean the bean
-     * @param paramName the parameter name
-     * @param values the values list
-     */
-    protected static void mapList(IBean bean, String paramName, List<?> values) {
-        Attribute attr = new BasicAttribute(paramName);
+				List<Method> meths = null;
+				if (lMs.get(paramName) == null) {
+					meths = new ArrayList<Method>(1);
+					lMs.put(paramName, meths);
+				} else {
+					meths = lMs.get(paramName);
+				}
+				meths.add(methods[i]);
+			}
+		}
+	}
 
-        if (values != null) {
-            Iterator<?> iter = values.iterator();
+	/**
+	 * Map a list into the bean.
+	 * This method is used to include String filtering
+	 * @param bean the bean
+	 * @param paramName the parameter name
+	 * @param values the values list
+	 */
+	protected static void mapList(IBean bean, String paramName, List<?> values) {
+		Attribute attr = new BasicAttribute(paramName);
 
-            while (iter.hasNext()) {
-                attr.add(iter.next());
-            }
-        }
+		if (values != null) {
+			Iterator<?> iter = values.iterator();
 
-        bean.setAttribute(attr);
-    }
+			while (iter.hasNext()) {
+				attr.add(iter.next());
+			}
+		}
 
-    /**
-     * Map a structure map into the bean
-     *
-     * This method is used to filter qualified string (in the form
-     * \\{[A-Za-z0-9]+\\}.+
-     *
-     * @param bean
-     *                the bean
-     * @param paramName
-     *                the parameter name
-     * @param values
-     *                the values map
-     */
-    protected static void mapMap(IBean bean, String paramName, Map<?, ?> values) {
-        Attribute attr = new BasicAttribute(paramName);
+		bean.setAttribute(attr);
+	}
 
-        if (values != null) {
-            Iterator<?> iter = values.keySet().iterator();
+	/**
+	 * Map a structure map into the bean
+	 *
+	 * This method is used to filter qualified string (in the form
+	 * \\{[A-Za-z0-9]+\\}.+
+	 *
+	 * @param bean
+	 *                the bean
+	 * @param paramName
+	 *                the parameter name
+	 * @param values
+	 *                the values map
+	 */
+	protected static void mapMap(IBean bean, String paramName, Map<?, ?> values) {
+		Attribute attr = new BasicAttribute(paramName);
 
-            while (iter.hasNext()) {
-                String key = (String) iter.next();
-                List<?> codesValues = (List<?>) values.get(key);
-                Iterator<?> codesValuesIter = codesValues.iterator();
+		if (values != null) {
+			Iterator<?> iter = values.keySet().iterator();
 
-                while (codesValuesIter.hasNext()) {
-                    // TODO: check consistency
-                    attr.add("{" + key.trim() + "}" +
-                            ((String) codesValuesIter.next()).trim());
-                }
-            }
-        }
+			while (iter.hasNext()) {
+				String key = (String) iter.next();
+				List<?> codesValues = (List<?>) values.get(key);
+				Iterator<?> codesValuesIter = codesValues.iterator();
 
-        bean.setAttribute(attr);
-    }
+				while (codesValuesIter.hasNext()) {
+					// TODO: check consistency
+					attr.add("{" + key.trim() + "}" +
+									((String) codesValuesIter.next()).trim());
+				}
+			}
+		}
 
-    /**
-     * Map a list into the bean
-     *
-     * This method is used to include String filtering
-     *
-     * @param bean
-     *                the bean to set
-     * @param paramName
-     *                the attribute name
-     * @param value
-     *                the string value
-     */
-    protected static void mapString(IBean bean, String paramName, String value) {
-        Attribute attr = new BasicAttribute(paramName);
+		bean.setAttribute(attr);
+	}
 
-        if ((value != null) && (value.trim().length() > 0)) {
-            attr.add(value.trim());
-        }
+	/**
+	 * Map a list into the bean
+	 *
+	 * This method is used to include String filtering
+	 *
+	 * @param bean
+	 *                the bean to set
+	 * @param paramName
+	 *                the attribute name
+	 * @param value
+	 *                the string value
+	 */
+	protected static void mapString(IBean bean, String paramName, String value) {
+		Attribute attr = new BasicAttribute(paramName);
 
-        bean.setAttribute(attr);
-    }
+		if ((value != null) && (value.trim().length() > 0)) {
+			attr.add(value.trim());
+		}
 
-    /**
-     * Method implemented to bypass the default distinguish name mapping.
-     *
-     * @param t
-     *                the original attribute
-     * @param destBean
-     *                the destination
-     * @param value
-     *                the distinguish name value
-     */
-    public final void mapDistinguishName(top t, IBean destBean,
-            final String value) {
-        // Map nothing except the dn !
-        destBean.setDistinguishName(value);
-    }
+		bean.setAttribute(attr);
+	}
 
-    /**
-     * Set a bean from an LDAP entry
-     *
-     * @param entry
-     *                the LDAP entry
-     * @param baseDn
-     *                the base Dn used to set the right Dn
-     * @param c
-     *                class to instantiate
-     * @return the bean
-     * @throws NamingException
-     *                 thrown if a directory exception is encountered while
-     *                 looking at the entry
-     */
-    public static AbstractBean getInstance(final SearchResult entry,
-            final String baseDn, final Class<?> c) throws NamingException {
-        try {
-            if (entry != null) {
-                AbstractBean ab = (AbstractBean) c.newInstance();
-                String dn = entry.getName();
+	/**
+	 * Method implemented to bypass the default distinguish name mapping.
+	 *
+	 * @param t
+	 *                the original attribute
+	 * @param destBean
+	 *                the destination
+	 * @param value
+	 *                the distinguish name value
+	 */
+	public final void mapDistinguishName(top t, IBean destBean,
+					final String value) {
+		// Map nothing except the dn !
+		destBean.setDistinguishName(value);
+	}
 
-                if ((dn.length() > 0) && (dn.charAt(0) == '"') &&
-                        (dn.charAt(dn.length() - 1) == '"')) {
-                    dn = dn.substring(1, dn.length() - 1);
-                }
+	/**
+	 * Set a bean from an LDAP entry
+	 *
+	 * @param entry
+	 *                the LDAP entry
+	 * @param baseDn
+	 *                the base Dn used to set the right Dn
+	 * @param c
+	 *                class to instantiate
+	 * @return the bean
+	 * @throws NamingException
+	 *                 thrown if a directory exception is encountered while
+	 *                 looking at the entry
+	 */
+	public static AbstractBean getInstance(final SearchResult entry,
+					final String baseDn, final Class<?> c) throws NamingException {
+		try {
+			if (entry != null) {
+				AbstractBean ab = (AbstractBean) c.newInstance();
+				String dn = entry.getName();
 
-                if ((baseDn != null) && (baseDn.length() > 0)) {
-                    if (dn.length() > 0) {
-                        ab.setDistinguishName(dn + "," + baseDn);
-                    } else {
-                        ab.setDistinguishName(baseDn);
-                    }
-                } else {
-                    ab.setDistinguishName(dn);
-                }
+				if ((dn.length() > 0) && (dn.charAt(0) == '"') &&
+								(dn.charAt(dn.length() - 1) == '"')) {
+					dn = dn.substring(1, dn.length() - 1);
+				}
 
-                NamingEnumeration<?> ne = entry.getAttributes().getAll();
+				if ((baseDn != null) && (baseDn.length() > 0)) {
+					if (dn.length() > 0) {
+						ab.setDistinguishName(dn + "," + baseDn);
+					} else {
+						ab.setDistinguishName(baseDn);
+					}
+				} else {
+					ab.setDistinguishName(dn);
+				}
 
-                while (ne.hasMore()) {
-                    ab.setAttribute((Attribute) ne.next());
-                }
+				NamingEnumeration<?> ne = entry.getAttributes().getAll();
 
-                return ab;
-            } else {
-                return null;
-            }
-        } catch (InstantiationException ie) {
-            LOGGER.error(ie.toString(), ie);
-        } catch (IllegalAccessException iae) {
-            LOGGER.error(iae.toString(), iae);
-        }
+				while (ne.hasMore()) {
+					ab.setAttribute((Attribute) ne.next());
+				}
 
-        return null;
-    }
+				return ab;
+			} else {
+				return null;
+			}
+		} catch (InstantiationException ie) {
+			LOGGER.error(ie.toString(), ie);
+		} catch (IllegalAccessException iae) {
+			LOGGER.error(iae.toString(), iae);
+		}
 
-    /**
-     * Get an attribute from its name.
-     *
-     * @param id the name
-     * @return the LDAP attribute
-     */
-    public final Attribute getAttributeById(final String id) {
-        // use lower case since attribute names are case-insensitive
-        return attrs.get(id.toLowerCase());
-    }
+		return null;
+	}
 
-    /**
-     * Get the <b>first</b> value of an attribute from its name
-     * 
-     * @param id The attribute name (case insensitive)
-     * @return String The first value of the attribute, or the empty string ("")
-     * @throws NamingException
-     * @deprecated
-     */
-    public final String getAttributeValueById(final String id)
-			throws NamingException
-	{
+	/**
+	 * Get an attribute from its name.
+	 *
+	 * @param id the name
+	 * @return the LDAP attribute
+	 */
+	public final Attribute getAttributeById(final String id) {
+		// use lower case since attribute names are case-insensitive
+		return attrs.get(id.toLowerCase());
+	}
+
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 *
+	 * @param id The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 * @deprecated
+	 */
+	public final String getAttributeValueById(final String id)
+					throws NamingException {
 		return getAttributeFirstValueById(id);
 	}
 
@@ -438,8 +436,7 @@ public abstract class AbstractBean implements IBean {
 	 * @throws NamingException
 	 */
 	public final String getAttributeFirstValueById(final String id)
-			throws NamingException
-	{
+					throws NamingException {
 		List<String> allValues = getAttributeValuesById(id);
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
@@ -453,128 +450,126 @@ public abstract class AbstractBean implements IBean {
 	 * @throws NamingException
 	 */
 	public final List<String> getAttributeValuesById(final String id)
-			throws NamingException
-	{
+					throws NamingException {
 		List<String> resultsArray = new ArrayList<String>();
 
 		Attribute attribute = getAttributeById(id);
-		for (int i = 0; attribute != null && i < attribute.size(); i++)
-		{
+		for (int i = 0; attribute != null && i < attribute.size(); i++) {
 			Object value = attribute.get(i);
 			String stringValue;
-			
+
 			// convert to String because this method only returns Strings
-			if (value instanceof byte[]) stringValue = new String((byte[]) value);
-			else stringValue = value.toString();
-				
+			if (value instanceof byte[]) {
+				stringValue = new String((byte[]) value);
+			} else {
+				stringValue = value.toString();
+			}
+
 			resultsArray.add(stringValue);
 		}
 
 		return resultsArray;
 	}
 
+	/**
+	 * Get the attributes name list.
+	 *
+	 * @return the attributes list
+	 */
+	public final Set<String> getAttributesNames() {
+		return attrs.keySet();
+	}
 
-    /**
-     * Get the attributes name list.
-     *
-     * @return the attributes list
-     */
-    public final Set<String> getAttributesNames() {
-        return attrs.keySet();
-    }
+	/**
+	 * Set an attribute.
+	 * API CHANGE: Do nothing if attribute is empty
+	 *
+	 * @param attr
+	 *                the attribute to set
+	 */
+	public final void setAttribute(final Attribute attr) {
+		// use lower case since attribute names are case-insensitive
+		if (attr != null && attr.size() > 0) {
+			attrs.put(attr.getID().toLowerCase(), attr);
+		}
+	}
 
-    /**
-     * Set an attribute. 
-     * API CHANGE: Do nothing if attribute is empty 
-     *
-     * @param attr
-     *                the attribute to set
-     */
-    public final void setAttribute(final Attribute attr) {
-        // use lower case since attribute names are case-insensitive
-    	if(attr != null && attr.size() > 0) {
-            attrs.put(attr.getID().toLowerCase(), attr);
-    	}
-    }
+	/**
+	 * Default distinguish name getter.
+	 *
+	 * @return the distinguishName
+	 */
+	public final String getDistinguishName() {
+		return distinguishName;
+	}
 
-    /**
-     * Default distinguish name getter.
-     *
-     * @return the distinguishName
-     */
-    public final String getDistinguishName() {
-        return distinguishName;
-    }
-    
-    /**
-     * Distinguish name getter that makes sure to return the FULL DN (including suffix).
-     *
-     * @return the distinguishName
-     */
-    public final String getFullDistinguishedName() {
-    	if (!distinguishName.endsWith("," + Configuration.DN_REAL_ROOT)) {
-    		return distinguishName + "," + Configuration.DN_REAL_ROOT;
-    	} else {
-    		return distinguishName;
-    	}
-    }
-    
-    
-    
+	/**
+	 * Distinguish name getter that makes sure to return the FULL DN (including suffix).
+	 *
+	 * @return the distinguishName
+	 */
+	public final String getFullDistinguishedName() {
+		if (!distinguishName.endsWith("," + Configuration.DN_REAL_ROOT)) {
+			return distinguishName + "," + Configuration.DN_REAL_ROOT;
+		} else {
+			return distinguishName;
+		}
+	}
 
-    /**
-     * Default distinguishName setter.
-     *
-     * @param dn
-     *                the distinguishName to set
-     */
-    public final void setDistinguishName(final String dn) {
-        distinguishName = dn;
-    }
-    
-    public void generateDn() throws NamingException {}
+	/**
+	 * Default distinguishName setter.
+	 *
+	 * @param dn
+	 *                the distinguishName to set
+	 */
+	public final void setDistinguishName(final String dn) {
+		distinguishName = dn;
+	}
 
-    /**
-     * Bean pretty printer.
-     *
-     * @return the pretty formatted string to display
-     */
-		@Override
-    public final String toString() {
-        StringBuffer sb = new StringBuffer();
-        Iterator<String> keySetIter = attrs.keySet().iterator();
-        sb.append("dn: ").append(distinguishName).append('\n');
+	public void generateDn() throws NamingException {
+	}
 
-        while (keySetIter.hasNext()) {
-            String key = keySetIter.next();
+	/**
+	 * Bean pretty printer.
+	 *
+	 * @return the pretty formatted string to display
+	 */
+	@Override
+	public final String toString() {
+		StringBuffer sb = new StringBuffer();
+		Iterator<String> keySetIter = attrs.keySet().iterator();
+		sb.append("dn: ").append(distinguishName).append('\n');
 
-            if (attrs.get(key) != null) {
-                sb.append("=> " + key);
+		while (keySetIter.hasNext()) {
+			String key = keySetIter.next();
 
-                Object values = attrs.get(key);
+			if (attrs.get(key) != null) {
+				sb.append("=> " + key);
 
-                if (values instanceof List) {
-                    Iterator<?> valuesIter = ((List<?>) values).iterator();
+				Object values = attrs.get(key);
 
-                    while (valuesIter.hasNext()) {
-                        sb.append(" - ").append(valuesIter.next()).append("\n");
-                    }
-                } else {
-                    sb.append(" - ").append(values).append("\n");
-                }
-            }
-        }
+				if (values instanceof List) {
+					Iterator<?> valuesIter = ((List<?>) values).iterator();
 
-        return sb.toString();
-    }
+					while (valuesIter.hasNext()) {
+						sb.append(" - ").append(valuesIter.next()).append("\n");
+					}
+				} else {
+					sb.append(" - ").append(values).append("\n");
+				}
+			}
+		}
 
-    public static final Map<String, List<Method>> getLocalMethods() {
-        return localMethods;
-    }
+		return sb.toString();
+	}
 
-    public static final void setLocalMethods(Map<String, List<Method>> localMethods) {
-        AbstractBean.localMethods = localMethods;
-    }
+	public static final Map<String, List<Method>> getLocalMethods() {
+		return localMethods;
+	}
+
+	public static final void setLocalMethods(Map<String, List<Method>> localMethods) {
+		AbstractBean.localMethods = localMethods;
+	}
 
 	/**
 	 * Clone this AbstractBean object.
@@ -582,27 +577,20 @@ public abstract class AbstractBean implements IBean {
 	 * @throws java.lang.CloneNotSupportedException
 	 */
 	@Override
-	public AbstractBean clone() throws CloneNotSupportedException
-	{
-		try
-		{
+	public AbstractBean clone() throws CloneNotSupportedException {
+		try {
 			AbstractBean bean = (AbstractBean) this.getClass().newInstance();
 			bean.setDistinguishName(this.getDistinguishName());
 			Iterator<String> attributesIt = this.getAttributesNames().iterator();
 
-			while (attributesIt.hasNext())
-			{
+			while (attributesIt.hasNext()) {
 				String attributeName = attributesIt.next();
 				bean.setAttribute((Attribute) this.getAttributeById(attributeName).clone());
 			}
 			return bean;
-		}
-		catch (InstantiationException ex)
-		{
+		} catch (InstantiationException ex) {
 			throw new CloneNotSupportedException(ex.getLocalizedMessage());
-		}
-		catch (IllegalAccessException ex)
-		{
+		} catch (IllegalAccessException ex) {
 			throw new CloneNotSupportedException(ex.getLocalizedMessage());
 		}
 	}
@@ -621,6 +609,5 @@ public abstract class AbstractBean implements IBean {
 	 */
 	public static void setMetadata(ResultSetMetaData metaData) {
 		// TODO Auto-generated method stub
-		
 	}
 }

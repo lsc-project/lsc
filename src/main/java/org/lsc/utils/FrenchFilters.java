@@ -90,7 +90,7 @@ public final class FrenchFilters {
 		"Ü", "Ý", "ý",
 		"ç"
 	};
-	
+
 	/**
 	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLES
 	 */
@@ -120,7 +120,7 @@ public final class FrenchFilters {
 		"Y", "y",
 		"c"
 	};
-	
+
 	/** Allowed chars for words separator */
 	private static final String[] SEPARATORS_FOR_UPPER_BEGINNING_NAME = {
 		" ",
@@ -129,7 +129,7 @@ public final class FrenchFilters {
 		"-",
 		"_"
 	};
-	
+
 	/**
 	 * Bad word separators chars for emails
 	 */
@@ -150,7 +150,7 @@ public final class FrenchFilters {
 		";", ":", "_",
 		","
 	};
-	
+
 	/**
 	 * Chars of remplactement for telephone numbers
 	 */
@@ -159,32 +159,32 @@ public final class FrenchFilters {
 		"", "", "", "",
 		"", "", ""
 	};
-	
+
 	/** Regexp for formatting first names */
 	private static final String REGEXP_FOR_FISRTNAME =
 					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
 					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç' -]+";
-					
+
 	/** Regexp for formatting last names */
 	private static final String REGEXP_FOR_LASTNAME =
 					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
 					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç'\"\\s -_]+";
-					
+
 	/**
 	 * Bad char separators for IDs
 	 */
 	private static final String[] BAD_SEPARATOR_FOR_ID = {" ", "'", "\"", "-"};
-	
+
 	/**
 	 * Chars authorized for passwords
 	 * (No O,0 and I,1,l etc.)
 	 */
 	private static final String GOOD_PASSWORD =
 					"abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789/";
-	
+
 	/** Authorized characters for numerical identifier. */
 	private static final String REGEXP_FOR_NUMERICAL_ID = "-?[0123456789]+";
-	
+
 	/** Authorized characters for numerical identifier. */
 	private static final String REGEXP_FOR_ALPHA_NUMERICAL_ID =
 					"[\\p{Alpha}0123456789]+";
@@ -230,10 +230,11 @@ public final class FrenchFilters {
 					final String[] destRegexp) {
 		String dest = src;
 
-		for (int i = 0; i < srcRegexp.length; i++) {
-			dest = dest.replaceAll(srcRegexp[i], destRegexp[i]);
+		if (srcRegexp.length == destRegexp.length) {
+			for (int i = 0; i < srcRegexp.length; i++) {
+				dest = dest.replaceAll(srcRegexp[i], destRegexp[i]);
+			}
 		}
-
 		return dest;
 	}
 
@@ -368,6 +369,16 @@ public final class FrenchFilters {
 		return tmp;
 	}
 
+	public static String filterLengthString(final String sn, int length) {
+		String tmp = filterBadChars(sn);
+
+		if (tmp.length() > length) {
+			return tmp.substring(0, length);
+		} else {
+			return tmp;
+		}
+	}
+
 	/**
 	 * Returns the uid on 14 chars and well formatted
 	 *
@@ -375,13 +386,7 @@ public final class FrenchFilters {
 	 * @return the filtered uid
 	 */
 	public static String filterUid(final String sn) {
-		String tmp = filterBadChars(sn);
-
-		if (tmp.length() > 14) {
-			return tmp.substring(0, 14);
-		} else {
-			return tmp;
-		}
+		return filterLengthString(sn, 14);
 	}
 
 	/**
@@ -391,13 +396,18 @@ public final class FrenchFilters {
 	 * @return the filtered short uid
 	 */
 	public static String filterShortUid(final String sn) {
-		String tmp = filterBadChars(sn);
+		return filterLengthString(sn, 8);
+	}
 
-		if (tmp.length() > 8) {
-			return tmp.substring(0, 8);
-		} else {
-			return tmp;
+	public static String filterStringRegExp(final String value, final String regexp)
+					throws CharacterUnacceptedException {
+		String tmp = toUpperCaseAllBeginningNames(filterName(value));
+
+		if (!tmp.matches(regexp)) {
+			throw new CharacterUnacceptedException(tmp);
 		}
+
+		return tmp;
 	}
 
 	/**
@@ -410,13 +420,7 @@ public final class FrenchFilters {
 	 */
 	public static String filterLastName(final String name)
 					throws CharacterUnacceptedException {
-		String tmp = toUpperCaseAllBeginningNames(filterName(name));
-
-		if (!tmp.matches(REGEXP_CHARACTERS)) {
-			throw new CharacterUnacceptedException(tmp);
-		}
-
-		return tmp;
+		return filterStringRegExp(name, REGEXP_CHARACTERS);
 	}
 
 	/**
@@ -429,13 +433,7 @@ public final class FrenchFilters {
 	 */
 	public static String filterFirstName(final String name)
 					throws CharacterUnacceptedException {
-		String tmp = toUpperCaseAllBeginningNames(filterName(name));
-
-		if (!tmp.matches(REGEXP_FOR_FISRTNAME)) {
-			throw new CharacterUnacceptedException(tmp);
-		}
-
-		return tmp;
+		return filterStringRegExp(name, REGEXP_FOR_FISRTNAME);
 	}
 
 	/**
@@ -448,9 +446,21 @@ public final class FrenchFilters {
 	 */
 	public static String filterGivenName(final String oldValue)
 					throws CharacterUnacceptedException {
-		String tmp = toUpperCaseAllBeginningNames(filterName(oldValue));
+		return filterStringRegExp(oldValue, REGEXP_FOR_FISRTNAME);
+	}
 
-		if (!tmp.matches(REGEXP_FOR_FISRTNAME)) {
+	/**
+	 * Filter all alphanumeric characters.
+	 * @param value the original value
+	 * @return the filtered string
+	 * @throws CharacterUnacceptedException thrown if an rejected character
+	 * is encountered during analysis
+	 */
+	public static String filterAlpha(final String value)
+					throws CharacterUnacceptedException {
+		String tmp = value.trim();
+
+		if (!tmp.matches(REGEXP_FOR_ALPHA_NUMERICAL_ID)) {
 			throw new CharacterUnacceptedException(tmp);
 		}
 
@@ -521,24 +531,6 @@ public final class FrenchFilters {
 		String tmp = String.valueOf(n);
 
 		if (!tmp.matches(REGEXP_FOR_NUMERICAL_ID)) {
-			throw new CharacterUnacceptedException(tmp);
-		}
-
-		return tmp;
-	}
-
-	/**
-	 * Filter all alphanumeric characters.
-	 * @param value the original value
-	 * @return the filtered string
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
-	 */
-	public static String filterAlpha(final String value)
-					throws CharacterUnacceptedException {
-		String tmp = value.trim();
-
-		if (!tmp.matches(REGEXP_FOR_ALPHA_NUMERICAL_ID)) {
 			throw new CharacterUnacceptedException(tmp);
 		}
 

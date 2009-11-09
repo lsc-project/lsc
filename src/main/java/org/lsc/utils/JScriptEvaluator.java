@@ -68,97 +68,95 @@ import org.slf4j.LoggerFactory;
  */
 public final class JScriptEvaluator {
 
-    // Logger
-    private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
+	// Logger
+	private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
-    /** The private unique instance. */
-    private static JScriptEvaluator instance;
-    /** The precompiled Javascript cache. */
-    private Map<String, Script> cache;
-    /** The local Rhino context. */
-    private Context cx;
+	/** The private unique instance. */
+	private static JScriptEvaluator instance;
 
-    /**
-     * Default private constructor.
-     * 
-     * @see getInstance()
-     */
-    private JScriptEvaluator() {
-        cache = new HashMap<String, Script>();
-        // When removing 1.5 compatibility prefer enterContext() method
-        cx = new ContextFactory().enter();
-    }
+	/** The precompiled Javascript cache. */
+	private Map<String, Script> cache;
 
-    /**
-     * Local instance getter.
-     * 
-     * @return the instance
-     */
-    public static JScriptEvaluator getInstance() {
-        if (instance == null) {
-            instance = new JScriptEvaluator();
-        }
-        return instance;
-    }
+	/** The local Rhino context. */
+	private Context cx;
 
-    /**
-     * Please consider using evalToString
-     * @deprecated
-     * @param expression
-     * @param params
-     * @return the string result
-     */
-    public static String eval(final String expression,
-            final Map<String, Object> params) {
-        return evalToString( expression, params);
-    }
-
-    /**
-     * Evaluate your Ecma script expression (manage pre-compiled expressions
-     * cache).
-     * 
-     * @param expression
-     *                the expression to eval
-     * @param params
-     *                the keys are the name used in the
-     * @return the evaluation result
-     */
-    public static String evalToString(final String expression,
-            final Map<String, Object> params) {
-	Object result = getInstance().instanceEval(expression, params);
-
-	if (result == null) {
-		return null;
+	/**
+	 * Default private constructor.
+	 *
+	 * @see getInstance()
+	 */
+	private JScriptEvaluator() {
+		cache = new HashMap<String, Script>();
+		// When removing 1.5 compatibility prefer enterContext() method
+		cx = new ContextFactory().enter();
 	}
 
-        return Context.toString(result);
-    }
+	/**
+	 * Local instance getter.
+	 *
+	 * @return the instance
+	 */
+	public static JScriptEvaluator getInstance() {
+		if (instance == null) {
+			instance = new JScriptEvaluator();
+		}
+		return instance;
+	}
 
-    @SuppressWarnings("unchecked")
-    public static List<String> evalToStringList(final String expression,
-			final Map<String, Object> params)
-	{
+	/**
+	 * Please consider using evalToString
+	 * @deprecated
+	 * @param expression
+	 * @param params
+	 * @return the string result
+	 */
+	public static String eval(final String expression,
+					final Map<String, Object> params) {
+		return evalToString(expression, params);
+	}
+
+	/**
+	 * Evaluate your Ecma script expression (manage pre-compiled expressions
+	 * cache).
+	 *
+	 * @param expression
+	 *                the expression to eval
+	 * @param params
+	 *                the keys are the name used in the
+	 * @return the evaluation result
+	 */
+	public static String evalToString(final String expression,
+					final Map<String, Object> params) {
 		Object result = getInstance().instanceEval(expression, params);
-		
+
+		if (result == null) {
+			return null;
+		}
+
+		return Context.toString(result);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<String> evalToStringList(final String expression,
+					final Map<String, Object> params) {
+		Object result = getInstance().instanceEval(expression, params);
+
 		// First try to convert to Array, else to List, and finally to String
-		try
-		{
+		try {
 			Object[] resultsRealArray = (Object[]) Context.jsToJava(result, Object[].class);
 			List<String> resultsArray = new ArrayList<String>();
-			for (Object resultValue : resultsRealArray)
-			{
+			for (Object resultValue : resultsRealArray) {
 				resultsArray.add(resultValue.toString());
 			}
 			return resultsArray;
-		}
-		catch (Exception e) {} // try next approach
-		
-		try
-		{
+		} catch (Exception e) {
+		} // try next approach
+
+		try {
 			Object resultsArray = Context.jsToJava(result, List.class);
 			return (List<String>) resultsArray;
-		}
-		catch (Exception e) {} // try next approach
+		} catch (Exception e) {
+		} // try next approach
 
 		List<String> resultsArray = new ArrayList<String>();
 		String resultAsString = Context.toString(result);
@@ -168,75 +166,77 @@ public final class JScriptEvaluator {
 		return resultsArray;
 	}
 
-    public static Boolean evalToBoolean(final String expression, final Map<String, Object> params) {
-        return Context.toBoolean(getInstance().instanceEval(expression, params));
-    }
+	public static Boolean evalToBoolean(final String expression, final Map<String, Object> params) {
+		return Context.toBoolean(getInstance().instanceEval(expression, params));
+	}
 
-    /**
-     * Local instance evaluation.
-     * 
-     * @param expression
-     *                the expression to eval
-     * @param params
-     *                the keys are the name used in the
-     * @return the evaluation result
-     */
+	/**
+	 * Local instance evaluation.
+	 *
+	 * @param expression
+	 *                the expression to eval
+	 * @param params
+	 *                the keys are the name used in the
+	 * @return the evaluation result
+	 */
 	private Object instanceEval(final String expression,
-            final Map<String, Object> params) {
-        Script script = null;
-        Scriptable scope = cx.initStandardObjects();
+					final Map<String, Object> params) {
+		Script script = null;
+		Scriptable scope = cx.initStandardObjects();
 
-       	Map<String, Object> localParams = new HashMap<String, Object>();
-       	if (params != null) localParams.putAll(params);
-        
-        /* Allow to have shorter names for function in the package org.lsc.utils.directory */
-        String expressionImport = 
-            "with (new JavaImporter(Packages.org.lsc.utils.directory)) {" + 
-            "with (new JavaImporter(Packages.org.lsc.utils)) { " + expression + "}}";
+		Map<String, Object> localParams = new HashMap<String, Object>();
+		if (params != null) {
+			localParams.putAll(params);
+		}
 
-        if (cache.containsKey(expressionImport)) {
-            script = cache.get(expressionImport);
-        } else {
-            script = cx.compileString(expressionImport, "<cmd>", 1, null);
-            cache.put(expressionImport, script);
-        }
+		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
+		String expressionImport =
+						"with (new JavaImporter(Packages.org.lsc.utils.directory)) {" +
+						"with (new JavaImporter(Packages.org.lsc.utils)) { " + expression + "}}";
 
-        // add LDAP interface for destination if necessary
-        if (expression.contains("ldap.") && !localParams.containsKey("ldap")) {
-        	ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-        	dstSjs.setJndiServices(JndiServices.getDstInstance());
-        	localParams.put("ldap", dstSjs);
-        }
+		if (cache.containsKey(expressionImport)) {
+			script = cache.get(expressionImport);
+		} else {
+			script = cx.compileString(expressionImport, "<cmd>", 1, null);
+			cache.put(expressionImport, script);
+		}
 
-        // add LDAP interface for source if necessary
-        if (expression.contains("srcLdap.") && !localParams.containsKey("srcLdap")) {
-        	JndiServices srcInstance = JndiServices.getSrcInstance();
-        	if (srcInstance != null) {
-        		ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-        		srcSjs.setJndiServices(srcInstance);
-        		localParams.put("srcLdap", srcSjs);
-        	}
-        }
+		// add LDAP interface for destination if necessary
+		if (expression.contains("ldap.") && !localParams.containsKey("ldap")) {
+			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
+			dstSjs.setJndiServices(JndiServices.getDstInstance());
+			localParams.put("ldap", dstSjs);
+		}
 
-        if (localParams != null) {
-	        Iterator<String> paramsIter = localParams.keySet().iterator();
-	        while (paramsIter.hasNext()) {
-	            String name = paramsIter.next();
-	            Object value = localParams.get(name);
-	
-	            Object jsObj = Context.javaToJS(value, scope);
-	            ScriptableObject.putProperty(scope, name, jsObj);
-	        }
-        }
+		// add LDAP interface for source if necessary
+		if (expression.contains("srcLdap.") && !localParams.containsKey("srcLdap")) {
+			JndiServices srcInstance = JndiServices.getSrcInstance();
+			if (srcInstance != null) {
+				ScriptableJndiServices srcSjs = new ScriptableJndiServices();
+				srcSjs.setJndiServices(srcInstance);
+				localParams.put("srcLdap", srcSjs);
+			}
+		}
 
-        Object ret = null;
-        try {
-                ret = script.exec(cx, scope);
-        } catch (Exception e) {
-                LOGGER.error(e.toString(), e);
-		return null;
-        }
+		if (localParams != null) {
+			Iterator<String> paramsIter = localParams.keySet().iterator();
+			while (paramsIter.hasNext()) {
+				String name = paramsIter.next();
+				Object value = localParams.get(name);
 
-        return ret;
-    }
+				Object jsObj = Context.javaToJS(value, scope);
+				ScriptableObject.putProperty(scope, name, jsObj);
+			}
+		}
+
+		Object ret = null;
+		try {
+			ret = script.exec(cx, scope);
+		} catch (Exception e) {
+			LOGGER.error(e.toString(), e);
+			return null;
+		}
+
+		return ret;
+	}
 }

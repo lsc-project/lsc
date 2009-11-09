@@ -70,25 +70,29 @@ public final class FrenchFilters {
 	/** Array of accents and cedillas */
 	private static final String[] REGEXP_ACCENTS_CEDILLAS = {
 		"À", "á", "Á",
-		"&agrave;",
-		"&agrave;", "â",
-		"Â", "ä", "Ä",
-		"&eacute;",
-		"&eacute;",
-		"&egrave;",
-		"&egrave;", "ê",
-		"Ê", "ë", "Ë",
-		"È", "É", "é",
-		"è", "Ì", "ì",
-		"Í", "í", "î",
-		"Î", "ï", "Ï",
-		"Ò", "ò", "Ó",
-		"ó", "ô", "Ô",
-		"ö", "Ö", "ù",
-		"Ù", "Ú", "ú",
-		"û", "Û", "ü",
-		"Ü", "Ý", "ý",
-		"ç"
+		"&agrave;", "&agrave;",
+		"â", "Â",
+		"ä", "Ä",
+		"&eacute;", "&eacute;",
+		"&egrave;", "&egrave;",
+		"ê", "Ê",
+		"ë", "Ë",
+		"È", "É",
+		"é", "è",
+		"Ì", "ì",
+		"Í", "í",
+		"î", "Î",
+		"ï", "Ï",
+		"Ò", "ò", 
+		"Ó", "ó",
+		"ô", "Ô",
+		"ö", "Ö",
+		"ù", "Ù",
+		"Ú", "ú",
+		"û", "Û",
+		"ü", "Ü",
+		"Ý", "ý",
+		"ç", "Ç"
 	};
 
 	/**
@@ -118,7 +122,7 @@ public final class FrenchFilters {
 		"u", "U",
 		"u", "U",
 		"Y", "y",
-		"c"
+		"c", "C"
 	};
 
 	/** Allowed chars for words separator */
@@ -333,7 +337,7 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * M&eacute;thode permettant de formatter le nouveau sn!
+	 * Format a sn
 	 * @param sn
 	 * @return the filtered surname
 	 * @throws CharacterUnacceptedException thrown if an rejected character

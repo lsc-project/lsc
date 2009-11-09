@@ -76,8 +76,12 @@ public class JScriptEvaluatorTest extends TestCase {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
-		assertNull(JScriptEvaluator.evalToString("src.get()", table));
-		assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
+		try {
+			assertNull(JScriptEvaluator.evalToString("src.get()", table));
+			assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
+		} catch(Exception e) {
+			//Ignore exceptions, so they are not displayed in any output
+		}
 	}
 
 	public void testOk2() {

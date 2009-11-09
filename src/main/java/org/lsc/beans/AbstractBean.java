@@ -189,20 +189,17 @@ public abstract class AbstractBean implements IBean {
                     try {
                         localMethod.invoke(bean, params);
                     } catch (IllegalArgumentException iae) {
+											if(LOGGER.isErrorEnabled()) {
                         if (o2 != null) {
                             LOGGER.error(
-                                    "Unable to invoke the method because values class differs : bean wait for " +
-                                    paramsType[2].getName() +
-                                    " where as object can provide " +
-                                    o2.getClass().getName() + " in method " +
-                                    localMethod.toString() + " (" + iae + ")", iae);
+                                    "Unable to invoke the method because values class differs : bean wait for {} where as object can provide {} in method {} ({})",
+																		new Object[] { paramsType[2].getName(), o2.getClass().getName(), localMethod.toString(), iae });
                         } else {
                             LOGGER.error(
-                                    "Unable to invoke the method because values class differs : bean wait for " +
-                                    paramsType[2].getName() +
-                                    " where as object is null " + " in method " +
-                                    localMethod.toString() + " (" + iae + ")", iae);
+                                    "Unable to invoke the method because values class differs : bean wait for {} where as object is null in method {} ({})",
+																		new Object[] { paramsType[2].getName(), localMethod.toString(), iae });
                         }
+											}
                     }
                 } else {
                     if (returnType == String.class) {

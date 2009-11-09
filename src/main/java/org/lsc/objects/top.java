@@ -143,7 +143,7 @@ public class top extends LscObject {
 								localMethod.invoke(this, new Object[] { paramsToUse });
 							} catch (IllegalArgumentException e) {
 								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
-								LOGGER.error(e.toString());
+								LOGGER.error(e.toString(), e);
 							}
 						} else {
 							LOGGER.error("Unable to manage translation from {} to {} for {} !", new Object[] { returnType, toReturnTypes[0], paramName });

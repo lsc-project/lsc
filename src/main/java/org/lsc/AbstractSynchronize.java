@@ -81,539 +81,533 @@ import org.lsc.utils.LSCStructuralLogger;
  */
 public abstract class AbstractSynchronize {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
-    /** List of configured options. */
-    private Options options;
+	/** List of configured options. */
+	private Options options;
 
-    /**
-     * This is the flag to prevent entries add operation in the target
-     * directory.
-     */
-    private boolean nocreate = false;
+	/**
+	 * This is the flag to prevent entries add operation in the target
+	 * directory.
+	 */
+	private boolean nocreate = false;
 
-    /**
-     * This is the flag to prevent entries update operation in the target
-     * directory.
-     */
-    private boolean noupdate = false;
+	/**
+	 * This is the flag to prevent entries update operation in the target
+	 * directory.
+	 */
+	private boolean noupdate = false;
 
-    /**
-     * This is the flag to prevent entries delete operation in the target
-     * directory.
-     */
-    private boolean nodelete = false;
-    
-    /**
-     * This is the flag to prevent entries modrdn operation in the target
-     * directory.
-     */
-    private boolean nomodrdn = false;
+	/**
+	 * This is the flag to prevent entries delete operation in the target
+	 * directory.
+	 */
+	private boolean nodelete = false;
 
-    
-    /**
-     * Default constructor.
-     */
-    protected AbstractSynchronize() {
-        options = new Options();
-        options.addOption("nc", "nocreate", false, "Don't create any entry");
-        options.addOption("nu", "noupdate", false, "Don't update");
-        options.addOption("nd", "nodelete", false, "Don't delete");
-        options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
-        options.addOption("n", "dryrun", false, "Don't update the directory at all");
-    }
+	/**
+	 * This is the flag to prevent entries modrdn operation in the target
+	 * directory.
+	 */
+	private boolean nomodrdn = false;
 
-    /**
-     * Clean the destination LDAP directory (delete objects not present in source).
-     * 
-     * @param syncName
-     *                the synchronization name
-     * @param srcService
-     *                the source service (JDBC or JNDI)
-     * @param dstJndiService
-     *                the jndi destination service
-     */
-    protected final void clean2Ldap(final String syncName,
-    		final Class<AbstractBean> taskBeanClass,
-            final ISrcService srcService,
-            final IJndiDstService dstJndiService) {
+	/**
+	 * Default constructor.
+	 */
+	protected AbstractSynchronize() {
+		options = new Options();
+		options.addOption("nc", "nocreate", false, "Don't create any entry");
+		options.addOption("nu", "noupdate", false, "Don't update");
+		options.addOption("nd", "nodelete", false, "Don't delete");
+		options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
+		options.addOption("n", "dryrun", false, "Don't update the directory at all");
+	}
 
-    	// Get list of all entries from the destination
-        Iterator<Entry<String, LscAttributes>> ids = null;
-        try {
-            ids = dstJndiService.getListPivots().entrySet().iterator();
-        } catch (NamingException e) {
-            LOGGER.error("Error getting list of IDs in the destination for task " + syncName);
-            LOGGER.debug(e.toString(), e);
-            return;
-        }
-        
-        // Make sure we have at least one entry to work on
-        if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant destination (no IDs found)");
-            return;
-        }
+	/**
+	 * Clean the destination LDAP directory (delete objects not present in source).
+	 *
+	 * @param syncName
+	 *                the synchronization name
+	 * @param srcService
+	 *                the source service (JDBC or JNDI)
+	 * @param dstJndiService
+	 *                the jndi destination service
+	 */
+	protected final void clean2Ldap(final String syncName,
+					final Class<AbstractBean> taskBeanClass,
+					final ISrcService srcService,
+					final IJndiDstService dstJndiService) {
 
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
+		// Get list of all entries from the destination
+		Iterator<Entry<String, LscAttributes>> ids = null;
+		try {
+			ids = dstJndiService.getListPivots().entrySet().iterator();
+		} catch (NamingException e) {
+			LOGGER.error("Error getting list of IDs in the destination for task " + syncName);
+			LOGGER.debug(e.toString(), e);
+			return;
+		}
 
-        int countAll = 0;
-        int countError = 0;
-        int countInitiated = 0;
-        int countCompleted = 0;
-        
-        JndiModifications jm = null;
-        
-        /** Hash table to pass objects into JavaScript condition */
-        Map<String, Object> conditionObjects = null;
-        
-        AbstractBean taskBean;
-        
-        // Loop on all entries in the destination and delete them if they're not found in the source
-        while (ids.hasNext()) {
-            countAll++;
+		// Make sure we have at least one entry to work on
+		if (!ids.hasNext()) {
+			LOGGER.error("Empty or non existant destination (no IDs found)");
+			return;
+		}
 
-            Entry<String, LscAttributes> id = ids.next();
+		ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
-            try {
-        		try {
-        			taskBean = taskBeanClass.newInstance();
-        		} catch (InstantiationException e) {
-                    LOGGER.error("Error while instanciating taskbean class: " + e, e);
-                    return;
-        		} catch (IllegalAccessException e) {
-                    LOGGER.error("Error while instanciating taskbean class: " + e, e);
-                    return;
-        		}
-                // Search for the corresponding object in the source
-            	taskBean = srcService.getBean(taskBean, id);
+		int countAll = 0;
+		int countError = 0;
+		int countInitiated = 0;
+		int countCompleted = 0;
 
-                // If we didn't find the object in the source, delete it in the destination
-                if (taskBean == null) {
-                    // Retrieve condition to evaluate before deleting
-                    Boolean doDelete = null;
-                    String conditionString = syncOptions.getDeleteCondition();
- 
-                    // Don't use JavaScript evaluator for primitive cases
-                    if (conditionString.matches("true")) {
-                    	doDelete = true;
-                    } else if (conditionString.matches("false")) {
-                    	doDelete = false;
-                    } else {
-                        // If condition is based on dstBean, retrieve the full object from destination
-	                    if (conditionString.contains("dstBean")) {
+		JndiModifications jm = null;
 
-	                        // Log an error if the bean could not be retrieved! This shouldn't happen.
-	                        if (taskBean == null) {
-	                            LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
-	                            countError++;
-	                            continue;
-	                        }
+		/** Hash table to pass objects into JavaScript condition */
+		Map<String, Object> conditionObjects = null;
 
-	                        // Put the bean in a map to pass to JavaScript evaluator
-	                        conditionObjects = new HashMap<String, Object>();
-	                        conditionObjects.put("dstBean", taskBean);	                    	
-	                    }
+		AbstractBean taskBean;
 
-	                    // Evaluate if we have to do something
-	                    doDelete = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
-                    }
-                    
-                    // Only create delete modification object if (or):
-                    // 	1)	the condition is true (obviously)
-                    //	2)	the condition is false and we would delete an object 
-                    //		and "nodelete" was specified in command line options
-                    // Case 2 is for debugging purposes.
-                    if (doDelete || nodelete) {
-                        jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
-                        jm.setDistinguishName(id.getKey());
-                        
-                        // if "nodelete" was specified in command line options,
-                        // or if the condition is false,
-                        // log action for debugging purposes and continue
-                        if (nodelete) {
-                            logShouldAction(jm, id, syncName);
-                            continue;
-                        }
-                    } else {
-                    	continue;
-                    }
-                    
-                    // if we got here, we have a modification to apply - let's do it!
-                    countInitiated++;
-                    if (JndiServices.getDstInstance().apply(jm)) {
-                        countCompleted++;
-                        logAction(jm, id, syncName);
-                    } else {
-                        countError++;
-                        logActionError(jm, id, null);
-                    }
-                }
-            } catch (CommunicationException e) { 
-                // we lost the connection to the source or destination, stop everything!
-                countError++;
-                LOGGER.error("Connection lost! Aborting.");
-                logActionError(jm, id, e);
-                return;
-            } catch (NamingException e) {
-                countError++;
-                LOGGER.error("Unable to delete object " + id.getKey() + " (" + e.toString() + ")", e);
-                logActionError(jm, id, e);
-            }
-        }
-        
-        String totalsLogMessage = I18n.getMessage(null,
-                "org.lsc.messages.NB_CHANGES", new Object[] {
-                countAll, countInitiated, countCompleted,
-                countError });
-        if (countError > 0) {
-        	LSCStructuralLogger.GLOBAL.error(totalsLogMessage);
-        } else {
-        	LSCStructuralLogger.GLOBAL.warn(totalsLogMessage);
-        }
-    }
+		// Loop on all entries in the destination and delete them if they're not found in the source
+		while (ids.hasNext()) {
+			countAll++;
 
-    /**
-     * Synchronize the destination LDAP directory (create and update objects from source).
-     * 
-     * @param syncName
-     *                the synchronization name
-     * @param srcService
-     *                the source service (JDBC or JNDI or anything else)
-     * @param dstService
-     *                the JNDI destination service
-     * @param objectBean
-     * @param customLibrary
-     */
-    protected final void synchronize2Ldap(final String syncName,
-            final ISrcService srcService,
-            final IJndiDstService dstService,
-            final Class<AbstractBean> objectBean,
-            final Object customLibrary) {
+			Entry<String, LscAttributes> id = ids.next();
 
-        // Get list of all entries from the source
-        Iterator<Entry<String, LscAttributes>> ids = null;
-        try {
-        	ids = srcService.getListPivots().entrySet().iterator();
-        } catch(Exception e) {
-            LOGGER.error("Error getting list of IDs in the source for task " + syncName);
-            if (LOGGER.isDebugEnabled()) e.printStackTrace();
-            return;
-        }
+			try {
+				try {
+					taskBean = taskBeanClass.newInstance();
+				} catch (InstantiationException e) {
+					LOGGER.error("Error while instanciating taskbean class: " + e, e);
+					return;
+				} catch (IllegalAccessException e) {
+					LOGGER.error("Error while instanciating taskbean class: " + e, e);
+					return;
+				}
+				// Search for the corresponding object in the source
+				taskBean = srcService.getBean(taskBean, id);
 
-        // Make sure we have at least one entry to work on
-        if (!ids.hasNext()) {
-            LOGGER.error("Empty or non existant source (no IDs found)");
-            return;
-        }
+				// If we didn't find the object in the source, delete it in the destination
+				if (taskBean == null) {
+					// Retrieve condition to evaluate before deleting
+					Boolean doDelete = null;
+					String conditionString = syncOptions.getDeleteCondition();
 
-        int countAll = 0;
-        int countError = 0;
-        int countInitiated = 0;
-        int countCompleted = 0;
+					// Don't use JavaScript evaluator for primitive cases
+					if (conditionString.matches("true")) {
+						doDelete = true;
+					} else if (conditionString.matches("false")) {
+						doDelete = false;
+					} else {
+						// If condition is based on dstBean, retrieve the full object from destination
+						if (conditionString.contains("dstBean")) {
 
-        JndiModifications jm = null;
-        ISyncOptions syncOptions = this.getSyncOptions(syncName);
-        // store method to obtain source bean
-        AbstractBean srcBean = null;
-        AbstractBean dstBean = null;
+							// Log an error if the bean could not be retrieved! This shouldn't happen.
+							if (taskBean == null) {
+								LOGGER.error("Could not retrieve the object " + id.getKey() + " from the directory!");
+								countError++;
+								continue;
+							}
 
-        /** Hash table to pass objects into JavaScript condition */
-        Map<String, Object> conditionObjects = null;
-        
-        /* Loop on all entries in the source and add or update them in the destination */
-        while (ids.hasNext()) {
-            countAll++;
+							// Put the bean in a map to pass to JavaScript evaluator
+							conditionObjects = new HashMap<String, Object>();
+							conditionObjects.put("dstBean", taskBean);
+						}
 
-            Entry<String, LscAttributes> id = ids.next();
-            LOGGER.debug("Synchronizing " + syncName + " for " + id.getValue());
+						// Evaluate if we have to do something
+						doDelete = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
+					}
 
-            try {
-                srcBean = srcService.getBean(objectBean.newInstance(), id);
+					// Only create delete modification object if (or):
+					// 	1)	the condition is true (obviously)
+					//	2)	the condition is false and we would delete an object
+					//		and "nodelete" was specified in command line options
+					// Case 2 is for debugging purposes.
+					if (doDelete || nodelete) {
+						jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, syncName);
+						jm.setDistinguishName(id.getKey());
 
-                /* Log an error if the source object could not be retrieved! This shouldn't happen. */
-                if(srcBean == null) {
-                    countError++;
-                    LOGGER.error("Unable to get object for id=" + id.getKey());
-                    continue;
-                }
+						// if "nodelete" was specified in command line options,
+						// or if the condition is false,
+						// log action for debugging purposes and continue
+						if (nodelete) {
+							logShouldAction(jm, id, syncName);
+							continue;
+						}
+					} else {
+						continue;
+					}
 
-                // Search destination for matching object
-                dstBean = dstService.getBean(id);
-                
-                // Calculate operation that would be performed
-                JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, customLibrary);
-                
-                // Retrieve condition to evaluate before creating/updating 
-                Boolean applyCondition = null;
-                String conditionString = syncOptions.getCondition(modificationType);
+					// if we got here, we have a modification to apply - let's do it!
+					countInitiated++;
+					if (JndiServices.getDstInstance().apply(jm)) {
+						countCompleted++;
+						logAction(jm, id, syncName);
+					} else {
+						countError++;
+						logActionError(jm, id, null);
+					}
+				}
+			} catch (CommunicationException e) {
+				// we lost the connection to the source or destination, stop everything!
+				countError++;
+				LOGGER.error("Connection lost! Aborting.");
+				logActionError(jm, id, e);
+				return;
+			} catch (NamingException e) {
+				countError++;
+				LOGGER.error("Unable to delete object " + id.getKey() + " (" + e.toString() + ")", e);
+				logActionError(jm, id, e);
+			}
+		}
 
-                // Don't use JavaScript evaluator for primitive cases
-                if (conditionString.matches("true")) {
-                	applyCondition = true;
-                } else if (conditionString.matches("false")) {
-                	applyCondition = false;
-                } else {
-                    conditionObjects = new HashMap<String, Object>();
-                    conditionObjects.put("dstBean", dstBean);
-                    conditionObjects.put("srcBean", srcBean);
-                    
-                    // Evaluate if we have to do something
-                    applyCondition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
-                }
-                
-                // Only evaluate modifications if (or):
-                // 	1) the condition is true (obviously)
-                //	2) the condition is false and
-                //		a) we would create an object and "nocreate" was specified in command line options
-                //		b) we would update an object and "noupdate" was specified in command line options
-                // Case 2 is for debugging purposes.
-                Boolean calculateForDebugOnly = (modificationType==JndiModificationType.ADD_ENTRY && nocreate) 
-                		|| (modificationType==JndiModificationType.MODIFY_ENTRY && noupdate)
-                		|| (modificationType==JndiModificationType.MODRDN_ENTRY && (nomodrdn || noupdate));
-                
-                if (applyCondition || calculateForDebugOnly) {
-                	jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
-                	
-                	// if there's nothing to do, skip to the next object
-                	if (jm==null)
-                	{
-                		continue;
-                	}
-                	
-                	// apply condition is false, log action for debugging purposes and forget
-                	if (!applyCondition || calculateForDebugOnly) {
-                		logShouldAction(jm, id, syncName);
-                		continue;
-                	}
-                } else {
-                	continue;
-                }
+		String totalsLogMessage = I18n.getMessage(null,
+						"org.lsc.messages.NB_CHANGES", new Object[]{
+							countAll, countInitiated, countCompleted,
+							countError});
+		if (countError > 0) {
+			LSCStructuralLogger.GLOBAL.error(totalsLogMessage);
+		} else {
+			LSCStructuralLogger.GLOBAL.warn(totalsLogMessage);
+		}
+	}
 
-                // if we got here, we have a modification to apply - let's do it!
-                countInitiated++;
-                if (JndiServices.getDstInstance().apply(jm)) {
-                    countCompleted++;
-                    logAction(jm, id, syncName);
-                } else {
-                    countError++;
-                    logActionError(jm, id, null);
-                }
-            } catch (CommunicationException e) { 
-                // we lost the connection to the source or destination, stop everything!
-                countError++;
-                LOGGER.error("Connection lost! Aborting.");
-                logActionError(jm, id, e);
-                return;
-            } catch (ExceptionInInitializerError e) { 
-                // this type of exception should stop everything, too
-                countError++;
-                throw e;
-            } catch (RuntimeException e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Exception e) {
-                countError++;
-                logActionError(jm, id, e);
-            } catch (Throwable e) {
-                countError++;
-                logActionError(jm, id, e);
-            }
-        }
+	/**
+	 * Synchronize the destination LDAP directory (create and update objects from source).
+	 *
+	 * @param syncName
+	 *                the synchronization name
+	 * @param srcService
+	 *                the source service (JDBC or JNDI or anything else)
+	 * @param dstService
+	 *                the JNDI destination service
+	 * @param objectBean
+	 * @param customLibrary
+	 */
+	protected final void synchronize2Ldap(final String syncName,
+					final ISrcService srcService,
+					final IJndiDstService dstService,
+					final Class<AbstractBean> objectBean,
+					final Object customLibrary) {
 
-        String totalsLogMessage = I18n.getMessage(null,
-                "org.lsc.messages.NB_CHANGES", new Object[] {
-                countAll, countInitiated, countCompleted,
-                countError });
-        if (countError > 0) {
-        	LSCStructuralLogger.DESTINATION.error(totalsLogMessage);
-        } else {
-        	LSCStructuralLogger.DESTINATION.warn(totalsLogMessage);
-        }
-    }
+		// Get list of all entries from the source
+		Iterator<Entry<String, LscAttributes>> ids = null;
+		try {
+			ids = srcService.getListPivots().entrySet().iterator();
+		} catch (Exception e) {
+			LOGGER.error("Error getting list of IDs in the source for task " + syncName);
+			if (LOGGER.isDebugEnabled()) {
+				e.printStackTrace();
+			}
+			return;
+		}
 
-    /**
-     * Log all effective action.
-     * 
-     * @param jm
-     *                List of modification to do on the Ldap server
-     * @param identifier
-     *                object identifier
-     * @param except
-     *                synchronization process name
-     */
-    protected final void logActionError(final JndiModifications jm,
-            final Entry<String, LscAttributes> identifier, final Throwable except) {
-        Object str = null;
+		// Make sure we have at least one entry to work on
+		if (!ids.hasNext()) {
+			LOGGER.error("Empty or non existant source (no IDs found)");
+			return;
+		}
 
-        if (except != null) {
-            str = except.toString();
-        } else {
-            str = "";
-        }
+		int countAll = 0;
+		int countError = 0;
+		int countInitiated = 0;
+		int countCompleted = 0;
 
-        LOGGER.error(I18n.getMessage(null,
-                "org.lsc.messages.SYNC_ERROR", new Object[] {
-                (jm != null ? jm.getDistinguishName() : ""), str, "", except }), except);
+		JndiModifications jm = null;
+		ISyncOptions syncOptions = this.getSyncOptions(syncName);
+		// store method to obtain source bean
+		AbstractBean srcBean = null;
+		AbstractBean dstBean = null;
 
-        if (jm != null) {
-            LOGGER.error(jm.toString());
-        }
-    }
+		/** Hash table to pass objects into JavaScript condition */
+		Map<String, Object> conditionObjects = null;
 
-    /**
-     * Log all effective action.
-     * 
-     * @param jm
-     *                List of modification to do on the Ldap server
-     * @param id
-     *                object identifier
-     * @param syncName
-     *                synchronization process name
-     */
-    protected final void logAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
-            final String syncName) {
-        switch (jm.getOperation()) {
-        case ADD_ENTRY:
-            LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.ADD_ENTRY", new Object[] { jm.getDistinguishName(),
-                    syncName }));
+		/* Loop on all entries in the source and add or update them in the destination */
+		while (ids.hasNext()) {
+			countAll++;
 
-            break;
+			Entry<String, LscAttributes> id = ids.next();
+			LOGGER.debug("Synchronizing " + syncName + " for " + id.getValue());
 
-        case MODIFY_ENTRY:
-            LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.UPDATE_ENTRY", new Object[] {
-                    jm.getDistinguishName(), syncName }));
+			try {
+				srcBean = srcService.getBean(objectBean.newInstance(), id);
 
-            break;
+				/* Log an error if the source object could not be retrieved! This shouldn't happen. */
+				if (srcBean == null) {
+					countError++;
+					LOGGER.error("Unable to get object for id=" + id.getKey());
+					continue;
+				}
 
-        case MODRDN_ENTRY:
-            LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.RENAME_ENTRY", new Object[] {
-                    jm.getDistinguishName(), syncName }));
+				// Search destination for matching object
+				dstBean = dstService.getBean(id);
 
-            break;
+				// Calculate operation that would be performed
+				JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, customLibrary);
 
-        case DELETE_ENTRY:
-            LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.REMOVE_ENTRY", new Object[] {
-                    jm.getDistinguishName(), syncName }));
+				// Retrieve condition to evaluate before creating/updating
+				Boolean applyCondition = null;
+				String conditionString = syncOptions.getCondition(modificationType);
 
-            break;
+				// Don't use JavaScript evaluator for primitive cases
+				if (conditionString.matches("true")) {
+					applyCondition = true;
+				} else if (conditionString.matches("false")) {
+					applyCondition = false;
+				} else {
+					conditionObjects = new HashMap<String, Object>();
+					conditionObjects.put("dstBean", dstBean);
+					conditionObjects.put("srcBean", srcBean);
 
-        default:
-            LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-                    "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
-                    jm.getDistinguishName(), syncName }));
-        }
+					// Evaluate if we have to do something
+					applyCondition = JScriptEvaluator.evalToBoolean(conditionString, conditionObjects);
+				}
 
-        LSCStructuralLogger.DESTINATION.info(jm.toString());
-    }
+				// Only evaluate modifications if (or):
+				// 	1) the condition is true (obviously)
+				//	2) the condition is false and
+				//		a) we would create an object and "nocreate" was specified in command line options
+				//		b) we would update an object and "noupdate" was specified in command line options
+				// Case 2 is for debugging purposes.
+				Boolean calculateForDebugOnly = (modificationType == JndiModificationType.ADD_ENTRY && nocreate) || (modificationType == JndiModificationType.MODIFY_ENTRY && noupdate) || (modificationType == JndiModificationType.MODRDN_ENTRY && (nomodrdn || noupdate));
 
+				if (applyCondition || calculateForDebugOnly) {
+					jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
 
-    /**
-     * @param jm
-     * @param id
-     * @param syncName
-     * 
-     */
-    protected final void logShouldAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
-            final String syncName) {
-        switch (jm.getOperation()) {
-        case ADD_ENTRY:
-            LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object " + jm.getDistinguishName());
-            break;
+					// if there's nothing to do, skip to the next object
+					if (jm == null) {
+						continue;
+					}
 
-        case MODIFY_ENTRY:
-            LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object " + jm.getDistinguishName());
-            break;
+					// apply condition is false, log action for debugging purposes and forget
+					if (!applyCondition || calculateForDebugOnly) {
+						logShouldAction(jm, id, syncName);
+						continue;
+					}
+				} else {
+					continue;
+				}
 
-        case MODRDN_ENTRY:
-            LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object " + jm.getDistinguishName());
-            break;
+				// if we got here, we have a modification to apply - let's do it!
+				countInitiated++;
+				if (JndiServices.getDstInstance().apply(jm)) {
+					countCompleted++;
+					logAction(jm, id, syncName);
+				} else {
+					countError++;
+					logActionError(jm, id, null);
+				}
+			} catch (CommunicationException e) {
+				// we lost the connection to the source or destination, stop everything!
+				countError++;
+				LOGGER.error("Connection lost! Aborting.");
+				logActionError(jm, id, e);
+				return;
+			} catch (ExceptionInInitializerError e) {
+				// this type of exception should stop everything, too
+				countError++;
+				throw e;
+			} catch (RuntimeException e) {
+				countError++;
+				logActionError(jm, id, e);
+			} catch (Exception e) {
+				countError++;
+				logActionError(jm, id, e);
+			} catch (Throwable e) {
+				countError++;
+				logActionError(jm, id, e);
+			}
+		}
 
-        case DELETE_ENTRY:
-            LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object " + jm.getDistinguishName());
-            break;
+		String totalsLogMessage = I18n.getMessage(null,
+						"org.lsc.messages.NB_CHANGES", new Object[]{
+							countAll, countInitiated, countCompleted,
+							countError});
+		if (countError > 0) {
+			LSCStructuralLogger.DESTINATION.error(totalsLogMessage);
+		} else {
+			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage);
+		}
+	}
 
-        default:
-            LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
-                    "org.lsc.messages.UNKNOWN_CHANGE", new Object[] {
-                    jm.getDistinguishName(), syncName }));
-        }
+	/**
+	 * Log all effective action.
+	 *
+	 * @param jm
+	 *                List of modification to do on the Ldap server
+	 * @param identifier
+	 *                object identifier
+	 * @param except
+	 *                synchronization process name
+	 */
+	protected final void logActionError(final JndiModifications jm,
+					final Entry<String, LscAttributes> identifier, final Throwable except) {
+		Object str = null;
 
-        LSCStructuralLogger.DESTINATION.debug(jm.toString());
-    }
+		if (except != null) {
+			str = except.toString();
+		} else {
+			str = "";
+		}
 
-    /**
-     * Parse the command line arguments according the selected filter.
-     * 
-     * @param args
-     *                the command line arguments
-     * 
-     * @return the parsing status
-     */
-    public final boolean parseOptions(final String[] args) {
-        CommandLineParser parser = new GnuParser();
-        try {
-            CommandLine cmdLine = parser.parse(options, args);
-            if (cmdLine.getOptions().length > 0) {
-                if (cmdLine.hasOption("nc")) {
-                    nocreate = true;
-                }
-                if (cmdLine.hasOption("nu")) {
-                    noupdate = true;
-                }
-                if (cmdLine.hasOption("nd")) {
-                    nodelete = true;
-                }
-                if (cmdLine.hasOption("nr")) {
-                    nomodrdn = true;
-                }
-                if (cmdLine.hasOption("n")) {
-                    nocreate = true;
-                    noupdate = true;
-                    nodelete = true;
-                    nomodrdn = true;
-                }
-            } else {
-                return false;
-            }
-        } catch (final ParseException e) {
-            LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
-            return false;
-        }
-        return true;
-    }
+		LOGGER.error(I18n.getMessage(null,
+						"org.lsc.messages.SYNC_ERROR", new Object[]{
+							(jm != null ? jm.getDistinguishName() : ""), str, "", except}), except);
 
-    /**
-     * Get options against which the command line is analyzed.
-     * 
-     * @return the options
-     */
-    public final Options getOptions() {
-        return options;
-    }
+		if (jm != null) {
+			LOGGER.error(jm.toString());
+		}
+	}
 
-    /**
-     * @param syncName
-     * @return ISyncOptions syncoptions object for the specified syncName
-     */
-    protected ISyncOptions getSyncOptions(final String syncName) { 
-        ISyncOptions syncOptions = SyncOptionsFactory.getInstance(syncName);
+	/**
+	 * Log all effective action.
+	 *
+	 * @param jm
+	 *                List of modification to do on the Ldap server
+	 * @param id
+	 *                object identifier
+	 * @param syncName
+	 *                synchronization process name
+	 */
+	protected final void logAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
+					final String syncName) {
+		switch (jm.getOperation()) {
+			case ADD_ENTRY:
+				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+								"org.lsc.messages.ADD_ENTRY", new Object[]{jm.getDistinguishName(),
+									syncName}));
 
-        if (syncOptions == null) {
-            if ((syncName == null) || (syncName.length() == 0)) {
-                LOGGER.info("No SyncOptions configuration. "
-                        + "Defaulting to Force policy ...");
-            } else {
-                LOGGER.warn("Unknown '" + syncName
-                        + "' synchronization task name. "
-                        + "Defaulting to Force policy ...");
-            }
-            syncOptions = new ForceSyncOptions();
-        }
+				break;
 
-        return syncOptions;
-    }
+			case MODIFY_ENTRY:
+				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+								"org.lsc.messages.UPDATE_ENTRY", new Object[]{
+									jm.getDistinguishName(), syncName}));
+
+				break;
+
+			case MODRDN_ENTRY:
+				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+								"org.lsc.messages.RENAME_ENTRY", new Object[]{
+									jm.getDistinguishName(), syncName}));
+
+				break;
+
+			case DELETE_ENTRY:
+				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+								"org.lsc.messages.REMOVE_ENTRY", new Object[]{
+									jm.getDistinguishName(), syncName}));
+
+				break;
+
+			default:
+				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
+								"org.lsc.messages.UNKNOWN_CHANGE", new Object[]{
+									jm.getDistinguishName(), syncName}));
+		}
+
+		LSCStructuralLogger.DESTINATION.info(jm.toString());
+	}
+
+	/**
+	 * @param jm
+	 * @param id
+	 * @param syncName
+	 *
+	 */
+	protected final void logShouldAction(final JndiModifications jm, final Entry<String, LscAttributes> id,
+					final String syncName) {
+		switch (jm.getOperation()) {
+			case ADD_ENTRY:
+				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object " + jm.getDistinguishName());
+				break;
+
+			case MODIFY_ENTRY:
+				LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object " + jm.getDistinguishName());
+				break;
+
+			case MODRDN_ENTRY:
+				LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object " + jm.getDistinguishName());
+				break;
+
+			case DELETE_ENTRY:
+				LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object " + jm.getDistinguishName());
+				break;
+
+			default:
+				LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
+								"org.lsc.messages.UNKNOWN_CHANGE", new Object[]{
+									jm.getDistinguishName(), syncName}));
+		}
+
+		LSCStructuralLogger.DESTINATION.debug(jm.toString());
+	}
+
+	/**
+	 * Parse the command line arguments according the selected filter.
+	 *
+	 * @param args
+	 *                the command line arguments
+	 *
+	 * @return the parsing status
+	 */
+	public final boolean parseOptions(final String[] args) {
+		CommandLineParser parser = new GnuParser();
+		try {
+			CommandLine cmdLine = parser.parse(options, args);
+			if (cmdLine.getOptions().length > 0) {
+				if (cmdLine.hasOption("nc")) {
+					nocreate = true;
+				}
+				if (cmdLine.hasOption("nu")) {
+					noupdate = true;
+				}
+				if (cmdLine.hasOption("nd")) {
+					nodelete = true;
+				}
+				if (cmdLine.hasOption("nr")) {
+					nomodrdn = true;
+				}
+				if (cmdLine.hasOption("n")) {
+					nocreate = true;
+					noupdate = true;
+					nodelete = true;
+					nomodrdn = true;
+				}
+			} else {
+				return false;
+			}
+		} catch (final ParseException e) {
+			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Get options against which the command line is analyzed.
+	 *
+	 * @return the options
+	 */
+	public final Options getOptions() {
+		return options;
+	}
+
+	/**
+	 * @param syncName
+	 * @return ISyncOptions syncoptions object for the specified syncName
+	 */
+	protected ISyncOptions getSyncOptions(final String syncName) {
+		ISyncOptions syncOptions = SyncOptionsFactory.getInstance(syncName);
+
+		if (syncOptions == null) {
+			if ((syncName == null) || (syncName.length() == 0)) {
+				LOGGER.info("No SyncOptions configuration. " + "Defaulting to Force policy ...");
+			} else {
+				LOGGER.warn("Unknown '" + syncName + "' synchronization task name. " + "Defaulting to Force policy ...");
+			}
+			syncOptions = new ForceSyncOptions();
+		}
+
+		return syncOptions;
+	}
 }

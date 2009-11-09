@@ -75,10 +75,9 @@ import org.lsc.utils.directory.LDAP;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-public class Ldap2LdapSyncTest extends TestCase
-{
-	private final String TASK_NAME = "ldap2ldapTestTask";
+public class Ldap2LdapSyncTest extends TestCase {
 
+	private final String TASK_NAME = "ldap2ldapTestTask";
 	private final String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
 	private final String DN_ADD_DST = "cn=CN0003,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	private final String DN_MODIFY_SRC = "cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
@@ -90,8 +89,7 @@ public class Ldap2LdapSyncTest extends TestCase
 	private final String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 
 	@Override
-	protected void setUp() throws Exception
-	{
+	protected void setUp() throws Exception {
 		super.setUp();
 
 		// force the locale to en_US to avoid I18N errors with foreign LANG
@@ -106,26 +104,24 @@ public class Ldap2LdapSyncTest extends TestCase
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException
-	{
+	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
 		attributeValues.put("sn", "SN0001");
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
-		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." +  TASK_NAME + ".srcService"));
+		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." + TASK_NAME + ".srcService"));
 		AbstractBean srcBean = srcService.getBean(new personBean(), ids.entrySet().iterator().next());
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
-		
+
 		// OpenDS automatically hashes the password using seeded SHA,
 		// so we can't test the full value, just the beginning.
 		// This is sufficient to confirm we can read the attribute as a String.
 		assertTrue(userPassword.startsWith("{SSHA}"));
 	}
 
-	public final void testSyncLdap2Ldap() throws Exception
-	{
-		
+	public final void testSyncLdap2Ldap() throws Exception {
+
 		// make sure the contents of the directory are as we expect to begin with
 
 		// check MODRDN
@@ -140,7 +136,7 @@ public class Ldap2LdapSyncTest extends TestCase
 		checkAttributeIsEmpty(DN_ADD_SRC, "telephoneNumber");
 		checkAttributeValue(DN_ADD_SRC, "description", "Number three's descriptive text");
 		checkAttributeValue(DN_ADD_SRC, "sn", "SN0003");
-		
+
 		// check MODIFY
 		assertTrue(JndiServices.getSrcInstance().exists(DN_MODIFY_SRC));
 		assertTrue(JndiServices.getDstInstance().exists(DN_MODIFY_DST));
@@ -158,26 +154,25 @@ public class Ldap2LdapSyncTest extends TestCase
 
 		// check the results of the synchronization
 		checkSyncResultsFirstPass();
-		
+
 		// sync again to confirm convergence
 		launchSyncCleanTask(TASK_NAME, true, false);
 
 		// check the results of the synchronization
-		checkSyncResultsSecondPass();		
+		checkSyncResultsSecondPass();
 
 		// sync a third time to make sure nothing changed
 		launchSyncCleanTask(TASK_NAME, true, false);
 
 		// check the results of the synchronization
-		checkSyncResultsSecondPass();		
+		checkSyncResultsSecondPass();
 	}
 
-	private final void checkSyncResultsFirstPass() throws Exception
-	{
+	private final void checkSyncResultsFirstPass() throws Exception {
 		List<String> attributeValues = null;
-		
+
 		checkSyncResultsCommon();
-		
+
 		// check ADD
 
 		// the telephoneNumber was created
@@ -189,22 +184,21 @@ public class Ldap2LdapSyncTest extends TestCase
 		// initials wasn't created, since it's not in the write attributes list
 		attributeValues = new ArrayList<String>();
 		checkAttributeValues(DN_ADD_DST, "initials", attributeValues);
-		
+
 		// mail was created, although it's not in the source object
 		attributeValues = new ArrayList<String>();
 		attributeValues.add("ok@domain.net");
 		checkAttributeValues(DN_ADD_DST, "mail", attributeValues);
 
 	}
-	
-	private final void checkSyncResultsSecondPass() throws Exception
-	{
+
+	private final void checkSyncResultsSecondPass() throws Exception {
 		List<String> attributeValues = null;
-		
+
 		checkSyncResultsCommon();
-		
+
 		// check MODRDN
-		
+
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_MODRDN_DST_AFTER, "secretCN0002"));
 
@@ -221,7 +215,7 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues.add("789987");
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "telephoneNumber", attributeValues);
 
-		
+
 		// check ADD
 
 		// the telephoneNumber was merged
@@ -234,11 +228,9 @@ public class Ldap2LdapSyncTest extends TestCase
 
 	}
 
-	
-	private final void checkSyncResultsCommon() throws Exception
-	{
+	private final void checkSyncResultsCommon() throws Exception {
 		List<String> attributeValues = null;
-		
+
 		// check MODRDN
 		assertTrue(JndiServices.getDstInstance().exists(DN_MODRDN_DST_AFTER));
 		assertFalse(JndiServices.getDstInstance().exists(DN_MODRDN_DST_BEFORE));
@@ -284,9 +276,8 @@ public class Ldap2LdapSyncTest extends TestCase
 		attributeValues = new ArrayList<String>();
 		checkAttributeValues(DN_MODIFY_DST, "seeAlso", attributeValues);
 	}
-	
-	public final void testCleanLdap2Ldap() throws Exception
-	{
+
+	public final void testCleanLdap2Ldap() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
 		assertTrue(JndiServices.getDstInstance().exists(DN_DELETE_DST));
 		assertFalse(JndiServices.getSrcInstance().exists(DN_DELETE_SRC));
@@ -299,20 +290,17 @@ public class Ldap2LdapSyncTest extends TestCase
 	}
 
 	private void launchSyncCleanTask(String taskName, boolean doSync,
-			boolean doClean) throws Exception
-	{
+					boolean doClean) throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-		if (doSync)
-		{
+		if (doSync) {
 			syncType.add(taskName);
 		}
 
-		if (doClean)
-		{
+		if (doClean) {
 			cleanType.add(taskName);
 		}
 
@@ -321,12 +309,11 @@ public class Ldap2LdapSyncTest extends TestCase
 	}
 
 	private void checkAttributeIsEmpty(String dn, String attributeName)
-			throws NamingException
-	{
+					throws NamingException {
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		assertNull(sr.getAttributes().get(attributeName));
 	}
-	
+
 	/**
 	 * Get an object from the destination directory, and check that a given attribute
 	 * has one value exactly that matches the value provided.
@@ -339,17 +326,16 @@ public class Ldap2LdapSyncTest extends TestCase
 	 * @param value The value expected in the attribute.
 	 * @throws NamingException
 	 */
-	private void checkAttributeValue(String dn, String attributeName, String value) throws NamingException
-	{
+	private void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		assertNotNull(at);
 		assertEquals(1, at.size());
-		
+
 		String realValue = (String) at.get();
 		assertTrue(realValue.equals(value));
 	}
-	
+
 	/**
 	 * Get an object from the destination directory, and check that a given attribute
 	 * has n values exactly that matches the values provided.
@@ -362,29 +348,25 @@ public class Ldap2LdapSyncTest extends TestCase
 	 * @param value The value expected in the attribute.
 	 * @throws NamingException
 	 */
-	private void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException
-	{
+	private void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		if (expectedValues.size() > 0) {
 			assertNotNull(at);
 		} else {
-			if (at==null) {
+			if (at == null) {
 				assertEquals(0, expectedValues.size());
 				return;
 			}
 		}
 		assertEquals(expectedValues.size(), at.size());
-		
+
 		// check that each value matches one on one
-		for (String expectedValue : expectedValues)
-		{
+		for (String expectedValue : expectedValues) {
 			assertTrue(at.contains(expectedValue));
 		}
-		for (int i=0; i<at.size(); i++)
-		{
-			assertTrue(expectedValues.contains(at.get(i)));
+		for (int i = 0; i < at.size(); i++) {
+			assertTrue(expectedValues.contains((String)at.get(i)));
 		}
 	}
-
 }

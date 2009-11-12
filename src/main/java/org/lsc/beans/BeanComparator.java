@@ -172,8 +172,9 @@ public final class BeanComparator {
 		JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, dstBean, customLibrary);
 
 		// if there's nothing to do, just return
-		if (modificationType == null)
+		if (modificationType == null) {
 			return null;
+		}
 
 		// prepare JndiModifications object
 		jm = new JndiModifications(modificationType, syncOptions.getTaskName());
@@ -186,7 +187,7 @@ public final class BeanComparator {
 
 			case ADD_ENTRY:
 			case MODIFY_ENTRY:
-				jm = getAddModifyEntry(jm, syncOptions, srcBean, itmBean, dstBean, customLibrary, condition);
+				jm = getAddModifyEntry(jm, syncOptions, srcBean, itmBean, dstBean, customLibrary);
 				break;
 
 			case MODRDN_ENTRY:
@@ -207,13 +208,15 @@ public final class BeanComparator {
 	{
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
-		if (dstBean != null)
+		if (dstBean != null) {
 			return dstBean.getDistinguishName();
-
+		}
+		
 		// If the itmBean has a DN set, use that (this is where JavaScript
 		// generated DNs come from)
-		if (itmBean != null && itmBean.getDistinguishName() != null)
+		if (itmBean != null && itmBean.getDistinguishName() != null) {
 			return itmBean.getDistinguishName();
+		}
 
 		// At this stage, we don't have a real DN to use.
 
@@ -257,9 +260,8 @@ public final class BeanComparator {
 	 */
 	private static JndiModifications getAddModifyEntry(
 			JndiModifications modOperation, ISyncOptions syncOptions,
-			IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary,
-			boolean condition) throws NamingException,
-			CloneNotSupportedException
+			IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary)
+		throws NamingException, CloneNotSupportedException
 	{
 
 		String dn = modOperation.getDistinguishName();
@@ -267,17 +269,21 @@ public final class BeanComparator {
 
 		// This method only handles ADD or MODIFY
 		JndiModificationType modType = modOperation.getOperation();
-		if (modType != JndiModificationType.ADD_ENTRY && modType != JndiModificationType.MODIFY_ENTRY)
+		if (modType != JndiModificationType.ADD_ENTRY && modType != JndiModificationType.MODIFY_ENTRY) {
 			return null;
-
+		}
+		
 		// Set up JavaScript objects
 		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
-		if (srcBean != null)
+		if (srcBean != null) {
 			javaScriptObjects.put("srcBean", srcBean);
-		if (dstBean != null)
+		}
+		if (dstBean != null) {
 			javaScriptObjects.put("dstBean", dstBean);
-		if (customLibrary != null)
+		}
+		if (customLibrary != null) {
 			javaScriptObjects.put("custom", customLibrary);
+		}
 
 		// We're going to iterate over the list of attributes we may write
 		Set<String> writeAttributes = getWriteAttributes(syncOptions, itmBean);
@@ -295,10 +301,12 @@ public final class BeanComparator {
 			Attribute dstAttr = (dstBean != null ? dstBean.getAttributeById(attrName) : null);
 
 			// Add attributes to JavaScript objects
-			if (srcAttr != null)
+			if (srcAttr != null) {
 				javaScriptObjects.put("srcAttr", srcAttr);
-			if (dstAttr != null)
+			}
+			if (dstAttr != null) {
 				javaScriptObjects.put("dstAttr", dstAttr);
+			}
 
 			// Use a list of values for easier handling
 			Set<Object> srcAttrValues = SetUtils.attributeToSet(srcAttr);
@@ -378,15 +386,16 @@ public final class BeanComparator {
 				javaScriptObjects.remove("dstAttr");
 		}
 
+		JndiModifications result = null;
 		if (modificationItems.size() != 0) {
-			modOperation.setModificationItems(modificationItems);
+			result = modOperation;
+			result.setModificationItems(modificationItems);
 		}
 		else {
-			modOperation = null;
 			LOGGER.debug("Entry \"" + dn + "\" will not be written to the destination");
 		}
 
-		return modOperation;
+		return result;
 	}
 
 	/**
@@ -410,14 +419,18 @@ public final class BeanComparator {
 	private static int getRequiredOperationForAttribute(
 			Set<Object> toSetAttrValues, Set<Object> currentAttrValues)
 	{
-		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0)
+		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0) {
 			return DirContext.REMOVE_ATTRIBUTE;
-		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0)
+		}
+		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0) {
 			return DirContext.ADD_ATTRIBUTE;
-		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0)
+		}
+		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0) {
 			return DirContext.REPLACE_ATTRIBUTE;
-		else
+		}
+		else {
 			return 0;
+		}
 	}
 
 	/**

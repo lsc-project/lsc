@@ -296,7 +296,7 @@ public class LDAP {
 			props.put(Context.REFERRAL, "ignore");
 
 			// use clean URL
-			String bindUrl = url.contains("?") ? url.substring(0, url.indexOf("?")) : url;
+			String bindUrl = url.contains("?") ? url.substring(0, url.indexOf('?')) : url;
 			props.put(Context.PROVIDER_URL, bindUrl);
 
 			// authentication properties

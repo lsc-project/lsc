@@ -59,6 +59,11 @@ import javax.naming.directory.BasicAttribute;
 public class SetUtils
 {
 
+	// Utility class, no public constructor
+	private SetUtils()
+	{
+	}
+
 	/**
 	 * Return a new HashSet containing all the Objects that are an Attribute's
 	 * values.
@@ -71,7 +76,9 @@ public class SetUtils
 	public static Set<Object> attributeToSet(Attribute attr)
 			throws NamingException
 	{
-		if (attr == null || attr.size() == 0) return new HashSet<Object>();
+		if (attr == null || attr.size() == 0) {
+			return new HashSet<Object>();
+		}
 
 		Set<Object> attrValues = new HashSet<Object>(attr.size());
 		NamingEnumeration<?> ne = attr.getAll();
@@ -94,8 +101,9 @@ public class SetUtils
 	{
 		Attribute ret = new BasicAttribute(attrName);
 
-		if (missingValues == null || missingValues.size() == 0)
+		if (missingValues == null || missingValues.size() == 0) {
 			return ret;
+		}
 
 		for (Object value : missingValues) {
 			ret.add(value);
@@ -121,19 +129,22 @@ public class SetUtils
 		Set<Object> missingNeedles = new HashSet<Object>();
 
 		// no needles? they can't be missing then.
-		if (needles == null)
+		if (needles == null) {
 			return missingNeedles;
+		}
 
 		// no haystack? all needles must be missing then.
-		if (haystack == null)
+		if (haystack == null) {
 			return needles;
+		}
 
 		for (Object needle : needles) {
 			ByteBuffer needleBuff = null;
 
 			// use a byte buffer is needle is binary
-			if (needle.getClass().isAssignableFrom(byte[].class))
+			if (needle.getClass().isAssignableFrom(byte[].class)) {
 				needleBuff = ByteBuffer.wrap((byte[]) needle);
+			}
 
 			boolean foundInHaystack = false;
 			for (Object haystackValue : haystack) {
@@ -146,10 +157,12 @@ public class SetUtils
 					// make sure we have a byte buffer for the needle too
 					if (needleBuff == null) {
 						// if needle is binary, make this haystack value binary
-						if (needle.getClass().isAssignableFrom(String.class))
+						if (needle.getClass().isAssignableFrom(String.class)) {
 							needleBuff = ByteBuffer.wrap(((String) needle).getBytes());
-						else
+						}
+						else {
 							continue;
+						}
 					}
 				}
 
@@ -159,26 +172,31 @@ public class SetUtils
 				if (needleBuff != null) {
 					// make sure we have a byte buffer for haystack value too
 					if (haystackValueBuff == null) {
-						if (haystackValue.getClass().isAssignableFrom(String.class))
+						if (haystackValue.getClass().isAssignableFrom(String.class)) {
 							haystackValueBuff = ByteBuffer.wrap(((String) haystackValue).getBytes());
-						else
+						}
+						else {
 							continue;
+						}
 					}
 
 					// binary comparison
-					if (haystackValueBuff.compareTo(needleBuff) == 0)
+					if (haystackValueBuff.compareTo(needleBuff) == 0) {
 						foundInHaystack = true;
+					}
 				}
 				else {
 					// fall back to standard compare (works well for String,
 					// int, boolean, etc)
-					if (haystackValue.equals(needle))
+					if (haystackValue.equals(needle)) {
 						foundInHaystack = true;
+					}
 				}
 			}
 
-			if (!foundInHaystack)
+			if (!foundInHaystack) {
 				missingNeedles.add(needle);
+			}
 		}
 
 		return missingNeedles;
@@ -210,16 +228,19 @@ public class SetUtils
 	public static boolean doSetsMatch(Set<Object> srcAttrValues, Set<Object> dstAttrValues)
 	{
 		// make sure value counts are the same
-		if (srcAttrValues.size() != dstAttrValues.size())
+		if (srcAttrValues.size() != dstAttrValues.size()) {
 			return false;
+		}
 
 		// check if there are any values in srcAttr not in dstAttr
-		if (!SetUtils.setContainsAll(dstAttrValues, srcAttrValues))
+		if (!SetUtils.setContainsAll(dstAttrValues, srcAttrValues)) {
 			return false;
+		}
 
 		// check if there are any values in dstAttr not in srcAttr
-		if (!SetUtils.setContainsAll(srcAttrValues, dstAttrValues))
+		if (!SetUtils.setContainsAll(srcAttrValues, dstAttrValues)) {
 			return false;
+		}
 
 		// looks ok!
 		return true;

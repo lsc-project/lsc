@@ -129,8 +129,8 @@ public class I18n {
 		Locale currentLocale = null;
 		String lang = System.getenv("LANG");
 		if (lang != null) {
-			if (lang.indexOf(".") > 0) {
-				lang = lang.substring(0, lang.indexOf("."));
+			if (lang.indexOf('.') > 0) {
+				lang = lang.substring(0, lang.indexOf('.'));
 			}
 		} else {
 			logger.info("No environemental LANG variable found. Defaulting to en_US.");

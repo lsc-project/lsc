@@ -156,10 +156,10 @@ public final class JndiServices {
 				tlsResponse = (StartTlsResponse) ctx.extendedOperation(new StartTlsRequest());
 				tlsResponse.negotiate();
 			} catch (IOException e) {
-				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty("java.naming.provider.url"), e);
+				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty(Context.PROVIDER_URL), e);
 				throw e;
 			} catch (NamingException e) {
-				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty("java.naming.provider.url"), e);
+				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty(Context.PROVIDER_URL), e);
 				throw e;
 			}
 
@@ -175,7 +175,7 @@ public final class JndiServices {
 
 		/* get LDAP naming context */
 		try {
-			namingContext = new LDAPUrl((String) ctx.getEnvironment().get("java.naming.provider.url"));
+			namingContext = new LDAPUrl((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
 		} catch (MalformedURLException e) {
 			LOGGER.error(e.toString(), e);
 			throw new NamingException(e.getMessage());
@@ -202,13 +202,14 @@ public final class JndiServices {
 	private void logConnectingTo(Properties connProps) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Connecting to LDAP server ");
-		sb.append(connProps.getProperty("java.naming.provider.url"));
+		sb.append(connProps.getProperty(Context.PROVIDER_URL));
 
 		// log identity used to connect
-		if (connProps.getProperty(Context.SECURITY_AUTHENTICATION) == null || connProps.getProperty(Context.SECURITY_AUTHENTICATION) == "none") {
+		if (connProps.getProperty(Context.SECURITY_AUTHENTICATION) == null || connProps.getProperty(Context.SECURITY_AUTHENTICATION).equals("none")) {
 			sb.append(" anonymously");
 		} else {
-			sb.append(" as " + connProps.getProperty(Context.SECURITY_PRINCIPAL));
+			sb.append(" as ");
+			sb.append(connProps.getProperty(Context.SECURITY_PRINCIPAL));
 		}
 
 		// using TLS ?
@@ -628,9 +629,9 @@ public final class JndiServices {
 
 		// connect to directory
 		Hashtable props = ctx.getEnvironment();
-		String baseUrl = (String) props.get("java.naming.provider.url");
-		baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
-		props.put("java.naming.provider.url", baseUrl);
+		String baseUrl = (String) props.get(Context.PROVIDER_URL);
+		baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
+		props.put(Context.PROVIDER_URL, baseUrl);
 		DirContext schemaCtx = new InitialLdapContext(props, null);
 
 		// find schema entry

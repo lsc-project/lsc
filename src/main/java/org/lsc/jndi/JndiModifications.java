@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -173,8 +174,8 @@ public class JndiModifications {
      * @return the hash
      * @throws NamingException
      */
-    public HashMap<String, List<String>> getModificationsItemsByHash() {
-        HashMap<String,  List<String>> result = new HashMap<String,  List<String>>();
+    public Map<String, List<String>> getModificationsItemsByHash() {
+        Map<String,  List<String>> result = new HashMap<String,  List<String>>();
         List<ModificationItem> mi = this.getModificationItems();
         
         if(mi != null) {

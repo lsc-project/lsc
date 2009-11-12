@@ -260,7 +260,7 @@ public class LdapObjectClass {
 			
 			// ignore attributes with names containing a "-"
 			// see http://tools.lsc-project.org/issues/show/31
-			if (attributeName.indexOf("-") != -1) {
+			if (attributeName.indexOf('-') != -1) {
 				badAttributeName(attributeName);
 				continue;
 			}

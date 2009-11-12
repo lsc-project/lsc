@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -123,7 +124,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 
 				Iterator<String> iterator = attributes.iterator();
 
-				HashMap<String, List<String>> modifications = jm.getModificationsItemsByHash();
+				Map<String, List<String>> modifications = jm.getModificationsItemsByHash();
 
 				String attributeName = null;
 				List<String> values = null;

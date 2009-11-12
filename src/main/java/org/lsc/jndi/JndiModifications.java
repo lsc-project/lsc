@@ -174,8 +174,8 @@ public class JndiModifications {
      * @return the hash
      * @throws NamingException
      */
-    public Map<String, List<String>> getModificationsItemsByHash() {
-        Map<String,  List<String>> result = new HashMap<String,  List<String>>();
+    public HashMap<String, List<String>> getModificationsItemsByHash() {
+        HashMap<String,  List<String>> result = new HashMap<String,  List<String>>();
         List<ModificationItem> mi = this.getModificationItems();
         
         if(mi != null) {

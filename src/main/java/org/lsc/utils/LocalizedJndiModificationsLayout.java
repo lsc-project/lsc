@@ -113,7 +113,7 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 			if (operations.contains(jm.getOperation())) {
 				StringBuffer msgBuffer = new StringBuffer();
 				String baseUrl = (String) Configuration.getDstProperties().get("java.naming.provider.url");
-				baseUrl = baseUrl.substring(baseUrl.lastIndexOf("/") + 1);
+				baseUrl = baseUrl.substring(baseUrl.lastIndexOf('/') + 1);
 				String dn = "";
 				if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
 					dn = jm.getDistinguishName();
@@ -129,23 +129,31 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 
 				switch (jm.getOperation()) {
 					case ADD_ENTRY:
-						msgBuffer.append("changetype: add\n" + listToLdif(jm.getModificationItems(), true));
+						msgBuffer.append("changetype: add\n");
+						msgBuffer.append(listToLdif(jm.getModificationItems(), true));
 						break;
 					case MODRDN_ENTRY:
 						LdapName ln;
 						try {
 							ln = new LdapName(jm.getNewDistinguishName());
-							msgBuffer.append("changetype: modrdn\nnewrdn: " +
-											ln.get(0) + "\ndeleteoldrdn: 1\nnewsuperior: " +
-											ln.getSuffix(1) + "\n");
+							msgBuffer.append("changetype: modrdn\nnewrdn: ");
+							msgBuffer.append(ln.get(0));
+							msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
+							msgBuffer.append(ln.getSuffix(1));
+							msgBuffer.append("\n");
 						} catch (InvalidNameException e) {
-							msgBuffer.append("changetype: modrdn\nnewrdn: " +
-											jm.getNewDistinguishName() + "\ndeleteoldrdn: 1\nnewsuperior: " +
-											jm.getNewDistinguishName() + "," + baseUrl + "\n");
+							msgBuffer.append("changetype: modrdn\nnewrdn: ");
+							msgBuffer.append(jm.getNewDistinguishName());
+							msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
+							msgBuffer.append(jm.getNewDistinguishName());
+							msgBuffer.append(",");
+							msgBuffer.append(baseUrl);
+							msgBuffer.append("\n");
 						}
 						break;
 					case MODIFY_ENTRY:
-						msgBuffer.append("changetype: modify\n" + listToLdif(jm.getModificationItems(), false));
+						msgBuffer.append("changetype: modify\n");
+						msgBuffer.append(listToLdif(jm.getModificationItems(), false));
 						break;
 					case DELETE_ENTRY:
 						msgBuffer.append("changetype: delete\n");
@@ -348,13 +356,11 @@ public class LocalizedJndiModificationsLayout extends PatternLayout {
 			/* We only add valid options */
 			StringTokenizer st = new StringTokenizer(logOperation, LOG_OPERATIONS_SEPARATOR);
 			String token = null;
-			for (int i = 0; st.hasMoreTokens(); i++) {
+			while (st.hasMoreTokens()) {
 				token = st.nextToken().toLowerCase();
 				JndiModificationType op = JndiModificationType.getFromDescription(token);
 				if (op != null) {
 					operations.add(op);
-				} else {
-//					LOGGER.error("Invalid operation in the LDIF logger (" + token + ")");
 				}
 			}
 		} else {

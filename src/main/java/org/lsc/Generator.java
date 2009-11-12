@@ -116,30 +116,16 @@ public final class Generator {
 	private void launch() throws NamingException {
 		String srcServiceClassName = null;
 		String xmlFilename = null;
-		String beanClassName = null;
 
-		LOGGER.info("Generating bean for class \"" + dstClassName + "\" from target directory...");
-		beanClassName = BeanGenerator.run(dstClassName, destination, false);
+		LOGGER.info("Generating bean for class \"{}\" from target directory...", dstClassName);
 
-		if (genType == GEN_TYPE.LDAP2LDAP) {
+		if (genType != GEN_TYPE.LDAP2LDAP) {
 			// Generating a JndiSrcService is no longer necessary - use SimpleJndiSrcService instead
-            /*srcServiceClassName = JndiSrcObjectGenerator.run(srcClassName,
-			destination); */
-		} else {
 			JdbcSrcServiceObjectGenerator jssoGenerator = new JdbcSrcServiceObjectGenerator();
 			srcServiceClassName = jssoGenerator.run(dstClassName, destination);
 			xmlFilename = jssoGenerator.getMyXMLFileName();
 			SqlMapXmlFileGenerator.run(xmlFilename, destination);
 		}
-
-//        LOGGER.info("Generating Java class for LDAP objectclass \"" + dstClassName + "\" from target directory...");
-//        String dstObjectClassName = ObjectClassGenerator.run(dstClassName, destination, false);
-//
-//        String srcObjectClassName = null;
-//        if (genType == GEN_TYPE.LDAP2LDAP) {
-//            LOGGER.info("Generating Java class for LDAP objectclass \"" + srcClassName + "\" from source directory...");
-//            srcObjectClassName = ObjectClassGenerator.run(srcClassName, destination, true);
-//        }
 
 		if (genType == GEN_TYPE.CSV2LDAP) {
 			Csv2SqlObjectGenerator.run(dstClassName, destination, csvFilename, csvSeparator);
@@ -276,7 +262,7 @@ public final class Generator {
 
 			return 1;
 		} catch (ParseException e) {
-			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			LOGGER.error("Unable to parse options : {} ({})", args, e);
 			printHelp(options);
 
 			return 1;

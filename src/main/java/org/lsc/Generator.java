@@ -57,7 +57,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.beans.BeanGenerator;
 import org.lsc.persistence.SqlMapXmlFileGenerator;
 import org.lsc.service.JdbcSrcServiceObjectGenerator;
 import org.lsc.utils.Csv2SqlObjectGenerator;

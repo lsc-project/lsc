@@ -52,8 +52,6 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.beans.AbstractBean;
 import org.lsc.service.ISrcService;

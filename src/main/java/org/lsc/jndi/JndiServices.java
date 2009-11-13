@@ -45,7 +45,6 @@
  */
 package org.lsc.jndi;
 
-import com.sun.org.apache.bcel.internal.generic.IFLE;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;

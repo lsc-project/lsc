@@ -59,7 +59,6 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
-import org.lsc.LscObject;
 import org.lsc.beans.AbstractBean;
 import org.lsc.persistence.DaoConfig;
 
@@ -75,26 +74,24 @@ import com.ibatis.sqlmap.client.SqlMapClient;
 public abstract class AbstractJdbcService implements ISrcService {
 
 	protected static Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
-	
 	protected SqlMapClient sqlMapper;
-	
+
 	public abstract String getRequestNameForList();
-	
+
 	public abstract String getRequestNameForObject();
-	
 	private DataSchemaProvider cb;
 
 	public AbstractJdbcService() {
 		sqlMapper = DaoConfig.getSqlMapClient();
 	}
-	
+
 	public void setCallback(DataSchemaProvider cb) {
 		this.cb = cb;
 	}
 
 	public AbstractBean getBean(AbstractBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
-		Map<String,Object> attributeMap = ids.getValue().getAttributes();
+		Map<String, Object> attributeMap = ids.getValue().getAttributes();
 		try {
 			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 			return (AbstractBean) o;
@@ -106,7 +103,7 @@ public abstract class AbstractJdbcService implements ISrcService {
 			throw new CommunicationException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Execute a database request to get a list of object identifiers. This request
 	 * must be a very simple and efficient request because it will get all the requested
@@ -119,21 +116,21 @@ public abstract class AbstractJdbcService implements ISrcService {
 		 * since it may be important when coming from a database.
 		 * This is really an API bug, getListPivots() should return a List, not a Map.
 		 */
-		Map<String,LscAttributes> ret = new ListOrderedMap();
+		Map<String, LscAttributes> ret = new ListOrderedMap();
 
-        try {
-            List<HashMap<String,Object>> ids = (List<HashMap<String,Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
-            Iterator<HashMap<String,Object>> idsIter = ids.iterator();
-            while(idsIter.hasNext()) {
-            	HashMap<String,Object> idMap = idsIter.next();
-            	LscAttributes la = new LscAttributes(idMap);
-            	ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
-            }
-        } catch (SQLException e) {
-            LOGGER.warn("Error while looking for the entries list: {}", e.toString());
-						LOGGER.debug(e.toString(), e);
-        }
+		try {
+			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
+			Iterator<HashMap<String, Object>> idsIter = ids.iterator();
+			while (idsIter.hasNext()) {
+				HashMap<String, Object> idMap = idsIter.next();
+				LscAttributes la = new LscAttributes(idMap);
+				ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
+			}
+		} catch (SQLException e) {
+			LOGGER.warn("Error while looking for the entries list: {}", e.toString());
+			LOGGER.debug(e.toString(), e);
+		}
 
-        return ret;
+		return ret;
 	}
 }

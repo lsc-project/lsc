@@ -326,7 +326,7 @@ public final class FrenchFilters {
 				try {
 					tmp = tmp.substring(i + 1, i + 2).toUpperCase() + tmp.substring(i + 2, tmp.length());
 				} catch (StringIndexOutOfBoundsException e) {
-					LOGGER.error(e + " caused by '" + string + "'");
+					LOGGER.error("{} caused by '{}'", e, string);
 					throw e;
 				}
 

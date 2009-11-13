@@ -74,9 +74,6 @@ import org.lsc.jndi.JndiModifications;
  */
 public class LocalizedJndiModificationsLayout extends PatternLayout {
 
-	/* The logger */
-//    private static final Logger LOGGER = Logger.getLogger(LocalizedJndiModificationsLayout.class);
-
 	/* The separator of the log operations */
 	protected static String LOG_OPERATIONS_SEPARATOR = ",";
 

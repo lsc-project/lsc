@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import com.sun.org.apache.bcel.internal.generic.IFLE;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -156,10 +157,12 @@ public final class JndiServices {
 				tlsResponse = (StartTlsResponse) ctx.extendedOperation(new StartTlsRequest());
 				tlsResponse.negotiate();
 			} catch (IOException e) {
-				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty(Context.PROVIDER_URL), e);
+				LOGGER.error("Error starting TLS encryption on connection to {}", localConnProps.getProperty(Context.PROVIDER_URL));
+				LOGGER.debug(e.toString(), e);
 				throw e;
 			} catch (NamingException e) {
-				LOGGER.error("Error starting TLS encryption on connection to " + localConnProps.getProperty(Context.PROVIDER_URL), e);
+				LOGGER.error("Error starting TLS encryption on connection to {}", localConnProps.getProperty(Context.PROVIDER_URL));
+				LOGGER.debug(e.toString(), e);
 				throw e;
 			}
 
@@ -200,24 +203,26 @@ public final class JndiServices {
 	}
 
 	private void logConnectingTo(Properties connProps) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Connecting to LDAP server ");
-		sb.append(connProps.getProperty(Context.PROVIDER_URL));
+		if (LOGGER.isInfoEnabled()) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("Connecting to LDAP server ");
+			sb.append(connProps.getProperty(Context.PROVIDER_URL));
 
-		// log identity used to connect
-		if (connProps.getProperty(Context.SECURITY_AUTHENTICATION) == null || connProps.getProperty(Context.SECURITY_AUTHENTICATION).equals("none")) {
-			sb.append(" anonymously");
-		} else {
-			sb.append(" as ");
-			sb.append(connProps.getProperty(Context.SECURITY_PRINCIPAL));
+			// log identity used to connect
+			if (connProps.getProperty(Context.SECURITY_AUTHENTICATION) == null || connProps.getProperty(Context.SECURITY_AUTHENTICATION).equals("none")) {
+				sb.append(" anonymously");
+			} else {
+				sb.append(" as ");
+				sb.append(connProps.getProperty(Context.SECURITY_PRINCIPAL));
+			}
+
+			// using TLS ?
+			if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
+				sb.append(" with STARTTLS extended operation");
+			}
+
+			LOGGER.info(sb.toString());
 		}
-
-		// using TLS ?
-		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
-			sb.append(" with STARTTLS extended operation");
-		}
-
-		LOGGER.info(sb.toString());
 	}
 
 	/**
@@ -341,14 +346,16 @@ public final class JndiServices {
 			}
 			ne = ctx.search(rewrittenBase, searchFilter, sc);
 		} catch (NamingException nex) {
-			LOGGER.error("Error while looking for " + searchFilter + " in " + searchBase + ": " + nex);
+			LOGGER.error("Error while looking for {} in {}: {}",
+							new Object[] { searchFilter, searchBase, nex });
 			throw nex;
 		}
 		SearchResult sr = null;
 		if (ne.hasMoreElements()) {
 			sr = (SearchResult) ne.nextElement();
 			if (ne.hasMoreElements()) {
-				LOGGER.error("Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\"");
+				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\"",
+								searchBase, searchFilter);
 				throw new SizeLimitExceededException("Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\"");
 			} else {
 				return sr;
@@ -434,7 +441,8 @@ public final class JndiServices {
 			ne = ctx.search(rewriteBase(base), filter, sc);
 		} catch (NamingException nex) {
 			if (!allowError) {
-				LOGGER.error("Error while reading entry " + base + " : " + nex, nex);
+				LOGGER.error("Error while reading entry {}: {}", base, nex);
+				LOGGER.debug(nex.toString(), nex);
 			}
 			return null;
 		}
@@ -442,7 +450,7 @@ public final class JndiServices {
 		if (ne.hasMore()) {
 			sr = (SearchResult) ne.next();
 			if (ne.hasMore()) {
-				LOGGER.error("To many entries returned (base: \"" + base + "\"");
+				LOGGER.error("To many entries returned (base: \"{}\"", base);
 			} else {
 				return sr;
 			}
@@ -536,39 +544,43 @@ public final class JndiServices {
 									new LdapName(rewriteBase(jm.getNewDistinguishName())));
 					break;
 				default:
-					LOGGER.error("Unable to identify the right modification type: " + jm.getOperation());
+					LOGGER.error("Unable to identify the right modification type: {}", jm.getOperation());
 					return false;
 			}
 			return true;
 		} catch (ContextNotEmptyException e) {
-			LOGGER.error("Object " + jm.getDistinguishName() + " not deleted because it has children (LDAP error code 66 received)." + " To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true");
+			LOGGER.error("Object {} not deleted because it has children (LDAP error code 66 received). To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true",
+							jm.getDistinguishName());
 			return false;
 		} catch (CommunicationException e) {
 			// we lost the connection to the source or destination, stop everything!
 			throw e;
 		} catch (NamingException ne) {
-			String errorMessage = "Error while ";
-			switch (jm.getOperation()) {
-				case ADD_ENTRY:
-					errorMessage += "adding";
-					break;
-				case MODIFY_ENTRY:
-					errorMessage += "modifying";
-					break;
-				case MODRDN_ENTRY:
-					errorMessage += "renaming";
-					break;
-				case DELETE_ENTRY:
-					if (recursiveDelete) {
-						errorMessage += "recursively deleting";
-					} else {
-						errorMessage += "deleting";
-					}
-					break;
-			}
-			errorMessage += " entry " + jm.getDistinguishName() + " in directory " + ": " + ne;
+			if (LOGGER.isErrorEnabled()) {
+				StringBuffer errorMessage = new StringBuffer("Error while ");
+				switch (jm.getOperation()) {
+					case ADD_ENTRY:
+						errorMessage.append("adding");
+						break;
+					case MODIFY_ENTRY:
+						errorMessage.append("modifying");
+						break;
+					case MODRDN_ENTRY:
+						errorMessage.append("renaming");
+						break;
+					case DELETE_ENTRY:
+						if (recursiveDelete) {
+							errorMessage.append("recursively deleting");
+						} else {
+							errorMessage.append("deleting");
+						}
+						break;
+				}
+				errorMessage.append(" entry ").append(jm.getDistinguishName());
+				errorMessage.append(" in directory :").append(ne.toString());
 
-			LOGGER.error(errorMessage);
+				LOGGER.error(errorMessage.toString());
+			}
 			return false;
 		}
 	}
@@ -742,7 +754,7 @@ public final class JndiServices {
 
 			if (pageSize > 0) {
 				requestPagedResults = true;
-				LOGGER.debug("Using pagedResults control for " + pageSize + " entries at a time");
+				LOGGER.debug("Using pagedResults control for {} entries at a time", pageSize);
 			}
 
 			if (requestPagedResults) {

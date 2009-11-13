@@ -45,7 +45,6 @@
  */
 package org.lsc;
 
-import ch.qos.logback.core.joran.spi.JoranException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -123,7 +122,7 @@ public final class Launcher {
 			// do the work!
 			sync.launch(syncType, cleanType);
 		} catch (Exception e) {
-			LOGGER.error(e.toString());
+			LOGGER.error(e.toString(), e);
 		}
 	}
 
@@ -172,7 +171,7 @@ public final class Launcher {
 				return 1;
 			}
 		} catch (ParseException e) {
-			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			LOGGER.error("Unable to parse options : {} ({})", args, e.toString());
 			return 1;
 		}
 		return 0;

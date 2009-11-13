@@ -157,12 +157,10 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 
             // Generate Class content
             if (!writeContent(generateContent())) {
-                LOGGER.info("JndiObject generation failed for "
-                            + this.getFileName());
+                LOGGER.info("JndiObject generation failed for {}", this.getFileName());
                 ret &= false;
             } else {
-                LOGGER.info("JndiObject generation successed for "
-                            + this.getFileName());
+                LOGGER.info("JndiObject generation successed for {}", this.getFileName());
                 ret &= true;
             }
 
@@ -181,18 +179,15 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 
             if (!writeXMLContent(myXMLFilename,
                              generateAssociatedXMLContent(inheritFrom))) {
-                LOGGER.info("Associated XML file generation failed for "
-                            + myXMLFilename);
+                LOGGER.info("Associated XML file generation failed for {}", myXMLFilename);
                 ret &= false;
             } else {
-                LOGGER.info("Associated XML file generation successed for "
-                            + myXMLFilename);
+                LOGGER.info("Associated XML file generation successed for {}", myXMLFilename);
                 ret &= true;
             }
         } else {
-            LOGGER.error("JndiObject generation failed : LDAP objectClass ("
-                         + className
-                         + ") could not be found in LDAP directory.");
+            LOGGER.error("JndiObject generation failed : LDAP objectClass ({}) could not be found in LDAP directory.",
+										className);
             ret &= false;
         }
 
@@ -301,7 +296,7 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
                        && (superClass.substring(superClass.lastIndexOf(".")
                                                     + 1)
                                          .compareToIgnoreCase("Object") != 0)) {
-                LOGGER.debug("Get inherited attributes from " + superClass);
+                LOGGER.debug("Get inherited attributes from {}", superClass);
 
                 try {
                     Class<?> superClassObj = Class.forName(superClass);
@@ -320,7 +315,8 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
                     	superClass = superClassObj.getSuperclass().getCanonicalName();
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Reflective Exception : " + e, e);
+                    LOGGER.error("Reflective Exception : {}", e.toString());
+										LOGGER.debug(e.toString(), e);
                     superClass = null;
                 }
             }
@@ -400,29 +396,26 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
                                             final String content) {
         File file = new File(fileName);
 
-        LOGGER.info("Creating file (" + fileName + ") ...");
+        LOGGER.info("Creating file ({}) ...", fileName);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\n---------------\n" + content + "---------------\n");
-        }
+				LOGGER.debug("\n---------------\n{}---------------\n", content);
 
         try {
             if (file.exists()) {
-                LOGGER.warn("XML File generation failed: file (" + fileName
-                            + ") already exists.");
+                LOGGER.warn("XML File generation failed: file ({}) already exists.", fileName);
             } else if (file.createNewFile()) {
                 FileOutputStream os = new FileOutputStream(file);
                 os.write(content.getBytes());
 
                 return true;
             } else {
-                LOGGER.error("XML File generation failed: file (" + fileName
-                       + ") could not be created (probably a rights issue).");
+                LOGGER.error("XML File generation failed: file ({}) could not be created (probably a rights issue).",
+												fileName);
             }
         } catch (FileNotFoundException fnfe) {
             LOGGER.error(fnfe.toString(), fnfe);
         } catch (IOException e) {
-            LOGGER.error(e + " (" + fileName + ")", e);
+            LOGGER.error("{} ({})", e, fileName);
         }
 
         return false;

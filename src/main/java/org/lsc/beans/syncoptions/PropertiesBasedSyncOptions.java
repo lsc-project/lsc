@@ -125,8 +125,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             String value = props.getProperty(key);
             StringTokenizer stok = new StringTokenizer(key, ".");
             if (stok.countTokens() != 2) {
-                LOGGER.error("Unable to use invalid name : lsc."
-                        + syncName + "." + key + " ! Bypassing ...");
+                LOGGER.error("Unable to use invalid name : lsc.{}.{} ! Bypassing ...", syncName, key);
                 continue;
             }
             String attributeName = stok.nextToken();
@@ -134,11 +133,11 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             if (typeName.equalsIgnoreCase("action")) {
                 STATUS_TYPE st = parseSyncType(value);
                 if(st == STATUS_TYPE.UNKNOWN) {
-                    LOGGER.error("Unable to analyze action type \"" + value + "\" for the following attribute : lsc."
-                            + syncName + "." + key + " ! Bypassing ...");
+                    LOGGER.error("Unable to analyze action type \"{}\" for the following attribute : lsc.{}.{} ! Bypassing ...",
+														new Object[] { value, syncName, key });
                     continue;
                 }
-            	LOGGER.debug("Adding '" + value + "' sync type for attribute name " + attributeName + ".");
+            	LOGGER.debug("Adding '{}' sync type for attribute name {}.", value, attributeName);
                 if(attributeName.equalsIgnoreCase("default")) {
                     defaultStatus = st;
                 } else {
@@ -157,8 +156,8 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
                 	delimiters.put(attributeName.toLowerCase(), value);
                 }               
             } else {
-                LOGGER.error("Unable to identify attribute option \"" + typeName + "\" in this name : lsc." + syncName
-                        + "." + key + " ! Bypassing ...");
+                LOGGER.error("Unable to identify attribute option \"{}\" in this name : lsc.{}.{} ! Bypassing.",
+												new Object[] { typeName, syncName, key });
                 continue;
             }
         }
@@ -279,7 +278,8 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
         
         List<String> writeAttributes = Configuration.getListFromString(property);
         if (writeAttributes.size() == 0) {
-        	LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update lsc.tasks." + syncName + ".dstService.attrs to change this.");
+        	LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update lsc.tasks.{}.dstService.attrs to change this.",
+									syncName);
         }
         return writeAttributes;
     }

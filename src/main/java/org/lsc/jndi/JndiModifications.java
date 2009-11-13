@@ -193,7 +193,7 @@ public class JndiModifications {
                         values.add(ne.next().toString());
                     }
                 } catch (NamingException e) {
-                    LOGGER.error("Error in getting the value(s) of the attribute " + id);
+                    LOGGER.error("Error in getting the value(s) of the attribute {}", id);
                 }
                 
                 result.put(id, values);

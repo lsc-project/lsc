@@ -202,7 +202,7 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 			try {
 				last.appendChild(newSqlMapEntry);
 			} catch (DOMException e) {
-				LOGGER.error("Please check your xerces version. Consider upgrading to Java 6 or to Xerces 2.0 ! (" + e + ")", e);
+				LOGGER.error("Please check your xerces version. Consider upgrading to Java 6 or to Xerces 2.0 ! ({})", e.toString());
 				return null;
 			}
 
@@ -216,25 +216,24 @@ public class SqlMapXmlFileGenerator extends AbstractGenerator {
 			DOMSource source = new DOMSource(doc);
 			transformer.transform(source, result);
 		} catch (SAXException e) {
-			LOGGER.error("Failed to parse XML file : " + e, e);
-
+			LOGGER.error("Failed to parse XML file : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
 			return null;
 		} catch (IOException e) {
-			LOGGER.error("Failed to read XML file : " + e, e);
-
+			LOGGER.error("Failed to read XML file : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
 			return null;
 		} catch (TransformerConfigurationException e) {
-			LOGGER.error("Failed to read XML transformation "
-					+ "configuration : " + e, e);
-
+			LOGGER.error("Failed to read XML transformation configuration : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
 			return null;
 		} catch (TransformerFactoryConfigurationError e) {
-			LOGGER.error("Failed to read XML transformation "
-					+ "configuration : " + e, e);
-
+			LOGGER.error("Failed to read XML transformation configuration : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
 			return null;
 		} catch (TransformerException e) {
-			LOGGER.error("Failed to transform XML structure : " + e, e);
+			LOGGER.error("Failed to transform XML structure : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
 			e.printStackTrace();
 		}
 

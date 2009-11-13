@@ -135,9 +135,8 @@ public class JndiSrcObjectGenerator extends AbstractGenerator {
                 return true;
             }
         } else {
-            LOGGER.error("JndiObject generation failed : LDAP objectClass ("
-                         + this.initialName
-                         + ") could not be found in LDAP directory.");
+            LOGGER.error("JndiObject generation failed : LDAP objectClass ({})) could not be found in LDAP directory.",
+										this.initialName);
         }
 
         return false;

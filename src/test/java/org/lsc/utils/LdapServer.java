@@ -175,7 +175,8 @@ public class LdapServer {
 				return 1;
 			}
 		} catch (ParseException e) {
-			LOGGER.error("Unable to parse options : " + args + " (" + e + ")", e);
+			LOGGER.error("Unable to parse options : {} ({})", args, e);
+			LOGGER.debug(e.toString(), e);
 			return 1;
 		}
 		return 0;

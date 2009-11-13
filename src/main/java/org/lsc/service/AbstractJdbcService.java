@@ -99,8 +99,8 @@ public abstract class AbstractJdbcService implements ISrcService {
 			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 			return (AbstractBean) o;
 		} catch (SQLException e) {
-			LOGGER.warn("Error while looking for a specific entry with id="
-					+ id + " (" + e + ")", e);
+			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
+			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
 			throw new CommunicationException(e.getMessage());
@@ -130,7 +130,8 @@ public abstract class AbstractJdbcService implements ISrcService {
             	ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
             }
         } catch (SQLException e) {
-            LOGGER.warn("Error while looking for the entries list: " + e, e);
+            LOGGER.warn("Error while looking for the entries list: {}", e.toString());
+						LOGGER.debug(e.toString(), e);
         }
 
         return ret;

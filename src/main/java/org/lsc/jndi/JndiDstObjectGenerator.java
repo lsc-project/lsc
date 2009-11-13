@@ -124,15 +124,12 @@ public class JndiDstObjectGenerator extends AbstractGenerator {
             String content = generateContent();
 
             if (writeContent(content)) {
-                LOGGER.info("JndiObject generation successed for "
-                            + this.getFileName());
-
+                LOGGER.info("JndiObject generation successed for {}", this.getFileName());
                 return true;
             }
         } else {
-            LOGGER.error("JndiObject generation failed : LDAP objectClass ("
-                         + this.initialName
-                         + ") could not be found in LDAP directory.");
+            LOGGER.error("JndiObject generation failed : LDAP objectClass ({}) could not be found in LDAP directory.",
+										this.initialName);
         }
 
         return false;

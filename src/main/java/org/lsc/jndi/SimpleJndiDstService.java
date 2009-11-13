@@ -110,20 +110,25 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 					Class.class });
 			return (AbstractBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });
 		} catch (SecurityException e) {
-			LOGGER.error("Unable to get static method getInstance on " + beanClass.getName()
-					+ " ! This is probably a programmer's error (" + e + ")", e);
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (NoSuchMethodException e) {
-			LOGGER.error("Unable to get static method getInstance on " + beanClass.getName()
-					+ " ! This is probably a programmer's error (" + e + ")", e);
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("Unable to call static method getInstance on " + beanClass.getName()
-					+ " ! This is probably a programmer's error (" + e + ")", e);
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
-			LOGGER.error("Unable to call static method getInstance on " + beanClass.getName()
-					+ " ! This is probably a programmer's error (" + e + ")", e);
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (InvocationTargetException e) {
-			LOGGER.error("Unable to call static method getInstance on " + beanClass.getName()
-					+ " ! This is probably a programmer's error (" + e + ")", e);
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 		return null;
 	}

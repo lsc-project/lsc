@@ -177,10 +177,12 @@ public abstract class AbstractSynchronize {
 				try {
 					taskBean = taskBeanClass.newInstance();
 				} catch (InstantiationException e) {
-					LOGGER.error("Error while instanciating taskbean class: " + e, e);
+					LOGGER.error("Error while instanciating taskbean class: {}", e.toString());
+					LOGGER.debug(e.toString(), e);
 					return;
 				} catch (IllegalAccessException e) {
-					LOGGER.error("Error while instanciating taskbean class: " + e, e);
+					LOGGER.error("Error while instanciating taskbean class: {}", e.toString());
+					LOGGER.debug(e.toString(), e);
 					return;
 				}
 				// Search for the corresponding object in the source

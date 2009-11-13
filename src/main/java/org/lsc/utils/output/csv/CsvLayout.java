@@ -178,7 +178,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				if (op != null) {
 					operations.add(op);
 				} else {
-					LOGGER.error("Invalid operation in the CSV export (" + token + ")");
+					LOGGER.error("Invalid operation in the CSV export ({})", token);
 				}
 			}
 		} else {
@@ -199,8 +199,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				attributes.add(token);
 			}
 		} else {
-			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the " +
-							"attrs property in the logback configuration file");
+			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the attrs property in the logback configuration file");
 		}
 
 		/* Parse task names to log for */

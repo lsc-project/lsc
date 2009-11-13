@@ -205,8 +205,8 @@ public abstract class AbstractSimpleJndiService {
 					throw new RuntimeException(e);
 				}
 			} else {
-				LOGGER.debug("Unable to map search result attribute to "
-						+ attr.getID() + " attribute object !");
+				LOGGER.debug("Unable to map search result attribute to {} attribute object !",
+								attr.getID());
 			}
 		}
 

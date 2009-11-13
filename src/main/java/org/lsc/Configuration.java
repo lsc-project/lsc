@@ -394,7 +394,7 @@ public class Configuration {
 	 *            the url of the configuration file to load
 	 */
 	static void setConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Loading configuration url: " + url);
+		LOGGER.debug("Loading configuration url: {}", url);
 		config = new PropertiesConfiguration(url);
 		config.getKeys();
 	}
@@ -406,14 +406,15 @@ public class Configuration {
 	 *            the url of the configuration file to load
 	 */
 	static void addConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Adding configuration: " + url);
+		LOGGER.debug("Adding configuration: {}", url);
 		PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
 		Iterator<?> configKeys = configTmp.getKeys();
 		while (configKeys.hasNext()) {
 			String key = (String) configKeys.next();
 			String value = (String) configTmp.getProperty(key);
 			if (config.containsKey(key)) {
-				LOGGER.warn("Property " + key + " (" + configTmp.getProperty(key) + ") in file " + url + " override main value (" + config.getProperty(key) + ")");
+				LOGGER.warn("Property {} ({}) in file {} override main value ({})",
+								new Object[] { key, configTmp.getProperty(key), url, config.getProperty(key) });
 			}
 			config.addProperty(key, value);
 		}
@@ -493,7 +494,6 @@ public class Configuration {
 		}
 
 		// WARNING: don't log anything before HERE!
-
-		LOGGER.debug("Reading configuration from " + Configuration.getConfigurationDirectory());
+		LOGGER.debug("Reading configuration from {}", Configuration.getConfigurationDirectory());
 	}
 }

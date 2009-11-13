@@ -142,7 +142,7 @@ public class LdapAttributeType {
 			lat.oid = ret[0];
 			rest = ret[1];
 		} else {
-			LOGGER.error("Unable to match the oid in \"" + atStr + "\"");
+			LOGGER.error("Unable to match the oid in \"{}\"", atStr);
 			return null;
 		}
 
@@ -154,19 +154,19 @@ public class LdapAttributeType {
 			StringTokenizer names = new StringTokenizer(ret[0], " ");
 			lat.setName(names.nextToken());
 			if (names.hasMoreElements()) {
-				LOGGER.debug("Multiple names not supported. Using first one ("
-						+ lat.name + ") for \"" + atStr + "\"");
+				LOGGER.debug("Multiple names not supported. Using first one ({}) for \"{}\"",
+								lat.name, atStr);
 			}
 			rest = ret[1];
 		} else {
-			LOGGER.error("Unable to match the name in \"" + atStr + "\"");
+			LOGGER.error("Unable to match the name in \"{}\"", atStr);
 			return null;
 		}
 		
 		int maxPass = 0;
 		for (; rest != null && rest.length() > 0
 				&& maxPass < MAX_PASS_BEFORE_FAILING; maxPass++) {
-			LOGGER.debug("Re/Starting analysis with rest=\"" + rest + "\"");
+			LOGGER.debug("Re/Starting analysis with rest=\"{}\"", rest);
 
 			ret = LdapObjectClass.execRegex(rest, "\\s*SYNTAX\\s+([^\\s]+)\\s*(.*)\\s*");
 			if (ret != null) {
@@ -260,28 +260,28 @@ public class LdapAttributeType {
 		}
 
 		if (maxPass >= MAX_PASS_BEFORE_FAILING) {
-			LOGGER.error("The parser encountered an error while parsing the "
-					+ "following string : " + rest + " while parsing " + atStr);
+			LOGGER.error("The parser encountered an error while parsing the following string : {} while parsing {}",
+							rest, atStr);
 			return null;
 		}
 
 		if (lat.inheritFrom == null) {
-			LOGGER.debug("No inheritence found for \"" + atStr + "\"");
+			LOGGER.debug("No inheritence found for \"{}\"", atStr);
 		}
 		if (lat.description == null) {
-			LOGGER.debug("No description found for \"" + atStr + "\"");
+			LOGGER.debug("No description found for \"{}\"", atStr);
 		}
 		if (lat.equalityRule == null) {
-			LOGGER.debug("No equality rule found for \"" + atStr + "\"");
+			LOGGER.debug("No equality rule found for \"{}\"", atStr);
 		}
 		if (lat.substringRule == null) {
-			LOGGER.debug("No substring rule found for \"" + atStr + "\"");
+			LOGGER.debug("No substring rule found for \"{}\"", atStr);
 		}
 		if (lat.orderingRule == null) {
-			LOGGER.debug("No ordering rule found for \"" + atStr + "\"");
+			LOGGER.debug("No ordering rule found for \"{}\"", atStr);
 		}
 		if (lat.x.size() == 0) {
-			LOGGER.debug("No x rule found for \"" + atStr + "\"");
+			LOGGER.debug("No x rule found for \"{}\"", atStr);
 		}
 
 		return lat;

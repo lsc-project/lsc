@@ -70,22 +70,16 @@ public class I18n {
 
 	/** The logger */
 	private static Logger logger = LoggerFactory.getLogger(I18n.class);
-
 	/** The messages in the current language */
 	private ResourceBundle messages;
-
 	/** the instance */
 	private static I18n instance;
-
 	/** the current locale used to get the message */
 	private Locale currentLocale;
-
 	/** The directory containing the language specific files */
 	private static final String localeDirectory = "resources";
-
 	/** Change according the project name with the '_' character */
 	private static final String PROJECT_NAME = "lsc";
-
 	private static String sep = System.getProperty("file.separator");
 
 	/**
@@ -148,11 +142,11 @@ public class I18n {
 				try {
 					setLocaleAndLoadMessages(currentLocale);
 				} catch (IOException e) {
-					logger.error("Unable to open the locale message file for " + currentLocale + " ! Exiting...");
+					logger.error("Unable to open the locale message file for {} ! Exiting...", currentLocale);
 					throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 				}
 			} else {
-				logger.error("Unable to find locale : " + lang + " ! Exiting ...");
+				logger.error("Unable to find locale : {} ! Exiting ...", lang);
 				throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 			}
 		}
@@ -168,19 +162,15 @@ public class I18n {
 
 	private void setLocaleAndLoadMessages(Locale locale) throws IOException {
 		currentLocale = locale;
-		if (logger.isDebugEnabled())
-			logger.debug("Setting locale to " + locale);
+		logger.debug("Setting locale to {}", locale);
 		try {
-                        messages = ResourceBundle.getBundle(
-                                localeDirectory + sep + PROJECT_NAME,
-                                currentLocale,
-                                new I18nCustomClassLoader()
-                            );
+			messages = ResourceBundle.getBundle(
+							localeDirectory + sep + PROJECT_NAME,
+							currentLocale,
+							new I18nCustomClassLoader());
 		} catch (MissingResourceException mre) {
 			logger.error(mre.toString(), mre);
-			if (logger.isDebugEnabled()) {
-				logger.debug(System.getenv("CLASSPATH"));
-			}
+			logger.debug(System.getenv("CLASSPATH"));
 			throw mre;
 		}
 	}
@@ -203,15 +193,15 @@ public class I18n {
 	}
 
 	public static String getMessage(Object obj, String code, Object param1) {
-		return getMessage(obj, code, new Object[] { param1 });
+		return getMessage(obj, code, new Object[]{param1});
 	}
 
 	public static String getMessage(Object obj, String code, Object param1, Object param2) {
-		return getMessage(obj, code, new Object[] { param1, param2 });
+		return getMessage(obj, code, new Object[]{param1, param2});
 	}
 
 	public static String getMessage(Object obj, String code, Object param1, Object param2, Object param3) {
-		return getMessage(obj, code, new Object[] { param1, param2, param3 });
+		return getMessage(obj, code, new Object[]{param1, param2, param3});
 	}
 
 	public static String getMessage(Object obj, String code, Object[] objs) {
@@ -259,20 +249,19 @@ public class I18n {
 		return getInstance().getKeysStarting(prefix);
 	}
 
-        /**
-         * Private ClassLoader to load locales from disk.
-         */
-        private class I18nCustomClassLoader extends ClassLoader {
-            @Override
-            protected URL findResource(String arg0) {
-                File f = new File(Configuration.getConfigurationDirectory() + arg0) ;
-                try
-                {
-                    return f.toURI().toURL();
-                }
-                catch (MalformedURLException e) {}
-                return super.findResource(arg0);
-            }
-        }
-        
+	/**
+	 * Private ClassLoader to load locales from disk.
+	 */
+	private class I18nCustomClassLoader extends ClassLoader {
+
+		@Override
+		protected URL findResource(String arg0) {
+			File f = new File(Configuration.getConfigurationDirectory() + arg0);
+			try {
+				return f.toURI().toURL();
+			} catch (MalformedURLException e) {
+			}
+			return super.findResource(arg0);
+		}
+	}
 }

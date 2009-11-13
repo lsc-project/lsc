@@ -113,7 +113,7 @@ public final class DaoConfig
 				{
 					// read the file from the configuration directory
 					String pathToFile = configFile.toURI().toURL().toString();
-					LOGGER.debug("Reading " + IBATIS_SQLMAP_CONFIGURATION_FILENAME + " from " + pathToFile);
+					LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
 					reader = Resources.getUrlAsReader(pathToFile);
 				}
 				else

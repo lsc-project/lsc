@@ -106,15 +106,15 @@ public class ScriptableObject {
 				return results;
 			}
 		} catch (SecurityException e) {
-			LOGGER.error("Programmatic error : " + e, e);
+			LOGGER.error("Programmatic error", e);
 		} catch (NoSuchMethodException e) {
-			LOGGER.error("Programmatic error : " + e, e);
+			LOGGER.error("Programmatic error", e);
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("Programmatic error : " + e, e);
+			LOGGER.error("Programmatic error", e);
 		} catch (IllegalAccessException e) {
-			LOGGER.error("Programmatic error : " + e, e);
+			LOGGER.error("Programmatic error", e);
 		} catch (InvocationTargetException e) {
-			LOGGER.error("Programmatic error : " + e, e);
+			LOGGER.error("Programmatic error", e);
 		}
 
 		return null;

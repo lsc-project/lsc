@@ -146,7 +146,7 @@ public class LdapObjectClass {
 			loc.oid = ret[0];
 			rest = ret[1];
 		} else {
-			LOGGER.error("Unable to match the oid in \"" + ocStr + "\"");
+			LOGGER.error("Unable to match the oid in \"{}\"", ocStr);
 			return null;
 		}
 
@@ -158,19 +158,19 @@ public class LdapObjectClass {
 			StringTokenizer names = new StringTokenizer(ret[0], " ");
 			loc.setName(names.nextToken());
 			if (names.hasMoreElements()) {
-				LOGGER.debug("Multiple names not supported. Using first one ("
-						+ loc.name + ") for \"" + ocStr + "\"");
+				LOGGER.debug("Multiple names not supported. Using first one ({}) for \"{}\"",
+								loc.name, ocStr);
 			}
 			rest = ret[1];
 		} else {
-			LOGGER.error("Unable to match the name in \"" + ocStr + "\"");
+			LOGGER.error("Unable to match the name in \"{}\"", ocStr);
 			return null;
 		}
 
 		int maxPass = 0;
 		for (; rest != null && rest.length() > 0
 		&& maxPass < MAX_PASS_BEFORE_FAILING; maxPass++) {
-			LOGGER.debug("Re/Starting analysis with rest=\"" + rest + "\"");
+			LOGGER.debug("Re/Starting analysis with rest=\"{}\"", rest);
 			ret = execRegex(rest,
 			"\\s*SUP\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
 			if (ret != null) {
@@ -233,24 +233,21 @@ public class LdapObjectClass {
 		}
 
 		if (maxPass >= MAX_PASS_BEFORE_FAILING) {
-			LOGGER.error("The parser encountered an error while parsing the "
-					+ "following string : " + rest + " while parsing " + ocStr);
+			LOGGER.error("The parser encountered an error while parsing the following string : {} while parsing {}",
+							rest, ocStr);
 			return null;
 		}
 
 		if (loc.inheritFrom == null) {
-			LOGGER.debug("No inheritence found for \"" + ocStr
-					+ "\". Defaulting to top");
+			LOGGER.debug("No inheritence found for \"{}\". Defaulting to top", ocStr);
 			loc.inheritFrom = "top";
 		}
 		if (loc.description == null) {
-			LOGGER.debug("No description found for \"" + ocStr + "\"");
+			LOGGER.debug("No description found for \"{}\"", ocStr);
 		}
 		if (loc.type == null) {
 			loc.type = "AUXILIARY";
-			LOGGER
-			.debug("No structural or abstract type found. Defaulting to auxiliary in \""
-					+ ocStr + "\"");
+			LOGGER.debug("No structural or abstract type found. Defaulting to auxiliary in \"{}\"", ocStr);
 		}
 
 		// Managing attributes
@@ -272,7 +269,7 @@ public class LdapObjectClass {
 				loc.multiAttrs.add(attributeName);
 			}
 		}
-		LOGGER.debug("Successfully parsed objectclass " + loc.name);
+		LOGGER.debug("Successfully parsed objectclass {}", loc.name);
 		return loc;
 	}
 
@@ -344,16 +341,16 @@ public class LdapObjectClass {
 		this.oid = oid;
 	}
 	
-    /**
-     * Handle bad attribute names found during generation.
-     * 
-     * Currently, this applies to names containing "-", which causes
-     * invalid method names in Java. We just log a warning for now.
-     * 
-     * @param name The attribute name that we rejected
-     */
-    protected static final void badAttributeName(String name) {
-    	LOGGER.warn("Ignoring attribute " + name + ". It contains currently unsupported characters. See http://tools.lsc-project.org/issues/show/31");
-    }
+	/**
+	 * Handle bad attribute names found during generation.
+	 *
+	 * Currently, this applies to names containing "-", which causes
+	 * invalid method names in Java. We just log a warning for now.
+	 *
+	 * @param name The attribute name that we rejected
+	 */
+	protected static final void badAttributeName(String name) {
+		LOGGER.warn("Ignoring attribute {}. It contains currently unsupported characters. See http://tools.lsc-project.org/issues/show/31", name);
+	}
 
 }

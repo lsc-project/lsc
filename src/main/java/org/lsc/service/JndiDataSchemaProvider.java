@@ -102,8 +102,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
         if ((ocsTemp == null) || (ocsTemp.keySet().size() == 0)
                 || (atsTemp == null) || (atsTemp.keySet().size() == 0)) {
-            LOGGER.error("Unable to read objectclasses or attributetypes in "
-                    + "ldap schema! Exiting...");
+            LOGGER.error("Unable to read objectclasses or attributetypes in ldap schema! Exiting...");
             return;
         }
 
@@ -147,7 +146,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
     		if(filteredName != null) {
     			filteredNames.add(filteredName);
     		} else {
-    			LOGGER.error("Name invalid: " + name + ". Attributes or object class not generated !!!");
+    			LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);
     		}
     	}
     	return filteredNames;

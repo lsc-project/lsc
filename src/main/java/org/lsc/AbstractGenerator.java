@@ -236,8 +236,7 @@ public abstract class AbstractGenerator {
 
         if ((ocsTemp == null) || (ocsTemp.keySet().size() == 0)
                 || (atsTemp == null) || (atsTemp.keySet().size() == 0)) {
-            LOGGER.error("Unable to read objectclasses or attributetypes in "
-                    + "ldap schema! Exiting...");
+            LOGGER.error("Unable to read objectclasses or attributetypes in ldap schema! Exiting...");
             return false;
         }
 
@@ -261,7 +260,7 @@ public abstract class AbstractGenerator {
     		if(filteredName != null) {
     			filteredNames.add(filteredName);
     		} else {
-    			LOGGER.error("Name invalid: " + name + ". Attributes or object class not generated !!!");
+    			LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);
     		}
     	}
     	return filteredNames;
@@ -323,28 +322,26 @@ public abstract class AbstractGenerator {
         String fileName = getFileName();
         File file = new File(fileName);
 
-        LOGGER.info("Creating file (" + fileName + ") ...");
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\n---------------\n" + content + "---------------\n");
-        }
+        LOGGER.info("Creating file ({}) ...", fileName);
+				LOGGER.debug("\n---------------\n{}---------------\n", content);
 
         try {
             if (file.exists() && !overwrite) {
-                LOGGER.warn("File generation failed: file (" + fileName
-                        + ") already exists.");
+                LOGGER.warn("File generation failed: file ({}) already exists.", fileName);
             } else if (file.createNewFile() || overwrite) {
                 FileOutputStream os = new FileOutputStream(file);
                 os.write(content.getBytes());
                 return true;
             } else {
-                LOGGER.error("File generation failed: file (" + fileName
-                        + ") could not be created (probably a rights issue).");
+                LOGGER.error("File generation failed: file ({}) could not be created (probably a rights issue).",
+												fileName);
             }
         } catch (FileNotFoundException fnfe) {
-            LOGGER.error(fnfe + " (" + fileName + ")", fnfe);
+            LOGGER.error("{} ({})", fnfe, fileName);
+						LOGGER.debug(fnfe.toString(), fnfe);
         } catch (IOException e) {
-            LOGGER.error(e + " (" + fileName + ")", e);
+            LOGGER.error("{} ({})", e, fileName);
+						LOGGER.debug(e.toString(), e);
         }
 
         return false;

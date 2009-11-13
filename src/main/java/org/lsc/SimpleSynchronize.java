@@ -261,7 +261,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     break;
                 default:        
                     //Should not happen
-                    LOGGER.error("Unknown task mode type " + taskMode.toString());
+                    LOGGER.error("Unknown task mode type {}", taskMode.toString());
                     return false;
             }
             
@@ -272,8 +272,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
                     IllegalArgumentException.class, InvocationTargetException.class};
 
             if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-                LOGGER.error("Error while launching the following task: "
-                        + taskName + ". Please check your code ! (" + e + ")", e);
+                LOGGER.error("Error while launching the following task: {}. Please check your code ! ({})", taskName, e);
+								LOGGER.debug(e.toString(), e);
                 return false;
             }
             else {

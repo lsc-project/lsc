@@ -410,9 +410,6 @@ public abstract class AbstractSynchronize {
 			} catch (Exception e) {
 				countError++;
 				logActionError(jm, id, e);
-			} catch (Throwable e) {
-				countError++;
-				logActionError(jm, id, e);
 			}
 		}
 

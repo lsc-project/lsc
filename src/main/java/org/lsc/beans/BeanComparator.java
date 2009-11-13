@@ -79,68 +79,66 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
  */
-
 public final class BeanComparator {
 
-    /**
-     * This class must not be called as an instance.
-     */
-    private BeanComparator() {}
+	/**
+	 * This class must not be called as an instance.
+	 */
+	private BeanComparator() {
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
-    /**
-     * Static method to return the kind of operation that would happen
-     *
-     * @param syncOptions SyncOptions object from properties
-     * @param srcBean Bean from source
-     * @param dstBean JNDI bean
-     * @return JndiModificationType the modification type that would happen
-     * @throws CloneNotSupportedException
-     */
-    public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
-    	// clone the source bean
-    	IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+	/**
+	 * Static method to return the kind of operation that would happen
+	 *
+	 * @param syncOptions SyncOptions object from properties
+	 * @param srcBean Bean from source
+	 * @param dstBean JNDI bean
+	 * @return JndiModificationType the modification type that would happen
+	 * @throws CloneNotSupportedException
+	 */
+	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
+		// clone the source bean
+		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
 
-    	if (itmBean == null && dstBean == null) {
-    		return null;
-    	} else if (itmBean == null && dstBean != null) {
-    		return JndiModificationType.DELETE_ENTRY;
-    	} else if (itmBean != null && dstBean == null) {
-    		return JndiModificationType.ADD_ENTRY;
-    	} else { /* srcBean != null && destBean != null */
-    		if (itmBean.getDistinguishName() == null
-    				|| itmBean.getDistinguishName().length() == 0
-    				|| dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
-    			return JndiModificationType.MODIFY_ENTRY;
-    		} else {
-    			return JndiModificationType.MODRDN_ENTRY;
-    		}
-    	}
-    }
+		if (itmBean == null && dstBean == null) {
+			return null;
+		} else if (itmBean == null && dstBean != null) {
+			return JndiModificationType.DELETE_ENTRY;
+		} else if (itmBean != null && dstBean == null) {
+			return JndiModificationType.ADD_ENTRY;
+		} else { /* srcBean != null && destBean != null */
+			if (itmBean.getDistinguishName() == null || itmBean.getDistinguishName().length() == 0 || dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
+				return JndiModificationType.MODIFY_ENTRY;
+			} else {
+				return JndiModificationType.MODRDN_ENTRY;
+			}
+		}
+	}
 
-    /**
-     * Static comparison method.
-     *
-     * By default, source information override destination
-     * (i.e. Database => Directory) But if a piece of information is
-     * present only in the destination, it remains
-     *
-     * @param srcBean Source bean from JDBC or JNDI
-     * @param destBean JNDI bean
-     * @return modifications to apply to the directory
-     * @throws NamingException an exception may be thrown if an LDAP data
-     * access error is encountered
-     * @deprecated
-     */
-    public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
-            Object customLibrary)	throws NamingException, CloneNotSupportedException {
+	/**
+	 * Static comparison method.
+	 *
+	 * By default, source information override destination
+	 * (i.e. Database => Directory) But if a piece of information is
+	 * present only in the destination, it remains
+	 *
+	 * @param srcBean Source bean from JDBC or JNDI
+	 * @param destBean JNDI bean
+	 * @return modifications to apply to the directory
+	 * @throws NamingException an exception may be thrown if an LDAP data
+	 * access error is encountered
+	 * @deprecated
+	 */
+	public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
+					Object customLibrary) throws NamingException, CloneNotSupportedException {
 
-    	// this method is deprecated so no need for optimizations
-    	// set condition to true, since using false is only useful for some optimizations after here
-    	boolean condition = true;
-    	return calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
-    }
+		// this method is deprecated so no need for optimizations
+		// set condition to true, since using false is only useful for some optimizations after here
+		boolean condition = true;
+		return calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+	}
 
 	/**
 	 * Static comparison method. By default, source information override
@@ -158,10 +156,9 @@ public final class BeanComparator {
 	 *             encountered
 	 */
 	public static JndiModifications calculateModifications(
-			ISyncOptions syncOptions, IBean srcBean, IBean dstBean,
-			Object customLibrary, boolean condition) throws NamingException,
-			CloneNotSupportedException
-	{
+					ISyncOptions syncOptions, IBean srcBean, IBean dstBean,
+					Object customLibrary, boolean condition) throws NamingException,
+					CloneNotSupportedException {
 
 		JndiModifications jm = null;
 
@@ -180,8 +177,7 @@ public final class BeanComparator {
 		jm = new JndiModifications(modificationType, syncOptions.getTaskName());
 		jm.setDistinguishName(getDstDN(itmBean, dstBean, condition));
 
-		switch (modificationType)
-		{
+		switch (modificationType) {
 			case DELETE_ENTRY:
 				break;
 
@@ -204,14 +200,13 @@ public final class BeanComparator {
 	}
 
 	private static String getDstDN(IBean itmBean, IBean dstBean,
-			boolean condition) throws NamingException
-	{
+					boolean condition) throws NamingException {
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
 		if (dstBean != null) {
 			return dstBean.getDistinguishName();
 		}
-		
+
 		// If the itmBean has a DN set, use that (this is where JavaScript
 		// generated DNs come from)
 		if (itmBean != null && itmBean.getDistinguishName() != null) {
@@ -259,10 +254,9 @@ public final class BeanComparator {
 	 * @throws CloneNotSupportedException
 	 */
 	private static JndiModifications getAddModifyEntry(
-			JndiModifications modOperation, ISyncOptions syncOptions,
-			IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary)
-		throws NamingException, CloneNotSupportedException
-	{
+					JndiModifications modOperation, ISyncOptions syncOptions,
+					IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary)
+					throws NamingException, CloneNotSupportedException {
 
 		String dn = modOperation.getDistinguishName();
 		String logPrefix = "In entry \"" + dn + "\": ";
@@ -272,7 +266,7 @@ public final class BeanComparator {
 		if (modType != JndiModificationType.ADD_ENTRY && modType != JndiModificationType.MODIFY_ENTRY) {
 			return null;
 		}
-		
+
 		// Set up JavaScript objects
 		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
 		if (srcBean != null) {
@@ -295,7 +289,7 @@ public final class BeanComparator {
 			// Get attribute status type
 			STATUS_TYPE attrStatus = syncOptions.getStatus(dn, attrName);
 			LOGGER.debug("{} Attribute \"{}\" is in {} status",
-							new Object[] { logPrefix, attrName, attrStatus });
+							new Object[]{logPrefix, attrName, attrStatus});
 
 			// Get the current attribute values from source and destination
 			Attribute srcAttr = (itmBean != null ? itmBean.getAttributeById(attrName) : null);
@@ -321,8 +315,7 @@ public final class BeanComparator {
 
 			// Build the modification
 			ModificationItem mi = null;
-			switch (operationType)
-			{
+			switch (operationType) {
 				case DirContext.REMOVE_ATTRIBUTE:
 					if (attrStatus == STATUS_TYPE.FORCE) {
 						LOGGER.debug("{} Deleting attribute  \"{}\"", logPrefix, attrName);
@@ -333,7 +326,7 @@ public final class BeanComparator {
 
 				case DirContext.ADD_ATTRIBUTE:
 					LOGGER.debug("Adding attribute \"{}\" with values {}",
-									new Object[] { logPrefix, attrName, toSetAttrValues });
+									new Object[]{logPrefix, attrName, toSetAttrValues});
 
 					if (modType != JndiModificationType.ADD_ENTRY && attrStatus == STATUS_TYPE.FORCE) {
 						// By default, if we try to modify an attribute in
@@ -355,11 +348,10 @@ public final class BeanComparator {
 							Attribute replaceAttr = SetUtils.setToAttribute(dstAttr.getID(), toSetAttrValues);
 
 							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
-											new Object[] { logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues });
+											new Object[]{logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues});
 							mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, replaceAttr);
 						}
-					}
-					else if (attrStatus == STATUS_TYPE.MERGE) {
+					} else if (attrStatus == STATUS_TYPE.MERGE) {
 						// check if there are any extra values to be added
 						Set<?> missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
 
@@ -367,7 +359,7 @@ public final class BeanComparator {
 							Attribute addValuesAttr = SetUtils.setToAttribute(dstAttr.getID(), missingValues);
 
 							LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
-											new Object[] { logPrefix, attrName, missingValues });
+											new Object[]{logPrefix, attrName, missingValues});
 							mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, addValuesAttr);
 						}
 					}
@@ -378,24 +370,24 @@ public final class BeanComparator {
 
 			if (mi == null) {
 				LOGGER.debug("{} Attribute \"{}\" will not be written to the destination", logPrefix, attrName);
-			}
-			else {
+			} else {
 				modificationItems.add(mi);
 			}
 
 			// Remove attributes from JavaScript objects
-			if (srcAttr != null)
+			if (srcAttr != null) {
 				javaScriptObjects.remove("srcAttr");
-			if (dstAttr != null)
+			}
+			if (dstAttr != null) {
 				javaScriptObjects.remove("dstAttr");
+			}
 		}
 
 		JndiModifications result = null;
 		if (modificationItems.size() != 0) {
 			result = modOperation;
 			result.setModificationItems(modificationItems);
-		}
-		else {
+		} else {
 			LOGGER.debug("Entry \"{}\" will not be written to the destination", dn);
 		}
 
@@ -421,18 +413,14 @@ public final class BeanComparator {
 	 * @return Operation to perform: {@link DirContext} constants, or 0 for no operation.
 	 */
 	private static int getRequiredOperationForAttribute(
-			Set<Object> toSetAttrValues, Set<Object> currentAttrValues)
-	{
+					Set<Object> toSetAttrValues, Set<Object> currentAttrValues) {
 		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0) {
 			return DirContext.REMOVE_ATTRIBUTE;
-		}
-		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0) {
+		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0) {
 			return DirContext.ADD_ATTRIBUTE;
-		}
-		else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0) {
+		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0) {
 			return DirContext.REPLACE_ATTRIBUTE;
-		}
-		else {
+		} else {
 			return 0;
 		}
 	}
@@ -455,8 +443,7 @@ public final class BeanComparator {
 	 *            The original bean read from the source
 	 * @return Set of attribute names to be updated
 	 */
-	private static Set<String> getWriteAttributes(ISyncOptions syncOptions, IBean srcBean)
-	{
+	private static Set<String> getWriteAttributes(ISyncOptions syncOptions, IBean srcBean) {
 		Set<String> res = new HashSet<String>();
 
 		// Check if an explicit list was configured
@@ -486,39 +473,39 @@ public final class BeanComparator {
 	}
 
 	/**
-     * Check modifications across other directory objects - Never used at this time : implementation may be buggy
-     *
-     * While adding, deleting or modifying an entry, specific treatments must be done like removing a member from all
-     * the remaining inscription, modifying an attribute in the person entry while the original modification has been
-     * done on a inscription.
-     *
-     * @param srcBean database object bean
-     * @param destBean directory object bean
-     * @param jm modification to apply on the main object
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     */
-    public static JndiModifications[] checkOtherModifications(IBean srcBean, IBean destBean, JndiModifications jm)
-    throws IllegalAccessException, InvocationTargetException {
-        String methodName = "checkDependencies";
-        Class<?>[] params = new Class[] { JndiModifications.class };
-        try {
-            Method checkDependencies = destBean.getClass().getMethod(methodName, params);
-            if (checkDependencies != null) {
-                return (JndiModifications[]) checkDependencies.invoke(destBean, new Object[] { jm });
-            }
-        } catch (SecurityException e) {
-            LOGGER.warn("Unattended exception has been raised : {}", e.toString());
-						LOGGER.debug(e.toString(), e);
-        } catch (NoSuchMethodException e) {
-            LOGGER.debug("No method \"{}\" to manage modification dependencies {} ({})",
-										new Object[] { methodName, destBean.getClass().getName(), e });
-        }
-        return new JndiModifications[] {};
-    }
+	 * Check modifications across other directory objects - Never used at this time : implementation may be buggy
+	 *
+	 * While adding, deleting or modifying an entry, specific treatments must be done like removing a member from all
+	 * the remaining inscription, modifying an attribute in the person entry while the original modification has been
+	 * done on a inscription.
+	 *
+	 * @param srcBean database object bean
+	 * @param destBean directory object bean
+	 * @param jm modification to apply on the main object
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
+	public static JndiModifications[] checkOtherModifications(IBean srcBean, IBean destBean, JndiModifications jm)
+					throws IllegalAccessException, InvocationTargetException {
+		String methodName = "checkDependencies";
+		Class<?>[] params = new Class[]{JndiModifications.class};
+		try {
+			Method checkDependencies = destBean.getClass().getMethod(methodName, params);
+			if (checkDependencies != null) {
+				return (JndiModifications[]) checkDependencies.invoke(destBean, new Object[]{jm});
+			}
+		} catch (SecurityException e) {
+			LOGGER.warn("Unattended exception has been raised : {}", e.toString());
+			LOGGER.debug(e.toString(), e);
+		} catch (NoSuchMethodException e) {
+			LOGGER.debug("No method \"{}\" to manage modification dependencies {} ({})",
+							new Object[]{methodName, destBean.getClass().getName(), e});
+		}
+		return new JndiModifications[]{};
+	}
 
-    /**
+	/**
 	 * <p>
 	 * Clone the source bean and return a new object that is a copy of the
 	 * srcBean and includes any modifications on the DN.
@@ -536,26 +523,22 @@ public final class BeanComparator {
 	 * @throws CloneNotSupportedException
 	 */
 	private static IBean cloneSrcBean(IBean srcBean, ISyncOptions syncOptions,
-			Object customLibrary) throws CloneNotSupportedException
-	{
+					Object customLibrary) throws CloneNotSupportedException {
 		//
 		// We clone the source object, because syncoptions should not be used
 		// on modified values of the source object :)
 		//
 		IBean itmBean = null;
-		if (srcBean != null)
-		{
+		if (srcBean != null) {
 			itmBean = srcBean.clone();
 		}
 
 		// apply any new DN from properties to this intermediary bean
 		String dn = syncOptions.getDn();
-		if (srcBean != null && dn != null)
-		{
+		if (srcBean != null && dn != null) {
 			Map<String, Object> table = new HashMap<String, Object>();
 			table.put("srcBean", srcBean);
-			if (customLibrary != null)
-			{
+			if (customLibrary != null) {
 				table.put("custom", customLibrary);
 			}
 			itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
@@ -603,16 +586,15 @@ public final class BeanComparator {
 	 *            {@link JndiModificationType} Modification type, to determine
 	 *            if the object is being newly created (causes
 	 *            create values to be used instead of default values)
-     * @param modType Type of operation to be done on the entry (should only be ADD or MODIFY)
+	 * @param modType Type of operation to be done on the entry (should only be ADD or MODIFY)
 	 * @return List<Object> The list of values that should be set in the
 	 *         destination. Never null.
 	 * @throws NamingException
 	 */
 	protected static Set<Object> getValuesToSet(String attrName,
-			Set<Object> srcAttrValues, ISyncOptions syncOptions,
-			Map<String, Object> javaScriptObjects, JndiModificationType modType)
-			throws NamingException
-	{
+					Set<Object> srcAttrValues, ISyncOptions syncOptions,
+					Map<String, Object> javaScriptObjects, JndiModificationType modType)
+					throws NamingException {
 		// Result
 		Set<Object> attrValues = new HashSet<Object>();
 
@@ -636,8 +618,7 @@ public final class BeanComparator {
 		// Add default or create values if:
 		// a) there are no values yet, or
 		// b) attribute is in Merge status
-		if (attrValues.size() == 0 || syncOptions.getStatus(null, attrName) == STATUS_TYPE.MERGE)
-		{
+		if (attrValues.size() == 0 || syncOptions.getStatus(null, attrName) == STATUS_TYPE.MERGE) {
 			List<String> newValuesDefs;
 			if (modType == JndiModificationType.ADD_ENTRY) {
 				newValuesDefs = syncOptions.getCreateValues(null, attrName);
@@ -654,5 +635,4 @@ public final class BeanComparator {
 
 		return attrValues;
 	}
-
 }

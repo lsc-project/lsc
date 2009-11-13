@@ -287,14 +287,15 @@ public final class BeanComparator {
 
 		// We're going to iterate over the list of attributes we may write
 		Set<String> writeAttributes = getWriteAttributes(syncOptions, itmBean);
-		LOGGER.debug(logPrefix + "List of attributes considered for writing in destination: " + writeAttributes);
+		LOGGER.debug("{} List of attributes considered for writing in destination: {}", logPrefix, writeAttributes);
 
 		// Iterate over attributes we may write
 		List<ModificationItem> modificationItems = new ArrayList<ModificationItem>();
 		for (String attrName : writeAttributes) {
 			// Get attribute status type
 			STATUS_TYPE attrStatus = syncOptions.getStatus(dn, attrName);
-			LOGGER.debug(logPrefix + "Attribute \"" + attrName + "\" is in " + attrStatus + " status");
+			LOGGER.debug("{} Attribute \"{}\" is in {} status",
+							new Object[] { logPrefix, attrName, attrStatus });
 
 			// Get the current attribute values from source and destination
 			Attribute srcAttr = (itmBean != null ? itmBean.getAttributeById(attrName) : null);
@@ -324,14 +325,15 @@ public final class BeanComparator {
 			{
 				case DirContext.REMOVE_ATTRIBUTE:
 					if (attrStatus == STATUS_TYPE.FORCE) {
-						LOGGER.debug(logPrefix + "Deleting attribute  \"" + attrName + "\"");
+						LOGGER.debug("{} Deleting attribute  \"{}\"", logPrefix, attrName);
 						mi = new ModificationItem(operationType, new BasicAttribute(attrName));
 					}
 
 					break;
 
 				case DirContext.ADD_ATTRIBUTE:
-					LOGGER.debug(logPrefix + "Adding attribute \"" + attrName + "\" with values " + toSetAttrValues);
+					LOGGER.debug("Adding attribute \"{}\" with values {}",
+									new Object[] { logPrefix, attrName, toSetAttrValues });
 
 					if (modType != JndiModificationType.ADD_ENTRY && attrStatus == STATUS_TYPE.FORCE) {
 						// By default, if we try to modify an attribute in
@@ -352,7 +354,8 @@ public final class BeanComparator {
 						if (!SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues)) {
 							Attribute replaceAttr = SetUtils.setToAttribute(dstAttr.getID(), toSetAttrValues);
 
-							LOGGER.debug(logPrefix + "Replacing attribute \"" + attrName + "\": source values are " + srcAttrValues + ", old values were " + dstAttrValues + ", new values are " + toSetAttrValues);
+							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
+											new Object[] { logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues });
 							mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, replaceAttr);
 						}
 					}
@@ -363,7 +366,8 @@ public final class BeanComparator {
 						if (missingValues.size() > 0) {
 							Attribute addValuesAttr = SetUtils.setToAttribute(dstAttr.getID(), missingValues);
 
-							LOGGER.debug(logPrefix + "Adding values to attribute \"" + attrName + "\": new values are " + missingValues);
+							LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
+											new Object[] { logPrefix, attrName, missingValues });
 							mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, addValuesAttr);
 						}
 					}
@@ -373,7 +377,7 @@ public final class BeanComparator {
 			}
 
 			if (mi == null) {
-				LOGGER.debug(logPrefix + "Attribute \"" + attrName + "\" will not be written to the destination");
+				LOGGER.debug("{} Attribute \"{}\" will not be written to the destination", logPrefix, attrName);
 			}
 			else {
 				modificationItems.add(mi);
@@ -392,7 +396,7 @@ public final class BeanComparator {
 			result.setModificationItems(modificationItems);
 		}
 		else {
-			LOGGER.debug("Entry \"" + dn + "\" will not be written to the destination");
+			LOGGER.debug("Entry \"{}\" will not be written to the destination", dn);
 		}
 
 		return result;
@@ -505,10 +509,11 @@ public final class BeanComparator {
                 return (JndiModifications[]) checkDependencies.invoke(destBean, new Object[] { jm });
             }
         } catch (SecurityException e) {
-            LOGGER.warn("Unattended exception has been raised : " + e, e);
+            LOGGER.warn("Unattended exception has been raised : {}", e.toString());
+						LOGGER.debug(e.toString(), e);
         } catch (NoSuchMethodException e) {
-            LOGGER.debug("No method \"" + methodName + "\" to manage modification dependencies"
-                    + destBean.getClass().getName() + " (" + e + ") on ", e);
+            LOGGER.debug("No method \"{}\" to manage modification dependencies {} ({})",
+										new Object[] { methodName, destBean.getClass().getName(), e });
         }
         return new JndiModifications[] {};
     }

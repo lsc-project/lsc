@@ -56,6 +56,7 @@ import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
 import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.lsc.LscAttributes;
 import org.lsc.LscObject;
@@ -118,8 +119,13 @@ public abstract class AbstractJdbcService implements ISrcService {
             Iterator<HashMap<String,Object>> idsIter = ids.iterator();
             while(idsIter.hasNext()) {
             	HashMap<String,Object> idMap = idsIter.next();
+            	
+            	// the key of the result Map is usally the DN
+            	// since we don't have a DN from a database, we use a concatenation of all pivot attributes
+            	// this is backwards compatible with the key being the pivot attribute (when there's only one)
+            	String key = StringUtils.join(idMap.values().iterator(), ", ");
             	LscAttributes la = new LscAttributes(idMap);
-            	ret.put(idMap.get(idMap.keySet().iterator().next()).toString(), la);
+            	ret.put(key, la);
             }
         } catch (SQLException e) {
             LOGGER.warn("Error while looking for the entries list: " + e, e);

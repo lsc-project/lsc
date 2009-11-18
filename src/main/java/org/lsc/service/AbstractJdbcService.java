@@ -122,13 +122,21 @@ public abstract class AbstractJdbcService implements ISrcService {
 		try {
 			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
 			Iterator<HashMap<String, Object>> idsIter = ids.iterator();
-			while (idsIter.hasNext()) {
+			for (int count = 1; idsIter.hasNext(); count++) {
 				HashMap<String, Object> idMap = idsIter.next();
 
 				// the key of the result Map is usally the DN
-				// since we don't have a DN from a database, we use a concatenation of all pivot attributes
-				// this is backwards compatible with the key being the pivot attribute (when there's only one)
-				String key = StringUtils.join(idMap.values().iterator(), ", ");
+				// since we don't have a DN from a database, we use a concatenation of:
+				//     - all pivot attributes
+				//     - a count of all objects (to make sure the key is unique)
+				// unless there's only one pivot, to be backwards compatible
+				String key;
+				if (idMap.values().size() == 1) {
+					key = idMap.values().iterator().next().toString();
+				}
+				else {
+					key = StringUtils.join(idMap.values().iterator(), ", ") + " (" + count + ")";
+				}
 				LscAttributes la = new LscAttributes(idMap);
 				ret.put(key, la);
 			}

@@ -203,8 +203,9 @@ public abstract class AbstractSynchronize {
 						// If condition is based on dstBean, retrieve the full object from destination
 						if (conditionString.contains("dstBean")) {
 
+							AbstractBean dstBean = dstJndiService.getBean(id);
 							// Log an error if the bean could not be retrieved! This shouldn't happen.
-							if (taskBean == null) {
+							if (dstBean == null) {
 								LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
 								countError++;
 								continue;
@@ -212,7 +213,7 @@ public abstract class AbstractSynchronize {
 
 							// Put the bean in a map to pass to JavaScript evaluator
 							conditionObjects = new HashMap<String, Object>();
-							conditionObjects.put("dstBean", taskBean);
+							conditionObjects.put("dstBean", dstBean);
 						}
 
 						// Evaluate if we have to do something

@@ -288,7 +288,7 @@
 				<enabled>true</enabled>
 			</releases>
 		</pluginRepository>
-  </pluginRepositories>
+	</pluginRepositories>
 
 	<dependencies>
 		<dependency>

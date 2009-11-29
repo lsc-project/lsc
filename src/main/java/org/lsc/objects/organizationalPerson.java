@@ -49,6 +49,11 @@ import java.util.List;
 
 /**
  * LDAP organizationalPerson objectClass representation.
+ * 
+ * @deprecated
+ * 		This class was used in LSC 1.1 projects, and is no longer
+ * 		necessary, but kept for reverse compatibility. It will be
+ * 		removed in LSC 1.3.
  */
 public class organizationalPerson extends person {
 

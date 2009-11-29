@@ -47,4 +47,10 @@ package org.lsc.objects.flat;
 
 import org.lsc.LscObject;
 
+/**
+ * @deprecated
+ * 		This class was used in LSC 1.1 projects, and is no longer
+ * 		necessary, but kept for reverse compatibility. It will be
+ * 		removed in LSC 1.3.
+ */
 public class fTop extends LscObject {}

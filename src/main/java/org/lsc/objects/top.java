@@ -59,6 +59,11 @@ import org.lsc.objects.flat.fTop;
 
 /**
  * Bean representing LDAP top LDAP objectclass
+ * 
+ * @deprecated
+ * 		This class was used in LSC 1.1 projects, and is no longer
+ * 		necessary, but kept for reverse compatibility. It will be
+ * 		removed in LSC 1.3.
  */
 public class top extends LscObject {
 
@@ -71,6 +76,8 @@ public class top extends LscObject {
 	public top() {
 		objectClass = new ArrayList<String>();
 		objectClass.add("top");
+		
+		LOGGER.warn("Using deprecated class top. Your setup will still work fine, but must be upgraded to use SimpleBean before upgrading to LSC 1.3.");
 	}
 	
 	public static String getDn(String uidValue) {

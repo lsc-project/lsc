@@ -76,11 +76,11 @@ import org.slf4j.LoggerFactory;
  * The bean is also able to map a bean from SearchResult LDAP object.
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * 
  * @deprecated
  * 		This class was used in LSC 1.1 projects, and is no longer
  * 		necessary, but kept for reverse compatibility. It will be
  * 		removed in LSC 1.3.
- * 
  */
 public abstract class AbstractBean extends LscBean {
 

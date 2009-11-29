@@ -130,25 +130,24 @@ public class I18n {
 			logger.info("No environemental LANG variable found. Defaulting to en_US.");
 			lang = "en_US";
 		}
-		if (lang != null) {
-			Locale[] locales = Locale.getAvailableLocales();
-			for (int i = 0; i < locales.length; i++) {
-				if (lang.compareToIgnoreCase(locales[i].toString()) == 0) {
-					currentLocale = locales[i];
-					break;
-				}
+		
+		Locale[] locales = Locale.getAvailableLocales();
+		for (int i = 0; i < locales.length; i++) {
+			if (lang.compareToIgnoreCase(locales[i].toString()) == 0) {
+				currentLocale = locales[i];
+				break;
 			}
-			if (currentLocale != null) {
-				try {
-					setLocaleAndLoadMessages(currentLocale);
-				} catch (IOException e) {
-					logger.error("Unable to open the locale message file for {} ! Exiting...", currentLocale);
-					throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
-				}
-			} else {
-				logger.error("Unable to find locale : {} ! Exiting ...", lang);
+		}
+		if (currentLocale != null) {
+			try {
+				setLocaleAndLoadMessages(currentLocale);
+			} catch (IOException e) {
+				logger.error("Unable to open the locale message file for {} ! Exiting...", currentLocale);
 				throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 			}
+		} else {
+			logger.error("Unable to find locale : {} ! Exiting ...", lang);
+			throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 		}
 	}
 
@@ -252,7 +251,7 @@ public class I18n {
 	/**
 	 * Private ClassLoader to load locales from disk.
 	 */
-	private class I18nCustomClassLoader extends ClassLoader {
+	private static class I18nCustomClassLoader extends ClassLoader {
 
 		@Override
 		protected URL findResource(String arg0) {

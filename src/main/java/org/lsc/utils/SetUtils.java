@@ -86,7 +86,7 @@ public class SetUtils
 			Object value = ne.next();
 			
 			// ignore empty string values
-			if (value.getClass().equals(String.class) && ((String)value).length() == 0) {
+			if ((value instanceof String) && ((String)value).length() == 0) {
 				continue;
 			}
 			

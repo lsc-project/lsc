@@ -55,6 +55,7 @@ import java.util.List;
  * 		necessary, but kept for reverse compatibility. It will be
  * 		removed in LSC 1.3.
  */
+@SuppressWarnings("unchecked")
 public class person extends top {
 
     /**

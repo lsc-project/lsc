@@ -11,6 +11,13 @@ import org.lsc.jndi.JndiModifications;
 import org.lsc.objects.person;
 import org.lsc.objects.top;
 
+/**
+ * @deprecated
+ * 		This class was used in LSC 1.1 projects, and is no longer
+ * 		necessary, but kept for reverse compatibility. It will be
+ * 		removed in LSC 1.3.
+ */
+@SuppressWarnings("serial")
 public class personBean extends AbstractBean implements IBean {
 
 	public static personBean getInstance(top myclass) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NamingException {

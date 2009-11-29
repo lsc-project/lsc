@@ -462,6 +462,17 @@ public final class BeanComparator {
             /* We do something only if we have to write */
             if(writeAttributes == null || writeAttributes.contains(jdbcAttrName)) {
                 Attribute srcJdbcAttribute = itmBean.getAttributeById(jdbcAttrName);
+                
+                // Clean up srcAttr
+                if (srcJdbcAttribute == null) {
+                	srcJdbcAttribute = new BasicAttribute(jdbcAttrName);
+                }
+                while (srcJdbcAttribute.size() >= 1 &&
+                		((srcJdbcAttribute.get(0).getClass().equals(String.class) && ((String)srcJdbcAttribute.get(0)).length() == 0) ||
+        				(srcJdbcAttribute.get(0) == null))) {
+                	srcJdbcAttribute.remove(0);
+                }
+
                 List<String> createValues = syncOptions.getCreateValues(itmBean.getDistinguishName(), srcJdbcAttribute.getID());
 
                 if ( ( createValues != null ) 
@@ -484,7 +495,11 @@ public final class BeanComparator {
                     	}
                     }
                 }
-                modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, srcJdbcAttribute));
+                
+                // don't add the attribute if there are no values
+                if (srcJdbcAttribute.size() > 0) {
+                	modificationItems.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, srcJdbcAttribute));
+                }
             }
         }
 

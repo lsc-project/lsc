@@ -200,6 +200,7 @@ public class Configuration {
 	 * 
 	 * @param prefix
 	 *            The prefix used to select the properties.
+	 * @return Properties object with the requests properties without the prefix
 	 */
 	public static Properties getAsProperties(final String prefix) {
 		org.apache.commons.configuration.Configuration conf = getConfiguration().subset(prefix);

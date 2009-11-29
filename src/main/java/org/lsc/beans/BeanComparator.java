@@ -325,7 +325,7 @@ public final class BeanComparator {
 					break;
 
 				case DirContext.ADD_ATTRIBUTE:
-					LOGGER.debug("Adding attribute \"{}\" with values {}",
+					LOGGER.debug("{} Adding attribute \"{}\" with values {}",
 									new Object[]{logPrefix, attrName, toSetAttrValues});
 
 					if (modType != JndiModificationType.ADD_ENTRY && attrStatus == STATUS_TYPE.FORCE) {
@@ -463,10 +463,10 @@ public final class BeanComparator {
 			Set<String> defaultAttrsList = syncOptions.getDefaultValuedAttributeNames();
 			Set<String> createAttrsList = syncOptions.getCreateAttributeNames();
 
-			res.addAll(itmBeanAttrsList);
-			res.addAll(forceAttrsList);
-			res.addAll(defaultAttrsList);
-			res.addAll(createAttrsList);
+			if (itmBeanAttrsList != null) res.addAll(itmBeanAttrsList);
+			if (forceAttrsList != null) res.addAll(forceAttrsList);
+			if (defaultAttrsList != null) res.addAll(defaultAttrsList);
+			if (createAttrsList != null) res.addAll(createAttrsList);
 		}
 
 		return res;

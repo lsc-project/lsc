@@ -43,7 +43,6 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-
 package org.lsc.utils.security;
 
 import java.io.File;
@@ -84,16 +83,13 @@ import org.lsc.Configuration;
  *   <li>lsc.security.encryption.strength: the strength in bits</li>
  * </ul>
  */
-public class SymmetricEncryption
-{
+public class SymmetricEncryption {
 
 	public static final int DEFAULT_CIPHER_STRENGTH = 128;
 	public static final String DEFAULT_CIPHER_ALGORITHM = "AES";
-
 	private int strength;
 	private String algorithm;
 	private String keyPath;
-
 	private Key key;
 	private Cipher cipherDecrypt;
 	private Cipher cipherEncrypt;
@@ -104,11 +100,10 @@ public class SymmetricEncryption
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public SymmetricEncryption() throws GeneralSecurityException
-	{
+	public SymmetricEncryption() throws GeneralSecurityException {
 		this(SymmetricEncryption.getDefaultKeyPath(),
-				SymmetricEncryption.getDefaultAlgorithm(),
-				SymmetricEncryption.getDefaultStrength());
+						SymmetricEncryption.getDefaultAlgorithm(),
+						SymmetricEncryption.getDefaultStrength());
 	}
 
 	/**
@@ -120,8 +115,7 @@ public class SymmetricEncryption
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException
-	{
+	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException {
 		this.securityProvider = new BouncyCastleProvider();
 		this.algorithm = algo;
 		this.strength = strength;
@@ -136,8 +130,7 @@ public class SymmetricEncryption
 	 * @return Encrypted bytes.
 	 * @throws java.security.GeneralSecurityException
 	 */
-	public byte[] encrypt(byte[] toEncrypt) throws GeneralSecurityException
-	{
+	public byte[] encrypt(byte[] toEncrypt) throws GeneralSecurityException {
 		return cipherEncrypt.doFinal(toEncrypt);
 	}
 
@@ -147,8 +140,7 @@ public class SymmetricEncryption
 	 * @return Decryted bytes.
 	 * @throws java.security.GeneralSecurityException
 	 */
-	public byte[] decrypt(byte[] toDecrypt) throws GeneralSecurityException
-	{
+	public byte[] decrypt(byte[] toDecrypt) throws GeneralSecurityException {
 		return cipherDecrypt.doFinal(toDecrypt);
 	}
 
@@ -156,8 +148,7 @@ public class SymmetricEncryption
 	 * Generate a random key file with default value
 	 * @return boolean
 	 */
-	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException
-	{
+	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException {
 		return this.generateRandomKeyFile(this.keyPath, this.algorithm, this.strength);
 	}
 
@@ -168,15 +159,13 @@ public class SymmetricEncryption
 	 * @param strength The encryption strength
 	 * @return boolean
 	 */
-	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException
-	{
-		try
-		{
+	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException {
+		try {
 			KeyGenerator kg = KeyGenerator.getInstance(algo, this.securityProvider.getName());
 			SecretKey cipherKey = kg.generateKey();
-			SecureRandom sr = new SecureRandom() ;
+			SecureRandom sr = new SecureRandom();
 			OutputStream os = new FileOutputStream(keyPath);
-			kg.init(strength, sr) ;
+			kg.init(strength, sr);
 			os.write(cipherKey.getEncoded());
 			os.close();
 		} catch (IOException e) {
@@ -191,10 +180,9 @@ public class SymmetricEncryption
 	 * lsc.security.encryption.keypath property.
 	 * @return A filename
 	 */
-	public static String getDefaultKeyPath()
-	{
+	public static String getDefaultKeyPath() {
 		return Configuration.getString("lsc.security.encryption.keyfile",
-				Configuration.getConfigurationDirectory() + "lsc.key");
+						Configuration.getConfigurationDirectory() + "lsc.key");
 	}
 
 	/**
@@ -204,10 +192,9 @@ public class SymmetricEncryption
 	 * in this class which specified supported algorithms.
 	 * @return A supported algorithm
 	 */
-	public static String getDefaultAlgorithm()
-	{
+	public static String getDefaultAlgorithm() {
 		return Configuration.getString("lsc.security.encryption.algorithm",
-				SymmetricEncryption.DEFAULT_CIPHER_ALGORITHM);
+						SymmetricEncryption.DEFAULT_CIPHER_ALGORITHM);
 	}
 
 	/**
@@ -216,20 +203,18 @@ public class SymmetricEncryption
 	 * through the lsc.security.encryption.strength property.
 	 * @return int
 	 */
-	public static int getDefaultStrength()
-	{
+	public static int getDefaultStrength() {
 		return Configuration.getInt("lsc.security.encryption.strength",
-				SymmetricEncryption.DEFAULT_CIPHER_STRENGTH);
+						SymmetricEncryption.DEFAULT_CIPHER_STRENGTH);
 	}
 
 	/**
 	 * Initialize encryption object from the configuration file.
 	 * @return boolean (always true if no exception)
 	 */
-	public boolean initialize() throws GeneralSecurityException, IOException
-	{
+	public boolean initialize() throws GeneralSecurityException, IOException {
 		InputStream input = new FileInputStream(new File(this.keyPath));
-		byte[] data = new byte[strength/8];
+		byte[] data = new byte[strength / 8];
 		input.read(data);
 
 		this.key = new SecretKeySpec(data, this.algorithm);
@@ -245,40 +230,32 @@ public class SymmetricEncryption
 	 * This main allow user to generate random key file.
 	 * @param argv
 	 */
-	public static void main(String argv[])
-	{
-		try
-		{
+	public static void main(String argv[]) {
+		try {
 			Options options = new Options();
-			options.addOption("f", "cfg", true, "Specify configuration directory" );
+			options.addOption("f", "cfg", true, "Specify configuration directory");
 			CommandLine cmdLine = new GnuParser().parse(options, argv);
 
-			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f"))
-			{
+			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f")) {
 				// if a configuration directory was set on command line, use it to set up Configuration
 				Configuration.setUp(cmdLine.getOptionValue("f"));
-            }
-			else
-			{
+			} else {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("lsc", options);
-                System.exit(1);
-            }
+				System.exit(1);
+			}
 		} catch (ParseException e) {
-            System.out.println("Unable to parse options : " + argv + " (" + e + ")");
-            System.exit(1);
-        }
+			System.out.println("Unable to parse options : " + argv + " (" + e + ")");
+			System.exit(1);
+		}
 
-		try
-		{
+		try {
 			SymmetricEncryption se = new SymmetricEncryption();
-			if (se.generateDefaultRandomKeyFile())
-			{
+			if (se.generateDefaultRandomKeyFile()) {
 				System.out.println("Key generated: " + SymmetricEncryption.getDefaultKeyPath());
 			}
 		} catch (GeneralSecurityException ex) {
 			System.out.println(ex);
 		}
 	}
-
 }

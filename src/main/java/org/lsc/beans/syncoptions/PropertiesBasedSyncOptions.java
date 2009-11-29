@@ -46,6 +46,7 @@
 package org.lsc.beans.syncoptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -277,7 +278,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
             return null;
         }
         
-        List<String> writeAttributes = Configuration.getListFromString(property);
+        List<String> writeAttributes = Arrays.asList(property.split(" "));
         if (writeAttributes.size() == 0) {
         	LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update lsc.tasks.{}.dstService.attrs to change this.",
 									syncName);

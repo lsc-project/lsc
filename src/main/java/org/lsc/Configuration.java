@@ -56,12 +56,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -180,17 +178,6 @@ public class Configuration {
 		}
 		checkLdapProperties(dst);
 		return dst;
-	}
-
-	public static List<String> getListFromString(String propertyValue) {
-		List<String> result = new ArrayList<String>();
-		if (propertyValue != null) {
-			StringTokenizer st = new StringTokenizer(propertyValue, " ");
-			while (st.hasMoreTokens()) {
-				result.add(st.nextToken().toLowerCase());
-			}
-		}
-		return result;
 	}
 
 	/**

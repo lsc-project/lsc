@@ -48,6 +48,7 @@ package org.lsc.jndi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +63,6 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.lsc.Configuration;
 import org.lsc.LscObject;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
@@ -122,23 +122,20 @@ public abstract class AbstractSimpleJndiService {
 		baseDn = serviceProps.getProperty("baseDn");
 		filterId = serviceProps.getProperty("filterId");
 		filterAll = serviceProps.getProperty("filterAll");
+		_filteredSc = new SearchControls();
 
 		String attrsValue = serviceProps.getProperty("attrs");
 		if (attrsValue != null) {
-			attrs = Configuration.getListFromString(attrsValue);
+			String[] attributes = attrsValue.split(" ");
+			attrs = Arrays.asList(attributes);
+			_filteredSc.setReturningAttributes(attributes);
 		}
 
 		String attrsIdValue = serviceProps.getProperty("pivotAttrs");
 		if (attrsIdValue != null) {
-			attrsId = Configuration.getListFromString(attrsIdValue);
+			attrsId = Arrays.asList(attrsIdValue.split(" "));
 		}
 
-		_filteredSc = new SearchControls();
-		if(attrs != null) {
-			String[] attributes = new String[attrs.size()];
-			attributes = attrs.toArray(attributes);
-			_filteredSc.setReturningAttributes(attributes);
-		}
 	}
 
 	/**

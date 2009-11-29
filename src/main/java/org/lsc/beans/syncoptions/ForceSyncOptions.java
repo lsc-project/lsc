@@ -45,6 +45,7 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -101,10 +102,10 @@ public class ForceSyncOptions implements ISyncOptions {
 
     public List<String> getWriteAttributes() {
         String property = Configuration.getString("lsc.tasks." + taskname + ".dstService.attrs");
-        if(property == null) {
+        if (property == null) {
             return null;
         }
-        return Configuration.getListFromString(property);
+        return Arrays.asList(property.split(" "));
     }
 
 

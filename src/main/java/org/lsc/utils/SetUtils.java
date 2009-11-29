@@ -100,19 +100,19 @@ public class SetUtils
 	 * 
 	 * @param attrName
 	 *            The name of the attribute to return
-	 * @param Set<?> Values as a set
+	 * @param values Values as a set
 	 * @return Attribute An Attribute containing values from the set. Never null.
 	 * @throws NamingException
 	 */
-	public static Attribute setToAttribute(String attrName, Set<?> missingValues)
+	public static Attribute setToAttribute(String attrName, Set<?> values)
 	{
 		Attribute ret = new BasicAttribute(attrName);
 
-		if (missingValues == null || missingValues.size() == 0) {
+		if (values == null || values.size() == 0) {
 			return ret;
 		}
 
-		for (Object value : missingValues) {
+		for (Object value : values) {
 			ret.add(value);
 		}
 

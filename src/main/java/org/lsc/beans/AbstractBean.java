@@ -47,10 +47,10 @@ package org.lsc.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,12 +62,10 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
 
+import org.lsc.objects.top;
+import org.lsc.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.Configuration;
-import org.lsc.objects.top;
-import org.lsc.service.DataSchemaProvider;
-import org.lsc.utils.DateUtils;
 
 /**
  * Abstract bean used to centralize methods across all beans
@@ -78,8 +76,13 @@ import org.lsc.utils.DateUtils;
  * The bean is also able to map a bean from SearchResult LDAP object.
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @deprecated
+ * 		This class was used in LSC 1.1 projects, and is no longer
+ * 		necessary, but kept for reverse compatibility. It will be
+ * 		removed in LSC 1.3.
+ * 
  */
-public abstract class AbstractBean implements IBean {
+public abstract class AbstractBean extends LscBean {
 
 	/**
 	 * For eclipse
@@ -105,21 +108,13 @@ public abstract class AbstractBean implements IBean {
 	/** The list of local methods. */
 	private static Map<String, List<Method>> localMethods;
 
-	/** The attributes map. */
-	private Map<String, Attribute> attrs;
-
-	/** The distinguish name. */
-	private String distinguishName;
-
-	/** Data schema related to this bean - must always be set just after initiating the bean */
-	private DataSchemaProvider dataSchemaProvider;
-
 	/**
 	 * The default constructor.
 	 */
 	public AbstractBean() {
-		attrs = new HashMap<String, Attribute>();
 		localMethods = new HashMap<String, List<Method>>();
+
+		LOGGER.warn("Using deprecated class AbstractBean. Your setup will still work fine, but must be upgraded to use SimpleBean before upgrading to LSC 1.3.");
 	}
 
 	/**
@@ -262,17 +257,9 @@ public abstract class AbstractBean implements IBean {
 	 * @param values the values list
 	 */
 	protected static void mapList(IBean bean, String paramName, List<?> values) {
-		Attribute attr = new BasicAttribute(paramName);
-
 		if (values != null) {
-			Iterator<?> iter = values.iterator();
-
-			while (iter.hasNext()) {
-				attr.add(iter.next());
-			}
+			bean.setAttribute(paramName, new HashSet<Object>(values));
 		}
-
-		bean.setAttribute(attr);
 	}
 
 	/**
@@ -323,13 +310,11 @@ public abstract class AbstractBean implements IBean {
 	 *                the string value
 	 */
 	protected static void mapString(IBean bean, String paramName, String value) {
-		Attribute attr = new BasicAttribute(paramName);
-
 		if ((value != null) && (value.trim().length() > 0)) {
-			attr.add(value.trim());
+			Set<Object> set = new HashSet<Object>(1);
+			set.add(value);
+			bean.setAttribute(paramName, set);
 		}
-
-		bean.setAttribute(attr);
 	}
 
 	/**
@@ -405,166 +390,6 @@ public abstract class AbstractBean implements IBean {
 		return null;
 	}
 
-	/**
-	 * Get an attribute from its name.
-	 *
-	 * @param id the name
-	 * @return the LDAP attribute
-	 */
-	public final Attribute getAttributeById(final String id) {
-		// use lower case since attribute names are case-insensitive
-		return attrs.get(id.toLowerCase());
-	}
-
-	/**
-	 * Get the <b>first</b> value of an attribute from its name
-	 *
-	 * @param id The attribute name (case insensitive)
-	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
-	 * @deprecated
-	 */
-	public final String getAttributeValueById(final String id)
-					throws NamingException {
-		return getAttributeFirstValueById(id);
-	}
-
-	/**
-	 * Get the <b>first</b> value of an attribute from its name
-	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
-	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
-	 */
-	public final String getAttributeFirstValueById(final String id)
-					throws NamingException {
-		List<String> allValues = getAttributeValuesById(id);
-		return allValues.size() >= 1 ? allValues.get(0) : "";
-	}
-
-	/**
-	 * Get all values of an attribute from its name
-	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
-	 * @return List<String> List of attribute values, or an empty list
-	 * @throws NamingException
-	 */
-	public final List<String> getAttributeValuesById(final String id)
-					throws NamingException {
-		List<String> resultsArray = new ArrayList<String>();
-
-		Attribute attribute = getAttributeById(id);
-		for (int i = 0; attribute != null && i < attribute.size(); i++) {
-			Object value = attribute.get(i);
-			String stringValue;
-
-			// convert to String because this method only returns Strings
-			if (value instanceof byte[]) {
-				stringValue = new String((byte[]) value);
-			} else {
-				stringValue = value.toString();
-			}
-
-			resultsArray.add(stringValue);
-		}
-
-		return resultsArray;
-	}
-
-	/**
-	 * Get the attributes name list.
-	 *
-	 * @return the attributes list
-	 */
-	public final Set<String> getAttributesNames() {
-		return attrs.keySet();
-	}
-
-	/**
-	 * Set an attribute.
-	 * API CHANGE: Do nothing if attribute is empty
-	 *
-	 * @param attr
-	 *                the attribute to set
-	 */
-	public final void setAttribute(final Attribute attr) {
-		// use lower case since attribute names are case-insensitive
-		if (attr != null && attr.size() > 0) {
-			attrs.put(attr.getID().toLowerCase(), attr);
-		}
-	}
-
-	/**
-	 * Default distinguish name getter.
-	 *
-	 * @return the distinguishName
-	 */
-	public final String getDistinguishName() {
-		return distinguishName;
-	}
-
-	/**
-	 * Distinguish name getter that makes sure to return the FULL DN (including suffix).
-	 *
-	 * @return the distinguishName
-	 */
-	public final String getFullDistinguishedName() {
-		if (!distinguishName.endsWith("," + Configuration.DN_REAL_ROOT)) {
-			return distinguishName + "," + Configuration.DN_REAL_ROOT;
-		} else {
-			return distinguishName;
-		}
-	}
-
-	/**
-	 * Default distinguishName setter.
-	 *
-	 * @param dn
-	 *                the distinguishName to set
-	 */
-	public final void setDistinguishName(final String dn) {
-		distinguishName = dn;
-	}
-
-	public void generateDn() throws NamingException {
-	}
-
-	/**
-	 * Bean pretty printer.
-	 *
-	 * @return the pretty formatted string to display
-	 */
-	@Override
-	public final String toString() {
-		StringBuffer sb = new StringBuffer();
-		Iterator<String> keySetIter = attrs.keySet().iterator();
-		sb.append("dn: ").append(distinguishName).append('\n');
-
-		while (keySetIter.hasNext()) {
-			String key = keySetIter.next();
-
-			if (attrs.get(key) != null) {
-				sb.append("=> " + key);
-
-				Object values = attrs.get(key);
-
-				if (values instanceof List) {
-					Iterator<?> valuesIter = ((List<?>) values).iterator();
-
-					while (valuesIter.hasNext()) {
-						sb.append(" - ").append(valuesIter.next()).append("\n");
-					}
-				} else {
-					sb.append(" - ").append(values).append("\n");
-				}
-			}
-		}
-
-		return sb.toString();
-	}
-
 	public static final Map<String, List<Method>> getLocalMethods() {
 		return localMethods;
 	}
@@ -573,43 +398,4 @@ public abstract class AbstractBean implements IBean {
 		AbstractBean.localMethods = localMethods;
 	}
 
-	/**
-	 * Clone this AbstractBean object.
-	 * @return Object
-	 * @throws java.lang.CloneNotSupportedException
-	 */
-	@Override
-	public AbstractBean clone() throws CloneNotSupportedException {
-		try {
-			AbstractBean bean = (AbstractBean) this.getClass().newInstance();
-			bean.setDistinguishName(this.getDistinguishName());
-			Iterator<String> attributesIt = this.getAttributesNames().iterator();
-
-			while (attributesIt.hasNext()) {
-				String attributeName = attributesIt.next();
-				bean.setAttribute((Attribute) this.getAttributeById(attributeName).clone());
-			}
-			return bean;
-		} catch (InstantiationException ex) {
-			throw new CloneNotSupportedException(ex.getLocalizedMessage());
-		} catch (IllegalAccessException ex) {
-			throw new CloneNotSupportedException(ex.getLocalizedMessage());
-		}
-	}
-
-	public void setDataSchema(DataSchemaProvider dataSchema) {
-		this.dataSchemaProvider = dataSchema;
-	}
-
-	public DataSchemaProvider getDataSchema() {
-		return dataSchemaProvider;
-	}
-
-	/**
-	 * Manage something there !
-	 * @param metaData
-	 */
-	public static void setMetadata(ResultSetMetaData metaData) {
-		// TODO Auto-generated method stub
-	}
 }

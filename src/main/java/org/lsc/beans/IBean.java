@@ -46,72 +46,135 @@
 package org.lsc.beans;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 
 /**
- * General interface of a bean.
+ * General interface of a bean. A bean in LSC describes an entry in a
+ * source or destination. It has nothing to do with Java beans (in fact,
+ * LSC beans do not have any get- or set- methods).
  * 
- * This bean has been designed to allow attribute modifications
+ * <p>
+ * An entry is described in this bean in a similar way to an LDAP entry.
+ * Each bean has a distinguishedName which can be set and get. Each bean
+ * also has a set of attributes, each of which has a set of values.
+ * </p>
+ * 
+ * <p>
+ * Most methods are convenience methods to get the values of each attribute.
+ * </p>
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public interface IBean extends Cloneable, Serializable {
+public interface IBean extends Cloneable, Serializable
+{
 
-    /**
-         * Get an attribute from its name.
-         * 
-         * @param id
-         *                the name
-         * @return the attribute
-         */
-    Attribute getAttributeById(String id);
+	/**
+	 * Get an attribute from its name.
+	 * 
+	 * @param id
+	 *            the name
+	 * @return the LDAP attribute
+	 */
+	Attribute getAttributeById(final String id);
 
-    /**
-         * Get the attributes name.
-         * 
-         * @return a set containing all the attributes name
-         */
-    Set<String> getAttributesNames();
+	/**
+	 * Get an attribute from its name as a Set.
+	 *
+	 * @param id the name
+	 * @return the LDAP attribute
+	 */
+	Set<Object> getAttributeAsSetById(final String id);
+	
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 * @deprecated
+	 */
+	public String getAttributeValueById(final String id) throws NamingException;
 
-    /**
-         * Set a attribute.
-         * 
-         * @param attr
-         *                the attribute to set
-         */
-    void setAttribute(Attribute attr);
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 */
+	public String getAttributeFirstValueById(final String id)
+			throws NamingException;
 
-    /**
-         * Get the distinguish name.
-         * 
-         * @return the distinguish name
-         */
-    String getDistinguishName();
+	/**
+	 * Get all values of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return List<String> List of attribute values, or an empty list
+	 * @throws NamingException
+	 */
+	public List<String> getAttributeValuesById(final String id)
+			throws NamingException;
 
-    /**
-         * Set the distinguish name.
-         * 
-         * @param dn
-         *                the distinguish name
-         */
-    void setDistinguishName(String dn);
+	/**
+	 * Get the attributes name.
+	 * 
+	 * @return a set containing all the attributes name
+	 */
+	Set<String> getAttributesNames();
 
-    /**
-         * Generate the distinguish name according to the information on the
-         * bean.
-         * 
-         * @throws NamingException
-         *                 thrown is a directory exception is encountered while
-         *                 generating the new distinguish name
-         */
-    void generateDn() throws NamingException;
+	/**
+	 * Set an attribute.
+	 * 
+	 * @param attr
+	 *            the attribute to set
+	 */
+	void setAttribute(Attribute attr);
+
+	/**
+	 * Set an attribute.
+	 *
+	 * @param attrName The attribute name.
+	 * @param attrValues A set of values for the attribute.
+	 */
+	void setAttribute(String attrName, Set<Object> attrValues);
+	
+	/**
+	 * Get the distinguish name.
+	 * 
+	 * @return the distinguish name
+	 */
+	String getDistinguishName();
+
+	/**
+	 * Set the distinguish name.
+	 * 
+	 * @param dn
+	 *            the distinguish name
+	 */
+	void setDistinguishName(String dn);
+
+	/**
+	 * Generate the distinguish name according to the information on the bean.
+	 * 
+	 * @throws NamingException
+	 *             thrown is a directory exception is encountered while
+	 *             generating the new distinguish name
+	 */
+	void generateDn() throws NamingException;
 
 	/**
 	 * Clone this object.
+	 * 
 	 * @return Object
+	 * @throws CloneNotSupportedException 
 	 */
 	IBean clone() throws CloneNotSupportedException;
 

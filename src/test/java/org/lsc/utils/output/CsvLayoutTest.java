@@ -70,11 +70,11 @@ import org.lsc.jndi.JndiModifications;
 public class CsvLayoutTest extends TestCase {
 
 	private LoggerContext lc = new LoggerContext();
-	private Logger logger = lc.getLogger(CsvLayout.class);
+	private Logger LOGGER = lc.getLogger(CsvLayout.class);
 
 	private ILoggingEvent makeLoggingEvent(String message, Object object) {
 		return new LoggingEvent("org.lsc",
-						logger, Level.INFO, message,
+						LOGGER, Level.INFO, message,
 						new Exception(), new Object[]{object});
 	}
 

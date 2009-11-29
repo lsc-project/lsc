@@ -103,7 +103,8 @@ public class DaoConfigTest extends TestCase {
 				LOGGER.debug("Table has {} rows.", rs.getInt(1));
 			}
 		} catch (SQLException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 		assertNotNull(rs);
 	}
@@ -124,7 +125,8 @@ public class DaoConfigTest extends TestCase {
 		try {
 			con.close();
 		} catch (SQLException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 	}
 }

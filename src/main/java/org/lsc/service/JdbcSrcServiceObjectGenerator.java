@@ -413,9 +413,10 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
 												fileName);
             }
         } catch (FileNotFoundException fnfe) {
-            LOGGER.error(fnfe.toString(), fnfe);
+					LOGGER.error(fnfe.toString());
+					LOGGER.debug(fnfe.toString(), fnfe);
         } catch (IOException e) {
-            LOGGER.error("{} ({})", e, fileName);
+					LOGGER.error("{} ({})", e, fileName);
         }
 
         return false;
@@ -442,6 +443,6 @@ public class JdbcSrcServiceObjectGenerator extends AbstractGenerator {
      * @return A java generic file name.
      */
     public final String getFileName() {
-	return getStandardFileName();
+			return getStandardFileName();
     }
 }

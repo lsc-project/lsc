@@ -179,7 +179,8 @@ public final class JndiServices {
 		try {
 			namingContext = new LDAPUrl((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
 		} catch (MalformedURLException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 			throw new NamingException(e.getMessage());
 		}
 
@@ -378,7 +379,8 @@ public final class JndiServices {
 		try {
 			return (readEntry(dn, filter, true) != null);
 		} catch (NamingException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 		return false;
 	}
@@ -493,9 +495,10 @@ public final class JndiServices {
 			while (ne.hasMore()) {
 				l.add(((SearchResult) ne.next()).getName() + completedBaseDn);
 			}
-		} catch (NamingException nex) {
-			LOGGER.error(nex.toString(), nex);
-			throw nex;
+		} catch (NamingException e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			throw e;
 		}
 		return l;
 	}

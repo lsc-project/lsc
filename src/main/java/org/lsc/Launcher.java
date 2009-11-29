@@ -122,7 +122,8 @@ public final class Launcher {
 			// do the work!
 			sync.launch(syncType, cleanType);
 		} catch (Exception e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 	}
 

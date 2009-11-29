@@ -69,7 +69,7 @@ import org.lsc.Configuration;
 public class I18n {
 
 	/** The logger */
-	private static Logger logger = LoggerFactory.getLogger(I18n.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(I18n.class);
 	/** The messages in the current language */
 	private ResourceBundle messages;
 	/** the instance */
@@ -127,7 +127,7 @@ public class I18n {
 				lang = lang.substring(0, lang.indexOf('.'));
 			}
 		} else {
-			logger.info("No environemental LANG variable found. Defaulting to en_US.");
+			LOGGER.info("No environemental LANG variable found. Defaulting to en_US.");
 			lang = "en_US";
 		}
 		
@@ -142,11 +142,11 @@ public class I18n {
 			try {
 				setLocaleAndLoadMessages(currentLocale);
 			} catch (IOException e) {
-				logger.error("Unable to open the locale message file for {} ! Exiting...", currentLocale);
+				LOGGER.error("Unable to open the locale message file for {} ! Exiting...", currentLocale);
 				throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 			}
 		} else {
-			logger.error("Unable to find locale : {} ! Exiting ...", lang);
+			LOGGER.error("Unable to find locale : {} ! Exiting ...", lang);
 			throw new RuntimeException("Unable to find locale : " + lang + " ! Exiting ...");
 		}
 	}
@@ -161,16 +161,17 @@ public class I18n {
 
 	private void setLocaleAndLoadMessages(Locale locale) throws IOException {
 		currentLocale = locale;
-		logger.debug("Setting locale to {}", locale);
+		LOGGER.debug("Setting locale to {}", locale);
 		try {
 			messages = ResourceBundle.getBundle(
 							localeDirectory + sep + PROJECT_NAME,
 							currentLocale,
 							new I18nCustomClassLoader());
-		} catch (MissingResourceException mre) {
-			logger.error(mre.toString(), mre);
-			logger.debug(System.getenv("CLASSPATH"));
-			throw mre;
+		} catch (MissingResourceException e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			LOGGER.debug(System.getenv("CLASSPATH"));
+			throw e;
 		}
 	}
 
@@ -182,7 +183,7 @@ public class I18n {
 		try {
 			return messages.getString(code);
 		} catch (MissingResourceException mre) {
-			logger.error("I18n layer: unknown code {}", code);
+			LOGGER.error("I18n layer: unknown code {}", code);
 		}
 		return null;
 	}
@@ -211,7 +212,8 @@ public class I18n {
 					try {
 						message = StringUtils.replace(message, "{" + i + "}", objs[i].toString());
 					} catch (IllegalArgumentException e) {
-						logger.error(e.toString(), e);
+						LOGGER.error(e.toString());
+						LOGGER.debug(e.toString(), e);
 					}
 				}
 			}

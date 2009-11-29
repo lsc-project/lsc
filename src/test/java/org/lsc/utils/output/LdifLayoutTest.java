@@ -73,11 +73,11 @@ import org.lsc.jndi.JndiModifications;
 public class LdifLayoutTest extends TestCase {
 
 	private LoggerContext lc = new LoggerContext();
-	private Logger logger = lc.getLogger(LdifLayout.class);
+	private Logger LOGGER = lc.getLogger(LdifLayout.class);
 
 	private ILoggingEvent makeLoggingEvent(String message, Object object) {
 		return new LoggingEvent("org.lsc",
-						logger, Level.INFO, message,
+						LOGGER, Level.INFO, message,
 						new Exception(), new Object[]{object});
 	}
 

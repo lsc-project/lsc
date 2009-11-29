@@ -121,19 +121,26 @@ public class LdapServer {
 		try {
 			retCode = usage(args);
 		} catch (InitializationException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (DirectoryException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (CanceledOperationException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (LDIFException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (IOException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (URISyntaxException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (ConfigException e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 		if (retCode != 0) {
 			System.exit(retCode);
@@ -175,7 +182,13 @@ public class LdapServer {
 				return 1;
 			}
 		} catch (ParseException e) {
-			LOGGER.error("Unable to parse options : {} ({})", args, e);
+			if(LOGGER.isErrorEnabled()) {
+				StringBuffer sbf = new StringBuffer();
+				for(String arg: args) {
+					sbf.append(arg).append(" ");
+				}
+				LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
+			}
 			LOGGER.debug(e.toString(), e);
 			return 1;
 		}

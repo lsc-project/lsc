@@ -395,9 +395,11 @@ public abstract class AbstractBean implements IBean {
 				return null;
 			}
 		} catch (InstantiationException ie) {
-			LOGGER.error(ie.toString(), ie);
+			LOGGER.error(ie.toString());
+			LOGGER.debug(ie.toString(), ie);
 		} catch (IllegalAccessException iae) {
-			LOGGER.error(iae.toString(), iae);
+			LOGGER.error(iae.toString());
+			LOGGER.debug(iae.toString(), iae);
 		}
 
 		return null;

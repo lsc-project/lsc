@@ -51,7 +51,7 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 
 /**
  * @author rschermesser
@@ -64,11 +64,12 @@ public interface IJndiDstService {
      * @return the object or null if not found
      * @throws NamingException when a directory exception is encountered
      */
-    AbstractBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
+    IBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
 
     /**
      * Returns a list of all the objects identifiers.
      * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
+     * @throws NamingException 
      */
     Map<String, LscAttributes> getListPivots() throws NamingException;
     

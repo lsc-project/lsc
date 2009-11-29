@@ -57,11 +57,11 @@ import javax.naming.NamingException;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
+import org.lsc.LscAttributes;
+import org.lsc.beans.IBean;
+import org.lsc.persistence.DaoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
-import org.lsc.persistence.DaoConfig;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
 
@@ -90,12 +90,12 @@ public abstract class AbstractJdbcService implements ISrcService {
 		this.cb = cb;
 	}
 
-	public AbstractBean getBean(AbstractBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
+	public IBean getBean(IBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
 		Map<String, Object> attributeMap = ids.getValue().getAttributes();
 		try {
 			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
-			return (AbstractBean) o;
+			return (IBean) o;
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
 			LOGGER.debug(e.toString(), e);

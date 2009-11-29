@@ -58,10 +58,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.lsc.beans.AbstractBean;
 import org.lsc.beans.BeanComparator;
+import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
@@ -73,6 +71,8 @@ import org.lsc.service.ISrcService;
 import org.lsc.utils.I18n;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.LSCStructuralLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract main class to derive.
@@ -133,7 +133,7 @@ public abstract class AbstractSynchronize {
 	 *                the jndi destination service
 	 */
 	protected final void clean2Ldap(final String syncName,
-					final Class<AbstractBean> taskBeanClass,
+					final Class<IBean> taskBeanClass,
 					final ISrcService srcService,
 					final IJndiDstService dstJndiService) {
 
@@ -165,7 +165,7 @@ public abstract class AbstractSynchronize {
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;
 
-		AbstractBean taskBean;
+		IBean taskBean;
 
 		// Loop on all entries in the destination and delete them if they're not found in the source
 		while (ids.hasNext()) {
@@ -203,7 +203,7 @@ public abstract class AbstractSynchronize {
 						// If condition is based on dstBean, retrieve the full object from destination
 						if (conditionString.contains("dstBean")) {
 
-							AbstractBean dstBean = dstJndiService.getBean(id);
+							IBean dstBean = dstJndiService.getBean(id);
 							// Log an error if the bean could not be retrieved! This shouldn't happen.
 							if (dstBean == null) {
 								LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
@@ -289,7 +289,7 @@ public abstract class AbstractSynchronize {
 	protected final void synchronize2Ldap(final String syncName,
 					final ISrcService srcService,
 					final IJndiDstService dstService,
-					final Class<AbstractBean> objectBean,
+					final Class<IBean> objectBean,
 					final Object customLibrary) {
 
 		// Get list of all entries from the source
@@ -316,8 +316,8 @@ public abstract class AbstractSynchronize {
 		JndiModifications jm = null;
 		ISyncOptions syncOptions = this.getSyncOptions(syncName);
 		// store method to obtain source bean
-		AbstractBean srcBean = null;
-		AbstractBean dstBean = null;
+		IBean srcBean = null;
+		IBean dstBean = null;
 
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;

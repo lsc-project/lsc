@@ -62,12 +62,12 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.lsc.Configuration;
+import org.lsc.LscObject;
+import org.lsc.LscAttributes;
+import org.lsc.beans.IBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.Configuration;
-import org.lsc.LscAttributes;
-import org.lsc.LscObject;
-import org.lsc.beans.AbstractBean;
 
 /**
  * This class is an abstract generic but configurable implementation to get data
@@ -226,8 +226,8 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if a directory exception is encountered while
 	 *             switching to the Java POJO
 	 */
-	public final AbstractBean getBeanFromSR(final SearchResult sr,
-			final AbstractBean beanToFill) throws NamingException {
+	public final IBean getBeanFromSR(final SearchResult sr,
+			final IBean beanToFill) throws NamingException {
 
 		if (sr == null)
 			return null;

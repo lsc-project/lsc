@@ -53,7 +53,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 import org.lsc.service.ISrcService;
 
 
@@ -89,7 +89,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final AbstractBean getBean(AbstractBean bean, final Entry<String, LscAttributes> ids) throws NamingException {
+	public final IBean getBean(IBean bean, final Entry<String, LscAttributes> ids) throws NamingException {
 		return this.getBeanFromSR(get(ids), bean);
 	}
 

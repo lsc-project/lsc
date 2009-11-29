@@ -51,7 +51,7 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 
 /**
  * Interface used by source services.
@@ -69,19 +69,20 @@ import org.lsc.beans.AbstractBean;
 public interface ISrcService {
     /**
      * The simple object getter according to its identifier.
-     * @param bean Base object to fill
+     * @param taskBean Base object to fill
      * @param obj
      * 		The data identifier in the source such as returned by getListPivots().
      * 		It must identify a unique entry in the source.
      * @return The bean, or null if not found
-     * @throws May throw a NamingException if the object is not found in the directory,
+     * @throws NamingException May throw a NamingException if the object is not found in the directory,
      * 			or if more than one object would be returned.
      */
-    AbstractBean getBean(AbstractBean bean, Entry<String, LscAttributes> obj) throws NamingException;
+    IBean getBean(IBean taskBean, Entry<String, LscAttributes> obj) throws NamingException;
 
     /**
      * Returns a list of all the objects' identifiers.
      * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
+     * @throws NamingException 
      */
     Map<String, LscAttributes> getListPivots() throws NamingException;
 }

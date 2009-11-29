@@ -52,12 +52,12 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 import org.lsc.jndi.IJndiDstService;
 import org.lsc.service.ISrcService;
 import org.lsc.utils.LSCStructuralLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extends AbstractSynchronize to instantiate a simple synchronization engine
@@ -250,7 +250,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
             	srcService = (ISrcService) constrSrcService.newInstance();
             }
 
-            Class<AbstractBean> taskBean = (Class<AbstractBean>) Class.forName(beanClassName);
+            Class<IBean> taskBean = (Class<IBean>) Class.forName(beanClassName);
             // Do the work!
             switch(taskMode) {
                 case clean:

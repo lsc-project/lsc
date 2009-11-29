@@ -43,8 +43,9 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.utils;
+package org.lsc.utils.output;
 
+import org.lsc.utils.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -61,7 +62,6 @@ import javax.naming.directory.ModificationItem;
 
 import junit.framework.TestCase;
 
-import org.slf4j.LoggerFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 
@@ -70,10 +70,10 @@ import org.lsc.jndi.JndiModifications;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LocalizedJndiModificationsLayoutTest extends TestCase {
+public class LdifLayoutTest extends TestCase {
 
 	private LoggerContext lc = new LoggerContext();
-	private Logger logger = lc.getLogger(LocalizedJndiModificationsLayout.class);
+	private Logger logger = lc.getLogger(LdifLayout.class);
 
 	private ILoggingEvent makeLoggingEvent(String message, Object object) {
 		return new LoggingEvent("org.lsc",
@@ -99,7 +99,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 
-		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		LdifLayout layout = new LdifLayout();
 		layout.setPattern("%m%n");
 		layout.start();
 
@@ -131,7 +131,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 
-		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		LdifLayout layout = new LdifLayout();
 		layout.setPattern("%m%n");
 		layout.start();
 
@@ -164,7 +164,7 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 
-		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
+		LdifLayout layout = new LdifLayout();
 		layout.setPattern("%m%n");
 		layout.start();
 
@@ -173,19 +173,4 @@ public class LocalizedJndiModificationsLayoutTest extends TestCase {
 						layout.doLayout(loggingEvent));
 	}
 
-//	/**
-//	 * Launch a neutral layout test.
-//	 *
-//	 * @throws IOException
-//	 */
-//	public final void testNeutral() throws IOException {
-//		ILoggingEvent loggingEvent = makeLoggingEvent("a simple string", "a simple string");
-//
-//		LocalizedJndiModificationsLayout layout = new LocalizedJndiModificationsLayout();
-//		layout.setPattern("%msg%n");
-//		layout.start();
-//
-//		I18n.setLocale(Locale.US);
-//		assertEquals("a simple string", layout.doLayout(loggingEvent));
-//	}
 }

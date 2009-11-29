@@ -43,7 +43,7 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.utils;
+package org.lsc.utils.output;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -72,7 +72,7 @@ import org.lsc.jndi.JndiModifications;
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LocalizedJndiModificationsLayout extends PatternLayout {
+public class LdifLayout extends PatternLayout {
 
 	/* The separator of the log operations */
 	protected static String LOG_OPERATIONS_SEPARATOR = ",";

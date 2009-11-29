@@ -46,21 +46,19 @@
 package org.lsc.utils;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 
  * 
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
+ * @param <V> Type of Object to store in this HashMap
  *
  */
 @SuppressWarnings("unchecked")
 public class CaseIgnoreStringHashMap<V> extends HashMap<String, V> {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -123,13 +121,9 @@ public class CaseIgnoreStringHashMap<V> extends HashMap<String, V> {
 	 */
 	@Override
 	public void putAll(Map m) {
-		Iterator keys = m.keySet().iterator();
-		while (keys.hasNext()) {
-			Object key = keys.next();
-			if (key instanceof String) {
-				Object value = m.get(key);
-				put(((String) key).toLowerCase(), (V) value);
-			}
+		Map<String,V> mapToAdd = (Map<String,V>) m;
+		for (Entry<String, V> entry : mapToAdd.entrySet()) {
+			put(entry.getKey(), entry.getValue());
 		}
 	}
 

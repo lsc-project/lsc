@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,19 +183,19 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
     {
     	Map<String, List<String>> res = new HashMap<String, List<String>>(originalValues.size());
     	
-    	for (String key : originalValues.keySet())
+    	for (Entry<String, String> entry : originalValues.entrySet())
 		{
-            String delimiter = getDelimiter(delimiters, key);
+            String delimiter = getDelimiter(delimiters, entry.getKey());
             
             // cut up the existing string on the delimiter
-            StringTokenizer st = new StringTokenizer(originalValues.get(key), delimiter);
+            StringTokenizer st = new StringTokenizer(entry.getValue(), delimiter);
             List<String> values = new ArrayList<String>();
             while (st.hasMoreTokens()) {
             	values.add(st.nextToken());
             }
             
             // store the result
-            res.put(key, values);
+            res.put(entry.getKey(), values);
 		}
     	
     	return res;

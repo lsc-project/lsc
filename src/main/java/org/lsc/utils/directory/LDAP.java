@@ -47,8 +47,8 @@ package org.lsc.utils.directory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Iterator;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.naming.AuthenticationException;
 import javax.naming.CommunicationException;
@@ -157,10 +157,8 @@ public class LDAP {
 			// clean up and replace authentication on the context with original
 			// identity
 			Properties authProps = getJndiAuthenticationProperties(bindDn, bindPassword);
-			Iterator<Object> authPropsit = authProps.keySet().iterator();
-			while (authPropsit.hasNext()) {
-				String key = (String) authPropsit.next();
-				bindContext.addToEnvironment(key, authProps.get(key));
+			for (Entry<Object, Object> propertyEntry : authProps.entrySet()) {
+				bindContext.addToEnvironment(propertyEntry.getKey().toString(), propertyEntry.getValue());
 			}
 			bindContext.reconnect(bindContext.getConnectControls());
 		}

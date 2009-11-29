@@ -47,9 +47,9 @@ package org.lsc.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.ScriptableJndiServices;
@@ -219,13 +219,9 @@ public final class JScriptEvaluator {
 		}
 
 		if (localParams != null) {
-			Iterator<String> paramsIter = localParams.keySet().iterator();
-			while (paramsIter.hasNext()) {
-				String name = paramsIter.next();
-				Object value = localParams.get(name);
-
-				Object jsObj = Context.javaToJS(value, scope);
-				ScriptableObject.putProperty(scope, name, jsObj);
+			for (Entry<String, Object> entry : localParams.entrySet()) {
+				Object jsObj = Context.javaToJS(entry.getValue(), scope);
+				ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
 			}
 		}
 

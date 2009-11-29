@@ -182,7 +182,7 @@ public class I18n {
 		try {
 			return messages.getString(code);
 		} catch (MissingResourceException mre) {
-			System.err.println("I18n layer: unknown code " + code);
+			logger.error("I18n layer: unknown code {}", code);
 		}
 		return null;
 	}

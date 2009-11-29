@@ -99,9 +99,8 @@ public class DaoConfigTest extends TestCase {
 			Statement stm = con.createStatement();
 			String sql = "DROP TABLE test IF EXISTS; CREATE TABLE test (id INTEGER PRIMARY KEY)";
 			rs = stm.executeQuery(sql);
-			//
 			while (rs.next()) {
-				System.out.println("Table has " + rs.getInt(1) + " rows.");
+				LOGGER.debug("Table has {} rows.", rs.getInt(1));
 			}
 		} catch (SQLException e) {
 			LOGGER.error(e.toString(), e);

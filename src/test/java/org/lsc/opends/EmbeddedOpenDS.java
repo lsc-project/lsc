@@ -205,14 +205,14 @@ public final class EmbeddedOpenDS {
 			e.printStackTrace();
 		}
 
-		System.out.println("Server started");
+		LOGGER.info("Server started");
 		// ok, stop
 		try {
 			shutdownServer("Stop required");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Server stoped");
+		LOGGER.info("Server stoped");
 	}
 
 	/**

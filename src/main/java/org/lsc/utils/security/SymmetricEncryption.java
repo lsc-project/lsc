@@ -71,6 +71,8 @@ import org.apache.commons.cli.ParseException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>This new class allows symmetric encryption. You should have BouncyCastle
@@ -84,6 +86,8 @@ import org.lsc.Configuration;
  * </ul>
  */
 public class SymmetricEncryption {
+
+	private static Logger LOGGER = LoggerFactory.getLogger(SymmetricEncryption.class);
 
 	public static final int DEFAULT_CIPHER_STRENGTH = 128;
 	public static final String DEFAULT_CIPHER_ALGORITHM = "AES";
@@ -245,17 +249,22 @@ public class SymmetricEncryption {
 				System.exit(1);
 			}
 		} catch (ParseException e) {
-			System.out.println("Unable to parse options : " + argv + " (" + e + ")");
+			StringBuffer sbf = new StringBuffer();
+			for(String arg : argv) {
+				sbf.append(arg).append(" ");
+			}
+			
+			LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
 			System.exit(1);
 		}
 
 		try {
 			SymmetricEncryption se = new SymmetricEncryption();
 			if (se.generateDefaultRandomKeyFile()) {
-				System.out.println("Key generated: " + SymmetricEncryption.getDefaultKeyPath());
+				LOGGER.info("Key generated: {}", SymmetricEncryption.getDefaultKeyPath());
 			}
 		} catch (GeneralSecurityException ex) {
-			System.out.println(ex);
+			LOGGER.debug(ex.toString(), ex);
 		}
 	}
 }

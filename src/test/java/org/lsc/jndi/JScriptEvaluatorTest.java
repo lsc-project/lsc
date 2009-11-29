@@ -55,8 +55,8 @@ import javax.naming.directory.BasicAttribute;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.lsc.beans.AbstractBean;
-import org.lsc.beans.personBean;
+import org.lsc.beans.IBean;
+import org.lsc.beans.SimpleBean;
 import org.lsc.utils.JScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
 
@@ -97,7 +97,7 @@ public class JScriptEvaluatorTest extends TestCase {
 		Attribute cn = new BasicAttribute("cn");
 		cn.add("John Doe");
 		cn.add("DOE John");
-		AbstractBean bean = (AbstractBean) new personBean();
+		IBean bean = (IBean) new SimpleBean();
 		bean.setAttribute(sn);
 		bean.setAttribute(givenName);
 		bean.setAttribute(cn);

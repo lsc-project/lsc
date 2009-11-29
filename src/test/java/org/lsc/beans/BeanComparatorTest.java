@@ -91,7 +91,7 @@ public class BeanComparatorTest extends TestCase
 		boolean condition = true;
 
 		// test add
-		srcBean = new personBean();
+		srcBean = new SimpleBean();
 		srcBean.setDistinguishName("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
@@ -112,7 +112,7 @@ public class BeanComparatorTest extends TestCase
 		}
 
 		// test mod
-		destBean = new personBean();
+		destBean = new SimpleBean();
 		destBean.setDistinguishName("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 

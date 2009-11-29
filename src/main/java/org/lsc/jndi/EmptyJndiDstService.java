@@ -52,7 +52,7 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 
 /**
  * This class is a generic implementation to simulate an empty destination directory.
@@ -81,7 +81,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public AbstractBean getBean(Entry<String, LscAttributes> id) throws NamingException {
+	public IBean getBean(Entry<String, LscAttributes> id) throws NamingException {
 		return null;
 	}
 

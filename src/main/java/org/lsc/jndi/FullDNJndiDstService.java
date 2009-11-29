@@ -63,7 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 import org.lsc.utils.StringLengthComparator;
 
 /**
@@ -80,7 +80,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
     /**
      * Preceding the object feeding, it will be instantiated from this class.
      */
-    private Class<AbstractBean> beanClass;
+    private Class<IBean> beanClass;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiDstService.class);
 
@@ -96,7 +96,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
     public FullDNJndiDstService(final Properties props, final String beanClassName) {
         super(props);
         try {
-            this.beanClass = (Class<AbstractBean>) Class.forName(beanClassName);
+            this.beanClass = (Class<IBean>) Class.forName(beanClassName);
         } catch (ClassNotFoundException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -119,7 +119,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
      * @throws NamingException
      *             thrown if an directory exception is encountered while getting the identified bean
      */
-	public AbstractBean getBean(Entry<String, LscAttributes> id) throws NamingException{
+	public IBean getBean(Entry<String, LscAttributes> id) throws NamingException{
 		String dn = id.getKey();
 		
 	    try {
@@ -132,7 +132,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	        SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
 	        Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
 	                Class.class });
-	        return (AbstractBean) method.invoke(null, new Object[] { srObject, dn, beanClass });
+	        return (IBean) method.invoke(null, new Object[] { srObject, dn, beanClass });
 	    } catch (SecurityException e) {
 	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
 									beanClass.getName(), e);
@@ -157,6 +157,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	    return null;
     }
 
+	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
         // get list of DNs
         List<String> idList = JndiServices.getDstInstance().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);

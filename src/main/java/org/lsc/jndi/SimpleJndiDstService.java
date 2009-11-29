@@ -58,7 +58,7 @@ import javax.naming.directory.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 
 /**
  * This class is a generic but configurable implementation to read data from the destination directory.
@@ -73,7 +73,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
 	 */
-	private Class<AbstractBean> beanClass;
+	private Class<IBean> beanClass;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiDstService.class);
 
@@ -89,7 +89,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	public SimpleJndiDstService(final Properties props, final String beanClassName) {
 		super(props);
 		try {
-			this.beanClass = (Class<AbstractBean>) Class.forName(beanClassName);
+			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
 			throw new ExceptionInInitializerError(e);
 		}
@@ -103,12 +103,12 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final AbstractBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
+	public final IBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
 		try {
 			SearchResult srObject = get(ids);
 			Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
 					Class.class });
-			return (AbstractBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });
+			return (IBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });
 		} catch (SecurityException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
 							beanClass.getName(), e.toString());

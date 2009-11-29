@@ -48,11 +48,16 @@ public class FrenchFiltersTest extends TestCase {
 		assertEquals("abcdefghijklmn", FrenchFilters.filterUid(uid));
 	}
 
-		public void testFilterShortUid() {
+	public void testFilterShortUid() {
 		String uid = "ABCDEFGHIJKLMNOPQ";
 		assertEquals("abcdefgh", FrenchFilters.filterShortUid(uid));
 	}
 
+	public void testFilterLengthString() {
+		assertEquals("identifier", FrenchFilters.filterLengthString("identifier", 12));
+		assertEquals("ident", FrenchFilters.filterLengthString("identifier", 5));
+		assertEquals("ident", FrenchFilters.filterLengthString("id-entifier", 5));
+	}
 
 //	public static String filterStringRegExp(final String value, final String regexp)
 //					throws CharacterUnacceptedException {
@@ -144,4 +149,6 @@ public class FrenchFiltersTest extends TestCase {
 //	public static String filterDate(final String value, final String format)
 //					throws CharacterUnacceptedException {
 
+		
+	
 }

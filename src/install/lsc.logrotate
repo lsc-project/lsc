@@ -1,0 +1,10 @@
+#LSC_LOGFILE# { 
+        daily
+        rotate 14
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 644 root root
+}
+

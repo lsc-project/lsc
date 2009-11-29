@@ -1,0 +1,87 @@
+#!/bin/bash
+
+#====================================================================
+# Script for LDAP Synchronization Connector
+#
+# Launch synchronize task with correct classpath
+#
+# Copyright (C) 2008 Clement OUDOT
+# Copyright (C) 2008 Jonathan CLARKE
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# GPL License: http://www.gnu.org/licenses/gpl.txt
+#====================================================================
+
+#====================================================================
+# Changelog
+#====================================================================
+# Version 0.2 (2008):
+# - Modify exit codes
+# - Add comments
+# Author: Clement OUDOT (LINAGORA)
+#
+# Version 0.1 (2008):
+# - First version
+# Author: Jonathan CLARKE (LINAGORA)
+#====================================================================
+
+#====================================================================
+# Configuration
+#====================================================================
+JAVA_HOME=/usr/java/jdk1.5.0_16
+LSC_HOME=/opt/lsc
+CFG_DIR=$LSC_HOME/etc
+LIB_DIR=$LSC_HOME/lib
+LOG_DIR=$LSC_HOME/log
+LOG_FILE=$LOG_DIR/lsc.log
+
+mkdir -p $LOG_DIR
+
+#====================================================================
+# Functions
+#====================================================================
+function log() {
+	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" >> $LOG_FILE
+}
+
+#====================================================================
+# Main
+#====================================================================
+# check if LSC is not already running
+if [ $(ps -efww | grep java | grep org.lsc | grep -v grep | wc -l) -ne 0 ] 
+then
+	# LSC already running
+	log "LSC already running - launch aborted"
+
+	# since LSC already running, don't launch and exit
+	exit 1
+fi
+
+# LSC not already running
+log "Starting LSC"
+
+CLASSPATH="."
+for jar in $LIB_DIR/*.jar
+do
+	CLASSPATH=$CLASSPATH:$jar
+done
+
+cd $CFG_DIR
+$JAVA_HOME/bin/java -cp $CLASSPATH org.lsc.Launcher $*
+
+# LSC finished running
+log "LSC finished running"
+
+#====================================================================
+# Exit
+#====================================================================
+exit 0

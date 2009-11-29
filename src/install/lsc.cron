@@ -1,0 +1,5 @@
+#
+# Regular cron jobs for the Ldap Synchronization Connector
+#
+
+30 * * * * root [ -x #LSC_BIN# ] && #LSC_BIN# -s all -c all > /dev/null 2>&1

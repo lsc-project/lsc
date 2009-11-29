@@ -1,0 +1,75 @@
+<project name="lsc-run" default="lsc::help" basedir=".">
+
+	<property file="env.properties"/>
+
+	<path id="execution.path">
+		<fileset dir="${basedir}/lib" includes="**/*.jar" />
+		<pathelement location="${CONF_DIR}" />
+	</path>
+
+	<!--
+        ===================================================================
+          Clean the HsqlDB
+        ===================================================================
+	-->
+	<target name="lsc::clean" description="Clean the HsqlDB">
+		<delete dir="${VAR_DIR}/hsqldb"/>
+	</target>
+
+	<!--
+        ===================================================================
+          Launch the synchronization engine
+        ===================================================================
+	-->
+	<target name="lsc::synchronize" depends="lsc::import" description="Import the data to the directory">
+		<java classname="org.lsc.Launcher" classpathref="execution.path" fork="true" maxmemory="512M" dir="${CONF_DIR}">
+			<arg line="${synchronize.parameters}" />
+		</java>
+	</target>
+
+	<!--
+        ===================================================================
+          Create the HsqlDB
+        ===================================================================
+	-->
+        <target name="lsc::createHsqlDB" unless="${execution.path}" description="Create the HsqlDB structure">
+                <echo>Creation de la base de donnees a partir des fichiers SQL</echo>
+                <property file="${CONF_DIR}/database.properties" />
+                <sql autocommit="true" caching="false" showheaders="true" classpathref="execution.path" driver="${driver}" password="${password}" url="${url}" userid="${username}" onerror="abort" src="${CONF_DIR}/sample-pregen.sql" />
+        </target>
+
+        <target name="lsc::runCsvToSql" description="Run the csvtosql tool to fill the inline HsqlDB database">
+                <copy file="${VAR_DIR}/input/sample.csv" tofile="${VAR_DIR}/input/sample-utf8.csv" encoding='ISO8859-1' outputencoding='UTF-8'/>
+                <copy file="${CONF_DIR}/csvtosql/sample.xml" tofile="${VAR_DIR}/input/sample.xml" encoding='ISO8859-1' outputencoding='UTF-8'/>
+                <path id="csvtosql.path">
+                        <path refid="execution.path"/>
+                        <fileset dir="${USR_DIR}/lib" includes="**/csvtosql.jar" />
+                </path>
+                <echo>Launch CsvToSql engine on Sample CSV file</echo>
+                <java classname="net.sf.csv2sql.frontends.console.ConsoleMain" classpathref="csvtosql.path" fork="true" maxmemory="512M" dir="${VAR_DIR}">
+                        <arg line="-d ${VAR_DIR}/input/sample.xml" />
+                </java>
+        </target>
+
+        <!--
+        ===================================================================
+          Launch the sample
+        ===================================================================
+        -->
+        <target name="lsc::import" depends="lsc::clean,lsc::createHsqlDB,lsc::runCsvToSql" description="Launch the CSV to HsqlDB import">
+        </target>
+
+	<target name="lsc::help">
+		<echo>
+*****************************************
+Ldap Synchronization Connector - LSC project
+*****************************************
+
+To launch the synchronization, use the lsc::synchronize task :
+&gt; ant lsc::synchronize
+
+		</echo>
+	</target>
+
+</project>
+

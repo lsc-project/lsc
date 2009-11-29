@@ -1,0 +1,102 @@
+<project name="installer" basedir="." default="install">
+
+	<property file="${basedir}/ant.install.properties" />
+
+	<path id="ant.path">
+		<fileset dir="${basedir}" includes="*.jar" />
+	</path>
+
+
+	<target name="init">
+		<delete dir="${install.usr.dir}/lib" />
+		<mkdir dir="${install.usr.dir}" />
+		<mkdir dir="${install.usr.dir}/lib" />
+		<mkdir dir="${install.conf.dir}" />
+		<mkdir dir="${install.log.dir}" />
+		<mkdir dir="${install.var.dir}" />
+		<mkdir dir="${install.var.dir}/input" />
+	</target>
+
+	<target name="copyCron" if="cronDirAvailable">
+		<copy toDir="${install.cron.dir}" overwrite="false">
+			<fileset dir="${basedir}/crond" includes="**/*" />
+			<filterset begintoken="#" endtoken="#">
+				<filter token="LSC_HOME" value="${install.usr.dir}" />
+			</filterset>
+		</copy>
+	</target>
+
+	<target name="copy" depends="init">
+		<copy toDir="${install.usr.dir}/lib">
+			<fileset dir="${basedir}/lib" includes="**/*.jar" />
+			<fileset dir="${basedir}" includes="lsc*.jar" />
+			<mapper type="flatten" />
+		</copy>
+		<copy toDir="${install.conf.dir}" overwrite="true">
+			<fileset dir="${basedir}/conf" includes="**/*" />
+		</copy>
+
+		<!-- Overwrite cron file with LSC_HOME replacement -->
+		<availability file="${install.cron.dir}" type="dir" property="cronDirAvailable" />
+
+		<!-- Overwrite all binaries file -->
+		<copy toDir="${install.usr.dir}" overwrite="true">
+			<fileset dir="${basedir}/bin" includes="**/*" />
+		</copy>
+		<!-- Overwrite *.sh file with LSC_HOME replacement -->
+		<copy toDir="${install.usr.dir}" overwrite="true">
+			<fileset dir="${basedir}/bin" includes="**/*.sh" />
+			<filterset begintoken="#" endtoken="#">
+				<filter token="LSC_HOME" value="${install.usr.dir}" />
+			</filterset>
+		</copy>
+		<chmod file="${install.usr.dir}/*.sh" perm="755" />
+	</target>
+
+	<target name="reconf" depends="copy">
+		<taskdef name="propertyfile" classname="org.apache.tools.ant.taskdefs.optional.PropertyFile" />
+
+                <propertyfile file="${install.conf.dir}/lsc.properties" comment="Re/set the LDAP properties">
+                        <entry key="src.java.naming.security.authentication" value="${src.auth.mode}"/>
+                        <entry key="src.java.naming.provider.url" value="${src.java.naming.provider.url}" />
+                        <entry key="src.java.naming.security.principal" value="${src.principal.dn}" />
+                        <entry key="src.java.naming.security.credentials" value="${src.principal.password}" />
+
+                        <entry key="dst.java.naming.security.authentication" value="${dst.auth.mode}"/>
+                        <entry key="dst.java.naming.provider.url" value="${dst.java.naming.provider.url}" />
+                        <entry key="dst.java.naming.security.principal" value="${dst.principal.dn}" />
+                        <entry key="dst.java.naming.security.credentials" value="${dst.principal.password}" />
+
+                        <entry key="dn.real_root" value="${dst.naming.context}" />
+                </propertyfile>
+
+
+		<propertyfile file="${install.conf.dir}/database.properties" comment="Reset the database properties">
+			<entry key="driver" value="${jdbc.driver}" />
+			<entry key="url" value="${jdbc.url}" />
+			<entry key="username" value="${jdbc.username}" />
+			<entry key="password" value="${jdbc.password}" />
+		</propertyfile>
+
+		<propertyfile file="${install.conf.dir}/log4j.properties" comment="Reset the Log4J properties">
+			<entry key="log4j.appender.LSC.File" value="${install.log.dir}/lsc.log" />
+		</propertyfile>
+
+		<propertyfile file="${install.usr.dir}/env.properties" comment="Reset the environment properties">
+			<entry key="JAVA_HOME" value="${java.home}" />
+			<entry key="ANT_HOME" value="${ant.home}" />
+			<entry key="CONF_DIR" value="${install.conf.dir}" />
+			<entry key="LOG_DIR" value="${install.log.dir}" />
+			<entry key="VAR_DIR" value="${install.var.dir}" />
+			<entry key="USR_DIR" value="${install.usr.dir}" />
+		</propertyfile>
+
+		<replaceregexp file="${install.conf.dir}/lsc.properties" match="\\\:" replace=":" flags="g" byline="true" />
+		<replaceregexp file="${install.conf.dir}/log4j.properties" match="\\\:" replace=":" flags="g" byline="true" />
+		<replaceregexp file="${install.conf.dir}/database.properties" match="\\\:" replace=":" flags="g" byline="true" />
+
+	</target>
+
+	<target name="install" depends="reconf">
+	</target>
+</project>

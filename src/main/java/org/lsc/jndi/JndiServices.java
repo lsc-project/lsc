@@ -595,7 +595,7 @@ public final class JndiServices {
 	private void deleteChildrenRecursively(String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-		NamingEnumeration ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
+		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
 		while (ne.hasMore()) {
 			SearchResult sr = (SearchResult) ne.next();
 			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);

@@ -159,10 +159,7 @@ public abstract class AbstractBean extends LscBean {
 						localMethod = meths.get(0);
 					} else {
 						/* Find method matching returnType */
-						Iterator<Method> methsIt = meths.iterator();
-						Method currentMeth = null;
-						while (methsIt.hasNext()) {
-							currentMeth = methsIt.next();
+						for (Method currentMeth : meths) {
 							if (currentMeth.getParameterTypes()[0].isAssignableFrom(returnType)) {
 								localMethod = currentMeth;
 							}

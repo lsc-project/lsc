@@ -243,34 +243,7 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Remove all the occurences of a string in a string
-	 *
-	 * @param chars to remove
-	 * @param string to filter
-	 *
-	 * @return
-	 */
-	private static String filterDelStringIntoString(final String charactere,
-					final String string) {
-		String returned = "";
-		String tmp = string;
-		int i = tmp.indexOf(charactere);
-
-		while ((i != -1) && (i < string.length())) {
-			returned += tmp.substring(0, i);
-			tmp = tmp.substring(i + 1, tmp.length());
-			i = tmp.indexOf(charactere);
-		}
-
-		if (tmp.length() > 0) {
-			returned += tmp;
-		}
-
-		return returned;
-	}
-
-	/**
-	 * Transform a telephon number in the international display
+	 * Transform a telephone number in the international display
 	 *
 	 * @param phone2parse
 	 *
@@ -369,7 +342,7 @@ public final class FrenchFilters {
 		String tmp = filterName(startString);
 
 		for (int i = 0; i < BAD_SEPARATOR_FOR_ID.length; i++) {
-			tmp = filterDelStringIntoString(BAD_SEPARATOR_FOR_ID[i], tmp);
+			tmp = tmp.replaceAll(BAD_SEPARATOR_FOR_ID[i], "");
 		}
 
 		// Remove all accents and cedillas

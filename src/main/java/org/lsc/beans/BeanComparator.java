@@ -489,6 +489,7 @@ public final class BeanComparator {
 	 * @param srcBean database object bean
 	 * @param destBean directory object bean
 	 * @param jm modification to apply on the main object
+	 * @return Array of {@link JndiModifications}
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException

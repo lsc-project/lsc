@@ -218,6 +218,7 @@ public class SetUtils
 	 *            Set of Objects to find the needles in.
 	 * @param needles
 	 *            Set of Objects to search for in the haystack.
+	 * @return true if all the members of needles are found in haystack
 	 */
 	public static boolean setContainsAll(Set<Object> haystack, Set<Object> needles)
 	{

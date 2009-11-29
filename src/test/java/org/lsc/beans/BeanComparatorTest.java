@@ -53,13 +53,16 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.naming.NamingException;
+import javax.naming.directory.BasicAttribute;
 
+import junit.framework.TestCase;
+
+import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
+import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.SetUtils;
-
-import junit.framework.TestCase;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -68,6 +71,67 @@ import junit.framework.TestCase;
 public class BeanComparatorTest extends TestCase
 {
 
+    /**
+     * This test ensures that a source bean containing fields with only
+     * empty string values is not output as a modification to be applied 
+     * to the destination.
+     * 
+     * If this is not the case, LDAP operations follow for LDIF like this:
+     * modificationType: add
+     * add: sn
+     * sn: 
+     * 
+     * With an invalid syntax error.
+     */
+    public void testCalculateModificationsWithEmptyFields()
+    {
+		ISyncOptions syncOptions = new ForceSyncOptions();
+		IBean srcBean, destBean;
+		Object customLibrary = null;
+		boolean condition = true;
+
+		// test add
+		srcBean = new personBean();
+		srcBean.setDistinguishName("something");
+		srcBean.setAttribute(new BasicAttribute("sn", ""));
+		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
+		destBean = null;
+
+		try {
+			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+
+			assertEquals("something", jm.getDistinguishName());
+			assertEquals(1, jm.getModificationItems().size());
+			assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
+			assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
+
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			assertTrue(false);
+		}
+
+		// test mod
+		destBean = new personBean();
+		destBean.setDistinguishName("something");
+		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
+
+		try {
+			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+
+			assertEquals("something", jm.getDistinguishName());
+			assertEquals(1, jm.getModificationItems().size());
+			assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
+			assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
+
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			assertTrue(false);
+		}
+    }
+
+	
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(java.lang.String, java.util.List, org.lsc.beans.syncoptions.ISyncOptions, java.util.Map)}.
 	 */

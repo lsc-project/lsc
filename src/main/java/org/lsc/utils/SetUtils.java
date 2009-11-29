@@ -83,7 +83,14 @@ public class SetUtils
 		Set<Object> attrValues = new HashSet<Object>(attr.size());
 		NamingEnumeration<?> ne = attr.getAll();
 		while (ne.hasMore()) {
-			attrValues.add(ne.next());
+			Object value = ne.next();
+			
+			// ignore empty string values
+			if (value.getClass().equals(String.class) && ((String)value).length() == 0) {
+				continue;
+			}
+			
+			attrValues.add(value);
 		}
 		return attrValues;
 	}

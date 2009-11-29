@@ -83,7 +83,7 @@ public final class JScriptEvaluator {
 	/**
 	 * Default private constructor.
 	 *
-	 * @see getInstance()
+	 * @see #getInstance()
 	 */
 	private JScriptEvaluator() {
 		cache = new HashMap<String, Script>();

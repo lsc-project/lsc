@@ -61,6 +61,8 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	/**
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
 	 * and calls the appropriate SQL requests defined in sql-map-config.d
+	 * 
+	 * @param props Configuration properties
 	 */
 	public SimpleJdbcSrcService(Properties props) {
 		requestNameForList = props.getProperty("requestNameForList");

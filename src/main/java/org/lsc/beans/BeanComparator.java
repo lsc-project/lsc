@@ -95,6 +95,7 @@ public final class BeanComparator {
 	 * @param syncOptions SyncOptions object from properties
 	 * @param srcBean Bean from source
 	 * @param dstBean JNDI bean
+	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @return JndiModificationType the modification type that would happen
 	 * @throws CloneNotSupportedException
 	 */
@@ -123,12 +124,15 @@ public final class BeanComparator {
 	 * By default, source information override destination
 	 * (i.e. Database => Directory) But if a piece of information is
 	 * present only in the destination, it remains
-	 *
+	 * 
+	 * @param syncOptions Instance of {@link ISyncOptions} to use.
 	 * @param srcBean Source bean from JDBC or JNDI
 	 * @param destBean JNDI bean
+	 * @param customLibrary 
 	 * @return modifications to apply to the directory
 	 * @throws NamingException an exception may be thrown if an LDAP data
 	 * access error is encountered
+	 * @throws CloneNotSupportedException 
 	 * @deprecated
 	 */
 	public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
@@ -144,16 +148,19 @@ public final class BeanComparator {
 	 * Static comparison method. By default, source information override
 	 * destination (i.e. Database => Directory) But if a piece of information is
 	 * present only in the destination, it remains
-	 *
+	 * 
+	 * @param syncOptions Instance of {@link ISyncOptions} to use.
 	 * @param srcBean
 	 *            Source bean
 	 * @param dstBean
 	 *            JNDI bean
+	 * @param customLibrary 
 	 * @param condition
 	 * @return modifications to apply to the directory
 	 * @throws NamingException
 	 *             an exception may be thrown if an LDAP data access error is
 	 *             encountered
+	 * @throws CloneNotSupportedException 
 	 */
 	public static JndiModifications calculateModifications(
 					ISyncOptions syncOptions, IBean srcBean, IBean dstBean,

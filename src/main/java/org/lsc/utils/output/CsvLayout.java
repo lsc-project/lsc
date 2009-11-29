@@ -215,7 +215,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
-	 * @param logOperation the logOperation to set
+	 * @param logOperations the logOperation to set
 	 */
 	public void setLogOperation(String logOperations) {
 		this.logOperations = logOperations;

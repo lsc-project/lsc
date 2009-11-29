@@ -115,6 +115,7 @@ public class AD {
      * 
      * @param password The cleartext password to be encoded
      * @return The value to write in AD's unicodePwd attribute
+     * @throws UnsupportedEncodingException 
      */
     public static String getUnicodePwd(String password) throws UnsupportedEncodingException {
     	String quotedPassword = "\"" + password + "\"";

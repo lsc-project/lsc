@@ -63,6 +63,8 @@ import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
 
 import junit.framework.TestCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Launch the jndi tests.
@@ -70,6 +72,8 @@ import junit.framework.TestCase;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class JndiServicesTest extends TestCase {
+
+	private static Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
     /**
      * Just check that the connection is ready.
@@ -96,7 +100,7 @@ public class JndiServicesTest extends TestCase {
                     new String[] { "objectclasses" }));
 
         } catch (NamingException ne) {
-            System.err.println(ne);
+            LOGGER.debug(ne.toString(), ne);
             assertNotNull(null);
         }
     }
@@ -114,7 +118,7 @@ public class JndiServicesTest extends TestCase {
             assertEquals(test2list, JndiServices.getDstInstance().sup(
                     "ou=test1,ou=test2,ou=test3", 0));
         } catch (NamingException ne) {
-            System.err.println(ne);
+            LOGGER.debug(ne.toString(), ne);
             assertNotNull(null);
         }
     }
@@ -131,7 +135,7 @@ public class JndiServicesTest extends TestCase {
             assertEquals(test2list, JndiServices.getDstInstance().getDnList("ou=People",
                     "objectclass=person", SearchControls.SUBTREE_SCOPE));
         } catch (NamingException ne) {
-            System.err.println(ne);
+            LOGGER.debug(ne.toString(), ne);
             assertNotNull(null);
         }
     }
@@ -140,7 +144,7 @@ public class JndiServicesTest extends TestCase {
         try {
             assertNotNull(JndiServices.getDstInstance().readEntry("", false));
         } catch (NamingException ne) {
-            System.err.println(ne);
+            LOGGER.debug(ne.toString(), ne);
             assertNotNull(null);
         }
     }
@@ -186,7 +190,7 @@ public class JndiServicesTest extends TestCase {
             jm.setModificationItems(mis);
             assertFalse(JndiServices.getDstInstance().apply(jm));	
         } catch (NamingException ne) {
-            System.err.println(ne);
+            LOGGER.debug(ne.toString(), ne);
             assertNotNull(null);
         }
     }
@@ -196,8 +200,8 @@ public class JndiServicesTest extends TestCase {
      */
     public final void testAttrPagedResultsList() {
         try {
-        	String attrName = "objectClass"; 
-            System.out.println("Counting all the directory entries ...");
+        	String attrName = "objectClass";
+					LOGGER.debug("Counting all the directory entries ...");
         	List<String> attrsName = new ArrayList<String>();
         	attrsName.add(attrName);
             Map<String, LscAttributes> results = JndiServices.getDstInstance().
@@ -207,12 +211,11 @@ public class JndiServicesTest extends TestCase {
             for (; iter.hasNext(); i++) {
                 String key = (String) iter.next();
                 LscAttributes value = results.get(key);
-                System.out.println("key=" + key + ", value=" + value.getStringValueAttribute(attrName));
+								LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
             }
-            System.out.println(" Final count : " + i);
-        } catch (NamingException e) {
-            System.err.println(e);
-            e.printStackTrace();
+						LOGGER.debug(" Final count : {}", i);
+        } catch (NamingException ne) {
+            LOGGER.debug(ne.toString(), ne);
         }
     }
 }

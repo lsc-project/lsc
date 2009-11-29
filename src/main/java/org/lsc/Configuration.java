@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -447,7 +448,9 @@ public class Configuration {
 	public static Properties getPropertiesFromFile(String pathToFile) throws FileNotFoundException, IOException {
 		File propertiesFile = new File(pathToFile);
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		InputStream st = new FileInputStream(propertiesFile);
+		props.load(st);
+		st.close();
 		return props;
 	}
 

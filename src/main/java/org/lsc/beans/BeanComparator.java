@@ -594,7 +594,6 @@ public final class BeanComparator {
 	 *            {@link JndiModificationType} Modification type, to determine
 	 *            if the object is being newly created (causes
 	 *            create values to be used instead of default values)
-	 * @param modType Type of operation to be done on the entry (should only be ADD or MODIFY)
 	 * @return List<Object> The list of values that should be set in the
 	 *         destination. Never null.
 	 * @throws NamingException

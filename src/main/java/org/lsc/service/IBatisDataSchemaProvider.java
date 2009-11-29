@@ -53,7 +53,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.AbstractGenerator;
 
 /**
  * This class provides the data schema by reading the request schema
@@ -68,7 +67,7 @@ public class IBatisDataSchemaProvider implements DataSchemaProvider {
 	
     /** This is the local logger. */
     public static final Logger LOGGER = 
-        LoggerFactory.getLogger(AbstractGenerator.class);
+        LoggerFactory.getLogger(IBatisDataSchemaProvider.class);
 
     public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
     	this.metadata = metadata;

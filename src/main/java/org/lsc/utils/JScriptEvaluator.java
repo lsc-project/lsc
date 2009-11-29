@@ -233,7 +233,8 @@ public final class JScriptEvaluator {
 		try {
 			ret = script.exec(cx, scope);
 		} catch (Exception e) {
-			LOGGER.error(e.toString(), e);
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 			return null;
 		}
 

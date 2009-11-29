@@ -470,10 +470,12 @@ public abstract class AbstractSynchronize {
         } else {
             str = "";
         }
+        
+        String dn = jm != null ? jm.getDistinguishName() : "unknown entry";
 
         LOGGER.error(I18n.getMessage(null,
                 "org.lsc.messages.SYNC_ERROR", new Object[] {
-                jm.getDistinguishName(), str, "", except }), except);
+                dn, str, "", except }), except);
 
         if (jm != null) {
             LOGGER.error(jm);

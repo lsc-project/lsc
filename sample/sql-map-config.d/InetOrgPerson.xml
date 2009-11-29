@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="InetOrgPerson">
+
+	<select id="getInetOrgPerson" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		Select
+			'inetOrgPerson' objectClass,
+			pers.id,
+			pers.uid,
+			pers.sn,
+			pers.givenName,
+			pers.cn,
+			pers.mail,
+			pers.givenName,
+			pers.address,
+			pers.telephoneNumber, 
+			pers.telephoneNumber AS userPassword
+		FROM INETORGPERSON pers
+		WHERE pers.mail LIKE #mail#
+	</select>
+
+	<select id="getInetOrgPersonList" resultClass="java.util.HashMap">
+		SELECT pers.mail AS mail
+		FROM INETORGPERSON pers
+	</select>
+
+</sqlMap>

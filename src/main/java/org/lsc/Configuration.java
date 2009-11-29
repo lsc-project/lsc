@@ -186,7 +186,7 @@ public class Configuration {
 		List<String> result = new ArrayList<String>();
 		if (propertyValue != null) {
 			StringTokenizer st = new StringTokenizer(propertyValue, " ");
-			for (int i = 0; st.hasMoreTokens(); i++) {
+			while (st.hasMoreTokens()) {
 				result.add(st.nextToken().toLowerCase());
 			}
 		}
@@ -450,8 +450,11 @@ public class Configuration {
 		File propertiesFile = new File(pathToFile);
 		Properties props = new Properties();
 		InputStream st = new FileInputStream(propertiesFile);
-		props.load(st);
-		st.close();
+		try {
+			props.load(st);
+		} finally {
+			st.close();
+		}
 		return props;
 	}
 

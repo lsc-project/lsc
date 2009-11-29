@@ -78,7 +78,7 @@ public class LdifLayout extends PatternLayout {
 	protected static String LOG_OPERATIONS_SEPARATOR = ",";
 
 	/* Configurations from the logback.xml */
-	private String logOperation;
+	private String logOperations;
 	private boolean onlyLdif = false;
 
 	/* The operations to log */
@@ -349,9 +349,9 @@ public class LdifLayout extends PatternLayout {
 	public void start() {
 		/* Parse logOperations */
 		operations = new HashSet<JndiModificationType>();
-		if (logOperation != null) {
+		if (logOperations != null) {
 			/* We only add valid options */
-			StringTokenizer st = new StringTokenizer(logOperation, LOG_OPERATIONS_SEPARATOR);
+			StringTokenizer st = new StringTokenizer(logOperations, LOG_OPERATIONS_SEPARATOR);
 			String token = null;
 			while (st.hasMoreTokens()) {
 				token = st.nextToken().toLowerCase();
@@ -380,7 +380,12 @@ public class LdifLayout extends PatternLayout {
 	/**
 	 * @param logOperation the logOperation to set
 	 */
+	@Deprecated
 	public void setLogOperation(String logOperation) {
-		this.logOperation = logOperation;
+		this.setLogOperations(logOperations);
+	}
+
+	public void setLogOperations(String logOperations) {
+		this.logOperations = logOperations;
 	}
 }

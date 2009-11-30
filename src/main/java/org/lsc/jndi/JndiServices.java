@@ -185,7 +185,7 @@ public final class JndiServices {
 		}
 
 		/* handle options */
-		contextDn = namingContext.getDN() != null ? namingContext.getDN().toString() : null;
+		contextDn = namingContext.getDN() != null ? namingContext.getDN() : null;
 
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null) {
@@ -417,7 +417,6 @@ public final class JndiServices {
 	}
 
 	public String rewriteBase(final String base) {
-		String contextDn = namingContext.getDN().toString();
 		String rewrittenBase = null;
 		if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
 			if (!base.equalsIgnoreCase(contextDn)) {
@@ -551,9 +550,6 @@ public final class JndiServices {
 			LOGGER.error("Object {} not deleted because it has children (LDAP error code 66 received). To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true",
 							jm.getDistinguishName());
 			return false;
-		} catch (CommunicationException e) {
-			// we lost the connection to the source or destination, stop everything!
-			throw e;
 		} catch (NamingException ne) {
 			if (LOGGER.isErrorEnabled()) {
 				StringBuilder errorMessage = new StringBuilder("Error while ");
@@ -580,6 +576,12 @@ public final class JndiServices {
 
 				LOGGER.error(errorMessage.toString());
 			}
+			
+			if (ne instanceof CommunicationException) {
+				// we lost the connection to the source or destination, stop everything!
+				throw (CommunicationException) ne;
+			}
+			
 			return false;
 		}
 	}
@@ -614,9 +616,7 @@ public final class JndiServices {
 	private Attributes getAttributes(final List<ModificationItem> modificationItems,
 					final boolean forgetEmpty) {
 		Attributes attrs = new BasicAttributes();
-		Iterator<ModificationItem> modificationItemsIter = modificationItems.iterator();
-		while (modificationItemsIter.hasNext()) {
-			ModificationItem mi = (ModificationItem) modificationItemsIter.next();
+		for (ModificationItem mi : modificationItems) {
 			if (!(forgetEmpty && mi.getAttribute().size() == 0)) {
 				attrs.put(mi.getAttribute());
 			}
@@ -813,11 +813,13 @@ public final class JndiServices {
 		} catch (NamingException e) {
 			// clear requestControls for future use of the JNDI context
 			ctx.setRequestControls(null);
-			e.printStackTrace();
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (IOException e) {
 			// clear requestControls for future use of the JNDI context
 			ctx.setRequestControls(null);
-			e.printStackTrace();
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
 		}
 		return res;
 	}

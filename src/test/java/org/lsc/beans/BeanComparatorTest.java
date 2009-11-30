@@ -45,19 +45,58 @@
  */
 package org.lsc.beans;
 
-import javax.naming.NamingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.naming.directory.BasicAttribute;
-import javax.swing.text.SimpleAttributeSet;
+
+import junit.framework.TestCase;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
+import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-
-import junit.framework.TestCase;
 
 public class BeanComparatorTest extends TestCase
 {
 
+	/**
+	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 */
+	public void testCalculateModificationType() {
+		dummySyncOptions syncOptions = new dummySyncOptions();
+		IBean srcBean = new personBean();
+		IBean dstBean = new personBean();
+
+		try {
+			// test null and null --> null
+			assertNull(BeanComparator.calculateModificationType(syncOptions, null, null, null));
+			
+			// test not null and null --> add
+			assertEquals(JndiModificationType.ADD_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, null, null));
+			
+			// test null and not null --> delete
+			assertEquals(JndiModificationType.DELETE_ENTRY, BeanComparator.calculateModificationType(syncOptions, null, dstBean, null));
+			
+			// test both not null, and syncoptions to make DNs identical --> modify
+			syncOptions.setDn("\"destination DN\"");
+			dstBean.setDistinguishName("destination DN");
+			assertEquals(JndiModificationType.MODIFY_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
+
+			// test both not null, with different DNs and no DN in syncoptions --> modrdn
+			syncOptions.setDn(null);
+			srcBean.setDistinguishName("source DN");
+			dstBean.setDistinguishName("destination DN");
+			assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
+		}
+		catch (CloneNotSupportedException e) {
+			assertTrue(e.toString(), false);
+		}
+	}
+
+	
 	/**
 	 * This test ensures that a source bean containing fields with only
 	 * empty string values is not output as a modification to be applied 
@@ -116,6 +155,135 @@ public class BeanComparatorTest extends TestCase
 			e.printStackTrace();
 			assertTrue(false);
 		}
+	}
+
+	public class dummySyncOptions implements ISyncOptions {
+
+		Map<String, List<String>> createValuesMap;
+		Map<String, List<String>> defaultValuesMap; 
+		Map<String, List<String>> forceValuesMap;
+		Map<String, STATUS_TYPE> statusMap;
+		String dn;
+		
+		public dummySyncOptions(Map<String, List<String>> createValuesMap,
+				Map<String, List<String>> defaultValuesMap, 
+				Map<String, List<String>> forceValuesMap,
+				Map<String, STATUS_TYPE> statusMap)
+		{
+			if (createValuesMap != null) this.createValuesMap = createValuesMap;
+			else this.createValuesMap = new HashMap<String, List<String>>();
+			
+			if (defaultValuesMap != null) this.defaultValuesMap = defaultValuesMap;
+			else this.defaultValuesMap = new HashMap<String, List<String>>();
+
+			if (forceValuesMap != null) this.forceValuesMap = forceValuesMap;
+			else this.forceValuesMap = new HashMap<String, List<String>>();
+			
+			if (statusMap != null) this.statusMap = statusMap;
+			else this.statusMap = new HashMap<String, STATUS_TYPE>();
+
+		}
+		
+		public dummySyncOptions() {
+			// TODO Auto-generated constructor stub
+		}
+
+		public String getCondition(JndiModificationType operation)
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public Set<String> getCreateAttributeNames()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String getCreateCondition()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public List<String> getCreateValues(String id, String attributeName)
+		{
+			return createValuesMap.get(attributeName);
+		}
+
+		public Set<String> getDefaultValuedAttributeNames()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public List<String> getDefaultValues(String id, String attributeName)
+		{
+			return defaultValuesMap.get(attributeName);
+		}
+
+		public String getDeleteCondition()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void setDn(String dn)
+		{
+			this.dn = dn;
+		}
+
+		public String getDn()
+		{
+			return dn;
+		}
+
+		public Set<String> getForceValuedAttributeNames()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public List<String> getForceValues(String id, String attributeName)
+		{
+			return forceValuesMap.get(attributeName);
+		}
+
+		public String getModrdnCondition()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public STATUS_TYPE getStatus(String id, String attributeName)
+		{
+			return statusMap.get(attributeName);
+		}
+
+		public String getTaskName()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String getUpdateCondition()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public List<String> getWriteAttributes()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void initialize(String taskname)
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 
 }

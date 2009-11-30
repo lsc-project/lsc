@@ -100,21 +100,30 @@ public final class BeanComparator {
 	 * @throws CloneNotSupportedException
 	 */
 	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
-		// clone the source bean
-		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
-
-		if (itmBean == null && dstBean == null) {
+		// no beans, nothing to do
+		if (srcBean == null && dstBean == null) {
 			return null;
-		} else if (itmBean == null && dstBean != null) {
+		}
+		
+		// if there is no source bean, we will delete the destination entry, if it exists
+		if (srcBean == null && dstBean != null) {
 			return JndiModificationType.DELETE_ENTRY;
-		} else if (itmBean != null && dstBean == null) {
+		}
+		
+		// if there is no destination bean, we must create it
+		if (dstBean == null) {
 			return JndiModificationType.ADD_ENTRY;
-		} else { /* srcBean != null && destBean != null */
-			if (itmBean.getDistinguishName() == null || itmBean.getDistinguishName().length() == 0 || dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) == 0) {
-				return JndiModificationType.MODIFY_ENTRY;
-			} else {
-				return JndiModificationType.MODRDN_ENTRY;
-			}
+		}
+
+		// we have the object in the source and the destination
+		// this must be either a MODIFY or MODRDN operation
+		// clone the source bean to calculate modifications on the DN
+		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+		if (itmBean.getDistinguishName() != null && itmBean.getDistinguishName().length() != 0 &&
+				dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) != 0) {
+			return JndiModificationType.MODRDN_ENTRY;
+		} else {
+			return JndiModificationType.MODIFY_ENTRY;
 		}
 	}
 
@@ -539,17 +548,17 @@ public final class BeanComparator {
 		IBean itmBean = null;
 		if (srcBean != null) {
 			itmBean = srcBean.clone();
-		}
 
-		// apply any new DN from properties to this intermediary bean
-		String dn = syncOptions.getDn();
-		if (srcBean != null && dn != null) {
-			Map<String, Object> table = new HashMap<String, Object>();
-			table.put("srcBean", srcBean);
-			if (customLibrary != null) {
-				table.put("custom", customLibrary);
+			// apply any new DN from properties to this intermediary bean
+			String dn = syncOptions.getDn();
+			if (dn != null) {
+				Map<String, Object> table = new HashMap<String, Object>();
+				table.put("srcBean", srcBean);
+				if (customLibrary != null) {
+					table.put("custom", customLibrary);
+				}
+				itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
 			}
-			itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
 		}
 
 		return itmBean;

@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -776,13 +775,10 @@ public final class JndiServices {
 						SearchResult ldapResult = (SearchResult) results.next();
 
 						// get the value for each attribute requested
-						Iterator<String> ite = attrsNames.iterator();
-						String attribute = null;
-						while (ite.hasNext()) {
-							attribute = ite.next();
-							Attribute attr = ldapResult.getAttributes().get(attribute);
+						for (String attributeName : attrsNames) {
+							Attribute attr = ldapResult.getAttributes().get(attributeName);
 							if (attr != null && attr.get() != null) {
-								attrsValues.put(attribute, (String) attr.get());
+								attrsValues.put(attributeName, (String) attr.get());
 							}
 						}
 

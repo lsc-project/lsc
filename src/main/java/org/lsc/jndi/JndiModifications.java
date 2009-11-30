@@ -47,7 +47,6 @@ package org.lsc.jndi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.NamingEnumeration;
@@ -172,9 +171,7 @@ public class JndiModifications {
 		List<ModificationItem> mi = this.getModificationItems();
 
 		if (mi != null) {
-			Iterator<ModificationItem> iterator = this.getModificationItems().iterator();
-			while (iterator.hasNext()) {
-				ModificationItem modificationItem = iterator.next();
+			for (ModificationItem modificationItem : mi) {
 				Attribute attr = modificationItem.getAttribute();
 				String id = attr.getID().toLowerCase();
 

@@ -47,7 +47,6 @@ package org.lsc.jndi.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -251,9 +250,7 @@ public class LdapObjectClass {
 		}
 
 		// Managing attributes
-		Iterator<String> attrsIter = attrs.iterator();
-		while (attrsIter.hasNext()) {
-			String attributeName = (String) attrsIter.next();
+		for (String attributeName : attrs) {
 			
 			// ignore attributes with names containing a "-"
 			// see http://tools.lsc-project.org/issues/show/31

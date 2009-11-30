@@ -48,7 +48,6 @@ package org.lsc.jndi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -187,9 +186,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		 */
         Map<String, LscAttributes> ids = new ListOrderedMap();
         
-        Iterator<String> idListIt = idList.iterator();
-        while (idListIt.hasNext()) {
-        	String dn = idListIt.next();
+        for (String dn : idList) {
         	LscAttributes attrs = new LscAttributes();
         	attrs.put("dn", dn);
         	ids.put(dn, attrs);

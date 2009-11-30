@@ -48,7 +48,6 @@ package org.lsc.jndi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.NamingException;
@@ -87,14 +86,9 @@ public class ScriptableObject {
 				method = this.getClass().getDeclaredMethod(methodName, String.class, String.class);
 
 				List<String> results = new ArrayList<String>();
-				Iterator<String> aListIter = aList.iterator();
 
-				while (aListIter.hasNext()) {
-					String aValue = aListIter.next();
-					Iterator<String> bListIter = bList.iterator();
-
-					while (bListIter.hasNext()) {
-						String bValue = bListIter.next();
+				for (String aValue : aList) {
+					for (String bValue : bList) {
 						List<String> res = (List<String>) method.invoke(this, aValue, bValue);
 
 						if (res != null) {

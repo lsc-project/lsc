@@ -48,7 +48,6 @@ package org.lsc.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
@@ -109,23 +108,19 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
         attributeTypes = filterNames(atsTemp.values().iterator().next());
 
         ldapAttributeTypes = new HashMap<String, LdapAttributeType>();
-        Iterator<String> atIter = attributeTypes.iterator();
-        while (atIter.hasNext()) {
-            String atStr = atIter.next();
+        for (String atStr : attributeTypes) {
             LdapAttributeType lat = LdapAttributeType.parse(atStr);
             if (lat != null) {
             	ldapAttributeTypes.put(lat.getName(), lat);
             }
         }
 
-        
-        Iterator<String> ocIter = objectClasses.iterator();
-        while (ocIter.hasNext() && ldapObjectClass == null) {
-            String ocStr = ocIter.next();
+        for (String ocStr : objectClasses) {
             LdapObjectClass loc = LdapObjectClass.parse(ocStr, ldapAttributeTypes);
             if (loc != null
                     && loc.getName().compareToIgnoreCase(className) == 0) {
                 ldapObjectClass = loc;
+                break;
             }
         }
 
@@ -138,9 +133,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
      */
     private List<String> filterNames(List<String> names) {
     	List<String> filteredNames = new ArrayList<String>();
-    	Iterator<String> namesIter = names.iterator();
-    	while(namesIter.hasNext()) {
-    		String name = namesIter.next();
+    	for (String name : names) {
     		String filteredName = filterName(name);
     		if(filteredName != null) {
     			filteredNames.add(filteredName);
@@ -154,7 +147,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
     /**
      * Filter name according to attribute or object class 
-     * @param name the originale name
+     * @param name the original name
      * @return the filtered name or null if not matching
      */
 	public String filterName(String name) {

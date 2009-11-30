@@ -47,7 +47,6 @@ package org.lsc.jndi;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.naming.NamingException;
@@ -164,24 +163,15 @@ public class ScriptableJndiServices extends ScriptableObject {
     protected List<String> _and(final List<String> aList, final List<String> bList)
                        throws NamingException {
         List<String> cList = new ArrayList<String>();
-        Iterator<String> iter = null;
 
         if (aList.size() < bList.size()) {
-            iter = aList.iterator();
-
-            while (iter.hasNext()) {
-                String tmp = iter.next();
-
+        	for (String tmp : aList) {
                 if (bList.contains(tmp)) {
                     cList.add(tmp);
                 }
             }
         } else {
-            iter = bList.iterator();
-
-            while (iter.hasNext()) {
-                String tmp = iter.next();
-
+        	for (String tmp : bList) {
                 if (aList.contains(tmp)) {
                     cList.add(tmp);
                 }
@@ -198,11 +188,7 @@ public class ScriptableJndiServices extends ScriptableObject {
     protected List<String> _retain(final List<String> aList, final List<String> bList)
                           throws NamingException {
         List<String> cList = new ArrayList<String>();
-        Iterator<String> aIter = aList.iterator();
-
-        while (aIter.hasNext()) {
-            String aValue = aIter.next();
-
+        for (String aValue : aList) {
             if (!bList.contains(aValue)) {
                 cList.add(aValue);
             }
@@ -236,11 +222,7 @@ public class ScriptableJndiServices extends ScriptableObject {
             return null;
         }
 
-        Iterator<String> dnsIter = dns.iterator();
-
-        while (dnsIter.hasNext()) {
-            String dn = dnsIter.next();
-
+        for (String dn : dns) {
             if (jndiServices.exists(dn, filter)) {
                 cList.add(dn);
 

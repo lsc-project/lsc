@@ -49,7 +49,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -108,10 +107,7 @@ public class top extends LscObject {
 						localMethod = meths.get(0);
 					} else {
 						/* Find method matching returnType */
-						Iterator<Method> methsIt = meths.iterator();
-						Method currentMeth = null;
-						while (methsIt.hasNext()) {
-							currentMeth = methsIt.next();
+						for (Method currentMeth : meths) {
 							if (currentMeth.getParameterTypes()[0].isAssignableFrom(returnType)) {
 								localMethod = currentMeth;
 							}

@@ -88,14 +88,14 @@ public abstract class LscBean implements IBean {
 
 	/** The attributes map. */
 	private Map<String, Set<Object>> attrs;
-	
+
 	/** Data schema related to this bean - must always be set just after initiating the bean */
 	private DataSchemaProvider dataSchemaProvider;
 
 	public LscBean() {
 		attrs = new HashMap<String, Set<Object>>();
 	}
-	
+
 	/**
 	 * Get an attribute from its name.
 	 *
@@ -106,8 +106,7 @@ public abstract class LscBean implements IBean {
 		// use lower case since attribute names are case-insensitive
 		return SetUtils.setToAttribute(id, attrs.get(id.toLowerCase()));
 	}
-	
-	
+
 	/**
 	 * Get an attribute from its name as a Set.
 	 *
@@ -118,7 +117,6 @@ public abstract class LscBean implements IBean {
 		// use lower case since attribute names are case-insensitive
 		return attrs.get(id.toLowerCase());
 	}
-
 
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
@@ -133,7 +131,6 @@ public abstract class LscBean implements IBean {
 		return getAttributeFirstValueById(id);
 	}
 
-	
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
 	 * 
@@ -148,7 +145,6 @@ public abstract class LscBean implements IBean {
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
 
-	
 	/**
 	 * Get all values of an attribute from its name
 	 * 
@@ -162,18 +158,18 @@ public abstract class LscBean implements IBean {
 		List<String> resultsArray = new ArrayList<String>();
 
 		Set<Object> attributeValues = attrs.get(id.toLowerCase());
-		
+
 		if (attributeValues != null) {
 			for (Object value : attributeValues) {
 				String stringValue;
-	
+
 				// convert to String because this method only returns Strings
 				if (value instanceof byte[]) {
 					stringValue = new String((byte[]) value);
 				} else {
 					stringValue = value.toString();
 				}
-	
+
 				resultsArray.add(stringValue);
 			}
 		}
@@ -181,7 +177,6 @@ public abstract class LscBean implements IBean {
 		return resultsArray;
 	}
 
-	
 	/**
 	 * Get the attributes name list.
 	 *
@@ -191,7 +186,6 @@ public abstract class LscBean implements IBean {
 		return attrs.keySet();
 	}
 
-	
 	/**
 	 * Set an attribute.
 	 * API CHANGE: Do nothing if attribute is empty
@@ -204,28 +198,24 @@ public abstract class LscBean implements IBean {
 			// convert the Attribute into a Set of values
 			try {
 				setAttribute(attr.getID(), SetUtils.attributeToSet(attr));
-			}
-			catch (NamingException e) {
-				LOGGER.error("Error storing the attribute {}: {}", new Object[]{attr.getID(), e.toString()});
+			} catch (NamingException e) {
+				LOGGER.error("Error storing the attribute {}: {}", attr.getID(), e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
 		}
 	}
 
-	
 	/**
 	 * Set an attribute.
 	 *
 	 * @param attrName The attribute name.
 	 * @param attrValues A set of values for the attribute.
 	 */
-	public final void setAttribute(String attrName, Set<Object> attrValues)
-	{
+	public final void setAttribute(String attrName, Set<Object> attrValues) {
 		// use lower case since attribute names are case-insensitive
 		attrs.put(attrName.toLowerCase(), attrValues);
 	}
 
-	
 	/**
 	 * Default distinguish name getter.
 	 *
@@ -235,7 +225,6 @@ public abstract class LscBean implements IBean {
 		return distinguishedName;
 	}
 
-	
 	/**
 	 * Distinguish name getter that makes sure to return the FULL DN (including suffix).
 	 *
@@ -248,7 +237,6 @@ public abstract class LscBean implements IBean {
 			return distinguishedName;
 		}
 	}
-	
 
 	/**
 	 * Default distinguishName setter.
@@ -260,11 +248,9 @@ public abstract class LscBean implements IBean {
 		distinguishedName = dn;
 	}
 
-	
 	public void generateDn() throws NamingException {
 	}
 
-	
 	/**
 	 * Bean pretty printer.
 	 *
@@ -275,7 +261,7 @@ public abstract class LscBean implements IBean {
 		StringBuilder sb = new StringBuilder();
 		sb.append("dn: ").append(distinguishedName).append('\n');
 
-		for (String key: attrs.keySet()) {
+		for (String key : attrs.keySet()) {
 			Set<Object> values = attrs.get(key);
 			if (values != null) {
 				sb.append("=> " + key);
@@ -288,7 +274,6 @@ public abstract class LscBean implements IBean {
 		return sb.toString();
 	}
 
-	
 	/**
 	 * Clone this Bean object.
 	 * @return Object
@@ -299,7 +284,7 @@ public abstract class LscBean implements IBean {
 		try {
 			LscBean bean = (LscBean) this.getClass().newInstance();
 			bean.setDistinguishName(this.getDistinguishName());
-			
+
 			for (String attributeName : this.getAttributesNames()) {
 				bean.setAttribute(attributeName, this.getAttributeAsSetById(attributeName));
 			}
@@ -311,17 +296,14 @@ public abstract class LscBean implements IBean {
 		}
 	}
 
-	
 	public void setDataSchema(DataSchemaProvider dataSchema) {
 		this.dataSchemaProvider = dataSchema;
 	}
 
-	
 	public DataSchemaProvider getDataSchema() {
 		return dataSchemaProvider;
 	}
-	
-	
+
 	/**
 	 * Manage something there !
 	 * @param metaData
@@ -329,5 +311,4 @@ public abstract class LscBean implements IBean {
 	public static void setMetadata(ResultSetMetaData metaData) {
 		// TODO Auto-generated method stub
 	}
-
 }

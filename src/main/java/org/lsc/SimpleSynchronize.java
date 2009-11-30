@@ -144,14 +144,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			String taskName = tasksSt.nextToken();
 
 			// Launch the task either if explicitly specified or if "all" magic keyword used
-			if (isSyncTaskAll || syncTasks.contains(taskName.toString())) {
+			if (isSyncTaskAll || syncTasks.contains(taskName)) {
 				foundATask = true;
 
 				if (!launchTask(taskName, TaskMode.sync)) {
 					return false;
 				}
 			}
-			if (isCleanTaskAll || cleanTasks.contains(taskName.toString())) {
+			if (isCleanTaskAll || cleanTasks.contains(taskName)) {
 				foundATask = true;
 
 				if (!launchTask(taskName, TaskMode.clean)) {

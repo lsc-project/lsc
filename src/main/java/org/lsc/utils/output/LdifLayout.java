@@ -173,12 +173,11 @@ public class LdifLayout extends PatternLayout {
 	 *            is this a new entry
 	 * @return the string to log
 	 */
-	private String listToLdif(final List<?> modificationItems, final boolean addEntry) {
+	private String listToLdif(final List<ModificationItem> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
-		List<ModificationItem> items = (List<ModificationItem>) modificationItems;
 		boolean first = true;
 
-		for(ModificationItem mi: items) {
+		for(ModificationItem mi: modificationItems) {
 			Attribute attr = mi.getAttribute();
 			try {
 				if (!addEntry) {

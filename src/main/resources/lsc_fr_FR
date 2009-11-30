@@ -1,0 +1,7 @@
+org.lsc.messages.ADD_ENTRY = \# Ajout du nouvel enregistrement {0} pour {1} 
+org.lsc.messages.RENAME_ENTRY = \# Renommage de l'enregistrement {0} pour {1} 
+org.lsc.messages.REMOVE_ENTRY = \# Retrait de l'enregistrement {0} pour {1} 
+org.lsc.messages.UPDATE_ENTRY = \# Mise à jour de l'enregistrement {0} pour {1} 
+org.lsc.messages.UNKNOWN_CHANGETYPE = Erreur: type de changement inconnu ({0} pour {1})
+org.lsc.messages.NB_CHANGES = \# Nombre d'enregistrement(s) pris en compte: {0}, nombre d'enregistrement(s) à reporter: {1}, nombre d'enregistrements reporté(s): {2}, nombre d'erreurs: {3}
+org.lsc.messages.SYNC_ERROR = Erreur rencontrée sur l'identifiant {0}: {1}\n{2}

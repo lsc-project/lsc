@@ -70,14 +70,19 @@ public class I18n {
 
 	/** The logger */
 	private static Logger LOGGER = LoggerFactory.getLogger(I18n.class);
+
 	/** The messages in the current language */
 	private ResourceBundle messages;
+
 	/** the instance */
 	private static I18n instance;
+
 	/** the current locale used to get the message */
 	private Locale currentLocale;
+
 	/** The directory containing the language specific files */
 	private static final String localeDirectory = "resources";
+
 	/** Change according the project name with the '_' character */
 	private static final String PROJECT_NAME = "lsc";
 	private static String sep = System.getProperty("file.separator");
@@ -131,10 +136,9 @@ public class I18n {
 			lang = "en_US";
 		}
 		
-		Locale[] locales = Locale.getAvailableLocales();
-		for (int i = 0; i < locales.length; i++) {
-			if (lang.compareToIgnoreCase(locales[i].toString()) == 0) {
-				currentLocale = locales[i];
+		for(Locale locale: Locale.getAvailableLocales()) {
+			if (lang.compareToIgnoreCase(locale.toString()) == 0) {
+				currentLocale = locale;
 				break;
 			}
 		}
@@ -164,13 +168,12 @@ public class I18n {
 		LOGGER.debug("Setting locale to {}", locale);
 		try {
 			messages = ResourceBundle.getBundle(
-							localeDirectory + sep + PROJECT_NAME,
+							PROJECT_NAME,
 							currentLocale,
 							new I18nCustomClassLoader());
 		} catch (MissingResourceException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
-			LOGGER.debug(System.getenv("CLASSPATH"));
 			throw e;
 		}
 	}

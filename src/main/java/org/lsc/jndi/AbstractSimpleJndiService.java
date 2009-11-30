@@ -50,7 +50,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -276,24 +275,22 @@ public abstract class AbstractSimpleJndiService {
 	 *             the identified object
 	 */
 	public final SearchResult get(final Entry<String, LscAttributes> entry) throws NamingException {
-		if(entry.getValue() != null && entry.getValue().getAttributes() != null && entry.getValue().getAttributes().size() > 0) {
-			String searchString = filterId;
-			Iterator<String> ite = entry.getValue().getAttributesNames().iterator();
-			while (ite.hasNext()) {
-	            String id = ite.next().toLowerCase();
-	            String valueId =  entry.getValue().getStringValueAttribute(id);
-	            valueId = valueId == null ? "" : valueId;
-	            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+		String searchString = filterId;
+		
+		LscAttributes pivotAttrs = entry.getValue();
+		if (pivotAttrs != null && pivotAttrs.getAttributes() != null && pivotAttrs.getAttributes().size() > 0) {
+			for (String id : pivotAttrs.getAttributesNames()) {
+	            String valueId =  pivotAttrs.getStringValueAttribute(id.toLowerCase());
+	            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId == null ? "" : valueId);
 	        }
-			return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
 		} else if (attrsId.size() == 1) {
-            String searchString = filterId;
             searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(entry.getKey());
-			return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
-//			return getJndiServices().getEntry(baseDn, filterId.replaceAll("\\{" + attrsId.get(0) + "\\}", entry.getKey()), _filteredSc);
 		} else {
-			return getJndiServices().getEntry(baseDn, filterId.replaceAll("\\{0\\}", entry.getKey()), _filteredSc);
+			// this is kept for backwards compatibility but will be removed
+			searchString = filterId.replaceAll("\\{0\\}", entry.getKey());
 		}
+		
+		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
 	}
 
 	/**

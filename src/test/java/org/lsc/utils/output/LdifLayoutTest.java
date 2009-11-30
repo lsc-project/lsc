@@ -45,7 +45,6 @@
  */
 package org.lsc.utils.output;
 
-import org.lsc.utils.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -54,7 +53,6 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
@@ -103,7 +101,6 @@ public class LdifLayoutTest extends TestCase {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		I18n.setLocale(Locale.US);
 		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 
@@ -135,7 +132,6 @@ public class LdifLayoutTest extends TestCase {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		I18n.setLocale(Locale.US);
 		assertEquals("dn: dc=lsc-project,dc=org\n" +
 						"changetype: modify\n" +
 						"replace: cn\n" +
@@ -168,7 +164,6 @@ public class LdifLayoutTest extends TestCase {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		I18n.setLocale(Locale.US);
 		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n",
 						layout.doLayout(loggingEvent));
 	}

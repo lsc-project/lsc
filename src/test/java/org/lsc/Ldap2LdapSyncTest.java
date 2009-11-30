@@ -63,7 +63,6 @@ import org.lsc.beans.SimpleBean;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.service.ISrcService;
-import org.lsc.utils.I18n;
 import org.lsc.utils.directory.LDAP;
 
 /**
@@ -91,9 +90,6 @@ public class Ldap2LdapSyncTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-
-		// force the locale to en_US to avoid I18N errors with foreign LANG
-		I18n.setLocale(Locale.US);
 	}
 
 	/**

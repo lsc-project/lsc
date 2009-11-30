@@ -46,7 +46,6 @@
 package org.lsc;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -69,7 +68,6 @@ import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
 import org.lsc.service.ISrcService;
-import org.lsc.utils.I18n;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
@@ -262,14 +260,16 @@ public abstract class AbstractSynchronize {
 			}
 		}
 
-		String totalsLogMessage = I18n.getMessage(null,
-						"org.lsc.messages.NB_CHANGES", new Object[]{
+		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
+
+		if (countError > 0) {
+			LSCStructuralLogger.GLOBAL.error(totalsLogMessage, new Object[]{
 							countAll, countInitiated, countCompleted,
 							countError});
-		if (countError > 0) {
-			LSCStructuralLogger.GLOBAL.error(totalsLogMessage);
 		} else {
-			LSCStructuralLogger.GLOBAL.warn(totalsLogMessage);
+			LSCStructuralLogger.GLOBAL.warn(totalsLogMessage, new Object[]{
+							countAll, countInitiated, countCompleted,
+							countError});
 		}
 	}
 
@@ -414,14 +414,15 @@ public abstract class AbstractSynchronize {
 			}
 		}
 
-		String totalsLogMessage = I18n.getMessage(null,
-						"org.lsc.messages.NB_CHANGES", new Object[]{
+		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
+		if (countError > 0) {
+			LSCStructuralLogger.DESTINATION.error(totalsLogMessage, new Object[]{
 							countAll, countInitiated, countCompleted,
 							countError});
-		if (countError > 0) {
-			LSCStructuralLogger.DESTINATION.error(totalsLogMessage);
 		} else {
-			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage);
+			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage, new Object[]{
+							countAll, countInitiated, countCompleted,
+							countError});
 		}
 	}
 
@@ -445,9 +446,9 @@ public abstract class AbstractSynchronize {
 			str = "";
 		}
 
-		LOGGER.error(I18n.getMessage(null,
-						"org.lsc.messages.SYNC_ERROR", new Object[]{
-							(jm != null ? jm.getDistinguishName() : ""), str, "", except}), except);
+		LOGGER.error("Error while synchronizing ID {}: {}\n{}", new Object[]{
+							(jm != null ? jm.getDistinguishName() : ""), str, "", except});
+		LOGGER.debug(except.toString(), except);
 
 		if (jm != null) {
 			LOGGER.error(jm.toString());
@@ -468,37 +469,28 @@ public abstract class AbstractSynchronize {
 					final String syncName) {
 		switch (jm.getOperation()) {
 			case ADD_ENTRY:
-				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-								"org.lsc.messages.ADD_ENTRY", new Object[]{jm.getDistinguishName(),
-									syncName}));
-
+				LSCStructuralLogger.DESTINATION.info("# Adding new entry {} for {}",
+								jm.getDistinguishName(), syncName);
 				break;
 
 			case MODIFY_ENTRY:
-				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-								"org.lsc.messages.UPDATE_ENTRY", new Object[]{
-									jm.getDistinguishName(), syncName}));
-
+				LSCStructuralLogger.DESTINATION.info("# Updating entry {} for {}",
+								jm.getDistinguishName(), syncName);
 				break;
 
 			case MODRDN_ENTRY:
-				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-								"org.lsc.messages.RENAME_ENTRY", new Object[]{
-									jm.getDistinguishName(), syncName}));
-
+				LSCStructuralLogger.DESTINATION.info("# Renaming entry {} for {}",
+									jm.getDistinguishName(), syncName);
 				break;
 
 			case DELETE_ENTRY:
-				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-								"org.lsc.messages.REMOVE_ENTRY", new Object[]{
-									jm.getDistinguishName(), syncName}));
-
+				LSCStructuralLogger.DESTINATION.info("# Removing entry {} for {}",
+									jm.getDistinguishName(), syncName);
 				break;
 
 			default:
-				LSCStructuralLogger.DESTINATION.info(I18n.getMessage(null,
-								"org.lsc.messages.UNKNOWN_CHANGE", new Object[]{
-									jm.getDistinguishName(), syncName}));
+				LSCStructuralLogger.DESTINATION.info("Error: unknown changetype ({} for {})",
+									jm.getDistinguishName(), syncName);
 		}
 
 		LSCStructuralLogger.DESTINATION.info(jm.toString());
@@ -530,9 +522,8 @@ public abstract class AbstractSynchronize {
 				break;
 
 			default:
-				LSCStructuralLogger.DESTINATION.debug(I18n.getMessage(null,
-								"org.lsc.messages.UNKNOWN_CHANGE", new Object[]{
-									jm.getDistinguishName(), syncName}));
+				LSCStructuralLogger.DESTINATION.debug("Error: unknown changetype ({} for {})",
+									jm.getDistinguishName(), syncName);
 		}
 
 		LSCStructuralLogger.DESTINATION.debug(jm.toString());

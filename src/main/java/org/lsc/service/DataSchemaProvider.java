@@ -64,13 +64,15 @@ public interface DataSchemaProvider {
 	
 	/**
 	 * Return the Java type of the specified element
-	 * @param elementName
+	 * @param elementName Element name
+	 * @return {@link Class} Java type of the specified element
 	 */
 	public Class<?> getElementSingleType(String elementName);
 	
 	/**
 	 * Must the abstract bean include a value for the following attributes
 	 * Binded to SINGLE-VALUE directory attributes. Default for SQL columns  
+	 * @param elementName Element name
 	 * @return element mandatory character
 	 */
 	public boolean isElementMultivalued(String elementName);
@@ -78,6 +80,7 @@ public interface DataSchemaProvider {
 	/**
 	 * Must the abstract bean include a value for the following attributes
 	 * Binded to mandatory directory attributes or non null SQL columns  
+	 * @param elementName Element name
 	 * @return element mandatory character
 	 */
 	public boolean isElementMandatory(String elementName);

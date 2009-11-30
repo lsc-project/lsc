@@ -336,7 +336,7 @@ public final class FrenchFilters {
 	 * Remove bad chars from a string
 	 *
 	 * @param startString
-	 * @return
+	 * @return String without the bad chars
 	 */
 	private static String filterBadChars(final String startString) {
 		String tmp = filterName(startString);

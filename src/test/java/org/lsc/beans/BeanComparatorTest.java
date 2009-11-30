@@ -167,7 +167,7 @@ public class BeanComparatorTest extends TestCase
 
 	
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(java.lang.String, java.util.List, org.lsc.beans.syncoptions.ISyncOptions, java.util.Map)}.
+	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
 	 */
 	public void testGetValuesToSet()
 	{

@@ -153,7 +153,7 @@ public class LdapServer {
 	 * @return the status code (0: OK, >=1 : failed)
 	 * @throws IOException 
 	 * @throws LDIFException 
-	 * @throws CancelledOperationException 
+	 * @throws CanceledOperationException 
 	 * @throws DirectoryException 
 	 * @throws InitializationException 
 	 * @throws URISyntaxException 

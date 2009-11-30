@@ -96,6 +96,7 @@ public class IBatisDataSchemaProvider implements DataSchemaProvider {
 
 	/**
 	 * Never return true, or maybe in a 3D database implementation :)
+	 * @param elementName Name of the element
 	 * @return false 
 	 */
 	public boolean isElementMultivalued(String elementName) {

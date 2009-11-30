@@ -80,11 +80,13 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 
 	/**
 	 * The simple object getter according to its identifier.
+	 * 
+	 * @param bean {@link IBean} object to fill
 	 *
-	 * @param ids the data identifier in the directory - must return a unique
+	 * @param ids the data identifier in the directory - must identify a unique
 	 *        directory entry
 	 *
-	 * @return the corresponding top derivated object or null if failed
+	 * @return The filled bean or null if an error occurred
 	 *
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean

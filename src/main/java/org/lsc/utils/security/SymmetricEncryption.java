@@ -101,7 +101,6 @@ public class SymmetricEncryption {
 	/**
 	 * New SymmetricEncryption object with default values.
 	 * @throws java.security.GeneralSecurityException
-	 * @throws java.io.IOException
 	 */
 	public SymmetricEncryption() throws GeneralSecurityException {
 		this(SymmetricEncryption.getDefaultKeyPath(),
@@ -116,7 +115,6 @@ public class SymmetricEncryption {
 	 * in this class which specified supported algorithms)
 	 * @param strength The encryption strength
 	 * @throws java.security.GeneralSecurityException
-	 * @throws java.io.IOException
 	 */
 	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException {
 		this.securityProvider = new BouncyCastleProvider();

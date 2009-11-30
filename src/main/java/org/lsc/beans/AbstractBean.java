@@ -69,18 +69,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Abstract bean used to centralize methods across all beans
- *
- * The main purpose of this class is to provide the mapper method which allow
+ * <p>
+ * The main purpose of this class is to provide the mapper method which allows
  * the bean to be mapped from the original object.
- *
+ * </p>
+ * <p>
  * The bean is also able to map a bean from SearchResult LDAP object.
- *
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * </p>
  * 
- * @deprecated
- * 		This class was used in LSC 1.1 projects, and is no longer
- * 		necessary, but kept for reverse compatibility. It will be
- * 		removed in LSC 1.3.
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ * @deprecated This class was used in LSC 1.1 projects, and is no longer necessary, but kept for
+ *             reverse compatibility. It will be removed in LSC 1.3.
  */
 public abstract class AbstractBean extends LscBean {
 

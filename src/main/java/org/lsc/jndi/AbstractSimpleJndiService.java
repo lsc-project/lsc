@@ -150,10 +150,9 @@ public abstract class AbstractSimpleJndiService {
 	 * @throws NamingException
 	 *             thrown if a directory exception is encountered while
 	 *             switching to the Java POJO
-	 * @deprecated
-	 * 		This method was used in LSC 1.1 projects, and is no longer
-	 * 		necessary, but kept for reverse compatibility. It will be
-	 * 		removed in LSC 1.3.
+	 * @deprecated This class was used in LSC 1.1 projects, and is no longer
+	 *             necessary, but kept for reverse compatibility. It will be removed
+	 *             in LSC 1.3.
 	 */
 	public final LscObject getObjectFromSR(final SearchResult sr,
 			final LscObject objToFill) throws NamingException {

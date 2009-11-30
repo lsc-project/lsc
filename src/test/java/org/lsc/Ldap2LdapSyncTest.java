@@ -335,7 +335,7 @@ public class Ldap2LdapSyncTest extends TestCase {
 	 * 
 	 * @param dn The object to read.
 	 * @param attributeName The attribute to check.
-	 * @param value The value expected in the attribute.
+	 * @param expectedValues List of values expected in the attribute.
 	 * @throws NamingException
 	 */
 	private void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {

@@ -166,7 +166,6 @@ public class JndiModifications {
 	 * Return all the modification in a hash indexed by the name of the attribute
 	 *
 	 * @return the hash
-	 * @throws NamingException
 	 */
 	public HashMap<String, List<String>> getModificationsItemsByHash() {
 		HashMap<String, List<String>> result = new HashMap<String, List<String>>();

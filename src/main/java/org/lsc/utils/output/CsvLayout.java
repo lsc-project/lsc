@@ -101,9 +101,10 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	private final static String DN_STRING = "dn";
 
 	/**
-	 *
+	 * Output log events in CSV format for the JndiModifications class
 	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
-	 *
+	 * @param event {@link ILoggingEvent} object representing an event to log
+	 * @return The String to log
 	 */
 	public String doLayout(ILoggingEvent event) {
 		Object[] messages = event.getArgumentArray();

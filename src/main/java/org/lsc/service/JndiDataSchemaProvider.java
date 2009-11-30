@@ -178,6 +178,8 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
 	/**
 	 * TODO Refactor to return the good type
+	 * @param elementName 
+	 * @return The @link {@link Class} type for this attribute
 	 */
 	public Class<?> getElementSingleType(String elementName) {
 		return String.class;
@@ -185,6 +187,8 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
 	/**
 	 * Unsupported at this time !
+	 * @param elementName 
+	 * @return The attribute's mandatory status
 	 */
 	public boolean isElementMandatory(String elementName) {
 		throw new UnsupportedOperationException();
@@ -192,6 +196,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 
 	/**
 	 * Return true if the attribute is not marked as SINGLE-VALUE
+	 * @param elementName 
 	 * @return the attribute multi-valued status
 	 * @throws MissingFormatArgumentException is the attribute is unknown
 	 */

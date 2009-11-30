@@ -102,7 +102,6 @@ public class SetUtils
 	 *            The name of the attribute to return
 	 * @param values Values as a set
 	 * @return Attribute An Attribute containing values from the set. Never null.
-	 * @throws NamingException
 	 */
 	public static Attribute setToAttribute(String attrName, Set<?> values)
 	{

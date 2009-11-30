@@ -58,6 +58,9 @@ public class StringLengthComparator implements Comparator<String>, Serializable 
     /**
 	 * This function actually compares String lengths
 	 * so that they are sorted from longest to shortest
+     * @param arg0 First string
+     * @param arg1 Second string
+     * @return int To order strings by length
 	 */
 	public int compare(String arg0, String arg1) {
 		String one = arg0;

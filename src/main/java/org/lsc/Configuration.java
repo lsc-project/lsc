@@ -381,6 +381,7 @@ public class Configuration {
 	 * 
 	 * @param url
 	 *            the url of the configuration file to load
+	 * @throws ConfigurationException If an error occurs while setting the properties
 	 */
 	static void setConfiguration(URL url) throws ConfigurationException {
 		LOGGER.debug("Loading configuration url: {}", url);
@@ -393,6 +394,7 @@ public class Configuration {
 	 * 
 	 * @param url
 	 *            the url of the configuration file to load
+	 * @throws ConfigurationException If an error occurs while setting the properties
 	 */
 	static void addConfiguration(URL url) throws ConfigurationException {
 		LOGGER.debug("Adding configuration: {}", url);

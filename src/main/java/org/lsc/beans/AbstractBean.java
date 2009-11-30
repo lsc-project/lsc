@@ -108,13 +108,16 @@ public abstract class AbstractBean extends LscBean {
 	/** The list of local methods. */
 	private static Map<String, List<Method>> localMethods;
 
+	private static boolean warned = false;
+	
 	/**
 	 * The default constructor.
 	 */
 	public AbstractBean() {
-		localMethods = new HashMap<String, List<Method>>();
-
-		LOGGER.warn("Using deprecated class AbstractBean. Your setup will still work fine, but must be upgraded to use SimpleBean before upgrading to LSC 1.3.");
+		if (! warned) {
+			LOGGER.warn("Using deprecated class AbstractBean. Your setup will still work fine, but must be upgraded to use SimpleBean before upgrading to LSC 1.3.");
+			warned = true;
+		}
 	}
 
 	/**

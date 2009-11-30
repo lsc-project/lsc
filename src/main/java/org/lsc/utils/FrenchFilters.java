@@ -195,7 +195,7 @@ public final class FrenchFilters {
 
 	/**
 	 * Find if a string is in an array
-	 * @Deprecated because the method is in Java
+	 * Deprecated because the method is in Java
 	 *
 	 * @param array the array
 	 * @param name the string

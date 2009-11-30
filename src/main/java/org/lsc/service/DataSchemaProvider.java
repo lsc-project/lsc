@@ -65,7 +65,6 @@ public interface DataSchemaProvider {
 	/**
 	 * Return the Java type of the specified element
 	 * @param elementName
-	 * @return
 	 */
 	public Class<?> getElementSingleType(String elementName);
 	

@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import java.util.Set;
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
@@ -138,9 +139,9 @@ public abstract class AbstractSynchronize {
 					final IJndiDstService dstJndiService) {
 
 		// Get list of all entries from the destination
-		Iterator<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscAttributes>> ids = null;
 		try {
-			ids = dstJndiService.getListPivots().entrySet().iterator();
+			ids = dstJndiService.getListPivots().entrySet();
 		} catch (NamingException e) {
 			LOGGER.error("Error getting list of IDs in the destination for task {}", syncName);
 			LOGGER.debug(e.toString(), e);
@@ -148,7 +149,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		// Make sure we have at least one entry to work on
-		if (!ids.hasNext()) {
+		if (ids.isEmpty()) {
 			LOGGER.error("Empty or non existant destination (no IDs found)");
 			return;
 		}
@@ -168,10 +169,8 @@ public abstract class AbstractSynchronize {
 		IBean taskBean;
 
 		// Loop on all entries in the destination and delete them if they're not found in the source
-		while (ids.hasNext()) {
+		for(Entry<String, LscAttributes> id: ids) {
 			countAll++;
-
-			Entry<String, LscAttributes> id = ids.next();
 
 			try {
 				try {
@@ -293,9 +292,9 @@ public abstract class AbstractSynchronize {
 					final Object customLibrary) {
 
 		// Get list of all entries from the source
-		Iterator<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscAttributes>> ids = null;
 		try {
-			ids = srcService.getListPivots().entrySet().iterator();
+			ids = srcService.getListPivots().entrySet();
 		} catch (Exception e) {
 			LOGGER.error("Error getting list of IDs in the source for task {}", syncName);
 			LOGGER.debug(e.toString(), e);
@@ -303,7 +302,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		// Make sure we have at least one entry to work on
-		if (!ids.hasNext()) {
+		if (ids.isEmpty()) {
 			LOGGER.error("Empty or non existant source (no IDs found)");
 			return;
 		}
@@ -323,10 +322,9 @@ public abstract class AbstractSynchronize {
 		Map<String, Object> conditionObjects = null;
 
 		/* Loop on all entries in the source and add or update them in the destination */
-		while (ids.hasNext()) {
+		for(Entry<String, LscAttributes> id: ids) {
 			countAll++;
 
-			Entry<String, LscAttributes> id = ids.next();
 			LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
 
 			try {
@@ -575,7 +573,13 @@ public abstract class AbstractSynchronize {
 				return false;
 			}
 		} catch (final ParseException e) {
-			LOGGER.error("Unable to parse options : {} ({})", args, e.toString());
+			if(LOGGER.isErrorEnabled()) {
+				StringBuilder sb = new StringBuilder();
+				for(String arg: args) {
+					sb.append(arg).append(" ");
+				}
+				LOGGER.error("Unable to parse options : {}({})", sb.toString(), e.toString());
+			}
 			LOGGER.debug(e.toString(), e);
 			return false;
 		}

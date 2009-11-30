@@ -125,6 +125,10 @@
 		<name>LSC project</name>
 		<url>http://lsc-project.org/</url>
 	</organization>
+	<properties>
+		<!--Force UTF-8 for the build-->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
 	<build>
 

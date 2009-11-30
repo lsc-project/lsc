@@ -69,37 +69,38 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SimpleSynchronize extends AbstractSynchronize {
-    /** the magic keyword for all synchronization. */
-    public static final String ALL_TASKS_KEYWORD = "all";
 
-    /** lsc prefix. */
-    public static final String LSC_PROPS_PREFIX = "lsc";
+	/** the magic keyword for all synchronization. */
+	public static final String ALL_TASKS_KEYWORD = "all";
 
-    /** lsc.tasks property. */
-    public static final String TASKS_PROPS_PREFIX = "tasks";
+	/** lsc prefix. */
+	public static final String LSC_PROPS_PREFIX = "lsc";
 
-    /** lsc.tasks.TASKNAME.srcService property. */
-    public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
+	/** lsc.tasks property. */
+	public static final String TASKS_PROPS_PREFIX = "tasks";
 
-    /** lsc.tasks.TASKNAME.dstService property. */
-    public static final String DSTSERVICE_PROPS_PREFIX = "dstService";
+	/** lsc.tasks.TASKNAME.srcService property. */
+	public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
 
-    /** lsc.tasks.TASKNAME.customLibrary property. */
-    public static final String CUSTOMLIBRARY_PROPS_PREFIX = "customLibrary";
+	/** lsc.tasks.TASKNAME.dstService property. */
+	public static final String DSTSERVICE_PROPS_PREFIX = "dstService";
 
-    /** lsc.tasks.TASKNAME.object property. */
-    public static final String OBJECT_PROPS_PREFIX = "object";
+	/** lsc.tasks.TASKNAME.customLibrary property. */
+	public static final String CUSTOMLIBRARY_PROPS_PREFIX = "customLibrary";
 
-    /** lsc.tasks.TASKNAME.bean property. */
-    public static final String BEAN_PROPS_PREFIX = "bean";
+	/** lsc.tasks.TASKNAME.object property. */
+	public static final String OBJECT_PROPS_PREFIX = "object";
 
-    private static final Logger LOGGER = 
-        LoggerFactory.getLogger(SimpleSynchronize.class);
+	/** lsc.tasks.TASKNAME.bean property. */
+	public static final String BEAN_PROPS_PREFIX = "bean";
 
-    /** The lsc properties. */
-    private Properties lscProperties;
+	private static final Logger LOGGER =
+					LoggerFactory.getLogger(SimpleSynchronize.class);
 
-    /**
+	/** The lsc properties. */
+	private Properties lscProperties;
+
+	/**
 	 * Default constructor
 	 */
 	public SimpleSynchronize() {
@@ -112,176 +113,172 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	}
 
 	/**
-     * Main method Check properties, and for each task, launch the
-     * synchronization and the cleaning phases.
-     * 
-     * @param syncTasks
-     *                string list of the synchronization tasks to launch
-     * @param cleanTasks
-     *                string list of the cleaning tasks to launch
-     * 
-     * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
-     * @throws Exception 
-     */
-    public final boolean launch(final List<String> syncTasks, 
-            final List<String> cleanTasks) throws Exception {
-        Boolean foundATask = false;
+	 * Main method Check properties, and for each task, launch the
+	 * synchronization and the cleaning phases.
+	 *
+	 * @param syncTasks
+	 *                string list of the synchronization tasks to launch
+	 * @param cleanTasks
+	 *                string list of the cleaning tasks to launch
+	 *
+	 * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
+	 * @throws Exception
+	 */
+	public final boolean launch(final List<String> syncTasks,
+					final List<String> cleanTasks) throws Exception {
+		Boolean foundATask = false;
 
-        // Get the list of defined tasks from LSC properties
+		// Get the list of defined tasks from LSC properties
 		String tasks = lscProperties.getProperty(TASKS_PROPS_PREFIX);
 		if (tasks == null) {
 			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
 			return false;
 		}
-        
-        // Iterate on each task        
-        StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
-        boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
-        boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 
-        while (tasksSt.hasMoreTokens()) {
-            String taskName = tasksSt.nextToken();
-            
-            // Launch the task either if explicitly specified or if "all" magic keyword used
-            if (isSyncTaskAll || syncTasks.contains(taskName.toString())) {
-            	foundATask = true;
+		// Iterate on each task
+		StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
+		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
+		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 
-                if (!launchTask(taskName, TaskMode.sync)) {
-                    return false;
-                }
-            }
-            if (isCleanTaskAll || cleanTasks.contains(taskName.toString())) {
-            	foundATask = true;
+		while (tasksSt.hasMoreTokens()) {
+			String taskName = tasksSt.nextToken();
 
-                if (!launchTask(taskName, TaskMode.clean)) {
-                    return false;
-                }
-            }
-        }
+			// Launch the task either if explicitly specified or if "all" magic keyword used
+			if (isSyncTaskAll || syncTasks.contains(taskName.toString())) {
+				foundATask = true;
 
-        if (!foundATask) {
-            LOGGER.error("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
-            return false;
-        }
+				if (!launchTask(taskName, TaskMode.sync)) {
+					return false;
+				}
+			}
+			if (isCleanTaskAll || cleanTasks.contains(taskName.toString())) {
+				foundATask = true;
 
-        return true;
-    }
-    
-    /**
-     * Enum for the type of mode
-     *
-     */
-    private enum TaskMode {
-        clean,
-        sync;
-    }
-    
+				if (!launchTask(taskName, TaskMode.clean)) {
+					return false;
+				}
+			}
+		}
 
-    private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
-    	if(props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
-       		String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
-       		LOGGER.error(errorMessage);
-       		throw new ExceptionInInitializerError(errorMessage);
-    	}
-    }
-    
-    private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
-    	String value = props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
-    	
-    	if (value == null)
-    	{
-    		String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
-    		LOGGER.error(errorMessage);
-    		throw new ExceptionInInitializerError(errorMessage);
-    	}
-    	
-    	return value;
-    }
-    
-    /**
-     * Launch a task. Call this for once each task type and task mode.
-     * 
-     * @param taskName
-     *                the task name (historically the LDAP object class name, but can be any string)
-     *  @param taskMode
-     *                the task mode (clean or sync)
-     * 
-     * @return boolean true on success, false if an error occurred
-     * @throws Exception 
-     */
-    @SuppressWarnings("unchecked")
-    private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
-        try {
-            LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName);
-        	
-            String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
+		if (!foundATask) {
+			LOGGER.error("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
+			return false;
+		}
 
-            // Get all properties
-            // TODO : nice error message if a class name is specified but doesn't exist
-            checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
-            String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
-            String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
-            String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
+		return true;
+	}
 
-            // Instantiate the destination service from properties
-            Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
-            Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[] { Properties.class, String.class });
-            IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[] { dstServiceProperties, beanClassName });
-            
-            // Instantiate custom JavaScript library from properties
-            String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);
-            Object customLibrary = null;
-            if (customLibraryName != null) {
-                customLibrary = Class.forName(customLibraryName).newInstance();
-            }
+	/**
+	 * Enum for the type of mode
+	 *
+	 */
+	private enum TaskMode {
 
-            // Instantiate source service and pass any properties
-            ISrcService srcService = null;
-            Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "."
-                    + prefix + SRCSERVICE_PROPS_PREFIX);
-            try {
-            	Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[] { Properties.class });
-            	srcService = (ISrcService) constrSrcService.newInstance(new Object[] { srcServiceProperties });
+		clean,
+		sync;
+	}
 
-            } catch (NoSuchMethodException e) {
-            	// backwards compatibility: if the source service doesn't take any properties,
-            	// use the parameter less constructor
-            	Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[] {});
-            	srcService = (ISrcService) constrSrcService.newInstance();
-            }
+	private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
+		if (props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
+			String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+	}
 
-            Class<IBean> taskBean = (Class<IBean>) Class.forName(beanClassName);
-            // Do the work!
-            switch(taskMode) {
-                case clean:
-                    clean2Ldap(taskName, taskBean, srcService, dstJndiService);
-                    break;
-                case sync:
-                    synchronize2Ldap(taskName, srcService, dstJndiService, taskBean, customLibrary);
-                    break;
-                default:        
-                    //Should not happen
-                    LOGGER.error("Unknown task mode type {}", taskMode.toString());
-                    return false;
-            }
-            
-        // Manage exceptions
-        } catch (Exception e) {
-            Class<?>[] exceptionsCaught = {InstantiationException.class, IllegalAccessException.class,
-                    ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,
-                    IllegalArgumentException.class, InvocationTargetException.class};
+	private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
+		String value = props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
 
-            if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-                LOGGER.error("Error while launching the following task: {}. Please check your code ! ({})", taskName, e);
-								LOGGER.debug(e.toString(), e);
-                return false;
-            }
-            else {
-                throw e;
-            }
-        }
+		if (value == null) {
+			String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
 
-        return true;
-    }
+		return value;
+	}
 
+	/**
+	 * Launch a task. Call this for once each task type and task mode.
+	 *
+	 * @param taskName
+	 *                the task name (historically the LDAP object class name, but can be any string)
+	 *  @param taskMode
+	 *                the task mode (clean or sync)
+	 *
+	 * @return boolean true on success, false if an error occurred
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
+		try {
+			LSCStructuralLogger.DESTINATION.warn("Starting " + taskMode.name() + " for " + taskName);
+
+			String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
+
+			// Get all properties
+			// TODO : nice error message if a class name is specified but doesn't exist
+			checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
+			String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
+			String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
+			String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
+
+			// Instantiate the destination service from properties
+			Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
+			Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[]{Properties.class, String.class});
+			IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
+
+			// Instantiate custom JavaScript library from properties
+			String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);
+			Object customLibrary = null;
+			if (customLibraryName != null) {
+				customLibrary = Class.forName(customLibraryName).newInstance();
+			}
+
+			// Instantiate source service and pass any properties
+			ISrcService srcService = null;
+			Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + SRCSERVICE_PROPS_PREFIX);
+			try {
+				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class});
+				srcService = (ISrcService) constrSrcService.newInstance(new Object[]{srcServiceProperties});
+
+			} catch (NoSuchMethodException e) {
+				// backwards compatibility: if the source service doesn't take any properties,
+				// use the parameter less constructor
+				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{});
+				srcService = (ISrcService) constrSrcService.newInstance();
+			}
+
+			Class<IBean> taskBean = (Class<IBean>) Class.forName(beanClassName);
+			// Do the work!
+			switch (taskMode) {
+				case clean:
+					clean2Ldap(taskName, taskBean, srcService, dstJndiService);
+					break;
+				case sync:
+					synchronize2Ldap(taskName, srcService, dstJndiService, taskBean, customLibrary);
+					break;
+				default:
+					//Should not happen
+					LOGGER.error("Unknown task mode type {}", taskMode.toString());
+					return false;
+			}
+
+			// Manage exceptions
+		} catch (Exception e) {
+			Class<?>[] exceptionsCaught = {InstantiationException.class, IllegalAccessException.class,
+				ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,
+				IllegalArgumentException.class, InvocationTargetException.class};
+
+			if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
+				LOGGER.error("Error while launching the following task: {}. Please check your code ! ({})", taskName, e);
+				LOGGER.debug(e.toString(), e);
+				return false;
+			} else {
+				throw e;
+			}
+		}
+
+		return true;
+	}
 }

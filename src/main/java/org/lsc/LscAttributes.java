@@ -46,7 +46,6 @@
 package org.lsc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -106,13 +105,7 @@ public class LscAttributes
 
 	public List<String> getAttributesNames()
 	{
-		List<String> attributesNames = new ArrayList<String>();
-		Iterator<String> it = values.keySet().iterator();
-		while (it.hasNext())
-		{
-			attributesNames.add(it.next());
-		}
-		return attributesNames;
+		return new ArrayList<String>(values.keySet());
 	}
 
 	/**

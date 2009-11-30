@@ -55,7 +55,7 @@ import org.lsc.Configuration;
 
 public final class SyncOptionsFactory {
 
-    private static SyncOptionsFactory INSTANCE;
+    private static SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
 
     private Map<String, ISyncOptions> cache; 
 
@@ -63,6 +63,7 @@ public final class SyncOptionsFactory {
 
     private SyncOptionsFactory() {
         cache = new HashMap<String, ISyncOptions>();
+        this.loadOptions();
     }
 
     private void loadOptions() {
@@ -88,10 +89,6 @@ public final class SyncOptionsFactory {
     }
 
     public static ISyncOptions getInstance(String syncName) {
-        if(INSTANCE == null) {
-            INSTANCE = new SyncOptionsFactory();
-            INSTANCE.loadOptions();
-        }
         return INSTANCE.get(syncName);
     }
 

@@ -72,7 +72,7 @@ public final class JScriptEvaluator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
 	/** The private unique instance. */
-	private static JScriptEvaluator instance;
+	private static JScriptEvaluator instance = new JScriptEvaluator();
 
 	/** The precompiled Javascript cache. */
 	private Map<String, Script> cache;
@@ -97,9 +97,6 @@ public final class JScriptEvaluator {
 	 * @return the instance
 	 */
 	public static JScriptEvaluator getInstance() {
-		if (instance == null) {
-			instance = new JScriptEvaluator();
-		}
 		return instance;
 	}
 
@@ -153,8 +150,7 @@ public final class JScriptEvaluator {
 		} // try next approach
 
 		try {
-			Object resultsArray = Context.jsToJava(result, List.class);
-			return (List<String>) resultsArray;
+			return (List<String>) Context.jsToJava(result, List.class);
 		} catch (Exception e) {
 		} // try next approach
 

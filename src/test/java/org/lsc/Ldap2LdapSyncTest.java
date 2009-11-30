@@ -87,11 +87,6 @@ public class Ldap2LdapSyncTest extends TestCase {
 	private final String DN_MODRDN_DST_BEFORE = "cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	private final String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
 	/**
 	 * Test reading the userPassword attribute from our source directory through Object
 	 * and Bean. This attribute has a binary syntax, so we must confirm we can parse it as a String.

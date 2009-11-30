@@ -415,14 +415,11 @@ public abstract class AbstractSynchronize {
 		}
 
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
+		Object[] objects = new Object[] { countAll, countInitiated, countCompleted, countError };
 		if (countError > 0) {
-			LSCStructuralLogger.DESTINATION.error(totalsLogMessage, new Object[]{
-							countAll, countInitiated, countCompleted,
-							countError});
+			LSCStructuralLogger.DESTINATION.error(totalsLogMessage, objects);
 		} else {
-			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage, new Object[]{
-							countAll, countInitiated, countCompleted,
-							countError});
+			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage, objects);
 		}
 	}
 
@@ -480,17 +477,17 @@ public abstract class AbstractSynchronize {
 
 			case MODRDN_ENTRY:
 				LSCStructuralLogger.DESTINATION.info("# Renaming entry {} for {}",
-									jm.getDistinguishName(), syncName);
+								jm.getDistinguishName(), syncName);
 				break;
 
 			case DELETE_ENTRY:
 				LSCStructuralLogger.DESTINATION.info("# Removing entry {} for {}",
-									jm.getDistinguishName(), syncName);
+								jm.getDistinguishName(), syncName);
 				break;
 
 			default:
 				LSCStructuralLogger.DESTINATION.info("Error: unknown changetype ({} for {})",
-									jm.getDistinguishName(), syncName);
+								jm.getDistinguishName(), syncName);
 		}
 
 		LSCStructuralLogger.DESTINATION.info(jm.toString());
@@ -506,24 +503,28 @@ public abstract class AbstractSynchronize {
 					final String syncName) {
 		switch (jm.getOperation()) {
 			case ADD_ENTRY:
-				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object " + jm.getDistinguishName());
+				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}",
+								jm.getDistinguishName());
 				break;
 
 			case MODIFY_ENTRY:
-				LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object " + jm.getDistinguishName());
+				LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object {}",
+								jm.getDistinguishName());
 				break;
 
 			case MODRDN_ENTRY:
-				LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object " + jm.getDistinguishName());
+				LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object {}",
+								jm.getDistinguishName());
 				break;
 
 			case DELETE_ENTRY:
-				LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object " + jm.getDistinguishName());
+				LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object {}",
+								jm.getDistinguishName());
 				break;
 
 			default:
 				LSCStructuralLogger.DESTINATION.debug("Error: unknown changetype ({} for {})",
-									jm.getDistinguishName(), syncName);
+								jm.getDistinguishName(), syncName);
 		}
 
 		LSCStructuralLogger.DESTINATION.debug(jm.toString());

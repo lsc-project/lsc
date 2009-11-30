@@ -176,11 +176,10 @@ public class LdifLayout extends PatternLayout {
 	 */
 	private String listToLdif(final List<?> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
-		Iterator<?> miIter = modificationItems.iterator();
+		List<ModificationItem> items = (List<ModificationItem>) modificationItems;
 		boolean first = true;
 
-		while (miIter.hasNext()) {
-			ModificationItem mi = (ModificationItem) miIter.next();
+		for(ModificationItem mi: items) {
 			Attribute attr = mi.getAttribute();
 			try {
 				if (!addEntry) {
@@ -362,9 +361,8 @@ public class LdifLayout extends PatternLayout {
 			}
 		} else {
 			/* Add all the operations */
-			JndiModificationType[] values = JndiModificationType.values();
-			for (int i = 0; i < values.length; i++) {
-				operations.add(values[i]);
+			for(JndiModificationType type: JndiModificationType.values()) {
+				operations.add(type);
 			}
 		}
 		super.start();

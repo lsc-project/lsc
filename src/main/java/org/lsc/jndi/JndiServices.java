@@ -204,7 +204,7 @@ public final class JndiServices {
 
 	private void logConnectingTo(Properties connProps) {
 		if (LOGGER.isInfoEnabled()) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("Connecting to LDAP server ");
 			sb.append(connProps.getProperty(Context.PROVIDER_URL));
 
@@ -556,7 +556,7 @@ public final class JndiServices {
 			throw e;
 		} catch (NamingException ne) {
 			if (LOGGER.isErrorEnabled()) {
-				StringBuffer errorMessage = new StringBuffer("Error while ");
+				StringBuilder errorMessage = new StringBuilder("Error while ");
 				switch (jm.getOperation()) {
 					case ADD_ENTRY:
 						errorMessage.append("adding");

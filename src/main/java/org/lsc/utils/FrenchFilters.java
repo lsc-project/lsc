@@ -465,7 +465,7 @@ public final class FrenchFilters {
 	 * @return Le mot de passe
 	 */
 	public static String generatePwd() {
-		StringBuffer passwd = new StringBuffer("");
+		StringBuilder passwd = new StringBuilder("");
 		Random r = new Random();
 
 		for (int i = 0; i < 8; i++) {

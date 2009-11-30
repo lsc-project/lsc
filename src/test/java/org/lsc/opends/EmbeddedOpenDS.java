@@ -169,7 +169,7 @@ public final class EmbeddedOpenDS {
 		}
 		
 		if (LOGGER.isDebugEnabled()) {
-			StringBuffer sb = new StringBuffer("");
+			StringBuilder sb = new StringBuilder("");
 			for (Backend b : DirectoryServer.getBackends().values()) {
 				sb.append("[ ").append(b.getBackendID()).append(" => ");
 				DN[] dns = b.getBaseDNs();
@@ -464,7 +464,7 @@ public final class EmbeddedOpenDS {
 	public static void importLdif(String ldif) throws IOException,
 			LDIFException {
 		BufferedReader br = new BufferedReader(new FileReader(ldif));
-		StringBuffer sb = new StringBuffer("");
+		StringBuilder sb = new StringBuilder("");
 		String line = null;
 		while (null != (line = br.readLine())) {
 			sb.append(line).append("\n");

@@ -272,7 +272,7 @@ public abstract class LscBean implements IBean {
 	 */
 	@Override
 	public final String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("dn: ").append(distinguishedName).append('\n');
 
 		for (String key: attrs.keySet()) {

@@ -108,7 +108,7 @@ public class LdifLayout extends PatternLayout {
 			JndiModifications jm = (JndiModifications) messages[0];
 
 			if (operations.contains(jm.getOperation())) {
-				StringBuffer msgBuffer = new StringBuffer();
+				StringBuilder msgBuffer = new StringBuilder();
 				String baseUrl = (String) Configuration.getDstProperties().get("java.naming.provider.url");
 				baseUrl = baseUrl.substring(baseUrl.lastIndexOf('/') + 1);
 				String dn = "";
@@ -175,7 +175,7 @@ public class LdifLayout extends PatternLayout {
 	 * @return the string to log
 	 */
 	private String listToLdif(final List<?> modificationItems, final boolean addEntry) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<?> miIter = modificationItems.iterator();
 		boolean first = true;
 

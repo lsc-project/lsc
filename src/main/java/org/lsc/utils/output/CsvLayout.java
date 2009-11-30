@@ -119,7 +119,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 			if (operations.contains(jm.getOperation()) && 
 							( taskNamesList.size() == 0 ||
 							  taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
-				StringBuffer sb = new StringBuffer(1024);
+				StringBuilder sb = new StringBuilder(1024);
 
 				Iterator<String> iterator = attributes.iterator();
 

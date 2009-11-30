@@ -183,7 +183,7 @@ public class LdapServer {
 			}
 		} catch (ParseException e) {
 			if(LOGGER.isErrorEnabled()) {
-				StringBuffer sbf = new StringBuffer();
+				StringBuilder sbf = new StringBuilder();
 				for(String arg: args) {
 					sbf.append(arg).append(" ");
 				}

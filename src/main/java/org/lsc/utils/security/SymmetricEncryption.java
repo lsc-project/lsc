@@ -249,7 +249,7 @@ public class SymmetricEncryption {
 				System.exit(1);
 			}
 		} catch (ParseException e) {
-			StringBuffer sbf = new StringBuffer();
+			StringBuilder sbf = new StringBuilder();
 			for(String arg : argv) {
 				sbf.append(arg).append(" ");
 			}

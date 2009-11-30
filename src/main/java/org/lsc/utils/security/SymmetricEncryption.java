@@ -94,7 +94,6 @@ public class SymmetricEncryption {
 	private int strength;
 	private String algorithm;
 	private String keyPath;
-	private Key key;
 	private Cipher cipherDecrypt;
 	private Cipher cipherEncrypt;
 	private Provider securityProvider;
@@ -141,7 +140,7 @@ public class SymmetricEncryption {
 	/**
 	 * Decrypt bytes.
 	 * @param toDecrypt
-	 * @return Decryted bytes.
+	 * @return Decrypted bytes.
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public byte[] decrypt(byte[] toDecrypt) throws GeneralSecurityException {
@@ -150,7 +149,9 @@ public class SymmetricEncryption {
 
 	/**
 	 * Generate a random key file with default value
-	 * @return boolean
+	 * @return boolean false if an error occurred
+	 * @throws NoSuchAlgorithmException 
+	 * @throws NoSuchProviderException 
 	 */
 	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException {
 		return this.generateRandomKeyFile(this.keyPath, this.algorithm, this.strength);
@@ -161,7 +162,9 @@ public class SymmetricEncryption {
 	 * @param keyPath The filename where to write the key
 	 * @param algo The supported algorithm to use
 	 * @param strength The encryption strength
-	 * @return boolean
+	 * @return boolean false if an error occurred
+	 * @throws NoSuchAlgorithmException 
+	 * @throws NoSuchProviderException 
 	 */
 	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException {
 		try {
@@ -215,17 +218,19 @@ public class SymmetricEncryption {
 	/**
 	 * Initialize encryption object from the configuration file.
 	 * @return boolean (always true if no exception)
+	 * @throws GeneralSecurityException 
+	 * @throws IOException 
 	 */
 	public boolean initialize() throws GeneralSecurityException, IOException {
 		InputStream input = new FileInputStream(new File(this.keyPath));
-		byte[] data = new byte[strength / 8];
+		byte[] data = new byte[strength / Byte.SIZE];
 		input.read(data);
 
-		this.key = new SecretKeySpec(data, this.algorithm);
+		Key key = new SecretKeySpec(data, this.algorithm);
 		this.cipherEncrypt = Cipher.getInstance(this.algorithm);
-		this.cipherEncrypt.init(Cipher.ENCRYPT_MODE, this.key);
+		this.cipherEncrypt.init(Cipher.ENCRYPT_MODE, key);
 		this.cipherDecrypt = Cipher.getInstance(this.algorithm);
-		this.cipherDecrypt.init(Cipher.DECRYPT_MODE, this.key);
+		this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
 
 		return true;
 	}

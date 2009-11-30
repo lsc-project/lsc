@@ -448,7 +448,8 @@ public abstract class AbstractSynchronize {
 		LOGGER.debug(except.toString(), except);
 
 		if (jm != null) {
-			LOGGER.error(jm.toString());
+			// TODO Fix LdifLogger to avoid this
+			LOGGER.error("", jm);
 		}
 	}
 
@@ -490,7 +491,8 @@ public abstract class AbstractSynchronize {
 								jm.getDistinguishName(), syncName);
 		}
 
-		LSCStructuralLogger.DESTINATION.info(jm.toString());
+		// TODO Fix LdifLogger to avoid this
+		LSCStructuralLogger.DESTINATION.info("", jm);
 	}
 
 	/**
@@ -526,8 +528,9 @@ public abstract class AbstractSynchronize {
 				LSCStructuralLogger.DESTINATION.debug("Error: unknown changetype ({} for {})",
 								jm.getDistinguishName(), syncName);
 		}
-
-		LSCStructuralLogger.DESTINATION.debug(jm.toString());
+		
+		// TODO Fix LdifLogger to avoid this
+		LSCStructuralLogger.DESTINATION.debug("", jm);
 	}
 
 	/**

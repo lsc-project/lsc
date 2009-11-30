@@ -91,7 +91,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
     /** Default separator is ";" */
     private String defaultDelimiter = ";";
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
     
     private String syncName;
 

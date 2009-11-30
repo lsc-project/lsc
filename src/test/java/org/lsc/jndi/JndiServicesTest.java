@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JndiServicesTest extends TestCase {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
 	/**
 	 * Just check that the connection is ready.

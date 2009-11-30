@@ -78,7 +78,7 @@ import org.opends.server.util.StaticUtils;
 public class LdapServer {
 
 	/** The local logger */
-	private static Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
 	
 	public final static void start() throws InitializationException, IOException, URISyntaxException, DirectoryException, ConfigException, CanceledOperationException, LDIFException {
 		EmbeddedOpenDS.startServer();

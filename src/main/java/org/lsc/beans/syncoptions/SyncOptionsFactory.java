@@ -59,7 +59,7 @@ public final class SyncOptionsFactory {
 
     private Map<String, ISyncOptions> cache; 
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
 
     private SyncOptionsFactory() {
         cache = new HashMap<String, ISyncOptions>();

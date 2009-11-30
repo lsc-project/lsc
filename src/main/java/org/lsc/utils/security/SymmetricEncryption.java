@@ -87,7 +87,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SymmetricEncryption {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(SymmetricEncryption.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SymmetricEncryption.class);
 
 	public static final int DEFAULT_CIPHER_STRENGTH = 128;
 	public static final String DEFAULT_CIPHER_ALGORITHM = "AES";

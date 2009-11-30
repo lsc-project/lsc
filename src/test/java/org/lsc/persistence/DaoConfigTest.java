@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class DaoConfigTest extends TestCase {
 
 	private Connection con;
-	private Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
 	/**
 	 * Test the JDBC connection.

@@ -92,7 +92,7 @@ public final class EmbeddedOpenDS {
 	/**
 	 * A logger for the class
 	 */
-	private static Logger LOGGER = LoggerFactory.getLogger(EmbeddedOpenDS.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedOpenDS.class);
 
 	/**
 	 * The of the system property that specifies the target working directory,

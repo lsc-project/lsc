@@ -77,7 +77,7 @@ public class JndiModifications {
 	private String taskName;
 
 	/* Logger */
-	private static Logger LOGGER = LoggerFactory.getLogger(JndiModifications.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JndiModifications.class);
 
 	/**
 	 * Standard constructor.

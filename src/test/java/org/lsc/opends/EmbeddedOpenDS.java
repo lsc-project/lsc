@@ -185,6 +185,7 @@ public final class EmbeddedOpenDS {
 
 	/**
 	 * Sets the system context root to null.
+	 * @param reason Shutdown message
 	 *
 	 * @see junit.framework.TestCase#tearDown()
 	 */
@@ -303,8 +304,10 @@ public final class EmbeddedOpenDS {
 	 * <p>
 	 * Also take a look at the makeLdif method below since this makes expressing
 	 * LDIF a little bit cleaner.
+	 * @param ldif LDIF of the entries to parse.
 	 *
 	 * @return the first Entry parsed from the ldif String
+	 * @throws Exception 
 	 * @see #makeLdif
 	 */
 	public static Entry entryFromLdifString(String ldif) throws Exception {
@@ -334,6 +337,7 @@ public final class EmbeddedOpenDS {
 	 * 		+ &quot;givenname: John\n&quot;;
 	 *
 	 * </pre>
+	 * @param lines LDIF lines
 	 *
 	 * @return the concatenation of each line followed by a newline character
 	 */
@@ -356,6 +360,9 @@ public final class EmbeddedOpenDS {
 	 * 		&quot;objectclass: inetorgperson&quot;, &quot;cn: John Smith&quot;, &quot;sn: Smith&quot;,
 	 * 		&quot;givenname: John&quot;);
 	 * </pre>
+	 * @param lines LDIF lines
+	 * @return Entry constructed from LDIF lines
+	 * @throws Exception 
 	 *
 	 * @see #makeLdif
 	 */
@@ -374,6 +381,8 @@ public final class EmbeddedOpenDS {
 	 * 		&quot;dn: cn=Jane Smith,dc=example,dc=com&quot;, &quot;objectclass: inetorgperson&quot;,
 	 * 		&quot;cn: Jane Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: Jane&quot;);
 	 * </pre>
+	 * @param lines Lines of LDIF
+	 * @return List of EntryS from the lines of LDIF
 	 *
 	 * @throws IOException
 	 * @throws LDIFException

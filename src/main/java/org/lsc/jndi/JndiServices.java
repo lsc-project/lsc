@@ -109,7 +109,7 @@ public final class JndiServices {
 	private String contextDn;
 
 	/** The instances cache. */
-	private static Map<Properties, JndiServices> cache;
+	private static Map<Properties, JndiServices> cache = new HashMap<Properties, JndiServices>();
 
 	/** Number of results per page (through PagedResults extended control). */
 	private int pageSize;
@@ -263,9 +263,6 @@ public final class JndiServices {
 	 * @throws NamingException
 	 */
 	public static JndiServices getInstance(final Properties props) throws NamingException, IOException {
-		if (cache == null) {
-			cache = new HashMap<Properties, JndiServices>();
-		}
 		if (!cache.containsKey(props)) {
 			cache.put(props, new JndiServices(props));
 		}

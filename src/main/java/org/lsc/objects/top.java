@@ -66,11 +66,7 @@ import org.lsc.objects.flat.fTop;
  */
 public class top extends LscObject {
 
-	protected static Map<String, List<Method>> localMethods;
-
-	static {
-		localMethods = new HashMap<String, List<Method>>();
-	}
+	protected static Map<String, List<Method>> localMethods = new HashMap<String, List<Method>>();
 
 	public top() {
 		objectClass = new ArrayList<String>();
@@ -86,23 +82,23 @@ public class top extends LscObject {
 	public final void setUpFromObject(fTop fo) throws IllegalAccessException, InvocationTargetException {
 		AbstractBean.loadLocalMethods(this.getClass(), localMethods, AbstractBean.SET_ACCESSOR_PREFIX);
 		
-		Method[] methods = fo.getClass().getMethods();
-		
-		for (int i = 0; i < methods.length; i++) {
-			if (methods[i].getName().startsWith(AbstractBean.GET_ACCESSOR_PREFIX)) {
+
+		for(Method method: fo.getClass().getMethods()) {
+			if (method.getName().startsWith(AbstractBean.GET_ACCESSOR_PREFIX)) {
 			    
 			    /* Get the name of the parameter */
-				String paramName = methods[i].getName().substring(AbstractBean.GET_ACCESSOR_PREFIX.length());
+				String paramName = method.getName().substring(AbstractBean.GET_ACCESSOR_PREFIX.length());
 				paramName = paramName.substring(0, 1).toLowerCase() + paramName.substring(1);
 				
 				/* Get the returnType for the get method */
-				Class<?> returnType = methods[i].getReturnType();
+				Class<?> returnType = method.getReturnType();
 				
 				/* Get matching local methods for this parameter */
 				Method localMethod = null;
 				List<Method> meths = localMethods.get(paramName);
-				if (meths == null) localMethod = null;
-				else {
+				if (meths == null) {
+					localMethod = null;
+				} else {
 					if (meths.size() == 1) {
 						localMethod = meths.get(0);
 					} else {
@@ -121,7 +117,7 @@ public class top extends LscObject {
 				}
 				
 				if (localMethod != null && returnType != null) {
-					Object returnedObject = methods[i].invoke(fo, new Object[] {});
+					Object returnedObject = method.invoke(fo, new Object[] {});
 					Class<?>[] toReturnTypes = localMethod.getParameterTypes();
 					if (returnedObject == null) {
 						// TODO: check the following : no need to call a method
@@ -151,7 +147,7 @@ public class top extends LscObject {
 					}
 				} else {
 					if (paramName.compareToIgnoreCase("class") != 0) {
-						LOGGER.warn("No corresponding method for original {} on {} object !", methods[i].getName(), fo.getClass());
+						LOGGER.warn("No corresponding method for original {} on {} object !", method.getName(), fo.getClass());
 					}
 				}
 			}

@@ -244,7 +244,7 @@ public abstract class AbstractSynchronize {
 						logAction(jm, id, syncName);
 					} else {
 						countError++;
-						logActionError(jm, id, null);
+						logActionError(jm, id, new Exception());
 					}
 				}
 			} catch (CommunicationException e) {
@@ -393,7 +393,7 @@ public abstract class AbstractSynchronize {
 					logAction(jm, id, syncName);
 				} else {
 					countError++;
-					logActionError(jm, id, null);
+					logActionError(jm, id, new Exception());
 				}
 			} catch (CommunicationException e) {
 				// we lost the connection to the source or destination, stop everything!
@@ -434,17 +434,10 @@ public abstract class AbstractSynchronize {
 	 *                synchronization process name
 	 */
 	protected final void logActionError(final JndiModifications jm,
-					final Entry<String, LscAttributes> identifier, final Throwable except) {
-		Object str = null;
+					final Entry<String, LscAttributes> identifier, final Exception except) {
 
-		if (except != null) {
-			str = except.toString();
-		} else {
-			str = "";
-		}
-
-		LOGGER.error("Error while synchronizing ID {}: {}\n{}", new Object[]{
-							(jm != null ? jm.getDistinguishName() : ""), str, "", except});
+		LOGGER.error("Error while synchronizing ID {}: {}", 
+							(jm != null ? jm.getDistinguishName() : ""), except.toString());
 		LOGGER.debug(except.toString(), except);
 
 		if (jm != null) {

@@ -51,21 +51,21 @@ import java.util.Comparator;
 public class StringLengthComparator implements Comparator<String>, Serializable {
 
 	/**
-     * For Eclipse
-     */
-    private static final long serialVersionUID = 7287095579023636070L;
+	 * For Eclipse
+	 */
+	private static final long serialVersionUID = 7287095579023636070L;
 
-    /**
+	/**
 	 * This function actually compares String lengths
 	 * so that they are sorted from longest to shortest
-     * @param arg0 First string
-     * @param arg1 Second string
-     * @return int To order strings by length
+	 * @param arg0 First string
+	 * @param arg1 Second string
+	 * @return int To order strings by length
 	 */
 	public int compare(String arg0, String arg1) {
 		String one = arg0;
 		String two = arg1;
-		
+
 		if (one.length() < two.length()) {
 			return 1;
 		} else if (one.length() > two.length()) {
@@ -73,5 +73,4 @@ public class StringLengthComparator implements Comparator<String>, Serializable 
 		}
 		return 0;
 	}
-
 }

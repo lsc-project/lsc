@@ -43,7 +43,6 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-
 package org.lsc.utils;
 
 import java.io.IOException;
@@ -57,8 +56,7 @@ import org.lsc.utils.security.SymmetricEncryption;
  * Provides some methods to encrypt, decrypt or hash data.
  * @see org.lsc.utils.security.SymmetricEncryption
  */
-public class SecurityUtils
-{
+public class SecurityUtils {
 
 	public static final String HASH_MD5 = "MD5";
 	public static final String HASH_SHA1 = "SHA1";
@@ -70,8 +68,7 @@ public class SecurityUtils
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public static String decrypt(String value) throws GeneralSecurityException, IOException
-	{
+	public static String decrypt(String value) throws GeneralSecurityException, IOException {
 		SymmetricEncryption se = new SymmetricEncryption();
 		se.initialize();
 		return new String(se.decrypt(new Base64().decode(value.getBytes())));
@@ -84,8 +81,7 @@ public class SecurityUtils
 	 * @throws java.security.GeneralSecurityException
 	 * @throws java.io.IOException
 	 */
-	public static String encrypt(String value) throws GeneralSecurityException, IOException
-	{
+	public static String encrypt(String value) throws GeneralSecurityException, IOException {
 		SymmetricEncryption se = new SymmetricEncryption();
 		se.initialize();
 		return new String(new Base64().encode(se.encrypt(value.getBytes())));
@@ -98,11 +94,9 @@ public class SecurityUtils
 	 * @return A valid base64 encoded hash
 	 * @throws java.security.NoSuchAlgorithmException
 	 */
-	public static String hash(String type, String value) throws NoSuchAlgorithmException
-	{
+	public static String hash(String type, String value) throws NoSuchAlgorithmException {
 		byte data[] = value.getBytes();
 		byte hash[] = MessageDigest.getInstance(type).digest(data);
 		return new String(new Base64().encode(hash));
 	}
-
 }

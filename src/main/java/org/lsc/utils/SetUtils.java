@@ -56,12 +56,10 @@ import javax.naming.directory.BasicAttribute;
  * 
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class SetUtils
-{
+public class SetUtils {
 
 	// Utility class, no public constructor
-	private SetUtils()
-	{
+	private SetUtils() {
 	}
 
 	/**
@@ -74,8 +72,7 @@ public class SetUtils
 	 * @throws NamingException
 	 */
 	public static Set<Object> attributeToSet(Attribute attr)
-			throws NamingException
-	{
+					throws NamingException {
 		if (attr == null || attr.size() == 0) {
 			return new HashSet<Object>();
 		}
@@ -84,12 +81,12 @@ public class SetUtils
 		NamingEnumeration<?> ne = attr.getAll();
 		while (ne.hasMore()) {
 			Object value = ne.next();
-			
+
 			// ignore empty string values
-			if ((value instanceof String) && ((String)value).length() == 0) {
+			if ((value instanceof String) && ((String) value).length() == 0) {
 				continue;
 			}
-			
+
 			attrValues.add(value);
 		}
 		return attrValues;
@@ -103,8 +100,7 @@ public class SetUtils
 	 * @param values Values as a set
 	 * @return Attribute An Attribute containing values from the set. Never null.
 	 */
-	public static Attribute setToAttribute(String attrName, Set<?> values)
-	{
+	public static Attribute setToAttribute(String attrName, Set<?> values) {
 		Attribute ret = new BasicAttribute(attrName);
 
 		if (values == null || values.size() == 0) {
@@ -130,8 +126,7 @@ public class SetUtils
 	 *            Set of Objects to search for in the haystack.
 	 * @return {@link Set} of needles that are not in the haystack.
 	 */
-	public static Set<?> findMissingNeedles(Set<?> haystack, Set<?> needles)
-	{
+	public static Set<?> findMissingNeedles(Set<?> haystack, Set<?> needles) {
 		Set<Object> missingNeedles = new HashSet<Object>();
 
 		// no needles? they can't be missing then.
@@ -165,8 +160,7 @@ public class SetUtils
 						// if needle is binary, make this haystack value binary
 						if (needle.getClass().isAssignableFrom(String.class)) {
 							needleBuff = ByteBuffer.wrap(((String) needle).getBytes());
-						}
-						else {
+						} else {
 							continue;
 						}
 					}
@@ -180,8 +174,7 @@ public class SetUtils
 					if (haystackValueBuff == null) {
 						if (haystackValue.getClass().isAssignableFrom(String.class)) {
 							haystackValueBuff = ByteBuffer.wrap(((String) haystackValue).getBytes());
-						}
-						else {
+						} else {
 							continue;
 						}
 					}
@@ -190,8 +183,7 @@ public class SetUtils
 					if (haystackValueBuff.compareTo(needleBuff) == 0) {
 						foundInHaystack = true;
 					}
-				}
-				else {
+				} else {
 					// fall back to standard compare (works well for String,
 					// int, boolean, etc)
 					if (haystackValue.equals(needle)) {
@@ -219,8 +211,7 @@ public class SetUtils
 	 *            Set of Objects to search for in the haystack.
 	 * @return true if all the members of needles are found in haystack
 	 */
-	public static boolean setContainsAll(Set<Object> haystack, Set<Object> needles)
-	{
+	public static boolean setContainsAll(Set<Object> haystack, Set<Object> needles) {
 		return (findMissingNeedles(haystack, needles).size() == 0);
 	}
 
@@ -232,8 +223,7 @@ public class SetUtils
 	 * @param dstAttrValues
 	 * @return true if all values of each set are present in the other set, false otherwise
 	 */
-	public static boolean doSetsMatch(Set<Object> srcAttrValues, Set<Object> dstAttrValues)
-	{
+	public static boolean doSetsMatch(Set<Object> srcAttrValues, Set<Object> dstAttrValues) {
 		// make sure value counts are the same
 		if (srcAttrValues.size() != dstAttrValues.size()) {
 			return false;
@@ -253,11 +243,8 @@ public class SetUtils
 		return true;
 	}
 
-	
-	public static void addAllIfNotPresent(Set<Object> set, Set<?> values)
-	{
+	public static void addAllIfNotPresent(Set<Object> set, Set<?> values) {
 		Set<?> valuesToAdd = findMissingNeedles(set, values);
 		set.addAll(valuesToAdd);
 	}
-	
 }

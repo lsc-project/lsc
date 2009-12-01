@@ -170,8 +170,7 @@ public class LdapObjectClass {
 		for (; rest != null && rest.length() > 0
 		&& maxPass < MAX_PASS_BEFORE_FAILING; maxPass++) {
 			LOGGER.debug("Re/Starting analysis with rest=\"{}\"", rest);
-			ret = execRegex(rest,
-			"\\s*SUP\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
+			ret = execRegex(rest, "\\s*SUP\\s+(\\([^\\)]+\\)|[^\\s]+)?\\s*(.*)\\s*");
 			if (ret != null) {
 				if (ret[0].startsWith("(")) {
 					ret[0] = ret[0].substring(1, ret[0].length() - 2);
@@ -179,12 +178,7 @@ public class LdapObjectClass {
 				StringTokenizer sups = new StringTokenizer(ret[0], "$");
 				loc.inheritFrom = sups.nextToken();
 				if (sups.hasMoreElements()) {
-					LOGGER
-					.warn("Multiple inheritence not supported. Using first one ("
-							+ loc.inheritFrom
-							+ ") for \""
-							+ ocStr
-							+ "\"");
+					LOGGER.warn("Multiple inheritence not supported. Using first one ({}) for \"{}\"", loc.inheritFrom, ocStr);
 				}
 				rest = ret[1];
 			}

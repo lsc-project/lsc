@@ -68,93 +68,87 @@ import org.lsc.jndi.parser.LdapObjectClass;
  */
 public class JndiDataSchemaProvider implements DataSchemaProvider {
 
-    /** This is the local logger. */
-    public static final Logger LOGGER = 
-        LoggerFactory.getLogger(JndiDataSchemaProvider.class);
+	/** This is the local logger. */
+	public static final Logger LOGGER =
+					LoggerFactory.getLogger(JndiDataSchemaProvider.class);
+	/** This is the list of object classes available in the directory. */
+	private List<String> objectClasses;
+	/** This is the list of attribute types available in the directory. */
+	private List<String> attributeTypes;
+	private LdapObjectClass ldapObjectClass;
+	private Map<String, LdapAttributeType> ldapAttributeTypes;
 
-    /** This is the list of object classes available in the directory. */
-    private List<String> objectClasses;
+	/**
+	 * Initialize the data schema provider by reading the directory schema and
+	 * looking for the specified objectclass name
+	 * @param js
+	 * @param className
+	 * @throws NamingException
+	 */
+	public JndiDataSchemaProvider(JndiServices js, String className) throws NamingException {
 
-    /** This is the list of attribute types available in the directory. */
-    private List<String> attributeTypes;
-    
-    private LdapObjectClass ldapObjectClass;
-    private Map<String, LdapAttributeType> ldapAttributeTypes; 
+		Map<String, List<String>> ocsTemp = js.getSchema(new String[]{
+							"objectclasses"
+						});
+		Map<String, List<String>> atsTemp = js.getSchema(new String[]{
+							"attributetypes"
+						});
 
+		if ((ocsTemp == null) || (ocsTemp.keySet().size() == 0) || (atsTemp == null) || (atsTemp.keySet().size() == 0)) {
+			LOGGER.error("Unable to read objectclasses or attributetypes in ldap schema! Exiting...");
+			return;
+		}
 
-    /**
-     * Initialize the data schema provider by reading the directory schema and 
-     * looking for the specified objectclass name
-     * @param js
-     * @param className
-     * @throws NamingException 
-     */
-    public JndiDataSchemaProvider(JndiServices js, String className) throws NamingException {
+		objectClasses = filterNames(ocsTemp.values().iterator().next());
+		attributeTypes = filterNames(atsTemp.values().iterator().next());
 
-        Map<String, List<String>> ocsTemp = js.getSchema(new String[] {
-                "objectclasses"
-        });
-        Map<String, List<String>> atsTemp = js.getSchema(new String[] {
-                "attributetypes"
-        });
+		ldapAttributeTypes = new HashMap<String, LdapAttributeType>();
+		for (String atStr : attributeTypes) {
+			LdapAttributeType lat = LdapAttributeType.parse(atStr);
+			if (lat != null) {
+				ldapAttributeTypes.put(lat.getName(), lat);
+			}
+		}
 
-        if ((ocsTemp == null) || (ocsTemp.keySet().size() == 0)
-                || (atsTemp == null) || (atsTemp.keySet().size() == 0)) {
-            LOGGER.error("Unable to read objectclasses or attributetypes in ldap schema! Exiting...");
-            return;
-        }
-
-        objectClasses = filterNames(ocsTemp.values().iterator().next());
-        attributeTypes = filterNames(atsTemp.values().iterator().next());
-
-        ldapAttributeTypes = new HashMap<String, LdapAttributeType>();
-        for (String atStr : attributeTypes) {
-            LdapAttributeType lat = LdapAttributeType.parse(atStr);
-            if (lat != null) {
-            	ldapAttributeTypes.put(lat.getName(), lat);
-            }
-        }
-
-        for (String ocStr : objectClasses) {
-            LdapObjectClass loc = LdapObjectClass.parse(ocStr, ldapAttributeTypes);
-            if (loc != null
-                    && loc.getName().compareToIgnoreCase(className) == 0) {
-                ldapObjectClass = loc;
-                break;
-            }
-        }
+		for (String ocStr : objectClasses) {
+			LdapObjectClass loc = LdapObjectClass.parse(ocStr, ldapAttributeTypes);
+			if (loc != null && loc.getName().compareToIgnoreCase(className) == 0) {
+				ldapObjectClass = loc;
+				break;
+			}
+		}
 
 	}
-	
-    /**
-     * Filter the attribute and object classes names
-     * @param names List of names
-     * @return list of filtered names
-     */
-    private List<String> filterNames(List<String> names) {
-    	List<String> filteredNames = new ArrayList<String>();
-    	for (String name : names) {
-    		String filteredName = filterName(name);
-    		if(filteredName != null) {
-    			filteredNames.add(filteredName);
-    		} else {
-    			LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);
-    		}
-    	}
-    	return filteredNames;
-    	
+
+	/**
+	 * Filter the attribute and object classes names
+	 * @param names List of names
+	 * @return list of filtered names
+	 */
+	private List<String> filterNames(List<String> names) {
+		List<String> filteredNames = new ArrayList<String>();
+		for (String name : names) {
+			String filteredName = filterName(name);
+			if (filteredName != null) {
+				filteredNames.add(filteredName);
+			} else {
+				LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);
+			}
+		}
+		return filteredNames;
+
 	}
 
-    /**
-     * Filter name according to attribute or object class 
-     * @param name the original name
-     * @return the filtered name or null if not matching
-     */
+	/**
+	 * Filter name according to attribute or object class
+	 * @param name the original name
+	 * @return the filtered name or null if not matching
+	 */
 	public String filterName(String name) {
 		String REGEX = "^\\p{Alpha}[\\w]*$";
 		Pattern p = Pattern.compile(REGEX);
 		Matcher m = p.matcher(name);
-		if(m.matches()) {
+		if (m.matches()) {
 			return null;
 		} else {
 			return name;
@@ -194,8 +188,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 	 * @throws MissingFormatArgumentException is the attribute is unknown
 	 */
 	public boolean isElementMultivalued(String elementName) {
-		if(!ldapObjectClass.getMonoAttrs().contains(elementName)
-			&& !ldapObjectClass.getMultiAttrs().contains(elementName)) {
+		if (!ldapObjectClass.getMonoAttrs().contains(elementName) && !ldapObjectClass.getMultiAttrs().contains(elementName)) {
 			throw new MissingFormatArgumentException("Unknown attribute: " + elementName);
 		}
 		return ldapObjectClass.getMultiAttrs().contains(elementName);

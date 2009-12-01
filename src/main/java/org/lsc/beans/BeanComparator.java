@@ -99,7 +99,8 @@ public final class BeanComparator {
 	 * @return JndiModificationType the modification type that would happen
 	 * @throws CloneNotSupportedException
 	 */
-	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions, IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
+	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions,
+					IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
 		// no beans, nothing to do
 		if (srcBean == null && dstBean == null) {
 			return null;

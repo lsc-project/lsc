@@ -160,8 +160,8 @@ public abstract class AbstractSimpleJndiService {
 		objToFill.setDistinguishName(sr.getNameInNamespace());
 
 		// get attributes
-		for (int i = 0; i < methods.length; i++) {
-			localMethods.put(methods[i].getName(), methods[i]);
+		for (Method method: methods) {
+			localMethods.put(method.getName(), method);
 		}
 
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();

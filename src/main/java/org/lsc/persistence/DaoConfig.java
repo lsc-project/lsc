@@ -67,16 +67,15 @@ import com.ibatis.sqlmap.client.SqlMapClientBuilder;
  * @author Thomas Chemineau &lt;thomas@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public final class DaoConfig
-{
+public final class DaoConfig {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
 	/** The base name of the iBatis configuration file */
 	public static final String IBATIS_SQLMAP_CONFIGURATION_FILENAME = "sql-map-config.xml";
 
 	/** The localization of the iBatis configuration file. */
-	public static final String IBATIS_SQLMAP_CONFIGURATION_FILE = "org/lsc/persistence/xml/"
-		+ IBATIS_SQLMAP_CONFIGURATION_FILENAME;
+	public static final String IBATIS_SQLMAP_CONFIGURATION_FILE = "org/lsc/persistence/xml/" + IBATIS_SQLMAP_CONFIGURATION_FILENAME;
 
 	/** iBatis sqlMap configuration file directory for sqlMap files */
 	public static final String IBATIS_SQLMAP_FILES_DIRNAME = "sql-map-config.d";
@@ -87,9 +86,36 @@ public final class DaoConfig
 	 */
 	private static SqlMapClient sqlMapper;
 
+	static {
+		try {
+			Reader reader = null;
+
+			// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
+			// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
+			// file always used to be in a JAR file. It should be removed in the future.
+			File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+			if (configFile.exists()) {
+				// read the file from the configuration directory
+				String pathToFile = configFile.toURI().toURL().toString();
+				LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
+				reader = Resources.getUrlAsReader(pathToFile);
+			} else {
+				// read the file from the classpath (it's in a JAR file)
+				reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
+			}
+
+			Properties props = getSqlMapProperties();
+			sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, props);
+
+			// clean up
+			reader.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Something bad happened while building the SqlMapClient instance." + e, e);
+		}
+	}
+
 	/** Tool class. */
-	private DaoConfig()
-	{
+	private DaoConfig() {
 	}
 
 	/**
@@ -97,64 +123,27 @@ public final class DaoConfig
 	 * 
 	 * @return the data accessor manager
 	 */
-	public static SqlMapClient getSqlMapClient()
-	{
-		if (sqlMapper == null)
-		{
-			try
-			{
-				Reader reader = null;
-
-				// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
-				// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
-				// file always used to be in a JAR file. It should be removed in the future.
-				File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
-				if (configFile.exists())
-				{
-					// read the file from the configuration directory
-					String pathToFile = configFile.toURI().toURL().toString();
-					LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
-					reader = Resources.getUrlAsReader(pathToFile);
-				}
-				else
-				{
-					// read the file from the classpath (it's in a JAR file)
-					reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
-				}
-
-				Properties props = getSqlMapProperties();
-				sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, props);
-
-				// clean up
-				reader.close();
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException("Something bad happened while building the SqlMapClient instance." + e, e);
-			}
-		}
-
+	public static SqlMapClient getSqlMapClient() {
 		return sqlMapper;
 	}
-	
+
 	protected static Properties getSqlMapProperties() throws IOException {
 		Properties props = new Properties();
-		
+
 		// read the database configuration file to pass to sql-map-config XML file
 		// this is maintained for backwards compatibility, although the database.properties file no longer exists
-		try
-		{
+		try {
 			props.putAll(Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME));
+		} catch (FileNotFoundException e) {
+			// ignore this, it probably just means that we're not using database.properties file anymore
 		}
-		catch (FileNotFoundException e) {} 
-		// ignore this, it probably just means that we're not using database.properties file anymore
-		
+
 		// add the database configuration properties from lsc.properties
 		props.putAll(Configuration.getAsProperties("src.database"));
-		
+
 		// add the configuration directory to properties so that sql-map-config can use relative paths
 		props.put("lsc.config", Configuration.getConfigurationDirectory());
-		
+
 		return props;
 	}
 }

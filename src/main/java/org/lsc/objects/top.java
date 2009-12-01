@@ -122,7 +122,6 @@ public class top extends LscObject {
 				
 				if (localMethod != null && returnType != null) {
 					Object returnedObject = methods[i].invoke(fo, new Object[] {});
-					List<Object> paramsToUse = null;
 					Class<?>[] toReturnTypes = localMethod.getParameterTypes();
 					if (returnedObject == null) {
 						// TODO: check the following : no need to call a method
@@ -130,23 +129,21 @@ public class top extends LscObject {
 						// localMethod.invoke(this, new Object[] {});
 						LOGGER.debug("No need to call a method with an empty value ... ({})", paramName);
 					} else {
-						if (toReturnTypes != null && toReturnTypes[0] == returnType) {
+						if (toReturnTypes != null) {
 							LOGGER.debug("Method invocation: {}", localMethod.getName());
+							Object paramsToUse = null;
+							if (toReturnTypes[0] == returnType) {
+								paramsToUse = returnedObject;
+							} else if (toReturnTypes[0] == List.class) {
+								ArrayList<Object> array = new ArrayList<Object>();
+								array.add(returnedObject);
+								paramsToUse = array;
+							}
 							try {
-								localMethod.invoke(this, new Object[] { returnedObject });
+								localMethod.invoke(this, new Object[]{paramsToUse});
 							} catch (IllegalArgumentException e) {
 								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
 								LOGGER.error(e.toString());
-							}
-						} else if (toReturnTypes != null && toReturnTypes[0] == List.class) {
-							LOGGER.debug("Method invocation: {}", localMethod.getName());
-							try {
-								paramsToUse = new ArrayList<Object>();
-								paramsToUse.add(returnedObject);
-								localMethod.invoke(this, new Object[] { paramsToUse });
-							} catch (IllegalArgumentException e) {
-								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
-								LOGGER.error(e.toString(), e);
 							}
 						} else {
 							LOGGER.error("Unable to manage translation from {} to {} for {} !", new Object[] { returnType, toReturnTypes[0], paramName });

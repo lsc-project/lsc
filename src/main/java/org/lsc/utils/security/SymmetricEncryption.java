@@ -230,6 +230,7 @@ public class SymmetricEncryption {
 		this.cipherDecrypt = Cipher.getInstance(this.algorithm);
 		this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
 
+		input.close();
 		return true;
 	}
 

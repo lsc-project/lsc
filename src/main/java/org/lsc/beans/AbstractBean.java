@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.naming.NamingEnumeration;
@@ -278,17 +279,13 @@ public abstract class AbstractBean extends LscBean {
 		Attribute attr = new BasicAttribute(paramName);
 
 		if (values != null) {
-			Iterator<?> iter = values.keySet().iterator();
 
-			while (iter.hasNext()) {
-				String key = (String) iter.next();
-				List<?> codesValues = (List<?>) values.get(key);
-				Iterator<?> codesValuesIter = codesValues.iterator();
+			for(Entry<?, ?> entry: values.entrySet()) {
 
-				while (codesValuesIter.hasNext()) {
+				for(Object obj: (List<?>) entry.getValue()) {
 					// TODO: check consistency
-					attr.add("{" + key.trim() + "}" +
-									((String) codesValuesIter.next()).trim());
+					attr.add("{" + ((String) entry.getKey()).trim() + "}" +
+									((String) obj).trim());
 				}
 			}
 		}

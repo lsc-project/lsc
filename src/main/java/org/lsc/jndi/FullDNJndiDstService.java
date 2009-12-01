@@ -76,123 +76,122 @@ import org.lsc.utils.StringLengthComparator;
  */
 public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiDstService {
 
-    /**
-     * Preceding the object feeding, it will be instantiated from this class.
-     */
-    private Class<IBean> beanClass;
+	/**
+	 * Preceding the object feeding, it will be instantiated from this class.
+	 */
+	private Class<IBean> beanClass;
+	private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiDstService.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiDstService.class);
+	/**
+	 * Constructor adapted to the context properties and the bean class name to instantiate.
+	 *
+	 * @param props
+	 *            the properties used to identify the directory parameters and context
+	 * @param beanClassName
+	 *            the bean class name that will be instantiated and feed up
+	 */
+	@SuppressWarnings("unchecked")
+	public FullDNJndiDstService(final Properties props, final String beanClassName) {
+		super(props);
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
+		} catch (ClassNotFoundException e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
 
-    /**
-     * Constructor adapted to the context properties and the bean class name to instantiate.
-     * 
-     * @param props
-     *            the properties used to identify the directory parameters and context
-     * @param beanClassName
-     *            the bean class name that will be instantiated and feed up
-     */
-    @SuppressWarnings("unchecked")
-    public FullDNJndiDstService(final Properties props, final String beanClassName) {
-        super(props);
-        try {
-            this.beanClass = (Class<IBean>) Class.forName(beanClassName);
-        } catch (ClassNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+	/**
+	 * Destination LDAP Services getter.
+	 *
+	 * @return the Destination JndiServices object used to apply directory operations
+	 */
+	public final JndiServices getJndiServices() {
+		return JndiServices.getDstInstance();
+	}
 
-    /**
-     * Destination LDAP Services getter.
-     * 
-     * @return the Destination JndiServices object used to apply directory operations
-     */
-    public final JndiServices getJndiServices() {
-        return JndiServices.getDstInstance();
-    }
-
-    /**
-     * The simple object getter according to its identifier.
-     * 
-     * @param id the data identifier in the directory - must return a unique directory entry
-     * @return the corresponding bean or null if failed
-     * @throws NamingException
-     *             thrown if an directory exception is encountered while getting the identified bean
-     */
-	public IBean getBean(Entry<String, LscAttributes> id) throws NamingException{
+	/**
+	 * The simple object getter according to its identifier.
+	 *
+	 * @param id the data identifier in the directory - must return a unique directory entry
+	 * @return the corresponding bean or null if failed
+	 * @throws NamingException
+	 *             thrown if an directory exception is encountered while getting the identified bean
+	 */
+	public IBean getBean(Entry<String, LscAttributes> id) throws NamingException {
 		String dn = id.getKey();
-		
-	    try {
-	        SearchControls sc = new SearchControls();
-	        sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-	        List<String> attrs = getAttrs();
-	        if (attrs != null) {
-	        	sc.setReturningAttributes(attrs.toArray(new String[attrs.size()]));
-	        }
-	        SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
-	        Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
-	                Class.class });
-	        return (IBean) method.invoke(null, new Object[] { srObject, dn, beanClass });
-	    } catch (SecurityException e) {
-	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-									beanClass.getName(), e);
-					LOGGER.debug(e.toString(), e);
-	    } catch (NoSuchMethodException e) {
-	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-									beanClass.getName(), e);
-					LOGGER.debug(e.toString(), e);
-	    } catch (IllegalArgumentException e) {
-	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-									beanClass.getName(), e);
-					LOGGER.debug(e.toString(), e);
-	    } catch (IllegalAccessException e) {
-	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-									beanClass.getName(), e);
-					LOGGER.debug(e.toString(), e);
-	    } catch (InvocationTargetException e) {
-	        LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-									beanClass.getName(), e);
-					LOGGER.debug(e.toString(), e);
-	    }
-	    return null;
-    }
+
+		try {
+			SearchControls sc = new SearchControls();
+			sc.setSearchScope(SearchControls.OBJECT_SCOPE);
+			List<String> attrs = getAttrs();
+			if (attrs != null) {
+				sc.setReturningAttributes(attrs.toArray(new String[attrs.size()]));
+			}
+			SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
+			Method method = beanClass.getMethod("getInstance", new Class[]{SearchResult.class, String.class,
+								Class.class});
+			return (IBean) method.invoke(null, new Object[]{srObject, dn, beanClass});
+			
+		} catch (SecurityException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+		} catch (NoSuchMethodException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+		} catch (IllegalArgumentException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+		} catch (IllegalAccessException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+		} catch (InvocationTargetException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+							beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+		}
+		return null;
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
-        // get list of DNs
-        List<String> idList = JndiServices.getDstInstance().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
+		// get list of DNs
+		List<String> idList = JndiServices.getDstInstance().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
 
-        // sort the list by shortest first - this makes sure clean operations delete leaf elements first
-        try {
-            Collections.sort(idList, new StringLengthComparator());
-        } catch (ClassCastException e) {
-            // ignore errors, just leave list unsorted
-        } catch (UnsupportedOperationException e) {
-            // ignore errors, just leave list unsorted
-        }
+		// sort the list by shortest first - this makes sure clean operations delete leaf elements first
+		try {
+			Collections.sort(idList, new StringLengthComparator());
+		} catch (ClassCastException e) {
+			// ignore errors, just leave list unsorted
+		} catch (UnsupportedOperationException e) {
+			// ignore errors, just leave list unsorted
+		}
 
-        // add DN suffix to obtain full DN
-        for (int i=0; i<idList.size(); i++) {
-            String id = idList.get(i);
-            if (!id.endsWith("," + Configuration.DN_REAL_ROOT)) {
-                idList.set(i, idList.get(i) + "," + Configuration.DN_REAL_ROOT);
-            }
-        }
-        
-        // convert to correct return format
-        
+		// add DN suffix to obtain full DN
+		for (int i = 0; i < idList.size(); i++) {
+			String id = idList.get(i);
+			if (!id.endsWith("," + Configuration.DN_REAL_ROOT)) {
+				idList.set(i, idList.get(i) + "," + Configuration.DN_REAL_ROOT);
+			}
+		}
+
+		// convert to correct return format
+
 		/* TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the list returned,
 		 * since it may be important when cleaning by full DN (for different levels).
 		 * This is really an API bug, getListPivots() should return a List, not a Map.
 		 */
-        Map<String, LscAttributes> ids = new ListOrderedMap();
-        
-        for (String dn : idList) {
-        	LscAttributes attrs = new LscAttributes();
-        	attrs.put("dn", dn);
-        	ids.put(dn, attrs);
-        }
-        
-        return ids;
-	}
+		Map<String, LscAttributes> ids = new ListOrderedMap();
 
+		for (String dn : idList) {
+			LscAttributes attrs = new LscAttributes();
+			attrs.put("dn", dn);
+			ids.put(dn, attrs);
+		}
+
+		return ids;
+	}
 }

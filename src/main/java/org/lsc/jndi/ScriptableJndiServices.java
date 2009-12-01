@@ -53,183 +53,180 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-
 /**
  * Based on rhino, this class is able to understand your LQL requests.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class ScriptableJndiServices extends ScriptableObject {
-    
-    /** Local jndi instance. Used to connect to the right directory. */
-    private JndiServices jndiServices;
 
-    /**
-     * Default constructor.
-     * 
-     * Default directory properties are based on destination.
-     */
-    public ScriptableJndiServices() {
-//        jndiServices = JndiServices.getDstInstance();
-    }
+	/** Local jndi instance. Used to connect to the right directory. */
+	private JndiServices jndiServices;
 
-    /**
-     * Default jndiServices setter.
-     * @param jndiServices the new value
-     */
-    public final void setJndiServices(JndiServices jndiServices) {
-        this.jndiServices = jndiServices;
-    }
+	/**
+	 * Default constructor.
+	 *
+	 * Default directory properties are based on destination.
+	 */
+	public ScriptableJndiServices() {
+		// jndiServices = JndiServices.getDstInstance();
+	}
 
-    public final List<String> search(final Object a, final Object b) throws NamingException {
-        return wrapString("_search", a, b);
-    }
+	/**
+	 * Default jndiServices setter.
+	 * @param jndiServices the new value
+	 */
+	public final void setJndiServices(JndiServices jndiServices) {
+		this.jndiServices = jndiServices;
+	}
 
-    protected List<String> _search(final String base, final String filter)
-                          throws NamingException {
-        return jndiServices.getDnList(base, filter,
-                                      SearchControls.SUBTREE_SCOPE);
-    }
+	public final List<String> search(final Object a, final Object b) throws NamingException {
+		return wrapString("_search", a, b);
+	}
 
-    public final List<String> list(final Object a, final Object b) throws NamingException {
-        return wrapString("_list", a, b);
-    }
+	protected List<String> _search(final String base, final String filter)
+					throws NamingException {
+		return jndiServices.getDnList(base, filter,
+						SearchControls.SUBTREE_SCOPE);
+	}
 
-    protected final List<String> _list(final String base, final String filter)
-                        throws NamingException {
-        return jndiServices.getDnList(base, filter,
-                                      SearchControls.ONELEVEL_SCOPE);
-    }
+	public final List<String> list(final Object a, final Object b) throws NamingException {
+		return wrapString("_list", a, b);
+	}
 
-    public final List<String> read(final Object a, final Object b) throws NamingException {
-        return wrapString("_read", a, b);
-    }
+	protected final List<String> _list(final String base, final String filter)
+					throws NamingException {
+		return jndiServices.getDnList(base, filter,
+						SearchControls.ONELEVEL_SCOPE);
+	}
 
-    protected List<String> _read(final String base, final String filter)
-                        throws NamingException {
-        return jndiServices.getDnList(base, filter, SearchControls.OBJECT_SCOPE);
-    }
+	public final List<String> read(final Object a, final Object b) throws NamingException {
+		return wrapString("_read", a, b);
+	}
 
-    public final List<String> exists(final Object a, final Object b)
-                              throws NamingException {
-        return wrapString("_exists", a, b);
-    }
+	protected List<String> _read(final String base, final String filter)
+					throws NamingException {
+		return jndiServices.getDnList(base, filter, SearchControls.OBJECT_SCOPE);
+	}
 
-    protected List<String> _exists(final String dn, final String filter)
-                          throws NamingException {
-        if (jndiServices.exists(dn)) {
-            List<String> c = new ArrayList<String>();
-            c.add(dn);
+	public final List<String> exists(final Object a, final Object b)
+					throws NamingException {
+		return wrapString("_exists", a, b);
+	}
 
-            return c;
-        } 
-        return null;
-    }
+	protected List<String> _exists(final String dn, final String filter)
+					throws NamingException {
+		if (jndiServices.exists(dn)) {
+			List<String> c = new ArrayList<String>();
+			c.add(dn);
 
-    public final List<String> or(final Object a, final Object b) throws NamingException {
-        return wrapList("_or", a, b);
-    }
+			return c;
+		}
+		return null;
+	}
 
-    protected final  List<String> _or(final List<String> a, final List<String> b)
-                      throws NamingException {
-        List<String> c = new ArrayList<String>();
-        c.addAll(a);
-        c.addAll(b);
+	public final List<String> or(final Object a, final Object b) throws NamingException {
+		return wrapList("_or", a, b);
+	}
 
-        return c;
-    }
+	protected final List<String> _or(final List<String> a, final List<String> b)
+					throws NamingException {
+		List<String> c = new ArrayList<String>();
+		c.addAll(a);
+		c.addAll(b);
 
-    public final List<String> attribute(final Object a, final Object b)
-                                 throws NamingException {
-        return wrapString("_attr", a, b);
-    }
+		return c;
+	}
 
-    @SuppressWarnings({"unchecked"})
-    protected List<String> _attr(final String base, final String attrName)
-                        throws NamingException {
-        SearchResult sr = jndiServices.readEntry( base, "objectClass=*", false);
+	public final List<String> attribute(final Object a, final Object b)
+					throws NamingException {
+		return wrapString("_attr", a, b);
+	}
 
-        if ((sr != null) && (sr.getAttributes() != null)
-                && (sr.getAttributes().get(attrName) != null)) {
-            return (List<String>) Collections.list(sr.getAttributes()
-                                                     .get(attrName).getAll());
-        }
-        return null;
-    }
+	@SuppressWarnings({"unchecked"})
+	protected List<String> _attr(final String base, final String attrName)
+					throws NamingException {
+		SearchResult sr = jndiServices.readEntry(base, "objectClass=*", false);
 
-    public final List<String> and(final Object a, final Object b) throws NamingException {
-        return wrapList("_and", a, b);
-    }
+		if ((sr != null) && (sr.getAttributes() != null) && (sr.getAttributes().get(attrName) != null)) {
+			return (List<String>) Collections.list(sr.getAttributes().get(attrName).getAll());
+		}
+		return null;
+	}
 
-    protected List<String> _and(final List<String> aList, final List<String> bList)
-                       throws NamingException {
-        List<String> cList = new ArrayList<String>();
+	public final List<String> and(final Object a, final Object b) throws NamingException {
+		return wrapList("_and", a, b);
+	}
 
-        if (aList.size() < bList.size()) {
-        	for (String tmp : aList) {
-                if (bList.contains(tmp)) {
-                    cList.add(tmp);
-                }
-            }
-        } else {
-        	for (String tmp : bList) {
-                if (aList.contains(tmp)) {
-                    cList.add(tmp);
-                }
-            }
-        }
+	protected List<String> _and(final List<String> aList, final List<String> bList)
+					throws NamingException {
+		List<String> cList = new ArrayList<String>();
 
-        return cList;
-    }
+		if (aList.size() < bList.size()) {
+			for (String tmp : aList) {
+				if (bList.contains(tmp)) {
+					cList.add(tmp);
+				}
+			}
+		} else {
+			for (String tmp : bList) {
+				if (aList.contains(tmp)) {
+					cList.add(tmp);
+				}
+			}
+		}
 
-    public final List<String> retain(final Object a, final Object b) throws NamingException {
-        return wrapList("_retain", a, b);
-    }
+		return cList;
+	}
 
-    protected List<String> _retain(final List<String> aList, final List<String> bList)
-                          throws NamingException {
-        List<String> cList = new ArrayList<String>();
-        for (String aValue : aList) {
-            if (!bList.contains(aValue)) {
-                cList.add(aValue);
-            }
-        }
+	public final List<String> retain(final Object a, final Object b) throws NamingException {
+		return wrapList("_retain", a, b);
+	}
 
-        return cList;
-    }
+	protected List<String> _retain(final List<String> aList, final List<String> bList)
+					throws NamingException {
+		List<String> cList = new ArrayList<String>();
+		for (String aValue : aList) {
+			if (!bList.contains(aValue)) {
+				cList.add(aValue);
+			}
+		}
 
-    public final List<String> sup(final Object a, final Object b) throws NamingException {
-        return wrapString("_sup", a, b);
-    }
+		return cList;
+	}
 
-    protected List<String> _sup(final String dn, final String levelStr)
-                       throws NamingException {
-        int levelValue = Integer.parseInt(levelStr);
+	public final List<String> sup(final Object a, final Object b) throws NamingException {
+		return wrapString("_sup", a, b);
+	}
 
-        return jndiServices.sup(dn, levelValue);
-    }
+	protected List<String> _sup(final String dn, final String levelStr)
+					throws NamingException {
+		int levelValue = Integer.parseInt(levelStr);
 
-    public final List<String> fsup(final Object a, final Object b)
-                            throws NamingException {
-        return wrapString("_fsup", a, b);
-    }
+		return jndiServices.sup(dn, levelValue);
+	}
 
-    protected List<String> _fsup(final String base, final String filter)
-                              throws NamingException {
-        List<String> cList = new ArrayList<String>();
-        List<String> dns = jndiServices.sup(base, 0);
+	public final List<String> fsup(final Object a, final Object b)
+					throws NamingException {
+		return wrapString("_fsup", a, b);
+	}
 
-        if (dns == null) {
-            return null;
-        }
+	protected List<String> _fsup(final String base, final String filter)
+					throws NamingException {
+		List<String> cList = new ArrayList<String>();
+		List<String> dns = jndiServices.sup(base, 0);
 
-        for (String dn : dns) {
-            if (jndiServices.exists(dn, filter)) {
-                cList.add(dn);
+		if (dns == null) {
+			return null;
+		}
 
-                return cList;
-            }
-        }
+		for (String dn : dns) {
+			if (jndiServices.exists(dn, filter)) {
+				cList.add(dn);
 
-        return cList;
-    }
+				return cList;
+			}
+		}
+
+		return cList;
+	}
 }

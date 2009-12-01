@@ -56,7 +56,6 @@ import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.lsc.service.ISrcService;
 
-
 /**
  * This class is a generic but configurable implementation to get data
  * from the directory.  You can specify where (baseDn) and what (filterId &
@@ -113,9 +112,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *                 thrown if an directory exception is encountered while
 	 *                 getting the identifiers list
 	 */
-    public Map<String, LscAttributes> getListPivots() throws NamingException {
-        return JndiServices.getSrcInstance().getAttrsList(getBaseDn(), 
-                getFilterAll(), SearchControls.SUBTREE_SCOPE, 
-                getAttrsId());
-    }
+	public Map<String, LscAttributes> getListPivots() throws NamingException {
+		return JndiServices.getSrcInstance().getAttrsList(getBaseDn(),
+						getFilterAll(), SearchControls.SUBTREE_SCOPE,
+						getAttrsId());
+	}
 }

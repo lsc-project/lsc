@@ -45,7 +45,6 @@
  */
 package org.lsc.jndi;
 
-
 /**
  * Enumeration for the modifications type of an directory
  * 
@@ -54,42 +53,42 @@ package org.lsc.jndi;
  */
 public enum JndiModificationType {
 
-    /** Operation identifier to add entry. */
-    ADD_ENTRY("create"),
+	/** Operation identifier to add entry. */
+	ADD_ENTRY("create"),
 
-    /** Operation identifier to remove entry. */
-    DELETE_ENTRY("delete"),
+	/** Operation identifier to remove entry. */
+	DELETE_ENTRY("delete"),
 
-    /** Operation identifier to modify entry. */
-    MODIFY_ENTRY("update"),
+	/** Operation identifier to modify entry. */
+	MODIFY_ENTRY("update"),
 
-    /** Operation identifier to modify the dn. */
-    MODRDN_ENTRY("modrdn");
-    
-    private final String description;
-    
-    private JndiModificationType(String description) {
-        this.description = description;
-    }
-    
-    public String getDescription() {
-        return this.description;
-    }
-    
-    /**
-     * Returns the JndiModificationType from a String
-     * 
-     * @param desc the string
-     * @return The JndiModificationType
-     */
-    public static JndiModificationType getFromDescription(String desc) {
-        JndiModificationType result = null;
-        JndiModificationType[] values = JndiModificationType.values();
-        for (int i = 0; i < values.length; i++) {
-            if(values[i].getDescription().matches(desc)) {
-                result = values[i];
-            }
-        }
-        return result;
-    }
+	/** Operation identifier to modify the dn. */
+	MODRDN_ENTRY("modrdn");
+
+	private final String description;
+
+	private JndiModificationType(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return this.description;
+	}
+
+	/**
+	 * Returns the JndiModificationType from a String
+	 *
+	 * @param desc the string
+	 * @return The JndiModificationType
+	 */
+	public static JndiModificationType getFromDescription(String desc) {
+		JndiModificationType result = null;
+
+		for(JndiModificationType type: JndiModificationType.values()) {
+			if (type.getDescription().matches(desc)) {
+				result = type;
+			}
+		}
+		return result;
+	}
 }

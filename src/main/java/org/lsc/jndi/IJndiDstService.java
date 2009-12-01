@@ -58,19 +58,19 @@ import org.lsc.beans.IBean;
  *
  */
 public interface IJndiDstService {
-    /**
-     * This method is a simple object getter.
-     * @param id the object identifier
-     * @return the object or null if not found
-     * @throws NamingException when a directory exception is encountered
-     */
-    IBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
 
-    /**
-     * Returns a list of all the objects identifiers.
-     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-     * @throws NamingException 
-     */
-    Map<String, LscAttributes> getListPivots() throws NamingException;
-    
+	/**
+	 * This method is a simple object getter.
+	 * @param id the object identifier
+	 * @return the object or null if not found
+	 * @throws NamingException when a directory exception is encountered
+	 */
+	IBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
+
+	/**
+	 * Returns a list of all the objects identifiers.
+	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
+	 * @throws NamingException
+	 */
+	Map<String, LscAttributes> getListPivots() throws NamingException;
 }

@@ -102,6 +102,6 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 *             thrown if an directory exception is encountered while getting the identifiers list
 	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
-        return null;
+		return null;
 	}
 }

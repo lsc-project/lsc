@@ -79,38 +79,31 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSimpleJndiService {
 
-	protected static final Logger LOGGER = LoggerFactory.
-					getLogger(AbstractSimpleJndiService.class);
-
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);
 	/**
 	 * The filter to be completed by replacing {0} by the id to find a unique
 	 * entry.
 	 */
 	private String filterId;
-
 	/**
 	 * The filter used to identify all the entries that have to be synchronized
 	 * by this JndiSrcService.
 	 */
 	private String filterAll;
-
 	/** Where to find the entries. */
 	private String baseDn;
-
 	/**
 	 * When finding entries with 'filterAll' filter, the attribute to read to
 	 * reuse it in 'filterId' filter.
 	 */
 	private List<String> attrsId;
-
 	/**
 	 * When a single entry is read in the directory, the attributes array to
 	 * read - Used to limit at the source, the synchronization perimeter.
 	 */
 	private List<String> attrs;
-
 	private SearchControls _filteredSc;
-	
+
 	/**
 	 * The default initializer.
 	 * 
@@ -155,16 +148,17 @@ public abstract class AbstractSimpleJndiService {
 	 *             in LSC 1.3.
 	 */
 	public final LscObject getObjectFromSR(final SearchResult sr,
-			final LscObject objToFill) throws NamingException {
+					final LscObject objToFill) throws NamingException {
 		Method[] methods = objToFill.getClass().getMethods();
 		Map<String, Method> localMethods = new HashMap<String, Method>();
 
-		if (sr == null)
+		if (sr == null) {
 			return null;
+		}
 
 		// get dn
 		objToFill.setDistinguishName(sr.getNameInNamespace());
-		
+
 		// get attributes
 		for (int i = 0; i < methods.length; i++) {
 			localMethods.put(methods[i].getName(), methods[i]);
@@ -174,27 +168,22 @@ public abstract class AbstractSimpleJndiService {
 
 		while (ne.hasMore()) {
 			Attribute attr = (Attribute) ne.next();
-			String methodName = "set"
-					+ attr.getID().substring(0, 1).toUpperCase()
-					+ attr.getID().substring(1);
+			String methodName = "set" + attr.getID().substring(0, 1).toUpperCase() + attr.getID().substring(1);
 
 			if (localMethods.containsKey(methodName)) {
 				try {
-					Class<?>[] paramsType = localMethods.get(methodName)
-							.getParameterTypes();
+					Class<?>[] paramsType = localMethods.get(methodName).getParameterTypes();
 
 					if (List.class.isAssignableFrom(paramsType[0])) {
 						localMethods.get(methodName).invoke(objToFill,
-								new Object[] { getValue(attr.getAll()) });
+										new Object[]{getValue(attr.getAll())});
 					} else if (String.class.isAssignableFrom(paramsType[0])) {
-						localMethods.get(methodName)
-								.invoke(
+						localMethods.get(methodName).invoke(
 										objToFill,
-										new Object[] { getValue(attr.getAll())
-												.get(0) });
+										new Object[]{getValue(attr.getAll()).get(0)});
 					} else {
 						throw new RuntimeException(
-								"Unable to manage data type !");
+										"Unable to manage data type !");
 					}
 				} catch (IllegalArgumentException e) {
 					throw new RuntimeException(e);
@@ -226,14 +215,15 @@ public abstract class AbstractSimpleJndiService {
 	 *             switching to the Java POJO
 	 */
 	public final IBean getBeanFromSR(final SearchResult sr,
-			final IBean beanToFill) throws NamingException {
+					final IBean beanToFill) throws NamingException {
 
-		if (sr == null)
+		if (sr == null) {
 			return null;
+		}
 
 		// get dn
 		beanToFill.setDistinguishName(sr.getNameInNamespace());
-		
+
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {
 			Attribute attr = (Attribute) ne.next();
@@ -255,7 +245,7 @@ public abstract class AbstractSimpleJndiService {
 	 *             switching to the Java POJO
 	 */
 	protected static List<?> getValue(final NamingEnumeration<?> ne)
-			throws NamingException {
+					throws NamingException {
 		List<Object> l = new ArrayList<Object>();
 
 		while (ne.hasMore()) {

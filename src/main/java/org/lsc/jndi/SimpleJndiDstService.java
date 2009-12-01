@@ -106,8 +106,8 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	public final IBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
 		try {
 			SearchResult srObject = get(ids);
-			Method method = beanClass.getMethod("getInstance", new Class[] { SearchResult.class, String.class,
-					Class.class });
+			Method method = beanClass.getMethod("getInstance", 
+							new Class[] { SearchResult.class, String.class, Class.class });
 			return (IBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });
 		} catch (SecurityException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",

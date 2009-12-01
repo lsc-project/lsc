@@ -122,16 +122,12 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 							  taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
 				StringBuilder sb = new StringBuilder(1024);
 
-				Iterator<String> iterator = attributes.iterator();
-
 				Map<String, List<String>> modifications = jm.getModificationsItemsByHash();
 
-				String attributeName = null;
 				List<String> values = null;
-				while (iterator.hasNext()) {
 
+				for(String attributeName: attributes) {
 					/* Does the modification has the attribute ? */
-					attributeName = iterator.next();
 					if (modifications.containsKey(attributeName)) {
 						values = modifications.get(attributeName);
 						if (values.size() > 0) {
@@ -141,12 +137,11 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 						sb.append(jm.getDistinguishName());
 					}
 					
-					if (iterator.hasNext()) {
-						sb.append(separator);
-					}
+					sb.append(separator);
 				}
-				result += sb.toString();
-				result += "\n";
+				//Remove the last unecessary separator
+				sb.deleteCharAt(sb.length()-1).append("\n");
+				result = sb.toString();
 			}
 		}
 		return result;
@@ -183,20 +178,16 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 			}
 		} else {
 			/* Add all the operations */
-			JndiModificationType[] values = JndiModificationType.values();
-			for (int i = 0; i < values.length; i++) {
-				operations.add(values[i]);
+			for(JndiModificationType type: JndiModificationType.values()) {
+				operations.add(type);
 			}
 		}
 
 		/* Parse attributes to log */
 		attributes = new ArrayList<String>();
 		if (attrs != null) {
-			String[] st = attrs.split(separator);
-			String token = null;
-			for (int i = 0; i < st.length; i++) {
-				token = st[i].toLowerCase();
-				attributes.add(token);
+			for(String st: attrs.split(separator)) {
+				attributes.add(st.toLowerCase());
 			}
 		} else {
 			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the attrs property in the logback configuration file");

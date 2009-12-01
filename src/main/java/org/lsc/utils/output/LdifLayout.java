@@ -121,7 +121,13 @@ public class LdifLayout extends PatternLayout {
 				}
 
 				// print dn and base64 encode if it's not a SAFE-STRING
-				msgBuffer.append("dn" + (isLdifSafeString(dn) ? ": " + dn : ":: " + toBase64(dn)) + "\n");
+				msgBuffer.append("dn");
+				if(isLdifSafeString(dn)) {
+					msgBuffer.append(": ").append(dn);
+				} else {
+					msgBuffer.append(":: ").append(toBase64(dn));
+				}
+				msgBuffer.append("\n");
 
 				switch (jm.getOperation()) {
 					case ADD_ENTRY:
@@ -205,8 +211,12 @@ public class LdifLayout extends PatternLayout {
 					// print value and base64 encode it if it's not a
 					// SAFE-STRING per RFC2849
 					value = getStringValue(ne.next());
-					sb.append((isLdifSafeString(value) ? ": " + value : ":: " + toBase64(value)));
-
+					if(isLdifSafeString(value)) {
+						sb.append(": ").append(value);
+					} else {
+						sb.append(":: ").append(toBase64(value));
+					}
+					
 					// new line
 					sb.append("\n");
 				}

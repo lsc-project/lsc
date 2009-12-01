@@ -56,55 +56,46 @@ import org.lsc.utils.CaseIgnoreStringHashMap;
  * 
  * @author rschermesser
  */
-public class LscAttributes
-{
+public class LscAttributes {
+
 	/** The heart of this class - a map of attribute names to values */
 	protected Map<String, Object> values;
 
-	public LscAttributes()
-	{
+	public LscAttributes() {
 		values = new CaseIgnoreStringHashMap<Object>();
 	}
 
-	public LscAttributes(Map<String, ?> values)
-	{
+	public LscAttributes(Map<String, ?> values) {
 		this.values = new CaseIgnoreStringHashMap<Object>(values);
 	}
 
-	public String getStringValueAttribute(String attribute)
-	{
+	public String getStringValueAttribute(String attribute) {
 		return values.get(attribute).toString();
 	}
 
-	public Integer getIntegerValueAttribute(String attribute)
-	{
+	public Integer getIntegerValueAttribute(String attribute) {
 		return (Integer) values.get(attribute);
 	}
 
-	public Boolean getBooleanValueAttribute(String attribute)
-	{
+	public Boolean getBooleanValueAttribute(String attribute) {
 		return (Boolean) values.get(attribute);
 	}
 
-	public List<?> getListValueAttribute(String attribute)
-	{
+	public List<?> getListValueAttribute(String attribute) {
 		return (List<?>) values.get(attribute);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> getListStringValueAttribute(String attribute)
-	{
+	public List<String> getListStringValueAttribute(String attribute) {
 		return (List<String>) values.get(attribute);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Integer> getListIntegerValueAttribute(String attribute)
-	{
+	public List<Integer> getListIntegerValueAttribute(String attribute) {
 		return (List<Integer>) values.get(attribute);
 	}
 
-	public List<String> getAttributesNames()
-	{
+	public List<String> getAttributesNames() {
 		return new ArrayList<String>(values.keySet());
 	}
 
@@ -113,23 +104,20 @@ public class LscAttributes
 	 * 
 	 * @return Map of the attributes, indexed by name
 	 */
-	public Map<String, Object> getAttributes()
-	{
+	public Map<String, Object> getAttributes() {
 		return (Map<String, Object>) values;
 	}
 
-	public void setAttributes(Map<String, Object> values)
-	{
+	public void setAttributes(Map<String, Object> values) {
 		this.values = values;
 	}
 
-	public void put(String key, Object value)
-	{
+	public void put(String key, Object value) {
 		this.values.put(key, value);
 	}
 
-	public String toString()
-	{
+	@Override
+	public String toString() {
 		return values.toString();
 	}
 }

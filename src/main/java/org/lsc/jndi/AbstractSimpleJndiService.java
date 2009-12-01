@@ -275,20 +275,20 @@ public abstract class AbstractSimpleJndiService {
 	 */
 	public final SearchResult get(final Entry<String, LscAttributes> entry) throws NamingException {
 		String searchString = filterId;
-		
+
 		LscAttributes pivotAttrs = entry.getValue();
 		if (pivotAttrs != null && pivotAttrs.getAttributes() != null && pivotAttrs.getAttributes().size() > 0) {
 			for (String id : pivotAttrs.getAttributesNames()) {
-	            String valueId =  pivotAttrs.getStringValueAttribute(id.toLowerCase());
-	            searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId == null ? "" : valueId);
-	        }
+				String valueId = pivotAttrs.getStringValueAttribute(id.toLowerCase());
+				searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId == null ? "" : valueId);
+			}
 		} else if (attrsId.size() == 1) {
-            searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(entry.getKey());
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(entry.getKey());
 		} else {
 			// this is kept for backwards compatibility but will be removed
 			searchString = filterId.replaceAll("\\{0\\}", entry.getKey());
 		}
-		
+
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
 	}
 

@@ -77,6 +77,7 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 
+import org.hsqldb.lib.ArrayCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.ietf.ldap.LDAPUrl;
@@ -333,26 +334,28 @@ public final class JndiServices {
 			String rewrittenBase = null;
 			if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toLowerCase())) {
 				if (!searchBase.equalsIgnoreCase(contextDn)) {
-					rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
-				} else {
+				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
+			} else {
 					rewrittenBase = "";
 				}
 			} else {
 				rewrittenBase = searchBase;
 			}
 			ne = ctx.search(rewrittenBase, searchFilter, sc);
+
 		} catch (NamingException nex) {
 			LOGGER.error("Error while looking for {} in {}: {}",
 							new Object[] { searchFilter, searchBase, nex });
 			throw nex;
 		}
+		
 		SearchResult sr = null;
 		if (ne.hasMoreElements()) {
 			sr = (SearchResult) ne.nextElement();
 			if (ne.hasMoreElements()) {
-				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\"",
+				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\")",
 								searchBase, searchFilter);
-				throw new SizeLimitExceededException("Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\"");
+				throw new SizeLimitExceededException("Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\")");
 			} else {
 				return sr;
 			}
@@ -419,8 +422,8 @@ public final class JndiServices {
 		String rewrittenBase = null;
 		if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
 			if (!base.equalsIgnoreCase(contextDn)) {
-				rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
-			} else {
+			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
+		} else {
 				rewrittenBase = "";
 			}
 		} else {
@@ -442,11 +445,12 @@ public final class JndiServices {
 			}
 			return null;
 		}
+
 		SearchResult sr = null;
 		if (ne.hasMore()) {
 			sr = (SearchResult) ne.next();
 			if (ne.hasMore()) {
-				LOGGER.error("To many entries returned (base: \"{}\"", base);
+				LOGGER.error("Too many entries returned (base: \"{}\")", base);
 			} else {
 				return sr;
 			}
@@ -473,7 +477,7 @@ public final class JndiServices {
 	public List<String> getDnList(final String base, final String filter,
 					final int scope) throws NamingException {
 		NamingEnumeration<SearchResult> ne = null;
-		List<String> l = new ArrayList<String>();
+		List<String> iist = new ArrayList<String>();
 		try {
 			SearchControls sc = new SearchControls();
 			sc.setDerefLinkFlag(false);
@@ -481,21 +485,20 @@ public final class JndiServices {
 			sc.setSearchScope(scope);
 			sc.setReturningObjFlag(true);
 			ne = ctx.search(base, filter, sc);
-			String completedBaseDn = null;
+			
+			String completedBaseDn = "";
 			if (base.length() > 0) {
 				completedBaseDn = "," + base;
-			} else {
-				completedBaseDn = "";
 			}
 			while (ne.hasMore()) {
-				l.add(((SearchResult) ne.next()).getName() + completedBaseDn);
+				iist.add(((SearchResult) ne.next()).getName() + completedBaseDn);
 			}
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 			throw e;
 		}
-		return l;
+		return iist;
 	}
 
 	/**
@@ -511,13 +514,16 @@ public final class JndiServices {
 		if (jm == null) {
 			return true;
 		}
+		
 		try {
 			switch (jm.getOperation()) {
+
 				case ADD_ENTRY:
 					ctx.createSubcontext(
 									new LdapName(rewriteBase(jm.getDistinguishName())),
 									getAttributes(jm.getModificationItems(), true));
 					break;
+
 				case DELETE_ENTRY:
 					if (recursiveDelete) {
 						deleteChildrenRecursively(rewriteBase(jm.getDistinguishName()));
@@ -525,14 +531,14 @@ public final class JndiServices {
 						ctx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
 					}
 					break;
+
 				case MODIFY_ENTRY:
 					Object[] table = jm.getModificationItems().toArray();
 					ModificationItem[] mis = new ModificationItem[table.length];
-					for (int i = 0; i < table.length; i++) {
-						mis[i] = (ModificationItem) table[i];
-					}
+					System.arraycopy(table, 0, mis, 0, table.length);
 					ctx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
 					break;
+
 				case MODRDN_ENTRY:
 					//We do not display this warning if we do not apply the modification with the option modrdn = false
 					LOGGER.warn("WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
@@ -540,15 +546,18 @@ public final class JndiServices {
 									new LdapName(rewriteBase(jm.getDistinguishName())),
 									new LdapName(rewriteBase(jm.getNewDistinguishName())));
 					break;
+					
 				default:
 					LOGGER.error("Unable to identify the right modification type: {}", jm.getOperation());
 					return false;
 			}
 			return true;
+			
 		} catch (ContextNotEmptyException e) {
 			LOGGER.error("Object {} not deleted because it has children (LDAP error code 66 received). To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true",
 							jm.getDistinguishName());
 			return false;
+			
 		} catch (NamingException ne) {
 			if (LOGGER.isErrorEnabled()) {
 				StringBuilder errorMessage = new StringBuilder("Error while ");
@@ -564,10 +573,9 @@ public final class JndiServices {
 						break;
 					case DELETE_ENTRY:
 						if (recursiveDelete) {
-							errorMessage.append("recursively deleting");
-						} else {
-							errorMessage.append("deleting");
+							errorMessage.append("recursively ");
 						}
+						errorMessage.append("deleting");
 						break;
 				}
 				errorMessage.append(" entry ").append(jm.getDistinguishName());
@@ -671,8 +679,8 @@ public final class JndiServices {
 							subschemaSubentryDN, attrsToReturn != null ? attrsToReturn : new String[]{"*", "+"});
 
 			if (schemaAttrs != null) {
-				for (int i = 0; i < attrsToReturn.length; i++) {
-					Attribute schemaAttr = schemaAttrs.get(attrsToReturn[i]);
+				for(String attr: attrsToReturn) {
+					Attribute schemaAttr = schemaAttrs.get(attr);
 					if (schemaAttr != null) {
 						attrsResult.put(schemaAttr.getID(), (List<String>) Collections.list(schemaAttr.getAll()));
 					}
@@ -785,12 +793,12 @@ public final class JndiServices {
 						res.put(ldapResult.getNameInNamespace(), new LscAttributes(attrsValues));
 					}
 				}
+				
 				Control[] respCtls = ctx.getResponseControls();
 				if (respCtls != null) {
-					for (int i = 0; i < respCtls.length; i++) {
-						Control respCtl = respCtls[i];
+					for(Control respCtl : respCtls) {
 						if (requestPagedResults && respCtl instanceof PagedResultsResponseControl) {
-							pagedResultsResponse = ((PagedResultsResponseControl) respCtls[i]).getCookie();
+							pagedResultsResponse = ((PagedResultsResponseControl) respCtl).getCookie();
 						}
 					}
 				}
@@ -811,6 +819,7 @@ public final class JndiServices {
 			ctx.setRequestControls(null);
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
+			
 		} catch (IOException e) {
 			// clear requestControls for future use of the JNDI context
 			ctx.setRequestControls(null);

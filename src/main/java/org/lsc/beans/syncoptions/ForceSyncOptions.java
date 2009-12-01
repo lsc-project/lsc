@@ -56,84 +56,81 @@ import org.lsc.jndi.JndiModificationType;
  * Always return a Force status.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-
 public class ForceSyncOptions implements ISyncOptions {
 
-    /**
-     * The name of the task
-     */
-    private String taskname;
+	/**
+	 * The name of the task
+	 */
+	private String taskname;
 
-    public final STATUS_TYPE getStatus(final String id, final String attributeName) {
-        return STATUS_TYPE.FORCE;
-    }
+	public final STATUS_TYPE getStatus(final String id, final String attributeName) {
+		return STATUS_TYPE.FORCE;
+	}
 
-    public final String getDefaultValue(final String id, final String attributeName) {
-        return null;
-    }
+	public final String getDefaultValue(final String id, final String attributeName) {
+		return null;
+	}
 
-    public final String getCreateValue(final String id, final String attributeName) {
-        return null;
-    }
+	public final String getCreateValue(final String id, final String attributeName) {
+		return null;
+	}
 
-    public final void initialize(final String taskname) {
-        this.taskname = taskname;
-    }
+	public final void initialize(final String taskname) {
+		this.taskname = taskname;
+	}
 
-    public final Set<String> getCreateAttributeNames() {
-        return null;
-    }
+	public final Set<String> getCreateAttributeNames() {
+		return null;
+	}
 
-    public final Set<String> getDefaultValuedAttributeNames() {
-        return null;
-    }
-    
-    public Set<String> getForceValuedAttributeNames() {
-        return null;
-    }
+	public final Set<String> getDefaultValuedAttributeNames() {
+		return null;
+	}
 
-    public List<String> getCreateValues(String id, String attributeName) {
-        return null;
-    }
+	public Set<String> getForceValuedAttributeNames() {
+		return null;
+	}
 
-    public List<String> getDefaultValues(String id, String attributeName) {
-        return null;
-    }
+	public List<String> getCreateValues(String id, String attributeName) {
+		return null;
+	}
 
-    public List<String> getWriteAttributes() {
-        String property = Configuration.getString("lsc.tasks." + taskname + ".dstService.attrs");
-        if (property == null) {
-            return null;
-        }
-        return Arrays.asList(property.split(" "));
-    }
+	public List<String> getDefaultValues(String id, String attributeName) {
+		return null;
+	}
 
+	public List<String> getWriteAttributes() {
+		String property = Configuration.getString("lsc.tasks." + taskname + ".dstService.attrs");
+		if (property == null) {
+			return null;
+		}
+		return Arrays.asList(property.split(" "));
+	}
+	private String TRUE_CONDITION = "true";
 
-    private String TRUE_CONDITION = "true";
+	public String getCreateCondition() {
+		return TRUE_CONDITION;
+	}
 
-    public String getCreateCondition() {
-        return TRUE_CONDITION;
-    }
+	public String getDeleteCondition() {
+		return TRUE_CONDITION;
+	}
 
-    public String getDeleteCondition() {
-        return TRUE_CONDITION;
-    }
+	public String getUpdateCondition() {
+		return TRUE_CONDITION;
+	}
 
-    public String getUpdateCondition() {
-        return TRUE_CONDITION;
-    }
-    
-    public String getModrdnCondition() {
-        return TRUE_CONDITION;
-    }
+	public String getModrdnCondition() {
+		return TRUE_CONDITION;
+	}
 
-    public String getCondition(JndiModificationType operation) {
-        return TRUE_CONDITION;
-    }
+	public String getCondition(JndiModificationType operation) {
+		return TRUE_CONDITION;
+	}
 
-    public String getDn() {
-        return Configuration.getString("lsc.tasks." + taskname + ".dn");
-    }
+	public String getDn() {
+		return Configuration.getString("lsc.tasks." + taskname + ".dn");
+	}
 
 	public List<String> getForceValues(String id, String attributeName) {
 		return null;

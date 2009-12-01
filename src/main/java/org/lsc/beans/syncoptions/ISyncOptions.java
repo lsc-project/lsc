@@ -56,133 +56,133 @@ import org.lsc.jndi.JndiModificationType;
  */
 public interface ISyncOptions {
 
-    /** The strategy to apply to the attribute updates. */
-    public enum STATUS_TYPE {
-        /** Keep the destination value. */
-        KEEP,
-        /** Force the source value. */
-        FORCE,
-        /** Merge source and destination values. */
-        MERGE,
-        /** Unknown. */
-        UNKNOWN,
-    }
+	/** The strategy to apply to the attribute updates. */
+	public enum STATUS_TYPE {
 
-    /**
-     * Initialize the synchronization options policy.
-     * @param taskname the task name on which applying syncopts
-     */
-    void initialize(String taskname);
+		/** Keep the destination value. */
+		KEEP,
+		/** Force the source value. */
+		FORCE,
+		/** Merge source and destination values. */
+		MERGE,
+		/** Unknown. */
+		UNKNOWN,
+	}
 
-    /**
-     * Analyze the context to get the right synchronization status to apply.
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the default or create value
-     */
-    STATUS_TYPE getStatus(String id, String attributeName);
+	/**
+	 * Initialize the synchronization options policy.
+	 * @param taskname the task name on which applying syncopts
+	 */
+	void initialize(String taskname);
 
-    /**
-     * Return the default values for a given attribute name.
-     * The default values replace a missing value in the source datasource
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the default value
-     */
-    List<String> getDefaultValues(String id, String attributeName);
+	/**
+	 * Analyze the context to get the right synchronization status to apply.
+	 * @param id the object identifier according to the datasource
+	 * @param attributeName the attribute name
+	 * @return the default or create value
+	 */
+	STATUS_TYPE getStatus(String id, String attributeName);
 
-    /**
-     * Return the create value for a given attribute name.
-     * The create value replace a missing value in the source datasource 
-     * only while creating a new entry. For coherence, implementation 
-     * classes must guarantee that a default value override a create value
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the create value
-     */
-    List<String> getCreateValues(String id, String attributeName);
+	/**
+	 * Return the default values for a given attribute name.
+	 * The default values replace a missing value in the source datasource
+	 * @param id the object identifier according to the datasource
+	 * @param attributeName the attribute name
+	 * @return the default value
+	 */
+	List<String> getDefaultValues(String id, String attributeName);
 
-    /**
-     * Return the names of attributes to be created.
-     * @return the created attributes names
-     */
-    Set<String> getCreateAttributeNames();
+	/**
+	 * Return the create value for a given attribute name.
+	 * The create value replace a missing value in the source datasource
+	 * only while creating a new entry. For coherence, implementation
+	 * classes must guarantee that a default value override a create value
+	 * @param id the object identifier according to the datasource
+	 * @param attributeName the attribute name
+	 * @return the create value
+	 */
+	List<String> getCreateValues(String id, String attributeName);
 
-    /**
-     * Return the default valued attributes
-     * @return the default valued attributes names
-     */
-    Set<String> getDefaultValuedAttributeNames();
-    
-    /**
-     * Return the force value for a given attribute name.
-     * The force value forces a value in the desination directory 
-     * @param id the object identifier according to the datasource
-     * @param attributeName the attribute name
-     * @return the force value
-     */
-    List<String> getForceValues(String id, String attributeName);
+	/**
+	 * Return the names of attributes to be created.
+	 * @return the created attributes names
+	 */
+	Set<String> getCreateAttributeNames();
 
-    /**
-     * Return the force valued attributes
-     * @return the force valued attributes names
-     */
-    Set<String> getForceValuedAttributeNames();
-    
-    /**
-     * Get all the attributes that must be written in the destination
-     * @return the attributes to write in the destination
-     */
-    List<String> getWriteAttributes();
-    
-    /**
-     * Returns the condition for a creation
-     * 
-     * @return the condition or "true" if none is specified (default)
-     */
-    String getCreateCondition();
-    
-    /**
-     * Returns the condition for an update
-     * 
-     * @return the condition or "true" if none is specified (default)
-     */
-    String getUpdateCondition();
-    
-    /**
-     * Returns the condition for a delete 
-     * 
-     * @return the condition or "true" if none is specified (default)
-     */
-    String getDeleteCondition();
-    
-    /**
-     * Returns the condition for a modrdn 
-     * 
-     * @return the condition or "true" if none is specified (default)
-     */
-    String getModrdnCondition();
-    
-    /**
-     * Returns the condition for this operation
-     * 
-     * @param operation The operation type
-     * @return the condition or "true" if none is specified (default)
-     */
-    String getCondition(JndiModificationType operation);
-    
-    /**
-     * Get the setting to generate a DN
-     * 
-     * @return String The script to generate a DN
-     */
-    String getDn();
-    
-    /**
-     * Get the task name
-     * 
-     * @return String The current task name. 
-     */
-    String getTaskName();
-    
+	/**
+	 * Return the default valued attributes
+	 * @return the default valued attributes names
+	 */
+	Set<String> getDefaultValuedAttributeNames();
+
+	/**
+	 * Return the force value for a given attribute name.
+	 * The force value forces a value in the desination directory
+	 * @param id the object identifier according to the datasource
+	 * @param attributeName the attribute name
+	 * @return the force value
+	 */
+	List<String> getForceValues(String id, String attributeName);
+
+	/**
+	 * Return the force valued attributes
+	 * @return the force valued attributes names
+	 */
+	Set<String> getForceValuedAttributeNames();
+
+	/**
+	 * Get all the attributes that must be written in the destination
+	 * @return the attributes to write in the destination
+	 */
+	List<String> getWriteAttributes();
+
+	/**
+	 * Returns the condition for a creation
+	 *
+	 * @return the condition or "true" if none is specified (default)
+	 */
+	String getCreateCondition();
+
+	/**
+	 * Returns the condition for an update
+	 *
+	 * @return the condition or "true" if none is specified (default)
+	 */
+	String getUpdateCondition();
+
+	/**
+	 * Returns the condition for a delete
+	 *
+	 * @return the condition or "true" if none is specified (default)
+	 */
+	String getDeleteCondition();
+
+	/**
+	 * Returns the condition for a modrdn
+	 *
+	 * @return the condition or "true" if none is specified (default)
+	 */
+	String getModrdnCondition();
+
+	/**
+	 * Returns the condition for this operation
+	 *
+	 * @param operation The operation type
+	 * @return the condition or "true" if none is specified (default)
+	 */
+	String getCondition(JndiModificationType operation);
+
+	/**
+	 * Get the setting to generate a DN
+	 *
+	 * @return String The script to generate a DN
+	 */
+	String getDn();
+
+	/**
+	 * Get the task name
+	 *
+	 * @return String The current task name.
+	 */
+	String getTaskName();
 }

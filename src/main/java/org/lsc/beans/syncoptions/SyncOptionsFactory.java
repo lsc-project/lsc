@@ -55,44 +55,42 @@ import org.lsc.Configuration;
 
 public final class SyncOptionsFactory {
 
-    private static SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
+	private static SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
+	private Map<String, ISyncOptions> cache;
+	private static final Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
 
-    private Map<String, ISyncOptions> cache; 
+	private SyncOptionsFactory() {
+		cache = new HashMap<String, ISyncOptions>();
+		this.loadOptions();
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
+	private void loadOptions() {
+		String tasks = Configuration.getString("lsc.tasks", "default");
+		StringTokenizer stok = new StringTokenizer(tasks, ",");
+		while (stok.hasMoreTokens()) {
+			String taskname = stok.nextToken();
+			String className = Configuration.getString("lsc.syncoptions." + taskname, "org.lsc.beans.syncoptions.ForceSyncOptions");
+			try {
+				Class<?> cSyncOptions = Class.forName(className);
+				ISyncOptions iso = (ISyncOptions) cSyncOptions.newInstance();
+				iso.initialize(taskname);
+				cache.put(taskname, iso);
+			} catch (ClassNotFoundException e) {
+				LOGGER.error("Unable to found '{}' name. Please respecify lsc.syncoptions.{} value.",
+								className, taskname);
+			} catch (InstantiationException e) {
+				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
+			} catch (IllegalAccessException e) {
+				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
+			}
+		}
+	}
 
-    private SyncOptionsFactory() {
-        cache = new HashMap<String, ISyncOptions>();
-        this.loadOptions();
-    }
+	public static ISyncOptions getInstance(String syncName) {
+		return INSTANCE.get(syncName);
+	}
 
-    private void loadOptions() {
-        String tasks = Configuration.getString("lsc.tasks", "default");
-        StringTokenizer stok = new StringTokenizer(tasks,",");
-        while(stok.hasMoreTokens()) {
-            String taskname = stok.nextToken();
-            String className = Configuration.getString("lsc.syncoptions." + taskname, "org.lsc.beans.syncoptions.ForceSyncOptions");
-            try {
-                Class<?> cSyncOptions = Class.forName(className);
-                ISyncOptions iso = (ISyncOptions) cSyncOptions.newInstance();
-                iso.initialize(taskname);
-                cache.put(taskname, iso);
-            } catch (ClassNotFoundException e) {
-                LOGGER.error("Unable to found '{}' name. Please respecify lsc.syncoptions.{} value.",
-												className, taskname);
-            } catch (InstantiationException e) {
-                LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
-            }
-        }
-    }
-
-    public static ISyncOptions getInstance(String syncName) {
-        return INSTANCE.get(syncName);
-    }
-
-    private ISyncOptions get(String syncName) {
-        return cache.get(syncName);
-    }
+	private ISyncOptions get(String syncName) {
+		return cache.get(syncName);
+	}
 }

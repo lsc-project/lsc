@@ -101,7 +101,7 @@ public final class Launcher {
 	public static void main(final String[] args) throws MalformedURLException {
 		// Create the object and parse options
 		Launcher obj = new Launcher();
-		int retCode = obj.usage(args);
+		int retCode = obj.parseOptions(args);
 
 		if (retCode != 0) {
 			System.exit(retCode);
@@ -132,14 +132,14 @@ public final class Launcher {
 	 * @param args command line
 	 * @return the status code (0: OK, >=1 : failed)
 	 */
-	private int usage(final String[] args) {
+	private int parseOptions(final String[] args) {
 		Options options = sync.getOptions();
 		options.addOption("l", "startLdapServer", false,
-						"Start the embedded OpenDS LDAP server " + "(will be shutdown at the end)");
+						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
 		options.addOption("s", "synchronization", true,
-						"Synchronization type (one of the available " + "tasks or 'all')");
+						"Synchronization type (one of the available tasks or 'all')");
 		options.addOption("c", "cleaning", true,
-						"Cleaning type (one of the available " + "tasks or 'all')");
+						"Cleaning type (one of the available tasks or 'all')");
 		options.addOption("f", "cfg", true,
 						"Specify configuration directory");
 		options.addOption("h", "help", false, "Get this text");
@@ -149,30 +149,26 @@ public final class Launcher {
 		try {
 			CommandLine cmdLine = parser.parse(options, args);
 
-			if (cmdLine.getOptions().length > 0) {
-				if (cmdLine.hasOption("s")) {
-					syncType = parseSyncType(cmdLine.getOptionValue("s"));
-				}
-				if (cmdLine.hasOption("f")) {
-					configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
-				}
-				if (cmdLine.hasOption("c")) {
-					cleanType = parseSyncType(cmdLine.getOptionValue("c"));
-				}
-				if (!sync.parseOptions(args)) {
-					printHelp(options);
-					return 1;
-				}
-				if (cmdLine.hasOption("h") || ((syncType.size() == 0) && (cleanType.size() == 0))) {
-					printHelp(options);
-					return 1;
-				}
-			} else {
+			if (cmdLine.hasOption("s")) {
+				syncType = parseSyncType(cmdLine.getOptionValue("s"));
+			}
+			if (cmdLine.hasOption("f")) {
+				configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
+			}
+			if (cmdLine.hasOption("c")) {
+				cleanType = parseSyncType(cmdLine.getOptionValue("c"));
+			}
+		
+			if(cmdLine.getOptions().length == 0 || 
+							cmdLine.hasOption("h") || 
+							!sync.parseOptions(cmdLine) ||
+							((syncType.size() == 0) && (cleanType.size() == 0))) {
 				printHelp(options);
 				return 1;
-			}
+			}	
 		} catch (ParseException e) {
-			LOGGER.error("Unable to parse options : {} ({})", args, e.toString());
+			LOGGER.error("Unable to parse the options ({})", e.toString());
+			LOGGER.debug(e.toString(), e);
 			return 1;
 		}
 		return 0;

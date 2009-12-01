@@ -534,42 +534,24 @@ public abstract class AbstractSynchronize {
 	 *
 	 * @return the parsing status
 	 */
-	public final boolean parseOptions(final String[] args) {
-		CommandLineParser parser = new GnuParser();
-		try {
-			CommandLine cmdLine = parser.parse(options, args);
-			if (cmdLine.getOptions().length > 0) {
-				if (cmdLine.hasOption("nc")) {
-					nocreate = true;
-				}
-				if (cmdLine.hasOption("nu")) {
-					noupdate = true;
-				}
-				if (cmdLine.hasOption("nd")) {
-					nodelete = true;
-				}
-				if (cmdLine.hasOption("nr")) {
-					nomodrdn = true;
-				}
-				if (cmdLine.hasOption("n")) {
-					nocreate = true;
-					noupdate = true;
-					nodelete = true;
-					nomodrdn = true;
-				}
-			} else {
-				return false;
-			}
-		} catch (final ParseException e) {
-			if(LOGGER.isErrorEnabled()) {
-				StringBuilder sb = new StringBuilder();
-				for(String arg: args) {
-					sb.append(arg).append(" ");
-				}
-				LOGGER.error("Unable to parse options : {}({})", sb.toString(), e.toString());
-			}
-			LOGGER.debug(e.toString(), e);
-			return false;
+	public final boolean parseOptions(final CommandLine cmdLine) {
+		if (cmdLine.hasOption("nc")) {
+			nocreate = true;
+		}
+		if (cmdLine.hasOption("nu")) {
+			noupdate = true;
+		}
+		if (cmdLine.hasOption("nd")) {
+			nodelete = true;
+		}
+		if (cmdLine.hasOption("nr")) {
+			nomodrdn = true;
+		}
+		if (cmdLine.hasOption("n")) {
+			nocreate = true;
+			noupdate = true;
+			nodelete = true;
+			nomodrdn = true;
 		}
 		return true;
 	}

@@ -350,7 +350,7 @@ public class Configuration {
 				throw new ExceptionInInitializerError("Unable to find '" + url + "' file. (" + e + ")");
 			} catch (MalformedURLException e) {
 				LOGGER.error(e.toString());
-				throw new ExceptionInInitializerError("Unable to find '" + url + "' file. (" + e + ")");
+				throw new ExceptionInInitializerError("Unable to find file. (" + e + ")");
 			}
 		}
 		return config;

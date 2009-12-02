@@ -52,10 +52,12 @@ package org.lsc.beans;
  * May be overridden by any subclass if needed. Currently,
  * the only purpose of this class is to have a non-abstract
  * implementation of LscBean.
-
+ *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SimpleBean extends LscBean {
+	
+	/** Created to be backward compatible */
 
 	private static final long serialVersionUID = -4500840611218768461L;
 	

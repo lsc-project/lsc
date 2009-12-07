@@ -7,6 +7,15 @@ Please note that this file contains changes for both the lsc-sample and lsc-core
 components.
 
 
+=== LSC release 1.1.2 (07/12/2009) ===
+
+- Fixed Bug #141: Create and default values not added to destination for attributes not in source object
+- Fixed Bug #145: db2ldap synchronizations with multiple pivot attributes don't handle all entries
+- Fixed Bug #148: Quickstart tutorial was broken (http://lsc-project.org/wiki/documentation/quickstart)
+- Fixed Bug #151: Null Pointer Exception in logActionError if errors occured very early
+- Fixed Bug #152: Add and modify operations do not handle empty fields the same way
+
+
 === LSC release 1.1.1 (01/11/2009) ===
 
 - Fixed Bug #118: LDIF logger throws exception on zero length value

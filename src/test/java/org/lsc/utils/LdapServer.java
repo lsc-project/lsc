@@ -45,31 +45,24 @@
  */
 package org.lsc.utils;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.opends.EmbeddedOpenDS;
 import org.opends.server.api.Backend;
-import org.opends.server.config.ConfigException;
 import org.opends.server.core.DirectoryServer;
-import org.opends.server.types.CanceledOperationException;
 import org.opends.server.types.DN;
-import org.opends.server.types.DirectoryException;
-import org.opends.server.types.InitializationException;
-import org.opends.server.util.LDIFException;
 import org.opends.server.util.StaticUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * Used to manage directory state (start/stop/status/...)
@@ -80,7 +73,7 @@ public class LdapServer {
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
 	
-	public final static void start() throws InitializationException, IOException, URISyntaxException, DirectoryException, ConfigException, CanceledOperationException, LDIFException {
+	public final static void start() throws Exception {
 		EmbeddedOpenDS.startServer();
 		EmbeddedOpenDS.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
@@ -120,25 +113,7 @@ public class LdapServer {
 		int retCode = 1;
 		try {
 			retCode = usage(args);
-		} catch (InitializationException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (DirectoryException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (CanceledOperationException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (LDIFException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (IOException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (URISyntaxException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (ConfigException e) {
+		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 		}
@@ -151,15 +126,9 @@ public class LdapServer {
 	 * Manage command line options
 	 * @param args command line
 	 * @return the status code (0: OK, >=1 : failed)
-	 * @throws IOException 
-	 * @throws LDIFException 
-	 * @throws CanceledOperationException 
-	 * @throws DirectoryException 
-	 * @throws InitializationException 
-	 * @throws URISyntaxException 
-	 * @throws ConfigException 
+	 * @throws Exception 
 	 */
-	private static int usage(String[] args) throws InitializationException, DirectoryException, CanceledOperationException, LDIFException, IOException, URISyntaxException, ConfigException {
+	private static int usage(String[] args) throws Exception {
 		Options options = new Options();
 		options.addOption("a", "start", false, "Start the embedded directory");
 		options.addOption("o", "stop", false, "Stop the embedded directory");

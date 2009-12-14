@@ -57,7 +57,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.AbstractBean;
+import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
 
 /**
@@ -104,7 +104,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * @TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 */
 	@Override
-	public AbstractBean getBean(AbstractBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
+	public IBean getBean(IBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
 		Map<String, Object> attributeMap = ids.getValue().getAttributes();
 		try {

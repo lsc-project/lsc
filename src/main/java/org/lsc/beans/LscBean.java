@@ -52,8 +52,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.SearchResult;
 
 import org.lsc.Configuration;
 import org.lsc.service.DataSchemaProvider;
@@ -161,16 +163,18 @@ public abstract class LscBean implements IBean {
 
 		if (attributeValues != null) {
 			for (Object value : attributeValues) {
-				String stringValue;
+				if (value != null) {
+					String stringValue;
 
-				// convert to String because this method only returns Strings
-				if (value instanceof byte[]) {
-					stringValue = new String((byte[]) value);
-				} else {
-					stringValue = value.toString();
+					// convert to String because this method only returns Strings
+					if (value instanceof byte[]) {
+						stringValue = new String((byte[]) value);
+					} else {
+						stringValue = value.toString();
+					}
+
+					resultsArray.add(stringValue);
 				}
-
-				resultsArray.add(stringValue);
 			}
 		}
 
@@ -310,5 +314,58 @@ public abstract class LscBean implements IBean {
 	 */
 	public static void setMetadata(ResultSetMetaData metaData) {
 		// TODO Auto-generated method stub
+	}
+
+	/**
+	 * Set a bean from an LDAP entry
+	 *
+	 * @param entry the LDAP entry
+	 * @param baseDn the base Dn used to set the right Dn
+	 * @param c class to instantiate
+	 * @return the bean
+	 * @throws NamingException thrown if a directory exception is encountered while
+	 *                 looking at the entry
+	 */
+	public static LscBean getInstance(final SearchResult entry,
+					final String baseDn, final Class<?> c) throws NamingException {
+		try {
+			if (entry != null) {
+				LscBean ab = (LscBean) c.newInstance();
+				String dn = entry.getName();
+
+				if ((dn.length() > 0) && (dn.charAt(0) == '"') &&
+								(dn.charAt(dn.length() - 1) == '"')) {
+					dn = dn.substring(1, dn.length() - 1);
+				}
+
+				if ((baseDn != null) && (baseDn.length() > 0)) {
+					if (dn.length() > 0) {
+						ab.setDistinguishName(dn + "," + baseDn);
+					} else {
+						ab.setDistinguishName(baseDn);
+					}
+				} else {
+					ab.setDistinguishName(dn);
+				}
+
+				NamingEnumeration<?> ne = entry.getAttributes().getAll();
+
+				while (ne.hasMore()) {
+					ab.setAttribute((Attribute) ne.next());
+				}
+
+				return ab;
+			} else {
+				return null;
+			}
+		} catch (InstantiationException ie) {
+			LOGGER.error(ie.toString());
+			LOGGER.debug(ie.toString(), ie);
+		} catch (IllegalAccessException iae) {
+			LOGGER.error(iae.toString());
+			LOGGER.debug(iae.toString(), iae);
+		}
+
+		return null;
 	}
 }

@@ -28,7 +28,7 @@
 
 	<target name="runCsvToSql" description="Run the csvtosql tool to fill the inline HsqlDB database">
 		<copy todir="${sample.dir}/csvtosql" encoding='ISO8859-1' outputencoding='UTF-8'>
-			<fileset dir="${sample.dir}/csvtosql" includes="**/*.csv"/>
+			<fileset dir="${sample.dir}/csvtosql" includes="**/*.csv" excludes="**/*-utf8.csv"/>
 			<mapper type="glob" from="*.csv" to="*-utf8.csv"/>
 		</copy>
 		<path id="csvtosql.path">

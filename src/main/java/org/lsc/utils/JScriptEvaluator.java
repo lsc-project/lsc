@@ -72,7 +72,7 @@ public final class JScriptEvaluator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
 	/** The private unique instance. */
-	private static JScriptEvaluator instance = new JScriptEvaluator();
+	private static Map<String,JScriptEvaluator> instances = new HashMap<String,JScriptEvaluator>();
 
 	/** The precompiled Javascript cache. */
 	private Map<String, Script> cache;
@@ -97,7 +97,11 @@ public final class JScriptEvaluator {
 	 * @return the instance
 	 */
 	public static JScriptEvaluator getInstance() {
-		return instance;
+		String threadName = Thread.currentThread().getName();
+		if(instances.get(threadName) == null) {
+			instances.put(threadName, new JScriptEvaluator());
+		}
+		return instances.get(threadName);
 	}
 
 	/**
@@ -214,11 +218,9 @@ public final class JScriptEvaluator {
 			}
 		}
 
-		if (localParams != null) {
-			for (Entry<String, Object> entry : localParams.entrySet()) {
-				Object jsObj = Context.javaToJS(entry.getValue(), scope);
-				ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
-			}
+		for (Entry<String, Object> entry : localParams.entrySet()) {
+			Object jsObj = Context.javaToJS(entry.getValue(), scope);
+			ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
 		}
 
 		Object ret = null;

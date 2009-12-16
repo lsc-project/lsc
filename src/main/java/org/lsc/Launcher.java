@@ -82,6 +82,12 @@ public final class Launcher {
 	/** Default synchronize instance. */
 	private SimpleSynchronize sync;
 
+	/** Number of parallel threads to run a task */
+	private int threads;
+
+	/** Time limit in seconds*/
+	private int timeLimit;
+
 	/**
 	 * Default constructor - instantiate objects.
 	 */
@@ -120,6 +126,12 @@ public final class Launcher {
 			Configuration.setUp(configurationLocation);
 
 			// do the work!
+			if (threads > 0) {
+				sync.setThreads( threads );
+			}
+			if (timeLimit > 0) {
+				sync.setTimeLimit( timeLimit );
+			}
 			sync.launch(syncType, cleanType);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -134,6 +146,12 @@ public final class Launcher {
 	 */
 	private int parseOptions(final String[] args) {
 		Options options = sync.getOptions();
+		options.addOption("nc", "nocreate", false, "Don't create any entry");
+		options.addOption("nu", "noupdate", false, "Don't update");
+		options.addOption("nd", "nodelete", false, "Don't delete");
+		options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
+		options.addOption("n", "dryrun", false,
+				"Don't update the directory at all");
 		options.addOption("l", "startLdapServer", false,
 						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
 		options.addOption("s", "synchronization", true,
@@ -142,6 +160,9 @@ public final class Launcher {
 						"Cleaning type (one of the available tasks or 'all')");
 		options.addOption("f", "cfg", true,
 						"Specify configuration directory");
+		options.addOption("t", "number of parrallel threads to synchronize a task", true,
+						"Server mode");
+		options.addOption("i", "Time limit in parallel server mode", true, "Time limit");
 		options.addOption("h", "help", false, "Get this text");
 
 		CommandLineParser parser = new GnuParser();
@@ -154,6 +175,15 @@ public final class Launcher {
 			}
 			if (cmdLine.hasOption("f")) {
 				configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
+			}
+			if (cmdLine.hasOption("t")) {
+				threads = Integer.parseInt(cmdLine.getOptionValue("t"));
+			}
+			if (cmdLine.hasOption("t")) {
+				threads = Integer.parseInt(cmdLine.getOptionValue("t"));
+			}
+			if (cmdLine.hasOption("i")) {
+				timeLimit = Integer.parseInt(cmdLine.getOptionValue("i"));
 			}
 			if (cmdLine.hasOption("c")) {
 				cleanType = parseSyncType(cmdLine.getOptionValue("c"));

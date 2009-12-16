@@ -99,17 +99,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 	/** The lsc properties. */
 	private Properties lscProperties;
-
+	
 	/**
 	 * Default constructor
 	 */
 	public SimpleSynchronize() {
 		super();
-		lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
-		if (lscProperties == null) {
-			LOGGER.error("Unable to get LSC properties! Exiting ...");
-			throw new ExceptionInInitializerError("Unable to get LSC properties!");
-		}
+		setThreads(5); 
 	}
 
 	/**
@@ -129,7 +125,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		Boolean foundATask = false;
 
 		// Get the list of defined tasks from LSC properties
-		String tasks = lscProperties.getProperty(TASKS_PROPS_PREFIX);
+		String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
 		if (tasks == null) {
 			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
 			return false;
@@ -216,6 +212,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 			String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 
+			Properties lscProperties = getLscProperties();
 			// Get all properties
 			// TODO : nice error message if a class name is specified but doesn't exist
 			checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
@@ -280,5 +277,16 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 
 		return true;
+	}
+	
+	public Properties getLscProperties() {
+		if (lscProperties == null) {
+			lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
+			if (lscProperties == null) {
+				LOGGER.error("Unable to get LSC properties! Exiting ...");
+				throw new ExceptionInInitializerError("Unable to get LSC properties!");
+			}
+		}
+		return lscProperties;
 	}
 }

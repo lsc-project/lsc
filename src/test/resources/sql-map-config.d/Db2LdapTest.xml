@@ -6,40 +6,24 @@
 
 <sqlMap namespace="Db2LdapTest">
 
-  <select id="getActivity" resultClass="java.util.HashMap" parameterClass="string">
-		SELECT
-			act.id,
-			act.person_id,
-			struct.code
-		FROM
-			activity act,
-			structure struct
-		WHERE
-			act.id = #value#
-			AND act.structure_id = struct.id
+  <select id="getObjectTestDb2Ldap" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+                SELECT
+                        pers.id,
+                        pers.uid,
+                        pers.sn,
+                        pers.givenName,
+                        pers.cn,
+                        pers.mail,
+                        pers.givenName,
+                        pers.address,
+                        pers.telephoneNumber,
+                        pers.telephoneNumber userPassword
+                FROM INETORGPERSON pers
+                WHERE pers.mail LIKE #mail#
   </select>
 
-  <select id="getActivityIdList" resultClass="string">
-		SELECT
-			DISTINCT act.id
-		FROM
-			activity act
-		WHERE
-			act.structure_id IN (
-				SELECT
-					DISTINCT struct2.id
-				FROM
-					structure struct3,
-					person pers3,
-					person pers2,
-					structure struct2
-				WHERE
-					pers3.structure_id = struct3.id
-					AND pers2.id = pers3.manager_id
-					AND pers2.structure_id = struct2.id
-			)
-			AND act.person_id IN (
-				SELECT DISTINCT manager_id
-				FROM person )
+  <select id="getListTestDb2Ldap" resultClass="java.util.HashMap">
+                SELECT pers.mail AS mail, pers.sn AS sn
+                FROM INETORGPERSON pers
   </select>
 </sqlMap>

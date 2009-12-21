@@ -5,12 +5,12 @@ package org.lsc.objects.flat;
 
 import java.util.GregorianCalendar;
 
-import org.lsc.objects.flat.fAlias;
 import org.lsc.utils.DateUtils;
 
 /**
  * LDAP Activity objectClass representation
  */
+@SuppressWarnings("deprecation")
 public class fActivity extends fAlias {
 	
 	public fActivity() {

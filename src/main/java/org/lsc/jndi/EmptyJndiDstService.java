@@ -53,13 +53,14 @@ import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.service.IService;
 
 /**
  * This class is a generic implementation to simulate an empty destination directory.
  * 
  * @author Jonathan Clarke &lt;jonathan@lsc-project.org&gt;
  */
-public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJndiDstService {
+public class EmptyJndiDstService extends AbstractSimpleJndiService implements IService {
 
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.
@@ -75,7 +76,6 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 
 	/**
 	 * The simple object getter according to its identifier.
-	 * 
 	 * @param id the data identifier in the directory - must return a unique directory entry
 	 * @return Always returns null since this simulates an empty directory
 	 * @throws NamingException

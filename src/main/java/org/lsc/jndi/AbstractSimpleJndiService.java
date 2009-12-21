@@ -62,8 +62,8 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.lsc.LscObject;
 import org.lsc.LscAttributes;
+import org.lsc.LscObject;
 import org.lsc.beans.IBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +77,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractSimpleJndiService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);

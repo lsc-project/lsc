@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008, 2009 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.jndi;
+package org.lsc.service;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,23 +54,36 @@ import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 
 /**
- * @author rschermesser
- *
+ * Interface used by source services.
+ * 
+ * <p>This interface must be implemented by a class to be considered a source
+ * service.</P>
+ * 
+ * <P>Optionally, the source service may also implement a constructor, which
+ * will be called once before a synchronization begins. This constructor may
+ * accept a Properties object as a parameter, which will be filled with
+ * properties from the lsc.properties file.</P>
+ * 
+ * <p>The returned bean type will be determined while calling constructor</p>
+ * 
+ * @author R&eacute;my-Christophe Schermesser
  */
-public interface IJndiDstService {
+public interface IService {
+    /**
+     * The simple object getter according to its identifier.
+     * @param obj
+     * 		The data identifier in the source such as returned by getListPivots().
+     * 		It must identify a unique entry in the source.
+     * @return The bean, or null if not found
+     * @throws NamingException May throw a NamingException if the object is not found in the directory,
+     * 			or if more than one object would be returned.
+     */
+    IBean getBean(Entry<String, LscAttributes> obj) throws NamingException;
 
-	/**
-	 * This method is a simple object getter.
-	 * @param id the object identifier
-	 * @return the object or null if not found
-	 * @throws NamingException when a directory exception is encountered
-	 */
-	IBean getBean(final Entry<String, LscAttributes> id) throws NamingException;
-
-	/**
-	 * Returns a list of all the objects identifiers.
-	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
-	 * @throws NamingException
-	 */
-	Map<String, LscAttributes> getListPivots() throws NamingException;
+    /**
+     * Returns a list of all the objects' identifiers.
+     * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
+     * @throws NamingException 
+     */
+    Map<String, LscAttributes> getListPivots() throws NamingException;
 }

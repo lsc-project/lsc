@@ -54,7 +54,9 @@ import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.service.ISrcService;
+import org.lsc.service.IService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a generic but configurable implementation to get data
@@ -64,8 +66,14 @@ import org.lsc.service.ISrcService;
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJndiSrcService extends AbstractSimpleJndiService implements ISrcService {
+public class SimpleJndiSrcService extends AbstractSimpleJndiService implements IService {
 
+	protected static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiSrcService.class);
+	/**
+	 * Preceding the object feeding, it will be instantiated from this class.
+	 */
+	private Class<IBean> beanClass;
+	
 	/**
 	 * Constructor adapted to the context properties and the bean class name
 	 * to instantiate.
@@ -73,8 +81,14 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @param props the properties used to identify the directory parameters
 	 * and context
 	 */
-	public SimpleJndiSrcService(final Properties props) {
+	@SuppressWarnings("unchecked")
+	public SimpleJndiSrcService(final Properties props, final String beanClassName) {
 		super(props);
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
+		} catch (ClassNotFoundException e) {
+			throw new ExceptionInInitializerError(e);
+		}
 	}
 
 	/**
@@ -90,8 +104,19 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final IBean getBean(IBean bean, final Entry<String, LscAttributes> ids) throws NamingException {
-		return this.getBeanFromSR(get(ids), bean);
+	public final IBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
+		IBean srcBean;
+		try {
+			srcBean = this.beanClass.newInstance();
+			return this.getBeanFromSR(get(ids), srcBean);
+		} catch (InstantiationException e) {
+			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+			LOGGER.debug(e.toString(), e);
+		} catch (IllegalAccessException e) {
+			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+			LOGGER.debug(e.toString(), e);
+		}
+		return null;
 	}
 
 	/**

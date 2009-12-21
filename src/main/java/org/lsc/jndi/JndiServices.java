@@ -77,12 +77,11 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 
-import org.hsqldb.lib.ArrayCounter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.ietf.ldap.LDAPUrl;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * General LDAP services wrapper.

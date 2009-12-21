@@ -58,12 +58,13 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.service.IService;
 import org.lsc.utils.StringLengthComparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a generic but configurable implementation to read data from the destination directory.
@@ -74,7 +75,7 @@ import org.lsc.utils.StringLengthComparator;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiDstService {
+public class FullDNJndiDstService extends AbstractSimpleJndiService implements IService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.

@@ -142,7 +142,7 @@ public class top extends LscObject {
 								LOGGER.error(e.toString());
 							}
 						} else {
-							LOGGER.error("Unable to manage translation from {} to {} for {} !", new Object[] { returnType, toReturnTypes[0], paramName });
+							LOGGER.error("Unable to manage translation from {} for {} !", new Object[] { returnType, paramName });
 						}
 					}
 				} else {

@@ -58,10 +58,9 @@ import javax.naming.directory.SearchResult;
 import junit.framework.TestCase;
 
 import org.lsc.beans.IBean;
-import org.lsc.beans.SimpleBean;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
-import org.lsc.service.ISrcService;
+import org.lsc.service.IService;
 import org.lsc.utils.directory.LDAP;
 
 /**
@@ -100,8 +99,8 @@ public class Ldap2LdapSyncTest extends TestCase {
 		attributeValues.put("sn", "SN0001");
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
-		ISrcService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." + TASK_NAME + ".srcService"));
-		IBean srcBean = srcService.getBean(new SimpleBean(), ids.entrySet().iterator().next());
+		IService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." + TASK_NAME + ".srcService"), "org.lsc.beans.SimpleBean");
+		IBean srcBean = srcService.getBean(ids.entrySet().iterator().next());
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
 
 		// OpenDS automatically hashes the password using seeded SHA,

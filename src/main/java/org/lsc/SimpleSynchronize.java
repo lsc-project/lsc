@@ -52,9 +52,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.lsc.beans.IBean;
-import org.lsc.jndi.IJndiDstService;
-import org.lsc.service.ISrcService;
+import org.lsc.service.IService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,7 +203,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * @return boolean true on success, false if an error occurred
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
 		try {
 			LSCStructuralLogger.DESTINATION.warn("Starting {} for {}", taskMode.name(), taskName);
@@ -223,7 +220,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			// Instantiate the destination service from properties
 			Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
 			Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[]{Properties.class, String.class});
-			IJndiDstService dstJndiService = (IJndiDstService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
+			IService dstJndiService = (IService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
 
 			// Instantiate custom JavaScript library from properties
 			String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);
@@ -233,27 +230,33 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 
 			// Instantiate source service and pass any properties
-			ISrcService srcService = null;
+			IService srcService = null;
 			Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + SRCSERVICE_PROPS_PREFIX);
 			try {
-				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class});
-				srcService = (ISrcService) constrSrcService.newInstance(new Object[]{srcServiceProperties});
+				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class, String.class});
+				srcService = (IService) constrSrcService.newInstance(new Object[]{srcServiceProperties, beanClassName});
 
 			} catch (NoSuchMethodException e) {
-				// backwards compatibility: if the source service doesn't take any properties,
-				// use the parameter less constructor
-				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{});
-				srcService = (ISrcService) constrSrcService.newInstance();
+				try {
+					// backwards compatibility: if the source service doesn't take any properties,
+					// use the parameter less constructor
+					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class});
+					srcService = (IService) constrSrcService.newInstance(new Object[] {srcServiceProperties});
+				} catch (NoSuchMethodException e1) {
+					// backwards compatibility: if the source service doesn't take any properties,
+					// use the parameter less constructor
+					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{});
+					srcService = (IService) constrSrcService.newInstance();
+				}
 			}
 
-			Class<IBean> taskBean = (Class<IBean>) Class.forName(beanClassName);
 			// Do the work!
 			switch (taskMode) {
 				case clean:
-					clean2Ldap(taskName, taskBean, srcService, dstJndiService);
+					clean2Ldap(taskName, srcService, dstJndiService);
 					break;
 				case sync:
-					synchronize2Ldap(taskName, srcService, dstJndiService, taskBean, customLibrary);
+					synchronize2Ldap(taskName, srcService, dstJndiService, customLibrary);
 					break;
 				default:
 					//Should not happen

@@ -318,4 +318,64 @@ public class LdapAttributeType {
 	public final String getName() {
 		return name;
 	}
+
+	public static int getMAX_PASS_BEFORE_FAILING() {
+		return MAX_PASS_BEFORE_FAILING;
+	}
+
+	public boolean isNoUserModification() {
+		return noUserModification;
+	}
+
+	public boolean isDirectoryOperation() {
+		return directoryOperation;
+	}
+
+	public boolean isDSAOperation() {
+		return dSAOperation;
+	}
+
+	public boolean isObsolete() {
+		return obsolete;
+	}
+
+	public boolean isDistributedOperation() {
+		return distributedOperation;
+	}
+
+	public String getOid() {
+		return oid;
+	}
+
+	public String getUsage() {
+		return usage;
+	}
+
+	public String getSyntax() {
+		return syntax;
+	}
+
+	public Map<String, String> getX() {
+		return x;
+	}
+
+	public String getInheritFrom() {
+		return inheritFrom;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public String getEqualityRule() {
+		return equalityRule;
+	}
+
+	public String getSubstringRule() {
+		return substringRule;
+	}
+
+	public String getOrderingRule() {
+		return orderingRule;
+	}
 }

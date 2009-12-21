@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.service.IService;
 
 /**
  * This class is a generic but configurable implementation to read data from the destination directory.
@@ -68,7 +69,7 @@ import org.lsc.beans.IBean;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJndiDstService extends AbstractSimpleJndiService implements IJndiDstService {
+public class SimpleJndiDstService extends AbstractSimpleJndiService implements IService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
@@ -153,5 +154,4 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
         return JndiServices.getDstInstance().getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
                 getAttrsId());
     }
-
 }

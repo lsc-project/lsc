@@ -58,7 +58,6 @@ import javax.naming.directory.BasicAttribute;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.beans.SimpleBean;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -69,6 +68,8 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 
 	private final String requestNameForList;
 	private final String requestNameForObject;
+	
+	private Class<IBean> beanClass;
 
 	/**
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
@@ -76,9 +77,15 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * 
 	 * @param props Configuration properties
 	 */
-	public SimpleJdbcSrcService(Properties props) {
+	@SuppressWarnings("unchecked")
+	public SimpleJdbcSrcService(Properties props, String beanClassName) {
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
+		} catch (ClassNotFoundException e) {
+			throw new ExceptionInInitializerError(e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -104,10 +111,12 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * @TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 */
 	@Override
-	public IBean getBean(IBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
+	public IBean getBean(Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
-		Map<String, Object> attributeMap = ids.getValue().getAttributes();
+		IBean srcBean = null;
 		try {
+			srcBean = beanClass.newInstance();
+			Map<String, Object> attributeMap = ids.getValue().getAttributes();
 			List records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
 			if(records.size() > 1) {
 				throw new RuntimeException("Only a single record can be returned from a getObject request ! " +
@@ -115,12 +124,19 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 			} else if (records.size() == 0) {
 				return null;
 			}
-			SimpleBean sb = new SimpleBean();
 			Map record = (Map) records.get(0);
 			for(Object recordKey: record.keySet()) {
-				sb.setAttribute(new BasicAttribute((String)recordKey, record.get(recordKey)));
+				srcBean.setAttribute(new BasicAttribute((String)recordKey, record.get(recordKey)));
 			}
-			return sb;
+			return srcBean;
+		} catch (InstantiationException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+					beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
+		} catch (IllegalAccessException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+					beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
 			LOGGER.debug(e.toString(), e);
@@ -128,5 +144,6 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
 			throw new CommunicationException(e.getMessage());
 		}
+		return null;
 	}
 }

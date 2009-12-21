@@ -72,7 +72,7 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  * Get a look at org.lsc.service.StructureJdbcService class
  * @author Sebastien Bahloul <seb@lsc-project.org>
  */
-public abstract class AbstractJdbcService implements ISrcService {
+public abstract class AbstractJdbcService implements IService {
 
 	protected static Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
 	protected SqlMapClient sqlMapper;
@@ -80,17 +80,18 @@ public abstract class AbstractJdbcService implements ISrcService {
 	public abstract String getRequestNameForList();
 
 	public abstract String getRequestNameForObject();
-	private DataSchemaProvider cb;
+
+//	private DataSchemaProvider cb;
 
 	public AbstractJdbcService() {
 		sqlMapper = DaoConfig.getSqlMapClient();
 	}
 
-	public void setCallback(DataSchemaProvider cb) {
-		this.cb = cb;
-	}
+//	public void setCallback(DataSchemaProvider cb) {
+//		this.cb = cb;
+//	}
 
-	public IBean getBean(IBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {
+	public IBean getBean(Entry<String, LscAttributes> ids) throws NamingException {
 		String id = ids.getKey();
 		Map<String, Object> attributeMap = ids.getValue().getAttributes();
 		try {

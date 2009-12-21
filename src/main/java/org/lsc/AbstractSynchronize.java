@@ -61,11 +61,10 @@ import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
-import org.lsc.jndi.IJndiDstService;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
-import org.lsc.service.ISrcService;
+import org.lsc.service.IService;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
@@ -144,8 +143,7 @@ public abstract class AbstractSynchronize {
 	 *            the jndi destination service
 	 */
 	protected final void clean2Ldap(final String syncName,
-			final Class<IBean> taskBeanClass, final ISrcService srcService,
-			final IJndiDstService dstJndiService) {
+			final IService srcService, final IService dstJndiService) {
 
 		InfoCounter counter = new InfoCounter();
 		
@@ -182,23 +180,8 @@ public abstract class AbstractSynchronize {
 			counter.incrementCountAll();
 
 			try {
-				try {
-					taskBean = taskBeanClass.newInstance();
-				} catch (InstantiationException e) {
-					LOGGER.error(
-							"Error while instanciating taskbean class: {}", e
-									.toString());
-					LOGGER.debug(e.toString(), e);
-					return;
-				} catch (IllegalAccessException e) {
-					LOGGER.error(
-							"Error while instanciating taskbean class: {}", e
-									.toString());
-					LOGGER.debug(e.toString(), e);
-					return;
-				}
 				// Search for the corresponding object in the source
-				taskBean = srcService.getBean(taskBean, id);
+				taskBean = srcService.getBean(id);
 
 				// If we didn't find the object in the source, delete it in the
 				// destination
@@ -308,8 +291,8 @@ public abstract class AbstractSynchronize {
 	 * @param customLibrary
 	 */
 	protected final void synchronize2Ldap(final String syncName,
-			final ISrcService srcService, final IJndiDstService dstService,
-			final Class<IBean> objectBean, final Object customLibrary) {
+			final IService srcService, final IService dstService,
+			final Object customLibrary) {
 
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
@@ -341,7 +324,7 @@ public abstract class AbstractSynchronize {
 		 */
 		for (Entry<String, LscAttributes> id : ids) {
 			threadPool.runTask(new SynchronizeTask(syncName, counter, 
-							srcService, dstService, objectBean, customLibrary, 
+							srcService, dstService, customLibrary, 
 							syncOptions, this, id));
 		}
 		try {
@@ -570,21 +553,24 @@ public abstract class AbstractSynchronize {
 	}
 }
 
+/**
+ * 
+ * @author sbahloul
+ *
+ */
 class SynchronizeTask implements Runnable {
 
 	private String syncName;
 	private InfoCounter counter;
-	private ISrcService srcService;
-	private IJndiDstService dstService;
-	private Class<IBean> objectBean;
+	private IService srcService;
+	private IService dstService;
 	private Object customLibrary;
 	private ISyncOptions syncOptions;
 	private AbstractSynchronize abstractSynchronize;
 	private Entry<String, LscAttributes> id;
 	
 	public SynchronizeTask(final String syncName, InfoCounter counter,
-			final ISrcService srcService,
-			final IJndiDstService dstService, final Class<IBean> objectBean,
+			final IService srcService, final IService dstService,
 			final Object customLibrary, ISyncOptions syncOptions,
 			AbstractSynchronize abstractSynchronize,
 			Entry<String, LscAttributes> id) {
@@ -592,7 +578,6 @@ class SynchronizeTask implements Runnable {
 		this.counter = counter;
 		this.srcService = srcService;
 		this.dstService = dstService;
-		this.objectBean = objectBean;
 		this.customLibrary = customLibrary;
 		this.syncOptions = syncOptions;
 		this.abstractSynchronize = abstractSynchronize;
@@ -612,7 +597,7 @@ class SynchronizeTask implements Runnable {
 		AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
 
 		try {
-			srcBean = srcService.getBean(objectBean.newInstance(), id);
+			srcBean = srcService.getBean(id);
 
 			/*
 			 * Log an error if the source object could not be retrieved! This
@@ -720,16 +705,12 @@ class SynchronizeTask implements Runnable {
 		return counter;
 	}
 
-	public ISrcService getSrcService() {
+	public IService getSrcService() {
 		return srcService;
 	}
 
-	public IJndiDstService getDstService() {
+	public IService getDstService() {
 		return dstService;
-	}
-
-	public Class<IBean> getObjectBean() {
-		return objectBean;
 	}
 
 	public Object getCustomLibrary() {
@@ -750,6 +731,12 @@ class SynchronizeTask implements Runnable {
 	
 }
 
+/**
+ * This object is storing counters across all tasks
+ * Update methods are specified as synchronized to avoid 
+ * loosing counts of operations
+ * @author Sebastien Bahloul <seb@lsc-project.org>
+ */
 class InfoCounter {
 
 	int countAll = 0;
@@ -773,18 +760,40 @@ class InfoCounter {
 		countCompleted++;
 	}
 
+	/**
+	 * Return the count of all objects concerned by synchronization
+	 * It does not include objects in data source that are not selected by
+	 * requests or filters, but it includes any of the objects retrieved
+	 * from the datasource 
+	 * @return the count of all objects taken from the data source
+	 */
 	public int getCountAll() {
 		return countAll;
 	}
 
+	/**
+	 * Return the count of all objects that have encountered an error while
+	 * synchronizing, either for a technical or for a functional reason
+	 * @return the number of objects in error
+	 */
 	public int getCountError() {
 		return countError;
 	}
 
+	/**
+	 * Return the count of all objects that have been embraced in a
+	 * data modification (successfully or not)
+	 * @return the count of all attempted updates
+	 */
 	public int getCountInitiated() {
 		return countInitiated;
 	}
 
+	/**
+	 * Return the count of all objects that have been embraced in a
+	 * data modification successfully
+	 * @return the count of all successful updates
+	 */
 	public int getCountCompleted() {
 		return countCompleted;
 	}

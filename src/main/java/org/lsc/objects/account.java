@@ -57,7 +57,6 @@ import org.lsc.objects.top;
  * 		necessary, but kept for reverse compatibility. It will be
  * 		removed in LSC 1.3.
  */
-@SuppressWarnings("unchecked")
 public class account extends top {
 
 	public account() {

@@ -46,7 +46,6 @@
 package org.lsc.service;
 
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
@@ -78,7 +77,7 @@ public interface IService {
      * @throws NamingException May throw a NamingException if the object is not found in the directory,
      * 			or if more than one object would be returned.
      */
-    IBean getBean(Entry<String, LscAttributes> obj) throws NamingException;
+    IBean getBean(String name, LscAttributes attributes) throws NamingException;
 
     /**
      * Returns a list of all the objects' identifiers.

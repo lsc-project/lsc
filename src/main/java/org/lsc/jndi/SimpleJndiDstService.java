@@ -49,17 +49,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.lsc.service.IService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a generic but configurable implementation to read data from the destination directory.
@@ -104,9 +103,9 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public final IBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
+	public final IBean getBean(String id, LscAttributes attributes) throws NamingException {
 		try {
-			SearchResult srObject = get(ids);
+			SearchResult srObject = get(id, attributes);
 			Method method = beanClass.getMethod("getInstance", 
 							new Class[] { SearchResult.class, String.class, Class.class });
 			return (IBean) method.invoke(null, new Object[] { srObject, getBaseDn(), beanClass });

@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -100,7 +101,8 @@ public class Ldap2LdapSyncTest extends TestCase {
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
 		IService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." + TASK_NAME + ".srcService"), "org.lsc.beans.SimpleBean");
-		IBean srcBean = srcService.getBean(ids.entrySet().iterator().next());
+		Entry<String, LscAttributes> obj = ids.entrySet().iterator().next();
+		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue());
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
 
 		// OpenDS automatically hashes the password using seeded SHA,

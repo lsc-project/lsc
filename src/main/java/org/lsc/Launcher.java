@@ -73,6 +73,9 @@ public final class Launcher {
 	/** List of the synchronizing types. */
 	private List<String> syncType;
 
+	/** List of the asynchronous synchronizing types. */
+	private List<String> asyncType;
+
 	/** List of the cleaning types. */
 	private List<String> cleanType;
 
@@ -87,12 +90,13 @@ public final class Launcher {
 
 	/** Time limit in seconds*/
 	private int timeLimit;
-
+	
 	/**
 	 * Default constructor - instantiate objects.
 	 */
 	public Launcher() {
 		syncType = new ArrayList<String>();
+		asyncType = new ArrayList<String>();
 		cleanType = new ArrayList<String>();
 		sync = new SimpleSynchronize();
 	}
@@ -132,7 +136,7 @@ public final class Launcher {
 			if (timeLimit > 0) {
 				sync.setTimeLimit( timeLimit );
 			}
-			sync.launch(syncType, cleanType);
+			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
@@ -154,6 +158,8 @@ public final class Launcher {
 				"Don't update the directory at all");
 		options.addOption("l", "startLdapServer", false,
 						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
+		options.addOption("a", "synchronization", true,
+						"Asynchronous synchronization type (one of the available tasks or 'all')");
 		options.addOption("s", "synchronization", true,
 						"Synchronization type (one of the available tasks or 'all')");
 		options.addOption("c", "cleaning", true,
@@ -170,6 +176,9 @@ public final class Launcher {
 		try {
 			CommandLine cmdLine = parser.parse(options, args);
 
+			if (cmdLine.hasOption("s")) {
+				asyncType = parseSyncType(cmdLine.getOptionValue("a"));
+			}
 			if (cmdLine.hasOption("s")) {
 				syncType = parseSyncType(cmdLine.getOptionValue("s"));
 			}
@@ -195,7 +204,12 @@ public final class Launcher {
 							((syncType.size() == 0) && (cleanType.size() == 0))) {
 				printHelp(options);
 				return 1;
-			}	
+			}
+			if(!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
+				System.err.println("Asynchronous synchronization is mutually exclusive with synchronous synchronizing and cleaning !");
+				printHelp(options);
+				return 1;
+			}
 		} catch (ParseException e) {
 			LOGGER.error("Unable to parse the options ({})", e.toString());
 			LOGGER.debug(e.toString(), e);

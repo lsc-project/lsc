@@ -52,6 +52,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
@@ -92,6 +93,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks.TASKNAME.bean property. */
 	public static final String BEAN_PROPS_PREFIX = "bean";
 
+	/** lsc.tasks.TASKNAME.bean property. */
+	public static final String ASYNCHRONOUS_PROPS = "async";
+
 	private static final Logger LOGGER =
 					LoggerFactory.getLogger(SimpleSynchronize.class);
 
@@ -118,7 +122,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
 	 * @throws Exception
 	 */
-	public final boolean launch(final List<String> syncTasks,
+	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 					final List<String> cleanTasks) throws Exception {
 		Boolean foundATask = false;
 
@@ -131,6 +135,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 		// Iterate on each task
 		StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
+		boolean isASyncTaskAll = asyncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 
@@ -141,7 +146,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (isSyncTaskAll || syncTasks.contains(taskName)) {
 				foundATask = true;
 
-				if (!launchTask(taskName, TaskMode.sync)) {
+				if(!launchTask(taskName, TaskMode.sync)) {
 					return false;
 				}
 			}
@@ -149,6 +154,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				foundATask = true;
 
 				if (!launchTask(taskName, TaskMode.clean)) {
+					return false;
+				}
+			}
+			if (isASyncTaskAll || asyncTasks.contains(taskName)) {
+				foundATask = true;
+
+				if(!launchTask(taskName, TaskMode.async)) {
 					return false;
 				}
 			}
@@ -167,9 +179,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 *
 	 */
 	private enum TaskMode {
-
 		clean,
-		sync;
+		sync,
+		async;
 	}
 
 	private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
@@ -258,6 +270,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				case sync:
 					synchronize2Ldap(taskName, srcService, dstJndiService, customLibrary);
 					break;
+				case async:
+					if(srcService instanceof IAsynchronousService) {
+						startAsynchronousSynchronize2Ldap(taskName, (IAsynchronousService) srcService, dstJndiService, customLibrary);
+					} else {
+						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + srcService.getClass().getName() + ")");
+					}
 				default:
 					//Should not happen
 					LOGGER.error("Unknown task mode type {}", taskMode.toString());

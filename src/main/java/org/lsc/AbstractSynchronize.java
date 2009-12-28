@@ -64,6 +64,7 @@ import org.lsc.beans.syncoptions.SyncOptionsFactory;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
+import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.LSCStructuralLogger;
@@ -181,7 +182,7 @@ public abstract class AbstractSynchronize {
 
 			try {
 				// Search for the corresponding object in the source
-				taskBean = srcService.getBean(id);
+				taskBean = srcService.getBean(id.getKey(), id.getValue());
 
 				// If we didn't find the object in the source, delete it in the
 				// destination
@@ -200,7 +201,7 @@ public abstract class AbstractSynchronize {
 						// object from destination
 						if (conditionString.contains("dstBean")) {
 
-							IBean dstBean = dstJndiService.getBean(id);
+							IBean dstBean = dstJndiService.getBean(id.getKey(), id.getValue());
 							// Log an error if the bean could not be retrieved!
 							// This shouldn't happen.
 							if (dstBean == null) {
@@ -344,6 +345,21 @@ public abstract class AbstractSynchronize {
 		} else {
 			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage, objects);
 		}
+	}
+
+	protected final void startAsynchronousSynchronize2Ldap(final String syncName,
+			final IAsynchronousService srcService, final IService dstService,
+			final Object customLibrary) {
+	
+		InfoCounter counter = new InfoCounter();
+
+		ISyncOptions syncOptions = this.getSyncOptions(syncName);
+
+		Thread thread = new Thread(new SynchronizeTask(syncName, counter, 
+						srcService, dstService, customLibrary, 
+						syncOptions, this, null));
+		thread.setName(syncName);
+		thread.run();
 	}
 
 	/**
@@ -586,35 +602,60 @@ class SynchronizeTask implements Runnable {
 
 	public void run() {
 
+		counter.incrementCountAll();
+
+		try {
+			if(id != null) {
+				AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
+				run(id);
+			} else if (srcService instanceof IAsynchronousService) {
+				AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", syncName);
+
+				IAsynchronousService aSrcService = (IAsynchronousService) srcService;
+				while(!Thread.interrupted()) {
+					Entry<String, LscAttributes> nextId = aSrcService.getNextId();
+					if(nextId != null) {
+						run(nextId);
+					} else {
+						try {
+							Thread.sleep(aSrcService.getInterval() * 1000);
+						} catch (InterruptedException e) {
+							AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
+						}
+					}
+				}
+			}
+		} catch (NamingException e) {
+			counter.incrementCountError();
+			abstractSynchronize.logActionError(null, id, e);
+		}
+	}
+		
+	public void run(Entry<String, LscAttributes> id) {
+
 		JndiModifications jm = null;
-		IBean srcBean = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;
 
-		counter.incrementCountAll();
-
-		AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
-
 		try {
-			srcBean = srcService.getBean(id);
-
+			IBean entry = srcService.getBean(id.getKey(), id.getValue());
 			/*
 			 * Log an error if the source object could not be retrieved! This
 			 * shouldn't happen.
 			 */
-			if (srcBean == null) {
+			if (entry == null) {
 				counter.incrementCountError();
 				AbstractSynchronize.LOGGER.error("Unable to get object for id={}", id.getKey());
 				return;
 			}
 
 			// Search destination for matching object
-			dstBean = dstService.getBean(id);
+			dstBean = dstService.getBean(id.getKey(), id.getValue());
 
 			// Calculate operation that would be performed
 			JndiModificationType modificationType = BeanComparator
-					.calculateModificationType(syncOptions, srcBean, dstBean,
+					.calculateModificationType(syncOptions, entry, dstBean,
 							customLibrary);
 
 			// Retrieve condition to evaluate before creating/updating
@@ -629,7 +670,7 @@ class SynchronizeTask implements Runnable {
 			} else {
 				conditionObjects = new HashMap<String, Object>();
 				conditionObjects.put("dstBean", dstBean);
-				conditionObjects.put("srcBean", srcBean);
+				conditionObjects.put("srcBean", entry);
 
 				// Evaluate if we have to do something
 				applyCondition = JScriptEvaluator.evalToBoolean(
@@ -650,7 +691,7 @@ class SynchronizeTask implements Runnable {
 
 			if (applyCondition || calculateForDebugOnly) {
 				jm = BeanComparator.calculateModifications(syncOptions,
-						srcBean, dstBean, customLibrary,
+						entry, dstBean, customLibrary,
 						(applyCondition && !calculateForDebugOnly));
 
 				// if there's nothing to do, skip to the next object
@@ -675,7 +716,7 @@ class SynchronizeTask implements Runnable {
 				abstractSynchronize.logAction(jm, id, syncName);
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(jm, id, new Exception());
+				abstractSynchronize.logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
 			}
 		} catch (CommunicationException e) {
 			// we lost the connection to the source or destination, stop

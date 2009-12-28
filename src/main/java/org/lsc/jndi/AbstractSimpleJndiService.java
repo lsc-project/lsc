@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingEnumeration;
@@ -264,20 +263,19 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public final SearchResult get(final Entry<String, LscAttributes> entry) throws NamingException {
+	public final SearchResult get(String id, LscAttributes pivotAttrs) throws NamingException {
 		String searchString = filterId;
 
-		LscAttributes pivotAttrs = entry.getValue();
 		if (pivotAttrs != null && pivotAttrs.getAttributes() != null && pivotAttrs.getAttributes().size() > 0) {
-			for (String id : pivotAttrs.getAttributesNames()) {
-				String valueId = pivotAttrs.getStringValueAttribute(id.toLowerCase());
-				searchString = Pattern.compile("\\{" + id + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId == null ? "" : valueId);
+			for (String attributeName : pivotAttrs.getAttributesNames()) {
+				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());
+				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId == null ? "" : valueId);
 			}
 		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(entry.getKey());
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
 		} else {
 			// this is kept for backwards compatibility but will be removed
-			searchString = filterId.replaceAll("\\{0\\}", entry.getKey());
+			searchString = filterId.replaceAll("\\{0\\}", id);
 		}
 
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);

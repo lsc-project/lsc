@@ -47,7 +47,6 @@ package org.lsc.jndi;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -104,11 +103,11 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException thrown if an directory exception is encountered
 	 *         while getting the identified bean
 	 */
-	public final IBean getBean(final Entry<String, LscAttributes> ids) throws NamingException {
+	public final IBean getBean(final String id, final LscAttributes attributes) throws NamingException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();
-			return this.getBeanFromSR(get(ids), srcBean);
+			return this.getBeanFromSR(get(id, attributes), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);

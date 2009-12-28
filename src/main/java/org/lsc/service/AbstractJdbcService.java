@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
@@ -81,19 +80,14 @@ public abstract class AbstractJdbcService implements IService {
 
 	public abstract String getRequestNameForObject();
 
-//	private DataSchemaProvider cb;
+	public abstract String getRequestNameForNextId();
 
 	public AbstractJdbcService() {
 		sqlMapper = DaoConfig.getSqlMapClient();
 	}
 
-//	public void setCallback(DataSchemaProvider cb) {
-//		this.cb = cb;
-//	}
-
-	public IBean getBean(Entry<String, LscAttributes> ids) throws NamingException {
-		String id = ids.getKey();
-		Map<String, Object> attributeMap = ids.getValue().getAttributes();
+	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
+		Map<String, Object> attributeMap = attributes.getAttributes();
 		try {
 			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 			return (IBean) o;
@@ -121,28 +115,13 @@ public abstract class AbstractJdbcService implements IService {
 		Map<String, LscAttributes> ret = new ListOrderedMap();
 
 		try {
-			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList(), null);
+			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList());
 			Iterator<HashMap<String, Object>> idsIter = ids.iterator();
-			String key;
-			HashMap<String, Object> idMap;
-			LscAttributes la;
+			Map<String, Object> idMap;
 			
 			for (int count = 1; idsIter.hasNext(); count++) {
 				idMap = idsIter.next();
-
-				// the key of the result Map is usually the DN
-				// since we don't have a DN from a database, we use a concatenation of:
-				//     - all pivot attributes
-				//     - a count of all objects (to make sure the key is unique)
-				// unless there's only one pivot, to be backwards compatible
-				if (idMap.values().size() == 1) {
-					key = idMap.values().iterator().next().toString();
-				}
-				else {
-					key = StringUtils.join(idMap.values().iterator(), ", ") + " (" + count + ")";
-				}
-				la = new LscAttributes(idMap);
-				ret.put(key, la);
+				ret.put(getMapKey(idMap, count), new LscAttributes(idMap));
 			}
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for the entries list: {}", e.toString());
@@ -150,5 +129,21 @@ public abstract class AbstractJdbcService implements IService {
 		}
 
 		return ret;
+	}
+	
+	protected String getMapKey(Map<String, Object> idMap, int count) {
+
+		String key;
+		// the key of the result Map is usually the DN
+		// since we don't have a DN from a database, we use a concatenation of:
+		//     - all pivot attributes
+		//     - a count of all objects (to make sure the key is unique)
+		// unless there's only one pivot, to be backwards compatible
+		if (idMap.values().size() == 1) {
+			key = idMap.values().iterator().next().toString();
+		} else {
+			key = StringUtils.join(idMap.values().iterator(), ", ") + " (" + count + ")";
+		}
+		return key;
 	}
 }

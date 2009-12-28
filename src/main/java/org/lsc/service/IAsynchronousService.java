@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008, 2009 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,64 +43,29 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.jndi;
+package org.lsc.service;
 
-import java.util.Map;
-import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
-import org.lsc.beans.IBean;
-import org.lsc.service.IService;
 
 /**
- * This class is a generic implementation to simulate an empty destination directory.
- * 
- * @author Jonathan Clarke &lt;jonathan@lsc-project.org&gt;
+ * Extende default IService interface to add an asynchronous method
+ * @author Sebastien Bahloul
  */
-public class EmptyJndiDstService extends AbstractSimpleJndiService implements IService {
+public interface IAsynchronousService extends IService {
+    /**
+     * This call is blocking until a data available on the data source
+     * @return the next available bean
+     * @throws NamingException 
+     */
+	Entry<String, LscAttributes> getNextId() throws NamingException;
 
-	/**
-	 * Constructor adapted to the context properties and the bean class name to instantiate.
-	 * 
-	 * @param props
-	 *            the properties used to identify the directory parameters and context
-	 * @param beanClassName
-	 *            the bean class name that will be instantiated and feed up
-	 */
-	public EmptyJndiDstService(final Properties props, final String beanClassName) {
-		super(props);
-	}
-
-	/**
-	 * The simple object getter according to its identifier.
-	 * @param id the data identifier in the directory - must return a unique directory entry
-	 * @return Always returns null since this simulates an empty directory
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identified bean
-	 */
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
-		return null;
-	}
-
-	/**
-	 * Destination LDAP Services getter.
-	 * 
-	 * @return the Destination JndiServices object used to apply directory operations
-	 */
-	public final JndiServices getJndiServices() {
-		return JndiServices.getDstInstance();
-	}
-
-	/**
-	 * Get the identifiers list.
-	 * 
-	 * @return the string iterator
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identifiers list
-	 */
-	public Map<String, LscAttributes> getListPivots() throws NamingException {
-		return null;
-	}
+    /**
+     * The delay in seconds to look for available updates
+     * @return the delay
+     */
+	long getInterval();
 }

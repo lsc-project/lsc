@@ -47,6 +47,7 @@
 package org.lsc.service;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -63,13 +64,14 @@ import org.lsc.beans.IBean;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  *
  */
-public class SimpleJdbcSrcService extends AbstractJdbcService
-{
+public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynchronousService {
 
 	private final String requestNameForList;
+	private final String requestNameForNextId;
 	private final String requestNameForObject;
 	
 	private Class<IBean> beanClass;
+	private int interval;
 
 	/**
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
@@ -81,6 +83,8 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	public SimpleJdbcSrcService(Properties props, String beanClassName) {
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
+		requestNameForNextId = props.getProperty("requestNameForNextId");
+		interval = Integer.parseInt(props.getProperty("interval"));
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
@@ -111,12 +115,11 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * @TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 */
 	@Override
-	public IBean getBean(Entry<String, LscAttributes> ids) throws NamingException {
-		String id = ids.getKey();
+	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			Map<String, Object> attributeMap = ids.getValue().getAttributes();
+			Map<String, Object> attributeMap = attributes.getAttributes();
 			List records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
 			if(records.size() > 1) {
 				throw new RuntimeException("Only a single record can be returned from a getObject request ! " +
@@ -145,5 +148,33 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 			throw new CommunicationException(e.getMessage());
 		}
 		return null;
+	}
+
+	@Override
+	public String getRequestNameForNextId() {
+		return requestNameForNextId;
+	}
+
+	static int count = 0;
+
+	@SuppressWarnings("unchecked")
+	public Entry<String, LscAttributes> getNextId() {
+		Map<String, Object> idMap;
+		try {
+			idMap = (Map<String, Object>) sqlMapper.queryForObject(getRequestNameForNextId());
+			String key = getMapKey(idMap, count++);
+			Map<String, LscAttributes> ret = new HashMap();
+			ret.put(key, new LscAttributes(idMap));
+			return ret.entrySet().iterator().next();
+		} catch (SQLException e) {
+			LOGGER.warn("Error while looking for next entry ({})", e);
+			LOGGER.debug(e.toString(), e);
+		}
+		
+		return null;
+	}
+	
+	public long getInterval() {
+		return interval;
 	}
 }

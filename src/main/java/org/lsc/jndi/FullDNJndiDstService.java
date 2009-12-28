@@ -51,7 +51,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -118,8 +117,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public IBean getBean(Entry<String, LscAttributes> id) throws NamingException {
-		String dn = id.getKey();
+	public IBean getBean(String dn, LscAttributes attributes) throws NamingException {
 
 		try {
 			SearchControls sc = new SearchControls();

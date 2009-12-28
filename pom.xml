@@ -256,11 +256,6 @@
 			</releases>
 		</repository>
 		<repository>
-			<id>java.net Maven 1</id>
-			<url>http://download.java.net/maven/1</url>
-			<layout>legacy</layout>
-		</repository>
-		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
 		</repository>
@@ -361,14 +356,9 @@
 			<version>1.6R5</version>
 		</dependency>
 		<dependency>
-			<groupId>com.sun</groupId>
-			<artifactId>ldapbp</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.novell.ldap</groupId>
-			<artifactId>jldap</artifactId>
-			<version>4.3</version>
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 
 		<dependency>

@@ -48,6 +48,8 @@ package org.lsc;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -60,13 +62,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.ietf.ldap.LDAPUrl;
 
 /**
  * Ldap Synchronization Connector Configuration.
@@ -151,10 +153,9 @@ public class Configuration {
 			LOGGER.error(errorMessage);
 			throw new ExceptionInInitializerError(errorMessage);
 		}
-
 		try {
-			contextDn = new LDAPUrl(ldapUrl).getDN();
-		} catch (MalformedURLException e) {
+			contextDn = new LDAPURL(ldapUrl).getBaseDN().toString();
+		} catch (LDAPException e) {
 			LOGGER.error(e.toString());
 			throw new ExceptionInInitializerError(e);
 		}

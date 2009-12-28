@@ -45,6 +45,8 @@
  */
 package org.lsc.utils.directory;
 
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Properties;
@@ -59,7 +61,6 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 
-import org.ietf.ldap.LDAPUrl;
 import org.lsc.jndi.JndiServices;
 
 /**
@@ -190,7 +191,7 @@ public class LDAP {
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
-					throws NamingException, MalformedURLException {
+					throws NamingException, LDAPException {
 		return canBindSearchRebind(url, null, null, passwordToCheck);
 	}
 
@@ -222,12 +223,12 @@ public class LDAP {
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,
 					String bindPassword, String passwordToCheck)
-					throws NamingException, MalformedURLException {
+					throws NamingException, LDAPException {
 
 		// interpret the search URL to feed to JndiServices
 		// this is done first to thrown MalformedURLException ASAP, not after
 		// connecting...
-		LDAPUrl urlInstance = new LDAPUrl(url);
+		LDAPURL urlInstance = new LDAPURL(url);
 
 		// get JndiServices for this bindDn and bindPassword
 		JndiServices bindJndiServices;
@@ -241,7 +242,7 @@ public class LDAP {
 		}
 
 		// transform to a relative DN for our JndiServices...
-		String baseDn = urlInstance.getDN();
+		String baseDn = urlInstance.getBaseDN().toString();
 		String contextDn = bindJndiServices.getContextDn();
 		if (contextDn != null && baseDn.endsWith(contextDn)) {
 			baseDn = baseDn.substring(0, baseDn.length() - contextDn.length());
@@ -250,7 +251,7 @@ public class LDAP {
 		// perform the search and get back matching DNS
 		SearchResult matchingDns;
 		try {
-			matchingDns = bindJndiServices.getEntry(baseDn, urlInstance.getFilter(), new SearchControls(), urlInstance.getScope());
+			matchingDns = bindJndiServices.getEntry(baseDn, urlInstance.getFilter().toString(), new SearchControls(), urlInstance.getScope().intValue());
 		} catch (SizeLimitExceededException e) {
 			// more than one result was returned!
 			// only one user account may match, anything else is an error

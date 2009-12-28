@@ -45,6 +45,7 @@
  */
 package org.lsc.utils.directory;
 
+import com.unboundid.ldap.sdk.LDAPException;
 import java.net.MalformedURLException;
 
 import javax.naming.CommunicationException;
@@ -98,7 +99,7 @@ public class LDAPTest extends TestCase {
 		{
 			assertTrue(false);
 		}
-		catch (MalformedURLException e)
+		catch (LDAPException e)
 		{
 			assertTrue(false);
 		}
@@ -126,7 +127,7 @@ public class LDAPTest extends TestCase {
 			assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?cn=CN0001",
 					"cn=Directory Manager", "secret", "secret"));
 		}
-		catch (MalformedURLException e)
+		catch (LDAPException e)
 		{
 			assertTrue(false);
 		}

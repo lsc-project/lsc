@@ -45,8 +45,10 @@
  */
 package org.lsc.jndi;
 
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,7 +79,6 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 
-import org.ietf.ldap.LDAPUrl;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ public final class JndiServices {
 	private StartTlsResponse tlsResponse;
 
 	/** The context base dn. */
-	private String contextDn;
+	private DN contextDn;
 
 	/** The instances cache. */
 	private static Map<Properties, JndiServices> cache = new HashMap<Properties, JndiServices>();
@@ -113,7 +114,7 @@ public final class JndiServices {
 	/** Number of results per page (through PagedResults extended control). */
 	private int pageSize;
 
-	private LDAPUrl namingContext;
+	private LDAPURL namingContext;
 
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
@@ -176,15 +177,15 @@ public final class JndiServices {
 
 		/* get LDAP naming context */
 		try {
-			namingContext = new LDAPUrl((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
-		} catch (MalformedURLException e) {
+			namingContext = new LDAPURL((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
+		} catch (LDAPException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 			throw new NamingException(e.getMessage());
 		}
 
 		/* handle options */
-		contextDn = namingContext.getDN() != null ? namingContext.getDN() : null;
+		contextDn = namingContext.getBaseDN() != null ? namingContext.getBaseDN() : null;
 
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null) {
@@ -331,9 +332,9 @@ public final class JndiServices {
 		try {
 			sc.setSearchScope(scope);
 			String rewrittenBase = null;
-			if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toLowerCase())) {
-				if (!searchBase.equalsIgnoreCase(contextDn)) {
-				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
+			if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
+				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
 			} else {
 					rewrittenBase = "";
 				}
@@ -419,9 +420,9 @@ public final class JndiServices {
 
 	public String rewriteBase(final String base) {
 		String rewrittenBase = null;
-		if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
-			if (!base.equalsIgnoreCase(contextDn)) {
-			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
+		if (base.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+			if (!base.equalsIgnoreCase(contextDn.toString())) {
+			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
 		} else {
 				rewrittenBase = "";
 			}
@@ -691,7 +692,7 @@ public final class JndiServices {
 	}
 
 	public List<String> sup(String dn, int level) throws NamingException {
-		int ncLevel = (new LdapName(contextDn)).size();
+		int ncLevel = (new LdapName(contextDn.toString())).size();
 
 		LdapName lName = new LdapName(dn);
 		List<String> cList = new ArrayList<String>();
@@ -832,7 +833,7 @@ public final class JndiServices {
 	 * @return the contextDn
 	 */
 	public String getContextDn() {
-		return contextDn;
+		return contextDn.toString();
 	}
 
 	/**

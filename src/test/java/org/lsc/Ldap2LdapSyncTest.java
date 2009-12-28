@@ -295,7 +295,7 @@ public class Ldap2LdapSyncTest extends TestCase {
 			cleanType.add(taskName);
 		}
 
-		boolean ret = sync.launch(syncType, cleanType);
+		boolean ret = sync.launch(new ArrayList<String>(), syncType, cleanType);
 		assertTrue(ret);
 	}
 

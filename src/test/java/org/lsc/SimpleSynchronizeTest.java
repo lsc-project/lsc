@@ -63,14 +63,15 @@ public class SimpleSynchronizeTest extends TestCase
 	public void testParameters() throws Exception {
 		SimpleSynchronize sync = new SimpleSynchronize();
 		
+		List<String> asyncTasks = new ArrayList<String>();
 		List<String> syncTasks = new ArrayList<String>();
 		List<String> cleanTasks = new ArrayList<String>();
 
-		assertFalse(sync.launch(syncTasks, cleanTasks));
+		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
 
 		syncTasks.add("nonexistent");
 		
-		assertFalse(sync.launch(syncTasks, cleanTasks));
+		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
 
 	}
 	

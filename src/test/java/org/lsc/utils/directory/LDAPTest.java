@@ -63,79 +63,62 @@ import org.lsc.utils.JScriptEvaluator;
 public class LDAPTest extends TestCase {
 
 	public final void testCanBind() {
-		try
-		{
+		try {
 			assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));
 			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "public"));
 			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=nobody", "secret"));
 
-			assertTrue(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", " +
-					"\"cn=Directory Manager\", \"secret\")", null));
-			assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", " +
-					"\"cn=Directory Manager\", \"public\")", null));
-			assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", " +
-					"\"cn=nobody\", \"secret\")", null));
+			assertTrue(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
+							+ "\"cn=Directory Manager\", \"secret\")", null));
+			assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
+							+ "\"cn=Directory Manager\", \"public\")", null));
+			assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
+							+ "\"cn=nobody\", \"secret\")", null));
 
-			assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", 
-					"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "secret"));
-			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", 
-					"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "public"));
-			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", 
-					"secret", "uid=nobody,ou=People,dc=lsc-project,dc=org", "secret"));
+			assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager",
+							"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "secret"));
+			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager",
+							"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "public"));
+			assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager",
+							"secret", "uid=nobody,ou=People,dc=lsc-project,dc=org", "secret"));
 
 			assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=00000001",
-					"cn=Directory Manager", "secret", "secret")); 
+							"cn=Directory Manager", "secret", "secret"));
 			assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=00000001",
-					"cn=Directory Manager", "secret", "public"));
+							"cn=Directory Manager", "secret", "public"));
 			assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=nonexistant",
-					"cn=Directory Manager", "secret", "secret"));
+							"cn=Directory Manager", "secret", "secret"));
 
 			// this should fail since there are two cn=CN0001 entries
 			assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?cn=CN0001",
-					"cn=Directory Manager", "secret", "secret"));
+							"cn=Directory Manager", "secret", "secret"));
 
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			assertTrue(false);
-		}
-		catch (LDAPException e)
-		{
+		} catch (LDAPException e) {
 			assertTrue(false);
 		}
 
 		// this should fail with a can't connect exception
-		try
-		{
+		try {
 			LDAP.canBind("ldap://no.such.host:33389/", "cn=Directory Manager", "public");
 			// should not reach this!
 			assertTrue(false);
 
-		}
-		catch (CommunicationException e)
-		{
+		} catch (CommunicationException e) {
 			assertFalse(false);
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			assertTrue(false);
 		}
-				
+
 		// this should fail with a NamingException (no such object)
-		try
-		{
+		try {
 			assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?cn=CN0001",
-					"cn=Directory Manager", "secret", "secret"));
-		}
-		catch (LDAPException e)
-		{
+							"cn=Directory Manager", "secret", "secret"));
+		} catch (LDAPException e) {
 			assertTrue(false);
-		}
-		catch (NamingException e)
-		{
+		} catch (NamingException e) {
 			assertTrue(true);
-		} 
-
-
+		}
 	}
 }

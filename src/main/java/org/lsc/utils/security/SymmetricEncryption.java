@@ -165,15 +165,22 @@ public class SymmetricEncryption {
 	 * @throws NoSuchProviderException 
 	 */
 	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException {
+		OutputStream os = null;
 		try {
 			KeyGenerator kg = KeyGenerator.getInstance(algo, this.securityProvider.getName());
 			SecretKey cipherKey = kg.generateKey();
 			SecureRandom sr = new SecureRandom();
-			OutputStream os = new FileOutputStream(keyPath);
 			kg.init(strength, sr);
+			os = new FileOutputStream(keyPath);
 			os.write(cipherKey.getEncoded());
-			os.close();
 		} catch (IOException e) {
+			try {
+				if(os != null) {
+					os.close();
+				}
+			}
+			catch (IOException e1) {
+			}
 			return false;
 		}
 		return true;
@@ -219,18 +226,27 @@ public class SymmetricEncryption {
 	 * @throws GeneralSecurityException 
 	 * @throws IOException 
 	 */
-	public boolean initialize() throws GeneralSecurityException, IOException {
-		InputStream input = new FileInputStream(new File(this.keyPath));
-		byte[] data = new byte[strength / Byte.SIZE];
-		input.read(data);
+	public boolean initialize() throws GeneralSecurityException {
+		InputStream input = null;
+		try {
+			input = new FileInputStream(new File(this.keyPath));
+			byte[] data = new byte[strength / Byte.SIZE];
+			input.read(data);
 
-		Key key = new SecretKeySpec(data, this.algorithm);
-		this.cipherEncrypt = Cipher.getInstance(this.algorithm);
-		this.cipherEncrypt.init(Cipher.ENCRYPT_MODE, key);
-		this.cipherDecrypt = Cipher.getInstance(this.algorithm);
-		this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
+			Key key = new SecretKeySpec(data, this.algorithm);
+			this.cipherEncrypt = Cipher.getInstance(this.algorithm);
+			this.cipherEncrypt.init(Cipher.ENCRYPT_MODE, key);
+			this.cipherDecrypt = Cipher.getInstance(this.algorithm);
+			this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
 
-		input.close();
+		} catch (IOException e) {
+		}
+		try {
+			if(input != null) {
+				input.close();
+			}
+		} catch (IOException e) {
+		}
 		return true;
 	}
 

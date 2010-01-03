@@ -808,7 +808,7 @@ class InfoCounter {
 	 * from the datasource 
 	 * @return the count of all objects taken from the data source
 	 */
-	public int getCountAll() {
+	public synchronized int getCountAll() {
 		return countAll;
 	}
 
@@ -817,7 +817,7 @@ class InfoCounter {
 	 * synchronizing, either for a technical or for a functional reason
 	 * @return the number of objects in error
 	 */
-	public int getCountError() {
+	public synchronized int getCountError() {
 		return countError;
 	}
 
@@ -826,7 +826,7 @@ class InfoCounter {
 	 * data modification (successfully or not)
 	 * @return the count of all attempted updates
 	 */
-	public int getCountInitiated() {
+	public synchronized int getCountInitiated() {
 		return countInitiated;
 	}
 
@@ -835,7 +835,7 @@ class InfoCounter {
 	 * data modification successfully
 	 * @return the count of all successful updates
 	 */
-	public int getCountCompleted() {
+	public synchronized int getCountCompleted() {
 		return countCompleted;
 	}
 }

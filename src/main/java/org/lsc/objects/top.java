@@ -125,24 +125,20 @@ public class top extends LscObject {
 						// localMethod.invoke(this, new Object[] {});
 						LOGGER.debug("No need to call a method with an empty value ... ({})", paramName);
 					} else {
-						if (toReturnTypes != null) {
-							LOGGER.debug("Method invocation: {}", localMethod.getName());
-							Object paramsToUse = null;
-							if (toReturnTypes[0] == returnType) {
-								paramsToUse = returnedObject;
-							} else if (toReturnTypes[0] == List.class) {
-								ArrayList<Object> array = new ArrayList<Object>();
-								array.add(returnedObject);
-								paramsToUse = array;
-							}
-							try {
-								localMethod.invoke(this, new Object[]{paramsToUse});
-							} catch (IllegalArgumentException e) {
-								LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
-								LOGGER.error(e.toString());
-							}
-						} else {
-							LOGGER.error("Unable to manage translation from {} for {} !", new Object[] { returnType, paramName });
+						LOGGER.debug("Method invocation: {}", localMethod.getName());
+						Object paramsToUse = null;
+						if (toReturnTypes[0] == returnType) {
+							paramsToUse = returnedObject;
+						} else if (toReturnTypes[0] == List.class) {
+							ArrayList<Object> array = new ArrayList<Object>();
+							array.add(returnedObject);
+							paramsToUse = array;
+						}
+						try {
+							localMethod.invoke(this, new Object[]{paramsToUse});
+						} catch (IllegalArgumentException e) {
+							LOGGER.error("Bad argument invoking {} for attribute {}", localMethod.getName(), paramName);
+							LOGGER.error(e.toString());
 						}
 					}
 				} else {

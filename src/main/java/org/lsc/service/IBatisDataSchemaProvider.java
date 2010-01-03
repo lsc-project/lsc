@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public class IBatisDataSchemaProvider implements DataSchemaProvider {
 
-	private ResultSetMetaData metadata;
+//	private ResultSetMetaData metadata;
 	
 	private Map<String, String> metadataCache;
 	
@@ -70,7 +70,7 @@ public class IBatisDataSchemaProvider implements DataSchemaProvider {
         LoggerFactory.getLogger(IBatisDataSchemaProvider.class);
 
     public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
-    	this.metadata = metadata;
+//    	this.metadata = metadata;
     	metadataCache = new HashMap<String, String>();
     	try {
     		for(int i = 1; i <= metadata.getColumnCount(); i++) {

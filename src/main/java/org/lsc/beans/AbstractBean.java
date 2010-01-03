@@ -51,11 +51,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -332,15 +331,11 @@ public abstract class AbstractBean extends LscBean {
 	/**
 	 * Set a bean from an LDAP entry
 	 *
-	 * @param entry
-	 *                the LDAP entry
-	 * @param baseDn
-	 *                the base Dn used to set the right Dn
-	 * @param c
-	 *                class to instantiate
+	 * @param entry the LDAP entry
+	 * @param baseDn the base Dn used to set the right Dn
+	 * @param c class to instantiate
 	 * @return the bean
-	 * @throws NamingException
-	 *                 thrown if a directory exception is encountered while
+	 * @throws NamingException thrown if a directory exception is encountered while
 	 *                 looking at the entry
 	 */
 	public static AbstractBean getInstance(final SearchResult entry,

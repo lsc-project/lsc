@@ -96,8 +96,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForList()
 	 */
 	@Override
-	public String getRequestNameForList()
-	{
+	public String getRequestNameForList() {
 		return requestNameForList;
 	}
 
@@ -105,8 +104,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
 	 */
 	@Override
-	public String getRequestNameForObject()
-	{
+	public String getRequestNameForObject() {
 		return requestNameForObject;
 	}
 
@@ -114,6 +112,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * Override default AbstractJdbcSrcService to get a SimpleBean
 	 * @TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
 		IBean srcBean = null;
@@ -127,9 +126,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 			} else if (records.size() == 0) {
 				return null;
 			}
-			Map record = (Map) records.get(0);
-			for(Object recordKey: record.keySet()) {
-				srcBean.setAttribute(new BasicAttribute((String)recordKey, record.get(recordKey)));
+			Map<String, Object> record = (Map<String, Object>) records.get(0);
+			for(Entry<String, Object> entry: record.entrySet()) {
+				srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
 			}
 			return srcBean;
 		} catch (InstantiationException e) {

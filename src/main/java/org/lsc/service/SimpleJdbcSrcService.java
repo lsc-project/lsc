@@ -85,8 +85,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForList()
 	 */
 	@Override
-	public String getRequestNameForList()
-	{
+	public String getRequestNameForList() {
 		return requestNameForList;
 	}
 
@@ -94,8 +93,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
 	 */
 	@Override
-	public String getRequestNameForObject()
-	{
+	public String getRequestNameForObject() {
 		return requestNameForObject;
 	}
 
@@ -116,9 +114,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 				return null;
 			}
 			SimpleBean sb = new SimpleBean();
-			Map record = (Map) records.get(0);
-			for(Object recordKey: record.keySet()) {
-				sb.setAttribute(new BasicAttribute((String)recordKey, record.get(recordKey)));
+			Map<String, Object> record = (Map<String, Object>) records.get(0);
+			for(Entry<String, Object> entry: record.entrySet()) {
+				sb.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
 			}
 			return sb;
 		} catch (SQLException e) {

@@ -111,9 +111,7 @@
 	<licenses>
 		<license>
 			<name>BSD</name>
-			<url>
-				http://www.fsf.org/licensing/licenses/agpl-3.0.html
-			</url>
+			<url>http://www.opensource.org/licenses/bsd-license.php</url>
 		</license>
 	</licenses>
 	<scm>

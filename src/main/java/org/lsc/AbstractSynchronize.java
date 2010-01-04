@@ -525,9 +525,7 @@ public abstract class AbstractSynchronize {
 
 	/**
 	 * Parse the command line arguments according the selected filter.
-	 *
-	 * @param args
-	 *                the command line arguments
+	 * @param cmdLine Command line options
 	 *
 	 * @return the parsing status
 	 */

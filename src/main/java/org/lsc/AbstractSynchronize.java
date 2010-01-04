@@ -778,10 +778,10 @@ class SynchronizeTask implements Runnable {
  */
 class InfoCounter {
 
-	int countAll = 0;
-	int countError = 0;
-	int countInitiated = 0;
-	int countCompleted = 0;
+	private int countAll = 0;
+	private int countError = 0;
+	private int countInitiated = 0;
+	private int countCompleted = 0;
 
 	public synchronized void incrementCountAll() {
 		countAll++;
@@ -803,7 +803,7 @@ class InfoCounter {
 	 * Return the count of all objects concerned by synchronization
 	 * It does not include objects in data source that are not selected by
 	 * requests or filters, but it includes any of the objects retrieved
-	 * from the datasource 
+	 * from the data source 
 	 * @return the count of all objects taken from the data source
 	 */
 	public synchronized int getCountAll() {

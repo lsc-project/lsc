@@ -224,7 +224,6 @@ public class SymmetricEncryption {
 	 * Initialize encryption object from the configuration file.
 	 * @return boolean (always true if no exception)
 	 * @throws GeneralSecurityException 
-	 * @throws IOException 
 	 */
 	public boolean initialize() throws GeneralSecurityException {
 		InputStream input = null;

@@ -174,6 +174,8 @@ public class SymmetricEncryption {
 			os = new FileOutputStream(keyPath);
 			os.write(cipherKey.getEncoded());
 		} catch (IOException e) {
+			return false;
+		} finally {
 			try {
 				if(os != null) {
 					os.close();
@@ -181,7 +183,6 @@ public class SymmetricEncryption {
 			}
 			catch (IOException e1) {
 			}
-			return false;
 		}
 		return true;
 	}
@@ -240,12 +241,13 @@ public class SymmetricEncryption {
 			this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
 
 		} catch (IOException e) {
-		}
-		try {
-			if(input != null) {
-				input.close();
+		} finally {
+			try {
+				if(input != null) {
+					input.close();
+				}
+			} catch (IOException e) {
 			}
-		} catch (IOException e) {
 		}
 		return true;
 	}

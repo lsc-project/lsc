@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
@@ -96,6 +95,7 @@
 			<timezone>+1</timezone>
 		</developer>
 	</developers>
+	
 	<contributors>
 		<contributor>
 			<name>Clement Oudot</name>
@@ -108,33 +108,42 @@
 			<timezone>+1</timezone>
 		</contributor>
 	</contributors>
+	
 	<licenses>
 		<license>
 			<name>BSD</name>
 			<url>http://www.opensource.org/licenses/bsd-license.php</url>
 		</license>
 	</licenses>
+	
 	<scm>
 		<connection>scm:svn:https://lsc-project.org/svn/lsc/</connection>
 		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core</developerConnection>
 		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc</url>
 	</scm>
+	
 	<organization>
 		<name>LSC project</name>
 		<url>http://lsc-project.org/</url>
 	</organization>
+	
 	<properties>
 		<!--Force UTF-8 for the build-->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	    <staging.dir>${project.build.directory}/staging</staging.dir>
 	</properties>
 
 	<build>
-
+		<defaultGoal>package</defaultGoal>
+		
+		<finalName>${project.artifactId}</finalName>
+		
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-			</plugin>
+
+			<plugin>                                                                                                            
+				<groupId>org.apache.maven.plugins</groupId>                                                                 
+				<artifactId>maven-surefire-plugin</artifactId>                                                              
+			</plugin>  
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -232,6 +241,30 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.codehaus.izpack</groupId>
+				<artifactId>izpack-maven-plugin</artifactId>
+				<version>1.0-alpha-5</version>
+
+				<!-- common configuration by all executions -->
+				<configuration>
+					<descriptor>${basedir}/src/install/install.xml</descriptor>
+					<descriptorEncoding>UTF-8</descriptorEncoding>
+					<fileExtension>jar</fileExtension>
+					<installerFile>${project.build.directory}/${project.artifactId}-${project.version}</installerFile>
+					<izpackBasedir>${project.build.directory}/lsc-core-dist/lsc-${project.version}</izpackBasedir>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>standard-installer</id>
+						<phase>package</phase>
+						<goals>
+							<goal>izpack</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -258,7 +291,11 @@
 
 	<repositories>
 		<repository>
-			<id>IBiblio</id>
+			<id>IBiblio - Maven2</id>
+			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
+		</repository>
+		<repository>
+			<id>IBiblio - Maven legacy</id>
 			<url>http://www.ibiblio.org/maven/</url>
 			<layout>legacy</layout>
 		</repository>

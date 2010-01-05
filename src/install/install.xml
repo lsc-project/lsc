@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+
+<installation version="1.0">
+
+	<info>
+		<appname>@{project.name}</appname>
+		<appversion>@{project.version}</appversion>
+		<url>@{project.url}</url>
+		<uninstaller name="uninstall.jar" path="${INSTALL_PATH}" write="yes" />
+		<javaversion>1.5</javaversion>
+		<requiresjdk>no</requiresjdk>
+	</info>
+
+	<guiprefs width="600" height="480" resizable="no">
+		<laf name="kunststoff">
+			<os family="unix" />
+		</laf>
+		<modifier key="useHeadingPanel" value="yes" />
+		<modifier key="useHeadingForSummary" value="yes" />
+		<modifier key="headingImageOnLeft" value="yes" />
+		<modifier key="headingLineCount" value="2" />
+		<modifier key="headingFontSize" value="1.5" />
+		<modifier key="headingBackgroundColor" value="0x00ffffff" />
+		<modifier key="headingPanelCounter" value="text" />
+		<modifier key="headingPanelCounterPos" value="inHeading" />
+	</guiprefs>
+
+	<locale>
+		<langpack iso3="eng" />
+	</locale>
+
+	<resources>
+		<res id="InfoPanel.info" src="README.txt"/>
+		<res id="LicencePanel.licence" src="LICENSE.txt"/>
+<!--		<res id="lsc-logo.png" src="src/izpack/resources/lsc-logo.png" />
+		<res id="lsc-sitelogo.png" src="src/izpack/resources/lsc-sitelogo.png" />
+		<res id="titlebar.png" src="src/izpack/resources/titlebar.png" /> -->
+	</resources>
+
+	<panels>
+		<panel classname="CheckedHelloPanel"/>
+		<panel classname="InfoPanel"/>
+		<panel classname="LicencePanel"/>
+		<panel classname="TargetPanel"/>
+		<panel classname="SummaryPanel" />
+		<panel classname="InstallPanel" />
+		<panel classname="SimpleFinishPanel" />
+	</panels>
+
+	<listeners>
+		<listener installer="SummaryLoggerInstallerListener">
+			<os family="windows" />
+		</listener>
+	</listeners>
+
+	<packs>
+		<pack name="Main Application" required="yes" installGroups="default">
+			<description>The directory engine synchronization.</description>
+			<fileset dir="." targetdir="$INSTALL_PATH">
+				<include name="*.txt" />
+				<include name="etc/**" />
+				<include name="lib/**" />
+				<include name="sample/**" />
+			</fileset>
+		</pack><!--
+		<pack name="Install Database Server" required="no" preselected="yes"
+			os="windows" installGroups="New Application">
+			<description>New server installation of the selected database as
+				required by the application.</description>
+			<file src="postgresql" targetdir="$INSTALL_PATH" />
+			<file src="sql" targetdir="$INSTALL_PATH" />
+			<executable targetfile="$INSTALL_PATH/postgresql/postgres_install_windows.bat"
+				stage="postinstall" keep="true">
+				<args>
+					<arg value="${UserPathPanelVariable}" />
+					<arg value="$HOST_NAME" />
+					<arg value="${db.service.name}" />
+					<arg value="${db.service.password}" />
+					<arg value="${db.su.password}" />
+				</args>
+			</executable>
+		</pack>
+		<pack name="JBoss Source Code" required="no" preselected="no"
+			installGroups="New Application">
+			<description>The JBoss application server source is available as
+				required by the LGPL.</description>
+			<file src="src" targetdir="$INSTALL_PATH/@{jboss.version}" />
+		</pack>
+		<pack name="Update Application" required="yes"
+			installGroups="Update Existing Application">
+			<description>The required application files to update an existing
+				installation.</description>
+			<file src="update" targetdir="$INSTALL_PATH" />
+		</pack>
+		<pack name="Post-Install Tasks" required="yes">
+			<description>Configuration and cleanup required for the
+				installation.</description>
+			<file src="ant" targetdir="$INSTALL_PATH" />
+			<file src="post-install-tasks.bat" targetdir="$INSTALL_PATH" />
+			<file src="build.xml" targetdir="$INSTALL_PATH" />
+			<file src="Uninstall_PostgreSQL_and_Application.bat" targetdir="$INSTALL_PATH" />
+			<file src="Uninstall_Application_Only.bat" targetdir="$INSTALL_PATH" />
+			<parsable targetfile="$INSTALL_PATH/post-install-tasks.bat" />
+			<parsable targetfile="$INSTALL_PATH/build.xml" />
+			<parsable targetfile="$INSTALL_PATH/@{jboss.version}/bin/system.properties" />
+			<parsable targetfile="$INSTALL_PATH/Uninstall_PostgreSQL_and_Application.bat" />
+			<parsable targetfile="$INSTALL_PATH/Uninstall_Application_Only.bat" />
+		</pack>
+	--></packs>
+
+	<!--
+		The native libraries to add. This is required for creating shortcuts
+		on Windows
+	-->
+	<native type="izpack" name="ShellLink.dll">
+		<os family="windows"/>
+	</native>
+
+</installation>

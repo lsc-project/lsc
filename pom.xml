@@ -136,7 +136,7 @@
 	<build>
 		<defaultGoal>package</defaultGoal>
 		
-		<finalName>${project.artifactId}</finalName>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 		
 		<plugins>
 
@@ -236,6 +236,7 @@
 					<execution>
 						<phase>package</phase>
 						<goals>
+							<goal>directory-single</goal>
 							<goal>single</goal>
 						</goals>
 					</execution>
@@ -253,7 +254,7 @@
 					<descriptorEncoding>UTF-8</descriptorEncoding>
 					<fileExtension>jar</fileExtension>
 					<installerFile>${project.build.directory}/${project.artifactId}-${project.version}</installerFile>
-					<izpackBasedir>${project.build.directory}/lsc-core-dist/lsc-${project.version}</izpackBasedir>
+					<izpackBasedir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</izpackBasedir>
 				</configuration>
 
 				<executions>

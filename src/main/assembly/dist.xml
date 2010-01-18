@@ -26,7 +26,8 @@
 			</includes>
 		</fileSet>
 			
-		<!-- Include the sample and etc directories -->
+		<!-- Include the bin, sample and etc directories -->
+		<fileSet> <directory>bin</directory> </fileSet>
 		<fileSet>
 			<directory>etc</directory>
 			<excludes>

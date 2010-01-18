@@ -56,12 +56,7 @@
 	<packs>
 		<pack name="Main Application" required="yes" installGroups="default">
 			<description>The directory engine synchronization.</description>
-			<fileset dir="." targetdir="$INSTALL_PATH">
-				<include name="*.txt" />
-				<include name="etc/**" />
-				<include name="lib/**" />
-				<include name="sample/**" />
-			</fileset>
+			<fileset dir="." targetdir="$INSTALL_PATH" />
 		</pack><!--
 		<pack name="Install Database Server" required="no" preselected="yes"
 			os="windows" installGroups="New Application">

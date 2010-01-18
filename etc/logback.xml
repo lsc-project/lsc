@@ -8,15 +8,23 @@
 	</appender>
 	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
-		<Append>false</Append>
+		<Append>true</Append>
 		<File>/tmp/synchro.log</File>
+
 		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%m%n</Pattern>
 		</layout>
+
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>DEBUG</level>
 		</filter>
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy"/>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>synchro.log.%i.gz</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>7</MaxIndex>
+		</rollingPolicy>
+
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<MaxFileSize>10000KB</MaxFileSize>
 		</triggeringPolicy>

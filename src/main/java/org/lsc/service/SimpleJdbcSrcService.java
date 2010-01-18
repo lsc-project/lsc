@@ -99,7 +99,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 
 	/**
 	 * Override default AbstractJdbcSrcService to get a SimpleBean
-	 * @TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
+	 * TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 */
 	@Override
 	public IBean getBean(IBean nonUsed, Entry<String, LscAttributes> ids) throws NamingException {

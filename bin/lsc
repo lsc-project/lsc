@@ -20,10 +20,20 @@
 #
 # GPL License: http://www.gnu.org/licenses/gpl.txt
 #====================================================================
+# Possible exit codes:
+#	- 0: success, LSC finished running
+#	- 1: LSC seems to be already running, aborting
+#	- 2: 'java' executable not found on PATH or in JAVA_HOME, aborting
+#====================================================================
+
 
 #====================================================================
 # Changelog
 #====================================================================
+# Version 0.3 (01/2010à:
+# - Update for LSC 1.2
+# - Guess the base directory for LSC and usual directories
+# - Use JAVA_HOME from the environment or java on PATH, without redefining it
 # Version 0.2 (2008):
 # - Modify exit codes
 # - Add comments
@@ -34,28 +44,55 @@
 # Author: Jonathan CLARKE (LINAGORA)
 #====================================================================
 
+# work out where LSC lives
+LSC_HOME=$(dirname "${BASH_SOURCE}")/..
+if [ ${LSC_HOME:0:1} != "/" ] ; then
+	LSC_HOME="${PWD}/${LSC_HOME}"
+fi
+
 #====================================================================
 # Configuration
 #====================================================================
-JAVA_HOME=/usr/java/jdk1.5.0_16
-LSC_HOME=/opt/lsc
-CFG_DIR=$LSC_HOME/etc
-LIB_DIR=$LSC_HOME/lib
-LOG_DIR=$LSC_HOME/log
-LOG_FILE=$LOG_DIR/lsc.log
 
-mkdir -p $LOG_DIR
+CFG_DIR="$LSC_HOME/etc"
+LIB_DIR="$LSC_HOME/lib"
+LOG_DIR="$LSC_HOME/var/log"
+LOG_FILE="$LOG_DIR/lsc.log"
+
+mkdir -p "$LOG_DIR"
 
 #====================================================================
 # Functions
 #====================================================================
 function log() {
-	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" >> $LOG_FILE
+	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" >> "$LOG_FILE"
+}
+
+# Determine where the java exectuable is
+function get_java() {
+	# Do we have a JAVA_HOME environment variable?
+	if [ "z" != "z${JAVA_HOME}" ]; then
+		JAVA_COMMAND="${JAVA_HOME}/bin/java"
+		return
+	fi
+
+	# Try java command on PATH as an alternative
+	JAVA_COMMAND="$(which java)"
+	if [ $? -eq 0 ]; then return; fi
+
+	# Nothing seems approprite, warn and exit
+	log "No java executable found on PATH or in JAVA_HOME! Aborting."
+	log "Define JAVA_HOME or adjust your PATH variable to include java."
+	exit 2
 }
 
 #====================================================================
 # Main
 #====================================================================
+
+# check if we have java executable
+get_java
+
 # check if LSC is not already running
 if [ $(ps -efww | grep java | grep org.lsc | grep -v grep | wc -l) -ne 0 ] 
 then
@@ -70,13 +107,13 @@ fi
 log "Starting LSC"
 
 CLASSPATH="."
-for jar in $LIB_DIR/*.jar
+for jar in "$LIB_DIR"/*.jar
 do
-	CLASSPATH=$CLASSPATH:$jar
+	CLASSPATH="$CLASSPATH:$jar"
 done
 
-cd $CFG_DIR
-$JAVA_HOME/bin/java -cp $CLASSPATH org.lsc.Launcher $*
+cd "$CFG_DIR"
+${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $*
 
 # LSC finished running
 log "LSC finished running"

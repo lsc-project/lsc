@@ -10,7 +10,7 @@
 		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
 		<Append>false</Append>
 		<File>/tmp/synchro.log</File>
-		<layout class="org.lsc.utils.LocalizedJndiModificationsLayout">
+		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%m%n</Pattern>
 		</layout>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">

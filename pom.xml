@@ -253,7 +253,7 @@
 					<descriptor>${basedir}/src/install/install.xml</descriptor>
 					<descriptorEncoding>UTF-8</descriptorEncoding>
 					<fileExtension>jar</fileExtension>
-					<installerFile>${project.build.directory}/${project.artifactId}-${project.version}</installerFile>
+					<installerFile>${project.build.directory}/${project.artifactId}-${project.version}-installer.jar</installerFile>
 					<izpackBasedir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</izpackBasedir>
 				</configuration>
 

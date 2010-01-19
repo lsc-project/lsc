@@ -98,17 +98,23 @@ public final class Launcher {
 	 *
 	 * @throws MalformedURLException thrown
 	 */
-	public static void main(final String[] args) throws MalformedURLException {
-		// Create the object and parse options
-		Launcher obj = new Launcher();
-		int retCode = obj.parseOptions(args);
-
-		if (retCode != 0) {
-			System.exit(retCode);
+	public static void main(final String[] args) {
+		try {
+			// Create the object and parse options
+			Launcher obj = new Launcher();
+			int retCode = obj.parseOptions(args);
+	
+			if (retCode != 0) {
+				System.exit(retCode);
+			}
+	
+			// Wrap the launcher
+			obj.run();
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			System.exit(1);
 		}
-
-		// Wrap the launcher
-		obj.run();
 	}
 
 	/**

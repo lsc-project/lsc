@@ -398,10 +398,6 @@ public abstract class AbstractSynchronize {
 				LOGGER.error("Connection lost! Aborting.");
 				logActionError(jm, id, e);
 				return;
-			} catch (ExceptionInInitializerError e) {
-				// this type of exception should stop everything, too
-				countError++;
-				throw e;
 			} catch (RuntimeException e) {
 				countError++;
 				logActionError(jm, id, e);

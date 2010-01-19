@@ -107,8 +107,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		super();
 		lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
 		if (lscProperties == null) {
-			LOGGER.error("Unable to get LSC properties! Exiting ...");
-			throw new ExceptionInInitializerError("Unable to get LSC properties!");
+			throw new RuntimeException("Unable to get LSC properties!");
 		}
 	}
 
@@ -181,8 +180,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
 		if (props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
 			String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
-			LOGGER.error(errorMessage);
-			throw new ExceptionInInitializerError(errorMessage);
+			throw new RuntimeException(errorMessage);
 		}
 	}
 
@@ -191,8 +189,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 		if (value == null) {
 			String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
-			LOGGER.error(errorMessage);
-			throw new ExceptionInInitializerError(errorMessage);
+			throw new RuntimeException(errorMessage);
 		}
 
 		return value;
@@ -271,7 +268,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				IllegalArgumentException.class, InvocationTargetException.class};
 
 			if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-				LOGGER.error("Error while launching the following task: {}. Please check your code ! ({})", taskName, e);
+				LOGGER.error("Error while launching the following task: {}. Please check your configuration! ({})", taskName, e);
 				LOGGER.debug(e.toString(), e);
 				return false;
 			} else {

@@ -238,7 +238,7 @@ public final class JndiServices {
 			return null;
 		} catch (Exception e) {
 			LOGGER.error("Error opening the LDAP connection to the source!");
-			throw new ExceptionInInitializerError(e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -251,7 +251,7 @@ public final class JndiServices {
 			return getInstance(Configuration.getDstProperties());
 		} catch (Exception e) {
 			LOGGER.error("Error opening the LDAP connection to the destination!");
-			throw new ExceptionInInitializerError(e);
+			throw new RuntimeException(e);
 		}
 	}
 

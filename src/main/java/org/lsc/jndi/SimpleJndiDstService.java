@@ -91,7 +91,8 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
+			LOGGER.error("Bean class {} not found. Check this class name really exists.", beanClassName);
+			throw new RuntimeException(e);
 		}
 	}
 

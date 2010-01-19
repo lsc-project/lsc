@@ -723,10 +723,6 @@ class SynchronizeTask implements Runnable {
 			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
 			abstractSynchronize.logActionError(jm, id, e);
 			return;
-		} catch (ExceptionInInitializerError e) {
-			// this type of exception should stop everything, too
-			counter.incrementCountError();
-			throw e;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);

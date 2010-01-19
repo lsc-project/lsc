@@ -149,21 +149,16 @@ public class Configuration {
 		String ldapUrl = (String) props.get("java.naming.provider.url");
 
 		if (ldapUrl == null) {
-			String errorMessage = "No LDAP provider url specified. Aborting.";
-			LOGGER.error(errorMessage);
-			throw new ExceptionInInitializerError(errorMessage);
+			throw new RuntimeException("No LDAP provider url specified. Aborting.");
 		}
 		try {
 			contextDn = new LDAPURL(ldapUrl).getBaseDN().toString();
 		} catch (LDAPException e) {
-			LOGGER.error(e.toString());
-			throw new ExceptionInInitializerError(e);
+			throw new RuntimeException("Error getting context DN from LDAP provider url", e);
 		}
 
 		if (contextDn == null || contextDn.length() == 0) {
-			String errorMessage = "No context DN specified in LDAP provider url (" + props.get("java.naming.provider.url") + "). Aborting.";
-			LOGGER.error(errorMessage);
-			throw new ExceptionInInitializerError(errorMessage);
+			throw new RuntimeException("No context DN specified in LDAP provider url (" + props.get("java.naming.provider.url") + "). Aborting.");
 		}
 	}
 
@@ -292,6 +287,8 @@ public class Configuration {
 		if (new File(location).isDirectory()) {
 			ret = location;
 		} else {
+			String errorMessage = "Could not understand where the configuration is! Try using -f option.";
+			
 			/* Backward compatibility: if no directory was specified,
 			 * we must find the directory where configuration files are.
 			 * This is in the classpath, so we look for "lsc.properties"
@@ -299,16 +296,14 @@ public class Configuration {
 			 */
 			URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
 			if (propertiesURL == null) {
-				throw new ExceptionInInitializerError("No configuration file found!");
+				throw new RuntimeException(errorMessage);
 			}
 
 			try {
 				// convert the URL to a URI to reverse any character encoding (" " -> "%20" for example)
 				ret = appendDirSeparator(new File(propertiesURL.toURI().getPath()).getParent());
 			} catch (URISyntaxException e) {
-				String errorMessage = "Could not understand where the configuration is! Try using -f option.";
-				LOGGER.error(errorMessage);
-				throw new ExceptionInInitializerError(errorMessage);
+				throw new RuntimeException(errorMessage, e);
 			}
 		}
 		return ret;
@@ -347,11 +342,9 @@ public class Configuration {
 				UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", UID_MAX_LENGTH);
 
 			} catch (ConfigurationException e) {
-				LOGGER.error(e.toString());
-				throw new ExceptionInInitializerError("Unable to find '" + url + "' file. (" + e + ")");
+				throw new RuntimeException("Unable to find '" + url + "' file", e);
 			} catch (MalformedURLException e) {
-				LOGGER.error(e.toString());
-				throw new ExceptionInInitializerError("Unable to find file. (" + e + ")");
+				throw new RuntimeException("Unable to find file", e);
 			}
 		}
 		return config;

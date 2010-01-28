@@ -1,87 +1,101 @@
+/* CSS styles for LSC User Guide */
+
+/* LSC colors (from lsc-project.org)
+ *
+ * Light green: #A7CC44
+ * Dark green:  #7A9833
+ * Light gray:  #949494 
+ * Dark gray:   #454545
+ */
+
+html {
+	background:#A7CC44;
+}
+
 body {
-    margin: auto;
-    padding-right: 1em;
-    padding-left: 1em;
-    max-width: 44em; 
-    border-left: 1px solid black;
-    border-right: 1px solid black;
-    color: black;
-    font-family: Verdana, sans-serif;
-    font-size: 100%;
-    line-height: 140%;
-    color: #333; 
+	margin: 20px 100px;
+	padding: 10px;
+	font-family: sans-serif;
+	color: #454545;
+	background:#fff;
+	border-radius:20px;
+	-moz-border-radius:20px;
+	-webkit-border-radius:20px;
 }
 pre {
-    border: 1px dotted gray;
-    background-color: #ececec;
-    color: #1111111;
-    padding: 0.5em;
+	border: 1px dotted #454545;
+	background-color: #949494;
+	color: #000;
+	padding: 5px;
 }
 code {
-    font-family: monospace;
+	font-family: monospace;
 }
 a {
-	color : #7a9833;
-	text-decoration : none;
+	color: #7A9833;
+	text-decoration: none;
 }
 a:hover {
-	color : #7a9833;
-	background : inherit;
-	text-decoration : underline;
+	color: #454545;
 }
-h1 a, h2 a, h3 a, h4 a, h5 a { 
-    text-decoration: none;
-    color: #7a9833; 
+h1, h2, h3, h4, h5 { 
+	font-weight: bold;
 }
-h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover { 
-    text-decoration: underline;
-    color: #7a9833; 
-}
-h1, h2, h3, h4, h5 { font-family: verdana;
-                     font-weight: bold;
-                     border-bottom: 1px dotted #7a9833;
-                     color: #7a9833; }
 h1 {
-        font-size: 130%;
+	font-size: 130%;
+	text-align:right;
+	color:#fff;
+	padding:5px;
+	background:#A7CC44;
+}
+h1 a {
+	color:#fff;
 }
 
 h2 {
-        font-size: 110%;
+	font-size: 110%;
+	border-left:30px solid #7A9833;
+	padding:5px;
 }
 
 h3 {
-        font-size: 95%;
+	font-size: 95%;
 }
 
 h4 {
-        font-size: 90%;
-        font-style: italic;
+	font-size: 90%;
+	font-style: italic;
 }
 
 h5 {
-        font-size: 90%;
-        font-style: italic;
+	font-size: 90%;
+	font-style: italic;
 }
 
 h1.title {
-        font-size: 200%;
-        font-weight: bold;
-        padding-top: 0.2em;
-        padding-bottom: 0.2em;
-        text-align: left;
-        border: none;
+	font-size:200%;
+	text-align:center;
+	color:#fff;
+	background:#7A9833;
 }
 
 dt code {
-        font-weight: bold;
+	font-weight: bold;
 }
 dd p {
-        margin-top: 0;
+	margin-top: 0;
 }
 
+#toc {
+	float:right;
+	width:40%;
+	background:#eee;
+	margin-left:5px;
+	border:10px #fff solid;
+}
 #footer {
-        padding-top: 1em;
-        font-size: 70%;
-        color: gray;
-        text-align: center;
+	padding-top: 1em;
+	font-size: 70%;
+	color: gray;
+	text-align: center;
 }

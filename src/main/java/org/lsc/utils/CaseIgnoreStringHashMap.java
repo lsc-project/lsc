@@ -97,7 +97,9 @@ public class CaseIgnoreStringHashMap<V> extends HashMap<String, V> {
 	public boolean containsKey(Object key) {
 		if (key instanceof String) {
 			return super.containsKey(((String) key).toLowerCase());
-		} else return false;
+		} else {
+			return false;
+		}
 	}
 
 	/* (non-Javadoc)

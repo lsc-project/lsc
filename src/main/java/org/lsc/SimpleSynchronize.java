@@ -287,7 +287,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				IllegalArgumentException.class, InvocationTargetException.class};
 
 			if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-				LOGGER.error("Error while launching the following task: {}. Please check your configuration! ({})", taskName, e);
+				String errorDetail;
+				if (e instanceof InvocationTargetException && e.getCause() != null) {
+					errorDetail = e.getCause().toString();
+				} else {
+					errorDetail = e.toString();
+				}
+
+				LOGGER.error("Error while launching task \"{}\". Please check your configuration! ({})", taskName, errorDetail);
 				LOGGER.debug(e.toString(), e);
 				return false;
 			} else {

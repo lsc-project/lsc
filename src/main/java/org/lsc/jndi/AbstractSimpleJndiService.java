@@ -128,6 +128,15 @@ public abstract class AbstractSimpleJndiService {
 			attrsId = Arrays.asList(attrsIdValue.split(" "));
 		}
 
+		// check that we have all parameters, or abort
+		if (filterId == null || filterId.length() == 0	) {
+			throw new RuntimeException("No filterId property specified in " + this.getClass().getName() + ". Aborting.");
+		}
+
+		if (filterAll == null || filterAll.length() == 0) {
+			throw new RuntimeException("No filterAll property specified in " + this.getClass().getName() + ". Aborting.");
+		}
+
 	}
 
 	/**

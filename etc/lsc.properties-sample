@@ -162,7 +162,7 @@ lsc.tasks.FirstTask.dstService.attrs = description cn sn userPassword objectClas
 
 # Java class name for the LDAP objectClass to compare source and destination objects
 # This should be the LDAP objectClass of entries in the destination directory
-lsc.tasks.FirstTask.bean = org.lsc.beans.inetOrgPersonBean
+lsc.tasks.FirstTask.bean = org.lsc.beans.SimpleBean
 
 # Construct a DN for new entries in the destination directory
 # This is a JavaScript expression, and can access any utility functions and the srcBean.

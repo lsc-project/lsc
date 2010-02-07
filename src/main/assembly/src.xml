@@ -9,7 +9,7 @@
   <id>src</id>
   <baseDirectory>lsc-${project.version}-src</baseDirectory>
   <formats>
-    <format>tar.bz2</format>
+    <format>tar.gz</format>
   </formats>
   <fileSets>
     <fileSet>

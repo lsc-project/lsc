@@ -188,7 +188,7 @@ public final class Launcher {
 		try {
 			cmdLine = parser.parse(options, args);
 
-			if (cmdLine.hasOption("s")) {
+			if (cmdLine.hasOption("a")) {
 				asyncType = parseSyncType(cmdLine.getOptionValue("a"));
 			}
 			if (cmdLine.hasOption("s")) {
@@ -196,9 +196,6 @@ public final class Launcher {
 			}
 			if (cmdLine.hasOption("f")) {
 				configurationLocation = new File(cmdLine.getOptionValue("f")).getAbsolutePath();
-			}
-			if (cmdLine.hasOption("t")) {
-				threads = Integer.parseInt(cmdLine.getOptionValue("t"));
 			}
 			if (cmdLine.hasOption("t")) {
 				threads = Integer.parseInt(cmdLine.getOptionValue("t"));

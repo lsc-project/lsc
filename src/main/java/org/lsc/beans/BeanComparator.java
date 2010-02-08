@@ -120,7 +120,7 @@ public final class BeanComparator {
 		// this must be either a MODIFY or MODRDN operation
 		// clone the source bean to calculate modifications on the DN
 		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
-		if (itmBean.getDistinguishName() != null && itmBean.getDistinguishName().length() != 0 &&
+		if (!"".equals(itmBean.getDistinguishName()) &&
 				dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) != 0) {
 			return JndiModificationType.MODRDN_ENTRY;
 		} else {
@@ -195,9 +195,6 @@ public final class BeanComparator {
 		jm.setDistinguishName(getDstDN(itmBean, dstBean, condition));
 
 		switch (modificationType) {
-			case DELETE_ENTRY:
-				break;
-
 			case ADD_ENTRY:
 			case MODIFY_ENTRY:
 				jm = getAddModifyEntry(jm, syncOptions, srcBean, itmBean, dstBean, customLibrary);

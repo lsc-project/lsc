@@ -61,6 +61,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class FrenchFilters {
 
+	// Utility class
+	private FrenchFilters() {}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FrenchFilters.class);
 
 	/** The regexep for authorized characters */

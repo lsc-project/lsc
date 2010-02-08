@@ -82,6 +82,9 @@ import org.lsc.jndi.JndiServices;
  */
 public class LDAP {
 
+	// Utility class
+	private LDAP() {}
+	
 	/**
 	 * Connects to a LDAP server anonymously and tries to rebind with the
 	 * provided DN and password to check.

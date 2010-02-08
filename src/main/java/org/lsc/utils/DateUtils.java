@@ -61,6 +61,9 @@ import java.util.TimeZone;
  */
 public final class DateUtils {
 
+	// Utility class
+	private DateUtils() {}
+	
 	/**
 	 * This is the standard LDAP date format : yyyyMMddHHmmss.S'Z'.
 	 */

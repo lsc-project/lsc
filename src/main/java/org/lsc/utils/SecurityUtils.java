@@ -61,6 +61,9 @@ public class SecurityUtils {
 	public static final String HASH_MD5 = "MD5";
 	public static final String HASH_SHA1 = "SHA1";
 
+	// Utility class
+	private SecurityUtils() {}
+	
 	/**
 	 * Decrypt a base64 value.
 	 * @param value The value

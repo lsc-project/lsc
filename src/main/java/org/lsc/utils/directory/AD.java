@@ -57,6 +57,9 @@ import java.util.HashMap;
  */
 public class AD {
 
+	// Utility class
+	private AD() {}
+	
 	/**
 	 * Set or unset some bits to a UserAccountControl attribute of an AD
 	 *

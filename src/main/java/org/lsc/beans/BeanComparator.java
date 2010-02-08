@@ -234,20 +234,13 @@ public final class BeanComparator {
 
 		// If we're not really going to create the entry, silently return a
 		// pseudo value
-		if (!condition) {
+		if (false == condition) {
 			// condition is false, we're not really going to create the entry
 			// set a pseudo DN to use for display purposes
 			return "No DN set! Read it from the source or set lsc.tasks.NAME.dn";
 		}
 
-		// still no DN? Try last resort, but complain about it loudly, this is
-		// probably not what the user wants!
-		LOGGER.warn("No DN set! Trying to generate an DN based on the uid attribute!");
-
-		if (itmBean.getAttributeById("uid") == null || itmBean.getAttributeById("uid").size() == 0) {
-			throw new RuntimeException("-- Development error: No RDN found (uid by default)!");
-		}
-		return "uid=" + itmBean.getAttributeById("uid").get() + "," + Configuration.DN_PEOPLE;
+		throw new RuntimeException("No DN set! Read it from the source or set lsc.tasks.NAME.dn");
 	}
 
 	/**

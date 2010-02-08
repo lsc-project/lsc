@@ -248,12 +248,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 			} catch (NoSuchMethodException e) {
 				try {
-					// backwards compatibility: if the source service doesn't take any properties,
-					// use the parameter less constructor
+					// backwards compatibility: if the source service doesn't take a beanClassName,
+					// use just the properties as a parameter
 					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class});
 					srcService = (IService) constrSrcService.newInstance(new Object[] {srcServiceProperties});
 				} catch (NoSuchMethodException e1) {
-					// backwards compatibility: if the source service doesn't take any properties,
+					// backwards compatibility: if the source service doesn't take any properties or a beanClassName,
 					// use the parameter less constructor
 					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{});
 					srcService = (IService) constrSrcService.newInstance();

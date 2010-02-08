@@ -89,8 +89,7 @@ public abstract class AbstractJdbcService implements IService {
 	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
 		Map<String, Object> attributeMap = attributes.getAttributes();
 		try {
-			Object o = sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
-			return (IBean) o;
+			return (IBean) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
 			LOGGER.debug(e.toString(), e);

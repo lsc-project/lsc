@@ -90,14 +90,9 @@ public final class Launcher {
 	// define command line options recognized
 	static {
 		options = SimpleSynchronize.getOptions();
-		options.addOption("l", "startLdapServer", false,
-						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
-		options.addOption("s", "synchronization", true,
-						"Synchronization type (one of the available tasks or 'all')");
-		options.addOption("c", "cleaning", true,
-						"Cleaning type (one of the available tasks or 'all')");
-		options.addOption("f", "cfg", true,
-						"Specify configuration directory");
+		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
+		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
+		options.addOption("f", "config", true, "Specify configuration directory");
 		options.addOption("h", "help", false, "Get this text");
 	}
 	
@@ -218,3 +213,4 @@ public final class Launcher {
 		formatter.printHelp("lsc", options);
 	}
 }
+

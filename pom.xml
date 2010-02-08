@@ -197,7 +197,7 @@
 						<id>startLdapServer</id>
 						<phase>test-compile</phase>
 						<configuration>
-							<tasks>
+							<tasks unless="maven.test.skip">
 								<property name="execution.path" refid="maven.runtime.classpath"></property>
 								<ant antfile="${basedir}/misc/build-runldap.xml" target="startLdapServer"></ant>
 							</tasks>
@@ -210,7 +210,7 @@
 						<id>stopLdapServer</id>
 						<phase>test</phase>
 						<configuration>
-							<tasks>
+							<tasks unless="maven.test.skip">
 								<property name="execution.path" refid="maven.runtime.classpath"></property>
 								<property name="plugin.path" refid="maven.plugin.classpath"></property>
 								<ant antfile="${basedir}/misc/build-runldap.xml" target="stopLdapServer"></ant>

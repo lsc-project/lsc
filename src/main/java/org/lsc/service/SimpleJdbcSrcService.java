@@ -57,6 +57,7 @@ import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
+import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 
@@ -84,7 +85,19 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
 		requestNameForNextId = props.getProperty("requestNameForNextId");
-		interval = Integer.parseInt(props.getProperty("interval"));
+		
+		// check that we have all parameters, or abort
+		Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
+		Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
+		Configuration.assertPropertyNotEmpty("requestNameForNextId", requestNameForNextId, this.getClass().getName());
+		
+		try {
+			interval = Integer.parseInt(props.getProperty("interval"));
+		}
+		catch (NumberFormatException e) {
+			interval = 0;
+		}
+		
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {

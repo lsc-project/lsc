@@ -485,4 +485,18 @@ public class Configuration {
 		// WARNING: don't log anything before HERE!
 		LOGGER.debug("Reading configuration from {}", Configuration.getConfigurationDirectory());
 	}
+	
+	/**
+	 * <P>Helper method to check that a String read in from a property is not empty or null</P>
+	 * 
+	 * @param propertyName Name of the property key as read from lsc.properties
+	 * @param propertyValue Value read from the configuration
+	 * @param location Where this property is read from, to display a meaningful error message (example: class name, task name, etc)
+	 * @throws RuntimeException If the property is null or empty.
+	 */
+	public static void assertPropertyNotEmpty(String propertyName, String propertyValue, String location) throws RuntimeException {
+		if (propertyValue == null || propertyValue.length() == 0	) {
+			throw new RuntimeException("No " + propertyName + " property specified in " + location + ". Aborting.");
+		}
+	}
 }

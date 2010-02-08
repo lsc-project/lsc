@@ -56,6 +56,7 @@ import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
+import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
@@ -79,6 +80,10 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 	public SimpleJdbcSrcService(Properties props) {
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
+		
+		// check that we have all parameters, or abort
+		Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
+		Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
 	}
 
 	/* (non-Javadoc)

@@ -63,6 +63,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.lsc.LscObject;
+import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.slf4j.Logger;
@@ -129,14 +130,8 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		// check that we have all parameters, or abort
-		if (filterId == null || filterId.length() == 0	) {
-			throw new RuntimeException("No filterId property specified in " + this.getClass().getName() + ". Aborting.");
-		}
-
-		if (filterAll == null || filterAll.length() == 0) {
-			throw new RuntimeException("No filterAll property specified in " + this.getClass().getName() + ". Aborting.");
-		}
-
+		Configuration.assertPropertyNotEmpty("filterId", filterId, this.getClass().getName());
+		Configuration.assertPropertyNotEmpty("filterAll", filterAll, this.getClass().getName());
 	}
 
 	/**

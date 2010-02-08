@@ -24,7 +24,7 @@
 ##############################
 # This section is mandatory since all synchronizations currently go to an LDAP directory.
 
-# Conection URL. This must include a valid LDAP context.
+# Connection URL. This must include a valid LDAP context.
 dst.java.naming.provider.url = ldap://localhost:33389/dc=lsc-project,dc=org
 
 # Authentication type.
@@ -110,8 +110,10 @@ lsc.tasks.FirstTask.type = ldap2ldap
 
 # Java class name for the service to read objects from the source
 # Either "org.lsc.jndi.SimpleJndiSrcService" for ldap2ldap, or
-# "org.lsc.service.<objectName>JDBCService" for db2ldap
+# "org.lsc.service.SimpleJdbcSrcService" for db2ldap
+# According to which service you use here, you only need *one* of the following sections
 lsc.tasks.FirstTask.srcService = org.lsc.jndi.SimpleJndiSrcService
+
 
 ### SimpleJndiSrcService parameters
 # The parameters in this section only apply to the SimpleJndiSrcService
@@ -135,9 +137,25 @@ lsc.tasks.FirstTask.srcService.attrs = description cn sn userPassword
 ### END of SimpleJndiSrcService parameters
 
 
-# Java class name for the service to read objects from the source
+### SimpleJdbcSrcService parameters
+# The parameters in this section only apply to the SimpleJdbcSrcService
+# This section can safely be deleted if you are not using db2ldap synchronization.
+
+# Request name from a file in CONFIGURATION_DIR/sql-map-config.d/
+# to read a full list of pivot attributes for all objects to be synchronized
+lsc.tasks.FirstTask.srcService.requestNameForList = getAllPeoplePivots
+
+# Request name from a file in CONFIGURATION_DIR/sql-map-config.d/
+# to read a single entry to be synchronized given a set of pivot attributes
+lsc.tasks.FirstTask.srcService.requestNameForObject = getOnePerson
+
+### END of SimpleJdbcSrcService parameters
+
+
+# Java class name for the service to read and write objects in the destination
 # Usually "org.lsc.jndi.SimpleJndiDstService".
 lsc.tasks.FirstTask.dstService = org.lsc.jndi.SimpleJndiDstService
+
 
 ### SimpleJndiDstService parameters
 # The parameters in this section only apply to the SimpleJndiDstService

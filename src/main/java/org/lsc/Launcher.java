@@ -99,19 +99,13 @@ public final class Launcher {
 	// define command line options recognized
 	static {
 		options = SimpleSynchronize.getOptions();
-		options.addOption("l", "startLdapServer", false,
-						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
-		options.addOption("a", "synchronization", true,
-						"Asynchronous synchronization type (one of the available tasks or 'all')");
-		options.addOption("s", "synchronization", true,
-						"Synchronization type (one of the available tasks or 'all')");
-		options.addOption("c", "cleaning", true,
-						"Cleaning type (one of the available tasks or 'all')");
-		options.addOption("f", "cfg", true,
-						"Specify configuration directory");
-		options.addOption("t", "number of parrallel threads to synchronize a task", true,
-						"Server mode");
-		options.addOption("i", "Time limit in parallel server mode", true, "Time limit");
+		options.addOption("a", "asynchronous-synchronize", true,
+						"Asynchronous synchronization task (one of the available tasks or 'all')");
+		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
+		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
+		options.addOption("f", "config", true, "Specify configuration directory");
+		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task");
+		options.addOption("i", "time-limit", true, "Time limit in parallel server mode");
 		options.addOption("h", "help", false, "Get this text");
 	}
 	

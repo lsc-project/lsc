@@ -46,7 +46,6 @@
 package org.lsc;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -82,21 +81,38 @@ public final class Launcher {
 	/** Default synchronize instance. */
 	private SimpleSynchronize sync;
 
+	/** Available command line options definition */
+	private static Options options = null;
+	
+	/** Parsed command line options */
+	private CommandLine cmdLine;
+	
+	// define command line options recognized
+	static {
+		options = SimpleSynchronize.getOptions();
+		options.addOption("l", "startLdapServer", false,
+						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
+		options.addOption("s", "synchronization", true,
+						"Synchronization type (one of the available tasks or 'all')");
+		options.addOption("c", "cleaning", true,
+						"Cleaning type (one of the available tasks or 'all')");
+		options.addOption("f", "cfg", true,
+						"Specify configuration directory");
+		options.addOption("h", "help", false, "Get this text");
+	}
+	
 	/**
 	 * Default constructor - instantiate objects.
 	 */
 	public Launcher() {
 		syncType = new ArrayList<String>();
 		cleanType = new ArrayList<String>();
-		sync = new SimpleSynchronize();
 	}
 
 	/**
 	 * Main launcher.
 	 *
 	 * @param args parameters passed by the JRE
-	 *
-	 * @throws MalformedURLException thrown
 	 */
 	public static void main(final String[] args) {
 		try {
@@ -125,6 +141,13 @@ public final class Launcher {
 			// if a configuration directory was set on command line, use it to set up Configuration
 			Configuration.setUp(configurationLocation);
 
+			// initialize the synchronization engine
+			sync = new SimpleSynchronize();
+			if (!sync.parseOptions(cmdLine)) {
+				printHelp();
+				System.exit(1);
+			}
+			
 			// do the work!
 			sync.launch(syncType, cleanType);
 		} catch (Exception e) {
@@ -139,21 +162,10 @@ public final class Launcher {
 	 * @return the status code (0: OK, >=1 : failed)
 	 */
 	private int parseOptions(final String[] args) {
-		Options options = sync.getOptions();
-		options.addOption("l", "startLdapServer", false,
-						"Start the embedded OpenDS LDAP server (will be shutdown at the end)");
-		options.addOption("s", "synchronization", true,
-						"Synchronization type (one of the available tasks or 'all')");
-		options.addOption("c", "cleaning", true,
-						"Cleaning type (one of the available tasks or 'all')");
-		options.addOption("f", "cfg", true,
-						"Specify configuration directory");
-		options.addOption("h", "help", false, "Get this text");
-
 		CommandLineParser parser = new GnuParser();
 
 		try {
-			CommandLine cmdLine = parser.parse(options, args);
+			cmdLine = parser.parse(options, args);
 
 			if (cmdLine.hasOption("s")) {
 				syncType = parseSyncType(cmdLine.getOptionValue("s"));
@@ -167,9 +179,8 @@ public final class Launcher {
 		
 			if(cmdLine.getOptions().length == 0 || 
 							cmdLine.hasOption("h") || 
-							!sync.parseOptions(cmdLine) ||
 							((syncType.size() == 0) && (cleanType.size() == 0))) {
-				printHelp(options);
+				printHelp();
 				return 1;
 			}	
 		} catch (ParseException e) {
@@ -201,9 +212,8 @@ public final class Launcher {
 
 	/**
 	 * Print the command line help.
-	 * @param options specified options to manage
 	 */
-	private static void printHelp(final Options options) {
+	private static void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("lsc", options);
 	}

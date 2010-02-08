@@ -80,8 +80,16 @@ public abstract class AbstractSynchronize {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
 	/** List of configured options. */
-	private Options options;
+	private static Options options = new Options();
 
+	static {
+		options.addOption("nc", "nocreate", false, "Don't create any entry");
+		options.addOption("nu", "noupdate", false, "Don't update");
+		options.addOption("nd", "nodelete", false, "Don't delete");
+		options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
+		options.addOption("n", "dryrun", false, "Don't update the directory at all");
+	}
+	
 	/**
 	 * This is the flag to prevent entries add operation in the target
 	 * directory.
@@ -110,12 +118,6 @@ public abstract class AbstractSynchronize {
 	 * Default constructor.
 	 */
 	protected AbstractSynchronize() {
-		options = new Options();
-		options.addOption("nc", "nocreate", false, "Don't create any entry");
-		options.addOption("nu", "noupdate", false, "Don't update");
-		options.addOption("nd", "nodelete", false, "Don't delete");
-		options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
-		options.addOption("n", "dryrun", false, "Don't update the directory at all");
 	}
 
 	/**
@@ -552,7 +554,7 @@ public abstract class AbstractSynchronize {
 	 *
 	 * @return the options
 	 */
-	public final Options getOptions() {
+	public static final Options getOptions() {
 		return options;
 	}
 

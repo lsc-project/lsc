@@ -46,6 +46,8 @@
 package org.lsc.utils.directory;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -125,6 +127,12 @@ public class AD {
 		return new String(quotedPassword.getBytes("UTF-16LE"));
 	}
 
+
+	/**
+	 * The weird date of Microsoft AD for last login
+	 */
+	private static Long LAST_LOGON_START_TIME = 116444736000000000L;
+
 	/**
 	 * Return the number of weeks since the last logon
 	 *
@@ -137,11 +145,39 @@ public class AD {
 		}
 		Long ts = Long.parseLong(lastLogonTimestamp);
 		//We divide the ts by 10⁷ for seconds, 60 seconds, 60 minutes, 24 hours, 7 days
-		long llastLogonAdjust = 116444736000000000L;  // adjust factor for converting it to java
-		long secondsToUnixTimeStamp = (ts - llastLogonAdjust) / (long) Math.pow(10, 7);
+		long secondsToUnixTimeStamp = (ts - LAST_LOGON_START_TIME) / (long) Math.pow(10, 7);
 		long lastLogonTime = (new Date().getTime() / 1000) - secondsToUnixTimeStamp;
 
 		return (int) (lastLogonTime / (60 * 60 * 24 * 7));
+	}
+
+	/**
+	 * Return the accountexpires time in microsoft format
+	 *
+	 * @param expireDate the date in any format
+	 * @param format The format of the date expireDate
+	 * @return the date in microsoft AD format
+	 * @throws ParseException
+	 */
+	public static long getAccountExpires(String expireDate, String format) throws ParseException {
+		if (expireDate == null || expireDate.length() == 0) {
+			return 0;
+		}
+
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		long accountExpiresTimeStampMs = sdf.parse(expireDate).getTime() * (long) Math.pow(10, 4);
+		return accountExpiresTimeStampMs + LAST_LOGON_START_TIME;
+	}
+
+	/**
+	 * Returns the accountexpires time in microsoft format
+	 *
+	 * @param expireDate the date in the format yyyy-MM-dd
+	 * @return
+	 * @throws ParseException
+	 */
+	public static long getAccountExpires(String expireDate) throws ParseException {
+		return getAccountExpires(expireDate, "yyyy-MM-dd");
 	}
 
 	/* The Hash of values to set or to unset  */

@@ -108,5 +108,4 @@ public class ADTest extends TestCase {
     	
     	assertTrue(numWeeksFromReference <= numWeeksFromLastLogon + 1 && numWeeksFromReference >= numWeeksFromLastLogon - 1);
     }
-
 }

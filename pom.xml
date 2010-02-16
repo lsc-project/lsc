@@ -298,11 +298,6 @@
 			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
 		</repository>
 		<repository>
-			<id>IBiblio - Maven legacy</id>
-			<url>http://www.ibiblio.org/maven/</url>
-			<layout>legacy</layout>
-		</repository>
-		<repository>
 			<id>Codehaus Snapshot</id>
 			<url>http://snapshots.repository.codehaus.org/</url>
 			<snapshots>
@@ -439,8 +434,8 @@
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>
-			<artifactId>bcprov</artifactId>
-			<version>${jdk-version}-140</version>
+			<artifactId>bcprov-${jdk-version}</artifactId>
+			<version>140</version>
 		</dependency>
 	</dependencies>
 

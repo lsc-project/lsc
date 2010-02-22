@@ -253,6 +253,12 @@ public class Configuration {
 	public static void setLocation(String configurationLocation) {
 		configurationLocation = cleanup(configurationLocation);
 		location = appendDirSeparator(configurationLocation);
+		
+		// check the new location actually exists
+		if (! new File(location).exists()) {
+			// no point logging anything here, the logging configuration can't be read if we don't have a config location
+			throw new RuntimeException("Configuration location doesn't exist! (" + location + "). Aborting.");
+		}
 	}
 
 	private static String appendDirSeparator(String path) {

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%-4r - %-5p - %m%n</Pattern>
+		</layout>
+	</appender>
+	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+		<Append>true</Append>
+		<File>/tmp/synchro.log</File>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%m%n</Pattern>
+		</layout>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>synchro.log.%i.gz</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>7</MaxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>10000KB</MaxFileSize>
+		</triggeringPolicy>
+	</appender>
+	<logger name="communicationLogger" level="WARN">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<logger name="org.lsc" level="INFO">
+		<appender-ref ref="LSC"/>
+	</logger>
+	<logger name="org.apache" level="WARN">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<logger name="lsc" level="INFO">
+		<appender-ref ref="LSC"/>
+	</logger>
+	<logger name="poolLogger" level="ERROR">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<root level="WARN">
+		<appender-ref ref="CONSOLE"/>
+	</root>
+</configuration>
+

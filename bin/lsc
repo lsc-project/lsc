@@ -122,7 +122,6 @@ do
 	CLASSPATH="$CLASSPATH:$jar"
 done
 
-cd "$CFG_DIR"
 ${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $* &>> "$LOG_FILE"
 
 status=$?

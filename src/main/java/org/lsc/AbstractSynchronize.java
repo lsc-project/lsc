@@ -403,6 +403,11 @@ public abstract class AbstractSynchronize {
 			} catch (RuntimeException e) {
 				countError++;
 				logActionError(jm, id, e);
+				
+				if (e.getCause() instanceof CommunicationException) {
+					LOGGER.error("Connection lost! Aborting.");
+					return;
+				}
 			} catch (Exception e) {
 				countError++;
 				logActionError(jm, id, e);

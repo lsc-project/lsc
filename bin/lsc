@@ -59,7 +59,7 @@ fi
 
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
-LOG_DIR="$LSC_HOME/var/log"
+LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/lsc.log"
 
 mkdir -p "$LOG_DIR"
@@ -98,8 +98,6 @@ function get_java() {
 # Main
 #====================================================================
 
-echo "Messages are logged to $LOG_FILE"
-
 # check if we have java executable
 get_java
 
@@ -122,7 +120,7 @@ do
 	CLASSPATH="$CLASSPATH:$jar"
 done
 
-${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $* &>> "$LOG_FILE"
+${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $* 
 
 status=$?
 

@@ -47,6 +47,7 @@ package org.lsc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -94,6 +95,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks.TASKNAME.bean property. */
 	public static final String BEAN_PROPS_PREFIX = "bean";
 
+	/** lsc.tasks.TASKNAME.postSyncHook property. */
+	public static final String POST_SYNC_HOOK_PROPS_PREFIX = "postSyncHook";
+	
+	/** lsc.tasks.TASKNAME.postCleanHook property. */
+	public static final String POST_CLEAN_HOOK_PROPS_PREFIX = "postCleanHook";
+	    
 	private static final Logger LOGGER =
 					LoggerFactory.getLogger(SimpleSynchronize.class);
 
@@ -148,6 +155,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 				if (!launchTask(taskName, TaskMode.sync)) {
 					return false;
+				} else {
+					String syncHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_SYNC_HOOK_PROPS_PREFIX);
+					if(syncHook != null && syncHook != "") {
+						runPostHook(taskName, syncHook);
+					}
 				}
 			}
 			if (isCleanTaskAll || cleanTasks.contains(taskName)) {
@@ -155,6 +167,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 				if (!launchTask(taskName, TaskMode.clean)) {
 					return false;
+				} else {
+					String cleanHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_CLEAN_HOOK_PROPS_PREFIX);
+					if(cleanHook != null && cleanHook != "") {
+						runPostHook(taskName, cleanHook);
+					}
 				}
 			}
 		}
@@ -284,5 +301,53 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Invoke the hook method wether it's a postsync or postclean
+	 * 
+	 * @param taskName the task name
+	 * @param servicePostHook the fully qualified name of the method to invoke
+	 */
+	private void runPostHook(String taskName, String servicePostHook) {
+		if (servicePostHook != null && servicePostHook.length() > 0) {
+			LOGGER.debug("Service Post Hook found: " + servicePostHook);
+			String hookClass = servicePostHook.substring(0, servicePostHook
+					.lastIndexOf('.'));
+			String hookMethod = servicePostHook.substring(servicePostHook
+					.lastIndexOf('.') + 1);
+
+			LOGGER.debug("Hook Class: " + hookClass);
+			LOGGER.debug("Hook Method: " + hookMethod);
+
+			if (hookClass.length() > 0 && hookMethod.length() > 0) {
+				try {
+					Method hook = Class.forName(hookClass).getMethod(
+							hookMethod, new Class[] {});
+
+					hook.invoke(null, new Object[] {});
+				} catch (ClassNotFoundException e) {
+					LOGGER.error("Invalid Hook Class specified " + hookClass
+							+ " for task " + taskName);
+					LOGGER.debug(e.toString(), e);
+				} catch (NoSuchMethodException e) {
+					LOGGER.error("Invalid hook method " + hookMethod
+							+ " specified for task " + taskName);
+					LOGGER.debug(e.toString(), e);
+				} catch (IllegalArgumentException e) {
+					LOGGER.error("Invalid argument exception for hook method "
+							+ hookClass + "." + hookMethod);
+					LOGGER.debug(e.toString(), e);
+				} catch (IllegalAccessException e) {
+					LOGGER.error("Illegal access exception for hook method "
+							+ hookClass + "." + hookMethod);
+					LOGGER.debug(e.toString(), e);
+				} catch (InvocationTargetException e) {
+					LOGGER.error("Invocation target exception for hook method "
+							+ hookClass + "." + hookMethod);
+					LOGGER.debug(e.toString(), e);
+				}
+			}
+		}
 	}
 }

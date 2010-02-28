@@ -30,7 +30,10 @@
 #====================================================================
 # Changelog
 #====================================================================
-# Version 0.3 (01/2010à:
+# Version 0.4 (01/2010):
+# - Include a fatal error message in JAVA_HOME missing
+# - Notice log file location
+# Version 0.3 (01/2010):
 # - Update for LSC 1.2
 # - Guess the base directory for LSC and usual directories
 # - Use JAVA_HOME from the environment or java on PATH, without redefining it
@@ -56,7 +59,7 @@ fi
 
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
-LOG_DIR="$LSC_HOME/var/log"
+LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/lsc.log"
 
 mkdir -p "$LOG_DIR"
@@ -66,6 +69,11 @@ mkdir -p "$LOG_DIR"
 #====================================================================
 function log() {
 	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" >> "$LOG_FILE"
+}
+
+function fatal() {
+	log $1
+	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" 1>&2
 }
 
 # Determine where the java exectuable is
@@ -81,8 +89,8 @@ function get_java() {
 	if [ $? -eq 0 ]; then return; fi
 
 	# Nothing seems approprite, warn and exit
-	log "No java executable found on PATH or in JAVA_HOME! Aborting."
-	log "Define JAVA_HOME or adjust your PATH variable to include java."
+	fatal "No java executable found on PATH or in JAVA_HOME! Aborting."
+	fatal "Define JAVA_HOME or adjust your PATH variable to include java."
 	exit 2
 }
 
@@ -97,7 +105,7 @@ get_java
 if [ $(ps -efww | grep java | grep org.lsc | grep -v grep | wc -l) -ne 0 ] 
 then
 	# LSC already running
-	log "LSC already running - launch aborted"
+	fatal "LSC already running - launch aborted"
 
 	# since LSC already running, don't launch and exit
 	exit 1
@@ -112,10 +120,18 @@ do
 	CLASSPATH="$CLASSPATH:$jar"
 done
 
-${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $*
+${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $* 
+
+status=$?
 
 # LSC finished running
 log "LSC finished running"
+
+if [ $status -ne 0 ]
+then
+	echo "Last log file line: `tail -2 "$LOG_FILE" | head -1`" 1>&2
+	exit $status
+fi
 
 #====================================================================
 # Exit

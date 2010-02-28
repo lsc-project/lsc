@@ -215,7 +215,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
 		try {
-			LSCStructuralLogger.DESTINATION.warn("Starting {} for {}", taskMode.name(), taskName);
+			LOGGER.info("Starting {} for {}", taskMode.name(), taskName);
 
 			String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
 

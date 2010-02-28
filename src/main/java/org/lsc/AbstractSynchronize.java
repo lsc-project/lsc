@@ -267,9 +267,9 @@ public abstract class AbstractSynchronize {
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
 		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
-			LSCStructuralLogger.GLOBAL.error(totalsLogMessage, objects);
+			LOGGER.error(totalsLogMessage, objects);
 		} else {
-			LSCStructuralLogger.GLOBAL.warn(totalsLogMessage, objects);
+			LOGGER.info(totalsLogMessage, objects);
 		}
 	}
 
@@ -331,9 +331,9 @@ public abstract class AbstractSynchronize {
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
 		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
-			LSCStructuralLogger.DESTINATION.error(totalsLogMessage, objects);
+			LOGGER.error(totalsLogMessage, objects);
 		} else {
-			LSCStructuralLogger.DESTINATION.warn(totalsLogMessage, objects);
+			LOGGER.info(totalsLogMessage, objects);
 		}
 	}
 

@@ -229,4 +229,8 @@ public class ScriptableJndiServices extends ScriptableObject {
 
 		return cList;
 	}
+	
+	public String getContextDn() {
+		return jndiServices.getContextDn();
+	}
 }

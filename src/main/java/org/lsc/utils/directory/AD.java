@@ -152,11 +152,11 @@ public class AD {
 	}
 
 	/**
-	 * Return the accountexpires time in microsoft format
+	 * Return the accountexpires time in Microsoft format
 	 *
 	 * @param expireDate the date in any format
-	 * @param format The format of the date expireDate
-	 * @return the date in microsoft AD format
+	 * @param format The format of the date expireDate.  See http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html.
+	 * @return the date in Microsoft AD format
 	 * @throws ParseException
 	 */
 	public static long getAccountExpires(String expireDate, String format) throws ParseException {
@@ -170,10 +170,10 @@ public class AD {
 	}
 
 	/**
-	 * Returns the accountexpires time in microsoft format
+	 * Returns the accountexpires time in Microsoft format
 	 *
-	 * @param expireDate the date in the format yyyy-MM-dd
-	 * @return
+	 * @param expireDate the date in the format yyyy-MM-dd.
+	 * @return the date in Microsoft AD format
 	 * @throws ParseException
 	 */
 	public static long getAccountExpires(String expireDate) throws ParseException {

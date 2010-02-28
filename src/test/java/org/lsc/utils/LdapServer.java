@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import java.io.File;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -72,16 +74,19 @@ public class LdapServer {
 
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
+	private static Options options;
 	
 	public final static void start() throws Exception {
 		EmbeddedOpenDS.startServer();
 		EmbeddedOpenDS.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
-		if(EmbeddedOpenDS.class.getResource("test.ldif") == null || EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath() == null) {
+		
+		String ldifPath = EmbeddedOpenDS.getPathToConfigFile("test.ldif");
+		if(ldifPath == null || "".equals(ldifPath)) {
 			LOGGER.error("Unable to load LDIF sample content !");
 		} else {
-			EmbeddedOpenDS.importLdif(EmbeddedOpenDS.class.getResource("test.ldif").toURI().getPath());
+			EmbeddedOpenDS.importLdif(ldifPath);
 			LOGGER.info("LDIF sample content loaded successfully");
 		}
 	}
@@ -96,6 +101,8 @@ public class LdapServer {
 	 * @param args parameters passed by the JRE
 	 */
 	public static void main(final String[] args) {
+		parseOptionsForConfiguration(args);
+		
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		JoranConfigurator configurator = new JoranConfigurator();
 		configurator.setContext(context);
@@ -122,6 +129,39 @@ public class LdapServer {
 		}
 	}
 
+	private static CommandLine getOptionsCmdLine(String[] args) throws ParseException {
+		options = new Options();
+		options.addOption("a", "start", false, "Start the embedded directory");
+		options.addOption("o", "stop", false, "Stop the embedded directory");
+		options.addOption("f", "config", true, "Specify configuration directory");
+		options.addOption("h", "help", false, "Get this text");
+		CommandLineParser parser = new GnuParser();
+		return parser.parse(options, args);
+	}
+	
+	private static void parseOptionsForConfiguration(String[] args) {
+		try {
+			CommandLine cmdLine = getOptionsCmdLine(args);
+
+			if (cmdLine.getOptions().length > 0 && !cmdLine.hasOption("h")) {
+				if (cmdLine.hasOption("f")) {
+					Configuration.setUp(new File(cmdLine.getOptionValue("f")).getAbsolutePath());
+				}
+			} else {
+				printHelp(options);
+			}
+		} catch (ParseException e) {
+			if(LOGGER.isErrorEnabled()) {
+				StringBuilder sbf = new StringBuilder();
+				for(String arg: args) {
+					sbf.append(arg).append(" ");
+				}
+				LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
+			}
+			LOGGER.debug(e.toString(), e);
+		}
+	}
+	
 	/**
 	 * Manage command line options
 	 * @param args command line
@@ -129,22 +169,17 @@ public class LdapServer {
 	 * @throws Exception 
 	 */
 	private static int usage(String[] args) throws Exception {
-		Options options = new Options();
-		options.addOption("a", "start", false, "Start the embedded directory");
-		options.addOption("o", "stop", false, "Stop the embedded directory");
-		options.addOption("h", "help", false, "Get this text");
-		CommandLineParser parser = new GnuParser();
 		try {
-			CommandLine cmdLine = parser.parse(options, args);
-			if (cmdLine.getOptions().length > 0) {
+			CommandLine cmdLine = getOptionsCmdLine(args);
+
+			if (cmdLine.getOptions().length > 0 && !cmdLine.hasOption("h")) {
+				if (cmdLine.hasOption("f")) {
+					Configuration.setUp(new File(cmdLine.getOptionValue("f")).getAbsolutePath());
+				}
 				if (cmdLine.hasOption("a")) {
 					start();
 				} else if (cmdLine.hasOption("o")) {
 					stop();
-				}
-				if (cmdLine.hasOption("h")) {
-					printHelp(options);
-					return 1;
 				}
 			} else {
 				printHelp(options);

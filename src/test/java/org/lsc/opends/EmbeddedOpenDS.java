@@ -61,6 +61,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.lsc.Configuration;
 import org.opends.messages.Message;
 import org.opends.server.api.Backend;
 import org.opends.server.backends.MemoryBackend;
@@ -122,13 +123,9 @@ public final class EmbeddedOpenDS {
 
         String configClass = "org.opends.server.extensions.ConfigFileHandler";
 
-        URL configUrl = EmbeddedOpenDS.class.getResource(CONFIG_DIR);
-        String conf = null;
-        if (configUrl != null) {
-            conf = configUrl.toURI().getPath();
-        }
-        if (configUrl == null || conf == null || "".equals(conf)) {
-            throw new RuntimeException("The config directory template " + conf + "(from " + configUrl + ") has not been found");
+        String conf = getPathToConfigFile(CONFIG_DIR);
+        if (conf == null || "".equals(conf)) {
+        	throw new RuntimeException("The config directory template " + conf + "(from " + CONFIG_DIR + ") has not been found");
         }
 
         String workingDirectory = System.getProperty(PROPERTY_WORKING_DIR);
@@ -440,6 +437,40 @@ public final class EmbeddedOpenDS {
             sb.append(line).append("\n");
         }
         addEntries(sb.toString());
+    }
+    
+    /**
+     * <p>Search for a file in the possible configuration locations:
+     * <ul><li>As a resource on the classpath (historical method)</li>
+     * <li>As a file in the configuration directory</li></ul></P>
+     * 
+     * <P>This method first looks on the classpath, then if that fails,
+     * looks in the configuration directory. Finally, it returns the
+     * absolute path name to the file.</P>.
+     * 
+     * @param fileName Name of the file or directory to locate.
+     * @return Absolute path name to the file, or null.
+     */
+    public static String getPathToConfigFile(String fileName) {
+    	String res = null;
+        
+        try {
+            URL configUrl = EmbeddedOpenDS.class.getResource(fileName);
+	        if (configUrl != null) {
+				res = configUrl.toURI().getPath();
+			}
+        } catch (URISyntaxException e) {
+        	// ignore, errors are handled below, this was just a first try
+		}
+        
+        if (res == null || "".equals(res)) {
+            // try getting the OpenDS config directory from the main configuration directory
+        	res = new File(Configuration.getConfigurationDirectory() + fileName).getAbsolutePath();
+        }
+        
+        // return whatever we have, even if it's just null
+        return res;
+
     }
 
 }

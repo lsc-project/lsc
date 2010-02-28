@@ -14,8 +14,7 @@
 			pers."mail",
 			pers."givenName",
 			pers."address",
-			pers."telephoneNumber", 
-			pers."telephoneNumber" AS userPassword
+			pers."telephoneNumber"
 		FROM csvdata pers
 		WHERE pers."mail" LIKE #mail#
 	</select>

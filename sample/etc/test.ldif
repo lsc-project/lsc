@@ -1,0 +1,12 @@
+dn: dc=lsc-project,dc=org
+dc: lsc-project
+objectClass: dcObject
+objectClass: top
+description: lsc-project naming context
+
+dn: ou=Sample,dc=lsc-project,dc=org
+ou: Sample
+objectClass: organizationalUnit
+objectClass: top
+description: Sample subtree
+

@@ -106,7 +106,7 @@ fi
 # LSC not already running
 log "Starting LSC"
 
-CLASSPATH="."
+CLASSPATH="$CLASSPATH:."
 for jar in "$LIB_DIR"/*.jar
 do
 	CLASSPATH="$CLASSPATH:$jar"

@@ -24,7 +24,7 @@
 			</includes>
 		</fileSet>
 			
-		<!-- Include the bin, sample and etc directories -->
+		<!-- Include the bin and etc directories -->
 		<fileSet> <directory>bin</directory> </fileSet>
 		<fileSet>
 			<directory>etc</directory>
@@ -32,13 +32,44 @@
 				<exclude>**/.placeholder</exclude>
 			</excludes>
 		</fileSet>
+
+		<!-- Include the sample directory and all required files -->
 		<fileSet> <directory>sample</directory> </fileSet>
+		<!-- copy the tests JAR from lsc-core to use to launch OpenDS -->
+		<fileSet>
+			<directory>target</directory>
+			<includes> <include>lsc-core-1.2-SNAPSHOT-tests.jar</include> </includes>
+			<outputDirectory>sample/lib</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>src/test/java/org/lsc/opends/config</directory>
+			<outputDirectory>sample/etc/config</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>src/test/resources</directory>
+			<includes> <include>logback-opends.xml</include> </includes>
+			<outputDirectory>sample/etc</outputDirectory>
+		</fileSet>
 	</fileSets>
 
 	<!-- Include all runtime dependencies of the project -->
 	<dependencySets>
 		<dependencySet>
+			<scope>runtime</scope>
 			<outputDirectory>lib</outputDirectory>
+			<excludes>
+				<exclude>junit:junit</exclude>
+				<exclude>org.opends:opends-core</exclude>
+				<exclude>hsqldb:hsqldb</exclude>
+			</excludes>
+		</dependencySet>
+		<dependencySet>
+			<outputDirectory>sample/lib</outputDirectory>
+			<includes>
+				<include>org.opends:opends-core</include>
+				<include>hsqldb:hsqldb</include>
+				<!-- see also the tests jar included in a fileSet above -->
+			</includes>
 		</dependencySet>
 	</dependencySets>
 </assembly>

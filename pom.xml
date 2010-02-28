@@ -223,6 +223,22 @@
 				</executions>
 			</plugin> 
 
+			<!-- build a JAR of the test classes for use in the sample -->
+			<!-- this MUST appear before the assembly plugin in the pom.xml file
+				 to make sure that the JAR exists before packaging -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2-beta-4</version>

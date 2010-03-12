@@ -94,6 +94,22 @@ function get_java() {
 	exit 2
 }
 
+function build_classpath() {
+	CLASSPATH="$CLASSPATH:."
+	for jar in "$LIB_DIR"/*.jar
+	do
+		CLASSPATH="$CLASSPATH:$jar"
+	done
+
+	# is this Cygwin? if so, convert path to Windows format for the JVM
+	CYGPATH_COMMAND="$(which cygpath)"
+	if [ $? -eq 0 ]; then
+		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
+	fi
+
+	export CLASSPATH
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -102,7 +118,7 @@ function get_java() {
 get_java
 
 # check if LSC is not already running
-if [ $(ps -efww | grep java | grep org.lsc.Launcher | grep -v grep | wc -l) -ne 0 ] 
+if [ $(grep -ahv ^grep /proc/*/cmdline | grep -a org.lsc.Launcher | wc -l) -ne 0 ] 
 then
 	# LSC already running
 	fatal "LSC already running - launch aborted"
@@ -114,13 +130,8 @@ fi
 # LSC not already running
 log "Starting LSC"
 
-CLASSPATH="$CLASSPATH:."
-for jar in "$LIB_DIR"/*.jar
-do
-	CLASSPATH="$CLASSPATH:$jar"
-done
-
-${JAVA_COMMAND} -cp "$CLASSPATH" org.lsc.Launcher $* 
+build_classpath
+"${JAVA_COMMAND}" -cp "$CLASSPATH" org.lsc.Launcher $* 
 
 status=$?
 

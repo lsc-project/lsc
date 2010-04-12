@@ -17,6 +17,8 @@ body {
 	padding: 10px;
 	font-family: sans-serif;
 	color: #454545;
+	font-size: 85%;
+	text-align: justify;
 	background:#fff;
 	border-radius:20px;
 	-moz-border-radius:20px;
@@ -36,14 +38,14 @@ a {
 	text-decoration: none;
 }
 a:hover {
-	color: #454545;
+	color: #949494;
 }
 h1, h2, h3, h4, h5 { 
 	font-weight: bold;
 }
 h1 {
 	font-size: 130%;
-	text-align:right;
+	text-align:left;
 	color:#fff;
 	padding:5px;
 	background:#A7CC44;
@@ -60,20 +62,20 @@ h2 {
 
 h3 {
 	font-size: 95%;
+	font-style: italic;
 }
 
 h4 {
 	font-size: 90%;
-	font-style: italic;
 }
 
 h5 {
-	font-size: 90%;
+	font-size: 80%;
 	font-style: italic;
 }
 
 h1.title {
-	font-size:200%;
+	font-size:150%;
 	text-align:center;
 	color:#fff;
 	background:#7A9833;
@@ -91,6 +93,7 @@ dd p {
 	width:40%;
 	background:#eee;
 	margin-left:5px;
+	padding:5px;
 	border:10px #fff solid;
 }
 #footer {

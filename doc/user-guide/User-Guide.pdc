@@ -2,23 +2,26 @@
 % Jonathan Clarke
 % 18/01/2010
 
-The latest version of this document is available online here:
+The latest version of this document is available online at
 [http://lsc-project.org/user-guide/](http://lsc-project.org/user-guide/). You
 can also download a [PDF
 version](http://lsc-project.org/user-guide/LSC-User-Guide.pdf).
+
+This guide covers versions **1.2.\*** of LSC. Other versions are available.
 
 # Introduction
 
 Ldap Synchronization Connector, or LSC, is a tool for synchronizing
 data repositories, with a particular focus on identity information.
+
 It can read from a variety of different sources, perform limitless
 transformations of data on-the-fly and write the results to a LDAP
 directory. The tool is designed to be fast, and extensible in all
-areas. It is an open source project, released under the BSD
-license.
+areas.
 
-This document is a hands-on guide to using Ldap Synchronization
-Connector. It covers all aspects of using LSC:
+It is an open source project, released under the BSD license.
+
+This document is a hands-on guide to all aspects of using LSC:
 
 1.  Basic principles
 2.  Obtaining and installing LSC
@@ -26,8 +29,6 @@ Connector. It covers all aspects of using LSC:
 4.  Running LSC
 5.  Integrating LSC to a running system (including best pratices)
 6.  Troubleshooting and getting help
-
-This guide covers versions **1.2.\*** of LSC.
 
 This guide aims to be exhaustive. As such, the reader is not
 expected to read it from cover to cover, but is encouraged to skip
@@ -37,10 +38,48 @@ is also available for the impatient.
 
 # Basic principles
 
+## Entries and attributes
+
+All data is split up into two elements:
+
+- **Entries**, which are containers. It can be considered equivalent to an *account* ("this account exists or it does not")
+- **Attributes**, which qualify the entry. These are also commonly called fields, elements or keys ("this account is called jdoe")
+
+## Pivot attributes
+
+To synchronize data, LSC must be able to match up entries in the source and in the destination. This is an important prerequisite to synchronizing your data: a **unique identifier** must be available in all entries and in both your source and your destination.
+
+This unique identifier may be a combination of several fields (for example: surname and first name).
+
+Commonly used pivot attributes include email addresses, or serial numbers (such as UUIDs).
+
+## One-to-one entry matching
+
+LSC will try and match every entry in the source to one, and only one entry in the destination. Matching is done by searching on the pivot attributes.
+
+Synchronizing several entries to one, or one entry to several could be achieved by implementing multiple synchronizations, but is a hack.
+
+## One-way only
+
+LSC synchronizations are **one-way only**: from a source to a destination.
+
+It usually only makes sense to copy data in one direction. However, if you need to copy a different set of data back, you can simply implement a separate synchronization.
+
+## Four operations available
+
+For every entry, LSC may perform one of the following operations (or nothing):
+
+1. Add a new entry (if an entry from the source was not found in the destination)
+2. Delete an old entry (if an entry in the destination was not found in the source)
+3. Update an existing entry (if attributes vary between the destination and the calculated transformations from the source)
+4. Rename an existing entry (if the LDAP DN should be changed)
+
+Please note that one and only one of these operations is performed on each run. So, if an entry is renamed, but some of it's attributes also need updating, this will only happen over two runs.
+
+## Transformations
+
 ... Work in progress ...
 
-Pivot attributes. One-to-one entry matching (source, destination).
-Create, Update, Delete, Rename. Transformations?
 
 # Obtaining and installing LSC
 
@@ -54,14 +93,13 @@ This section offers guidance.
 
 ### Version numbering
 
-LSC version numbers are in two parts:
+A full version number looks something like **1.1.0**. LSC version numbers are in two parts:
 
 - The first two digits represent the **major** branch number, for example
   **1.1**.
 - The third digit represents a **minor** release within that branch, similar to
   a patch level.
 
-A full version number looks something like **1.1.0**.
 
 A minor update (patch level increase, such as 1.1.0 to 1.1.1) never changes
 functionality, and is only released to fix bugs.
@@ -73,7 +111,7 @@ and is fully supported.
 
 The **1.1** branch is no longer actively developed, and will no longer be
 supported in the near future. The latest and most stable versions of LSC are
-always shown on the project's website at http://lsc-project.org/.
+always shown on the project's website at [http://lsc-project.org/](http://lsc-project.org).
 
 Development work is currently transitioning between improving this branch,
 **1.2**, and implementing new features for future versions.
@@ -82,19 +120,14 @@ Development work is currently transitioning between improving this branch,
 
 ### Dependencies
 
-To run LSC you need Sun's Java Virtual Machine (JVM), version 1.5 or higher.
+To run LSC you need Sun's Java Virtual Machine (JVM), version 1.5 or higher. Download and install [Sun's Java Runtime Edition (JRE)](http://java.sun.com/javase/downloads/index.jsp#jre), if you don't already have it installed. Please note that it may be simpler to use a pre-packaged version from your operating system.
 
-Download and install [Sun's Java Runtime Edition
-(JRE)](http://java.sun.com/javase/downloads/index.jsp#jre), if you don't already
-have it installed.
-
-Please note that it may be simpler to use a pre-packaged version with your
-operating system.
+All other dependencies required by LSC are included in the download.
 
 ### Downloading
 
-In the past, two separate components were required to use LSC (lsc-core and
-lsc-sample). This is no longer the case. LSC is distributed like most programs,
+In the past, two separate components were required to use LSC (*lsc-core* and
+*lsc-sample*). This is no longer the case. LSC is distributed like most programs,
 as an archive to download and install.
 
 There are several formats available. They all lead to the same result, just
@@ -123,9 +156,9 @@ all dependencies required to run.
 Once installed, you should see the following folders in the installation
 directory:
 
--	bin (programs to launch and interact with LSC)
--	etc (configuration files)
--	lib (software dependencies)
+-	*bin* (programs to launch and interact with LSC)
+-	*etc* (configuration files)
+-	*lib* (software dependencies)
 
 # Configuring LSC
 

@@ -104,10 +104,6 @@ src.database.password =
 # List of defined tasks, seperated by commas
 lsc.tasks = FirstTask, SecondTask
 
-# Task type for task "FirstTask" (ldap2ldap or db2ldap)
-lsc.tasks.FirstTask.type = ldap2ldap
-
-
 # Java class name for the service to read objects from the source
 # Either "org.lsc.jndi.SimpleJndiSrcService" for ldap2ldap, or
 # "org.lsc.service.SimpleJdbcSrcService" for db2ldap

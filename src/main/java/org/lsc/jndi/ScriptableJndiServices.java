@@ -120,7 +120,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	
 	protected List<String> _exists(final String dn, final String filter)
 					throws NamingException {
-		if (jndiServices.exists(dn)) {
+		if (jndiServices.exists(dn, filter)) {
 			List<String> c = new ArrayList<String>();
 			c.add(dn);
 

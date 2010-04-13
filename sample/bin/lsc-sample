@@ -84,7 +84,7 @@ CSV_SEPARATOR=";"
 # Configuration for sample
 SAMPLE_CONFIG_DIR="$SAMPLE_HOME/etc"
 # is this Cygwin? if so, convert path to Windows format for the JVM
-CYGPATH_COMMAND="$(which cygpath)"
+CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
 if [ $? -eq 0 ]; then
 	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
 fi

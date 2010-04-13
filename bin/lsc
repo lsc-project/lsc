@@ -102,7 +102,7 @@ function build_classpath() {
 	done
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath)"
+	CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
 	if [ $? -eq 0 ]; then
 		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
 	fi

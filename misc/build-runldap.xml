@@ -67,11 +67,11 @@
             Ldap Synchronization Connector project
             *****************************************
             
-            To launch the synchronization, use the following task
-            &gt; ant lsc::synchronize
+            To start the embbeded OpenDS
+            &gt; ant startLdapServer
             
-            To get a graphical / command line installer, use 
-            &gt; ant lsc::installer
+            To stop the embbeded OpenDS
+            &gt; ant stopLdapServer
             
 		</echo>
 	</target>

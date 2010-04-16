@@ -105,69 +105,75 @@ public class LdifLayout extends PatternLayout {
 			}
 		} else {
 			JndiModifications jm = (JndiModifications) messages[0];
-
 			if (operations.contains(jm.getOperation())) {
-				StringBuilder msgBuffer = new StringBuilder();
-				String baseUrl = (String) Configuration.getDstProperties().get("java.naming.provider.url");
-				baseUrl = baseUrl.substring(baseUrl.lastIndexOf('/') + 1);
-				String dn = "";
-				if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
-					dn = jm.getDistinguishName();
-					if (!dn.endsWith(baseUrl)) {
-						dn += "," + baseUrl;
-					}
-				} else {
-					dn = baseUrl;
-				}
-
-				// print dn and base64 encode if it's not a SAFE-STRING
-				msgBuffer.append("dn");
-				if(isLdifSafeString(dn)) {
-					msgBuffer.append(": ").append(dn);
-				} else {
-					msgBuffer.append(":: ").append(toBase64(dn));
-				}
-				msgBuffer.append("\n");
-
-				switch (jm.getOperation()) {
-					case ADD_ENTRY:
-						msgBuffer.append("changetype: add\n");
-						msgBuffer.append(listToLdif(jm.getModificationItems(), true));
-						break;
-					case MODRDN_ENTRY:
-						LdapName ln;
-						try {
-							ln = new LdapName(jm.getNewDistinguishName());
-							msgBuffer.append("changetype: modrdn\nnewrdn: ");
-							msgBuffer.append(ln.get(0));
-							msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
-							msgBuffer.append(ln.getSuffix(1));
-							msgBuffer.append("\n");
-						} catch (InvalidNameException e) {
-							msgBuffer.append("changetype: modrdn\nnewrdn: ");
-							msgBuffer.append(jm.getNewDistinguishName());
-							msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
-							msgBuffer.append(jm.getNewDistinguishName());
-							msgBuffer.append(",");
-							msgBuffer.append(baseUrl);
-							msgBuffer.append("\n");
-						}
-						break;
-					case MODIFY_ENTRY:
-						msgBuffer.append("changetype: modify\n");
-						msgBuffer.append(listToLdif(jm.getModificationItems(), false));
-						break;
-					case DELETE_ENTRY:
-						msgBuffer.append("changetype: delete\n");
-						break;
-					default:
-				}
-
-				msgBuffer.append("\n");
-				msg = msgBuffer.toString();
+				msg = format(jm);
 			}
 		}
 		return msg;
+	}
+	
+	public static String format(JndiModifications jm) {
+		StringBuilder msgBuffer = new StringBuilder();
+		String baseUrl = (String) Configuration.getDstProperties().get("java.naming.provider.url");
+		baseUrl = baseUrl.substring(baseUrl.lastIndexOf('/') + 1);
+		String dn = "";
+		if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
+			dn = jm.getDistinguishName();
+			if (!dn.endsWith(baseUrl)) {
+				dn += "," + baseUrl;
+			}
+		} else {
+			dn = baseUrl;
+		}
+
+		// print dn and base64 encode if it's not a SAFE-STRING
+		msgBuffer.append("dn");
+		if(isLdifSafeString(dn)) {
+			msgBuffer.append(": ").append(dn);
+		} else {
+			msgBuffer.append(":: ").append(toBase64(dn));
+		}
+		msgBuffer.append("\n");
+
+		switch (jm.getOperation()) {
+			case ADD_ENTRY:
+				msgBuffer.append("changetype: add\n");
+				msgBuffer.append(listToLdif(jm.getModificationItems(), true));
+				break;
+			case MODRDN_ENTRY:
+				LdapName ln;
+				try {
+					ln = new LdapName(jm.getNewDistinguishName());
+					msgBuffer.append("changetype: modrdn\nnewrdn: ");
+					msgBuffer.append(ln.get(ln.size()-1));
+					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
+					if(ln.size() <= 1) {
+						msgBuffer.append(baseUrl);
+					} else {
+						msgBuffer.append(ln.getPrefix(ln.size()-1) + "," + baseUrl);
+					}
+					msgBuffer.append("\n");
+				} catch (InvalidNameException e) {
+					msgBuffer.append("changetype: modrdn\nnewrdn: ");
+					msgBuffer.append(jm.getNewDistinguishName());
+					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
+					msgBuffer.append(jm.getNewDistinguishName());
+					msgBuffer.append(",");
+					msgBuffer.append(baseUrl);
+					msgBuffer.append("\n");
+				}
+				break;
+			case MODIFY_ENTRY:
+				msgBuffer.append("changetype: modify\n");
+				msgBuffer.append(listToLdif(jm.getModificationItems(), false));
+				break;
+			case DELETE_ENTRY:
+				msgBuffer.append("changetype: delete\n");
+				break;
+			default:
+		}
+		msgBuffer.append("\n");
+		return msgBuffer.toString();
 	}
 
 	/**
@@ -179,7 +185,7 @@ public class LdifLayout extends PatternLayout {
 	 *            is this a new entry
 	 * @return the string to log
 	 */
-	private String listToLdif(final List<ModificationItem> modificationItems, final boolean addEntry) {
+	private static String listToLdif(final List<ModificationItem> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
 
@@ -202,24 +208,7 @@ public class LdifLayout extends PatternLayout {
 							sb.append("add: ").append(attr.getID()).append("\n");
 					}
 				}
-				NamingEnumeration<?> ne = attr.getAll();
-				String value = null;
-				while (ne.hasMore()) {
-					// print attribute name
-					sb.append(attr.getID());
-
-					// print value and base64 encode it if it's not a
-					// SAFE-STRING per RFC2849
-					value = getStringValue(ne.next());
-					if(isLdifSafeString(value)) {
-						sb.append(": ").append(value);
-					} else {
-						sb.append(":: ").append(toBase64(value));
-					}
-					
-					// new line
-					sb.append("\n");
-				}
+				printAttributeToStringBuffer(sb, attr);
 			} catch (NamingException e) {
 				sb.append(attr.getID()).append(": ").append("!!! Unable to print value !!!\n");
 			}
@@ -228,7 +217,29 @@ public class LdifLayout extends PatternLayout {
 		return sb.toString();
 	}
 
-	private String getStringValue(Object value) {
+	public static void printAttributeToStringBuffer(StringBuilder sb, Attribute attr) throws NamingException {
+		NamingEnumeration<?> ne = attr.getAll();
+		String value = null;
+		while (ne.hasMore()) {
+			// print attribute name
+			sb.append(attr.getID());
+
+			// print value and base64 encode it if it's not a
+			// SAFE-STRING per RFC2849
+			value = getStringValue(ne.next());
+			if(isLdifSafeString(value)) {
+				sb.append(": ").append(value);
+			} else {
+				sb.append(":: ").append(toBase64(value));
+			}
+			
+			// new line
+			sb.append("\n");
+		}
+
+	}
+
+	private static String getStringValue(Object value) {
 		if (value instanceof byte[]) {
 			return new String((byte[]) value);
 		} else {
@@ -236,7 +247,7 @@ public class LdifLayout extends PatternLayout {
 		}
 	}
 
-	private String toBase64(String value) {
+	private static String toBase64(String value) {
 		return new String(new Base64().encode(value.getBytes()));
 	}
 
@@ -260,7 +271,7 @@ public class LdifLayout extends PatternLayout {
 	 *            The character to test
 	 * @return true if char is a SAFE-CHAR, false otherwise
 	 */
-	private boolean isLdifSafeChar(char c) {
+	private static boolean isLdifSafeChar(char c) {
 		if ((int) c > 127) {
 			return false;
 		}
@@ -297,7 +308,7 @@ public class LdifLayout extends PatternLayout {
 	 *            The character to test
 	 * @return true if char is SAFE-INIT-CHAR, false otherwise
 	 */
-	private boolean isLdifSafeInitChar(char c) {
+	private static boolean isLdifSafeInitChar(char c) {
 		if ((int) c > 127) {
 			return false;
 		}
@@ -331,7 +342,7 @@ public class LdifLayout extends PatternLayout {
 	 *            The string to test
 	 * @return true if is a SAFE-STRING, false otherwise
 	 */
-	private boolean isLdifSafeString(String s) {
+	private static boolean isLdifSafeString(String s) {
 		// check if first character is a SAFE-INIT-CHAR
 		if (s.length() > 0 && !isLdifSafeInitChar(s.charAt(0))) {
 			return false;

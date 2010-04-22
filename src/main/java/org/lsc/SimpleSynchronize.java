@@ -53,9 +53,9 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.lsc.jndi.IJndiDestinationService;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
-import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,7 +247,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			// Instantiate the destination service from properties
 			Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
 			Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[]{Properties.class, String.class});
-			IService dstJndiService = (IService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
+			IJndiDestinationService dstJndiService = (IJndiDestinationService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
 
 			// Instantiate custom JavaScript library from properties
 			String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);

@@ -61,6 +61,7 @@ import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
+import org.lsc.jndi.IJndiDestinationService;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -145,7 +146,7 @@ public abstract class AbstractSynchronize {
 	 *            the jndi destination service
 	 */
 	protected final void clean2Ldap(final String syncName,
-			final IService srcService, final IService dstJndiService) {
+			final IService srcService, final IJndiDestinationService dstJndiService) {
 
 		InfoCounter counter = new InfoCounter();
 
@@ -242,7 +243,7 @@ public abstract class AbstractSynchronize {
 					// if we got here, we have a modification to apply - let's
 					// do it!
 					counter.incrementCountInitiated();
-					if (JndiServices.getDstInstance().apply(jm)) {
+					if (dstJndiService.apply(jm)) {
 						counter.incrementCountCompleted();
 						logAction(jm, id, syncName);
 					} else {
@@ -287,7 +288,7 @@ public abstract class AbstractSynchronize {
 	 * @param customLibrary
 	 */
 	protected final void synchronize2Ldap(final String syncName,
-			final IService srcService, final IService dstService,
+			final IService srcService, final IJndiDestinationService dstService,
 			final Object customLibrary) {
 
 		InfoCounter counter = new InfoCounter();
@@ -339,7 +340,7 @@ public abstract class AbstractSynchronize {
 
 	protected final void startAsynchronousSynchronize2Ldap(
 			final String syncName, final IAsynchronousService srcService,
-			final IService dstService, final Object customLibrary) {
+			final IJndiDestinationService dstService, final Object customLibrary) {
 
 		InfoCounter counter = new InfoCounter();
 
@@ -548,14 +549,14 @@ class SynchronizeTask implements Runnable {
 	private String syncName;
 	private InfoCounter counter;
 	private IService srcService;
-	private IService dstService;
+	private IJndiDestinationService dstService;
 	private Object customLibrary;
 	private ISyncOptions syncOptions;
 	private AbstractSynchronize abstractSynchronize;
 	private Entry<String, LscAttributes> id;
 
 	public SynchronizeTask(final String syncName, InfoCounter counter,
-			final IService srcService, final IService dstService,
+			final IService srcService, final IJndiDestinationService dstService,
 			final Object customLibrary, ISyncOptions syncOptions,
 			AbstractSynchronize abstractSynchronize,
 			Entry<String, LscAttributes> id) {
@@ -673,7 +674,7 @@ class SynchronizeTask implements Runnable {
 
 			// if we got here, we have a modification to apply - let's do it!
 			counter.incrementCountInitiated();
-			if (JndiServices.getDstInstance().apply(jm)) {
+			if (dstService.apply(jm)) {
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(jm, id, syncName);
 			} else {

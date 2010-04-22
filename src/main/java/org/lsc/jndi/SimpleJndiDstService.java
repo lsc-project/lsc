@@ -50,6 +50,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -68,7 +69,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJndiDstService extends AbstractSimpleJndiService implements IService {
+public class SimpleJndiDstService extends AbstractSimpleJndiService implements IJndiDestinationService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
@@ -154,4 +155,8 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
         return JndiServices.getDstInstance().getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
                 getAttrsId());
     }
+
+	public boolean apply(JndiModifications jm) throws CommunicationException {
+		return JndiServices.getDstInstance().apply(jm);
+	}
 }

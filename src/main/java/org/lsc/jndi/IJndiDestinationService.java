@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008-2010 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2010 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,70 +45,26 @@
  */
 package org.lsc.jndi;
 
-import java.util.Map;
-import java.util.Properties;
-
 import javax.naming.CommunicationException;
-import javax.naming.NamingException;
 
-import org.lsc.LscAttributes;
-import org.lsc.beans.IBean;
 import org.lsc.service.IService;
 
+
 /**
- * This class is a generic implementation to simulate an empty destination directory.
+ * Interface used by Jndi target services.
  * 
- * @author Jonathan Clarke &lt;jonathan@lsc-project.org&gt;
+ * <p>This interface must be implemented by a class to be considered a target
+ * service.</P>
+ * 
+ * <P>Optionally, the target service may also implement a constructor, which
+ * will be called once before a synchronization begins. This constructor may
+ * accept a Properties object as a parameter, which will be filled with
+ * properties from the lsc.properties file.</P>
+ * 
+ * @author Sebastien Bahloul
  */
-public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJndiDestinationService {
+public interface IJndiDestinationService extends IService {
 
-	/**
-	 * Constructor adapted to the context properties and the bean class name to instantiate.
-	 * 
-	 * @param props
-	 *            the properties used to identify the directory parameters and context
-	 * @param beanClassName
-	 *            the bean class name that will be instantiated and feed up
-	 */
-	public EmptyJndiDstService(final Properties props, final String beanClassName) {
-		super(props);
-	}
 
-	/**
-	 * The simple object getter according to its identifier.
-	 * @param id the data identifier in the directory - must return a unique directory entry
-	 * @return Always returns null since this simulates an empty directory
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identified bean
-	 */
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
-		return null;
-	}
-
-	/**
-	 * Destination LDAP Services getter.
-	 * 
-	 * @return the Destination JndiServices object used to apply directory operations
-	 */
-	public final JndiServices getJndiServices() {
-		return JndiServices.getDstInstance();
-	}
-
-	/**
-	 * Get the identifiers list.
-	 * 
-	 * @return the string iterator
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identifiers list
-	 */
-	public Map<String, LscAttributes> getListPivots() throws NamingException {
-		return null;
-	}
-
-	/**
-	 * Always accept to apply modifications
-	 */
-	public boolean apply(JndiModifications jm) throws CommunicationException {
-		return true;
-	}
+	public boolean apply(final JndiModifications jm) throws CommunicationException;
 }

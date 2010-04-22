@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -60,7 +61,6 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.service.IService;
 import org.lsc.utils.StringLengthComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class FullDNJndiDstService extends AbstractSimpleJndiService implements IService {
+public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiDestinationService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
@@ -193,5 +193,9 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		}
 
 		return ids;
+	}
+
+	public boolean apply(JndiModifications jm) throws CommunicationException {
+		return JndiServices.getDstInstance().apply(jm);
 	}
 }

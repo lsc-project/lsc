@@ -620,7 +620,9 @@ public final class BeanComparator {
 		if (forceValueDefs != null) {
 			for (String forceValueDef : forceValueDefs) {
 				List<String> forceValues = JScriptEvaluator.evalToStringList(forceValueDef, javaScriptObjects);
-				attrValues.addAll(forceValues);
+				if (forceValues != null) {
+					attrValues.addAll(forceValues);
+				}
 			}
 
 			return attrValues;
@@ -645,7 +647,9 @@ public final class BeanComparator {
 			if (newValuesDefs != null) {
 				for (String defaultValueDef : newValuesDefs) {
 					List<String> defaultValues = JScriptEvaluator.evalToStringList(defaultValueDef, javaScriptObjects);
-					attrValues.addAll(defaultValues);
+					if (defaultValues != null) {
+						attrValues.addAll(defaultValues);
+					}
 				}
 			}
 		}

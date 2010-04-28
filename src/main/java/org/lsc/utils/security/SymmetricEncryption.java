@@ -79,7 +79,7 @@ import org.slf4j.LoggerFactory;
  * installed. Three new configuration parameters could be added to the
  * configuration:</p>
  * <ul>
- *   <li>lsc.security.encryption.keypath: the path to the file used to
+ *   <li>lsc.security.encryption.keyfile: the path to the file used to
  *   encrypt/decrypt data</li>
  *   <li>lsc.security.encryption.algorithm: the algorithm to use</li>
  *   <li>lsc.security.encryption.strength: the strength in bits</li>
@@ -189,7 +189,7 @@ public class SymmetricEncryption {
 	/**
 	 * Return the default filename of the key to use.
 	 * The filename could be specified in the configuration file through the
-	 * lsc.security.encryption.keypath property.
+	 * lsc.security.encryption.keyfile property.
 	 * @return A filename
 	 */
 	public static String getDefaultKeyPath() {

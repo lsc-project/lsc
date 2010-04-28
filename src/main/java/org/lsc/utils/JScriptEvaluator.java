@@ -226,6 +226,8 @@ public final class JScriptEvaluator {
 		Object ret = null;
 		try {
 			ret = script.exec(cx, scope);
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);

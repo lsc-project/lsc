@@ -365,7 +365,7 @@ public abstract class AbstractSynchronize {
 			final Entry<String, LscAttributes> identifier,
 			final Exception except) {
 
-		LOGGER.error("Error while synchronizing ID {}: {}", (jm != null ? jm.getDistinguishName() : ""), except.toString());
+		LOGGER.error("Error while synchronizing ID {}: {}", (jm != null ? jm.getDistinguishName() : identifier.getValue()), except.toString());
 		LOGGER.debug(except.toString(), except);
 
 		if (jm != null) {

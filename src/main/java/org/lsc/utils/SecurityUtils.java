@@ -70,7 +70,9 @@ public class SecurityUtils {
 	 */
 	public static String decrypt(String value) throws GeneralSecurityException, IOException {
 		SymmetricEncryption se = new SymmetricEncryption();
-		se.initialize();
+		if (!se.initialize()) {
+			throw new RuntimeException("SecurityUtils: Error initializing SymmetricEncryption!");
+		}
 		return new String(se.decrypt(new Base64().decode(value.getBytes())));
 	}
 
@@ -83,7 +85,9 @@ public class SecurityUtils {
 	 */
 	public static String encrypt(String value) throws GeneralSecurityException, IOException {
 		SymmetricEncryption se = new SymmetricEncryption();
-		se.initialize();
+		if (!se.initialize()) {
+			throw new RuntimeException("SecurityUtils: Error initializing SymmetricEncryption!");
+		}
 		return new String(new Base64().encode(se.encrypt(value.getBytes())));
 	}
 

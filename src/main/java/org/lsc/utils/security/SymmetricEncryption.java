@@ -227,6 +227,7 @@ public class SymmetricEncryption {
 	 */
 	public boolean initialize() throws GeneralSecurityException {
 		InputStream input = null;
+		boolean fail = false;
 		try {
 			input = new FileInputStream(new File(this.keyPath));
 			byte[] data = new byte[strength / Byte.SIZE];
@@ -239,6 +240,7 @@ public class SymmetricEncryption {
 			this.cipherDecrypt.init(Cipher.DECRYPT_MODE, key);
 
 		} catch (IOException e) {
+			fail = true;
 		}
 		try {
 			if(input != null) {
@@ -246,6 +248,12 @@ public class SymmetricEncryption {
 			}
 		} catch (IOException e) {
 		}
+		
+		if (fail) {
+			LOGGER.error("Error reading the key for SymmetricEncryption! ({})", this.keyPath);
+			return false;
+		}
+		
 		return true;
 	}
 

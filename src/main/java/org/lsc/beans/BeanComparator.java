@@ -317,6 +317,11 @@ public final class BeanComparator {
 			// Get list of values that the attribute should be set to in the destination
 			Set<Object> toSetAttrValues = getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, modType);
 
+			// Convention: if values to set is returned null, ignore this attribute
+			if (toSetAttrValues == null) {
+				continue;
+			}
+			
 			// What operation do we need to do on this attribute?
 			int operationType = getRequiredOperationForAttribute(toSetAttrValues, dstAttrValues);
 
@@ -578,6 +583,12 @@ public final class BeanComparator {
 	 * </ul>
 	 * </P>
 	 *
+	 * <P>The special case where an attribute is considered only for setting
+	 * values on creation is handled by returning null, if this is not a create
+	 * operation. This indicates this attribute should not be considered for
+	 * synchronization. In all other cases, a valid List will be returned (maybe
+	 * empty, of course).</P>
+	 *
 	 * @param attrName
 	 *            {@link String} Name of the attribute to be considered. Used to
 	 *            read default/force values from syncoptions.
@@ -595,7 +606,7 @@ public final class BeanComparator {
 	 *            if the object is being newly created (causes
 	 *            create values to be used instead of default values)
 	 * @return List<Object> The list of values that should be set in the
-	 *         destination. Never null.
+	 *         destination, or null if this attribute should be ignored.
 	 * @throws NamingException
 	 */
 	protected static Set<Object> getValuesToSet(String attrName,
@@ -642,6 +653,16 @@ public final class BeanComparator {
 					}
 				}
 			}
+		}
+		
+		// special case : is this attribute configured for create_values only?
+		// if so, and if there are no values, and this is not an add operation,
+		// ignore this attribute
+		// by convention, returning null ignores this attribute
+		if (attrValues.size() == 0 
+				&& modType != JndiModificationType.ADD_ENTRY 
+				&& syncOptions.getCreateValues(null, attrName) != null) {
+			return null;
 		}
 
 		return attrValues;

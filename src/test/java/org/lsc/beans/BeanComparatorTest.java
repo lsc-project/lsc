@@ -354,6 +354,23 @@ public class BeanComparatorTest extends TestCase
 		for (Object srcAttrValue : srcAttrValues) expectedValues.add(srcAttrValue);
 		for (int i = 0; i < jsCreateValues.size(); i++) expectedValues.add("Created by JavaScript successfully (" + i + ")");
 		assertTrue(SetUtils.doSetsMatch(res, expectedValues));
+		
+
+		// test that attributes configured for create values only
+		// (no force_values, default_values or source values)
+		// are ignored if this is not an Add operation
+		srcAttrValues = new HashSet<Object>();
+		syncOptions = new dummySyncOptions(createValuesMap, null, null, null);
+
+		try {
+			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		}
+		catch (NamingException e) {
+			assertTrue("NamingException thrown in test: ignore attribute for create values only on modification", false);
+		}
+		
+		assertNull(res);
+
 	}
 	
 	public class dummySyncOptions implements ISyncOptions {

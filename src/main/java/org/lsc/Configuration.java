@@ -88,6 +88,9 @@ public class Configuration {
 	/** Default location for configuration filename */
 	public static String location = PROPERTIES_FILENAME;
 
+	/** Flag to detect if logging is configured or not yet */
+	public static boolean loggingSetup = false;
+	
 	// People DN
 	public static String DN_PEOPLE = "ou=People";
 
@@ -292,7 +295,7 @@ public class Configuration {
 		if (new File(location).isDirectory()) {
 			ret = location;
 		} else {
-			String errorMessage = "Could not understand where the configuration is! Try using -f option.";
+			String errorMessage = "Could not understand where the configuration is! Try using -f option. Aborting.";
 			
 			/* Backward compatibility: if no directory was specified,
 			 * we must find the directory where configuration files are.
@@ -487,6 +490,9 @@ public class Configuration {
 		} catch (JoranException je) {
 			System.err.println("Can not find LogBack configuration file");
 		}
+		
+		// Logging configured
+		loggingSetup = true;
 
 		// WARNING: don't log anything before HERE!
 		LOGGER.debug("Reading configuration from {}", Configuration.getConfigurationDirectory());

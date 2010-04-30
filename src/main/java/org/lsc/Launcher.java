@@ -136,8 +136,12 @@ public final class Launcher {
 			// Wrap the launcher
 			obj.run();
 		} catch (Exception e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
+			if (!Configuration.loggingSetup) {
+				System.err.println("Error: " + e.getMessage());
+			} else {
+				LOGGER.error(e.toString());
+				LOGGER.debug(e.toString(), e);
+			}
 			System.exit(1);
 		}
 	}
@@ -166,8 +170,13 @@ public final class Launcher {
 			}
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
+			if (!Configuration.loggingSetup) {
+				System.err.println("Error: " + e.getMessage());
+			} else {
+				LOGGER.error(e.toString());
+				LOGGER.debug(e.toString(), e);
+			}
+			System.exit(1);
 		}
 	}
 

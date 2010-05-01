@@ -248,7 +248,7 @@ public abstract class AbstractSynchronize {
 						logAction(jm, id, syncName);
 					} else {
 						counter.incrementCountError();
-						logActionError(jm, id, new Exception());
+						logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
 					}
 				}
 			} catch (CommunicationException e) {

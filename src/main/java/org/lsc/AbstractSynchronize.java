@@ -243,7 +243,7 @@ public abstract class AbstractSynchronize {
 						logAction(jm, id, syncName);
 					} else {
 						countError++;
-						logActionError(jm, id, new Exception());
+						logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
 					}
 				}
 			} catch (CommunicationException e) {
@@ -392,7 +392,7 @@ public abstract class AbstractSynchronize {
 					logAction(jm, id, syncName);
 				} else {
 					countError++;
-					logActionError(jm, id, new Exception());
+					logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
 				}
 			} catch (CommunicationException e) {
 				// we lost the connection to the source or destination, stop everything!

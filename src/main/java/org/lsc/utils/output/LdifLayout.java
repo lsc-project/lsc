@@ -139,9 +139,13 @@ public class LdifLayout extends PatternLayout {
 						try {
 							ln = new LdapName(jm.getNewDistinguishName());
 							msgBuffer.append("changetype: modrdn\nnewrdn: ");
-							msgBuffer.append(ln.get(0));
+							msgBuffer.append(ln.get(ln.size()-1));
 							msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
-							msgBuffer.append(ln.getSuffix(1));
+							if(ln.size() <= 1) {
+								msgBuffer.append(baseUrl);
+							} else {
+								msgBuffer.append(ln.getPrefix(ln.size()-1) + "," + baseUrl);
+							}
 							msgBuffer.append("\n");
 						} catch (InvalidNameException e) {
 							msgBuffer.append("changetype: modrdn\nnewrdn: ");

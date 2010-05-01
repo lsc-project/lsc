@@ -1,7 +1,6 @@
 <!--	Build the distribution archive for LSC	-->
 
 <!--	TODO:
-			- Add bin directory (startup script, Nagios script?
 			- Add cron and logrotate files
 -->
 

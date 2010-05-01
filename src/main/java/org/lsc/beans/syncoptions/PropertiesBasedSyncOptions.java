@@ -154,6 +154,10 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 			} else if (typeName.equalsIgnoreCase("force_value")) {
 				forceValueStrings.put(attributeName.toLowerCase(), value);
 			} else if (typeName.equalsIgnoreCase("delimiter")) {
+				if (value.length() > 1) {
+					LOGGER.error("Invalid delimiter for {} attribute. Delimiters must be 1 character maximum. Ignoring.", attributeName);
+					continue;
+				}
 				if (attributeName.equalsIgnoreCase("default")) {
 					defaultDelimiter = value;
 				} else {

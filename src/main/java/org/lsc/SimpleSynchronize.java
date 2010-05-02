@@ -153,7 +153,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (isSyncTaskAll || syncTasks.contains(taskName)) {
 				foundATask = true;
 
-				if(!launchTask(taskName, TaskMode.sync)) {
+				if (!launchTask(taskName, TaskMode.sync)) {
 					return false;
 				} else {
 					String syncHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_SYNC_HOOK_PROPS_PREFIX);

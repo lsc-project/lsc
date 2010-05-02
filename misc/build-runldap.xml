@@ -67,10 +67,10 @@
             Ldap Synchronization Connector project
             *****************************************
             
-            To start the embbeded OpenDS
+            To start the embedded OpenDS
             &gt; ant startLdapServer
             
-            To stop the embbeded OpenDS
+            To stop the embedded OpenDS
             &gt; ant stopLdapServer
             
 		</echo>

@@ -71,7 +71,7 @@ if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
 fi
 
 # HSQLDB jar file
-HSQLDB_LIB=$SAMPLE_HOME/lib/hsqldb*.jar
+HSQLDB_LIB=$SAMPLE_HOME/lib/hsqldb-1.8.0.7.jar
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
 # HSQLDB configuration file
@@ -87,6 +87,9 @@ SAMPLE_CONFIG_DIR="$SAMPLE_HOME/etc"
 CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
 if [ $? -eq 0 ]; then
 	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
+	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
+	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
+	HSQLDB_DIR=$(cygpath -u "c:\tmp\lsc\hsqldb")
 fi
 
 # ---------------------------------------------------------------------------------

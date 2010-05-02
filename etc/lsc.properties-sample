@@ -185,3 +185,38 @@ lsc.tasks.FirstTask.dn = "cn=" + srcBean.getAttributeValueById("cn") + ",ou=Peop
 
 dn.real_root = dc=lsc-project,dc=org
 
+#############################
+# Syncoptions configuration #
+#############################
+# This section defines synchronization rules for each task, attribute by attribute
+
+# Define the implementation to use. PropertiesBasedSyncOptions is usually what you want.
+# The only current alternative is ForceSyncOptions, which don't take any configuration.
+lsc.syncoptions.FirstTask = org.lsc.beans.syncoptions.PropertiesBasedSyncOptions
+
+# Set default behavior for all attributes not explicitly specified below
+# Available actions are:
+#	- K for Keep: don't change existing values in the destination
+#		(create and default values from syncoptions may be applied, though)
+#	- F for Force: replace values in the destination with our values
+#		(from source, or force values in syncoptions)
+#	- M for Merge: add values to multi-valued attributes
+#		(from source, or create/default/force values in syncoptions)
+# See documentation at http://lsc-project.org/wiki/documentation/1.2/configuration/syncoptions
+lsc.syncoptions.FirstTask.default.action = K
+
+# Set default delimiter for multiple values for an attribute.
+# This is normally a semi-colon (;) but can be problematic when writing complex JavaScript
+lsc.syncoptions.FirstTask.default.delimiter = $
+
+# Sample syncoption for the SN attribute: force update, and put value from source in capitals
+lsc.syncoptions.FirstTask.sn.action = F
+lsc.syncoptions.FirstTask.sn.force_value = srcBean.getAttributeValueById("sn").toUpperCase()
+
+# Sample syncoption for the userPassword attribute: provide a default password,
+# if there isn't one in the destination, and hash it in SHA
+lsc.syncoptions.FirstTask.userPassword.default_value = SecurityUtils.hash(SecurityUtils.HASH_SHA1, "defaultPassword")
+
+# Many other possibilities are available in SyncOptions.
+# You can write any JavaScript code in a default_value, force_value or create_value.
+# See http://lsc-project.org/wiki/documentation/1.2/configuration/start for more.

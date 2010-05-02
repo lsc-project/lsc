@@ -55,6 +55,7 @@ import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -226,6 +227,10 @@ public final class JScriptEvaluator {
 		Object ret = null;
 		try {
 			ret = script.exec(cx, scope);
+		} catch (EcmaError e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			return null;
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {

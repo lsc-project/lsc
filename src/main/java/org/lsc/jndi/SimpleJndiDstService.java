@@ -57,7 +57,6 @@ import javax.naming.directory.SearchResult;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.service.IService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJndiDstService extends AbstractSimpleJndiService implements IJndiDestinationService {
+public class SimpleJndiDstService extends AbstractSimpleJndiService implements IJndiWritableService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.

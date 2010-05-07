@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiDestinationService {
+public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiWritableService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.

@@ -63,7 +63,7 @@ import org.lsc.service.IService;
  * 
  * @author Sebastien Bahloul
  */
-public interface IJndiDestinationService extends IService {
+public interface IJndiWritableService extends IService {
 
 
 	public boolean apply(final JndiModifications jm) throws CommunicationException;

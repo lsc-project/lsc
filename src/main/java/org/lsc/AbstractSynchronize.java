@@ -61,10 +61,9 @@ import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
-import org.lsc.jndi.IJndiDestinationService;
+import org.lsc.jndi.IJndiWritableService;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-import org.lsc.jndi.JndiServices;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
 import org.lsc.utils.JScriptEvaluator;
@@ -146,7 +145,7 @@ public abstract class AbstractSynchronize {
 	 *            the jndi destination service
 	 */
 	protected final void clean2Ldap(final String syncName,
-			final IService srcService, final IJndiDestinationService dstJndiService) {
+			final IService srcService, final IJndiWritableService dstJndiService) {
 
 		InfoCounter counter = new InfoCounter();
 
@@ -288,7 +287,7 @@ public abstract class AbstractSynchronize {
 	 * @param customLibrary
 	 */
 	protected final void synchronize2Ldap(final String syncName,
-			final IService srcService, final IJndiDestinationService dstService,
+			final IService srcService, final IJndiWritableService dstService,
 			final Object customLibrary) {
 
 		InfoCounter counter = new InfoCounter();
@@ -340,7 +339,7 @@ public abstract class AbstractSynchronize {
 
 	protected final void startAsynchronousSynchronize2Ldap(
 			final String syncName, final IAsynchronousService srcService,
-			final IJndiDestinationService dstService, final Object customLibrary) {
+			final IJndiWritableService dstService, final Object customLibrary) {
 
 		InfoCounter counter = new InfoCounter();
 
@@ -549,14 +548,14 @@ class SynchronizeTask implements Runnable {
 	private String syncName;
 	private InfoCounter counter;
 	private IService srcService;
-	private IJndiDestinationService dstService;
+	private IJndiWritableService dstService;
 	private Object customLibrary;
 	private ISyncOptions syncOptions;
 	private AbstractSynchronize abstractSynchronize;
 	private Entry<String, LscAttributes> id;
 
 	public SynchronizeTask(final String syncName, InfoCounter counter,
-			final IService srcService, final IJndiDestinationService dstService,
+			final IService srcService, final IJndiWritableService dstService,
 			final Object customLibrary, ISyncOptions syncOptions,
 			AbstractSynchronize abstractSynchronize,
 			Entry<String, LscAttributes> id) {

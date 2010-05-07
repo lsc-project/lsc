@@ -60,7 +60,6 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import org.lsc.Configuration;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
@@ -119,7 +118,7 @@ public final class BeanComparator {
 		// we have the object in the source and the destination
 		// this must be either a MODIFY or MODRDN operation
 		// clone the source bean to calculate modifications on the DN
-		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+		IBean itmBean = cloneSrcBean(srcBean, dstBean, syncOptions, customLibrary);
 		if (!"".equals(itmBean.getDistinguishName()) &&
 				dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) != 0) {
 			return JndiModificationType.MODRDN_ENTRY;
@@ -180,7 +179,7 @@ public final class BeanComparator {
 		JndiModifications jm = null;
 
 		// clone the source bean to work on it
-		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+		IBean itmBean = cloneSrcBean(srcBean, dstBean, syncOptions, customLibrary);
 
 		// get modification type to perform
 		JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, dstBean, customLibrary);
@@ -528,14 +527,14 @@ public final class BeanComparator {
 	 * only change the result intermediary bean, never the original source bean
 	 * </p>
 	 *
-	 * @param srcBean
-	 *            Original bean from source
+	 * @param srcBean Original bean from source
+	 * @param srcBean Destination bean
 	 * @param syncOptions
 	 * @param customLibrary
 	 * @return New bean cloned from srcBean
 	 * @throws CloneNotSupportedException
 	 */
-	private static IBean cloneSrcBean(IBean srcBean, ISyncOptions syncOptions,
+	private static IBean cloneSrcBean(IBean srcBean, IBean dstBean, ISyncOptions syncOptions,
 					Object customLibrary) throws CloneNotSupportedException {
 		//
 		// We clone the source object, because syncoptions should not be used
@@ -550,6 +549,7 @@ public final class BeanComparator {
 			if (dn != null) {
 				Map<String, Object> table = new HashMap<String, Object>();
 				table.put("srcBean", srcBean);
+				table.put("dstBean", dstBean);
 				if (customLibrary != null) {
 					table.put("custom", customLibrary);
 				}

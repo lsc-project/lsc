@@ -203,6 +203,21 @@ public class Configuration {
 		}
 		return result;
 	}
+	
+	public static Properties getPropertiesSubset(final Properties originalProperties, String prefix) {
+		if (originalProperties == null) {
+			return null;
+		}
+		Properties result = new Properties();
+		for (Object propertyName: originalProperties.keySet()) {
+			String propertyNameStr = (String) propertyName;
+			if(propertyNameStr.startsWith(prefix + ".")) {
+				String newPropertyName = propertyNameStr.substring(propertyNameStr.indexOf(prefix.length()+1));
+				result.put(newPropertyName, originalProperties.getProperty(propertyNameStr));
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Get a int associated with the given property key

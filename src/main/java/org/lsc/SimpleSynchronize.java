@@ -232,7 +232,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 			// Get all properties
 			// TODO : nice error message if a class name is specified but doesn't exist
-			checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
+			checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/1.2/upgrade-from-1.1");
 			String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
 			String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
 			String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);

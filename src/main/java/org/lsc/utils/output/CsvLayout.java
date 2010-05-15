@@ -208,8 +208,16 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 
 	/**
 	 * @param logOperations the logOperation to set
+         * @deprecated Use {@link #setLogOperations(java.lang.String)}
 	 */
 	public void setLogOperation(String logOperations) {
+		this.logOperations = logOperations;
+	}
+
+        /**
+	 * @param logOperations the logOperation to set
+	 */
+	public void setLogOperations(String logOperations) {
 		this.logOperations = logOperations;
 	}
 

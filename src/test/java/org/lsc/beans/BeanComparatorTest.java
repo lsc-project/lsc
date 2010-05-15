@@ -91,13 +91,13 @@ public class BeanComparatorTest extends TestCase
 			
 			// test both not null, and syncoptions to make DNs identical --> modify
 			syncOptions.setDn("\"destination DN\"");
-			dstBean.setDistinguishName("destination DN");
+			dstBean.setDistinguishedName("destination DN");
 			assertEquals(JndiModificationType.MODIFY_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
 
 			// test both not null, with different DNs and no DN in syncoptions --> modrdn
 			syncOptions.setDn(null);
-			srcBean.setDistinguishName("source DN");
-			dstBean.setDistinguishName("destination DN");
+			srcBean.setDistinguishedName("source DN");
+			dstBean.setDistinguishedName("destination DN");
 			assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
 		}
 		catch (CloneNotSupportedException e) {
@@ -126,7 +126,7 @@ public class BeanComparatorTest extends TestCase
 
 		// test add
 		srcBean = new SimpleBean();
-		srcBean.setDistinguishName("something");
+		srcBean.setDistinguishedName("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 		destBean = null;
@@ -147,7 +147,7 @@ public class BeanComparatorTest extends TestCase
 
 		// test mod
 		destBean = new SimpleBean();
-		destBean.setDistinguishName("something");
+		destBean.setDistinguishedName("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 
 		try {

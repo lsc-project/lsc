@@ -226,7 +226,7 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		// get dn
-		beanToFill.setDistinguishName(sr.getNameInNamespace());
+		beanToFill.setDistinguishedName(sr.getNameInNamespace());
 
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {

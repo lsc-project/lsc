@@ -97,7 +97,7 @@ public interface IBean extends Cloneable, Serializable
 	 *            The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
 	 * @throws NamingException
-	 * @deprecated
+	 * @deprecated Use {@link #getAttributeFirstValueById(String)}
 	 */
 	public String getAttributeValueById(final String id) throws NamingException;
 
@@ -147,19 +147,34 @@ public interface IBean extends Cloneable, Serializable
 	void setAttribute(String attrName, Set<Object> attrValues);
 	
 	/**
-	 * Get the distinguish name.
+	 * Get the distinguished name.
 	 * 
-	 * @return the distinguish name
+	 * @return the distinguished name
+	 * @deprecated Use {@link #getDistinguishedName()}
 	 */
 	String getDistinguishName();
 
 	/**
-	 * Set the distinguish name.
+	 * Get the distinguished name.
 	 * 
-	 * @param dn
-	 *            the distinguish name
+	 * @return the distinguished name
+	 */
+	String getDistinguishedName();
+	
+	/**
+	 * Set the distinguished name.
+	 * 
+	 * @param dn The distinguishedName to set
+	 * @deprecated Use {@link #setDistinguishedName(String)}
 	 */
 	void setDistinguishName(String dn);
+	
+	/**
+	 * Set the distinguished name.
+	 * 
+	 * @param dn The distinguishedName to set
+	 */
+	void setDistinguishedName(String dn);
 
 	/**
 	 * Generate the distinguish name according to the information on the bean.

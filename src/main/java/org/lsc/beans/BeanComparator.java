@@ -120,8 +120,8 @@ public final class BeanComparator {
 		// this must be either a MODIFY or MODRDN operation
 		// clone the source bean to calculate modifications on the DN
 		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
-		if (itmBean.getDistinguishName() != null && itmBean.getDistinguishName().length() != 0 &&
-				dstBean.getDistinguishName().compareToIgnoreCase(itmBean.getDistinguishName()) != 0) {
+		if (itmBean.getDistinguishedName() != null && itmBean.getDistinguishedName().length() != 0 &&
+				dstBean.getDistinguishedName().compareToIgnoreCase(itmBean.getDistinguishedName()) != 0) {
 			return JndiModificationType.MODRDN_ENTRY;
 		} else {
 			return JndiModificationType.MODIFY_ENTRY;
@@ -206,7 +206,7 @@ public final class BeanComparator {
 			case MODRDN_ENTRY:
 				// WARNING: updating the RDN of the entry will cancel other
 				// modifications! Relaunch synchronization to complete update
-				jm.setNewDistinguishName(itmBean.getDistinguishName());
+				jm.setNewDistinguishName(itmBean.getDistinguishedName());
 				break;
 
 			default:
@@ -221,13 +221,13 @@ public final class BeanComparator {
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
 		if (dstBean != null) {
-			return dstBean.getDistinguishName();
+			return dstBean.getDistinguishedName();
 		}
 
 		// If the itmBean has a DN set, use that (this is where JavaScript
 		// generated DNs come from)
-		if (itmBean != null && itmBean.getDistinguishName() != null) {
-			return itmBean.getDistinguishName();
+		if (itmBean != null && itmBean.getDistinguishedName() != null) {
+			return itmBean.getDistinguishedName();
 		}
 
 		// At this stage, we don't have a real DN to use.
@@ -563,7 +563,7 @@ public final class BeanComparator {
 				if (customLibrary != null) {
 					table.put("custom", customLibrary);
 				}
-				itmBean.setDistinguishName(JScriptEvaluator.evalToString(dn, table));
+				itmBean.setDistinguishedName(JScriptEvaluator.evalToString(dn, table));
 			}
 		}
 

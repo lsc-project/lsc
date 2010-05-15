@@ -221,34 +221,66 @@ public abstract class LscBean implements IBean {
 	}
 
 	/**
-	 * Default distinguish name getter.
+	 * Default distinguished name getter.
 	 *
-	 * @return the distinguishName
+	 * @return the distinguishedName
+	 * @deprecated Use {@link #getDistinguishedName()}
 	 */
 	public final String getDistinguishName() {
+		LOGGER.warn("The method getDistinguishName() is deprecated and will be removed in a future version of LSC. Please use getDistinguishedName() instead.");
+		return getDistinguishedName();
+	}
+	
+	/**
+	 * Default distinguished name getter.
+	 *
+	 * @return the distinguishedName
+	 */
+	public final String getDistinguishedName() {
 		return distinguishedName;
 	}
 
 	/**
+	 * Default distinguished name getter.
+	 *
+	 * @return the distinguishedName
+	 */
+	public final String getDN() {
+		return getDistinguishedName();
+	}
+
+
+	/**
 	 * Distinguish name getter that makes sure to return the FULL DN (including suffix).
 	 *
-	 * @return the distinguishName
+	 * @return the distinguishedName
 	 */
 	public final String getFullDistinguishedName() {
-		if (!distinguishedName.endsWith("," + Configuration.DN_REAL_ROOT)) {
-			return distinguishedName + "," + Configuration.DN_REAL_ROOT;
+		String dn = getDistinguishedName();
+		if (!dn.endsWith("," + Configuration.DN_REAL_ROOT)) {
+			return dn + "," + Configuration.DN_REAL_ROOT;
 		} else {
-			return distinguishedName;
+			return dn;
 		}
 	}
 
 	/**
-	 * Default distinguishName setter.
+	 * Default distinguishedName setter.
 	 *
-	 * @param dn
-	 *                the distinguishName to set
+	 * @param dn The distinguishedName to set
+	 * @deprecated Use {@link #setDistinguishedName(String)}
 	 */
 	public final void setDistinguishName(final String dn) {
+		LOGGER.warn("The method setDistinguishName() is deprecated and will be removed in a future version of LSC. Please use setDistinguishedName() instead.");
+		setDistinguishedName(dn);
+	}		
+
+	/**
+	 * Default distinguishedName setter.
+	 *
+	 * @param dn The distinguishedName to set
+	 */
+	public final void setDistinguishedName(final String dn) {
 		distinguishedName = dn;
 	}
 
@@ -287,7 +319,7 @@ public abstract class LscBean implements IBean {
 	public LscBean clone() throws CloneNotSupportedException {
 		try {
 			LscBean bean = (LscBean) this.getClass().newInstance();
-			bean.setDistinguishName(this.getDistinguishName());
+			bean.setDistinguishedName(this.getDistinguishedName());
 
 			for (String attributeName : this.getAttributesNames()) {
 				bean.setAttribute(attributeName, this.getAttributeAsSetById(attributeName));
@@ -340,12 +372,12 @@ public abstract class LscBean implements IBean {
 
 				if ((baseDn != null) && (baseDn.length() > 0)) {
 					if (dn.length() > 0) {
-						ab.setDistinguishName(dn + "," + baseDn);
+						ab.setDistinguishedName(dn + "," + baseDn);
 					} else {
-						ab.setDistinguishName(baseDn);
+						ab.setDistinguishedName(baseDn);
 					}
 				} else {
-					ab.setDistinguishName(dn);
+					ab.setDistinguishedName(dn);
 				}
 
 				NamingEnumeration<?> ne = entry.getAttributes().getAll();

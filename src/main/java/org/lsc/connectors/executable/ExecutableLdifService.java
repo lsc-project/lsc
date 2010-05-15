@@ -179,7 +179,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 					//TODO: handle multi value attributes pivot
 					attributes.getAttributes().put(id, attribute.get());
 				}
-				map.put(bean.getDistinguishName(), attributes);
+				map.put(bean.getDistinguishedName(), attributes);
 			}
 		}
 		return map;
@@ -382,7 +382,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 	private void updateBeanAttributeValue(IBean bean,
 			String attributeName, String attributeValue) {
 		if(attributeName.equals("dn")) {
-			bean.setDistinguishName(attributeValue);
+			bean.setDistinguishedName(attributeValue);
 		} else {
 			if(bean.getAttributeById(attributeName) != null) {
 				Attribute attr = bean.getAttributeById(attributeName);
@@ -391,8 +391,8 @@ public class ExecutableLdifService implements IJndiWritableService {
 			} else {
 				bean.setAttribute(new BasicAttribute(attributeName, attributeValue));
 			}
-			if(bean.getDistinguishName() == null) {
-				bean.setDistinguishName(attributeValue);
+			if(bean.getDistinguishedName() == null) {
+				bean.setDistinguishedName(attributeValue);
 			}
 		}
 	}

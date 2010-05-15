@@ -325,7 +325,7 @@ public abstract class AbstractBean extends LscBean {
 	public final void mapDistinguishName(top t, IBean destBean,
 					final String value) {
 		// Map nothing except the dn !
-		destBean.setDistinguishName(value);
+		destBean.setDistinguishedName(value);
 	}
 
 	/**
@@ -352,12 +352,12 @@ public abstract class AbstractBean extends LscBean {
 
 				if ((baseDn != null) && (baseDn.length() > 0)) {
 					if (dn.length() > 0) {
-						ab.setDistinguishName(dn + "," + baseDn);
+						ab.setDistinguishedName(dn + "," + baseDn);
 					} else {
-						ab.setDistinguishName(baseDn);
+						ab.setDistinguishedName(baseDn);
 					}
 				} else {
-					ab.setDistinguishName(dn);
+					ab.setDistinguishedName(dn);
 				}
 
 				NamingEnumeration<?> ne = entry.getAttributes().getAll();

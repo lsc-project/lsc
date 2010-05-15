@@ -56,6 +56,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.Rdn;
 
 import org.lsc.Configuration;
 import org.lsc.service.DataSchemaProvider;
@@ -281,7 +282,10 @@ public abstract class LscBean implements IBean {
 	 * @param dn The distinguishedName to set
 	 */
 	public final void setDistinguishedName(final String dn) {
-		distinguishedName = dn;
+		distinguishedName = null;
+		if (dn != null) {
+			distinguishedName = (String) Rdn.unescapeValue(dn);
+		}
 	}
 
 	public void generateDn() throws NamingException {

@@ -108,7 +108,7 @@ public class JScriptEvaluatorTest {
 		table.put("srcBean", bean);
 
 		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
-		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeValueById('sn')", table));
+		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeFirstValueById('sn')", table));
 
 		List<String> res = JScriptEvaluator.evalToStringList("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table);
 		assertNotNull(res);
@@ -124,7 +124,7 @@ public class JScriptEvaluatorTest {
 		assertNotNull(res);
 		assertEquals(0, res.size());
 		
-		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValueById('nonexistent')", table);
+		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeFirstValueById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 

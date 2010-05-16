@@ -123,19 +123,6 @@ public abstract class LscBean implements IBean {
 
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
-	 *
-	 * @param id The attribute name (case insensitive)
-	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
-	 * @deprecated
-	 */
-	public final String getAttributeValueById(final String id)
-					throws NamingException {
-		return getAttributeFirstValueById(id);
-	}
-
-	/**
-	 * Get the <b>first</b> value of an attribute from its name
 	 * 
 	 * @param id
 	 *            The attribute name (case insensitive)

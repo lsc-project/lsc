@@ -102,7 +102,7 @@ public class Ldap2LdapSyncTest {
 		attributeValues.put("sn", "SN0001");
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
-		IService srcService = new SimpleJndiSrcService(Configuration.getAsProperties("lsc.tasks." + TASK_NAME + ".srcService"), "org.lsc.beans.SimpleBean");
+		IService srcService = new SimpleJndiSrcService(Configuration.getAsProperties(Configuration.LSC_TASKS_PREFIX + "." + TASK_NAME + ".srcService"), "org.lsc.beans.SimpleBean");
 		Entry<String, LscAttributes> obj = ids.entrySet().iterator().next();
 		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue());
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");

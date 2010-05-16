@@ -131,7 +131,14 @@ public class ExecutableLdifService implements IJndiWritableService {
 		}
 	}
 
-	
+	/**
+	 * Apply directory modifications.
+	 *
+	 * @param jm Modifications to apply in a {@link JndiModifications} object.
+	 * @return Operation status
+	 * @throws CommunicationException If the connection to the service is lost,
+	 * and all other attempts to use this service should fail.
+	 */
 	public boolean apply(final JndiModifications jm) throws CommunicationException {
 		int exitCode = 0;
 		String ldif = LdifLayout.format(jm);
@@ -155,6 +162,18 @@ public class ExecutableLdifService implements IJndiWritableService {
 		return exitCode == 0;
 	}
 
+	/**
+	 * The simple object getter according to its identifier.
+	 * 
+	 * @param pivotName Name of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 *            (used for display only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 *            source such as returned by {@link #getListPivots()}. It must identify a unique entry in the
+	 *            source.
+	 * @return The bean, or null if not found
+	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned.
+	 */
 	public IBean getBean(String pivotName, LscAttributes pivotAttributes)
 			throws NamingException {
 		String output = executeWithReturn(getParameters(getScript, pivotName), getEnv(), toLdif(pivotAttributes));
@@ -166,6 +185,13 @@ public class ExecutableLdifService implements IJndiWritableService {
 		return entries.iterator().next();
 	}
 
+    /**
+     * Returns a list of all the objects' identifiers.
+     * 
+	 * @return Map of all entries names that are returned by the directory with an associated map of
+	 *         attribute names and values (never null)
+     * @throws NamingException 
+     */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		Map<String, LscAttributes> map = null;
 		String output = executeWithReturn(getParameters(listScript), getEnv(), "");

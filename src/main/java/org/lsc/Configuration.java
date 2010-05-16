@@ -80,10 +80,10 @@ public class Configuration {
 	// Logger
 	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
-	// Filename of the <code>lsc.properties</code>
+	/** Filename of the <code>lsc.properties</code> file */
 	public static final String PROPERTIES_FILENAME = "lsc.properties";
 
-	// Filename of the <code>database.properties</code>
+	/** Filename of the <code>database.properties</code> file */
 	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
 
 	/** Default location for configuration filename */

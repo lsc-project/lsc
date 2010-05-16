@@ -177,6 +177,7 @@ public final class EmbeddedOpenDS {
 
     /**
      * Sets the system context root to null.
+     * @param reason Message to log when shutting down
      * 
      * @see junit.framework.TestCase#tearDown()
      */
@@ -282,8 +283,10 @@ public final class EmbeddedOpenDS {
      * <p>
      * Also take a look at the makeLdif method below since this makes expressing LDIF a little bit cleaner.
      * 
+     * @param ldif Line of LDIF
      * @return the first Entry parsed from the ldif String
      * @see #makeLdif
+     * @throws Exception If an unexpected problem occurs.
      */
     public static Entry entryFromLdifString(String ldif) throws Exception {
         return entriesFromLdifString(ldif).get(0);
@@ -307,6 +310,7 @@ public final class EmbeddedOpenDS {
      * 		+ &quot;cn: John Smith\n&quot; + &quot;sn: Smith\n&quot; + &quot;givenname: John\n&quot;;
      * 
      * </pre>
+     * @param lines Lines of LDIF without newline characters
      * 
      * @return the concatenation of each line followed by a newline character
      */
@@ -327,6 +331,9 @@ public final class EmbeddedOpenDS {
      * Entry john = TestCaseUtils.makeEntry(&quot;dn: cn=John Smith,dc=example,dc=com&quot;, &quot;objectclass: inetorgperson&quot;,
      * 		&quot;cn: John Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: John&quot;);
      * </pre>
+     * @param lines Lines of LDIF
+     * @return Entry constructed from the specified lines of LDIF
+     * @throws Exception 
      * 
      * @see #makeLdif
      */
@@ -343,6 +350,8 @@ public final class EmbeddedOpenDS {
      * 		&quot;cn: John Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: John&quot;, &quot;&quot;, &quot;dn: cn=Jane Smith,dc=example,dc=com&quot;,
      * 		&quot;objectclass: inetorgperson&quot;, &quot;cn: Jane Smith&quot;, &quot;sn: Smith&quot;, &quot;givenname: Jane&quot;);
      * </pre>
+     * @param lines Lines of LDIF
+     * @return List of EntryS constructed from the specified lines of LDIF
      * @throws IOException 
      * @throws LDIFException 
      * 
@@ -357,7 +366,6 @@ public final class EmbeddedOpenDS {
      * 
      * @param entry The entry to be added.
      * @return the error code
-     * @throws Exception If an unexpected problem occurs.
      */
     public static ResultCode addEntry(Entry entry) {
         InternalClientConnection conn = InternalClientConnection.getRootConnection();
@@ -371,8 +379,6 @@ public final class EmbeddedOpenDS {
      * Adds the provided set of entries to the Directory Server using internal operations.
      * 
      * @param entries The entries to be added.
-     * 
-     * @throws Exception If an unexpected problem occurs.
      */
     public static void addEntries(List<Entry> entries) {
         for (Entry entry : entries) {
@@ -387,9 +393,6 @@ public final class EmbeddedOpenDS {
      *            by blank lines.
      * @throws IOException 
      * @throws LDIFException 
-     * @throws Exception
-     * 
-     * @throws Exception If an unexpected problem occurs.
      */
     public static void addEntries(String... lines) throws LDIFException, IOException {
         for (Entry entry : makeEntries(lines)) {

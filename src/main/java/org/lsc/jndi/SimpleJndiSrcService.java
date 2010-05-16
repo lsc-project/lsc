@@ -93,21 +93,20 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param bean {@link IBean} object to fill
-	 *
-	 * @param ids the data identifier in the directory - must identify a unique
-	 *        directory entry
-	 *
-	 * @return The filled bean or null if an error occurred
-	 *
-	 * @throws NamingException thrown if an directory exception is encountered
-	 *         while getting the identified bean
+	 * @param pivotName Name of the entry to be returned, which is the name returned by
+	 *            {@link #getListPivots()} (used for display only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
+	 *            entry in the source.
+	 * @return The bean, or null if not found
+	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned.
 	 */
-	public final IBean getBean(final String id, final LscAttributes attributes) throws NamingException {
+	public final IBean getBean(final String pivotName, final LscAttributes pivotAttributes) throws NamingException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();
-			return this.getBeanFromSR(get(id, attributes), srcBean);
+			return this.getBeanFromSR(get(pivotName, pivotAttributes), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
@@ -129,12 +128,12 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	}
 
 	/**
-	 * Get the identifiers list.
+	 * Returns a list of all the objects' identifiers.
 	 * 
-	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values, never null
-	 * @throws NamingException
-	 *                 thrown if an directory exception is encountered while
-	 *                 getting the identifiers list
+	 * @return Map of all entries names that are returned by the directory with an associated map of
+	 *         attribute names and values (never null)
+	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
+	 *             searching the directory.
 	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		return JndiServices.getSrcInstance().getAttrsList(getBaseDn(),

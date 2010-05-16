@@ -74,6 +74,7 @@ public class BeanComparatorTest {
 
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 */
 	@Test
 	public void testCalculateModificationType() throws CloneNotSupportedException {
@@ -114,6 +115,8 @@ public class BeanComparatorTest {
 	 * sn:
 	 *
 	 * With an invalid syntax error.
+	 * @throws NamingException As thrown when reading JNDI Attribute values.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 */
 	@Test
 	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException {
@@ -167,7 +170,7 @@ public class BeanComparatorTest {
 	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
 	 */
 	@Test
-	public void testGetValuesToSet() throws NamingException {
+	public void testGetValuesToSet() {
 
 		// Set up objects needed to test
 		String attrName = "cn";

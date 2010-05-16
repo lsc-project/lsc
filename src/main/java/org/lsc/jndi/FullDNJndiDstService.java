@@ -112,13 +112,14 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 
 	/**
 	 * The simple object getter according to its identifier.
-	 *
-	 * @param id the data identifier in the directory - must return a unique directory entry
-	 * @return the corresponding bean or null if failed
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identified bean
+	 * 
+	 * @param dn DN of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 * @param pivotAttributes Unused.
+	 * @return The bean, or null if not found
+	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned.
 	 */
-	public IBean getBean(String dn, LscAttributes attributes) throws NamingException {
+	public IBean getBean(String dn, LscAttributes pivotAttributes) throws NamingException {
 
 		try {
 			SearchControls sc = new SearchControls();
@@ -156,6 +157,13 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		return null;
 	}
 
+    /**
+     * Returns a list of all the objects' identifiers.
+     * 
+     * @return	Map of all entries DNs (this is not for display only!)
+     * 			that are returned by the directory with an associated map of attribute names and values (never null)
+     * @throws NamingException 
+     */
 	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		// get list of DNs
@@ -195,6 +203,14 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		return ids;
 	}
 
+	/**
+	 * Apply directory modifications.
+	 *
+	 * @param jm Modifications to apply in a {@link JndiModifications} object.
+	 * @return Operation status
+	 * @throws CommunicationException If the connection to the service is lost,
+	 * and all other attempts to use this service should fail.
+	 */
 	public boolean apply(JndiModifications jm) throws CommunicationException {
 		return JndiServices.getDstInstance().apply(jm);
 	}

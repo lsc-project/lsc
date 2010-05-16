@@ -86,10 +86,29 @@ public class JndiExecutableLdifService extends ExecutableLdifService {
 		sjds = new SimpleJndiDstService(props, beanClassName);
 	}
 
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
-		return sjds.getBean(id, attributes);
+	/**
+	 * The simple object getter according to its identifier.
+	 * 
+	 * @param pivotName Name of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 *            (used for display only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 *            source such as returned by {@link #getListPivots()}. It must identify a unique entry in the
+	 *            source.
+	 * @return The bean, or null if not found
+	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned.
+	 */
+	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException {
+		return sjds.getBean(pivotName, pivotAttributes);
 	}
 
+    /**
+     * Returns a list of all the objects' identifiers.
+     * 
+	 * @return Map of all entries names that are returned by the directory with an associated map of
+	 *         attribute names and values (never null)
+     * @throws NamingException 
+     */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		return sjds.getListPivots();
 	}

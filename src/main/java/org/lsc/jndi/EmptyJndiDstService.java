@@ -69,18 +69,22 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @param beanClassName
 	 *            the bean class name that will be instantiated and feed up
 	 */
-	public EmptyJndiDstService(final Properties props, final String beanClassName) {
+	public EmptyJndiDstService(final Properties props, @SuppressWarnings("unused") final String beanClassName) {
 		super(props);
 	}
 
 	/**
 	 * The simple object getter according to its identifier.
-	 * @param id the data identifier in the directory - must return a unique directory entry
+	 * 
+	 * @param pivotName Name of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 *            (used for display only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 *            source such as returned by {@link #getListPivots()}. It must identify a unique entry in the
+	 *            source.
 	 * @return Always returns null since this simulates an empty directory
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identified bean
+	 * @throws NamingException Never thrown.
 	 */
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
+	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException {
 		return null;
 	}
 
@@ -93,19 +97,22 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 		return JndiServices.getDstInstance();
 	}
 
-	/**
-	 * Get the identifiers list.
-	 * 
-	 * @return the string iterator
-	 * @throws NamingException
-	 *             thrown if an directory exception is encountered while getting the identifiers list
-	 */
+    /**
+     * Returns a list of all the objects' identifiers.
+     * 
+     * @return Map Always null since this simulates an empty directory
+     * @throws NamingException Never thrown.
+     */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		return null;
 	}
 
 	/**
-	 * Always accept to apply modifications
+	 * Apply directory modifications. Always accept them in this Empty service.
+	 *
+	 * @param jm Modifications to apply in a {@link JndiModifications} object.
+	 * @return Operation status, always true.
+	 * @throws CommunicationException Never thrown.
 	 */
 	public boolean apply(JndiModifications jm) throws CommunicationException {
 		return true;

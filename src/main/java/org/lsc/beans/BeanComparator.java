@@ -214,7 +214,7 @@ public final class BeanComparator {
 	}
 
 	private static String getDstDN(IBean itmBean, IBean dstBean,
-					boolean condition) throws NamingException {
+					boolean condition) {
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
 		if (dstBean != null) {
@@ -608,12 +608,10 @@ public final class BeanComparator {
 	 *            create values to be used instead of default values)
 	 * @return List<Object> The list of values that should be set in the
 	 *         destination, or null if this attribute should be ignored.
-	 * @throws NamingException
 	 */
 	protected static Set<Object> getValuesToSet(String attrName,
 					Set<Object> srcAttrValues, ISyncOptions syncOptions,
-					Map<String, Object> javaScriptObjects, JndiModificationType modType)
-					throws NamingException {
+					Map<String, Object> javaScriptObjects, JndiModificationType modType) {
 		// Result
 		Set<Object> attrValues = new HashSet<Object>();
 

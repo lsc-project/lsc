@@ -86,12 +86,24 @@ public abstract class AbstractJdbcService implements IService {
 		sqlMapper = DaoConfig.getSqlMapClient();
 	}
 
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
-		Map<String, Object> attributeMap = attributes.getAttributes();
+	/**
+	 * The simple object getter according to its identifier.
+	 * 
+	 * @param pivotName Name of the entry to be returned, which is the name returned by
+	 *            {@link #getListPivots()} (used for display only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
+	 *            entry in the source.
+	 * @return The bean, or null if not found
+	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned.
+	 */
+	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException {
+		Map<String, Object> attributeMap = pivotAttributes.getAttributes();
 		try {
 			return (IBean) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 		} catch (SQLException e) {
-			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
+			LOGGER.warn("Error while looking for a specific entry with id={} ({})", pivotName, e);
 			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
@@ -103,7 +115,8 @@ public abstract class AbstractJdbcService implements IService {
 	 * Execute a database request to get a list of object identifiers. This request
 	 * must be a very simple and efficient request because it will get all the requested
 	 * identifiers.
-	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
+	 * @return Map of all entries names that are returned by the directory with an associated map of
+	 *         attribute names and values (never null)
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() {

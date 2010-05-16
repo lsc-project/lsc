@@ -151,7 +151,7 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 
 		// Get list of all entries from the destination
-		Set<Entry<String, LscAttributes>> ids = Collections.emptySet();
+		Set<Entry<String, LscAttributes>> ids;
 		try {
 			ids = dstJndiService.getListPivots().entrySet();
 		} catch (NamingException e) {
@@ -293,8 +293,7 @@ public abstract class AbstractSynchronize {
 
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
-		Set<Entry<String, LscAttributes>> ids = Collections.emptySet();
-		SynchronizeThreadPoolExecutor threadPool = null;
+		Set<Entry<String, LscAttributes>> ids;
 
 		try {
 			ids = srcService.getListPivots().entrySet();
@@ -312,7 +311,7 @@ public abstract class AbstractSynchronize {
 
 		ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads(), getThreads() * 10);
+		SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(getThreads(), getThreads() * 10);
 
 		/*
 		 * Loop on all entries in the source and add or update them in the
@@ -571,7 +570,6 @@ class SynchronizeTask implements Runnable {
 	}
 
 	public void run() {
-
 		counter.incrementCountAll();
 
 		try {
@@ -602,11 +600,8 @@ class SynchronizeTask implements Runnable {
 	}
 
 	public void run(Entry<String, LscAttributes> id) {
-
 		JndiModifications jm = null;
-		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
-		Map<String, Object> conditionObjects = Collections.emptyMap();
 
 		try {
 			IBean entry = srcService.getBean(id.getKey(), id.getValue());
@@ -621,7 +616,7 @@ class SynchronizeTask implements Runnable {
 			}
 
 			// Search destination for matching object
-			dstBean = dstService.getBean(id.getKey(), id.getValue());
+			IBean dstBean = dstService.getBean(id.getKey(), id.getValue());
 
 			// Calculate operation that would be performed
 			JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, entry, dstBean, customLibrary);
@@ -636,7 +631,7 @@ class SynchronizeTask implements Runnable {
 			} else if (conditionString.matches("false")) {
 				applyCondition = false;
 			} else {
-				conditionObjects = new HashMap<String, Object>();
+				Map<String, Object> conditionObjects = new HashMap<String, Object>();
 				conditionObjects.put("dstBean", dstBean);
 				conditionObjects.put("srcBean", entry);
 

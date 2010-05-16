@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 public abstract class LscObject
 {
 	/* The local logger */
-	protected static Logger LOGGER = LoggerFactory.getLogger(LscObject.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(LscObject.class);
 
 	protected String distinguishName;
 

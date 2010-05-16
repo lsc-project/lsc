@@ -131,7 +131,7 @@ public class AD {
 	/**
 	 * The weird date of Microsoft AD for last login
 	 */
-	private static Long LAST_LOGON_START_TIME = 116444736000000000L;
+	private static final Long LAST_LOGON_START_TIME = 116444736000000000L;
 
 	/**
 	 * Return the number of weeks since the last logon

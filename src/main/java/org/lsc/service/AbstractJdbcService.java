@@ -73,7 +73,7 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  */
 public abstract class AbstractJdbcService implements IService {
 
-	protected static Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
 	protected SqlMapClient sqlMapper;
 
 	public abstract String getRequestNameForList();

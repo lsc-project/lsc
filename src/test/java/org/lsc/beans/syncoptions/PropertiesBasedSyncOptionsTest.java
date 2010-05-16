@@ -80,14 +80,9 @@ public class PropertiesBasedSyncOptionsTest {
 		assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
 
 		// evaluate JavaScript
-		try {
-			defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
-			assertEquals(1, defaultValues.size());
-			assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
-		} catch (Exception e) {
-			// shouldn't happen
-			assertTrue(e.toString(), false);
-		}
+		defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
+		assertEquals(1, defaultValues.size());
+		assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
 	}
 
 	@Test

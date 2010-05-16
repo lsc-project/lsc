@@ -48,7 +48,6 @@ package org.lsc.utils;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Random;
 import org.lsc.utils.security.SymmetricEncryption;
 
@@ -62,65 +61,42 @@ import static org.junit.Assert.*;
 public class SecurityUtilsTest {
 
 	@Test
-	public final void testSymmetricEncryption() {
+	public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
 		//
 		// First generate a random symmetric key. We could use it then to
 		// do all encryption operations.
 		//
-		try {
-			SymmetricEncryption se = new SymmetricEncryption();
-			assertTrue(se.generateDefaultRandomKeyFile());
-		} catch (NoSuchAlgorithmException ex) {
-			assertTrue(false);
-		} catch (NoSuchProviderException ex) {
-			assertTrue(false);
-		} catch (GeneralSecurityException ex) {
-			assertTrue(false);
-		}
+		SymmetricEncryption se = new SymmetricEncryption();
+		assertTrue(se.generateDefaultRandomKeyFile());
+
 		//
 		// Now, the test consist to encrypt a random value. Then, we compare the
 		// decrypted value with the initial one, they should be equal.
 		//
-		try {
-			String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-			Random r = new Random();
-			char[] buf = new char[20];
-			for (int i = 0; i < 20; i++) {
-				buf[i] = chars.charAt(r.nextInt(chars.length()));
-			}
-			String randomValue = new String(buf);
-			String encryptedValue = SecurityUtils.encrypt(randomValue);
-			String decryptedValue = SecurityUtils.decrypt(encryptedValue);
-			assertTrue(randomValue.equals(decryptedValue));
-		} catch (GeneralSecurityException ex) {
-			assertTrue(false);
-		} catch (IOException ex) {
-			assertTrue(false);
+		String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		Random r = new Random();
+		char[] buf = new char[20];
+		for (int i = 0; i < 20; i++) {
+			buf[i] = chars.charAt(r.nextInt(chars.length()));
 		}
+		String randomValue = new String(buf);
+		String encryptedValue = SecurityUtils.encrypt(randomValue);
+		String decryptedValue = SecurityUtils.decrypt(encryptedValue);
+		assertTrue(randomValue.equals(decryptedValue));
 	}
 
 	@Test
-	public final void testHash() {
+	public final void testHash() throws NoSuchAlgorithmException {
 		String simpleValue = "lsc-project.org";
 		String hashedValueMD5 = "9xGo7EH8D2X+OOqXw1eIxQ==";
 		String hashedValueSHA1 = "YVTOIPfeXwxFluZBGrS+V5lARgc=";
-		//
+
 		// MD5
-		//
-		try {
-			String result = SecurityUtils.hash(SecurityUtils.HASH_MD5, simpleValue);
-			assertTrue(result.equals(hashedValueMD5));
-		} catch (NoSuchAlgorithmException ex) {
-			assertTrue(false);
-		}
-		//
+		String result = SecurityUtils.hash(SecurityUtils.HASH_MD5, simpleValue);
+		assertTrue(result.equals(hashedValueMD5));
+
 		// SHA-1
-		//
-		try {
-			String result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
-			assertTrue(result.equals(hashedValueSHA1));
-		} catch (NoSuchAlgorithmException ex) {
-			assertTrue(false);
-		}
+		result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
+		assertTrue(result.equals(hashedValueSHA1));
 	}
 }

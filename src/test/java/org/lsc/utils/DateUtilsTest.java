@@ -90,19 +90,13 @@ public class DateUtilsTest {
 		gc.setTimeInMillis(time);
 		assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
 		assertEquals("20070622192826Z", DateUtils.simpleFormat(gc.getTime()));
-
 	}
 
 	/**
 	 * Launch the format test.
 	 */
-	@Test
-	public final void testError() {
-		try {
-			DateUtils.parse("0Z");
-			assertTrue(false);
-		} catch (ParseException pe) {
-			assertTrue(true);
-		}
+	@Test(expected=ParseException.class)
+	public final void testError() throws ParseException {
+		DateUtils.parse("0Z");
 	}
 }

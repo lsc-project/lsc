@@ -89,137 +89,107 @@ public class JndiServicesTest {
 	}
 
 	@Test
-	public final void testGetAttrList() {
+	public final void testGetAttrList() throws NamingException {
 		Map<String, LscAttributes> values = null;
-		try {
-			List<String> attrsName = new ArrayList<String>();
-			attrsName.add("objectClass");
-			values = JndiServices.getDstInstance().getAttrsList("",
-							JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
-			assertEquals(1, values.size());
-			assertNotNull(values.get(values.keySet().iterator().next()));
-			assertNotNull(JndiServices.getDstInstance().getSchema(
-							new String[]{"objectclasses"}));
-
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
-			assertNotNull(null);
-		}
+		List<String> attrsName = new ArrayList<String>();
+		attrsName.add("objectClass");
+		values = JndiServices.getDstInstance().getAttrsList("",
+						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
+		assertEquals(1, values.size());
+		assertNotNull(values.get(values.keySet().iterator().next()));
+		assertNotNull(JndiServices.getDstInstance().getSchema(
+						new String[]{"objectclasses"}));
 	}
 
 	@Test
-	public final void testSup() {
-		try {
-			assertEquals(null, JndiServices.getDstInstance().sup("", -1));
-			assertEquals(new ArrayList<String>(), JndiServices.getDstInstance().sup(
-							"ou=People", 1));
-			List<String> test2list = new ArrayList<String>();
-			test2list.add("ou=test2,ou=test3");
-			assertEquals(test2list, JndiServices.getDstInstance().sup(
-							"ou=test1,ou=test2,ou=test3", 1));
-			test2list.add(0, "ou=test1,ou=test2,ou=test3");
-			assertEquals(test2list, JndiServices.getDstInstance().sup(
-							"ou=test1,ou=test2,ou=test3", 0));
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
-			assertNotNull(null);
-		}
+	public final void testSup() throws NamingException {
+		assertEquals(null, JndiServices.getDstInstance().sup("", -1));
+		assertEquals(new ArrayList<String>(), JndiServices.getDstInstance().sup(
+						"ou=People", 1));
+		List<String> test2list = new ArrayList<String>();
+		test2list.add("ou=test2,ou=test3");
+		assertEquals(test2list, JndiServices.getDstInstance().sup(
+						"ou=test1,ou=test2,ou=test3", 1));
+		test2list.add(0, "ou=test1,ou=test2,ou=test3");
+		assertEquals(test2list, JndiServices.getDstInstance().sup(
+						"ou=test1,ou=test2,ou=test3", 0));
 	}
 
 	@Test
-	public final void testGetDnList() {
+	public final void testGetDnList() throws NamingException {
 		List<String> test2list = new ArrayList<String>();
 		test2list.add("");
-		try {
-			assertEquals(test2list, JndiServices.getDstInstance().getDnList("",
-							JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE));
+		assertEquals(test2list, JndiServices.getDstInstance().getDnList("",
+						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE));
 
-			test2list = new ArrayList<String>();
-			test2list.add("uid=00000001,ou=People");
-			assertEquals(test2list, JndiServices.getDstInstance().getDnList("ou=People",
-							"objectclass=person", SearchControls.SUBTREE_SCOPE));
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
-			assertNotNull(null);
-		}
+		test2list = new ArrayList<String>();
+		test2list.add("uid=00000001,ou=People");
+		assertEquals(test2list, JndiServices.getDstInstance().getDnList("ou=People",
+						"objectclass=person", SearchControls.SUBTREE_SCOPE));
 	}
 
 	@Test
-	public final void testReadEntry() {
-		try {
-			assertNotNull(JndiServices.getDstInstance().readEntry("", false));
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
-			assertNotNull(null);
-		}
+	public final void testReadEntry() throws NamingException {
+		assertNotNull(JndiServices.getDstInstance().readEntry("", false));
 	}
 
 	@Test
-	public final void testApplyModifications() {
+	public final void testApplyModifications() throws NamingException {
+		String attrName = "description";
+		List<String> attrsName = new ArrayList<String>();
+		attrsName.add(attrName);
+		Map<String, LscAttributes> values = JndiServices.getDstInstance().getAttrsList("ou=People",
+						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
+		Attribute descAttr = new BasicAttribute(attrName);
+		String descValue = (String) values.get(values.keySet().iterator().next()).getStringValueAttribute(attrName);
 		try {
-			String attrName = "description";
-			List<String> attrsName = new ArrayList<String>();
-			attrsName.add(attrName);
-			Map<String, LscAttributes> values = JndiServices.getDstInstance().getAttrsList("ou=People",
-							JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
-			Attribute descAttr = new BasicAttribute(attrName);
-			String descValue = (String) values.get(values.keySet().iterator().next()).getStringValueAttribute(attrName);
-			try {
-				int n = Integer.parseInt(descValue.substring(descValue.length() - 1));
-				n += 1;
-				descValue = descValue.substring(0, descValue.length() - 1) + n;
-			} catch (NumberFormatException e) {
-				descValue = descValue + "-1";
-			}
-			descAttr.add(descValue);
-			JndiModifications jm = new JndiModifications(
-							JndiModificationType.MODIFY_ENTRY);
-			jm.setDistinguishName("ou=People");
-			ModificationItem mi = new ModificationItem(
-							DirContext.REPLACE_ATTRIBUTE, descAttr);
-			List<ModificationItem> mis = new ArrayList<ModificationItem>();
-			mis.add(mi);
-			jm.setModificationItems(mis);
-			assertTrue(JndiServices.getDstInstance().apply(jm));
-
-			// this should fail
-			Attribute illegalAttr = new BasicAttribute("creatorsName");
-			illegalAttr.add("Myself");
-			jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
-			jm.setDistinguishName("ou=People");
-			mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, illegalAttr);
-			mis = new ArrayList<ModificationItem>();
-			mis.add(mi);
-			jm.setModificationItems(mis);
-			assertFalse(JndiServices.getDstInstance().apply(jm));
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
-			assertNotNull(null);
+			int n = Integer.parseInt(descValue.substring(descValue.length() - 1));
+			n += 1;
+			descValue = descValue.substring(0, descValue.length() - 1) + n;
+		} catch (NumberFormatException e) {
+			descValue = descValue + "-1";
 		}
+		descAttr.add(descValue);
+		JndiModifications jm = new JndiModifications(
+						JndiModificationType.MODIFY_ENTRY);
+		jm.setDistinguishName("ou=People");
+		ModificationItem mi = new ModificationItem(
+						DirContext.REPLACE_ATTRIBUTE, descAttr);
+		List<ModificationItem> mis = new ArrayList<ModificationItem>();
+		mis.add(mi);
+		jm.setModificationItems(mis);
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+		// this should fail
+		Attribute illegalAttr = new BasicAttribute("creatorsName");
+		illegalAttr.add("Myself");
+		jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+		jm.setDistinguishName("ou=People");
+		mi = new ModificationItem(DirContext.ADD_ATTRIBUTE, illegalAttr);
+		mis = new ArrayList<ModificationItem>();
+		mis.add(mi);
+		jm.setModificationItems(mis);
+		assertFalse(JndiServices.getDstInstance().apply(jm));
 	}
 
 	/**
 	 * Test the retrieve of the complete directory.
 	 */
 	@Test
-	public final void testAttrPagedResultsList() {
-		try {
-			String attrName = "objectClass";
-			LOGGER.debug("Counting all the directory entries ...");
-			List<String> attrsName = new ArrayList<String>();
-			attrsName.add(attrName);
-			Map<String, LscAttributes> results = JndiServices.getDstInstance().
-							getAttrsList("", attrName + "=*", SearchControls.ONELEVEL_SCOPE, attrsName);
-			Iterator<String> iter = results.keySet().iterator();
-			int i = 0;
-			for (; iter.hasNext(); i++) {
-				String key = (String) iter.next();
-				LscAttributes value = results.get(key);
-				LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
-			}
-			LOGGER.debug(" Final count : {}", i);
-		} catch (NamingException ne) {
-			LOGGER.debug(ne.toString(), ne);
+	public final void testAttrPagedResultsList() throws NamingException {
+		String attrName = "objectClass";
+		LOGGER.debug("Counting all the directory entries ...");
+		List<String> attrsName = new ArrayList<String>();
+		attrsName.add(attrName);
+		Map<String, LscAttributes> results = JndiServices.getDstInstance().
+						getAttrsList("", attrName + "=*", SearchControls.ONELEVEL_SCOPE, attrsName);
+		Iterator<String> iter = results.keySet().iterator();
+		int i = 0;
+		for (; iter.hasNext(); i++) {
+			String key = (String) iter.next();
+			LscAttributes value = results.get(key);
+			LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
 		}
+		LOGGER.debug(" Final count : {}", i);
 	}
 }

@@ -73,7 +73,6 @@ public class SimpleSynchronizeTest {
 		syncTasks.add("nonexistent");
 		
 		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
-
 	}
 	
 }

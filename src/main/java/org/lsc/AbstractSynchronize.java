@@ -45,6 +45,7 @@
  */
 package org.lsc;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -150,7 +151,7 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 
 		// Get list of all entries from the destination
-		Set<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscAttributes>> ids = Collections.emptySet();
 		try {
 			ids = dstJndiService.getListPivots().entrySet();
 		} catch (NamingException e) {
@@ -170,7 +171,7 @@ public abstract class AbstractSynchronize {
 		JndiModifications jm = null;
 
 		/** Hash table to pass objects into JavaScript condition */
-		Map<String, Object> conditionObjects = null;
+		Map<String, Object> conditionObjects = Collections.emptyMap();
 
 		IBean taskBean;
 
@@ -187,7 +188,7 @@ public abstract class AbstractSynchronize {
 				// destination
 				if (taskBean == null) {
 					// Retrieve condition to evaluate before deleting
-					Boolean doDelete = null;
+					Boolean doDelete;
 					String conditionString = syncOptions.getDeleteCondition();
 
 					// Don't use JavaScript evaluator for primitive cases
@@ -292,7 +293,7 @@ public abstract class AbstractSynchronize {
 
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
-		Set<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscAttributes>> ids = Collections.emptySet();
 		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
@@ -605,7 +606,7 @@ class SynchronizeTask implements Runnable {
 		JndiModifications jm = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
-		Map<String, Object> conditionObjects = null;
+		Map<String, Object> conditionObjects = Collections.emptyMap();
 
 		try {
 			IBean entry = srcService.getBean(id.getKey(), id.getValue());
@@ -626,7 +627,7 @@ class SynchronizeTask implements Runnable {
 			JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, entry, dstBean, customLibrary);
 
 			// Retrieve condition to evaluate before creating/updating
-			Boolean applyCondition = null;
+			Boolean applyCondition;
 			String conditionString = syncOptions.getCondition(modificationType);
 
 			// Don't use JavaScript evaluator for primitive cases

@@ -1,0 +1,77 @@
+===== Ldap Synchronization Connector (LSC) Change Log =====
+
+This file contains a summary of changes between releases. Please refer to
+individual issues on http://tools.lsc-project.org/ for details.
+
+Please note that this file contains changes for both the lsc-sample and lsc-core
+components.
+
+
+=== LSC release 1.2.0 (16/05/2010) ===
+
+If you're upgrading from 1.1.*, see upgrading notes at:
+http://lsc-project.org/wiki/documentation/1.2/upgrade-from-1.1
+
+Major changes:
+- Generation is no longer necessary (Objects no longer exist, and the new SimpleBean can be used in place of most specific beans)
+- LSC-sample no longer exists (a demonstration configuration is in sample/ from the new distribution)
+- Ant and Maven are no longer required. The only dependency for LSC is JRE (other dependencies are bundled)
+- db2ldap configuration has been simplified: The configuration file database.properties is obsolete. Database connection properties are now read from the main lsc.properties file.
+- The logging system and configuration has changed: logging configuration is now done via the logback.xml file.
+
+Resolved issues:
+- Feature #22: Don't require generation for attributes and objectclasses from the schema in the directory
+- Feature #33: Support attribute names containing a "-" character
+- Feature #59: Implement post hooks after sync and clean
+- Feature #103: Create a distribution tarball from lsc-core including quickstart possibilities
+- Feature #112: Upgrade to OpenDS 1.2 stable version (for the sample)
+- Feature #136: Plug in any source connector easily
+- Feature #139: Migrate from log4j to sfl4j & LogBack
+- Feature #153: AntInstaller deprecated
+- Feature #154: Migrate the stack traces from LOGGER.error to LOGGER.debug
+- Feature #187: ldap.exists caller method
+- Feature #198: Display warning message when configuration file not found
+- Feature #214: All deprecated methods should log warnings
+- Bug #32: [ldap2ldap] Source objectClass is created in destination directory
+- Bug #99: getContextDn() is not found by rhino
+- Bug #107: Null values not supported in CSV files
+- Bug #140: JScriptEvaluator method evalToStringList() may return a list of one empty string
+- Bug #157: Standardise output parameters for logging configuration
+- Bug #168: lsc fails with unrelevant message due to bad config file
+- Bug #170: Correct default logging settings
+- Bug #174: Update sample for 1.2
+- Bug #176: add function getAccountExpires to AD.class
+- Bug #179: Quickstart tutorial fails
+- Bug #184: create_value inconsistency between 1.1.2 and 1.2
+- Bug #190: utf-8 and import csv
+- Bug #191: ScriptableJndiServices exists method ignores filter
+- Bug #192: Message about cygwin path under GNU/Linux
+- Bug #196: Ldif layout bug for modrdn LDAP operation
+- Bug #197: Problem with DN that has a # sign
+- Bug #202: LSC silently fails if the key for SymmetricEncryption can't be read
+- Bug #203: Error in documentation for SymmetricEncryption: property keypath doesn't exist, it's keyfile
+- Bug #204: EvaluatorException for value containing ";"
+- Bug #115: After OpenDS 2.0 upgrade, directory fails to shutdown (development)
+
+
+=== LSC release 1.1.2 (07/12/2009) ===
+
+- Fixed Bug #141: Create and default values not added to destination for attributes not in source object
+- Fixed Bug #145: db2ldap synchronizations with multiple pivot attributes don't handle all entries
+- Fixed Bug #148: Quickstart tutorial was broken (http://lsc-project.org/wiki/documentation/quickstart)
+- Fixed Bug #151: Null Pointer Exception in logActionError if errors occured very early
+- Fixed Bug #152: Add and modify operations do not handle empty fields the same way
+
+
+=== LSC release 1.1.1 (01/11/2009) ===
+
+- Fixed Bug #118: LDIF logger throws exception on zero length value
+- Fixed Bug #119: SQLMap url in example sql-map-config.xml is wrong
+- Fixed Bug #128: Bad value checking for default values in BeanComparator
+- Added Feature #97: Explicit error message when Rhino fails
+
+
+=== LSC release 1.1.0 (27/07/2009) ===
+
+- Initial release of LSC 1.1.
+- Changes from the 1.0 branch are too numerous to list.

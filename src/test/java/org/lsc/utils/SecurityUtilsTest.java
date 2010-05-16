@@ -59,56 +59,45 @@ import junit.framework.TestCase;
  */
 public class SecurityUtilsTest extends TestCase {
 
-	public final void testSymmetricEncryption()
-	{
+	public final void testSymmetricEncryption() {
 		//
 		// First generate a random symmetric key. We could use it then to
 		// do all encryption operations.
 		//
-		try
-		{
+		try {
 			SymmetricEncryption se = new SymmetricEncryption();
 			assertTrue(se.generateDefaultRandomKeyFile());
-		}
-		catch (NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			assertTrue(false);
-		}
-		catch (NoSuchProviderException ex)
-		{
+		} catch (NoSuchProviderException ex) {
 			assertTrue(false);
-		}
-		catch (GeneralSecurityException ex) {
+		} catch (GeneralSecurityException ex) {
 			assertTrue(false);
 		}
 		//
 		// Now, the test consist to encrypt a random value. Then, we compare the
 		// decrypted value with the initial one, they should be equal.
 		//
-		try
-		{
+		try {
 			String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 			Random r = new Random();
 			char[] buf = new char[20];
-			for (int i = 0; i < 20; i++)
+			for (int i = 0; i < 20; i++) {
 				buf[i] = chars.charAt(r.nextInt(chars.length()));
+			}
 			String randomValue = new String(buf);
 			String encryptedValue = SecurityUtils.encrypt(randomValue);
 			String decryptedValue = SecurityUtils.decrypt(encryptedValue);
 			assertTrue(randomValue.equals(decryptedValue));
-		}
-		catch (GeneralSecurityException ex)
-		{
+		} catch (GeneralSecurityException ex) {
 			assertTrue(false);
-		}
-		catch (IOException ex)
-		{
+		} catch (IOException ex) {
 			assertTrue(false);
 		}
 	}
 
-	public final void testHash()
-	{
-		String simpleValue = "lsc-project.org" ;
+	public final void testHash() {
+		String simpleValue = "lsc-project.org";
 		String hashedValueMD5 = "9xGo7EH8D2X+OOqXw1eIxQ==";
 		String hashedValueSHA1 = "YVTOIPfeXwxFluZBGrS+V5lARgc=";
 		//
@@ -130,5 +119,4 @@ public class SecurityUtilsTest extends TestCase {
 			assertTrue(false);
 		}
 	}
-
 }

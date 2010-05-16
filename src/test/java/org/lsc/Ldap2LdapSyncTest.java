@@ -95,7 +95,7 @@ public class Ldap2LdapSyncTest {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-        @Test
+	@Test
 	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
@@ -113,7 +113,7 @@ public class Ldap2LdapSyncTest {
 		assertTrue(userPassword.startsWith("{SSHA}"));
 	}
 
-        @Test
+	@Test
 	public final void testSyncLdap2Ldap() throws Exception {
 
 		// make sure the contents of the directory are as we expect to begin with
@@ -271,7 +271,7 @@ public class Ldap2LdapSyncTest {
 		checkAttributeValues(DN_MODIFY_DST, "seeAlso", attributeValues);
 	}
 
-        @Test
+	@Test
 	public final void testCleanLdap2Ldap() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
 		assertTrue(JndiServices.getDstInstance().exists(DN_DELETE_DST));
@@ -361,7 +361,7 @@ public class Ldap2LdapSyncTest {
 			assertTrue(at.contains(expectedValue));
 		}
 		for (int i = 0; i < at.size(); i++) {
-			assertTrue(expectedValues.contains((String)at.get(i)));
+			assertTrue(expectedValues.contains((String) at.get(i)));
 		}
 	}
 }

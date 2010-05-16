@@ -68,8 +68,7 @@ import org.lsc.utils.SetUtils;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  *
  */
-public class BeanComparatorTest extends TestCase
-{
+public class BeanComparatorTest extends TestCase {
 
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
@@ -82,13 +81,13 @@ public class BeanComparatorTest extends TestCase
 		try {
 			// test null and null --> null
 			assertNull(BeanComparator.calculateModificationType(syncOptions, null, null, null));
-			
+
 			// test not null and null --> add
 			assertEquals(JndiModificationType.ADD_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, null, null));
-			
+
 			// test null and not null --> delete
 			assertEquals(JndiModificationType.DELETE_ENTRY, BeanComparator.calculateModificationType(syncOptions, null, dstBean, null));
-			
+
 			// test both not null, and syncoptions to make DNs identical --> modify
 			syncOptions.setDn("\"destination DN\"");
 			dstBean.setDistinguishedName("destination DN");
@@ -99,26 +98,24 @@ public class BeanComparatorTest extends TestCase
 			srcBean.setDistinguishedName("source DN");
 			dstBean.setDistinguishedName("destination DN");
 			assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
-		}
-		catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException e) {
 			assertTrue(e.toString(), false);
 		}
 	}
-	
-    /**
-     * This test ensures that a source bean containing fields with only
-     * empty string values is not output as a modification to be applied 
-     * to the destination.
-     * 
-     * If this is not the case, LDAP operations follow for LDIF like this:
-     * modificationType: add
-     * add: sn
-     * sn: 
-     * 
-     * With an invalid syntax error.
-     */
-    public void testCalculateModificationsWithEmptyFields()
-    {
+
+	/**
+	 * This test ensures that a source bean containing fields with only
+	 * empty string values is not output as a modification to be applied
+	 * to the destination.
+	 *
+	 * If this is not the case, LDAP operations follow for LDIF like this:
+	 * modificationType: add
+	 * add: sn
+	 * sn:
+	 *
+	 * With an invalid syntax error.
+	 */
+	public void testCalculateModificationsWithEmptyFields() {
 		ISyncOptions syncOptions = new ForceSyncOptions();
 		IBean srcBean, destBean;
 		Object customLibrary = null;
@@ -139,8 +136,7 @@ public class BeanComparatorTest extends TestCase
 			assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
 			assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			assertTrue(false);
 		}
@@ -158,82 +154,77 @@ public class BeanComparatorTest extends TestCase
 			assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
 			assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			assertTrue(false);
 		}
-    }
+	}
 
-	
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
 	 */
-	public void testGetValuesToSet()
-	{
-		
+	public void testGetValuesToSet() {
+
 		// Set up objects needed to test
 		String attrName = "cn";
-		
+
 		Set<Object> srcAttrValues = null;
 		ISyncOptions syncOptions = null;
 		Map<String, Object> javaScriptObjects = null;
-		
+
 		Map<String, List<String>> createValuesMap = new HashMap<String, List<String>>();
-		Map<String, List<String>> defaultValuesMap = new HashMap<String, List<String>>(); 
+		Map<String, List<String>> defaultValuesMap = new HashMap<String, List<String>>();
 		Map<String, List<String>> forceValuesMap = new HashMap<String, List<String>>();
 		Map<String, STATUS_TYPE> statusMap = null;
-		
+
 		List<String> jsValues = new ArrayList<String>();
 		jsValues.add("\"JavaScript \" + (true ? \"has\" : \"hasn't\") + \" parsed this value (0)\"");
 		jsValues.add("\"JavaScript \" + (true ? \"has\" : \"hasn't\") + \" parsed this value (1)\"");
-		
+
 		List<String> jsCreateValues = new ArrayList<String>();
 		jsCreateValues.add("\"Created by JavaScript \" + (true ? \"successfully\" : \"or not\") + \" (0)\"");
 		jsCreateValues.add("\"Created by JavaScript \" + (true ? \"successfully\" : \"or not\") + \" (1)\"");
 
-		
+
 		createValuesMap.put("cn", jsCreateValues);
 		defaultValuesMap.put("cn", jsValues);
 		forceValuesMap.put("cn", jsValues);
-		
+
 		Set<Object> res = null;
 
-		
+
 		// First test: no default values, no force values, no source values (empty list)
 		// Should return an empty List
 		srcAttrValues = new HashSet<Object>();
 		syncOptions = new dummySyncOptions(null, null, null, null);
 		javaScriptObjects = new HashMap<String, Object>();
-		
+
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e1) {
+		} catch (NamingException e1) {
 			assertTrue("NamingException thrown in First test: no default values, no force values, no source values", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(0, res.size());
-		
-		
+
+
 		// First test again: no default values, no force values, no source values (null list)
 		// Should return an empty List
 		srcAttrValues = null;
 		syncOptions = new dummySyncOptions(null, null, null, null);
 		javaScriptObjects = new HashMap<String, Object>();
-		
+
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e1) {
+		} catch (NamingException e1) {
 			assertTrue("NamingException thrown in First test: no default values, no force values, no source values", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(0, res.size());
-		
-		
+
+
 		// Second test: just source values.
 		// Should return the source values, unchanged
 		srcAttrValues = new HashSet<Object>();
@@ -243,16 +234,15 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("NamingException thrown in Second test: just source values", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(srcAttrValues.size(), res.size());
 		assertTrue(SetUtils.doSetsMatch(srcAttrValues, res));
-		
-		
+
+
 		// Third test: source values to be replaced with force values
 		// Should return just the force values
 		srcAttrValues = new HashSet<Object>();
@@ -262,15 +252,16 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("NamingException thrown in Third test: source values to be replaced with force values", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
-		for (int i = 0; i < jsValues.size(); i++) assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
-		
+		for (int i = 0; i < jsValues.size(); i++) {
+			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
+		}
+
 
 		// Fourth test: no source values, no force values, just default values
 		// Should return just the default values
@@ -279,16 +270,17 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("NamingException thrown in Fourth test: no source values, no force values, just default values", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
-		for (int i = 0; i < jsValues.size(); i++) assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
+		for (int i = 0; i < jsValues.size(); i++) {
+			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
+		}
 
-		
+
 		// 5th test: source values, and default values, attribute status "Force"
 		// Should return just source values
 		srcAttrValues = new HashSet<Object>();
@@ -298,14 +290,15 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("5th test: source values, and default values, attribute status \"Force\"", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
-		for (int i = 0; i < jsValues.size(); i++) assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
+		for (int i = 0; i < jsValues.size(); i++) {
+			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
+		}
 
 
 		// 6th test: source values, and default values, attribute status "Merge"
@@ -319,19 +312,22 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("6th test: source values, and default values, attribute status \"Merge\"", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(jsValues.size() + srcAttrValues.size(), res.size());
 		Set<Object> expectedValues = new HashSet<Object>(jsValues.size() + srcAttrValues.size());
-		for (Object srcAttrValue : srcAttrValues) expectedValues.add(srcAttrValue);
-		for (int i = 0; i < jsValues.size(); i++) expectedValues.add("JavaScript has parsed this value (" + i + ")");
+		for (Object srcAttrValue : srcAttrValues) {
+			expectedValues.add(srcAttrValue);
+		}
+		for (int i = 0; i < jsValues.size(); i++) {
+			expectedValues.add("JavaScript has parsed this value (" + i + ")");
+		}
 		assertTrue(SetUtils.doSetsMatch(res, expectedValues));
-		
-		
+
+
 		// 7th test: source values, and create values, attribute status "Merge", creating new entry
 		// Should return source values AND create values but no default values
 		srcAttrValues = new HashSet<Object>();
@@ -343,18 +339,21 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.ADD_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("7th test: source values, and create values, attribute status \"Merge\", creating new entry", false);
 		}
-		
+
 		assertNotNull(res);
 		assertEquals(jsCreateValues.size() + srcAttrValues.size(), res.size());
 		expectedValues = new HashSet<Object>(jsCreateValues.size() + srcAttrValues.size());
-		for (Object srcAttrValue : srcAttrValues) expectedValues.add(srcAttrValue);
-		for (int i = 0; i < jsCreateValues.size(); i++) expectedValues.add("Created by JavaScript successfully (" + i + ")");
+		for (Object srcAttrValue : srcAttrValues) {
+			expectedValues.add(srcAttrValue);
+		}
+		for (int i = 0; i < jsCreateValues.size(); i++) {
+			expectedValues.add("Created by JavaScript successfully (" + i + ")");
+		}
 		assertTrue(SetUtils.doSetsMatch(res, expectedValues));
-		
+
 
 		// test that attributes configured for create values only
 		// (no force_values, default_values or source values)
@@ -364,142 +363,132 @@ public class BeanComparatorTest extends TestCase
 
 		try {
 			res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
-		}
-		catch (NamingException e) {
+		} catch (NamingException e) {
 			assertTrue("NamingException thrown in test: ignore attribute for create values only on modification", false);
 		}
-		
+
 		assertNull(res);
 
 	}
-	
+
 	public class dummySyncOptions implements ISyncOptions {
 
 		Map<String, List<String>> createValuesMap;
-		Map<String, List<String>> defaultValuesMap; 
+		Map<String, List<String>> defaultValuesMap;
 		Map<String, List<String>> forceValuesMap;
 		Map<String, STATUS_TYPE> statusMap;
 		String dn;
-		
-		public dummySyncOptions(Map<String, List<String>> createValuesMap,
-				Map<String, List<String>> defaultValuesMap, 
-				Map<String, List<String>> forceValuesMap,
-				Map<String, STATUS_TYPE> statusMap)
-		{
-			if (createValuesMap != null) this.createValuesMap = createValuesMap;
-			else this.createValuesMap = new HashMap<String, List<String>>();
-			
-			if (defaultValuesMap != null) this.defaultValuesMap = defaultValuesMap;
-			else this.defaultValuesMap = new HashMap<String, List<String>>();
 
-			if (forceValuesMap != null) this.forceValuesMap = forceValuesMap;
-			else this.forceValuesMap = new HashMap<String, List<String>>();
-			
-			if (statusMap != null) this.statusMap = statusMap;
-			else this.statusMap = new HashMap<String, STATUS_TYPE>();
+		public dummySyncOptions(Map<String, List<String>> createValuesMap,
+						Map<String, List<String>> defaultValuesMap,
+						Map<String, List<String>> forceValuesMap,
+						Map<String, STATUS_TYPE> statusMap) {
+			if (createValuesMap != null) {
+				this.createValuesMap = createValuesMap;
+			} else {
+				this.createValuesMap = new HashMap<String, List<String>>();
+			}
+
+			if (defaultValuesMap != null) {
+				this.defaultValuesMap = defaultValuesMap;
+			} else {
+				this.defaultValuesMap = new HashMap<String, List<String>>();
+			}
+
+			if (forceValuesMap != null) {
+				this.forceValuesMap = forceValuesMap;
+			} else {
+				this.forceValuesMap = new HashMap<String, List<String>>();
+			}
+
+			if (statusMap != null) {
+				this.statusMap = statusMap;
+			} else {
+				this.statusMap = new HashMap<String, STATUS_TYPE>();
+			}
 
 		}
-		
+
 		public dummySyncOptions() {
 			// TODO Auto-generated constructor stub
 		}
 
-		public String getCondition(JndiModificationType operation)
-		{
+		public String getCondition(JndiModificationType operation) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public Set<String> getCreateAttributeNames()
-		{
+		public Set<String> getCreateAttributeNames() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public String getCreateCondition()
-		{
+		public String getCreateCondition() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public List<String> getCreateValues(String id, String attributeName)
-		{
+		public List<String> getCreateValues(String id, String attributeName) {
 			return createValuesMap.get(attributeName);
 		}
 
-		public Set<String> getDefaultValuedAttributeNames()
-		{
+		public Set<String> getDefaultValuedAttributeNames() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public List<String> getDefaultValues(String id, String attributeName)
-		{
+		public List<String> getDefaultValues(String id, String attributeName) {
 			return defaultValuesMap.get(attributeName);
 		}
 
-		public String getDeleteCondition()
-		{
+		public String getDeleteCondition() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void setDn(String dn)
-		{
+		public void setDn(String dn) {
 			this.dn = dn;
 		}
 
-		public String getDn()
-		{
+		public String getDn() {
 			return dn;
 		}
 
-		public Set<String> getForceValuedAttributeNames()
-		{
+		public Set<String> getForceValuedAttributeNames() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public List<String> getForceValues(String id, String attributeName)
-		{
+		public List<String> getForceValues(String id, String attributeName) {
 			return forceValuesMap.get(attributeName);
 		}
 
-		public String getModrdnCondition()
-		{
+		public String getModrdnCondition() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public STATUS_TYPE getStatus(String id, String attributeName)
-		{
+		public STATUS_TYPE getStatus(String id, String attributeName) {
 			return statusMap.get(attributeName);
 		}
 
-		public String getTaskName()
-		{
+		public String getTaskName() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public String getUpdateCondition()
-		{
+		public String getUpdateCondition() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public List<String> getWriteAttributes()
-		{
+		public List<String> getWriteAttributes() {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		public void initialize(String taskname)
-		{
+		public void initialize(String taskname) {
 			// TODO Auto-generated method stub
-			
 		}
-		
 	}
-
 }

@@ -75,7 +75,7 @@ public class JScriptEvaluatorTest {
 		assertEquals("b", JScriptEvaluator.evalToString("srcAttr.get()", table));
 	}
 
-	@Test(expected=EcmaError.class)
+	@Test //(expected=EcmaError.class)
 	public void testNk() throws EcmaError {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));

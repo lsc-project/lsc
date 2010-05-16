@@ -43,9 +43,9 @@ public class FrenchFiltersTest {
 	}
 
 	@Test(expected=CharacterUnacceptedException.class)
-	public void testFilterSnException() throws CharacterUnacceptedException {
-		String sn = "Me MySelf And ê";
-		assertNotNull(FrenchFilters.filterSn(sn));
+	public void testFilterSnException() throws Exception {
+		String sn = "Me MySelf §!°^¨$*€`£ù%+=:/;,?# I";
+		FrenchFilters.filterSn(sn);
 	}
 
 	@Test

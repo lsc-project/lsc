@@ -56,7 +56,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.lsc.beans.IBean;
 import org.lsc.jndi.IJndiDstService;
 import org.lsc.service.ISrcService;
-import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

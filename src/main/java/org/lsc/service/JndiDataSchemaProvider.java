@@ -129,7 +129,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 		List<String> filteredNames = new ArrayList<String>();
 		for (String name : names) {
 			String filteredName = filterName(name);
-			if (filteredName != null) {
+			if (!filteredName.isEmpty()) {
 				filteredNames.add(filteredName);
 			} else {
 				LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);
@@ -144,12 +144,12 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 	 * @param name the original name
 	 * @return the filtered name or null if not matching
 	 */
-	public String filterName(String name) {
+	private String filterName(String name) {
 		String REGEX = "^\\p{Alpha}[\\w]*$";
 		Pattern p = Pattern.compile(REGEX);
 		Matcher m = p.matcher(name);
 		if (m.matches()) {
-			return null;
+			return "";
 		} else {
 			return name;
 		}

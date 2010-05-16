@@ -158,7 +158,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * @throws NamingException
 	 */
 	public final List<String> exists(final Object dn) throws NamingException {
-		return wrapString("_exists", dn, jndiServices.DEFAULT_FILTER);
+		return wrapString("_exists", dn, JndiServices.DEFAULT_FILTER);
 	}
 	
 	protected List<String> _exists(final String dn, final String filter) throws NamingException {

@@ -528,7 +528,7 @@ public final class BeanComparator {
 	 * </p>
 	 *
 	 * @param srcBean Original bean from source
-	 * @param srcBean Destination bean
+	 * @param dstBean Destination bean
 	 * @param syncOptions
 	 * @param customLibrary
 	 * @return New bean cloned from srcBean

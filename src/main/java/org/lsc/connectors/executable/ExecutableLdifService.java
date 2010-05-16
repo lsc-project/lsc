@@ -230,6 +230,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 			outputStream.flush();
 			outputStream.close();
 
+			//TODO: need to check for max time
 			LOGGER.debug("Waiting for command to stop ... ");
 
 			p.waitFor();

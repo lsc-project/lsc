@@ -33,7 +33,7 @@ public class SequencesFactory {
 	/** the sequences cache */
 	private Map<String, Sequence> sequences;
 	/** the local Log4J logger */
-	private static Logger LOGGER = LoggerFactory.getLogger(SequencesFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SequencesFactory.class);
 
 	/**
 	 * The local constructor
@@ -121,7 +121,7 @@ public class SequencesFactory {
 
 class Sequence {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
 
 	/** The entry distinguish name */
 	private String dn;

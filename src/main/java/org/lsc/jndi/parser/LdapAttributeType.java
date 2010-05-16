@@ -294,10 +294,9 @@ public class LdapAttributeType {
 	 *                the name to set
 	 */
 	public final void setName(final String lname) {
-		if (lname.trim().startsWith("'")) {
-			name = lname.trim().substring(1, lname.length() - 1);
-		} else {
-			name = lname.trim();
+		name = lname.trim();
+		if (name.startsWith("'")) {
+			name = name.substring(1, name.length() - 1);
 		}
 	}
 

@@ -66,4 +66,20 @@ public class LdapAttributeTypeTest {
 				"( 1.3.6.1.4.1.3317.4.3.1.57 NAME 'dialupAccess' DESC '' EQUALITY caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )"));
 	}
 
+	@Test
+	public void testSetName() {
+		LdapAttributeType lat = new LdapAttributeType();
+		lat.setName("test");
+		assertEquals("test", lat.getName());
+
+		lat.setName(" test ");
+		assertEquals("test", lat.getName());
+
+		lat.setName("test");
+		assertEquals("test", lat.getName());
+
+		lat.setName(" ' test ' ");
+		assertEquals(" test ", lat.getName());
+	}
+
 }

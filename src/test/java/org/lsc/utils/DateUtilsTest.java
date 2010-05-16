@@ -60,45 +60,46 @@ import junit.framework.TestCase;
  */
 public class DateUtilsTest extends TestCase {
 
-    /**
-     * Launch the parse test.
-     * @throws ParseException Thrown if the parsing operation failed
-     */
-    public final void testParse() throws ParseException {
-        // Please take care : use 5 instead of 6 because month is a 0 starting value
-        GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
-        gc.set(2007, 5, 22, 19, 28, 26);
-        // Then remove milliseconds
-        long time = gc.getTime().getTime();
-        time = time - time % 1000;
-        gc.setTimeInMillis(time);
-        assertEquals(gc.getTime(), DateUtils.parse("20070622192826.0Z"));
-        assertEquals(gc.getTime(), DateUtils.parse("20070622192826Z"));
-    }
+	/**
+	 * Launch the parse test.
+	 * @throws ParseException Thrown if the parsing operation failed
+	 */
+	public final void testParse() throws ParseException {
+		// Please take care : use 5 instead of 6 because month is a 0 starting value
+		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
+		gc.set(2007, 5, 22, 19, 28, 26);
+		// Then remove milliseconds
+		long time = gc.getTime().getTime();
+		time = time - time % 1000;
+		gc.setTimeInMillis(time);
+		assertEquals(gc.getTime(), DateUtils.parse("20070622192826.0Z"));
+		assertEquals(gc.getTime(), DateUtils.parse("20070622192826Z"));
+	}
 
-    /**
-     * Launch the format test.
-     */
-    public final void testFormat() {
-        // Please take care : use 5 instead of 6 because month is a 0 starting value
-        GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
-        gc.set(2007, 5, 22, 19, 28, 26);
-        long time = gc.getTime().getTime();
-        time = time - time % 1000;
-        gc.setTimeInMillis(time);
-        assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
-        assertEquals("20070622192826Z", DateUtils.simpleFormat(gc.getTime()));
+	/**
+	 * Launch the format test.
+	 */
+	public final void testFormat() {
+		// Please take care : use 5 instead of 6 because month is a 0 starting value
+		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
+		gc.set(2007, 5, 22, 19, 28, 26);
+		long time = gc.getTime().getTime();
+		time = time - time % 1000;
+		gc.setTimeInMillis(time);
+		assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
+		assertEquals("20070622192826Z", DateUtils.simpleFormat(gc.getTime()));
 
-    }
-    /**
-     * Launch the format test.
-     */
-    public final void testError() {
-        try {
-            DateUtils.parse("0Z");
-            assertTrue(false);
-        } catch(ParseException pe) {
-            assertTrue(true);
-        }
-    }
+	}
+
+	/**
+	 * Launch the format test.
+	 */
+	public final void testError() {
+		try {
+			DateUtils.parse("0Z");
+			assertTrue(false);
+		} catch (ParseException pe) {
+			assertTrue(true);
+		}
+	}
 }

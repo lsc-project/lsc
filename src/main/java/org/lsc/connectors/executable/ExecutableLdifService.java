@@ -63,6 +63,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.lsc.jndi.IJndiWritableService;
+import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.output.LdifLayout;
 import org.slf4j.Logger;
@@ -93,21 +94,22 @@ import org.slf4j.LoggerFactory;
  */
 public class ExecutableLdifService implements IJndiWritableService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExecutableLdifService.class);
+
 	private static final String DEBUG_PREFIX = "DEBUG: ";
 	private static final String INFO_PREFIX = "INFO: ";
 	private static final String WARN_PREFIX = "WARN: ";
 	private static final String ERROR_PREFIX = "ERROR: ";
-	private static final Logger LOGGER = LoggerFactory.getLogger(ExecutableLdifService.class);
 	private static final String VARS_PREFIX = "vars";
+
 	private String listScript;
 	private String getScript;
-	private String addScript;
-	private String updateScript;
-	private String renameScript;
-	private String deleteScript;
 	private Class<IBean> beanClass;
 	private Runtime rt;
 	private Properties globalEnvironmentVariables;
+
+	/** Map a JndiModificationType to the associated Script **/
+	private Map<JndiModificationType, String> modificationToScript = new HashMap<JndiModificationType, String>();
 
 	@SuppressWarnings("unchecked")
 	public ExecutableLdifService(Properties props, String beanClassName) {
@@ -116,16 +118,19 @@ public class ExecutableLdifService implements IJndiWritableService {
 			globalEnvironmentVariables = org.lsc.Configuration.getPropertiesSubset(props, VARS_PREFIX);
 			listScript = (String) props.get("listScript");
 			getScript = (String) props.get("getScript");
-			addScript = (String) props.get("addScript");
-			updateScript = (String) props.get("updateScript");
-			renameScript = (String) props.get("renameScript");
-			deleteScript = (String) props.get("deleteScript");
+
 			beanClass = (Class<IBean>) Class.forName(beanClassName);
+
+			modificationToScript.put(JndiModificationType.ADD_ENTRY, (String) props.get("addScript"));
+			modificationToScript.put(JndiModificationType.DELETE_ENTRY, (String) props.get("deleteScript"));
+			modificationToScript.put(JndiModificationType.MODIFY_ENTRY, (String) props.get("updateScript"));
+			modificationToScript.put(JndiModificationType.MODRDN_ENTRY, (String) props.get("renameScript"));
 		} catch (ClassNotFoundException e) {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
 
+	
 	/**
 	 * Apply directory modifications.
 	 *
@@ -137,22 +142,10 @@ public class ExecutableLdifService implements IJndiWritableService {
 	public boolean apply(final JndiModifications jm) throws CommunicationException {
 		int exitCode = 0;
 		String ldif = LdifLayout.format(jm);
-		switch (jm.getOperation()) {
-			case ADD_ENTRY:
-				exitCode = execute(getParameters(addScript, jm.getDistinguishName()), getEnv(), ldif);
-				break;
-			case DELETE_ENTRY:
-				exitCode = execute(getParameters(deleteScript, jm.getDistinguishName()), getEnv(), ldif);
-				break;
-			case MODIFY_ENTRY:
-				exitCode = execute(getParameters(updateScript, jm.getDistinguishName()), getEnv(), ldif);
-				break;
-			case MODRDN_ENTRY:
-				exitCode = execute(getParameters(renameScript, jm.getDistinguishName()), getEnv(), ldif);
-				break;
-		}
+		exitCode = execute(getParameters(modificationToScript.get(jm.getOperation()), 
+						jm.getDistinguishName()), getEnv(), ldif);
 		if (exitCode != 0) {
-			LOGGER.error("Exit code != 0: " + exitCode);
+			LOGGER.error("Exit code != 0: {}", exitCode);
 		}
 		return exitCode == 0;
 	}
@@ -174,7 +167,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 		String output = executeWithReturn(getParameters(getScript, pivotName), getEnv(), toLdif(pivotAttributes));
 		Collection<IBean> entries = fromLdif(output);
 		if (entries.size() != 1) {
-			LOGGER.error("Entries count: " + entries.size());
+			LOGGER.error("Entries count: {}", entries.size());
 			return null;
 		}
 		return entries.iterator().next();
@@ -222,36 +215,34 @@ public class ExecutableLdifService implements IJndiWritableService {
 		Process p = null;
 		try {
 			if (LOGGER.isDebugEnabled()) {
-				String parametersStr = "";
+				StringBuilder parametersStr = new StringBuilder();
 				for (String parameter : runtime) {
-					parametersStr += parameter + " ";
+					parametersStr.append(parameter).append(" ");
 				}
-				LOGGER.debug("Lauching '" + parametersStr + "'");
+				LOGGER.debug("Lauching '{}'", parametersStr.toString());
 			}
 			p = rt.exec(runtime, env);
 
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Writing to STDIN " + input);
-			}
+			LOGGER.debug("Writing to STDIN {}", input);
 
 			OutputStream outputStream = p.getOutputStream();
 			outputStream.write(input.getBytes());
 			outputStream.flush();
 			outputStream.close();
 
-			//TODO: need to check for max time
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Waiting for command to stop ... ");
-			}
+			LOGGER.debug("Waiting for command to stop ... ");
 
 			p.waitFor();
 		} catch (IOException e) {
 			// Encountered an error while reading data from output
-			LOGGER.error("Encountered an I/O exception while writing data to script " + runtime + "  (" + e + ")", e);
+			LOGGER.error("Encountered an I/O exception while writing data to script {}", runtime);
+			LOGGER.debug(e.toString(), e);
 		} catch (InterruptedException e) {
 			// Encountered an interruption
-			LOGGER.error("Script " + runtime + " interrupted (" + e + ")", e);
+			LOGGER.error("Script {} interrupted", runtime);
+			LOGGER.debug(e.toString(), e);
 		}
+
 		byte[] data = new byte[65535];
 		try {
 			while (p.getInputStream().read(data) > 0) {
@@ -259,8 +250,10 @@ public class ExecutableLdifService implements IJndiWritableService {
 			}
 		} catch (IOException e) {
 			// Failing to read the complete string causes null return
-			LOGGER.error("Fail to read complete data from script output stream: " + runtime + " (" + e + ")", e);
+			LOGGER.error("Fail to read complete data from script output stream: {}", runtime);
+			LOGGER.debug(e.toString(), e);
 		}
+
 		byte[] message = new byte[65535];
 		try {
 			while (p.getErrorStream().read(message) > 0) {
@@ -268,11 +261,13 @@ public class ExecutableLdifService implements IJndiWritableService {
 			}
 		} catch (IOException e) {
 			// Failing to read the complete string causes null return
-			LOGGER.error("Fail to read complete messages from script stderr stream: " + runtime + " (" + e + ")", e);
+			LOGGER.error("Fail to read complete messages from script stderr stream: {}", runtime);
+			LOGGER.debug(e.toString(), e);
 		}
+		
 		if (p.exitValue() != 0) {
 			// A non zero value causes null return
-			LOGGER.error("Non zero exit code for runtime: " + runtime[0] + ", exit code =" + p.exitValue());
+			LOGGER.error("Non zero exit code for runtime: {}, exit code={}", runtime[0], p.exitValue());
 			displayByLevel(messages.toString());
 		} else {
 			LOGGER.debug("Messages dump on stderr by script: ");
@@ -349,9 +344,11 @@ public class ExecutableLdifService implements IJndiWritableService {
 				}
 			}
 		} catch (InstantiationException e) {
-			LOGGER.error("Bean class name: " + beanClass.getName() + " (" + e + ")", e);
+			LOGGER.error("Bean class name: {}", beanClass.getName());
+			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
-			LOGGER.error("Bean class name: " + beanClass.getName() + " (" + e + ")", e);
+			LOGGER.error("Bean class name: {}", beanClass.getName());
+			LOGGER.debug(e.toString(), e);
 		}
 
 		return beans;
@@ -388,7 +385,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 				break;
 			} else {
 				// TODO
-				LOGGER.error("Got something strange : '" + line + "'. Please consider checking as this data may be either an incorrect format or an error !");
+				LOGGER.error("Got something strange : '{}'. Please consider checking as this data may be either an incorrect format or an error !", line);
 			}
 		}
 		if (multiLineValue != null) {

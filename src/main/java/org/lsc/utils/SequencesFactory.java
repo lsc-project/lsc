@@ -7,9 +7,7 @@ import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
@@ -56,8 +54,10 @@ public class SequencesFactory {
 
 	/**
 	 * Get the next value for this sequence
-	 * @param attributeName the sequence name
-	 * @return the next value, a negative value means an error
+	 * 
+	 * @param dn DN where the sequence is stored in the directory
+	 * @param attributeName The attribute name the sequence is stored in
+	 * @return The next value, a negative value means an error
 	 */
 	public static int getNextValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
@@ -73,17 +73,19 @@ public class SequencesFactory {
 	}
 
 	/**
-	 * Get the next value for this sequence
-	 * @param sequenceName the sequence name
+	 * Get the current value for this sequence
+	 * 
+	 * @param dn DN where the sequence is stored in the directory
+	 * @param attributeName The attribute name the sequence is stored in
 	 * @return the next value, a negative value means an error
 	 */
-	public static int getActualValue(String dn, String attributeName) {
+	public static int getCurrentValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
-		LOGGER.debug("Getting the actual value for the following sequence {}", hash);
+		LOGGER.debug("Getting the current value for the following sequence {}", hash);
 
 		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
 		if (sq != null) {
-			return sq.getActualValue();
+			return sq.getCurrentValue();
 		} else {
 			return -1;
 		}
@@ -91,7 +93,9 @@ public class SequencesFactory {
 
 	/**
 	 * Private local method to get the next value
-	 * @param sequenceName the sequence name
+	 * @param dn DN where the sequence is stored in the directory
+	 * @param attributeName The attribute name the sequence is stored in
+	 * @param hash A unique identifier for this sequence. See {@link #getHash(String, String)}.
 	 * @return the next value
 	 */
 	private Sequence getSequence(String dn, String attributeName, String hash) {
@@ -162,7 +166,7 @@ class Sequence {
 		dn = value;
 	}
 
-	public int getActualValue() {
+	public int getCurrentValue() {
 		return value;
 	}
 
@@ -171,7 +175,7 @@ class Sequence {
 	 * @return
 	 */
 	public synchronized int getNextValue() {
-		int actualValue = 0;
+		int currentValue = 0;
 		int newValue = 0;
 		try {
 			SearchControls sc = new SearchControls();
@@ -179,15 +183,13 @@ class Sequence {
 			sc.setReturningAttributes(new String[]{attributeName});
 			SearchResult sr = JndiServices.getDstInstance().readEntry(getDn(), "objectclass=*", false, sc);
 			if (sr.getAttributes().get(attributeName) != null) {
-				actualValue = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
+				currentValue = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
 			} else {
 				LOGGER.error("Failed to get the current value for the sequence {}/{}", dn, attributeName);
 				return 0;
 			}
-			newValue = actualValue + 1;
+			newValue = currentValue + 1;
 			Attribute newValueAttribute = new BasicAttribute(attributeName);
-			Attributes newValueAttributes = new BasicAttributes();
-			newValueAttributes.put(newValueAttribute);
 			newValueAttribute.clear();
 			newValueAttribute.add("" + newValue);
 

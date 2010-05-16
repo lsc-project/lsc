@@ -48,7 +48,6 @@ package org.lsc.utils;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 import org.slf4j.Logger;
@@ -197,23 +196,6 @@ public final class FrenchFilters {
 					"[\\p{Alpha}0123456789]+";
 
 	/**
-	 * Find if a string is in an array
-	 *
-	 * @param array the array
-	 * @param name the string
-	 *
-	 * @return boolean
-	 * 
-	 * @Deprecated because the method is in Java
-	 */
-	@Deprecated
-	public static boolean containsInTab(final String[] array, final String name) {
-		LOGGER.warn("The method containsInTab() in FrenchFilters is deprecated and will be" +
-				"removed in a future version of LSC.");
-		return Arrays.asList(array).contains(name);
-	}
-
-	/**
 	 * Normalize accents and cedillas
 	 *
 	 * @param src Source string
@@ -271,13 +253,6 @@ public final class FrenchFilters {
 			default:
 				return phoneResult;
 		}
-	}
-
-	@Deprecated
-	public static String filterPhones(final String phone2parse) {
-		LOGGER.warn("The method filterPhones() in FrenchFilters is deprecated and will be removed" +
-				"in a future version of LSC. Please use filterPhone() instead.");
-		return filterPhone(phone2parse);
 	}
 
 	/**
@@ -413,45 +388,6 @@ public final class FrenchFilters {
 		return filterStringRegExp(name, REGEXP_CHARACTERS);
 	}
 
-	@Deprecated
-	public static String filterNomPatronymique(final String name) throws CharacterUnacceptedException {
-		LOGGER.warn("The method filterNomPatronymique() in FrenchFilters is deprecated and will be" +
-				"removed in a future version of LSC. Please use filterLastName() instead.");
-		return filterLastName(name);
-	}
-
-	/**
-	 * Filter a string to match a first name
-	 * 
-	 * @param name the first name to filter
-	 * @return the filtered public given name
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
-	 * @deprecated Use {@link #filterGivenName(String)} instead.
-	 */
-	public static String filterFirstName(final String name)
-					throws CharacterUnacceptedException {
-		LOGGER.warn("The method filterFirstName() in FrenchFilters is deprecated and will be removed" +
-				"in a future version of LSC. Please use filterGivenName() instead.");
-		return filterGivenName(name);
-	}
-
-	/**
-	 * Filter a string to match a first name
-	 * 
-	 * @param name the first name to filter
-	 * @return the filtered public given name
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
-	 * @deprecated Use {@link #filterGivenName(String)} instead.
-	 */
-	@Deprecated
-	public static String filterPrenomEtatCivil(final String name) throws CharacterUnacceptedException {
-		LOGGER.warn("The method filterPrenomEtatCivil() in FrenchFilters is deprecated and will be removed" +
-				"in a future version of LSC. Please use filterGivenName() instead.");
-		return filterGivenName(name);
-	}
-
 	/**
 	 * Filter a string to match a givenName
 	 * 
@@ -519,20 +455,6 @@ public final class FrenchFilters {
 		}
 
 		return tmp;
-	}
-
-	/**
-	 * Trim a string
-	 * @deprecated because it is a simple wrapper for a Java method
-	 *
-	 * @param aString the string to filter
-	 * @return the filtered string
-	 */
-	@Deprecated
-	public static String filterString(final String aString) {
-		LOGGER.warn("The method filterString() in FrenchFilters is deprecated and will be removed" +
-				"in a future version of LSC. Please use String.trim() instead.");
-		return aString.trim();
 	}
 
 	/**

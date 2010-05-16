@@ -45,13 +45,9 @@
  */
 package org.lsc.jndi;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -63,7 +59,6 @@ import javax.naming.directory.SearchResult;
 
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
-import org.lsc.LscObject;
 import org.lsc.beans.IBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +72,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractSimpleJndiService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);
@@ -132,77 +126,6 @@ public abstract class AbstractSimpleJndiService {
 		// check that we have all parameters, or abort
 		Configuration.assertPropertyNotEmpty("filterId", filterId, this.getClass().getName());
 		Configuration.assertPropertyNotEmpty("filterAll", filterAll, this.getClass().getName());
-	}
-
-	/**
-	 * Map the ldap search result into a top derivated object.
-	 * 
-	 * @param sr
-	 *            the ldap search result
-	 * @param objToFill
-	 *            the original object to fill
-	 * 
-	 * @return the object modified
-	 * 
-	 * @throws NamingException
-	 *             thrown if a directory exception is encountered while
-	 *             switching to the Java POJO
-	 * @deprecated This class was used in LSC 1.1 projects, and is no longer
-	 *             necessary, but kept for reverse compatibility. It will be removed
-	 *             in LSC 1.3.
-	 */
-	public final LscObject getObjectFromSR(final SearchResult sr,
-					final LscObject objToFill) throws NamingException {
-		Method[] methods = objToFill.getClass().getMethods();
-		Map<String, Method> localMethods = new HashMap<String, Method>();
-
-		if (sr == null) {
-			return null;
-		}
-
-		// get dn
-		objToFill.setDistinguishName(sr.getNameInNamespace());
-
-		// get attributes
-		for (Method method: methods) {
-			localMethods.put(method.getName(), method);
-		}
-
-		NamingEnumeration<?> ne = sr.getAttributes().getAll();
-
-		while (ne.hasMore()) {
-			Attribute attr = (Attribute) ne.next();
-			String methodName = "set" + attr.getID().substring(0, 1).toUpperCase() + attr.getID().substring(1);
-
-			if (localMethods.containsKey(methodName)) {
-				try {
-					Class<?>[] paramsType = localMethods.get(methodName).getParameterTypes();
-
-					if (List.class.isAssignableFrom(paramsType[0])) {
-						localMethods.get(methodName).invoke(objToFill,
-										new Object[]{getValue(attr.getAll())});
-					} else if (String.class.isAssignableFrom(paramsType[0])) {
-						localMethods.get(methodName).invoke(
-										objToFill,
-										new Object[]{getValue(attr.getAll()).get(0)});
-					} else {
-						throw new RuntimeException(
-										"Unable to manage data type !");
-					}
-				} catch (IllegalArgumentException e) {
-					throw new RuntimeException(e);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(e);
-				} catch (InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
-			} else {
-				LOGGER.debug("Unable to map search result attribute to {} attribute object !",
-								attr.getID());
-			}
-		}
-
-		return objToFill;
 	}
 
 	/**

@@ -150,24 +150,8 @@ public interface IBean extends Cloneable, Serializable
 	 * Get the distinguished name.
 	 * 
 	 * @return the distinguished name
-	 * @deprecated Use {@link #getDistinguishedName()}
-	 */
-	String getDistinguishName();
-
-	/**
-	 * Get the distinguished name.
-	 * 
-	 * @return the distinguished name
 	 */
 	String getDistinguishedName();
-	
-	/**
-	 * Set the distinguished name.
-	 * 
-	 * @param dn The distinguishedName to set
-	 * @deprecated Use {@link #setDistinguishedName(String)}
-	 */
-	void setDistinguishName(String dn);
 	
 	/**
 	 * Set the distinguished name.

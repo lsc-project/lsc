@@ -225,17 +225,6 @@ public abstract class LscBean implements IBean {
 	 * Default distinguished name getter.
 	 *
 	 * @return the distinguishedName
-	 * @deprecated Use {@link #getDistinguishedName()}
-	 */
-	public final String getDistinguishName() {
-		LOGGER.warn("The method getDistinguishName() is deprecated and will be removed in a future version of LSC. Please use getDistinguishedName() instead.");
-		return getDistinguishedName();
-	}
-	
-	/**
-	 * Default distinguished name getter.
-	 *
-	 * @return the distinguishedName
 	 */
 	public final String getDistinguishedName() {
 		return distinguishedName;
@@ -264,17 +253,6 @@ public abstract class LscBean implements IBean {
 			return dn;
 		}
 	}
-
-	/**
-	 * Default distinguishedName setter.
-	 *
-	 * @param dn The distinguishedName to set
-	 * @deprecated Use {@link #setDistinguishedName(String)}
-	 */
-	public final void setDistinguishName(final String dn) {
-		LOGGER.warn("The method setDistinguishName() is deprecated and will be removed in a future version of LSC. Please use setDistinguishedName() instead.");
-		setDistinguishedName(dn);
-	}		
 
 	/**
 	 * Default distinguishedName setter.

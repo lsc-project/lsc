@@ -106,18 +106,6 @@ public final class JScriptEvaluator {
 	}
 
 	/**
-	 * Please consider using evalToString
-	 * @deprecated Please consider using {@link #evalToString(String, Map)}
-	 * @param expression
-	 * @param params
-	 * @return the string result
-	 */
-	public static String eval(final String expression,
-					final Map<String, Object> params) {
-		return evalToString(expression, params);
-	}
-
-	/**
 	 * Evaluate your Ecma script expression (manage pre-compiled expressions
 	 * cache).
 	 *

@@ -46,8 +46,6 @@
 package org.lsc.utils.directory;
 
 import com.unboundid.ldap.sdk.LDAPException;
-import java.net.MalformedURLException;
-
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 

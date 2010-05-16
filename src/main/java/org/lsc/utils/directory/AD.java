@@ -50,6 +50,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Utility class to manage specific entries for a Microsoft ActiveDirectory
@@ -181,8 +182,8 @@ public class AD {
 	}
 
 	/* The Hash of values to set or to unset  */
-	private static final HashMap<Integer, Integer> setHexValue = new HashMap<Integer, Integer>();
-	private static final HashMap<Integer, Integer> unsetHexValue = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> setHexValue = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> unsetHexValue = new HashMap<Integer, Integer>();
 
 	/**
 	 * Internal values in the AD in Hex

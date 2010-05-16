@@ -106,7 +106,7 @@ public class ForceSyncOptions implements ISyncOptions {
 		}
 		return Arrays.asList(property.split(" "));
 	}
-	private String TRUE_CONDITION = "true";
+	private static final String TRUE_CONDITION = "true";
 
 	public String getCreateCondition() {
 		return TRUE_CONDITION;

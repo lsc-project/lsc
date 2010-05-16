@@ -79,7 +79,7 @@ public class LdifLayout extends PatternLayout {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdifLayout.class);
 
 	/* The separator of the log operations */
-	protected static String LOG_OPERATIONS_SEPARATOR = ",";
+	protected static final String LOG_OPERATIONS_SEPARATOR = ",";
 
 	/* Configurations from the logback.xml */
 	private String logOperations;

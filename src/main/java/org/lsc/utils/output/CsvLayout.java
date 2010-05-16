@@ -72,10 +72,10 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CsvLayout.class);
 
 	/* Default values for the parameters */
-	protected static String DEFAULT_SEPARATOR = ";";
+	protected static final String DEFAULT_SEPARATOR = ";";
 
 	/* The separator of the log operations */
-	protected static String OPTIONS_SEPARATOR = ",";
+	protected static final String OPTIONS_SEPARATOR = ",";
 
 	/* Configurations from the log configuration */
 	private String logOperations;

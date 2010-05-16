@@ -54,48 +54,47 @@ import org.lsc.utils.JScriptEvaluator;
 
 public class PropertiesBasedSyncOptionsTest extends TestCase {
 
-    public final void test1() {
-        ISyncOptions iso = new PropertiesBasedSyncOptions();
-        assertNotNull(iso);
-        iso.initialize("sampleTask");
-        assertNotSame(iso.getStatus("sampleTask", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
-        assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
-    }
+	public final void test1() {
+		ISyncOptions iso = new PropertiesBasedSyncOptions();
+		assertNotNull(iso);
+		iso.initialize("sampleTask");
+		assertNotSame(iso.getStatus("sampleTask", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
+		assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
+	}
 
-    public final void testJS() {
-        ISyncOptions iso = new PropertiesBasedSyncOptions();
-        assertNotNull(iso);
-        iso.initialize("sampleTask");
-        
-        // get JavaScript enable default value
-        List<String> defaultValues = iso.getDefaultValues(null, "JsAttribute");
-        assertNotNull(defaultValues);
-        Iterator<String> it = defaultValues.iterator();
-        assertTrue(it.hasNext());
-        String defaultValue = it.next();
-        assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
-        
-        // evaluate JavaScript
-        try {
-            defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
-            assertEquals(1, defaultValues.size());
-            assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
-        } catch (Exception e) {
-        	// shouldn't happen
-        	assertTrue(e.toString(), false);
-        }
-    }
-    
-    public final void testDelimiters()
-    {
-        ISyncOptions iso = new PropertiesBasedSyncOptions();
-        assertNotNull(iso);
-        iso.initialize("sampleTask");
-        
-        List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
-        
-        assertEquals(2, forceValues.size());
-        assertEquals("\"a\"", forceValues.get(0));
-        assertEquals("\"b\"", forceValues.get(1));
-    }
+	public final void testJS() {
+		ISyncOptions iso = new PropertiesBasedSyncOptions();
+		assertNotNull(iso);
+		iso.initialize("sampleTask");
+
+		// get JavaScript enable default value
+		List<String> defaultValues = iso.getDefaultValues(null, "JsAttribute");
+		assertNotNull(defaultValues);
+		Iterator<String> it = defaultValues.iterator();
+		assertTrue(it.hasNext());
+		String defaultValue = it.next();
+		assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
+
+		// evaluate JavaScript
+		try {
+			defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
+			assertEquals(1, defaultValues.size());
+			assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
+		} catch (Exception e) {
+			// shouldn't happen
+			assertTrue(e.toString(), false);
+		}
+	}
+
+	public final void testDelimiters() {
+		ISyncOptions iso = new PropertiesBasedSyncOptions();
+		assertNotNull(iso);
+		iso.initialize("sampleTask");
+
+		List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
+
+		assertEquals(2, forceValues.size());
+		assertEquals("\"a\"", forceValues.get(0));
+		assertEquals("\"b\"", forceValues.get(1));
+	}
 }

@@ -55,14 +55,14 @@ import junit.framework.TestCase;
  */
 public class ForceSyncOptionsTest extends TestCase {
 
-    /**
-     * Launch the all tests.
-     */
-    public final void test() {
-        ForceSyncOptions fso = new ForceSyncOptions();
-        assertEquals(fso.getDefaultValue(null, null), null);
-        assertEquals(fso.getCreateValue(null, null), null);
-        assertEquals(fso.getStatus(null, null), STATUS_TYPE.FORCE);
-        assertEquals(fso.getCreateAttributeNames(), null);
-    }
+	/**
+	 * Launch the all tests.
+	 */
+	public final void test() {
+		ForceSyncOptions fso = new ForceSyncOptions();
+		assertEquals(fso.getDefaultValue(null, null), null);
+		assertEquals(fso.getCreateValue(null, null), null);
+		assertEquals(fso.getStatus(null, null), STATUS_TYPE.FORCE);
+		assertEquals(fso.getCreateAttributeNames(), null);
+	}
 }

@@ -91,7 +91,7 @@ public final class Launcher {
 	private int timeLimit;
 	
 	/** Available command line options definition */
-	private static Options options = null;
+	private static Options options;
 	
 	/** Parsed command line options */
 	private CommandLine cmdLine;

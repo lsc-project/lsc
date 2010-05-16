@@ -90,7 +90,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 	/** Default separator is ";" */
 	private String defaultDelimiter = ";";
-
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
 
 	private String syncName;
@@ -119,7 +119,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		Map<String, String> delimiters = new HashMap<String, String>();
 
 		// first, just read in all the properties (they are read in a random order, not the order in the file)
-		Properties props = Configuration.getAsProperties("lsc.syncoptions." + syncName);
+		Properties props = Configuration.getAsProperties(Configuration.LSC_SYNCOPTIONS_PREFIX + "." + syncName);
 		Enumeration<Object> en = props.keys();
 		while (en.hasMoreElements()) {
 			String key = (String) en.nextElement();
@@ -273,53 +273,53 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public List<String> getWriteAttributes() {
-		String property = Configuration.getString("lsc.tasks." + syncName + ".dstService.attrs");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".dstService.attrs");
 		if (property == null) {
 			return null;
 		}
 
 		List<String> writeAttributes = Arrays.asList(property.split(" "));
 		if (writeAttributes.size() == 0) {
-			LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update lsc.tasks.{}.dstService.attrs to change this.",
-							syncName);
+			LOGGER.warn("No attributes set to write in the destination. This means that LSC will not change anything! Update {}.{}.dstService.attrs to change this.",
+					Configuration.LSC_TASKS_PREFIX, syncName);
 		}
 		return writeAttributes;
 	}
 
 	public String getCreateCondition() {
-		String property = Configuration.getString("lsc.tasks." + syncName + ".condition.create");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".condition.create");
 		if (property == null) {
-			return "true";
+			return DEFAULT_CONDITION;
 		}
 		return property;
 	}
 
 	public String getDeleteCondition() {
-		String property = Configuration.getString("lsc.tasks." + syncName + ".condition.delete");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".condition.delete");
 		if (property == null) {
-			return "true";
+			return DEFAULT_CONDITION;
 		}
 		return property;
 	}
 
 	public String getUpdateCondition() {
-		String property = Configuration.getString("lsc.tasks." + syncName + ".condition.update");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".condition.update");
 		if (property == null) {
-			return "true";
+			return DEFAULT_CONDITION;
 		}
 		return property;
 	}
 
 	public String getModrdnCondition() {
-		String property = Configuration.getString("lsc.tasks." + syncName + ".condition.modrdn");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".condition.modrdn");
 		if (property == null) {
-			return "true";
+			return DEFAULT_CONDITION;
 		}
 		return property;
 	}
 
 	public String getCondition(JndiModificationType operation) {
-		String result = "true";
+		String result = DEFAULT_CONDITION;
 		switch (operation) {
 			case ADD_ENTRY:
 				result = this.getCreateCondition();
@@ -343,7 +343,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	 * @return String The script to generate a DN
 	 */
 	public String getDn() {
-		return Configuration.getString("lsc.tasks." + syncName + ".dn");
+		return Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + syncName + ".dn");
 	}
 
 	/**

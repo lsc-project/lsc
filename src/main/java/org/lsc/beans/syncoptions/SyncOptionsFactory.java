@@ -65,19 +65,19 @@ public final class SyncOptionsFactory {
 	}
 
 	private void loadOptions() {
-		String tasks = Configuration.getString("lsc.tasks", "default");
+		String tasks = Configuration.getString(Configuration.LSC_TASKS_PREFIX, "default");
 		StringTokenizer stok = new StringTokenizer(tasks, ",");
 		while (stok.hasMoreTokens()) {
 			String taskname = stok.nextToken();
-			String className = Configuration.getString("lsc.syncoptions." + taskname, "org.lsc.beans.syncoptions.ForceSyncOptions");
+			String className = Configuration.getString(Configuration.LSC_SYNCOPTIONS_PREFIX + "." + taskname, "org.lsc.beans.syncoptions.ForceSyncOptions");
 			try {
 				Class<?> cSyncOptions = Class.forName(className);
 				ISyncOptions iso = (ISyncOptions) cSyncOptions.newInstance();
 				iso.initialize(taskname);
 				cache.put(taskname, iso);
 			} catch (ClassNotFoundException e) {
-				LOGGER.error("Unable to found '{}' name. Please respecify lsc.syncoptions.{} value.",
-								className, taskname);
+				LOGGER.error("Unable to found '{}' name. Please respecify {}.{} value.",
+						new Object[]{Configuration.LSC_SYNCOPTIONS_PREFIX, className, taskname});
 			} catch (InstantiationException e) {
 				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
 			} catch (IllegalAccessException e) {

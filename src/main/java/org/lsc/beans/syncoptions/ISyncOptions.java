@@ -56,6 +56,9 @@ import org.lsc.jndi.JndiModificationType;
  */
 public interface ISyncOptions {
 
+	/** default condition if none is given */
+	public static final String DEFAULT_CONDITION = "true";
+	
 	/** The strategy to apply to the attribute updates. */
 	public enum STATUS_TYPE {
 

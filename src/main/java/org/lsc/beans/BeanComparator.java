@@ -60,6 +60,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
+import org.lsc.Configuration;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
@@ -233,10 +234,10 @@ public final class BeanComparator {
 		if (false == condition) {
 			// condition is false, we're not really going to create the entry
 			// set a pseudo DN to use for display purposes
-			return "No DN set! Read it from the source or set lsc.tasks.NAME.dn";
+			return "No DN set! Read it from the source or set " + Configuration.LSC_TASKS_PREFIX + ".NAME.dn";
 		}
 
-		throw new RuntimeException("No DN set! Read it from the source or set lsc.tasks.NAME.dn");
+		throw new RuntimeException("No DN set! Read it from the source or set " + Configuration.LSC_TASKS_PREFIX + ".NAME.dn");
 	}
 
 	/**

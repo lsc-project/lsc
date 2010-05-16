@@ -100,36 +100,35 @@ public class ForceSyncOptions implements ISyncOptions {
 	}
 
 	public List<String> getWriteAttributes() {
-		String property = Configuration.getString("lsc.tasks." + taskname + ".dstService.attrs");
+		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + taskname + ".dstService.attrs");
 		if (property == null) {
 			return null;
 		}
 		return Arrays.asList(property.split(" "));
 	}
-	private static final String TRUE_CONDITION = "true";
 
 	public String getCreateCondition() {
-		return TRUE_CONDITION;
+		return DEFAULT_CONDITION;
 	}
 
 	public String getDeleteCondition() {
-		return TRUE_CONDITION;
+		return DEFAULT_CONDITION;
 	}
 
 	public String getUpdateCondition() {
-		return TRUE_CONDITION;
+		return DEFAULT_CONDITION;
 	}
 
 	public String getModrdnCondition() {
-		return TRUE_CONDITION;
+		return DEFAULT_CONDITION;
 	}
 
 	public String getCondition(JndiModificationType operation) {
-		return TRUE_CONDITION;
+		return DEFAULT_CONDITION;
 	}
 
 	public String getDn() {
-		return Configuration.getString("lsc.tasks." + taskname + ".dn");
+		return Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + taskname + ".dn");
 	}
 
 	public List<String> getForceValues(String id, String attributeName) {

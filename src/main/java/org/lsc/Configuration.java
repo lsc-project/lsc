@@ -128,6 +128,12 @@ public class Configuration {
 	// LSC configuration of the application
 	private static PropertiesConfiguration config = null;
 
+	/** Prefix for tasks configuration elements in lsc.properties */
+	public static final String LSC_TASKS_PREFIX = "lsc.tasks";
+	
+	/** Prefix for syncoptions configuration elements in lsc.properties */
+	public static final String LSC_SYNCOPTIONS_PREFIX = "lsc.syncoptions";
+	
 	// Default constructor.
 	protected Configuration() {
 	}

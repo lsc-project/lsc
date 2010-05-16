@@ -70,8 +70,7 @@ import javax.naming.directory.Attribute;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public interface IBean extends Cloneable, Serializable
-{
+public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Get an attribute from its name.
@@ -89,7 +88,7 @@ public interface IBean extends Cloneable, Serializable
 	 * @return the LDAP attribute
 	 */
 	Set<Object> getAttributeAsSetById(final String id);
-	
+
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
 	 * 
@@ -110,7 +109,7 @@ public interface IBean extends Cloneable, Serializable
 	 * @throws NamingException
 	 */
 	public String getAttributeFirstValueById(final String id)
-			throws NamingException;
+					throws NamingException;
 
 	/**
 	 * Get all values of an attribute from its name
@@ -121,7 +120,7 @@ public interface IBean extends Cloneable, Serializable
 	 * @throws NamingException
 	 */
 	public List<String> getAttributeValuesById(final String id)
-			throws NamingException;
+					throws NamingException;
 
 	/**
 	 * Get the attributes name.
@@ -145,14 +144,14 @@ public interface IBean extends Cloneable, Serializable
 	 * @param attrValues A set of values for the attribute.
 	 */
 	void setAttribute(String attrName, Set<Object> attrValues);
-	
+
 	/**
 	 * Get the distinguished name.
 	 * 
 	 * @return the distinguished name
 	 */
 	String getDistinguishedName();
-	
+
 	/**
 	 * Set the distinguished name.
 	 * 
@@ -176,5 +175,4 @@ public interface IBean extends Cloneable, Serializable
 	 * @throws CloneNotSupportedException 
 	 */
 	IBean clone() throws CloneNotSupportedException;
-
 }

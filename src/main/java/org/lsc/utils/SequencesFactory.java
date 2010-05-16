@@ -33,7 +33,7 @@ public class SequencesFactory {
 	private Map<String, Sequence> sequences;
 	/** the local Log4J logger */
 	private static Logger LOGGER = Logger.getLogger(SequencesFactory.class);
-	
+
 	/**
 	 * The local constructor
 	 */
@@ -46,13 +46,13 @@ public class SequencesFactory {
 	 * @return the instance
 	 */
 	public static SequencesFactory getInstance() {
-		if(instance == null) {
+		if (instance == null) {
 			LOGGER.info("Initializing the sequences factory.");
 			instance = new SequencesFactory();
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Get the next value for this sequence
 	 * @param attributeName the sequence name
@@ -60,31 +60,35 @@ public class SequencesFactory {
 	 */
 	public static int getNextValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("Getting the next value for the following sequence " + hash);
-        Sequence sq = getInstance().getSequence(dn, attributeName, hash);
-        if(sq != null ) {
-            return sq.getNextValue();
-        } else {
-        	LOGGER.debug("Couldn't get the sequence " + attributeName + ". Returning 0.");
-            return -1;
-        }
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Getting the next value for the following sequence " + hash);
+		}
+		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
+		if (sq != null) {
+			return sq.getNextValue();
+		} else {
+			LOGGER.debug("Couldn't get the sequence " + attributeName + ". Returning 0.");
+			return -1;
+		}
 	}
 
-    /**
-     * Get the next value for this sequence
-     * @param sequenceName the sequence name
-     * @return the next value, a negative value means an error
-     */
-    public static int getActualValue(String dn, String attributeName) {
+	/**
+	 * Get the next value for this sequence
+	 * @param sequenceName the sequence name
+	 * @return the next value, a negative value means an error
+	 */
+	public static int getActualValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("Getting the actual value for the following sequence " + hash);
-        Sequence sq = getInstance().getSequence(dn, attributeName, hash);
-        if(sq != null ) {
-            return sq.getActualValue();
-        } else {
-            return -1;
-        }
-    }
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Getting the actual value for the following sequence " + hash);
+		}
+		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
+		if (sq != null) {
+			return sq.getActualValue();
+		} else {
+			return -1;
+		}
+	}
 
 	/**
 	 * Private local method to get the next value
@@ -92,7 +96,7 @@ public class SequencesFactory {
 	 * @return the next value
 	 */
 	private Sequence getSequence(String dn, String attributeName, String hash) {
-		if(sequences.containsKey(hash)) {
+		if (sequences.containsKey(hash)) {
 			return (Sequence) sequences.get(hash);
 		} else {
 			try {
@@ -108,7 +112,7 @@ public class SequencesFactory {
 	}
 
 	private static String getHash(String dn, String attributeName) {
-		if(dn == null || attributeName == null) {
+		if (dn == null || attributeName == null) {
 			return null;
 		}
 		return attributeName + "/" + dn;
@@ -125,7 +129,7 @@ class Sequence {
 	private String attributeName;
 	/** The value */
 	private int value;
-	
+
 	public boolean load(String dn, String attributeName, int serialNumber) throws NamingException {
 		if (attributeName == null || dn == null || dn.indexOf('=') == -1) {
 			return false;
@@ -135,21 +139,21 @@ class Sequence {
 
 		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
 		if (sr.getAttributes().get(attributeName) != null && sr.getAttributes().get(attributeName).size() > 0) {
-			value = Integer.parseInt((String)sr.getAttributes().get(attributeName).get());
+			value = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
 		} else {
 			return false;
 		}
 		return true;
 	}
-	
+
 	public void setAttributeName(String attributeName) {
 		this.attributeName = attributeName;
 	}
-	
+
 	public String getAttributeName() {
 		return attributeName;
 	}
-	
+
 	/**
 	 * The setter
 	 * @param value
@@ -161,7 +165,7 @@ class Sequence {
 	public int getActualValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Return the updated in directory new value
 	 * @return
@@ -172,28 +176,28 @@ class Sequence {
 		try {
 			SearchControls sc = new SearchControls();
 			sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-			sc.setReturningAttributes(new String[] {attributeName});
+			sc.setReturningAttributes(new String[]{attributeName});
 			SearchResult sr = JndiServices.getDstInstance().readEntry(getDn(), "objectclass=*", false, sc);
-			if(sr.getAttributes().get(attributeName) != null) {
-				actualValue = Integer.parseInt((String)sr.getAttributes().get(attributeName).get());
+			if (sr.getAttributes().get(attributeName) != null) {
+				actualValue = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
 			} else {
 				LOGGER.error("Failed to get the current value for the sequence " + dn + "/" + attributeName);
 				return 0;
 			}
-			newValue = actualValue +1;
+			newValue = actualValue + 1;
 			Attribute newValueAttribute = new BasicAttribute(attributeName);
 			Attributes newValueAttributes = new BasicAttributes();
 			newValueAttributes.put(newValueAttribute);
 			newValueAttribute.clear();
 			newValueAttribute.add("" + newValue);
-			
+
 			// prepare modifications to be written to the directory
 			JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
 			jm.setDistinguishName(getDn());
 			List<ModificationItem> mi = new ArrayList<ModificationItem>();
 			mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, newValueAttribute));
 			jm.setModificationItems(mi);
-			
+
 			JndiServices.getDstInstance().apply(jm);
 		} catch (NamingException e) {
 			LOGGER.error("Failed to get the current value for the sequence " + dn + "/" + attributeName);

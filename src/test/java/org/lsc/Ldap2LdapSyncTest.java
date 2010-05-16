@@ -56,7 +56,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import org.lsc.beans.IBean;
 import org.lsc.jndi.JndiServices;
@@ -73,7 +74,7 @@ import org.lsc.utils.directory.LDAP;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-public class Ldap2LdapSyncTest extends TestCase {
+public class Ldap2LdapSyncTest {
 
 	private final String TASK_NAME = "ldap2ldapTestTask";
 	private final String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
@@ -94,6 +95,7 @@ public class Ldap2LdapSyncTest extends TestCase {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
+        @Test
 	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
@@ -111,6 +113,7 @@ public class Ldap2LdapSyncTest extends TestCase {
 		assertTrue(userPassword.startsWith("{SSHA}"));
 	}
 
+        @Test
 	public final void testSyncLdap2Ldap() throws Exception {
 
 		// make sure the contents of the directory are as we expect to begin with
@@ -268,6 +271,7 @@ public class Ldap2LdapSyncTest extends TestCase {
 		checkAttributeValues(DN_MODIFY_DST, "seeAlso", attributeValues);
 	}
 
+        @Test
 	public final void testCleanLdap2Ldap() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
 		assertTrue(JndiServices.getDstInstance().exists(DN_DELETE_DST));

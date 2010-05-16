@@ -52,13 +52,16 @@ import java.security.NoSuchProviderException;
 import java.util.Random;
 import org.lsc.utils.security.SymmetricEncryption;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test security tools.
  */
-public class SecurityUtilsTest extends TestCase {
+public class SecurityUtilsTest {
 
+	@Test
 	public final void testSymmetricEncryption() {
 		//
 		// First generate a random symmetric key. We could use it then to
@@ -96,6 +99,7 @@ public class SecurityUtilsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testHash() {
 		String simpleValue = "lsc-project.org";
 		String hashedValueMD5 = "9xGo7EH8D2X+OOqXw1eIxQ==";

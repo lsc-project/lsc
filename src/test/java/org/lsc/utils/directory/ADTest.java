@@ -47,18 +47,21 @@ package org.lsc.utils.directory;
 
 import java.util.Calendar;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test AD specific function library.
  * 
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
  */
-public class ADTest extends TestCase {
+public class ADTest {
 
 	/**
 	 * Test functions to manipulate AD's userAccountControl attribute in bit-field format.
 	 */
+	@Test
 	public final void testUserAccountControl() {
 		// initialize userAccountControl to a normal account
 		int uACValue = AD.userAccountControlSet(0, new String[]{AD.UAC_NORMAL_ACCOUNT.toString()});
@@ -94,6 +97,7 @@ public class ADTest extends TestCase {
 	 * lastLogonTimestamp: 128673223549843750
 	 * The last logon was recorded at 01/10/08 10:12:34.
 	 */
+	@Test
 	public final void testNumberWeeksLastLogon() {
 		// get result from tested class
 		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon("128673223549843750");

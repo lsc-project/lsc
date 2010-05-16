@@ -58,7 +58,9 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
@@ -68,7 +70,7 @@ import org.lsc.jndi.JndiModifications;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LdifLayoutTest extends TestCase {
+public class LdifLayoutTest {
 
 	private LoggerContext lc = new LoggerContext();
 	private Logger LOGGER = lc.getLogger(LdifLayout.class);
@@ -84,6 +86,7 @@ public class LdifLayoutTest extends TestCase {
 	 * 
 	 * @throws IOException
 	 */
+	@Test
 	public final void testAdd() throws IOException {
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
@@ -114,6 +117,7 @@ public class LdifLayoutTest extends TestCase {
 	 * 
 	 * @throws IOException
 	 */
+	@Test
 	public final void testModify() throws IOException {
 		List<ModificationItem> mi = new ArrayList<ModificationItem>();
 		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
@@ -154,6 +158,7 @@ public class LdifLayoutTest extends TestCase {
 	 * 
 	 * @throws IOException
 	 */
+	@Test
 	public final void testRemove() throws IOException {
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("uid=a");

@@ -58,11 +58,11 @@ import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
-import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
-import org.lsc.jndi.JndiServices;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,21 +71,24 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class JndiServicesTest extends TestCase {
+public class JndiServicesTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
 	/**
 	 * Just check that the connection is ready.
 	 */
+	@Test
 	public final void testConnection() {
 		assertEquals(true, JndiServices.getDstInstance().exists(""));
 	}
 
+	@Test
 	public final void testConnectionCache() {
 		assertEquals(JndiServices.getDstInstance(), JndiServices.getDstInstance());
 	}
 
+	@Test
 	public final void testGetAttrList() {
 		Map<String, LscAttributes> values = null;
 		try {
@@ -104,6 +107,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testSup() {
 		try {
 			assertEquals(null, JndiServices.getDstInstance().sup("", -1));
@@ -122,6 +126,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testGetDnList() {
 		List<String> test2list = new ArrayList<String>();
 		test2list.add("");
@@ -139,6 +144,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testReadEntry() {
 		try {
 			assertNotNull(JndiServices.getDstInstance().readEntry("", false));
@@ -148,6 +154,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testApplyModifications() {
 		try {
 			String attrName = "description";
@@ -194,6 +201,7 @@ public class JndiServicesTest extends TestCase {
 	/**
 	 * Test the retrieve of the complete directory.
 	 */
+	@Test
 	public final void testAttrPagedResultsList() {
 		try {
 			String attrName = "objectClass";

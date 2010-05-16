@@ -47,7 +47,9 @@ package org.lsc.jndi.parser;
 
 import java.util.HashMap;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +58,9 @@ import org.slf4j.LoggerFactory;
  * Successfully tested with OpenLDAP 2.3
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LdapObjectClassTest extends TestCase {
+public class LdapObjectClassTest  {
 
+	@Test
 	public final void testParsing() {
 		LoggerFactory.getLogger(this.getClass()).info("A warn message about 'Multiple inheritence not supported' is normal.");
 		assertNotNull(LdapObjectClass.parse(

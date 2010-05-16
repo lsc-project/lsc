@@ -47,8 +47,9 @@ package org.lsc;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /**
  * Tests for the SimpleSynchronize class.
@@ -57,9 +58,9 @@ import junit.framework.TestCase;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-public class SimpleSynchronizeTest extends TestCase
-{
+public class SimpleSynchronizeTest {
 
+	@Test
 	public void testParameters() throws Exception {
 		SimpleSynchronize sync = new SimpleSynchronize();
 		

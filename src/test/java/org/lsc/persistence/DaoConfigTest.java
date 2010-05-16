@@ -52,7 +52,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.After;
+
+import static org.junit.Assert.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * Public class to test the DAO engine loader
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class DaoConfigTest extends TestCase {
+public class DaoConfigTest {
 
 	private Connection con;
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
@@ -69,6 +72,7 @@ public class DaoConfigTest extends TestCase {
 	/**
 	 * Test the JDBC connection.
 	 */
+	@Test
 	public final void testConnection() {
 		try {
 			Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
@@ -90,6 +94,7 @@ public class DaoConfigTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testRequest() {
 		ResultSet rs = null;
 		try {
@@ -109,6 +114,7 @@ public class DaoConfigTest extends TestCase {
 		assertNotNull(rs);
 	}
 
+	@Test
 	public final void testGetSqlMapClient() {
 		// this is useless but breaks the test otherwise :)
 		if (con == null) {
@@ -120,7 +126,7 @@ public class DaoConfigTest extends TestCase {
 	/**
 	 * Close DB connection
 	 */
-	@Override
+	@After
 	public final void tearDown() {
 		try {
 			con.close();

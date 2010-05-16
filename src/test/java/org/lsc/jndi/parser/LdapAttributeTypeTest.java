@@ -45,15 +45,18 @@
  */
 package org.lsc.jndi.parser;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test an ldap attribute type representation
  * Successfully tested with OpenLDAP 2.3
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LdapAttributeTypeTest extends TestCase {
+public class LdapAttributeTypeTest {
 
+	@Test
 	public final void testParsing() {
 		assertNotNull(LdapAttributeType.parse(
 				"( 1.3.6.1.4.1.4203.666.11.1.3.2.1.3 NAME 'olcDbConfig' DESC 'BerkeleyDB DB_CONFIG configuration directives' SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORDERED 'VALUES' )"));

@@ -57,7 +57,9 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
@@ -67,7 +69,7 @@ import org.lsc.jndi.JndiModifications;
  * 
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class CsvLayoutTest extends TestCase {
+public class CsvLayoutTest {
 
 	private LoggerContext lc = new LoggerContext();
 	private Logger LOGGER = lc.getLogger(CsvLayout.class);
@@ -98,6 +100,7 @@ public class CsvLayoutTest extends TestCase {
 		return jm;
 	}
 
+	@Test
 	public void testParameterHandling() {
 		// set some initial options and activate them
 		CsvLayout layout = getDefaultOptionsLayout();
@@ -119,12 +122,14 @@ public class CsvLayoutTest extends TestCase {
 		assertEquals(true, layout.operations.contains(JndiModificationType.ADD_ENTRY));
 	}
 
+	@Test
 	public void testEmptyLogging() {
 		CsvLayout layout = getDefaultOptionsLayout();
 		ILoggingEvent event = makeLoggingEvent("random string", null);		
 		assertEquals("", layout.doLayout(event));
 	}
 
+	@Test
 	public void testBasicLogging() {
 		CsvLayout layout = getDefaultOptionsLayout();
 
@@ -136,6 +141,7 @@ public class CsvLayoutTest extends TestCase {
 		assertEquals("Jon;;cn=test,o=testing;;Tester CN\n", layout.doLayout(event));
 	}
 
+	@Test
 	public void testExcludedTaskLogging() {
 		CsvLayout layout = getDefaultOptionsLayout();
 
@@ -146,6 +152,7 @@ public class CsvLayoutTest extends TestCase {
 		assertEquals("", layout.doLayout(event));
 	}
 
+	@Test
 	public void testExcludedOperationLogging() {
 		CsvLayout layout = getDefaultOptionsLayout();
 
@@ -156,6 +163,7 @@ public class CsvLayoutTest extends TestCase {
 		assertEquals("", layout.doLayout(event));
 	}
 
+	@Test
 	public void testHeader() {
 		CsvLayout layout = getDefaultOptionsLayout();
 

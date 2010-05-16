@@ -6,19 +6,22 @@
 package org.lsc.utils;
 
 import org.junit.Test;
-import junit.framework.TestCase;
+
+import static org.junit.Assert.*;
 
 /**
  *
  * @author rschermesser
  */
-public class FrenchFiltersTest extends TestCase {
+public class FrenchFiltersTest {
 
+	@Test
 	public void testRemoveBadChars() {
 		String test = "Ç'ést lä lùttè fînâlÉ";
 		assertEquals("C'est la lutte finalE", FrenchFilters.removeBadChars(test));	
 	}
 
+	@Test
 	public void testFilterPhone() {
 		String phone = "01 02 03 04 05";
 		assertEquals("33102030405", FrenchFilters.filterPhone(phone));
@@ -27,11 +30,13 @@ public class FrenchFiltersTest extends TestCase {
 		assertEquals("33234567890", FrenchFilters.filterPhone(phone));
 	}
 
+	@Test
 	public void testToUpperCaseAllBeginningNames() {
 		String name = "toto titi-tata.tutu_tyty";
 		assertEquals("Toto Titi-Tata.tutu_Tyty", FrenchFilters.toUpperCaseAllBeginningNames(name));
 	}
 
+	@Test
 	public void testFilterSn() throws CharacterUnacceptedException {
 		String sn = "Me MySelf And I";
 		assertEquals("Me Myself And I", FrenchFilters.filterSn(sn));
@@ -39,20 +44,23 @@ public class FrenchFiltersTest extends TestCase {
 
 	@Test(expected=CharacterUnacceptedException.class)
 	public void testFilterSnException() throws CharacterUnacceptedException {
-		String sn = "Me MySelf And Î";
+		String sn = "Me MySelf And ê";
 		assertNotNull(FrenchFilters.filterSn(sn));
 	}
 
+	@Test
 	public void testFilterUid() {
 		String uid = "ABCDEFGHIJKLMNOPQ";
 		assertEquals("abcdefghijklmn", FrenchFilters.filterUid(uid));
 	}
 
+	@Test
 	public void testFilterShortUid() {
 		String uid = "ABCDEFGHIJKLMNOPQ";
 		assertEquals("abcdefgh", FrenchFilters.filterShortUid(uid));
 	}
 
+	@Test
 	public void testFilterLengthString() {
 		assertEquals("identifier", FrenchFilters.filterLengthString("identifier", 12));
 		assertEquals("ident", FrenchFilters.filterLengthString("identifier", 5));
@@ -148,7 +156,4 @@ public class FrenchFiltersTest extends TestCase {
 	 */
 //	public static String filterDate(final String value, final String format)
 //					throws CharacterUnacceptedException {
-
-		
-	
 }

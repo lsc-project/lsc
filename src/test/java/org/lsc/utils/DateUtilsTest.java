@@ -49,21 +49,22 @@ import java.text.ParseException;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.lsc.utils.DateUtils;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /**
  * Test conversion date utils.
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class DateUtilsTest extends TestCase {
+public class DateUtilsTest {
 
 	/**
 	 * Launch the parse test.
 	 * @throws ParseException Thrown if the parsing operation failed
 	 */
+	@Test
 	public final void testParse() throws ParseException {
 		// Please take care : use 5 instead of 6 because month is a 0 starting value
 		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
@@ -79,6 +80,7 @@ public class DateUtilsTest extends TestCase {
 	/**
 	 * Launch the format test.
 	 */
+	@Test
 	public final void testFormat() {
 		// Please take care : use 5 instead of 6 because month is a 0 starting value
 		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
@@ -94,6 +96,7 @@ public class DateUtilsTest extends TestCase {
 	/**
 	 * Launch the format test.
 	 */
+	@Test
 	public final void testError() {
 		try {
 			DateUtils.parse("0Z");

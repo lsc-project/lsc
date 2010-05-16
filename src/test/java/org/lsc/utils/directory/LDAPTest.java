@@ -46,10 +46,13 @@
 package org.lsc.utils.directory;
 
 import com.unboundid.ldap.sdk.LDAPException;
+
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.lsc.utils.JScriptEvaluator;
 
@@ -58,8 +61,9 @@ import org.lsc.utils.JScriptEvaluator;
  * 
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class LDAPTest extends TestCase {
+public class LDAPTest {
 
+	@Test
 	public final void testCanBind() {
 		try {
 			assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));

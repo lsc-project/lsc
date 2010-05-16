@@ -52,9 +52,9 @@ import java.util.Map;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
 import org.lsc.utils.JScriptEvaluator;
@@ -66,8 +66,9 @@ import org.mozilla.javascript.EcmaError;
  * @author Sebastien Bahloul <seb@lsc-project.org>
  * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
-public class JScriptEvaluatorTest extends TestCase {
+public class JScriptEvaluatorTest {
 
+	@Test
 	public void testOk() {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
@@ -83,6 +84,7 @@ public class JScriptEvaluatorTest extends TestCase {
 		assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
 	}
 
+	@Test
 	public void testOk2() {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("sn", new BasicAttribute("sn", "Doe"));
@@ -90,6 +92,7 @@ public class JScriptEvaluatorTest extends TestCase {
 		assertEquals(JScriptEvaluator.evalToString("givenName.get() + ' ' + sn.get()", table), "John Doe");
 	}
 
+	@Test
 	public void testList() {
 		Map<String, Object> table = new HashMap<String, Object>();
 		Attribute sn = new BasicAttribute("sn", "Doe");
@@ -127,6 +130,7 @@ public class JScriptEvaluatorTest extends TestCase {
 
 	}
 
+	@Test
 	public void testOkLdap() {
 		Map<String, Object> table = new HashMap<String, Object>();
 

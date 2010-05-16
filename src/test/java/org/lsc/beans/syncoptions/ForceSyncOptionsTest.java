@@ -45,19 +45,20 @@
  */
 package org.lsc.beans.syncoptions;
 
-import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
+import static org.junit.Assert.*;
 /**
  * Simple tests.
  */
-public class ForceSyncOptionsTest extends TestCase {
+public class ForceSyncOptionsTest {
 
 	/**
 	 * Launch the all tests.
 	 */
+	@Test
 	public final void test() {
 		ForceSyncOptions fso = new ForceSyncOptions();
 		assertEquals(fso.getDefaultValue(null, null), null);

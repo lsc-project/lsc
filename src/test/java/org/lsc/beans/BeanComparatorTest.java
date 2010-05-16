@@ -55,7 +55,9 @@ import java.util.Set;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
@@ -68,11 +70,12 @@ import org.lsc.utils.SetUtils;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  *
  */
-public class BeanComparatorTest extends TestCase {
+public class BeanComparatorTest {
 
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 */
+	@Test
 	public void testCalculateModificationType() {
 		dummySyncOptions syncOptions = new dummySyncOptions();
 		IBean srcBean = new SimpleBean();
@@ -115,6 +118,7 @@ public class BeanComparatorTest extends TestCase {
 	 *
 	 * With an invalid syntax error.
 	 */
+	@Test
 	public void testCalculateModificationsWithEmptyFields() {
 		ISyncOptions syncOptions = new ForceSyncOptions();
 		IBean srcBean, destBean;
@@ -163,6 +167,7 @@ public class BeanComparatorTest extends TestCase {
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
 	 */
+	@Test
 	public void testGetValuesToSet() {
 
 		// Set up objects needed to test

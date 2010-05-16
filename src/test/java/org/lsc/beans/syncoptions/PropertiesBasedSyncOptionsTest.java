@@ -48,12 +48,15 @@ package org.lsc.beans.syncoptions;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.lsc.utils.JScriptEvaluator;
 
-public class PropertiesBasedSyncOptionsTest extends TestCase {
+public class PropertiesBasedSyncOptionsTest {
 
+	@Test
 	public final void test1() {
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
@@ -62,6 +65,7 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
 		assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
 	}
 
+	@Test
 	public final void testJS() {
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
@@ -86,6 +90,7 @@ public class PropertiesBasedSyncOptionsTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testDelimiters() {
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);

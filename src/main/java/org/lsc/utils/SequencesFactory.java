@@ -15,10 +15,11 @@ import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.log4j.Logger;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to manage numeric sequences
@@ -32,7 +33,7 @@ public class SequencesFactory {
 	/** the sequences cache */
 	private Map<String, Sequence> sequences;
 	/** the local Log4J logger */
-	private static Logger LOGGER = Logger.getLogger(SequencesFactory.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SequencesFactory.class);
 
 	/**
 	 * The local constructor
@@ -60,14 +61,13 @@ public class SequencesFactory {
 	 */
 	public static int getNextValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Getting the next value for the following sequence " + hash);
-		}
+		LOGGER.debug("Getting the next value for the following sequence {}", hash);
+
 		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
 		if (sq != null) {
 			return sq.getNextValue();
 		} else {
-			LOGGER.debug("Couldn't get the sequence " + attributeName + ". Returning 0.");
+			LOGGER.debug("Couldn't get the sequence {}. Returning 0.", attributeName);
 			return -1;
 		}
 	}
@@ -79,9 +79,8 @@ public class SequencesFactory {
 	 */
 	public static int getActualValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Getting the actual value for the following sequence " + hash);
-		}
+		LOGGER.debug("Getting the actual value for the following sequence {}", hash);
+
 		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
 		if (sq != null) {
 			return sq.getActualValue();
@@ -105,7 +104,8 @@ public class SequencesFactory {
 				sequences.put(hash, seq);
 				return seq;
 			} catch (NamingException ne) {
-				LOGGER.error("Unable to load sequence: " + ne, ne);
+				LOGGER.error("Unable to load sequence");
+				LOGGER.debug(ne.toString(), ne);
 			}
 		}
 		return null;
@@ -122,7 +122,7 @@ public class SequencesFactory {
 class Sequence {
 
 	/** the local Log4J logger */
-	private static Logger LOGGER = Logger.getLogger(Sequence.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
 	/** The entry distinguish name */
 	private String dn;
 	/** The attribute name */
@@ -181,7 +181,7 @@ class Sequence {
 			if (sr.getAttributes().get(attributeName) != null) {
 				actualValue = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
 			} else {
-				LOGGER.error("Failed to get the current value for the sequence " + dn + "/" + attributeName);
+				LOGGER.error("Failed to get the current value for the sequence {}/{}", dn, attributeName);
 				return 0;
 			}
 			newValue = actualValue + 1;
@@ -200,9 +200,10 @@ class Sequence {
 
 			JndiServices.getDstInstance().apply(jm);
 		} catch (NamingException e) {
-			LOGGER.error("Failed to get the current value for the sequence " + dn + "/" + attributeName);
+			LOGGER.error("Failed to get the current value for the sequence {}/{}", dn, attributeName);
 			return -1;
 		}
+
 		value = newValue;
 		return newValue;
 	}

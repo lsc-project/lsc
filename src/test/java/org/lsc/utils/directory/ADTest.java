@@ -56,56 +56,56 @@ import junit.framework.TestCase;
  */
 public class ADTest extends TestCase {
 
-    /**
-     * Test functions to manipulate AD's userAccountControl attribute in bit-field format.
-     */
-    public final void testUserAccountControl() {
-    	// initialize userAccountControl to a normal account
-    	int uACValue = AD.userAccountControlSet(0, new String[]{AD.UAC_NORMAL_ACCOUNT.toString()});
-    	assertEquals(512, uACValue);
-    	
-    	// check it's enabled two ways
-    	assertFalse(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
+	/**
+	 * Test functions to manipulate AD's userAccountControl attribute in bit-field format.
+	 */
+	public final void testUserAccountControl() {
+		// initialize userAccountControl to a normal account
+		int uACValue = AD.userAccountControlSet(0, new String[]{AD.UAC_NORMAL_ACCOUNT.toString()});
+		assertEquals(512, uACValue);
 
-    	// disable the account and set password expired
-    	uACValue = AD.userAccountControlSet(uACValue, new String[]{AD.UAC_ACCOUNTDISABLE.toString(), AD.UAC_PASSWORD_EXPIRED.toString()});
-    	assertEquals(8389122, uACValue);
-    	
-    	// unset password expired
-    	uACValue = AD.userAccountControlSet(uACValue, new String[]{AD.UAC_UNSET_PASSWORD_EXPIRED.toString()});
-    	assertEquals(514, uACValue);
-    	
-    	// check it's disabled
-    	assertTrue(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
-    	
-    	// toggle it back to enabled
-    	uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
-    	assertEquals(512, uACValue);
+		// check it's enabled two ways
+		assertFalse(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
 
-    	// and toggle back to disabled
-    	uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
-    	assertEquals(514, uACValue);
-    }
-    
-    /**
-     * Test number of weeks calculation for lastLogon or lastLogonTimestamp attribute in AD.
-     * 
-     * With this value:
-     * lastLogonTimestamp: 128673223549843750
-     * The last logon was recorded at 01/10/08 10:12:34.
-     */
-    public final void testNumberWeeksLastLogon() {
-    	// get result from tested class
-    	int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon("128673223549843750");
-    	
-    	// calculate result from known date to now
-    	Calendar now = Calendar.getInstance();
-    	Calendar then = Calendar.getInstance();
-    	then.set(2008, 10-1, 01, 10, 12, 34);
-    	
-    	long secondsSinceReference = (now.getTimeInMillis() - then.getTimeInMillis()) / 1000;
-    	int numWeeksFromReference = (int)(secondsSinceReference / (60 * 60 * 24 * 7));
-    	
-    	assertTrue(numWeeksFromReference <= numWeeksFromLastLogon + 1 && numWeeksFromReference >= numWeeksFromLastLogon - 1);
-    }
+		// disable the account and set password expired
+		uACValue = AD.userAccountControlSet(uACValue, new String[]{AD.UAC_ACCOUNTDISABLE.toString(), AD.UAC_PASSWORD_EXPIRED.toString()});
+		assertEquals(8389122, uACValue);
+
+		// unset password expired
+		uACValue = AD.userAccountControlSet(uACValue, new String[]{AD.UAC_UNSET_PASSWORD_EXPIRED.toString()});
+		assertEquals(514, uACValue);
+
+		// check it's disabled
+		assertTrue(AD.userAccountControlCheck(uACValue, AD.UAC_ACCOUNTDISABLE.toString()));
+
+		// toggle it back to enabled
+		uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
+		assertEquals(512, uACValue);
+
+		// and toggle back to disabled
+		uACValue = AD.userAccountControlToggle(uACValue, AD.UAC_ACCOUNTDISABLE.toString());
+		assertEquals(514, uACValue);
+	}
+
+	/**
+	 * Test number of weeks calculation for lastLogon or lastLogonTimestamp attribute in AD.
+	 *
+	 * With this value:
+	 * lastLogonTimestamp: 128673223549843750
+	 * The last logon was recorded at 01/10/08 10:12:34.
+	 */
+	public final void testNumberWeeksLastLogon() {
+		// get result from tested class
+		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon("128673223549843750");
+
+		// calculate result from known date to now
+		Calendar now = Calendar.getInstance();
+		Calendar then = Calendar.getInstance();
+		then.set(2008, 10 - 1, 01, 10, 12, 34);
+
+		long secondsSinceReference = (now.getTimeInMillis() - then.getTimeInMillis()) / 1000;
+		int numWeeksFromReference = (int) (secondsSinceReference / (60 * 60 * 24 * 7));
+
+		assertTrue(numWeeksFromReference <= numWeeksFromLastLogon + 1 && numWeeksFromReference >= numWeeksFromLastLogon - 1);
+	}
 }

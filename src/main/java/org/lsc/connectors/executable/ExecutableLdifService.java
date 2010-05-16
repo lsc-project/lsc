@@ -92,28 +92,23 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class ExecutableLdifService implements IJndiWritableService {
-	
+
 	private static final String DEBUG_PREFIX = "DEBUG: ";
 	private static final String INFO_PREFIX = "INFO: ";
 	private static final String WARN_PREFIX = "WARN: ";
 	private static final String ERROR_PREFIX = "ERROR: ";
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExecutableLdifService.class);
-
 	private static final String VARS_PREFIX = "vars";
-
 	private String listScript;
 	private String getScript;
 	private String addScript;
 	private String updateScript;
 	private String renameScript;
 	private String deleteScript;
-
 	private Class<IBean> beanClass;
 	private Runtime rt;
-
 	private Properties globalEnvironmentVariables;
-	
+
 	@SuppressWarnings("unchecked")
 	public ExecutableLdifService(Properties props, String beanClassName) {
 		rt = Runtime.getRuntime();
@@ -142,7 +137,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 	public boolean apply(final JndiModifications jm) throws CommunicationException {
 		int exitCode = 0;
 		String ldif = LdifLayout.format(jm);
-		switch(jm.getOperation()) {
+		switch (jm.getOperation()) {
 			case ADD_ENTRY:
 				exitCode = execute(getParameters(addScript, jm.getDistinguishName()), getEnv(), ldif);
 				break;
@@ -156,7 +151,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 				exitCode = execute(getParameters(renameScript, jm.getDistinguishName()), getEnv(), ldif);
 				break;
 		}
-		if(exitCode != 0) {
+		if (exitCode != 0) {
 			LOGGER.error("Exit code != 0: " + exitCode);
 		}
 		return exitCode == 0;
@@ -175,32 +170,32 @@ public class ExecutableLdifService implements IJndiWritableService {
 	 *             directory, or if more than one object would be returned.
 	 */
 	public IBean getBean(String pivotName, LscAttributes pivotAttributes)
-			throws NamingException {
+					throws NamingException {
 		String output = executeWithReturn(getParameters(getScript, pivotName), getEnv(), toLdif(pivotAttributes));
 		Collection<IBean> entries = fromLdif(output);
-		if(entries.size() != 1) {
+		if (entries.size() != 1) {
 			LOGGER.error("Entries count: " + entries.size());
 			return null;
 		}
 		return entries.iterator().next();
 	}
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * 
+	/**
+	 * Returns a list of all the objects' identifiers.
+	 *
 	 * @return Map of all entries names that are returned by the directory with an associated map of
 	 *         attribute names and values (never null)
-     * @throws NamingException 
-     */
+	 * @throws NamingException
+	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		Map<String, LscAttributes> map = null;
 		String output = executeWithReturn(getParameters(listScript), getEnv(), "");
 		Collection<IBean> beans = fromLdif(output);
-		if(beans != null) {
+		if (beans != null) {
 			map = new HashMap<String, LscAttributes>();
-			for(IBean bean: beans) {
+			for (IBean bean : beans) {
 				LscAttributes attributes = new LscAttributes();
-				for(String id : bean.getAttributesNames()) {
+				for (String id : bean.getAttributesNames()) {
 					Attribute attribute = bean.getAttributeById(id);
 					//TODO: handle multi value attributes pivot
 					attributes.getAttributes().put(id, attribute.get());
@@ -212,40 +207,44 @@ public class ExecutableLdifService implements IJndiWritableService {
 	}
 
 	public int execute(String[] runtime, String[] env, String input) {
-        StringBuffer datas = new StringBuffer();
-        return execute(runtime, env, input, datas);
+		StringBuffer datas = new StringBuffer();
+		return execute(runtime, env, input, datas);
 	}
-	
+
 	public String executeWithReturn(String[] runtime, String[] env, String input) {
-        StringBuffer datas = new StringBuffer();
-        execute(runtime, env, input, datas);
-        return datas.toString();
+		StringBuffer datas = new StringBuffer();
+		execute(runtime, env, input, datas);
+		return datas.toString();
 	}
-	
+
 	private int execute(String[] runtime, String[] env, String input, StringBuffer datas) {
 		StringBuffer messages = new StringBuffer();
 		Process p = null;
 		try {
-			if(LOGGER.isDebugEnabled()) {
+			if (LOGGER.isDebugEnabled()) {
 				String parametersStr = "";
-				for(String parameter: runtime) {
+				for (String parameter : runtime) {
 					parametersStr += parameter + " ";
 				}
 				LOGGER.debug("Lauching '" + parametersStr + "'");
 			}
 			p = rt.exec(runtime, env);
-			
-			if(LOGGER.isDebugEnabled()) LOGGER.debug("Writing to STDIN " + input);
+
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Writing to STDIN " + input);
+			}
 
 			OutputStream outputStream = p.getOutputStream();
-	        outputStream.write(input.getBytes());
-	        outputStream.flush();
-	        outputStream.close();
-	        
-	        //TODO: need to check for max time
-			if(LOGGER.isDebugEnabled()) LOGGER.debug("Waiting for command to stop ... ");
-			
-	        p.waitFor();
+			outputStream.write(input.getBytes());
+			outputStream.flush();
+			outputStream.close();
+
+			//TODO: need to check for max time
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Waiting for command to stop ... ");
+			}
+
+			p.waitFor();
 		} catch (IOException e) {
 			// Encountered an error while reading data from output
 			LOGGER.error("Encountered an I/O exception while writing data to script " + runtime + "  (" + e + ")", e);
@@ -253,33 +252,33 @@ public class ExecutableLdifService implements IJndiWritableService {
 			// Encountered an interruption
 			LOGGER.error("Script " + runtime + " interrupted (" + e + ")", e);
 		}
-        byte[] data = new byte[65535];
-        try {
-			while(p.getInputStream().read(data) > 0) {
+		byte[] data = new byte[65535];
+		try {
+			while (p.getInputStream().read(data) > 0) {
 				datas.append(new String(data));
 			}
 		} catch (IOException e) {
 			// Failing to read the complete string causes null return
 			LOGGER.error("Fail to read complete data from script output stream: " + runtime + " (" + e + ")", e);
 		}
-        byte[] message = new byte[65535];
-        try {
-			while(p.getErrorStream().read(message) > 0) {
+		byte[] message = new byte[65535];
+		try {
+			while (p.getErrorStream().read(message) > 0) {
 				messages.append(new String(message));
 			}
 		} catch (IOException e) {
 			// Failing to read the complete string causes null return
 			LOGGER.error("Fail to read complete messages from script stderr stream: " + runtime + " (" + e + ")", e);
 		}
-        if(p.exitValue() != 0) {
-        	// A non zero value causes null return
+		if (p.exitValue() != 0) {
+			// A non zero value causes null return
 			LOGGER.error("Non zero exit code for runtime: " + runtime[0] + ", exit code =" + p.exitValue());
 			displayByLevel(messages.toString());
-        } else {
-        	LOGGER.debug("Messages dump on stderr by script: ");
+		} else {
+			LOGGER.debug("Messages dump on stderr by script: ");
 			displayByLevel(messages.toString());
-        }
-        return p.exitValue();
+		}
+		return p.exitValue();
 	}
 
 	/**
@@ -290,16 +289,16 @@ public class ExecutableLdifService implements IJndiWritableService {
 	 */
 	private void displayByLevel(String messages) {
 		StringTokenizer lines = new StringTokenizer(messages, "\n");
-		while(lines.hasMoreTokens()) {
+		while (lines.hasMoreTokens()) {
 			String line = lines.nextToken();
 			String message = (line.contains(": ") ? line.substring(line.indexOf(": ") + 2) : line);
-			if(line.startsWith(DEBUG_PREFIX)) {
+			if (line.startsWith(DEBUG_PREFIX)) {
 				LOGGER.debug(message);
-			} else if(line.startsWith(INFO_PREFIX)) {
+			} else if (line.startsWith(INFO_PREFIX)) {
 				LOGGER.info(message);
-			} else if(line.startsWith(WARN_PREFIX)) {
+			} else if (line.startsWith(WARN_PREFIX)) {
 				LOGGER.warn(message);
-			} else if(line.startsWith(ERROR_PREFIX)) {
+			} else if (line.startsWith(ERROR_PREFIX)) {
 				LOGGER.error(message);
 			} else {
 				// Default to WARN level
@@ -308,44 +307,43 @@ public class ExecutableLdifService implements IJndiWritableService {
 		}
 	}
 
-
 	private String[] getEnv(String... args) {
 		String[] envVars = new String[args.length + globalEnvironmentVariables.size()];
 		int i = 0;
-		for(String parameter: args) {
+		for (String parameter : args) {
 			envVars[i++] = parameter;
 		}
-		for(Object parameterName: globalEnvironmentVariables.keySet()) {
-			envVars[i++] = (String)parameterName + "=" + (String) globalEnvironmentVariables.get(parameterName); 
+		for (Object parameterName : globalEnvironmentVariables.keySet()) {
+			envVars[i++] = (String) parameterName + "=" + (String) globalEnvironmentVariables.get(parameterName);
 		}
 		return envVars;
 	}
-	
+
 	private String[] getParameters(String... args) {
 		String[] parameters = new String[args.length];
 		int i = 0;
-		for(String parameter: args) {
+		for (String parameter : args) {
 			parameters[i++] = parameter;
 		}
 		return parameters;
 	}
-	
+
 	private Collection<IBean> fromLdif(String output) {
 		ArrayList<IBean> beans = new ArrayList<IBean>();
 		try {
 			IBean bean = null;
 			StringTokenizer sTok = new StringTokenizer(output, "\n", true);
-			while(sTok.hasMoreTokens()) {
+			while (sTok.hasMoreTokens()) {
 				bean = beanClass.newInstance();
 				String entryStr = "";
-				while(sTok.hasMoreTokens()) {
+				while (sTok.hasMoreTokens()) {
 					String line = sTok.nextToken();
 					entryStr += line;
-					if(entryStr.endsWith("\n\n")) {
+					if (entryStr.endsWith("\n\n")) {
 						break;
 					}
 				}
-				if(entryStr.trim().length() > 0) {
+				if (entryStr.trim().length() > 0) {
 					updateBean(bean, entryStr);
 					beans.add(bean);
 				}
@@ -355,21 +353,20 @@ public class ExecutableLdifService implements IJndiWritableService {
 		} catch (IllegalAccessException e) {
 			LOGGER.error("Bean class name: " + beanClass.getName() + " (" + e + ")", e);
 		}
-		
+
 		return beans;
 	}
-
 
 	private void updateBean(IBean bean, String entryStr) {
 		StringTokenizer sTok = new StringTokenizer(entryStr, "\n");
 		String multiLineValue = null;
 		String multiLineAttribute = null;
 		boolean base64 = false;
-		while(sTok.hasMoreTokens()) {
+		while (sTok.hasMoreTokens()) {
 			String line = sTok.nextToken();
-			if(multiLineValue != null && !line.startsWith(" ")) {
+			if (multiLineValue != null && !line.startsWith(" ")) {
 				// End of multi line value
-				if(base64) {
+				if (base64) {
 					String attributeValue = new String(Base64.decodeBase64(multiLineValue.getBytes()));
 					updateBeanAttributeValue(bean, multiLineAttribute, attributeValue);
 				} else {
@@ -377,25 +374,25 @@ public class ExecutableLdifService implements IJndiWritableService {
 				}
 				multiLineValue = null;
 			}
-			if(multiLineValue != null && line.startsWith(" ")) {
+			if (multiLineValue != null && line.startsWith(" ")) {
 				multiLineValue += line.substring(1);
-			} else if(line.contains(":: ")) {
+			} else if (line.contains(":: ")) {
 				multiLineAttribute = line.substring(0, line.indexOf(":"));
 				multiLineValue = line.substring(line.indexOf(":: ") + 3);
 				base64 = true;
-			} else if(line.contains(": ")) {
+			} else if (line.contains(": ")) {
 				multiLineAttribute = line.substring(0, line.indexOf(":"));
 				multiLineValue = line.substring(line.indexOf(": ") + 2);
 				base64 = false;
-			} else if (line.trim().length() == 0){
+			} else if (line.trim().length() == 0) {
 				break;
 			} else {
 				// TODO
 				LOGGER.error("Got something strange : '" + line + "'. Please consider checking as this data may be either an incorrect format or an error !");
 			}
 		}
-		if(multiLineValue != null) {
-			if(base64) {
+		if (multiLineValue != null) {
+			if (base64) {
 				String attributeValue = new String(Base64.decodeBase64(multiLineValue.getBytes()));
 				updateBeanAttributeValue(bean, multiLineAttribute, attributeValue);
 			} else {
@@ -404,20 +401,19 @@ public class ExecutableLdifService implements IJndiWritableService {
 		}
 	}
 
-
 	private void updateBeanAttributeValue(IBean bean,
-			String attributeName, String attributeValue) {
-		if(attributeName.equals("dn")) {
+					String attributeName, String attributeValue) {
+		if (attributeName.equals("dn")) {
 			bean.setDistinguishedName(attributeValue);
 		} else {
-			if(bean.getAttributeById(attributeName) != null) {
+			if (bean.getAttributeById(attributeName) != null) {
 				Attribute attr = bean.getAttributeById(attributeName);
 				attr.add(attributeValue);
 				bean.setAttribute(attr);
 			} else {
 				bean.setAttribute(new BasicAttribute(attributeName, attributeValue));
 			}
-			if(bean.getDistinguishedName() == null) {
+			if (bean.getDistinguishedName() == null) {
 				bean.setDistinguishedName(attributeValue);
 			}
 		}
@@ -425,7 +421,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 
 	private String toLdif(LscAttributes attributes) throws NamingException {
 		StringBuilder sb = new StringBuilder();
-		for(String attributeName: attributes.getAttributes().keySet()) {
+		for (String attributeName : attributes.getAttributes().keySet()) {
 			LdifLayout.printAttributeToStringBuffer(sb, new BasicAttribute(attributeName, attributes.getAttributes().get(attributeName)));
 		}
 		return sb.toString();

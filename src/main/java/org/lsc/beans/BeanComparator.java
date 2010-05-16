@@ -129,11 +129,11 @@ public final class BeanComparator {
 	}
 
 	/**
-	 * Static comparison method.
+	 * <p>Static comparison method.</p>
 	 *
-	 * By default, source information override destination
+	 * <p>By default, source information override destination
 	 * (i.e. Database => Directory) But if a piece of information is
-	 * present only in the destination, it remains
+	 * present only in the destination, it remains</p>
 	 * 
 	 * @param syncOptions Instance of {@link ISyncOptions} to use.
 	 * @param srcBean Source bean from JDBC or JNDI
@@ -143,7 +143,7 @@ public final class BeanComparator {
 	 * @throws NamingException an exception may be thrown if an LDAP data
 	 * access error is encountered
 	 * @throws CloneNotSupportedException 
-	 * @deprecated
+	 * @deprecated Use {@link #calculateModifications(ISyncOptions, IBean, IBean, Object, boolean)}
 	 */
 	public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
 					Object customLibrary) throws NamingException, CloneNotSupportedException {

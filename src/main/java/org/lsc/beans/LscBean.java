@@ -124,6 +124,22 @@ public abstract class LscBean implements IBean {
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
 	 * 
+	 * @param id The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 * @deprecated Use {@link #getAttributeFirstValueById(String)} or
+	 *             {@link #getAttributeValuesById(String)}. This method will be removed after LSC
+	 *             1.3.
+	 */
+	public final String getAttributeValueById(final String id)
+					throws NamingException {
+		LOGGER.warn("The method getAttributeValueById() is deprecated and will be removed in a future version of LSC. Please use getAttributeFirstValueById() instead.");
+		return getAttributeFirstValueById(id);
+	}
+
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 * 
 	 * @param id
 	 *            The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")

@@ -65,6 +65,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides a localized logback layout for LDAP entries.
@@ -72,6 +74,9 @@ import org.lsc.jndi.JndiModifications;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class LdifLayout extends PatternLayout {
+	
+	/* The logger */
+	private static final Logger LOGGER = LoggerFactory.getLogger(LdifLayout.class);
 
 	/* The separator of the log operations */
 	protected static String LOG_OPERATIONS_SEPARATOR = ",";
@@ -389,9 +394,11 @@ public class LdifLayout extends PatternLayout {
 
 	/**
 	 * @param logOperation the logOperation to set
+	 * @deprecated Use {@link #setLogOperations(java.lang.String)}
 	 */
 	@Deprecated
 	public void setLogOperation(String logOperation) {
+		LOGGER.warn("The method setLogOperation() in LdifLayout is deprecated and will be removed in a future version of LSC. Please use setLogOperations() instead.");
 		this.setLogOperations(logOperations);
 	}
 

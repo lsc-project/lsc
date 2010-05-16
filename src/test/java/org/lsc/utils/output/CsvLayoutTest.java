@@ -81,7 +81,7 @@ public class CsvLayoutTest extends TestCase {
 	private CsvLayout getDefaultOptionsLayout() {
 		CsvLayout layout = new CsvLayout();
 		layout.setSeparator(";");
-		layout.setLogOperation("create");
+		layout.setLogOperations("create");
 		layout.setTaskNames("testTask,otherTestTask");
 		layout.setAttrs("givenName;sn;dn;;cn");
 		layout.start();
@@ -160,7 +160,7 @@ public class CsvLayoutTest extends TestCase {
 		CsvLayout layout = getDefaultOptionsLayout();
 
 		// change options and reactivate them
-		layout.setLogOperation("create,update");
+		layout.setLogOperations("create,update");
 		layout.setSeparator("%");
 		layout.setAttrs("givenName%sn%dn%%cn");
 		layout.setOutputHeader(true);

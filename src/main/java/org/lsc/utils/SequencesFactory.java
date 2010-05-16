@@ -121,8 +121,8 @@ public class SequencesFactory {
 
 class Sequence {
 
-	/** the local Log4J logger */
 	private static Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
+
 	/** The entry distinguish name */
 	private String dn;
 	/** The attribute name */

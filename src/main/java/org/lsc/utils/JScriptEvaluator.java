@@ -107,7 +107,7 @@ public final class JScriptEvaluator {
 
 	/**
 	 * Please consider using evalToString
-	 * @deprecated
+	 * @deprecated Please consider using {@link #evalToString(String, Map)}
 	 * @param expression
 	 * @param params
 	 * @return the string result

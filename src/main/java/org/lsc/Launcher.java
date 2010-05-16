@@ -136,7 +136,7 @@ public final class Launcher {
 			// Wrap the launcher
 			obj.run();
 		} catch (Exception e) {
-			if (!Configuration.loggingSetup) {
+			if (!Configuration.isLoggingSetup()) {
 				System.err.println("Error: " + e.getMessage());
 			} else {
 				LOGGER.error(e.toString());
@@ -170,7 +170,7 @@ public final class Launcher {
 			}
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
-			if (!Configuration.loggingSetup) {
+			if (!Configuration.isLoggingSetup()) {
 				System.err.println("Error: " + e.getMessage());
 			} else {
 				LOGGER.error(e.toString());

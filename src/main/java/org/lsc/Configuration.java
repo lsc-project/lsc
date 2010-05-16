@@ -90,7 +90,7 @@ public class Configuration {
 	public static String location = PROPERTIES_FILENAME;
 
 	/** Flag to detect if logging is configured or not yet */
-	public static boolean loggingSetup = false;
+	private static boolean loggingSetup = false;
 	
 	// People DN
 	public static String DN_PEOPLE = "ou=People";
@@ -507,7 +507,7 @@ public class Configuration {
 		}
 		
 		// Logging configured
-		loggingSetup = true;
+		setLoggingSetup(true);
 
 		// WARNING: don't log anything before HERE!
 		LOGGER.debug("Reading configuration from {}", Configuration.getConfigurationDirectory());
@@ -525,5 +525,23 @@ public class Configuration {
 		if (propertyValue == null || propertyValue.length() == 0	) {
 			throw new RuntimeException("No " + propertyName + " property specified in " + location + ". Aborting.");
 		}
+	}
+
+	/**
+	 * Set the flag to determine if logging is configured or not yet
+	 * 
+	 * @param loggingSetup Is logging setup yet?
+	 */
+	public static void setLoggingSetup(boolean loggingSetup) {
+		Configuration.loggingSetup = loggingSetup;
+	}
+
+	/**
+	 * Get the flag to determine if logging is configured or not yet
+	 * 
+	 * @return boolean loggingSetup
+	 */
+	public static boolean isLoggingSetup() {
+		return loggingSetup;
 	}
 }

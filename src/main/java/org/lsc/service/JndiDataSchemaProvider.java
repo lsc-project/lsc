@@ -129,7 +129,7 @@ public class JndiDataSchemaProvider implements DataSchemaProvider {
 		List<String> filteredNames = new ArrayList<String>();
 		for (String name : names) {
 			String filteredName = filterName(name);
-			if (!filteredName.isEmpty()) {
+			if (filteredName.length()!=0) {
 				filteredNames.add(filteredName);
 			} else {
 				LOGGER.error("Name invalid: {}. Attributes or object class not generated !!!", name);

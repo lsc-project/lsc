@@ -53,12 +53,12 @@ import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 
 /**
- * Interface used by source services.
+ * Interface used by services.
  * <p>
- * This interface must be implemented by a class to be considered a source service.
+ * This interface must be implemented by a class to be considered a service.
  * </P>
  * <P>
- * Optionally, the source service may also implement a constructor, which will be called once before
+ * Optionally, the service may also implement a constructor, which will be called once before
  * a synchronization begins. This constructor may accept a Properties object as a parameter, which
  * will be filled with properties from the lsc.properties file.
  * </P>

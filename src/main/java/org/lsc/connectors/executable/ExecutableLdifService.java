@@ -298,7 +298,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 				LOGGER.error(message);
 			} else {
 				// Default to WARN level
-				LOGGER.warn(message);
+				LOGGER.warn(line);
 			}
 		}
 	}

@@ -104,8 +104,8 @@ public final class Launcher {
 		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
 		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
 		options.addOption("f", "config", true, "Specify configuration directory");
-		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task");
-		options.addOption("i", "time-limit", true, "Time limit in parallel server mode");
+		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: 5)");
+		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
 		options.addOption("h", "help", false, "Get this text");
 	}
 	

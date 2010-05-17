@@ -120,7 +120,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 *
+	 * @param asyncTasks 
+	 *                string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks
 	 *                string list of the synchronization tasks to launch
 	 * @param cleanTasks
@@ -224,7 +225,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 *
 	 * @param taskName
 	 *                the task name (historically the LDAP object class name, but can be any string)
-	 *  @param taskMode
+	 * @param taskMode
 	 *                the task mode (clean or sync)
 	 *
 	 * @return boolean true on success, false if an error occurred
@@ -333,7 +334,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	}
 
 	/**
-	 * Invoke the hook method wether it's a postsync or postclean
+	 * Invoke the hook method whether it's a postsync or postclean
 	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke

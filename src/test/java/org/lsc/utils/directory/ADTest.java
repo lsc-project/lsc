@@ -46,7 +46,9 @@
 package org.lsc.utils.directory;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -58,6 +60,20 @@ import static org.junit.Assert.*;
  */
 public class ADTest {
 
+	// various representations of the reference date 01/10/08 8:12:34 UTC
+	private static Calendar refTimeCalendar;
+	private static final String refTimeADString = "128673223540000000";
+	private static final long refTimeADLong = 128673223540000000L;
+	private static final String refTimeUnixString = "1222848754";
+	private static final int refTimeUnixInt= 1222848754;
+
+	@Before
+	public void setUp() {
+		refTimeCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		refTimeCalendar.clear();
+		refTimeCalendar.set(2008, 10-1, 01, 8, 12, 34);
+	}
+	
 	/**
 	 * Test functions to manipulate AD's userAccountControl attribute in bit-field format.
 	 */
@@ -95,21 +111,59 @@ public class ADTest {
 	 *
 	 * With this value:
 	 * lastLogonTimestamp: 128673223549843750
-	 * The last logon was recorded at 01/10/08 10:12:34.
+	 * The last logon was recorded at 01/10/08 8:12:34 UTC.
 	 */
 	@Test
 	public final void testNumberWeeksLastLogon() {
 		// get result from tested class
-		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon("128673223549843750");
+		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon(refTimeADString);
 
 		// calculate result from known date to now
-		Calendar now = Calendar.getInstance();
-		Calendar then = Calendar.getInstance();
-		then.set(2008, 10 - 1, 01, 10, 12, 34);
-
-		long secondsSinceReference = (now.getTimeInMillis() - then.getTimeInMillis()) / 1000;
+		Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		long secondsSinceReference = (now.getTimeInMillis() - refTimeCalendar.getTimeInMillis()) / 1000;
 		int numWeeksFromReference = (int) (secondsSinceReference / (60 * 60 * 24 * 7));
 
 		assertTrue(numWeeksFromReference <= numWeeksFromLastLogon + 1 && numWeeksFromReference >= numWeeksFromLastLogon - 1);
 	}
+	
+	/**
+	 * Test for the {@link AD#aDTimeToUnixTimestamp(String)} method.
+	 */
+	@Test
+	public final void testADTimeToUnixTimestampWithString() {
+		Calendar testedTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		testedTime.clear();
+		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(refTimeADString) * (long) 1000);
+		
+		assertEquals(refTimeCalendar, testedTime);
+	}
+	
+	/**
+	 * Test for the {@link AD#aDTimeToUnixTimestamp(long)} method.
+	 */
+	@Test
+	public final void testADTimeToUnixTimestampWithLong() {
+		Calendar testedTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		testedTime.clear();
+		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(refTimeADLong) * (long) 1000);
+		
+		assertEquals(refTimeCalendar, testedTime);
+	}
+
+	/**
+	 * Test for the {@link AD#unixTimestampToADTime(String)} method.
+	 */
+	@Test
+	public final void testUnixTimestampToADTimeWithString() {
+		assertEquals(refTimeADLong, AD.unixTimestampToADTime(refTimeUnixString));
+	}
+	
+	/**
+	 * Test for the {@link AD#unixTimestampToADTime(int)} method.
+	 */
+	@Test
+	public final void testUnixTimestampToADTimeWithInt() {
+		assertEquals(refTimeADLong, AD.unixTimestampToADTime(refTimeUnixInt));
+	}
+	
 }

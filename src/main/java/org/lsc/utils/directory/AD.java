@@ -130,10 +130,74 @@ public class AD {
 
 
 	/**
-	 * The weird date of Microsoft AD for last login
+	 * The Unix epoch (1 January 1970 00:00:00 UT) in AD's time format 
 	 */
-	private static final Long LAST_LOGON_START_TIME = 116444736000000000L;
+	private static final Long UNIX_EPOCH_IN_AD_TIME = 116444736000000000L;
 
+	/**
+	 * <p>Transform an AD timestamp to a Unix timestamp.</p>
+	 * 
+	 * <p>AD timestamps are the number of 100-nanosecond ticks since 1 January 1601 00:00:00 UT.
+	 * Unix timestamps are the number of seconds elapsed since the start of the epoch at 1 January 1970 00:00:00 UT.
+	 * Source: http://en.wikipedia.org/wiki/System_time.</p>
+	 * 
+	 * <p>This method returns the number of seconds elapsed since the start of the Unix epoch
+	 * as represented by the AD timestamp given. Any extra precision as provided by the AD timestamp
+	 * is discarded (truncated, not rounded).</p>
+	 * 
+	 * @param aDTime An AD timestamp as a long
+	 * @return Timestamp in seconds since the Unix epoch (1 January 1970 00:00:00 UT)
+	 */
+	public static int aDTimeToUnixTimestamp(long aDTime) {
+		// Subtract Unix epoch in AD time, and divide by 10^7 to switch from 100 ns intervals to seconds
+		return (int) ( (aDTime - UNIX_EPOCH_IN_AD_TIME) / (long) Math.pow(10, 7) );
+	}
+	
+	/**
+	 * <p>Helper method to automatically parse an AD timestamp from a String before
+	 * calling {@link #aDTimeToUnixTimestamp(long)}.</p>
+	 * 
+	 * @param aDTimeString A string containing an AD timestamp
+	 * @return Timestamp in seconds since the Unix epoch (1 January 1970 00:00:00 UT)
+	 * @see #aDTimeToUnixTimestamp(long)
+	 */
+	public static int aDTimeToUnixTimestamp(String aDTimeString) {
+		Long ts = Long.parseLong(aDTimeString);
+		return aDTimeToUnixTimestamp(ts);
+	}
+	
+	/**
+	 * <p>Transform a Unix timestamp to an AD timestamp.</p>
+	 * 
+	 * <p>AD timestamps are the number of 100-nanosecond ticks since 1 January 1601 00:00:00 UT.
+	 * Unix timestamps are the number of seconds elapsed since the start of the epoch at 1 January 1970 00:00:00 UT.
+	 * Source: http://en.wikipedia.org/wiki/System_time.</p>
+	 * 
+	 * <p>This method returns the number of 100-nanosecond ticks elapsed since the start of the AD epoch
+	 * as represented by the Unix timestamp given. The extra precision in the AD timestamp representation
+	 * is set to zeroes (0).</p>
+	 * 
+	 * @param refTimeUnix A Unix timestamp as an int
+	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
+	 */
+	public static long unixTimestampToADTime(int refTimeUnix) {
+		// Multiply by 10^7 to switch from seconds to 100 ns intervals and add Unix epoch in AD time
+		return ( refTimeUnix * (long) Math.pow(10, 7) ) + UNIX_EPOCH_IN_AD_TIME;
+	}
+	
+	/**
+	 * <p>Helper method to automatically parse a Unix timestamp from a String before
+	 * calling {@link #unixTimestampToADTime(int)}.</p>
+	 * 
+	 * @param refTimeUnixString A Unix timestamp as an int
+	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
+	 * @see #unixTimestampToADTime(int)
+	 */
+	public static long unixTimestampToADTime(String refTimeUnixString) {
+		return unixTimestampToADTime(Integer.parseInt(refTimeUnixString));
+	}
+	
+	
 	/**
 	 * Return the number of weeks since the last logon
 	 *
@@ -144,9 +208,7 @@ public class AD {
 		if (lastLogonTimestamp == null || lastLogonTimestamp.length() == 0) {
 			return 0;
 		}
-		Long ts = Long.parseLong(lastLogonTimestamp);
-		//We divide the ts by 10⁷ for seconds, 60 seconds, 60 minutes, 24 hours, 7 days
-		long secondsToUnixTimeStamp = (ts - LAST_LOGON_START_TIME) / (long) Math.pow(10, 7);
+		long secondsToUnixTimeStamp = aDTimeToUnixTimestamp(lastLogonTimestamp);
 		long lastLogonTime = (new Date().getTime() / 1000) - secondsToUnixTimeStamp;
 
 		return (int) (lastLogonTime / (60 * 60 * 24 * 7));
@@ -167,7 +229,7 @@ public class AD {
 
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		long accountExpiresTimeStampMs = sdf.parse(expireDate).getTime() * (long) Math.pow(10, 4);
-		return accountExpiresTimeStampMs + LAST_LOGON_START_TIME;
+		return accountExpiresTimeStampMs + UNIX_EPOCH_IN_AD_TIME;
 	}
 
 	/**
@@ -324,4 +386,5 @@ public class AD {
 		setHexValue.put(UAC_SET_TRUSTED_TO_AUTH_FOR_DELEGATION, UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
 		unsetHexValue.put(UAC_UNSET_TRUSTED_TO_AUTH_FOR_DELEGATION, ~UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
 	}
+
 }

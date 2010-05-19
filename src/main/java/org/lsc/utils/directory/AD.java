@@ -177,24 +177,24 @@ public class AD {
 	 * as represented by the Unix timestamp given. The extra precision in the AD timestamp representation
 	 * is set to zeroes (0).</p>
 	 * 
-	 * @param refTimeUnix A Unix timestamp as an int
+	 * @param unixTimestamp A Unix timestamp as an int
 	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
 	 */
-	public static long unixTimestampToADTime(int refTimeUnix) {
+	public static long unixTimestampToADTime(int unixTimestamp) {
 		// Multiply by 10^7 to switch from seconds to 100 ns intervals and add Unix epoch in AD time
-		return ( refTimeUnix * (long) Math.pow(10, 7) ) + UNIX_EPOCH_IN_AD_TIME;
+		return ( unixTimestamp * (long) Math.pow(10, 7) ) + UNIX_EPOCH_IN_AD_TIME;
 	}
 	
 	/**
 	 * <p>Helper method to automatically parse a Unix timestamp from a String before
 	 * calling {@link #unixTimestampToADTime(int)}.</p>
 	 * 
-	 * @param refTimeUnixString A Unix timestamp as an int
+	 * @param unixTimestampString A Unix timestamp as an int
 	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
 	 * @see #unixTimestampToADTime(int)
 	 */
-	public static long unixTimestampToADTime(String refTimeUnixString) {
-		return unixTimestampToADTime(Integer.parseInt(refTimeUnixString));
+	public static long unixTimestampToADTime(String unixTimestampString) {
+		return unixTimestampToADTime(Integer.parseInt(unixTimestampString));
 	}
 	
 	

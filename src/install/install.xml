@@ -57,51 +57,8 @@
 		<pack name="Main Application" required="yes" installGroups="default">
 			<description>The directory engine synchronization.</description>
 			<fileset dir="." targetdir="$INSTALL_PATH" />
-		</pack><!--
-		<pack name="Install Database Server" required="no" preselected="yes"
-			os="windows" installGroups="New Application">
-			<description>New server installation of the selected database as
-				required by the application.</description>
-			<file src="postgresql" targetdir="$INSTALL_PATH" />
-			<file src="sql" targetdir="$INSTALL_PATH" />
-			<executable targetfile="$INSTALL_PATH/postgresql/postgres_install_windows.bat"
-				stage="postinstall" keep="true">
-				<args>
-					<arg value="${UserPathPanelVariable}" />
-					<arg value="$HOST_NAME" />
-					<arg value="${db.service.name}" />
-					<arg value="${db.service.password}" />
-					<arg value="${db.su.password}" />
-				</args>
-			</executable>
 		</pack>
-		<pack name="JBoss Source Code" required="no" preselected="no"
-			installGroups="New Application">
-			<description>The JBoss application server source is available as
-				required by the LGPL.</description>
-			<file src="src" targetdir="$INSTALL_PATH/@{jboss.version}" />
-		</pack>
-		<pack name="Update Application" required="yes"
-			installGroups="Update Existing Application">
-			<description>The required application files to update an existing
-				installation.</description>
-			<file src="update" targetdir="$INSTALL_PATH" />
-		</pack>
-		<pack name="Post-Install Tasks" required="yes">
-			<description>Configuration and cleanup required for the
-				installation.</description>
-			<file src="ant" targetdir="$INSTALL_PATH" />
-			<file src="post-install-tasks.bat" targetdir="$INSTALL_PATH" />
-			<file src="build.xml" targetdir="$INSTALL_PATH" />
-			<file src="Uninstall_PostgreSQL_and_Application.bat" targetdir="$INSTALL_PATH" />
-			<file src="Uninstall_Application_Only.bat" targetdir="$INSTALL_PATH" />
-			<parsable targetfile="$INSTALL_PATH/post-install-tasks.bat" />
-			<parsable targetfile="$INSTALL_PATH/build.xml" />
-			<parsable targetfile="$INSTALL_PATH/@{jboss.version}/bin/system.properties" />
-			<parsable targetfile="$INSTALL_PATH/Uninstall_PostgreSQL_and_Application.bat" />
-			<parsable targetfile="$INSTALL_PATH/Uninstall_Application_Only.bat" />
-		</pack>
-	--></packs>
+	</packs>
 
 	<!--
 		The native libraries to add. This is required for creating shortcuts

@@ -10,7 +10,6 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
-import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.lsc.jndi.JndiModificationType;
@@ -64,12 +63,12 @@ public class SequencesFactory {
 		LOGGER.debug("Getting the next value for the following sequence {}", hash);
 
 		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
-		if (sq != null) {
-			return sq.getNextValue();
-		} else {
-			LOGGER.debug("Couldn't get the sequence {}. Returning 0.", attributeName);
+		if (sq == null) {
+			LOGGER.debug("Couldn't get the sequence {}. Returning -1.", hash);
 			return -1;
 		}
+
+		return sq.getNextValue();
 	}
 
 	/**
@@ -77,42 +76,39 @@ public class SequencesFactory {
 	 * 
 	 * @param dn DN where the sequence is stored in the directory
 	 * @param attributeName The attribute name the sequence is stored in
-	 * @return the next value, a negative value means an error
+	 * @return the current value, a negative value means an error
 	 */
 	public static int getCurrentValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
 		LOGGER.debug("Getting the current value for the following sequence {}", hash);
 
 		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
-		if (sq != null) {
-			return sq.getCurrentValue();
-		} else {
+		if (sq == null) {
+			LOGGER.debug("Couldn't get the sequence {}. Returning -1.", hash);
 			return -1;
 		}
+
+		return sq.getCurrentValue();
 	}
 
 	/**
-	 * Private local method to get the next value
+	 * Private local method to get a sequence
 	 * @param dn DN where the sequence is stored in the directory
 	 * @param attributeName The attribute name the sequence is stored in
 	 * @param hash A unique identifier for this sequence. See {@link #getHash(String, String)}.
-	 * @return the next value
+	 * @return Sequence A Sequence object representing this entry
 	 */
 	private Sequence getSequence(String dn, String attributeName, String hash) {
 		if (sequences.containsKey(hash)) {
-			return (Sequence) sequences.get(hash);
+			return sequences.get(hash);
 		} else {
-			try {
-				Sequence seq = new Sequence();
-				seq.load(dn, attributeName, 0);
-				sequences.put(hash, seq);
-				return seq;
-			} catch (NamingException ne) {
-				LOGGER.error("Unable to load sequence");
-				LOGGER.debug(ne.toString(), ne);
+			Sequence seq = new Sequence();
+			if (!seq.load(dn, attributeName, 0)) {
+				return null;
 			}
+			sequences.put(hash, seq);
+			return seq;	
 		}
-		return null;
 	}
 
 	private static String getHash(String dn, String attributeName) {
@@ -134,20 +130,14 @@ class Sequence {
 	/** The value */
 	private int value;
 
-	public boolean load(String dn, String attributeName, int serialNumber) throws NamingException {
+	public boolean load(String dn, String attributeName, int serialNumber) {
 		if (attributeName == null || dn == null || dn.indexOf('=') == -1) {
 			return false;
 		}
 		setAttributeName(attributeName);
 		setDn(dn);
 
-		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
-		if (sr.getAttributes().get(attributeName) != null && sr.getAttributes().get(attributeName).size() > 0) {
-			value = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
-		} else {
-			return false;
-		}
-		return true;
+		return readValue();
 	}
 
 	public void setAttributeName(String attributeName) {
@@ -158,10 +148,6 @@ class Sequence {
 		return attributeName;
 	}
 
-	/**
-	 * The setter
-	 * @param value
-	 */
 	private void setDn(String value) {
 		dn = value;
 	}
@@ -170,26 +156,41 @@ class Sequence {
 		return value;
 	}
 
+	private synchronized void setValue(int value) {
+		this.value = value;
+	}
+
+	private boolean readValue() {
+		try {
+			SearchResult sr = JndiServices.getDstInstance().readEntry(getDn(), false);
+			if (sr.getAttributes().get(getAttributeName()) != null && sr.getAttributes().get(getAttributeName()).size() > 0) {
+				setValue(Integer.parseInt((String) sr.getAttributes().get(getAttributeName()).get()));
+				return true;
+			}
+		}
+		catch (NamingException e) {
+			LOGGER.debug(e.toString(), e);
+			// fall-thru to default failure exit
+		}
+		
+		LOGGER.error("Failed to get the current value for the sequence {}/{}", getDn(), getAttributeName());
+		return false;
+	}
+	
 	/**
 	 * Return the updated in directory new value
-	 * @return
+	 * @return Next value to set, or -1 if an error occurred
 	 */
 	public synchronized int getNextValue() {
-		int currentValue = 0;
 		int newValue = 0;
 		try {
-			SearchControls sc = new SearchControls();
-			sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-			sc.setReturningAttributes(new String[]{attributeName});
-			SearchResult sr = JndiServices.getDstInstance().readEntry(getDn(), "objectclass=*", false, sc);
-			if (sr.getAttributes().get(attributeName) != null) {
-				currentValue = Integer.parseInt((String) sr.getAttributes().get(attributeName).get());
-			} else {
-				LOGGER.error("Failed to get the current value for the sequence {}/{}", dn, attributeName);
-				return 0;
+			if (!readValue()) {
+				return -1;
 			}
-			newValue = currentValue + 1;
-			Attribute newValueAttribute = new BasicAttribute(attributeName);
+			
+			newValue = getCurrentValue() + 1;
+			
+			Attribute newValueAttribute = new BasicAttribute(getAttributeName());
 			newValueAttribute.clear();
 			newValueAttribute.add("" + newValue);
 
@@ -202,19 +203,14 @@ class Sequence {
 
 			JndiServices.getDstInstance().apply(jm);
 		} catch (NamingException e) {
-			LOGGER.error("Failed to get the current value for the sequence {}/{}", dn, attributeName);
+			LOGGER.error("Failed to update the directory for the value of the sequence {}/{}", getDn(), getAttributeName());
 			return -1;
 		}
 
-		value = newValue;
+		setValue(newValue);
 		return newValue;
 	}
 
-	/**
-	 * The getter accessor the sequence name. This is normally
-	 * composed of "attribute-objectclass" 
-	 * @return the sequence name
-	 */
 	public String getDn() {
 		return dn;
 	}

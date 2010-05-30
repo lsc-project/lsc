@@ -246,7 +246,7 @@ public class ExecutableLdifService implements IJndiWritableService {
 
 		byte[] data = new byte[65535];
 		try {
-			while (p.getInputStream().read(data) > 0) {
+			while (p.getInputStream() != null && p.getInputStream().read(data) > 0) {
 				datas.append(new String(data));
 			}
 		} catch (IOException e) {

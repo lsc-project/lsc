@@ -229,7 +229,7 @@ public class Configuration {
 		for (Object propertyName: originalProperties.keySet()) {
 			String propertyNameStr = (String) propertyName;
 			if(propertyNameStr.startsWith(prefix + ".")) {
-				String newPropertyName = propertyNameStr.substring(propertyNameStr.indexOf(prefix.length()+1));
+				String newPropertyName = propertyNameStr.substring(prefix.length()+1);
 				result.put(newPropertyName, originalProperties.getProperty(propertyNameStr));
 			}
 		}

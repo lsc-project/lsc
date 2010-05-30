@@ -184,7 +184,7 @@ public abstract class AbstractSimpleJndiService {
 	/**
 	 * Get the ldap search result according the specified identifier.
 	 * 
-	 * @param entry The object identifiers - used in the directory filter as {0} or any attributes name
+	 * @param id The object identifiers - used in the directory filter as {0} or any attributes name
 	 * @return The ldap search result
 	 * @throws NamingException
 	 *             thrown if an directory exception is encountered while getting

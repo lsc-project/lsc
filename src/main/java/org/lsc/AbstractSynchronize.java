@@ -533,7 +533,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Time limit accessor
 	 * 
-	 * @param threads
+	 * @param timeLimit
 	 *            number of seconds
 	 */
 	public void setTimeLimit(int timeLimit) {

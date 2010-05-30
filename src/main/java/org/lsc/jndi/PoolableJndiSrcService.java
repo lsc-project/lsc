@@ -66,9 +66,9 @@ import org.lsc.service.IAsynchronousService;
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class PoolableJndiSrcService extends SimpleJndiSrcService implements
-		IAsynchronousService {
+				IAsynchronousService {
 
-	/** This field is storing the last successful synchronization date */ 
+	/** This field is storing the last successful synchronization date */
 	private Date lastSuccessfulSync;
 	/** */
 	private Set<Entry<String, LscAttributes>> listPivots;
@@ -95,10 +95,10 @@ public class PoolableJndiSrcService extends SimpleJndiSrcService implements
 	}
 
 	public Entry<String, LscAttributes> getNextId() throws NamingException {
-		if(listPivots != null && !listPivots.isEmpty()) {
+		if (listPivots != null && !listPivots.isEmpty()) {
 			Entry<String, LscAttributes> entry = listPivots.iterator().next();
 			listPivots.remove(entry);
-			if(listPivots.isEmpty()) {
+			if (listPivots.isEmpty()) {
 				listPivots = null;
 			}
 			return entry;
@@ -111,29 +111,29 @@ public class PoolableJndiSrcService extends SimpleJndiSrcService implements
 			// the difference to get
 			GregorianCalendar gc = new GregorianCalendar();
 			gc.setTime(lastSuccessfulSync);
-			
+
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			// VADE RETRO : Directory may store dates in GMT or local timezone
 			// Therefore, filters must be adapted to fit this feature.
 			// Must find a way to implement this correctly !
 			// Maybe through a JavaScript expression ? 
-	        gc.add(GregorianCalendar.HOUR, -1);
+			gc.add(GregorianCalendar.HOUR, -1);
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			
-	        gc.add(GregorianCalendar.SECOND, -interval);
-	        // Avoid to resynchronize already synchronized entry
-	        //gc.add(GregorianCalendar.SECOND, 1);
-	        String date = dateFormater.format(gc.getTime());
-	        
-	        // Reset the last successful synchronization date
-	        // Must be done now to avoid loosing entries modification while synchronizing
-	        // We may replay some synchronization two times but there's now simple way to avoid it
-	        lastSuccessfulSync = new Date();
-	        
-	        listPivots = JndiServices.getSrcInstance().getAttrsList(getBaseDn(),
-					filterTimestamp.replaceAll("\\{0\\}", date), SearchControls.SUBTREE_SCOPE,
-					getAttrsId()).entrySet();
-			if(listPivots.isEmpty()) {
+
+			gc.add(GregorianCalendar.SECOND, -interval);
+			// Avoid to resynchronize already synchronized entry
+			//gc.add(GregorianCalendar.SECOND, 1);
+			String date = dateFormater.format(gc.getTime());
+
+			// Reset the last successful synchronization date
+			// Must be done now to avoid loosing entries modification while synchronizing
+			// We may replay some synchronization two times but there's now simple way to avoid it
+			lastSuccessfulSync = new Date();
+
+			listPivots = JndiServices.getSrcInstance().getAttrsList(getBaseDn(),
+							filterTimestamp.replaceAll("\\{0\\}", date), SearchControls.SUBTREE_SCOPE,
+							getAttrsId()).entrySet();
+			if (listPivots.isEmpty()) {
 				return null;
 			}
 		}

@@ -47,6 +47,7 @@ package org.lsc;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.joran.spi.JoranException;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPURL;
@@ -66,6 +67,8 @@ import java.util.Properties;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.lsc.utils.output.CsvLayout;
+import org.lsc.utils.output.LdifLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,6 +185,14 @@ public class Configuration {
 		}
 		checkLdapProperties(dst);
 		return dst;
+	}
+
+	public static Properties getCsvProperties() {
+		return getAsProperties("lsc.output.csv");
+	}
+
+	public static Properties getLdifProperties() {
+		return getAsProperties("lsc.output.ldif");
 	}
 
 	/**
@@ -508,6 +519,13 @@ public class Configuration {
 
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
+			if(!getCsvProperties().isEmpty()) {
+				setUpCsvLogging(context);
+			}
+
+			if(!getLdifProperties().isEmpty()) {
+				setUpLdifLogging(context);
+			}
 		} catch (JoranException je) {
 			System.err.println("Can not find LogBack configuration file");
 		}
@@ -550,4 +568,50 @@ public class Configuration {
 	public static boolean isLoggingSetup() {
 		return loggingSetup;
 	}
+
+	protected static void setUpCsvLogging(LoggerContext context) {
+		Properties properties = getLdifProperties();
+
+		FileAppender appender = new FileAppender();
+		appender.setName("csv");
+		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
+		appender.setFile(properties.getProperty("file"));
+		appender.setContext(context);
+
+		CsvLayout csvLayout = new CsvLayout();
+		csvLayout.setLogOperations(properties.getProperty("logOperations"));
+		csvLayout.setAttrs(properties.getProperty("attrs"));
+		csvLayout.setSeparator(properties.getProperty("separator", ";"));
+		csvLayout.setOutputHeader(Boolean.parseBoolean(properties.getProperty("outputHeader", "true")));
+		csvLayout.setTaskNames(properties.getProperty("taskNames"));
+		csvLayout.setContext(context);
+		csvLayout.start();
+
+		appender.setLayout(csvLayout);
+		appender.start();
+		ch.qos.logback.classic.Logger rootLogger = context.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+		rootLogger.addAppender(appender);
+	}
+
+	protected static void setUpLdifLogging(LoggerContext context) {
+		Properties properties = getLdifProperties();
+
+		FileAppender appender = new FileAppender();
+		appender.setName("ldif");
+		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
+		appender.setFile(properties.getProperty("file"));
+		appender.setContext(context);
+
+		LdifLayout ldifLayout = new LdifLayout();
+		ldifLayout.setLogOperations(properties.getProperty("logOperations"));
+		ldifLayout.setOnlyLdif(Boolean.parseBoolean(properties.getProperty("onlyLdif", "false")));
+		ldifLayout.setContext(context);
+		ldifLayout.start();
+
+		appender.setLayout(ldifLayout);
+		appender.start();
+		ch.qos.logback.classic.Logger rootLogger = context.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+		rootLogger.addAppender(appender);
+	}
+	
 }

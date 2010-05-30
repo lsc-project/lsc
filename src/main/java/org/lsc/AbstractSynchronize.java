@@ -324,8 +324,9 @@ public abstract class AbstractSynchronize {
 			threadPool.shutdown();
 			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
-			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+			LOGGER.error("Tasks terminated according to time limit");
+			LOGGER.info("If you want to avoid this message, increase the time limit by using dedicated parameter.");
+			LOGGER.debug(e.toString(), e);
 		}
 
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";

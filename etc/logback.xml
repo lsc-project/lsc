@@ -4,9 +4,11 @@
 
 	<!-- standard output to console -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="org.lsc.utils.output.LdifLayout">
-			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
-		</layout>
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.lsc.utils.output.LdifLayout">
+				<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
+			</layout>
+		</encoder>
 	</appender>
 
 	<!-- log all application messages to the file /tmp/lsc.log -->

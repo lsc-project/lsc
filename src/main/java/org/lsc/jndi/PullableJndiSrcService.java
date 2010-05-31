@@ -65,7 +65,7 @@ import org.lsc.service.IAsynchronousService;
  * 
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class PoolableJndiSrcService extends SimpleJndiSrcService implements
+public class PullableJndiSrcService extends SimpleJndiSrcService implements
 				IAsynchronousService {
 
 	/** This field is storing the last successful synchronization date */
@@ -83,7 +83,7 @@ public class PoolableJndiSrcService extends SimpleJndiSrcService implements
 	/** The interval in seconds */
 	private int interval;
 
-	public PoolableJndiSrcService(Properties props, String beanClassName) {
+	public PullableJndiSrcService(Properties props, String beanClassName) {
 		super(props, beanClassName);
 		// Default LDAP date filter
 		filterTimestamp = props.getProperty("filterAsync", "modifytimestamp>={0}");

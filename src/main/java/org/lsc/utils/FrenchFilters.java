@@ -201,7 +201,7 @@ public final class FrenchFilters {
 	 *
 	 * @return boolean
 	 * 
-	 * @Deprecated because the method is in Java
+	 * @deprecated because the method is in Java
 	 */
 	@Deprecated
 	public static boolean containsInTab(final String[] array, final String name) {

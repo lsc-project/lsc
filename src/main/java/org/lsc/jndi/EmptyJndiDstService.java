@@ -69,7 +69,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @param beanClassName
 	 *            the bean class name that will be instantiated and feed up
 	 */
-	public EmptyJndiDstService(final Properties props, @SuppressWarnings("unused") final String beanClassName) {
+	public EmptyJndiDstService(final Properties props, final String beanClassName) {
 		super(props);
 	}
 

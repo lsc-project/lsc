@@ -212,7 +212,7 @@ public final class Launcher {
 		
 			if(cmdLine.getOptions().length == 0 || 
 							cmdLine.hasOption("h") || 
-							((syncType.size() == 0) && (cleanType.size() == 0))) {
+							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0))) {
 				printHelp();
 				return 1;
 			}

@@ -23,7 +23,40 @@
   </select>
 
   <select id="getListTestDb2Ldap" resultClass="java.util.HashMap">
-                SELECT pers.mail AS mail, pers.sn AS sn
-                FROM INETORGPERSON pers
+	        SELECT pers.mail AS mail, pers.sn AS sn
+	        FROM INETORGPERSON pers
   </select>
+
+  <statement id="add" parameterClass="java.util.HashMap">
+			INSERT INTO INETORGPERSON 
+			( id, uid, sn, givenName, cn, mail, address, telephoneNumber, mail, objectClass) 
+			VALUES 
+			( #id#, #uid#, #sn#, #givenName#, #cn#, #mail#, #address#, #telephoneNumber#, #mail#, 'inetOrgPerson')
+  </statement>
+
+  <statement id="update" parameterClass="java.util.HashMap">
+			UPDATE INETORGPERSON
+          		SET 
+          			sn = #sn#,
+          			givenName = #givenName#,
+          			cn = #cn#,
+          			mail = #mail#,
+          			address = #address#,
+          			telephoneNumber = #telephoneNumber#,
+          			mail = #mail#,
+          			objectClass = 'inetOrgPerson'
+          		WHERE id = #id# 
+  </statement>
+
+  <statement id="rename" parameterClass="java.util.HashMap">
+  			UPDATE INETORGPERSON
+  				SET
+          			uid = #uid#
+  				WHERE
+  					id = #id#
+  </statement>
+
+  <statement id="delete" parameterClass="java.util.HashMap">
+  			DELETE FROM INETORGPERSON WHERE id = #id#
+  </statement>
 </sqlMap>

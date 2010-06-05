@@ -45,17 +45,21 @@
  */
 package org.lsc;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.lsc.jndi.IJndiWritableService;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.TaskImpl;
+import org.lsc.jmx.LscServerImpl;
 import org.lsc.service.IAsynchronousService;
-import org.lsc.service.IService;
+import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +82,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 	/** lsc.tasks property. */
 	public static final String TASKS_PROPS_PREFIX = "tasks";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSynchronize.class);
 
 	/** lsc.tasks.TASKNAME.srcService property. */
 	public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
@@ -103,18 +109,42 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks.TASKNAME.postCleanHook property. */
 	public static final String POST_CLEAN_HOOK_PROPS_PREFIX = "postCleanHook";
 	    
-	private static final Logger LOGGER =
-					LoggerFactory.getLogger(SimpleSynchronize.class);
-
 	/** The lsc properties. */
 	private Properties lscProperties;
 	
+	Map<String, Task> cache;
+
 	/**
 	 * Default constructor
 	 */
 	public SimpleSynchronize() {
 		super();
 		setThreads(5); 
+		cache = new HashMap<String, Task>();
+	}
+	
+	public void init() {
+        // Get the "lsc.tasks" property
+        String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
+        if (tasks != null) {
+            // Iterate on each task
+            StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
+    		while (tasksSt.hasMoreTokens()) {
+    			String taskName = tasksSt.nextToken();
+    			if(!cache.containsKey(taskName)) {
+    				cache.put(taskName, new TaskImpl(taskName, getLscProperties()));
+    			}
+    		}
+        }
+
+	}
+	
+	public Iterable<String> getTasksName() {
+		return cache.keySet();
+	}
+	
+	public boolean isAsynchronousTask(String taskName) {
+		return cache.get(taskName).getSourceService() instanceof IAsynchronousService;
 	}
 
 	/**
@@ -122,63 +152,64 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * synchronization and the cleaning phases.
 	 * @param asyncTasks 
 	 *                string list of the asynchronous synchronization tasks to launch
-	 * @param syncTasks
-	 *                string list of the synchronization tasks to launch
-	 * @param cleanTasks
-	 *                string list of the cleaning tasks to launch
+	 * @param syncTasks string list of the synchronization tasks to launch
+	 * @param cleanTasks string list of the cleaning tasks to launch
 	 *
-	 * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
+	 * @return the launch status - true if all tasks executed successfully, 
+	 * 				false if no tasks were executed or any failed
 	 * @throws Exception
 	 */
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 					final List<String> cleanTasks) throws Exception {
 		Boolean foundATask = false;
 
-		// Get the list of defined tasks from LSC properties
 		String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
 		if (tasks == null) {
-			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
-			return false;
+				LOGGER.error("No tasks defined in LSC properties! Exiting ...");
+				return false;
+		
 		}
-
+		// Get the list of defined tasks from LSC properties
 		// Iterate on each task
-		StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
 		boolean isASyncTaskAll = asyncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
-
-		while (tasksSt.hasMoreTokens()) {
-			String taskName = tasksSt.nextToken();
+		
+		if(getTasksName() == null) {
+			return false;
+		} else if(getTasks().length == 0) {
+			init();
+		}
+		
+		for (Task task: cache.values()) {
 
 			// Launch the task either if explicitly specified or if "all" magic keyword used
-			if (isSyncTaskAll || syncTasks.contains(taskName)) {
+			if (isSyncTaskAll || syncTasks.contains(task.getName())) {
 				foundATask = true;
 
-				if (!launchTask(taskName, TaskMode.sync)) {
+				if (!launchTask(task, Task.Mode.sync)) {
 					return false;
 				} else {
-					String syncHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_SYNC_HOOK_PROPS_PREFIX);
-					if(syncHook != null && syncHook != "") {
-						runPostHook(taskName, syncHook);
+					if(task.getSyncHook() != null && task.getSyncHook() != "") {
+						runPostHook(task.getName(), task.getSyncHook());
 					}
 				}
 			}
-			if (isCleanTaskAll || cleanTasks.contains(taskName)) {
+			if (isCleanTaskAll || cleanTasks.contains(task.getName())) {
 				foundATask = true;
 
-				if (!launchTask(taskName, TaskMode.clean)) {
+				if (!launchTask(task, Task.Mode.clean)) {
 					return false;
 				} else {
-					String cleanHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_CLEAN_HOOK_PROPS_PREFIX);
-					if(cleanHook != null && cleanHook != "") {
-						runPostHook(taskName, cleanHook);
+					if(task.getCleanHook() != null && task.getCleanHook() != "") {
+						runPostHook(task.getName(), task.getCleanHook());
 					}
 				}
 			}
-			if (isASyncTaskAll || asyncTasks.contains(taskName)) {
+			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
 				foundATask = true;
 
-				if(!launchTask(taskName, TaskMode.async)) {
+				if(!launchTask(task, Task.Mode.async)) {
 					return false;
 				}
 			}
@@ -193,34 +224,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	}
 
 	/**
-	 * Enum for the type of mode
-	 *
-	 */
-	private enum TaskMode {
-		clean,
-		sync,
-		async;
-	}
-
-	private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
-		if (props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
-			String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
-			throw new RuntimeException(errorMessage);
-		}
-	}
-
-	private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
-		String value = props.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
-
-		if (value == null) {
-			String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
-			throw new RuntimeException(errorMessage);
-		}
-
-		return value;
-	}
-
-	/**
 	 * Launch a task. Call this for once each task type and task mode.
 	 *
 	 * @param taskName
@@ -231,66 +234,24 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * @return boolean true on success, false if an error occurred
 	 * @throws Exception
 	 */
-	private boolean launchTask(final String taskName, final TaskMode taskMode) throws Exception {
+	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
 		try {
-			LOGGER.info("Starting {} for {}", taskMode.name(), taskName);
-
-			String prefix = TASKS_PROPS_PREFIX + "." + taskName + ".";
-
-			Properties lscProperties = getLscProperties();
-			// Get all properties
-			// TODO : nice error message if a class name is specified but doesn't exist
-			checkTaskOldProperty(lscProperties, taskName, OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/1.2/upgrade-from-1.1");
-			String beanClassName = getTaskPropertyAndCheckNotNull(taskName, lscProperties, BEAN_PROPS_PREFIX);
-			String srcServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, SRCSERVICE_PROPS_PREFIX);
-			String dstServiceClass = getTaskPropertyAndCheckNotNull(taskName, lscProperties, DSTSERVICE_PROPS_PREFIX);
-
-			// Instantiate the destination service from properties
-			Properties dstServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + DSTSERVICE_PROPS_PREFIX);
-			Constructor<?> constr = Class.forName(dstServiceClass).getConstructor(new Class[]{Properties.class, String.class});
-			IJndiWritableService dstJndiService = (IJndiWritableService) constr.newInstance(new Object[]{dstServiceProperties, beanClassName});
-
-			// Instantiate custom JavaScript library from properties
-			String customLibraryName = lscProperties.getProperty(prefix + CUSTOMLIBRARY_PROPS_PREFIX);
-			Object customLibrary = null;
-			if (customLibraryName != null) {
-				customLibrary = Class.forName(customLibraryName).newInstance();
-			}
-
-			// Instantiate source service and pass any properties
-			IService srcService = null;
-			Properties srcServiceProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX + "." + prefix + SRCSERVICE_PROPS_PREFIX);
-			try {
-				Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class, String.class});
-				srcService = (IService) constrSrcService.newInstance(new Object[]{srcServiceProperties, beanClassName});
-
-			} catch (NoSuchMethodException e) {
-				try {
-					// backwards compatibility: if the source service doesn't take a beanClassName,
-					// use just the properties as a parameter
-					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{Properties.class});
-					srcService = (IService) constrSrcService.newInstance(new Object[] {srcServiceProperties});
-				} catch (NoSuchMethodException e1) {
-					// backwards compatibility: if the source service doesn't take any properties or a beanClassName,
-					// use the parameter less constructor
-					Constructor<?> constrSrcService = Class.forName(srcServiceClass).getConstructor(new Class[]{});
-					srcService = (IService) constrSrcService.newInstance();
-				}
-			}
+			LSCStructuralLogger.DESTINATION.warn("Starting {} for {}", taskMode.name(), task.getName());
 
 			// Do the work!
 			switch (taskMode) {
 				case clean:
-					clean2Ldap(taskName, srcService, dstJndiService);
+					clean2Ldap(task);
 					break;
 				case sync:
-					synchronize2Ldap(taskName, srcService, dstJndiService, customLibrary);
+					synchronize2Ldap(task);
 					break;
 				case async:
-					if(srcService instanceof IAsynchronousService) {
-						startAsynchronousSynchronize2Ldap(taskName, (IAsynchronousService) srcService, dstJndiService, customLibrary);
+					if(task.getSourceService() instanceof IAsynchronousService) {
+						LscServerImpl.startJmx(this);
+						startAsynchronousSynchronize2Ldap(task);
 					} else {
-						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + srcService.getClass().getName() + ")");
+						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + task.getSourceService().getClass().getName() + ")");
 					}
 				default:
 					//Should not happen
@@ -312,7 +273,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					errorDetail = e.toString();
 				}
 
-				LOGGER.error("Error while launching task \"{}\". Please check your configuration! ({})", taskName, errorDetail);
+				LOGGER.error("Error while launching task \"{}\". Please check your configuration! ({})", task.getName(), errorDetail);
 				LOGGER.debug(e.toString(), e);
 				return false;
 			} else {
@@ -342,10 +303,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	private void runPostHook(String taskName, String servicePostHook) {
 		if (servicePostHook != null && servicePostHook.length() > 0) {
 			LOGGER.debug("Service Post Hook found: " + servicePostHook);
-			String hookClass = servicePostHook.substring(0, servicePostHook
-					.lastIndexOf('.'));
-			String hookMethod = servicePostHook.substring(servicePostHook
-					.lastIndexOf('.') + 1);
+			String hookClass = servicePostHook.substring(0, servicePostHook.lastIndexOf('.'));
+			String hookMethod = servicePostHook.substring(servicePostHook.lastIndexOf('.') + 1);
 
 			LOGGER.debug("Hook Class: " + hookClass);
 			LOGGER.debug("Hook Method: " + hookMethod);
@@ -379,5 +338,22 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Task getTask(String taskName) {
+		return cache.get(taskName);
+	}
+
+	@Override
+	public Task[] getTasks() {
+		return cache.values().toArray(new Task[cache.values().size()]);
+	}
+
+	public final boolean launchById(String taskName, String dn, LscAttributes attributes) {
+		Task task = cache.get(taskName);
+		Entry<String, LscAttributes> id = new MapEntry<String, LscAttributes>(dn, attributes);
+		InfoCounter counter = new InfoCounter();
+		return new SynchronizeTask(task, counter, this, id).run(id);
 	}
 }

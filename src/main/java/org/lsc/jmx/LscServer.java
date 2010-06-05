@@ -38,52 +38,59 @@
  *
  *               (c) 2008 - 2010 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
+ *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.configuration.objects;
+package org.lsc.jmx;
+
+import java.util.Map;
 
 import javax.management.MXBean;
 
-import org.lsc.beans.IBean;
-import org.lsc.beans.syncoptions.ISyncOptions;
-import org.lsc.jndi.IJndiWritableService;
-import org.lsc.service.IService;
 
 /**
- * This class represent a LSC task
+ * This object is used by JMX as public interface for Lsc Server
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 @MXBean
-public interface Task {
+public interface LscServer {
 
 	/**
-	 * Enum for the type of mode
+	 * List all asynchronous manageable tasks (running or not)
+	 * @return asynchronous tasks list
 	 */
-	public enum Mode {
-		clean,
-		sync,
-		async;
-	}
+	public String[] getAsyncTasksName();
+	
+	/**
+	 * List all synchronous manageable tasks (running or not)
+	 * @return synchronous tasks list
+	 */
+	public String[] getSyncTasksName();
+	
+	/**
+	 * Check if the named task is running or not
+	 * @param taskName
+	 * @return task status
+	 */
+	public boolean isAsyncTaskRunning(String taskName);
 
-	public String getType();
+	/**
+	 * Start a named task
+	 * @param taskName
+	 */
+	public void startAsyncTask(String taskName);
 	
-	public String getDn();
+	/**
+	 * Start a named task
+	 * @param taskName
+	 */
+	public boolean launchSyncTaskById(String taskName, String id, Map<String, String> attributes);
 	
-	public IBean getBean();
-	
-	public String getName();
-	
-	public IService getSourceService();
-	
-	public IJndiWritableService getDestinationService();
-	
-	public ISyncOptions getSyncOptions();
-
-	public Object getCustomLibrary();
-
-	public String getCleanHook();
-	
-	public String getSyncHook();
+	/**
+	 * Schedule for shutdown a named task
+	 * @param taskName
+	 */
+	public void shutdownAsyncTask(String taskName);
 }

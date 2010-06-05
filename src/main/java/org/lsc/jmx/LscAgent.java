@@ -114,7 +114,7 @@ public class LscAgent implements NotificationListener {
 	/**
 	 * Default constructor
 	 */
-	private LscAgent() {
+	protected LscAgent() {
 		operation = OperationType.UNKNOWN;
 		attrsToSync = new HashMap<String, String>(); 
 	}
@@ -125,12 +125,12 @@ public class LscAgent implements NotificationListener {
 		if (retCode > 0) {
 			System.exit(retCode);
 		}
-		jmxAgent.run();
+		System.exit(jmxAgent.run());
 	}
 
-	private void run() {
-		if(!jmxBind()) {
-			System.exit(1);
+	protected int run() {
+		if(!jmxBind()) {System.exit(1);
+			return 1;
 		}
 		switch(operation) {
 			case START:
@@ -139,6 +139,7 @@ public class LscAgent implements NotificationListener {
 						LOGGER.info("Synchronization per id successfully achieved.");
 					} else {
 						LOGGER.error("Synchronization per id failed !");
+						return 2;
 					}
 				} else {
 					lscServer.startAsyncTask(taskName);
@@ -154,6 +155,7 @@ public class LscAgent implements NotificationListener {
 					LOGGER.info("Synchronous task " + taskName + " is " + ( lscServer.isAsyncTaskRunning(taskName) ? "running" : "stopped"));
 				} else {
 					LOGGER.error("Unknown or synchronous task name: " + taskName);
+					return 3;
 				}
 				break;
 			case TASKS_LIST:
@@ -170,6 +172,7 @@ public class LscAgent implements NotificationListener {
 				
 		}
 		jmxUnbind();
+		return 0;
 	}
 
 	/**
@@ -178,7 +181,7 @@ public class LscAgent implements NotificationListener {
 	 * @param args command line
 	 * @return the status code (0: OK, >=1 : failed)
 	 */
-	private int parseOptions(final String[] args) {
+	protected int parseOptions(final String[] args) {
 		Options options = new Options();
 		options.addOption("a", "start", true, "Start an asynchronous task");
 		options.addOption("h", "hostname", true, "Specify the hostname to connect to");
@@ -266,7 +269,7 @@ public class LscAgent implements NotificationListener {
 	/**
 	 * Bind to the JMX Server 
 	 */
-	private boolean jmxBind() {
+	protected boolean jmxBind() {
 		try {
 			String sUrl = "service:jmx:rmi:///jndi/rmi://" + hostname + ":" + port + "/jmxrmi";
 			LOGGER.info("Connecting to remote engine on : " + sUrl);
@@ -292,7 +295,7 @@ public class LscAgent implements NotificationListener {
 	/**
 	 * Unbind from the JMX Server 
 	 */
-	private boolean jmxUnbind() {
+	protected boolean jmxUnbind() {
 		try {
 			jmxC.close();
 			return true;

@@ -76,16 +76,16 @@ import org.lsc.utils.directory.LDAP;
  */
 public class Ldap2LdapSyncTest {
 
-	private final String TASK_NAME = "ldap2ldapTestTask";
-	private final String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_ADD_DST = "cn=CN0003,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_MODIFY_SRC = "cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_MODIFY_DST = "cn=CN0001,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_DELETE_SRC = "cn=CN0004,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_DELETE_DST = "cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_MODRDN_SRC = "cn=CN0002,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_MODRDN_DST_BEFORE = "cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	private final String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String TASK_NAME = "ldap2ldapTestTask";
+	public final static String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_ADD_DST = "cn=CN0003,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_MODIFY_SRC = "cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_MODIFY_DST = "cn=CN0001,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_DELETE_SRC = "cn=CN0004,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_DELETE_DST = "cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_MODRDN_SRC = "cn=CN0002,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_MODRDN_DST_BEFORE = "cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 
 	/**
 	 * Test reading the userPassword attribute from our source directory through Object
@@ -144,19 +144,19 @@ public class Ldap2LdapSyncTest {
 		assertFalse(LDAP.canBind(Configuration.getSrcProperties().getProperty("java.naming.provider.url"), DN_MODIFY_DST, "secretCN0001"));
 
 		// perform the sync
-		launchSyncCleanTask(TASK_NAME, true, false);
+		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
 		checkSyncResultsFirstPass();
 
 		// sync again to confirm convergence
-		launchSyncCleanTask(TASK_NAME, true, false);
+		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
 		checkSyncResultsSecondPass();
 
 		// sync a third time to make sure nothing changed
-		launchSyncCleanTask(TASK_NAME, true, false);
+		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
 		checkSyncResultsSecondPass();
@@ -278,19 +278,25 @@ public class Ldap2LdapSyncTest {
 		assertFalse(JndiServices.getSrcInstance().exists(DN_DELETE_SRC));
 
 		// perform the clean
-		launchSyncCleanTask(TASK_NAME, false, true);
+		launchSyncCleanTask(TASK_NAME, false, false, true);
 
 		// check the results of the clean
 		assertFalse(JndiServices.getDstInstance().exists(DN_DELETE_DST));
 	}
 
-	private void launchSyncCleanTask(String taskName, boolean doSync,
+	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync,
 					boolean doClean) throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
+		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
+
+		if (doAsync) {
+			asyncType.add(taskName);
+		}
+		
 		if (doSync) {
 			syncType.add(taskName);
 		}
@@ -299,7 +305,7 @@ public class Ldap2LdapSyncTest {
 			cleanType.add(taskName);
 		}
 
-		boolean ret = sync.launch(new ArrayList<String>(), syncType, cleanType);
+		boolean ret = sync.launch(asyncType, syncType, cleanType);
 		assertTrue(ret);
 	}
 

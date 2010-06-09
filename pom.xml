@@ -337,6 +337,10 @@
 			<url>http://download.java.net/maven/2</url>
 		</repository>
 		<repository>
+			<id>JBoss repository</id>
+			<url>http://repository.jboss.org/maven2/</url>
+		</repository>
+		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
 		</repository>

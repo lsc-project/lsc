@@ -490,7 +490,7 @@ public final class JndiServices {
 			if (base.length() > 0) {
 				completedBaseDn = "," + base;
 			}
-			while (ne.hasMore()) {
+			while (ne.hasMoreElements()) {
 				iist.add(((SearchResult) ne.next()).getName() + completedBaseDn);
 			}
 		} catch (NamingException e) {

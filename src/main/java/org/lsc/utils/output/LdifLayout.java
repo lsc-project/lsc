@@ -149,6 +149,8 @@ public class LdifLayout extends PatternLayout {
 					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
 					if(ln.size() <= 1) {
 						msgBuffer.append(baseUrl);
+					} else if (jm.getNewDistinguishName().endsWith(baseUrl)) {
+						msgBuffer.append(ln.getPrefix(ln.size()-1));
 					} else {
 						msgBuffer.append(ln.getPrefix(ln.size()-1) + "," + baseUrl);
 					}

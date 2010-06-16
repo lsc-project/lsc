@@ -271,9 +271,9 @@ run() {
 
 	export CLASSPATH
 
-	command="\"$SAMPLE_HOME/../bin/lsc\" --config \"$SAMPLE_HOME/etc\" --synchronize all"
+	command="\"$SAMPLE_HOME/../bin/lsc\" --config \"$SAMPLE_CONFIG_DIR\" --synchronize all"
 	echo "Running $command"
-	"$SAMPLE_HOME/../bin/lsc" --config "$SAMPLE_HOME/etc" --synchronize all
+	"$SAMPLE_HOME/../bin/lsc" --config "$SAMPLE_CONFIG_DIR" --synchronize all
 }
 
 # ---------------------------------------------------------------------------------

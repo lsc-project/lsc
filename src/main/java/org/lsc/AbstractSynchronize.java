@@ -311,7 +311,7 @@ public abstract class AbstractSynchronize {
 
 		ISyncOptions syncOptions = this.getSyncOptions(syncName);
 
-		SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(getThreads(), getThreads() * 10);
+		SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(getThreads());
 
 		/*
 		 * Loop on all entries in the source and add or update them in the

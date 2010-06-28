@@ -24,8 +24,8 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	final Logger LOGGER = LoggerFactory
 			.getLogger(SynchronizeThreadPoolExecutor.class);
 
-	protected SynchronizeThreadPoolExecutor(int threads, int maxTasksCount) {
-		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(maxTasksCount));
+	protected SynchronizeThreadPoolExecutor(int threads) {
+		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>());
 		queue = getQueue(); 
 	}
 

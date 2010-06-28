@@ -315,7 +315,7 @@ public abstract class AbstractSynchronize {
 			return;
 		}
 
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads(), getThreads() * 10);
+		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
 
 		/*
 		 * Loop on all entries in the source and add or update them in the

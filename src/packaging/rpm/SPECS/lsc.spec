@@ -28,7 +28,7 @@ Release: 0%{?dist}
 License: BSD
 
 Group: Applications/System
-URL: http://www.lsc-project.org
+URL: http://lsc-project.org
 
 Source: %{lsc_name}-core-%{lsc_version}-dist.tar.gz
 Source1: lsc.cron

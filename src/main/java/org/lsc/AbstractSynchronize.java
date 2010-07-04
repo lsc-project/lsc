@@ -140,15 +140,9 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
-	 * Clean the destination LDAP directory (delete objects not present in
-	 * source).
+	 * Clean the destination LDAP directory (delete objects not present in source).
 	 * 
-	 * @param syncName
-	 *            the synchronization name
-	 * @param srcService
-	 *            the source service (JDBC or JNDI)
-	 * @param dstJndiService
-	 *            the jndi destination service
+	 * @param task TODO
 	 */
 	protected final void clean2Ldap(Task task) {
 
@@ -179,8 +173,7 @@ public abstract class AbstractSynchronize {
 
 		IBean taskBean;
 
-		// Loop on all entries in the destination and delete them if they're not
-		// found in the source
+		// Loop on all entries in the destination and delete them if they're not found in the source
 		for (Entry<String, LscAttributes> id : ids) {
 			counter.incrementCountAll();
 
@@ -188,8 +181,7 @@ public abstract class AbstractSynchronize {
 				// Search for the corresponding object in the source
 				taskBean = task.getSourceService().getBean(id.getKey(), id.getValue());
 
-				// If we didn't find the object in the source, delete it in the
-				// destination
+				// If we didn't find the object in the source, delete it in the destination
 				if (taskBean == null) {
 					// Retrieve condition to evaluate before deleting
 					Boolean doDelete = null;
@@ -201,21 +193,18 @@ public abstract class AbstractSynchronize {
 					} else if (conditionString.matches("false")) {
 						doDelete = false;
 					} else {
-						// If condition is based on dstBean, retrieve the full
-						// object from destination
+						// If condition is based on dstBean, retrieve the full object from destination
 						if (conditionString.contains("dstBean")) {
 
 							IBean dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue());
-							// Log an error if the bean could not be retrieved!
-							// This shouldn't happen.
+							// Log an error if the bean could not be retrieved! This shouldn't happen.
 							if (dstBean == null) {
 								LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
 								counter.incrementCountError();
 								continue;
 							}
 
-							// Put the bean in a map to pass to JavaScript
-							// evaluator
+							// Put the bean in a map to pass to JavaScript evaluator
 							conditionObjects = new HashMap<String, Object>();
 							conditionObjects.put("dstBean", dstBean);
 						}
@@ -225,9 +214,9 @@ public abstract class AbstractSynchronize {
 					}
 
 					// Only create delete modification object if (or):
-					// 1) the condition is true (obviously)
-					// 2) the condition is false and we would delete an object
-					// and "nodelete" was specified in command line options
+					// 	1)	the condition is true (obviously)
+					//	2)	the condition is false and we would delete an object
+					//		and "nodelete" was specified in command line options
 					// Case 2 is for debugging purposes.
 					if (doDelete || nodelete) {
 						jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, task.getName());
@@ -244,8 +233,7 @@ public abstract class AbstractSynchronize {
 						continue;
 					}
 
-					// if we got here, we have a modification to apply - let's
-					// do it!
+					// if we got here, we have a modification to apply - let's do it!
 					counter.incrementCountInitiated();
 					if (task.getDestinationService().apply(jm)) {
 						counter.incrementCountCompleted();
@@ -256,8 +244,7 @@ public abstract class AbstractSynchronize {
 					}
 				}
 			} catch (CommunicationException e) {
-				// we lost the connection to the source or destination, stop
-				// everything!
+				// we lost the connection to the source or destination, stop everything!
 				counter.incrementCountError();
 				LOGGER.error("Connection lost! Aborting.");
 				logActionError(jm, id, e);
@@ -279,17 +266,9 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
-	 * Synchronize the destination LDAP directory (create and update objects
-	 * from source).
+	 * Synchronize the destination LDAP directory (create and update objects from source).
 	 * 
-	 * @param syncName
-	 *            the synchronization name
-	 * @param srcService
-	 *            the source service (JDBC or JNDI or anything else)
-	 * @param dstService
-	 *            the JNDI destination service
-	 * @param objectBean
-	 * @param customLibrary
+	 * @param task TODO
 	 */
 	protected final void synchronize2Ldap(final Task task) {
 		/*final String syncName,
@@ -317,10 +296,7 @@ public abstract class AbstractSynchronize {
 
 		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
 
-		/*
-		 * Loop on all entries in the source and add or update them in the
-		 * destination
-		 */
+		/* Loop on all entries in the source and add or update them in the destination */
 		for (Entry<String, LscAttributes> id : ids) {
 			threadPool.runTask(new SynchronizeTask(task, counter, this, id));
 		}
@@ -392,17 +368,17 @@ public abstract class AbstractSynchronize {
         
 	/**
 	 * Log all effective action.
-	 * 
+	 *
 	 * @param jm
-	 *            List of modification to do on the Ldap server
+	 *                List of modification to do on the Ldap server
 	 * @param identifier
-	 *            object identifier
+	 *                object identifier
 	 * @param except
-	 *            synchronization process name
+	 *                synchronization process name
 	 */
 	protected final void logActionError(final JndiModifications jm,
-			final Entry<String, LscAttributes> identifier,
-			final Exception except) {
+					final Entry<String, LscAttributes> identifier,
+					final Exception except) {
 
 		LOGGER.error("Error while synchronizing ID {}: {}", (jm != null ? jm.getDistinguishName() : identifier.getValue()), except.toString());
 		LOGGER.debug(except.toString(), except);
@@ -424,7 +400,8 @@ public abstract class AbstractSynchronize {
 	 *            synchronization process name
 	 */
 	protected final void logAction(final JndiModifications jm,
-			final Entry<String, LscAttributes> id, final String syncName) {
+					final Entry<String, LscAttributes> id,
+					final String syncName) {
 		switch (jm.getOperation()) {
 			case ADD_ENTRY:
 				LSCStructuralLogger.DESTINATION.info("# Adding new entry {} for {}", jm.getDistinguishName(), syncName);
@@ -456,7 +433,8 @@ public abstract class AbstractSynchronize {
 	 * @param syncName
 	 */
 	protected final void logShouldAction(final JndiModifications jm,
-			final Entry<String, LscAttributes> id, final String syncName) {
+					final Entry<String, LscAttributes> id,
+					final String syncName) {
 		switch (jm.getOperation()) {
 			case ADD_ENTRY:
 				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}", jm.getDistinguishName());
@@ -485,8 +463,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Parse the command line arguments according the selected filter.
 	 * 
-	 * @param cmdLine
-	 *            Command line options
+	 * @param cmdLine Command line options
 	 * @return the parsing status
 	 */
 	public final boolean parseOptions(final CommandLine cmdLine) {
@@ -513,7 +490,7 @@ public abstract class AbstractSynchronize {
 
 	/**
 	 * Get options against which the command line is analyzed.
-	 * 
+	 *
 	 * @return the options
 	 */
 	public static final Options getOptions() {

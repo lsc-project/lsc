@@ -68,9 +68,6 @@ import ch.qos.logback.core.LayoutBase;
  */
 public class CsvLayout extends LayoutBase<ILoggingEvent> {
 
-	/* The logger */
-	private static final Logger LOGGER = LoggerFactory.getLogger(CsvLayout.class);
-
 	/* Default values for the parameters */
 	protected static final String DEFAULT_SEPARATOR = ";";
 
@@ -173,7 +170,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				if (op != null) {
 					operations.add(op);
 				} else {
-					LOGGER.error("Invalid operation in the CSV export ({})", token);
+					addError("Invalid operation in the CSV export ( + token + )");
 				}
 			}
 		} else {
@@ -190,7 +187,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				attributes.add(st.toLowerCase());
 			}
 		} else {
-			LOGGER.warn("There is no attributes to write in the CSV file.\nSet the attrs property in the logback configuration file");
+			addWarn("There is no attributes to write in the CSV file.\nSet the attrs property in the logback configuration file");
 		}
 
 		/* Parse task names to log for */
@@ -211,7 +208,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 * @deprecated Use {@link #setLogOperations(java.lang.String)}
 	 */
 	public void setLogOperation(String logOperations) {
-		LOGGER.warn("The method setLogOperation() in CsvLayout is deprecated and will be removed in a future version of LSC. Please use setLogOperations() instead.");
+		addError("The method setLogOperation() in CsvLayout is deprecated and will be removed in a future version of LSC. Please use setLogOperations() instead.");
 		this.logOperations = logOperations;
 	}
 

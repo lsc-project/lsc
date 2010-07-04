@@ -52,7 +52,6 @@ import java.util.Properties;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
-import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.lsc.LscAttributes;
@@ -156,8 +155,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *             searching the directory.
 	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
-        return JndiServices.getDstInstance().getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
-                getAttrsId());
+		return this.getListPivots(getJndiServices());
     }
 
 	/**
@@ -169,6 +167,6 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * and all other attempts to use this service should fail.
 	 */
 	public boolean apply(JndiModifications jm) throws CommunicationException {
-		return JndiServices.getDstInstance().apply(jm);
+		return getJndiServices().apply(jm);
 	}
 }

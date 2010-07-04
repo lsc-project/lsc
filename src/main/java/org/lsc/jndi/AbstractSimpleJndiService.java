@@ -48,6 +48,7 @@ package org.lsc.jndi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -205,8 +206,21 @@ public abstract class AbstractSimpleJndiService {
 			searchString = filterId.replaceAll("\\{0\\}", id);
 		}
 
-		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
+		return getJndiServices().getEntry(getBaseDn(), searchString, _filteredSc);
 	}
+	
+	/**
+	 * Returns a list of all the objects' identifiers.
+	 * Generic method that can be used by connectors extending this class.
+	 * 
+	 * @return Map of all entries names that are returned by the directory with an associated map of
+	 *         attribute names and values (never null)
+	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
+	 *             searching the directory.
+	 */
+	protected Map<String, LscAttributes> getListPivots(JndiServices jndiServices) throws NamingException {
+		return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE, getAttrsId());
+    }
 
 	/**
 	 * LDAP Services getter to fit to the context - source or destination.

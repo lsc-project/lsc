@@ -49,7 +49,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
@@ -136,8 +135,6 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *             searching the directory.
 	 */
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
-		return JndiServices.getSrcInstance().getAttrsList(getBaseDn(),
-						getFilterAll(), SearchControls.SUBTREE_SCOPE,
-						getAttrsId());
+		return this.getListPivots(getJndiServices());
 	}
 }

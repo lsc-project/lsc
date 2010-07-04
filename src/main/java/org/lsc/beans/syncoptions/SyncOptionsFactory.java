@@ -76,12 +76,12 @@ public final class SyncOptionsFactory {
 				iso.initialize(taskname);
 				cache.put(taskname, iso);
 			} catch (ClassNotFoundException e) {
-				LOGGER.error("Unable to found '{}' name. Please respecify {}.{} value.",
+				LOGGER.error("Unable to find '{}' name. Please respecify {}.{} value.",
 						new Object[]{Configuration.LSC_SYNCOPTIONS_PREFIX, className, taskname});
 			} catch (InstantiationException e) {
-				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
+				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it!", className);
 			} catch (IllegalAccessException e) {
-				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it !", className);
+				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it!", className);
 			}
 		}
 	}

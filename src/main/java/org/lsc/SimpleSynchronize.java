@@ -103,8 +103,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks.TASKNAME.postCleanHook property. */
 	public static final String POST_CLEAN_HOOK_PROPS_PREFIX = "postCleanHook";
 	    
-	private static final Logger LOGGER =
-					LoggerFactory.getLogger(SimpleSynchronize.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSynchronize.class);
 
 	/** The lsc properties. */
 	private Properties lscProperties;
@@ -120,14 +119,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 * @param asyncTasks 
-	 *                string list of the asynchronous synchronization tasks to launch
-	 * @param syncTasks
-	 *                string list of the synchronization tasks to launch
-	 * @param cleanTasks
-	 *                string list of the cleaning tasks to launch
+	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
+	 * @param syncTasks string list of the synchronization tasks to launch
+	 * @param cleanTasks string list of the cleaning tasks to launch
 	 *
-	 * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
+	 * @return the launch status - true if all tasks executed successfully,
+	 * 				false if no tasks were executed or any failed
 	 * @throws Exception
 	 */
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
@@ -342,10 +339,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	private void runPostHook(String taskName, String servicePostHook) {
 		if (servicePostHook != null && servicePostHook.length() > 0) {
 			LOGGER.debug("Service Post Hook found: " + servicePostHook);
-			String hookClass = servicePostHook.substring(0, servicePostHook
-					.lastIndexOf('.'));
-			String hookMethod = servicePostHook.substring(servicePostHook
-					.lastIndexOf('.') + 1);
+			String hookClass = servicePostHook.substring(0, servicePostHook.lastIndexOf('.'));
+			String hookMethod = servicePostHook.substring(servicePostHook.lastIndexOf('.') + 1);
 
 			LOGGER.debug("Hook Class: " + hookClass);
 			LOGGER.debug("Hook Method: " + hookMethod);

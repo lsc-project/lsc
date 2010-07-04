@@ -116,7 +116,7 @@ public abstract class AbstractSynchronize {
 
 	/**
 	 * Number of parallel threads handling synchronization and cleaning
-	 * Default to 5
+	 * Defaults to 5
 	 */
 	private int threads;
 
@@ -553,7 +553,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Time limit accessor
 	 * 
-	 * @param threads
+	 * @param timeLimit
 	 *            number of seconds
 	 */
 	public void setTimeLimit(int timeLimit) {

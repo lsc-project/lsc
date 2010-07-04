@@ -83,8 +83,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks property. */
 	public static final String TASKS_PROPS_PREFIX = "tasks";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSynchronize.class);
-
 	/** lsc.tasks.TASKNAME.srcService property. */
 	public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
 
@@ -109,6 +107,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** lsc.tasks.TASKNAME.postCleanHook property. */
 	public static final String POST_CLEAN_HOOK_PROPS_PREFIX = "postCleanHook";
 	    
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSynchronize.class);
+	
 	/** The lsc properties. */
 	private Properties lscProperties;
 	
@@ -150,8 +150,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 * @param asyncTasks 
-	 *                string list of the asynchronous synchronization tasks to launch
+	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks string list of the synchronization tasks to launch
 	 * @param cleanTasks string list of the cleaning tasks to launch
 	 *
@@ -163,21 +162,20 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					final List<String> cleanTasks) throws Exception {
 		Boolean foundATask = false;
 
+		// Get the list of defined tasks from LSC properties
 		String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
 		if (tasks == null) {
-				LOGGER.error("No tasks defined in LSC properties! Exiting ...");
-				return false;
-		
+			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
+			return false;
 		}
-		// Get the list of defined tasks from LSC properties
 		// Iterate on each task
 		boolean isASyncTaskAll = asyncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 		
-		if(getTasksName() == null) {
+		if (getTasksName() == null) {
 			return false;
-		} else if(getTasks().length == 0) {
+		} else if (getTasks().length == 0) {
 			init();
 		}
 		

@@ -70,7 +70,13 @@ public class LscAttributes {
 	}
 
 	public String getStringValueAttribute(String attribute) {
-		return values.get(attribute).toString();
+		Object attributeVal = values.get(attribute);
+
+		if (null == attributeVal) {
+			return null;
+		}
+
+		return attributeVal.toString();
 	}
 
 	public Integer getIntegerValueAttribute(String attribute) {

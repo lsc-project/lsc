@@ -65,8 +65,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides a localized logback layout for LDAP entries.

@@ -98,9 +98,29 @@ public final class BeanComparator {
 	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @return JndiModificationType the modification type that would happen
 	 * @throws CloneNotSupportedException
+	 * @deprecated This method forces multiple clones, and should be avoided. Use {@link #calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)} instead.
 	 */
 	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions,
 					IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
+		// clone the source bean to work on it
+		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
+
+		return calculateModificationType(syncOptions, srcBean, itmBean, dstBean, customLibrary);
+	}
+
+	
+	/**
+	 * Static method to return the kind of operation that would happen
+	 *
+	 * @param syncOptions SyncOptions object from properties
+	 * @param srcBean Bean from source
+	 * @param itmBean Copy of the bean from source (from {@link #cloneSrcBean(IBean, ISyncOptions, Object)})
+	 * @param dstBean JNDI bean
+	 * @param customLibrary User-specified object to add to the JavaScript execution environment
+	 * @return JndiModificationType the modification type that would happen
+	 */
+	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions,
+					IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary) {
 		// no beans, nothing to do
 		if (srcBean == null && dstBean == null) {
 			return null;
@@ -118,8 +138,6 @@ public final class BeanComparator {
 
 		// we have the object in the source and the destination
 		// this must be either a MODIFY or MODRDN operation
-		// clone the source bean to calculate modifications on the DN
-		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
 		if (itmBean.getDistinguishedName() != null && itmBean.getDistinguishedName().length() != 0 &&
 				dstBean.getDistinguishedName().compareToIgnoreCase(itmBean.getDistinguishedName()) != 0) {
 			return JndiModificationType.MODRDN_ENTRY;
@@ -136,13 +154,14 @@ public final class BeanComparator {
 	 * present only in the destination, it remains</p>
 	 * 
 	 * @param syncOptions Instance of {@link ISyncOptions} to use.
-	 * @param srcBean Source bean from JDBC or JNDI
+	 * @param srcBean Bean from source
 	 * @param destBean JNDI bean
-	 * @param customLibrary 
+	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @return modifications to apply to the directory
-	 * @throws NamingException an exception may be thrown if an LDAP data
-	 * access error is encountered
-	 * @throws CloneNotSupportedException 
+	 * @throws NamingException
+	 *             an exception may be thrown if an LDAP data access error is
+	 *             encountered
+	 * @throws CloneNotSupportedException No longer thrown, actually.
 	 * @deprecated Use {@link #calculateModifications(ISyncOptions, IBean, IBean, Object, boolean)}
 	 */
 	public static JndiModifications calculateModifications(ISyncOptions syncOptions, IBean srcBean, IBean destBean,
@@ -155,35 +174,61 @@ public final class BeanComparator {
 	}
 
 	/**
-	 * Static comparison method. By default, source information override
-	 * destination (i.e. Database => Directory) But if a piece of information is
-	 * present only in the destination, it remains
+	 * <p>Static comparison method.</p>
+	 *
+	 * <p>By default, source information override destination
+	 * (i.e. Database => Directory) But if a piece of information is
+	 * present only in the destination, it remains</p>
 	 * 
 	 * @param syncOptions Instance of {@link ISyncOptions} to use.
-	 * @param srcBean
-	 *            Source bean
-	 * @param dstBean
-	 *            JNDI bean
-	 * @param customLibrary 
+	 * @param srcBean Bean from source
+	 * @param dstBean JNDI bean
+	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @param condition
 	 * @return modifications to apply to the directory
 	 * @throws NamingException
 	 *             an exception may be thrown if an LDAP data access error is
 	 *             encountered
-	 * @throws CloneNotSupportedException 
+	 * @throws CloneNotSupportedException No longer thrown, actually.
+	 * @deprecated Use {@link #calculateModifications(ISyncOptions, IBean, IBean, IBean, Object, boolean)}
 	 */
 	public static JndiModifications calculateModifications(
 					ISyncOptions syncOptions, IBean srcBean, IBean dstBean,
 					Object customLibrary, boolean condition) throws NamingException,
 					CloneNotSupportedException {
 
-		JndiModifications jm = null;
-
 		// clone the source bean to work on it
 		IBean itmBean = cloneSrcBean(srcBean, syncOptions, customLibrary);
 
+		return calculateModifications(syncOptions, srcBean, itmBean, dstBean, customLibrary, condition);
+	}
+	
+	/**
+	 * <p>Static comparison method.</p>
+	 *
+	 * <p>By default, source information override destination
+	 * (i.e. Database => Directory) But if a piece of information is
+	 * present only in the destination, it remains</p>
+	 * 
+	 * @param syncOptions Instance of {@link ISyncOptions} to use.
+	 * @param srcBean Bean from source
+	 * @param itmBean Copy of the bean from source (from {@link #cloneSrcBean(IBean, ISyncOptions, Object)})
+	 * @param dstBean JNDI bean
+	 * @param customLibrary User-specified object to add to the JavaScript execution environment
+	 * @param condition
+	 * @return modifications to apply to the directory
+	 * @throws NamingException
+	 *             an exception may be thrown if an LDAP data access error is
+	 *             encountered
+	 */
+	public static JndiModifications calculateModifications(
+					ISyncOptions syncOptions, IBean srcBean, IBean itmBean, IBean dstBean,
+					Object customLibrary, boolean condition) throws NamingException {
+
+		JndiModifications jm = null;
+
 		// get modification type to perform
-		JndiModificationType modificationType = calculateModificationType(syncOptions, itmBean, dstBean, customLibrary);
+		JndiModificationType modificationType = calculateModificationType(syncOptions, srcBean, itmBean, dstBean, customLibrary);
 
 		// if there's nothing to do, just return
 		if (modificationType == null) {
@@ -268,12 +313,11 @@ public final class BeanComparator {
 	 *            An optional class to pass into the JavaScript interpreter
 	 * @return {@link JndiModifications} List of modifications to apply to the destination
 	 * @throws NamingException
-	 * @throws CloneNotSupportedException
 	 */
 	private static JndiModifications getAddModifyEntry(
 					JndiModifications modOperation, ISyncOptions syncOptions,
 					IBean srcBean, IBean itmBean, IBean dstBean, Object customLibrary)
-					throws NamingException, CloneNotSupportedException {
+					throws NamingException {
 
 		String dn = modOperation.getDistinguishName();
 		String logPrefix = "In entry \"" + dn + "\": ";
@@ -545,7 +589,7 @@ public final class BeanComparator {
 	 * @return New bean cloned from srcBean
 	 * @throws CloneNotSupportedException
 	 */
-	private static IBean cloneSrcBean(IBean srcBean, ISyncOptions syncOptions,
+	public static IBean cloneSrcBean(IBean srcBean, ISyncOptions syncOptions,
 					Object customLibrary) throws CloneNotSupportedException {
 		//
 		// We clone the source object, because syncoptions should not be used

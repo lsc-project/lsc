@@ -315,6 +315,7 @@ public abstract class AbstractSynchronize {
 		ISyncOptions syncOptions = this.getSyncOptions(syncName);
 		// store method to obtain source bean
 		IBean srcBean = null;
+		IBean itmBean = null;
 		IBean dstBean = null;
 
 		/** Hash table to pass objects into JavaScript condition */
@@ -336,11 +337,14 @@ public abstract class AbstractSynchronize {
 					continue;
 				}
 
+				// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
+				itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, customLibrary);
+				
 				// Search destination for matching object
 				dstBean = dstService.getBean(id);
 
 				// Calculate operation that would be performed
-				JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, customLibrary);
+				JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, dstBean, customLibrary);
 
 				// Retrieve condition to evaluate before creating/updating
 				Boolean applyCondition = null;
@@ -369,7 +373,7 @@ public abstract class AbstractSynchronize {
 				Boolean calculateForDebugOnly = (modificationType == JndiModificationType.ADD_ENTRY && nocreate) || (modificationType == JndiModificationType.MODIFY_ENTRY && noupdate) || (modificationType == JndiModificationType.MODRDN_ENTRY && (nomodrdn || noupdate));
 
 				if (applyCondition || calculateForDebugOnly) {
-					jm = BeanComparator.calculateModifications(syncOptions, srcBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
+					jm = BeanComparator.calculateModifications(syncOptions, srcBean, itmBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
 
 					// if there's nothing to do, skip to the next object
 					if (jm == null) {

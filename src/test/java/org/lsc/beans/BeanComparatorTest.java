@@ -72,37 +72,37 @@ public class BeanComparatorTest extends TestCase
 {
 
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)}.
+	 * @throws CloneNotSupportedException 
 	 */
-	public void testCalculateModificationType() {
+	public void testCalculateModificationType() throws CloneNotSupportedException {
 		dummySyncOptions syncOptions = new dummySyncOptions();
 		IBean srcBean = new SimpleBean();
 		IBean dstBean = new SimpleBean();
+		IBean itmBean;
 
-		try {
-			// test null and null --> null
-			assertNull(BeanComparator.calculateModificationType(syncOptions, null, null, null));
-			
-			// test not null and null --> add
-			assertEquals(JndiModificationType.ADD_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, null, null));
-			
-			// test null and not null --> delete
-			assertEquals(JndiModificationType.DELETE_ENTRY, BeanComparator.calculateModificationType(syncOptions, null, dstBean, null));
-			
-			// test both not null, and syncoptions to make DNs identical --> modify
-			syncOptions.setDn("\"destination DN\"");
-			dstBean.setDistinguishedName("destination DN");
-			assertEquals(JndiModificationType.MODIFY_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
+		// test null and null --> null
+		assertNull(BeanComparator.calculateModificationType(syncOptions, null, null, null, null));
+		
+		// test not null and null --> add
+		itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, null);
+		assertEquals(JndiModificationType.ADD_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, null, null));
+		
+		// test null and not null --> delete
+		assertEquals(JndiModificationType.DELETE_ENTRY, BeanComparator.calculateModificationType(syncOptions, null, null, dstBean, null));
+		
+		// test both not null, and syncoptions to make DNs identical --> modify
+		syncOptions.setDn("\"destination DN\"");
+		dstBean.setDistinguishedName("destination DN");
+		itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, null);
+		assertEquals(JndiModificationType.MODIFY_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, dstBean, null));
 
-			// test both not null, with different DNs and no DN in syncoptions --> modrdn
-			syncOptions.setDn(null);
-			srcBean.setDistinguishedName("source DN");
-			dstBean.setDistinguishedName("destination DN");
-			assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, dstBean, null));
-		}
-		catch (CloneNotSupportedException e) {
-			assertTrue(e.toString(), false);
-		}
+		// test both not null, with different DNs and no DN in syncoptions --> modrdn
+		syncOptions.setDn(null);
+		srcBean.setDistinguishedName("source DN");
+		dstBean.setDistinguishedName("destination DN");
+		itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, null);
+		assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, dstBean, null));
 	}
 	
     /**
@@ -116,11 +116,12 @@ public class BeanComparatorTest extends TestCase
      * sn: 
      * 
      * With an invalid syntax error.
+     * @throws CloneNotSupportedException 
      */
-    public void testCalculateModificationsWithEmptyFields()
+    public void testCalculateModificationsWithEmptyFields() throws CloneNotSupportedException
     {
 		ISyncOptions syncOptions = new ForceSyncOptions();
-		IBean srcBean, destBean;
+		IBean srcBean, itmBean, destBean;
 		Object customLibrary = null;
 		boolean condition = true;
 
@@ -130,9 +131,11 @@ public class BeanComparatorTest extends TestCase
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 		destBean = null;
+		
+		itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, customLibrary);
 
 		try {
-			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, itmBean, destBean, customLibrary, condition);
 
 			assertEquals("something", jm.getDistinguishName());
 			assertEquals(1, jm.getModificationItems().size());
@@ -150,8 +153,10 @@ public class BeanComparatorTest extends TestCase
 		destBean.setDistinguishedName("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 
+		itmBean = BeanComparator.cloneSrcBean(srcBean, syncOptions, customLibrary);
+		
 		try {
-			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, destBean, customLibrary, condition);
+			JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, itmBean, destBean, customLibrary, condition);
 
 			assertEquals("something", jm.getDistinguishName());
 			assertEquals(1, jm.getModificationItems().size());

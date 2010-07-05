@@ -51,13 +51,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.NamingException;
+import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.lsc.LscAttributes;
+import org.lsc.jndi.JndiServices;
 
 import org.junit.Test;
 
@@ -192,4 +195,107 @@ public class JndiServicesTest {
 		}
 		LOGGER.debug(" Final count : {}", i);
 	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForResults() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("ou=Test Data", "(objectClass=person)", SearchControls.ONELEVEL_SCOPE);
+		assertNotNull(list);
+		assertTrue(list.size() >= 1);
+		assertTrue(list.contains("cn=One / One,ou=Test Data"));
+	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForSearchBase() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("cn=One / One,ou=Test Data", "(objectClass=person)", SearchControls.OBJECT_SCOPE);
+		assertNotNull(list);
+		assertTrue(1 == list.size());
+		assertTrue(list.contains("cn=One / One,ou=Test Data"));
+	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForSearchBaseAndResults() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("cn=One / One,ou=Test Data", "(objectClass=person)", SearchControls.ONELEVEL_SCOPE);
+		assertNotNull(list);
+		assertTrue(1 == list.size());
+		assertTrue(list.contains("cn=OneFriend,cn=One / One,ou=Test Data"));
+	}
+
+	/**
+	 * Tests {@link JndiServices#readEntry(String, boolean)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInReadEntry() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().readEntry("cn=One / One,ou=Test Data", false);
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetEntry() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().getEntry("ou=Test Data", "sn=One One");
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+	
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test(expected=SizeLimitExceededException.class)
+	public final void testGetEntryMultipleEntries() throws NamingException {
+		@SuppressWarnings("unused")
+		SearchResult sr = JndiServices.getDstInstance().getEntry("ou=Test Data", "objectClass=person");
+	}
+
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetEntryWithSlashesInDnInSearchBase() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().getEntry("cn=One / One,ou=Test Data", "sn=One One");
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+
+	/**
+	 * Test {@link JndiServices#exists(String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testExistsWithSlashesInDnInSearchBase() throws NamingException {
+		boolean res = JndiServices.getDstInstance().exists("cn=One / One,ou=Test Data");
+		assertTrue(res);
+	}
+	
+	/**
+	 * Test {@link JndiServices#sup(String, int)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testSupWithSlashesInDn() throws NamingException {
+		List<String> res = JndiServices.getDstInstance().sup("cn=OneFriend,cn=One / One,ou=Test Data", 1);
+		assertNotNull(res);
+		assertEquals(1, res.size());
+		assertEquals("cn=One / One,ou=Test Data", res.get(0));
+	}
+
+	
 }

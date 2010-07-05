@@ -58,8 +58,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.CommunicationException;
+import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
+import javax.naming.Name;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.SizeLimitExceededException;
@@ -341,7 +343,11 @@ public final class JndiServices {
 			} else {
 				rewrittenBase = searchBase;
 			}
-			ne = ctx.search(rewrittenBase, searchFilter, sc);
+			Name nBase = new CompositeName();
+			if (rewrittenBase.length() > 0) {
+				nBase.add(rewrittenBase);
+			}
+			ne = ctx.search(nBase, searchFilter, sc);
 
 		} catch (NamingException nex) {
 			LOGGER.error("Error while looking for {} in {}: {}",
@@ -437,7 +443,12 @@ public final class JndiServices {
 		NamingEnumeration<SearchResult> ne = null;
 		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 		try {
-			ne = ctx.search(rewriteBase(base), filter, sc);
+			String rewrittenBase = rewriteBase(base);
+			Name nBase = new CompositeName();
+			if (rewrittenBase.length() > 0) {
+				nBase.add(rewrittenBase);
+			}
+			ne = ctx.search(nBase, filter, sc);
 		} catch (NamingException nex) {
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
@@ -484,14 +495,24 @@ public final class JndiServices {
 			sc.setReturningAttributes(new String[]{"1.1"});
 			sc.setSearchScope(scope);
 			sc.setReturningObjFlag(true);
-			ne = ctx.search(base, filter, sc);
-			
-			String completedBaseDn = "";
+			Name nBase = new CompositeName();
 			if (base.length() > 0) {
-				completedBaseDn = "," + base;
+				nBase.add(base);
 			}
+			ne = ctx.search(nBase, filter, sc);
+			
 			while (ne.hasMoreElements()) {
-				iist.add(((SearchResult) ne.next()).getName() + completedBaseDn);
+				Name ndn = new CompositeName(((SearchResult) ne.next()).getName());
+				String dn = "";
+				if (ndn.size() > 0) {
+					dn = ndn.get(0);
+				}
+				if (dn.length() != 0) {
+					dn += ",";
+				}
+				dn += base;
+				
+				iist.add(dn);
 			}
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());

@@ -54,8 +54,6 @@ import java.util.StringTokenizer;
 
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.LayoutBase;

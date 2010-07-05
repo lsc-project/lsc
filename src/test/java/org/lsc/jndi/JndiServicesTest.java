@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
@@ -326,6 +327,48 @@ public class JndiServicesTest {
 		assertEquals(1, res.size());
 		assertEquals("cn=One / One,ou=Test Data", res.get(0));
 	}
-
 	
+	/**
+	 * Test {@link JndiServices#getAttrsList(String, String, int, List)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetAttrsListWithSlashesInDn() throws NamingException {
+		List<String> attrsNames = new ArrayList<String>(1);
+		attrsNames.add("cn");
+		Map<String, LscAttributes> res = JndiServices.getDstInstance().getAttrsList("cn=One / One,ou=Test Data", JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsNames);
+		assertNotNull(res);
+		assertEquals(1, res.size());
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", res.keySet().iterator().next());
+		assertEquals(1, res.values().size());
+		assertEquals("One / One", res.values().iterator().next().getStringValueAttribute("cn"));
+	}
+
+	/**
+	 * Test {@link JndiServices#apply(JndiModifications)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testApplyWithSlashesInDn() throws NamingException {
+		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+		jm.setDistinguishName("cn=OneFriend,cn=One / One,ou=Test Data");
+		
+		List<ModificationItem> mi = new ArrayList<ModificationItem>(1);
+		Attribute desc = new BasicAttribute("description", "testing desc");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, desc));
+		jm.setModificationItems(mi);
+		
+		// apply the modification and make sure there are no errors
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+		
+		// check that it was applied OK
+		List<String> attrsNames = new ArrayList<String>(1);
+		attrsNames.add("description");
+		Map<String, LscAttributes> res = JndiServices.getDstInstance().getAttrsList("cn=OneFriend,cn=One / One,ou=Test Data", JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsNames);
+		assertNotNull(res);
+		assertEquals(1, res.size());
+		assertEquals("cn=OneFriend,cn=One / One,ou=Test Data,dc=lsc-project,dc=org", res.keySet().iterator().next());
+		assertEquals(1, res.values().size());
+		assertEquals("testing desc", res.values().iterator().next().getStringValueAttribute("description"));
+	}
 }

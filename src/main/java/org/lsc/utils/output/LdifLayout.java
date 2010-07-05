@@ -394,7 +394,7 @@ public class LdifLayout extends PatternLayout {
 	@Deprecated
 	public void setLogOperation(String logOperation) {
 		addError("The method setLogOperation() in LdifLayout is deprecated and will be removed in a future version of LSC. Please use setLogOperations() instead.");
-		this.setLogOperations(logOperations);
+		this.setLogOperations(logOperation);
 	}
 
 	public void setLogOperations(String logOperations) {

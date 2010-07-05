@@ -91,3 +91,15 @@ ou: db2ldap2TestTaskDst
 objectClass: organizationalUnit
 objectClass: top
 
+dn: cn=One / One,ou=Test Data,dc=lsc-project,dc=org
+objectClass: person
+objectClass: top
+cn: One / One
+sn: One One
+
+dn: cn=OneFriend,cn=One / One,ou=Test Data,dc=lsc-project,dc=org
+objectClass: person
+objectClass: top
+cn: OneFriend
+sn: OneFriend
+

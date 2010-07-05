@@ -51,18 +51,21 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.NamingException;
+import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
 import org.lsc.LscAttributes;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
 
-import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,21 +74,24 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class JndiServicesTest extends TestCase {
+public class JndiServicesTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
 	/**
 	 * Just check that the connection is ready.
 	 */
+	@Test
 	public final void testConnection() {
 		assertEquals(true, JndiServices.getDstInstance().exists(""));
 	}
 
+	@Test
 	public final void testConnectionCache() {
 		assertEquals(JndiServices.getDstInstance(), JndiServices.getDstInstance());
 	}
 
+	@Test
 	public final void testGetAttrList() {
 		Map<String, LscAttributes> values = null;
 		try {
@@ -104,6 +110,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testSup() {
 		try {
 			assertEquals(null, JndiServices.getDstInstance().sup("", -1));
@@ -122,6 +129,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testGetDnList() {
 		List<String> test2list = new ArrayList<String>();
 		test2list.add("");
@@ -139,6 +147,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testReadEntry() {
 		try {
 			assertNotNull(JndiServices.getDstInstance().readEntry("", false));
@@ -148,6 +157,7 @@ public class JndiServicesTest extends TestCase {
 		}
 	}
 
+	@Test
 	public final void testApplyModifications() {
 		try {
 			String attrName = "description";
@@ -194,6 +204,7 @@ public class JndiServicesTest extends TestCase {
 	/**
 	 * Test the retrieve of the complete directory.
 	 */
+	@Test
 	public final void testAttrPagedResultsList() {
 		try {
 			String attrName = "objectClass";
@@ -214,4 +225,107 @@ public class JndiServicesTest extends TestCase {
 			LOGGER.debug(ne.toString(), ne);
 		}
 	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForResults() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("ou=Test Data", "(objectClass=person)", SearchControls.ONELEVEL_SCOPE);
+		assertNotNull(list);
+		assertTrue(list.size() >= 1);
+		assertTrue(list.contains("cn=One / One,ou=Test Data"));
+	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForSearchBase() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("cn=One / One,ou=Test Data", "(objectClass=person)", SearchControls.OBJECT_SCOPE);
+		assertNotNull(list);
+		assertTrue(1 == list.size());
+		assertTrue(list.contains("cn=One / One,ou=Test Data"));
+	}
+	
+	/**
+	 * Tests {@link JndiServices#getDnList(String, String, int)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInGetDnListForSearchBaseAndResults() throws NamingException {
+		List<String> list = JndiServices.getDstInstance().getDnList("cn=One / One,ou=Test Data", "(objectClass=person)", SearchControls.ONELEVEL_SCOPE);
+		assertNotNull(list);
+		assertTrue(1 == list.size());
+		assertTrue(list.contains("cn=OneFriend,cn=One / One,ou=Test Data"));
+	}
+
+	/**
+	 * Tests {@link JndiServices#readEntry(String, boolean)}
+	 * @throws NamingException
+	 */
+	@Test
+	public final void testSlashesInDnInReadEntry() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().readEntry("cn=One / One,ou=Test Data", false);
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetEntry() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().getEntry("ou=Test Data", "sn=One One");
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+	
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test(expected=SizeLimitExceededException.class)
+	public final void testGetEntryMultipleEntries() throws NamingException {
+		@SuppressWarnings("unused")
+		SearchResult sr = JndiServices.getDstInstance().getEntry("ou=Test Data", "objectClass=person");
+	}
+
+	/**
+	 * Test {@link JndiServices#getEntry(String, String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetEntryWithSlashesInDnInSearchBase() throws NamingException {
+		SearchResult sr = JndiServices.getDstInstance().getEntry("cn=One / One,ou=Test Data", "sn=One One");
+		assertNotNull(sr);
+		assertEquals("cn=One / One,ou=Test Data,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
+
+	/**
+	 * Test {@link JndiServices#exists(String)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testExistsWithSlashesInDnInSearchBase() throws NamingException {
+		boolean res = JndiServices.getDstInstance().exists("cn=One / One,ou=Test Data");
+		assertTrue(res);
+	}
+	
+	/**
+	 * Test {@link JndiServices#sup(String, int)}
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testSupWithSlashesInDn() throws NamingException {
+		List<String> res = JndiServices.getDstInstance().sup("cn=OneFriend,cn=One / One,ou=Test Data", 1);
+		assertNotNull(res);
+		assertEquals(1, res.size());
+		assertEquals("cn=One / One,ou=Test Data", res.get(0));
+	}
+
+	
 }

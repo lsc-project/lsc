@@ -617,6 +617,7 @@ class SynchronizeTask implements Runnable {
 	public boolean run(Entry<String, LscAttributes> id) {
 
 		JndiModifications jm = null;
+		IBean itmBean = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;
@@ -636,8 +637,11 @@ class SynchronizeTask implements Runnable {
 			// Search destination for matching object
 			dstBean = dstService.getBean(id.getKey(), id.getValue());
 
+			// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
+			itmBean = BeanComparator.cloneSrcBean(entry, dstBean, syncOptions, customLibrary);
+			
 			// Calculate operation that would be performed
-			JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, entry, dstBean, customLibrary);
+			JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, entry, itmBean, dstBean, customLibrary);
 
 			// Retrieve condition to evaluate before creating/updating
 			Boolean applyCondition = null;
@@ -668,7 +672,7 @@ class SynchronizeTask implements Runnable {
 			Boolean calculateForDebugOnly = (modificationType == JndiModificationType.ADD_ENTRY && abstractSynchronize.nocreate) || (modificationType == JndiModificationType.MODIFY_ENTRY && abstractSynchronize.noupdate) || (modificationType == JndiModificationType.MODRDN_ENTRY && (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate));
 
 			if (applyCondition || calculateForDebugOnly) {
-				jm = BeanComparator.calculateModifications(syncOptions, entry, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
+				jm = BeanComparator.calculateModifications(syncOptions, entry, itmBean, dstBean, customLibrary, (applyCondition && !calculateForDebugOnly));
 
 				// if there's nothing to do, skip to the next object
 				if (jm == null) {

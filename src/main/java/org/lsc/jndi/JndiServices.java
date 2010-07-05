@@ -794,7 +794,11 @@ public final class JndiServices {
 
 			byte[] pagedResultsResponse = null;
 			do {
-				NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
+				Name nBase = new CompositeName();
+				if (searchBase.length() > 0) {
+					nBase.add(searchBase);
+				}
+				NamingEnumeration<SearchResult> results = ctx.search(nBase, searchFilter, constraints);
 
 				if (results != null) {
 					Map<String, String> attrsValues = null;

@@ -103,3 +103,16 @@ objectClass: top
 cn: OneFriend
 sn: OneFriend
 
+dn: o=Père,dc=lsc-project,dc=org
+objectClass: organization
+o: Père
+
+dn: o=bla bla,dc=lsc-project,dc=org
+objectClass: organization
+o: bla bla
+
+dn: cn=test,o=bla bla,dc=lsc-project,dc=org
+objectClass: person
+cn: test
+sn: test
+

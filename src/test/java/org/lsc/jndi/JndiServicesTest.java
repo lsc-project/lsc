@@ -69,6 +69,8 @@ import org.lsc.LscAttributes;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
+import org.lsc.utils.LSCStructuralLogger;
+import org.lsc.utils.output.LdifLayout;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -363,7 +365,7 @@ public class JndiServicesTest {
 		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
 		jm.setDistinguishName("cn=Two / Two,cn=One / One,ou=Test Data");
 		
-		mi = new ArrayList<ModificationItem>(1);
+		mi = new ArrayList<ModificationItem>(3);
 		a = new BasicAttribute("objectClass", "person");
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
 		a = new BasicAttribute("cn", "Two / Two");
@@ -379,7 +381,7 @@ public class JndiServicesTest {
 		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
 		jm.setDistinguishName("cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
 		
-		mi = new ArrayList<ModificationItem>(1);
+		mi = new ArrayList<ModificationItem>(3);
 		a = new BasicAttribute("objectClass", "person");
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
 		a = new BasicAttribute("cn", "sub/entry");
@@ -395,7 +397,7 @@ public class JndiServicesTest {
 		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
 		jm.setDistinguishName("cn=sub/entry2,cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
 		
-		mi = new ArrayList<ModificationItem>(1);
+		mi = new ArrayList<ModificationItem>(3);
 		a = new BasicAttribute("objectClass", "person");
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
 		a = new BasicAttribute("cn", "sub/entry2");
@@ -422,7 +424,7 @@ public class JndiServicesTest {
 		jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("cn=sub/entry2,cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
 		
-		Properties props = Configuration.getDstProperties();
+		Properties props = (Properties) Configuration.getDstProperties().clone();
 		props.remove("java.naming.recursivedelete");
 		props.put("java.naming.recursivedelete", "false");
 		assertTrue(JndiServices.getInstance(props).apply(jm));
@@ -445,4 +447,87 @@ public class JndiServicesTest {
 		assertTrue(JndiServices.getInstance(props).apply(jm));
 		
 	}
+	
+	/**
+	 * Test {@link JndiServices#apply(JndiModifications)} for deletion only (in a context with spaces in the DN)
+	 * @throws IOException 
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testApplyForContextWithSpaces() throws NamingException, IOException {
+		Properties props = (Properties) Configuration.getDstProperties().clone();
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.spaces.new"));
+		
+		JndiServices jndiServices = JndiServices.getInstance(props);
+		JndiModifications jm;
+		
+		// delete an entry
+		jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
+		jm.setDistinguishName("cn=test");
+		assertTrue(jndiServices.apply(jm));
+		
+		// and add it again
+		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("cn=test");
+		ArrayList<ModificationItem> mi = new ArrayList<ModificationItem>(3);
+		Attribute a;
+		a = new BasicAttribute("objectClass", "person");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("cn", "sub/entry2");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("sn", "subentry2");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		jm.setModificationItems(mi);
+
+		assertTrue(jndiServices.apply(jm));
+		
+	}
+	
+	/**
+	 * Test {@link JndiServices#getInstance(Properties)} for various formats of URL
+	 * @throws IOException 
+	 * @throws NamingException 
+	 */
+	@Test
+	public final void testGetInstanceUrlFormats() throws NamingException, IOException {
+		Properties props = (Properties) Configuration.getDstProperties().clone();
+		JndiServices jndiServices;
+		SearchResult sr;
+		
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.spaces.new"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.readEntry("cn=test", false);
+		assertNotNull(sr);
+		assertEquals("cn=test,o=bla bla,dc=lsc-project,dc=org", sr.getNameInNamespace());
+
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.spaces.old"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.readEntry("cn=test", false);
+		assertNotNull(sr);
+		assertEquals("cn=test,o=bla bla,dc=lsc-project,dc=org", sr.getNameInNamespace());
+
+	}
+	
+	/**
+	 * testGetInstanceUrlWithAccents() 
+	 */
+	@Test
+	public final void testGetInstanceUrlWithAccents() throws NamingException, IOException {
+		Properties props = (Properties) Configuration.getDstProperties().clone();
+		JndiServices jndiServices;
+		SearchResult sr;
+		
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.accents.new"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.readEntry("", false);
+		assertNotNull(sr);
+		assertEquals("o=Père,dc=lsc-project,dc=org", sr.getNameInNamespace());
+		
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.accents.old"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.readEntry("", false);
+		assertNotNull(sr);
+		assertEquals("o=Père,dc=lsc-project,dc=org", sr.getNameInNamespace());
+	}
 }
+

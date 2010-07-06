@@ -85,6 +85,9 @@ import org.ietf.ldap.LDAPUrl;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPURL;
+
 /**
  * General LDAP services wrapper.
  *
@@ -130,10 +133,22 @@ public final class JndiServices {
 	 * @throws NamingException thrown if a directory error is encountered
 	 * @throws IOException thrown if an error occurs negotiating StartTLS operation
 	 */
-	private JndiServices(final Properties connProps) throws NamingException, IOException {
+	private JndiServices(final Properties props) throws NamingException, IOException {
 
+		// duplicate properties to avoid changing original ones
+		Properties connProps = (Properties) props.clone();
+		
 		// log new connection with it's details
 		logConnectingTo(connProps);
+		
+		// rewrite connection URI
+		try {
+			connProps.setProperty(Context.PROVIDER_URL, new LDAPURL((String) connProps.get(Context.PROVIDER_URL)).toNormalizedString());
+		} catch (LDAPException e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			throw new NamingException(e.getMessage());
+		}
 
 		/* should we negotiate TLS? */
 		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {

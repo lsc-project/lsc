@@ -444,6 +444,11 @@
 			<artifactId>jldap</artifactId>
 			<version>4.3</version>
 		</dependency>
+        <dependency>
+            <groupId>com.unboundid</groupId>
+            <artifactId>unboundid-ldapsdk</artifactId>
+            <version>1.1.4</version>
+        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>

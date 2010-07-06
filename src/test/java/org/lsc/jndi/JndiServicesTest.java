@@ -45,12 +45,13 @@
  */
 package org.lsc.jndi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
-import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
@@ -62,6 +63,8 @@ import javax.naming.directory.SearchResult;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+
+import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
@@ -347,28 +350,99 @@ public class JndiServicesTest {
 	/**
 	 * Test {@link JndiServices#apply(JndiModifications)}
 	 * @throws NamingException 
+	 * @throws IOException 
 	 */
 	@Test
-	public final void testApplyWithSlashesInDn() throws NamingException {
-		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
-		jm.setDistinguishName("cn=OneFriend,cn=One / One,ou=Test Data");
+	public final void testApplyWithSlashesInDn() throws NamingException, IOException {
+		JndiModifications jm;
+		Attribute a;
+		List<ModificationItem> mi;
 		
-		List<ModificationItem> mi = new ArrayList<ModificationItem>(1);
-		Attribute desc = new BasicAttribute("description", "testing desc");
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, desc));
+
+		// test add for base "cn=Two / Two"
+		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("cn=Two / Two,cn=One / One,ou=Test Data");
+		
+		mi = new ArrayList<ModificationItem>(1);
+		a = new BasicAttribute("objectClass", "person");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("cn", "Two / Two");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("sn", "Two Two");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		jm.setModificationItems(mi);
+
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+		
+		// test add for sub entry "cn=sub/entry,cn=Two / Two"
+		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
+		
+		mi = new ArrayList<ModificationItem>(1);
+		a = new BasicAttribute("objectClass", "person");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("cn", "sub/entry");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("sn", "subentry");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		jm.setModificationItems(mi);
+
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+		
+		// test add for sub entry "cn=subentry2,cn=Two / Two"
+		jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("cn=sub/entry2,cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
+		
+		mi = new ArrayList<ModificationItem>(1);
+		a = new BasicAttribute("objectClass", "person");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("cn", "sub/entry2");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		a = new BasicAttribute("sn", "subentry2");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
+		jm.setModificationItems(mi);
+
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+		
+		// test modify
+		jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+		jm.setDistinguishName("cn=Two / Two,cn=One / One,ou=Test Data");
+		mi = new ArrayList<ModificationItem>(1);
+		a = new BasicAttribute("description", "testing desc");
+		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, a));
 		jm.setModificationItems(mi);
 		
-		// apply the modification and make sure there are no errors
 		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+
+		// test delete non-recursively
+		jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
+		jm.setDistinguishName("cn=sub/entry2,cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
 		
-		// check that it was applied OK
-		List<String> attrsNames = new ArrayList<String>(1);
-		attrsNames.add("description");
-		Map<String, LscAttributes> res = JndiServices.getDstInstance().getAttrsList("cn=OneFriend,cn=One / One,ou=Test Data", JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsNames);
-		assertNotNull(res);
-		assertEquals(1, res.size());
-		assertEquals("cn=OneFriend,cn=One / One,ou=Test Data,dc=lsc-project,dc=org", res.keySet().iterator().next());
-		assertEquals(1, res.values().size());
-		assertEquals("testing desc", res.values().iterator().next().getStringValueAttribute("description"));
+		Properties props = Configuration.getDstProperties();
+		props.remove("java.naming.recursivedelete");
+		props.put("java.naming.recursivedelete", "false");
+		assertTrue(JndiServices.getInstance(props).apply(jm));
+		
+		
+		// test modrdn
+		jm = new JndiModifications(JndiModificationType.MODRDN_ENTRY);
+		jm.setDistinguishName("cn=sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
+		jm.setNewDistinguishName("cn=only/sub/entry,cn=Two / Two,cn=One / One,ou=Test Data");
+		
+		assertTrue(JndiServices.getDstInstance().apply(jm));
+
+		
+		// test delete recursively
+		jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
+		jm.setDistinguishName("cn=Two / Two,cn=One / One,ou=Test Data");
+
+		props.remove("java.naming.recursivedelete");
+		props.put("java.naming.recursivedelete", "true");
+		assertTrue(JndiServices.getInstance(props).apply(jm));
+		
 	}
 }

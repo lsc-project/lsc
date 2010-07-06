@@ -622,10 +622,15 @@ public final class JndiServices {
 	private void deleteChildrenRecursively(String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
+		Name nBase = new CompositeName();
+		if (distinguishName.length() > 0) {
+			nBase.add(distinguishName);
+		}
+		NamingEnumeration<SearchResult> ne = ctx.search(nBase, DEFAULT_FILTER, sc);
 		while (ne.hasMore()) {
 			SearchResult sr = (SearchResult) ne.next();
-			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
+			Name ndn = new CompositeName(sr.getName());
+			String childrenDn = rewriteBase(ndn.get(0) + "," + distinguishName);
 			deleteChildrenRecursively(childrenDn);
 		}
 		ctx.destroySubcontext(new LdapName(distinguishName));

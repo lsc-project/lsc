@@ -3,5 +3,5 @@
 #
 
 # Uncomment to run LSC as batch
-#30 2 * * * root [ -x /usr/bin/lsc ] && /usr/bin/lsc -s all -c all -f /etc/lsc > /dev/null 2>&1
+#30 2 * * * root [ -x /usr/bin/lsc ] && LANG=en_US.UTF-8 /usr/bin/lsc -s all -c all -f /etc/lsc > /dev/null 2>&1
 

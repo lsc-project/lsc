@@ -134,6 +134,8 @@ public class JndiServicesTest {
 		test2list.add("uid=00000001,ou=People");
 		assertEquals(test2list, JndiServices.getDstInstance().getDnList("ou=People",
 						"objectclass=person", SearchControls.SUBTREE_SCOPE));
+		assertEquals(test2list, JndiServices.getDstInstance().getDnList("",
+						"uid=00000001", SearchControls.SUBTREE_SCOPE));
 	}
 
 	@Test

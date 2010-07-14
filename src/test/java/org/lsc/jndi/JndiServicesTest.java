@@ -531,5 +531,29 @@ public class JndiServicesTest {
 		assertNotNull(sr);
 		assertEquals("o=Père,dc=lsc-project,dc=org", sr.getNameInNamespace());
 	}
+	
+	/**
+	 * testGetInstanceUrlWithMultipleURLs() 
+	 */
+	@Test
+	public final void testGetInstanceUrlWithMultipleURLs() throws NamingException, IOException {
+		Properties props = (Properties) Configuration.getDstProperties().clone();
+		JndiServices jndiServices;
+		List<String> sr;
+		
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.multiple.simple"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.getDnList("", "cn=test", SearchControls.SUBTREE_SCOPE);
+		assertNotNull(sr);
+		assertEquals(1, sr.size());
+		assertEquals("cn=test,o=bla bla", sr.get(0));
+		
+		props.put("java.naming.provider.url", Configuration.getString("dst.java.naming.provider.url.multiple.spaces"));
+		jndiServices = JndiServices.getInstance(props);
+		sr = jndiServices.getDnList("", "cn=test", SearchControls.SUBTREE_SCOPE);
+		assertNotNull(sr);
+		assertEquals(1, sr.size());
+		assertEquals("cn=test", sr.get(0));
+	}
 }
 

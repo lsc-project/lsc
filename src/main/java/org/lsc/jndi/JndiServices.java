@@ -54,6 +54,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.naming.CommunicationException;
 import javax.naming.CompositeName;
@@ -143,7 +145,13 @@ public final class JndiServices {
 		
 		// rewrite connection URI
 		try {
-			connProps.setProperty(Context.PROVIDER_URL, new LDAPURL((String) connProps.get(Context.PROVIDER_URL)).toNormalizedString());
+			String uriString = "";
+			Matcher uriMatcher = Pattern.compile("ldaps?://[^/]+/.*?(?=( ldaps?://)|$)", Pattern.CASE_INSENSITIVE).matcher(connProps.getProperty(Context.PROVIDER_URL));
+			while (uriMatcher.find()) {
+				uriString += new LDAPURL(uriMatcher.group()).toNormalizedString() + " ";
+			}
+			connProps.setProperty(Context.PROVIDER_URL, uriString);
+			LOGGER.debug("Using JNDI URL setting of \"" + connProps.getProperty(Context.PROVIDER_URL) + "\"");
 		} catch (LDAPException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);

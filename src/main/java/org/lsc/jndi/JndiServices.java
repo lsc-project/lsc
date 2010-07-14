@@ -521,7 +521,7 @@ public final class JndiServices {
 				if (ndn.size() > 0) {
 					dn = ndn.get(0);
 				}
-				if (dn.length() != 0) {
+				if (dn.length() != 0 && 0 != base.length()) {
 					dn += ",";
 				}
 				dn += base;

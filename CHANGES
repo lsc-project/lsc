@@ -7,6 +7,28 @@ Please note that this file contains changes for both the lsc-sample and lsc-core
 components.
 
 
+=== LSC release 1.2.1 (15/07/2010) ===
+
+This is a minor upgrade from 1.2.0 that's only purpose is to fix bugs. Users running 1.2.0 or any 1.2-SNAPSHOT version are strongly encouraged to upgrade as soon as possible.
+
+Resolved issues:
+- Bug #209: Bad URL parsing for URL with spaces and non ASCII characters
+- Bug #216: SLF4J error message: loggers created during the default configuration phase
+- Bug #223: srcBean is not consistent when using JavaScript to create a DN
+- Bug #224: Bad handling of / character in RDN
+- Bug #234: The ldap.search method causes continuation referrals to be thrown
+- Bug #249: Tests JAR is not packaged in dist archive - sample can fail in some cases
+- Bug #250: Possible NPE in LscAttributes
+- Bug #251: logOperation parameter is ignored by CSV logger
+- Bug #252: Error deleting entry with a suffix containg a space
+- Bug #253: Bad default character handling for cron jobs
+- Bug #257: Extra commas returned in ldap.search method causing errors
+
+Bug #215 has also been worked on, allowing the sample to work on Windows in Cygwin.
+
+Please note that this version adds a new dependency on the UnboundID LDAP SDK. The dependency is distributed as a .jar file in the lib/ directory.
+
+
 === LSC release 1.2.0 (16/05/2010) ===
 
 If you're upgrading from 1.1.*, see upgrading notes at:

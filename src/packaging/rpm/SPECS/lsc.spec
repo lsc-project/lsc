@@ -13,7 +13,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	1.2.0
+%define lsc_version	1.2.1
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -26,17 +26,19 @@ Name: %{lsc_name}
 Version: %{lsc_version}
 Release: 0%{?dist}
 License: BSD
+BuildArch: noarch
 
 Group: Applications/System
 URL: http://lsc-project.org
 
-Source: %{lsc_name}-core-%{lsc_version}-dist.tar.gz
+Source: %{lsc_name}-core-%{lsc_version}-src.tar.gz
 Source1: lsc.cron
 Source2: lsc.logrotate
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Prereq: coreutils
 Requires: jdk
+# Warning: build requires maven
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize
@@ -47,13 +49,23 @@ a JDBC connector, another LDAP directory, flat files...
 # Source preparation
 #=================================================
 %prep
-%setup -n  %{lsc_name}-%{lsc_version}
+%setup -n  %{lsc_name}-%{lsc_version}-src
+
+#=================================================
+# Build
+#=================================================
+%build
+export LANG=en_US.UTF-8
+mvn package
 
 #=================================================
 # Installation
 #=================================================
 %install
 rm -rf %{buildroot}
+
+# Change to target direct
+cd target/%{lsc_name}-core-%{lsc_version}-dist/%{lsc_name}-%{lsc_version}/
 
 # Create directories
 mkdir -p %{buildroot}/usr/bin
@@ -150,5 +162,8 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Sun Jul 18 2010 - Clement Oudot <clem@lsc-project.org> - 1.2.1-0
+- Upgrade to LSC 1.2.1
+- Build package from source
 * Thu May 25 2010 - Clement Oudot <clem@lsc-project.org> - 1.2.0-0
 - First package for LSC

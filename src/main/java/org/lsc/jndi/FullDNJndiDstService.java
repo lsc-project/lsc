@@ -58,7 +58,6 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
 import org.lsc.utils.StringLengthComparator;
@@ -179,10 +178,11 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		}
 
 		// add DN suffix to obtain full DN
+		String contextDN = getJndiServices().getContextDn();
 		for (int i = 0; i < idList.size(); i++) {
 			String id = idList.get(i);
-			if (!id.endsWith("," + Configuration.DN_REAL_ROOT)) {
-				idList.set(i, idList.get(i) + "," + Configuration.DN_REAL_ROOT);
+			if (!id.endsWith("," + contextDN)) {
+				idList.set(i, idList.get(i) + "," + contextDN);
 			}
 		}
 

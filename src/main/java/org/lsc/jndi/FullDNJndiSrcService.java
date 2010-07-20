@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2010, LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2010 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,14 +45,13 @@
  */
 package org.lsc.jndi;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -60,20 +59,20 @@ import javax.naming.directory.SearchResult;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.utils.StringLengthComparator;
+import org.lsc.service.IService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>This class is a generic but configurable implementation to read data from the destination directory.</P>
+ * <p>This class is a generic but configurable implementation to read data from the source directory.</P>
  * 
  * <P>You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
  * (filterAll).</P>
  * 
  * <P>This connector has the particularity of identifying entries by their DN, and not via pivot attributes.
  * For standard behavior with pivot attributes, see {@link SimpleJndiSrcService}. The list of DNs will be
- * returned ordered from longest to shortest, to ensure that "child" entries are deleted before "parent" entries
- * (during a clean operation).</P>
+ * returned ordered from shortest to longest, to ensure that "parent" entries are created before "child" entries
+ * (during a sync operation).</P>
  * 
  * <p><b>WARNING:</b> If you're using several threads, the ordering described above may not be respected. To ensure
  * that it is, run with only one thread (run LSC with "-t 1").</p>
@@ -81,13 +80,14 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiWritableService {
+public class FullDNJndiSrcService extends AbstractSimpleJndiService implements IService {
 
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
 	 */
 	private Class<IBean> beanClass;
-	private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiDstService.class);
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(FullDNJndiSrcService.class);
 
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.
@@ -98,7 +98,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 *            the bean class name that will be instantiated and feed up
 	 */
 	@SuppressWarnings("unchecked")
-	public FullDNJndiDstService(final Properties props, final String beanClassName) {
+	public FullDNJndiSrcService(final Properties props, final String beanClassName) {
 		super(props);
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
@@ -114,21 +114,24 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @return the Destination JndiServices object used to apply directory operations
 	 */
 	public final JndiServices getJndiServices() {
-		return JndiServices.getDstInstance();
+		return JndiServices.getSrcInstance();
 	}
 
 	/**
 	 * The simple object getter according to its identifier.
-	 * 
-	 * @param dn DN of the entry to be returned, which is the name returned by {@link #getListPivots()}
-	 * @param pivotAttributes Unused.
-	 * @return The bean, or null if not found
-	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
-	 *             directory, or if more than one object would be returned.
+	 *
+	 * @param id the data identifier in the directory - must return a unique directory entry
+	 * @return the corresponding bean or null if failed
+	 * @throws NamingException
+	 *             thrown if an directory exception is encountered while getting the identified bean
 	 */
-	public IBean getBean(String dn, LscAttributes pivotAttributes) throws NamingException {
-
+	public IBean getBean(String id, LscAttributes lscAttrs) throws NamingException {
+		IBean srcBean;
 		try {
+			srcBean = this.beanClass.newInstance();
+			
+			String dn = id;
+
 			SearchControls sc = new SearchControls();
 			sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 			List<String> attrs = getAttrs();
@@ -136,49 +139,26 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 				sc.setReturningAttributes(attrs.toArray(new String[attrs.size()]));
 			}
 			SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
-			Method method = beanClass.getMethod("getInstance", new Class[]{SearchResult.class, String.class,
-								Class.class});
-			return (IBean) method.invoke(null, new Object[]{srObject, dn, beanClass});
-			
-		} catch (SecurityException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (NoSuchMethodException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalArgumentException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
+			return this.getBeanFromSR(srObject, srcBean);
+		} catch (InstantiationException e) {
+			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (InvocationTargetException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
+			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		}
 		return null;
-	}
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * 
-     * @return	Map of all entries DNs (this is not for display only!)
-     * 			that are returned by the directory with an associated map of attribute names and values (never null)
-     * @throws NamingException May throw a {@link NamingException} if an error occurs during the search in the directory
-     */
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Map<String, LscAttributes> getListPivots() throws NamingException {
 		// get list of DNs
-		List<String> idList = JndiServices.getDstInstance().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
+		List<String> idList = getJndiServices().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
 
-		// sort the list by shortest first - this makes sure clean operations delete leaf elements first
+		// sort the list by longest first - this makes sure add operations add base elements first
 		try {
-			Collections.sort(idList, new StringLengthComparator());
+			Collections.sort(idList, new StringShortestLengthComparator());
 		} catch (ClassCastException e) {
 			// ignore errors, just leave list unsorted
 		} catch (UnsupportedOperationException e) {
@@ -189,8 +169,11 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		String contextDN = getJndiServices().getContextDn();
 		for (int i = 0; i < idList.size(); i++) {
 			String id = idList.get(i);
-			if (!id.endsWith("," + contextDN)) {
-				idList.set(i, idList.get(i) + "," + contextDN);
+			if (!id.endsWith(contextDN)) {
+				if (id.length() != 0) {
+					id += ",";
+				}
+				idList.set(i, id + contextDN);
 			}
 		}
 
@@ -210,16 +193,28 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 
 		return ids;
 	}
+	
+	public class StringShortestLengthComparator implements Comparator<String>, Serializable {
 
-	/**
-	 * Apply directory modifications.
-	 *
-	 * @param jm Modifications to apply in a {@link JndiModifications} object.
-	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
-	 * and all other attempts to use this service should fail.
-	 */
-	public boolean apply(JndiModifications jm) throws CommunicationException {
-		return JndiServices.getDstInstance().apply(jm);
+		/**
+		 * This function actually compares String lengths
+		 * so that they are sorted from longest to shortest
+		 * @param arg0 First string
+		 * @param arg1 Second string
+		 * @return int To order strings by length
+		 */
+		public int compare(String arg0, String arg1) {
+			String one = arg0;
+			String two = arg1;
+
+			if (one.length() < two.length()) {
+				return -1;
+			} else if (one.length() > two.length()) {
+				return 1;
+			}
+			return 0;
+		}
 	}
+
 }
+

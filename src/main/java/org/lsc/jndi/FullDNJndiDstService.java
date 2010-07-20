@@ -65,10 +65,15 @@ import org.lsc.beans.IBean;
 import org.lsc.utils.StringLengthComparator;
 
 /**
- * This class is a generic but configurable implementation to read data from the destination directory.
+ * <p>This class is a generic but configurable implementation to read data from the destination directory.</P>
  * 
- * You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
- * (filterAll and attrId).
+ * <P>You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
+ * (filterAll).</P>
+ * 
+ * <P>This connector has the particularity of identifying entries by their DN, and not via pivot attributes.
+ * For standard behavior with pivot attributes, see {@link SimpleJndiSrcService}. The list of DNs will be
+ * returned ordered from longest to shortest, to ensure that "child" entries are deleted before "parent" entries
+ * (during a clean operation).</P>
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;

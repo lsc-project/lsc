@@ -65,6 +65,7 @@ import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
+import org.lsc.jndi.JndiServices;
 import org.lsc.utils.JScriptEvaluator;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
@@ -138,8 +139,12 @@ public final class BeanComparator {
 
 		// we have the object in the source and the destination
 		// this must be either a MODIFY or MODRDN operation
-		if (itmBean.getDistinguishedName() != null && itmBean.getDistinguishedName().length() != 0 &&
-				dstBean.getDistinguishedName().compareToIgnoreCase(itmBean.getDistinguishedName()) != 0) {
+		
+		// we must compare DNs without the context DN from the destination
+		String itmDn = JndiServices.getDstInstance().rewriteBase(itmBean.getDistinguishedName());
+		String dstDn = JndiServices.getDstInstance().rewriteBase(dstBean.getDistinguishedName());
+		
+		if (itmDn != null && itmDn.length() != 0 && dstDn.compareToIgnoreCase(itmDn) != 0) {
 			return JndiModificationType.MODRDN_ENTRY;
 		} else {
 			return JndiModificationType.MODIFY_ENTRY;

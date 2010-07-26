@@ -447,11 +447,15 @@ public final class JndiServices {
 	}
 
 	public String rewriteBase(final String base) {
+		if (base == null) {
+			return null;
+		}
+		
 		String rewrittenBase = null;
 		if (base.toLowerCase().endsWith(contextDn.toLowerCase())) {
 			if (!base.equalsIgnoreCase(contextDn)) {
-			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
-		} else {
+				rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toLowerCase()) - 1);
+			} else {
 				rewrittenBase = "";
 			}
 		} else {

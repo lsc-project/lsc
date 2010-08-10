@@ -7,9 +7,9 @@
 	<name>Ldap Synchronization Connector</name>
 	<version>trunk-SNAPSHOT</version>
 	<description>
-		This project is the Ldap Synchronization Connector which
-		simplifies synchronizations between relation databases and LDAP
-		directories.
+		Open source connector to synchronize identities to a LDAP directory
+		from any data source including any database with a JDBC connector,
+		another LDAP server or flat files ... 
 	</description>
 	<url>http://lsc-project.org/</url>
 	<issueManagement>

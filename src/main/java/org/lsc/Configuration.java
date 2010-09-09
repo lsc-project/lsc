@@ -570,7 +570,7 @@ public class Configuration {
 	}
 
 	protected static void setUpCsvLogging(LoggerContext context) {
-		Properties properties = getLdifProperties();
+		Properties properties = getCsvProperties();
 
 		FileAppender appender = new FileAppender();
 		appender.setName("csv");

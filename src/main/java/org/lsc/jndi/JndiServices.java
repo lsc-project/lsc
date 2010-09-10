@@ -143,12 +143,12 @@ public final class JndiServices {
 		
 		// rewrite connection URI
 		try {
-			String uriString = "";
+			StringBuilder uriString = new StringBuilder();
 			Matcher uriMatcher = Pattern.compile("ldaps?://[^/]+/.*?(?=( ldaps?://)|$)", Pattern.CASE_INSENSITIVE).matcher(connProps.getProperty(Context.PROVIDER_URL));
 			while (uriMatcher.find()) {
-				uriString += new LDAPURL(uriMatcher.group()).toNormalizedString() + " ";
+				uriString.append(new LDAPURL(uriMatcher.group()).toNormalizedString() + " ");
 			}
-			connProps.setProperty(Context.PROVIDER_URL, uriString);
+			connProps.setProperty(Context.PROVIDER_URL, uriString.toString());
 			LOGGER.debug("Using JNDI URL setting of \"" + connProps.getProperty(Context.PROVIDER_URL) + "\"");
 		} catch (LDAPException e) {
 			LOGGER.error(e.toString());

@@ -54,22 +54,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manage all common string manipulation for french
+ * <P>Manage all common string manipulation for French.</P>
+ * 
+ * <P>Some methods in this class may be useful for other languages too. Please read the documentation
+ * (or the source code) carefully to make sure.</P> 
  *
- * @author Sebastien Bahloul <seb@lsc-project.org>;
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public final class FrenchFilters {
 
 	// Utility class
-	private FrenchFilters() {}
+	private FrenchFilters() { }
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FrenchFilters.class);
 
-	/** The regexep for authorized characters */
+	/** The regexep for authorized characters. */
 	private static final String REGEXP_CHARACTERS =
 					"[\\p{Alpha}\\s'\"áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;" + "&egrave;êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç-]+";
 
-	/** Array of accents and cedillas */
+	/** Array of accents and cedillas. */
 	private static final String[] REGEXP_ACCENTS_CEDILLAS = {
 		"À", "á", "Á",
 		"&agrave;", "&agrave;",
@@ -98,7 +101,7 @@ public final class FrenchFilters {
 	};
 
 	/**
-	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLES
+	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLAS.
 	 */
 	private static final String[] REGEXP_STRING_ACCENTS_CEDILLAS = {
 		"A", "a", "A",
@@ -127,7 +130,7 @@ public final class FrenchFilters {
 		"c", "C"
 	};
 
-	/** Allowed chars for words separator */
+	/** Allowed chars for word separators. */
 	private static final String[] SEPARATORS_FOR_UPPER_BEGINNING_NAME = {
 		" ",
 		"'",
@@ -137,17 +140,17 @@ public final class FrenchFilters {
 	};
 
 	/**
-	 * Bad word separators chars for emails
+	 * Bad word separator chars for emails.
 	 */
 	public static final String[] BAD_SEPARATOR_FOR_EMAIL = {" ", "'", "\""};
 
 	/**
-	 * Good words separators for emails
+	 * Replacement chars for the array BAD_SEPARATOR_FOR_EMAIL.
 	 */
 	public static final String[] GOOD_SEPARATOR_FOR_EMAIL = {"_", "_", "_"};
 
 	/**
-	 * Chars to replace in telephone numbers
+	 * Chars to replace in telephone numbers.
 	 */
 	public static final String[] BAD_SEPARATOR_FOR_PHONE = {
 		"-", " ", "\\.",
@@ -158,7 +161,7 @@ public final class FrenchFilters {
 	};
 
 	/**
-	 * Chars of remplactement for telephone numbers
+	 * Replacement chars for the array BAD_SEPARATOR_FOR_PHONE.
 	 */
 	public static final String[] GOOD_SEPARATOR_FOR_PHONE = {
 		"", "", "", "",
@@ -166,23 +169,23 @@ public final class FrenchFilters {
 		"", "", ""
 	};
 
-	/** Regexp for formatting first names */
+	/** Regexp for formatting first names. */
 	private static final String REGEXP_FOR_FISRTNAME =
-					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
-					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç' -]+";
+					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;"
+					+ "êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç' -]+";
 
-	/** Regexp for formatting last names */
+	/** Regexp for formatting last names. */
 	private static final String REGEXP_FOR_LASTNAME =
-					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
-					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç'\"\\s -_]+";
+					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;"
+					+ "êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç'\"\\s -_]+";
 
 	/**
-	 * Bad char separators for IDs
+	 * Bad char separators for IDs.
 	 */
 	private static final String[] BAD_SEPARATOR_FOR_ID = {" ", "'", "\"", "-"};
 
 	/**
-	 * Chars authorized for passwords
+	 * Chars authorized for passwords.
 	 * (No O,0 and I,1,l etc.)
 	 */
 	private static final String GOOD_PASSWORD =
@@ -196,24 +199,25 @@ public final class FrenchFilters {
 					"[\\p{Alpha}0123456789]+";
 
 	/**
-	 * Normalize accents and cedillas
+	 * Normalize accents and cedillas.
 	 *
 	 * @param src Source string
 	 *
 	 * @return Filtered string
 	 */
 	public static String removeBadChars(final String src) {
-		return filterRegexp(src, REGEXP_ACCENTS_CEDILLAS,
-						REGEXP_STRING_ACCENTS_CEDILLAS);
+		return filterRegexp(src, REGEXP_ACCENTS_CEDILLAS, REGEXP_STRING_ACCENTS_CEDILLAS);
 	}
 
 	/**
 	 * Filter the string src by removing the chars in srcRegexp
-	 * by the ones in destRegexp
+	 * by the ones in destRegexp.
+	 * 
+	 * These two arrays must be of equal size!
 	 *
-	 * @param src
-	 * @param srcRegexp
-	 * @param destRegexp
+	 * @param src String to filter.
+	 * @param srcRegexp Array of regexp to match.
+	 * @param destRegexp Array of regexp with replacements.
 	 *
 	 * @return the filered string
 	 */
@@ -231,9 +235,11 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Transform a telephone number in the international display
+	 * Transform a French telephone number in the international display.
+	 * Warning: this method assumes the phone number is a French number from the
+	 * 01 zone (Paris and greater Paris area)!
 	 *
-	 * @param phone2parse
+	 * @param phone2parse Telephone number to transform, as a String.
 	 *
 	 * @return the filtered phone number
 	 */
@@ -256,10 +262,9 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Uppercased all the words of a string
+	 * Uppercase the first letter or all the words in a string.
 	 *
-	 * @param string
-	 *
+	 * @param string String to uppercase words in.
 	 * @return String with caps for all characters after space, "-", etc ...
 	 */
 	public static String toUpperCaseAllBeginningNames(final String string) {
@@ -298,8 +303,9 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Format a sn
-	 * @param sn
+	 * Format a surname (sn).
+	 * 
+	 * @param sn The surname to be formatted, as a String.
 	 * @return the filtered surname
 	 * @throws CharacterUnacceptedException thrown if an rejected character
 	 * is encountered during analysis
@@ -316,9 +322,9 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Remove bad chars from a string
+	 * Remove bad chars from a string. See {@link #BAD_SEPARATOR_FOR_ID}.
 	 *
-	 * @param startString
+	 * @param startString String to filter.
 	 * @return String without the bad chars
 	 */
 	private static String filterBadChars(final String startString) {
@@ -345,7 +351,7 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Returns the uid on 14 chars and well formatted
+	 * Returns the uid truncated to 14 chars and well formatted (by {@link #filterBadChars(String)}).
 	 *
 	 * @param sn the last name to filter
 	 * @return the filtered uid
@@ -420,9 +426,9 @@ public final class FrenchFilters {
 	}
 
 	/**
-	 * Generate a 8 chars long password
+	 * Generate a 8 chars long random password.
 	 *
-	 * @return Le mot de passe
+	 * @return Generated password
 	 */
 	public static String generatePwd() {
 		StringBuilder passwd = new StringBuilder("");

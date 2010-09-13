@@ -102,8 +102,8 @@ public class SecurityUtils {
 	 * @throws java.security.NoSuchAlgorithmException
 	 */
 	public static String hash(String type, String value) throws NoSuchAlgorithmException {
-		byte data[] = value.getBytes();
-		byte hash[] = MessageDigest.getInstance(type).digest(data);
+		byte[] data = value.getBytes();
+		byte[] hash = MessageDigest.getInstance(type).digest(data);
 		return new String(new Base64().encode(hash));
 	}
 }

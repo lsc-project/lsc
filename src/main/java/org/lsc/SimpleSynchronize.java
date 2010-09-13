@@ -109,11 +109,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	private Properties lscProperties;
 	
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 */
 	public SimpleSynchronize() {
 		super();
-		setThreads(5); 
+		setThreads(5);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					return false;
 				} else {
 					String syncHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_SYNC_HOOK_PROPS_PREFIX);
-					if(syncHook != null && syncHook != "") {
+					if (syncHook != null && syncHook != "") {
 						runPostHook(taskName, syncHook);
 					}
 				}
@@ -167,7 +167,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					return false;
 				} else {
 					String cleanHook = lscProperties.getProperty(TASKS_PROPS_PREFIX + "." + taskName + "." + POST_CLEAN_HOOK_PROPS_PREFIX);
-					if(cleanHook != null && cleanHook != "") {
+					if (cleanHook != null && cleanHook != "") {
 						runPostHook(taskName, cleanHook);
 					}
 				}
@@ -175,7 +175,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (isASyncTaskAll || asyncTasks.contains(taskName)) {
 				foundATask = true;
 
-				if(!launchTask(taskName, TaskMode.async)) {
+				if (!launchTask(taskName, TaskMode.async)) {
 					return false;
 				}
 			}
@@ -331,7 +331,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	}
 
 	/**
-	 * Invoke the hook method whether it's a postsync or postclean
+	 * Invoke the hook method whether it's a postsync or postclean.
 	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke

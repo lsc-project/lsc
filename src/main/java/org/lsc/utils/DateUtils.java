@@ -62,7 +62,7 @@ import java.util.TimeZone;
 public final class DateUtils {
 
 	// Utility class
-	private DateUtils() {}
+	private DateUtils() { }
 	
 	/**
 	 * This is the standard LDAP date format : yyyyMMddHHmmss.S'Z'.
@@ -95,7 +95,7 @@ public final class DateUtils {
 					new SimpleDateFormat(LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT);
 
 	/** The UTC time zone. */
-	private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault();//getTimeZone("UTC");
+	private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault(); //getTimeZone("UTC");
 
 	static {
 		FORMATTER.setLenient(false);

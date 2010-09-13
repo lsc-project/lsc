@@ -167,7 +167,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForNextId;
 	}
 
-	static int count = 0;
+	private static int count = 0;
 
 	@SuppressWarnings("unchecked")
 	public Entry<String, LscAttributes> getNextId() {

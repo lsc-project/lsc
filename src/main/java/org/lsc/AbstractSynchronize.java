@@ -117,14 +117,14 @@ public abstract class AbstractSynchronize {
 	protected boolean nomodrdn = false;
 
 	/**
-	 * Number of parallel threads handling synchronization and cleaning
-	 * Defaults to 5
+	 * Number of parallel threads handling synchronization and cleaning.
+	 * Defaults to 5.
 	 */
 	private int threads;
 
 	/**
-	 * Maximum time waiting for synchronizing threads tasks to finish (in seconds)
-	 * This is the global synchronization task time - 3600 by default
+	 * Maximum time waiting for synchronizing threads tasks to finish (in seconds).
+	 * This is the global synchronization task time - 3600 by default.
 	 */
 	private int timeLimit;
 

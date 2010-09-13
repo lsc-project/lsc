@@ -48,7 +48,6 @@ package org.lsc.utils.directory;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.Map.Entry;
 
@@ -78,12 +77,12 @@ import org.lsc.jndi.JndiServices;
  * utilization.
  * </P>
  * 
- * @author Jonathan Clarke <jonathan@phillipoux.net>
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class LDAP {
 
 	// Utility class
-	private LDAP() {}
+	private LDAP() { }
 	
 	/**
 	 * Connects to a LDAP server anonymously and tries to rebind with the
@@ -190,7 +189,7 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
-	 * @throws MalformedURLException
+	 * @throws LDAPException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
@@ -221,7 +220,7 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
-	 * @throws MalformedURLException
+	 * @throws LDAPException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,

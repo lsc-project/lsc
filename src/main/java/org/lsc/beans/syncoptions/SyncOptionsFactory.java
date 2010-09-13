@@ -55,7 +55,7 @@ import org.lsc.Configuration;
 
 public final class SyncOptionsFactory {
 
-	private static SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
+	private static final SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
 	private Map<String, ISyncOptions> cache;
 	private static final Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
 

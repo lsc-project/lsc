@@ -83,16 +83,16 @@ public class Configuration {
 	// Logger
 	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
-	/** Filename of the <code>lsc.properties</code> file */
+	/** Filename of the <code>lsc.properties</code> file. */
 	public static final String PROPERTIES_FILENAME = "lsc.properties";
 
-	/** Filename of the <code>database.properties</code> file */
+	/** Filename of the <code>database.properties</code> file. */
 	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
 
-	/** Default location for configuration filename */
-	public static String location = PROPERTIES_FILENAME;
+	/** Default location for configuration filename. */
+	private static String location = PROPERTIES_FILENAME;
 
-	/** Flag to detect if logging is configured or not yet */
+	/** Flag to detect if logging is configured or not yet. */
 	private static boolean loggingSetup = false;
 	
 	// People DN
@@ -131,10 +131,10 @@ public class Configuration {
 	// LSC configuration of the application
 	private static PropertiesConfiguration config = null;
 
-	/** Prefix for tasks configuration elements in lsc.properties */
+	/** Prefix for tasks configuration elements in lsc.properties. */
 	public static final String LSC_TASKS_PREFIX = "lsc.tasks";
 	
-	/** Prefix for syncoptions configuration elements in lsc.properties */
+	/** Prefix for syncoptions configuration elements in lsc.properties. */
 	public static final String LSC_SYNCOPTIONS_PREFIX = "lsc.syncoptions";
 	
 	// Default constructor.
@@ -209,7 +209,7 @@ public class Configuration {
 		if (conf == null) {
 			return null;
 		}
-		Iterator<?> it = conf.getKeys();
+		Iterator< ? > it = conf.getKeys();
 		Properties result = new Properties();
 		String key = null;
 		Object value = null;
@@ -226,10 +226,10 @@ public class Configuration {
 			return null;
 		}
 		Properties result = new Properties();
-		for (Object propertyName: originalProperties.keySet()) {
+		for (Object propertyName : originalProperties.keySet()) {
 			String propertyNameStr = (String) propertyName;
-			if(propertyNameStr.startsWith(prefix + ".")) {
-				String newPropertyName = propertyNameStr.substring(prefix.length()+1);
+			if (propertyNameStr.startsWith(prefix + ".")) {
+				String newPropertyName = propertyNameStr.substring(prefix.length() + 1);
 				result.put(newPropertyName, originalProperties.getProperty(propertyNameStr));
 			}
 		}
@@ -237,7 +237,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Get a int associated with the given property key
+	 * Get an int associated with the given property key.
 	 * 
 	 * @param key
 	 *            The property key.
@@ -250,7 +250,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Get a string associated with the given property key
+	 * Get a string associated with the given property key.
 	 * 
 	 * @param key
 	 *            The property key.
@@ -262,7 +262,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Get a string associated with the given property key
+	 * Get a string associated with the given property key.
 	 * 
 	 * @param key
 	 *            The property key.
@@ -280,7 +280,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Set the configuration properties location
+	 * Set the configuration properties location.
 	 * 
 	 * @param configurationLocation
 	 *            the user defined location
@@ -290,7 +290,7 @@ public class Configuration {
 		location = appendDirSeparator(configurationLocation);
 		
 		// check the new location actually exists
-		if (! new File(location).exists()) {
+		if (!new File(location).exists()) {
 			// no point logging anything here, the logging configuration can't be read if we don't have a config location
 			throw new RuntimeException("Configuration location doesn't exist! (" + location + "). Aborting.");
 		}
@@ -403,7 +403,7 @@ public class Configuration {
 	 */
 	private static String asString(Object value) {
 		if (value instanceof List) {
-			List<?> list = (List<?>) value;
+			List< ? > list = (List< ? >) value;
 			value = StringUtils.join(list.iterator(), ",");
 		}
 		return (String) value;
@@ -433,7 +433,7 @@ public class Configuration {
 	static void addConfiguration(URL url) throws ConfigurationException {
 		LOGGER.debug("Adding configuration: {}", url);
 		PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
-		Iterator<?> configKeys = configTmp.getKeys();
+		Iterator< ? > configKeys = configTmp.getKeys();
 		while (configKeys.hasNext()) {
 			String key = (String) configKeys.next();
 			String value = (String) configTmp.getProperty(key);
@@ -500,7 +500,8 @@ public class Configuration {
 	/**
 	 * Set up configuration for the given location, including logback.
 	 * IMPORTANT: don't log ANYTHING before calling this method!
-	 * @param configurationLocation
+	 * 
+	 * @param configurationLocation Absolute path to the configuration directory, as a String
 	 */
 	public static void setUp(String configurationLocation) {
 		if (configurationLocation != null) {
@@ -519,11 +520,11 @@ public class Configuration {
 
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
-			if(!getCsvProperties().isEmpty()) {
+			if (!getCsvProperties().isEmpty()) {
 				setUpCsvLogging(context);
 			}
 
-			if(!getLdifProperties().isEmpty()) {
+			if (!getLdifProperties().isEmpty()) {
 				setUpLdifLogging(context);
 			}
 		} catch (JoranException je) {
@@ -538,7 +539,7 @@ public class Configuration {
 	}
 	
 	/**
-	 * <P>Helper method to check that a String read in from a property is not empty or null</P>
+	 * <P>Helper method to check that a String read in from a property is not empty or null.</P>
 	 * 
 	 * @param propertyName Name of the property key as read from lsc.properties
 	 * @param propertyValue Value read from the configuration
@@ -546,24 +547,24 @@ public class Configuration {
 	 * @throws RuntimeException If the property is null or empty.
 	 */
 	public static void assertPropertyNotEmpty(String propertyName, String propertyValue, String location) throws RuntimeException {
-		if (propertyValue == null || propertyValue.length() == 0	) {
+		if (propertyValue == null || propertyValue.length() == 0) {
 			throw new RuntimeException("No " + propertyName + " property specified in " + location + ". Aborting.");
 		}
 	}
 
 	/**
-	 * Set the flag to determine if logging is configured or not yet
+	 * Set the flag to determine if logging is configured or not yet.
 	 * 
-	 * @param loggingSetup Is logging setup yet?
+	 * @param loggingSetup boolean: is logging setup yet?
 	 */
 	public static void setLoggingSetup(boolean loggingSetup) {
 		Configuration.loggingSetup = loggingSetup;
 	}
 
 	/**
-	 * Get the flag to determine if logging is configured or not yet
+	 * Get the flag to determine if logging is configured or not yet.
 	 * 
-	 * @return boolean loggingSetup
+	 * @return boolean: is logging setup yet?
 	 */
 	public static boolean isLoggingSetup() {
 		return loggingSetup;

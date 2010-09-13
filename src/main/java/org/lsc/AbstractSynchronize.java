@@ -315,8 +315,8 @@ public abstract class AbstractSynchronize {
 			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Tasks terminated according to time limit");
-			LOGGER.info("If you want to avoid this message, increase the time limit by using dedicated parameter.");
 			LOGGER.debug(e.toString(), e);
+			LOGGER.info("If you want to avoid this message, increase the time limit by using dedicated parameter.");
 		}
 
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
@@ -594,10 +594,13 @@ class SynchronizeTask implements Runnable {
 		}
 	}
 
-	public void run(Entry<String, LscAttributes> id) {
+	public boolean run(Entry<String, LscAttributes> id) {
 		JndiModifications jm = null;
+		IBean itmBean = null;
+		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
-
+		Map<String, Object> conditionObjects = null;
+		
 		try {
 			IBean entry = srcService.getBean(id.getKey(), id.getValue());
 			/*
@@ -607,20 +610,20 @@ class SynchronizeTask implements Runnable {
 			if (entry == null) {
 				counter.incrementCountError();
 				AbstractSynchronize.LOGGER.error("Unable to get object for id={}", id.getKey());
-				return;
+				return false;
 			}
 
 			// Search destination for matching object
-			IBean dstBean = dstService.getBean(id.getKey(), id.getValue());
+			dstBean = dstService.getBean(id.getKey(), id.getValue());
 			
 			// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
-			IBean itmBean = BeanComparator.cloneSrcBean(entry, dstBean, syncOptions, customLibrary);
+			itmBean = BeanComparator.cloneSrcBean(entry, dstBean, syncOptions, customLibrary);
 			
 			// Calculate operation that would be performed
 			JndiModificationType modificationType = BeanComparator.calculateModificationType(syncOptions, entry, itmBean, dstBean, customLibrary);
 
 			// Retrieve condition to evaluate before creating/updating
-			Boolean applyCondition;
+			Boolean applyCondition = null;
 			String conditionString = syncOptions.getCondition(modificationType);
 
 			// Don't use JavaScript evaluator for primitive cases
@@ -629,7 +632,7 @@ class SynchronizeTask implements Runnable {
 			} else if (conditionString.matches("false")) {
 				applyCondition = false;
 			} else {
-				Map<String, Object> conditionObjects = new HashMap<String, Object>();
+				conditionObjects = new HashMap<String, Object>();
 				conditionObjects.put("dstBean", dstBean);
 				conditionObjects.put("srcBean", entry);
 
@@ -652,17 +655,17 @@ class SynchronizeTask implements Runnable {
 
 				// if there's nothing to do, skip to the next object
 				if (jm == null) {
-					return;
+					return true;
 				}
 
 				// apply condition is false, log action for debugging purposes
 				// and forget
 				if (!applyCondition || calculateForDebugOnly) {
 					abstractSynchronize.logShouldAction(jm, id, syncName);
-					return;
+					return true;
 				}
 			} else {
-				return;
+				return true;
 			}
 
 			// if we got here, we have a modification to apply - let's do it!
@@ -670,9 +673,11 @@ class SynchronizeTask implements Runnable {
 			if (dstService.apply(jm)) {
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(jm, id, syncName);
+				return true;
 			} else {
 				counter.incrementCountError();
 				abstractSynchronize.logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
+				return false;
 			}
 		} catch (CommunicationException e) {
 			// we lost the connection to the source or destination, stop
@@ -680,19 +685,20 @@ class SynchronizeTask implements Runnable {
 			counter.incrementCountError();
 			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
 			abstractSynchronize.logActionError(jm, id, e);
-			return;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);
 			
 			if (e.getCause() instanceof CommunicationException) {
 				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
-				return;
 			}
 		} catch (Exception e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);
 		}
+		
+		// default fallback after exceptions
+		return false;
 	}
 
 	public String getSyncName() {

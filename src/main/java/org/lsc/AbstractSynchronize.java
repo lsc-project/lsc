@@ -114,17 +114,19 @@ public abstract class AbstractSynchronize {
 	 */
 	protected boolean nomodrdn = false;
 
-	/**
-	 * Number of parallel threads handling synchronization and cleaning.
-	 * Defaults to 5.
-	 */
-	private int threads;
+	/** Default number of threads to start. */
+	public static final int DEFAULT_NUMBER_THREADS = 5;
+	
+	/** Number of parallel threads handling synchronization and cleaning.
+	 * Defaults to {@value #DEFAULT_NUMBER_THREADS}. */
+	private int threads = DEFAULT_NUMBER_THREADS;
 
-	/**
-	 * Maximum time waiting for synchronizing threads tasks to finish (in seconds).
-	 * This is the global synchronization task time - 3600 by default.
-	 */
-	private int timeLimit;
+	/** Default maximum time (in seconds) to wait for synchronizing threads tasks to finish. */
+	public static final int MAX_THREAD_WAIT = 3600;
+	
+	/** Maximum time waiting for synchronizing threads tasks to finish (in seconds).
+	 * This is the global synchronization task time - {@value #MAX_THREAD_WAIT} by default. */
+	private int timeLimit = MAX_THREAD_WAIT;
 
 	/**
 	 * Map used to keep trace of all running threads.
@@ -135,7 +137,6 @@ public abstract class AbstractSynchronize {
 	 * Default constructor.
 	 */
 	protected AbstractSynchronize() {
-		timeLimit = 3600;
 		asynchronousThreads = new HashMap<String, Thread>();
 	}
 

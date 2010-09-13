@@ -98,7 +98,7 @@ public final class BeanComparator {
 	 * @param dstBean JNDI bean
 	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @return JndiModificationType the modification type that would happen
-	 * @throws CloneNotSupportedException
+	 * @throws CloneNotSupportedException No longer thrown, actually.
 	 * @deprecated	This method forces multiple clones, and should be avoided. 
 	 * 			 	Use {@link #calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)} instead.
 	 */
@@ -225,7 +225,6 @@ public final class BeanComparator {
 	 * @throws NamingException
 	 *             an exception may be thrown if an LDAP data access error is
 	 *             encountered
-	 * @throws CloneNotSupportedException No longer thrown, actually.
 	 */
 	public static JndiModifications calculateModifications(
 					ISyncOptions syncOptions, IBean srcBean, IBean itmBean, IBean dstBean,
@@ -593,17 +592,22 @@ public final class BeanComparator {
 	 *            configuration.
 	 * @param customLibrary
 	 * @return New bean cloned from srcBean
-	 * @throws CloneNotSupportedException
 	 */
 	public static IBean cloneSrcBean(IBean srcBean, IBean dstBean, ISyncOptions syncOptions,
-					Object customLibrary) throws CloneNotSupportedException {
+					Object customLibrary) {
 		//
 		// We clone the source object, because syncoptions should not be used
 		// on modified values of the source object :)
 		//
 		IBean itmBean = null;
 		if (srcBean != null) {
-			itmBean = srcBean.clone();
+			try {
+				itmBean = srcBean.clone();
+			} catch (CloneNotSupportedException e) {
+				// this indicates the source bean doesn't support cloning, so should never happen
+				LOGGER.error("Unexpected error: source bean is not cloneable");
+				throw new RuntimeException(e);
+			}
 
 			// apply any new DN from properties to this intermediary bean
 			String dn = syncOptions.getDn();

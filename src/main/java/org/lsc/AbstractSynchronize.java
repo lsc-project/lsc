@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSynchronize {
 
-	static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
 	/** List of configured options. */
 	private static Options options = new Options();
@@ -543,6 +543,8 @@ public abstract class AbstractSynchronize {
  */
 class SynchronizeTask implements Runnable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeTask.class);
+	
 	private String syncName;
 	private InfoCounter counter;
 	private IService srcService;
@@ -589,10 +591,10 @@ class SynchronizeTask implements Runnable {
 
 		try {
 			if (id != null) {
-				AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
+				LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
 				run(id);
 			} else if (srcService instanceof IAsynchronousService) {
-				AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", syncName);
+				LOGGER.debug("Asynchronous synchronize {}", syncName);
 
 				IAsynchronousService aSrcService = (IAsynchronousService) srcService;
 				while (!Thread.interrupted()) {
@@ -603,7 +605,7 @@ class SynchronizeTask implements Runnable {
 						try {
 							Thread.sleep(aSrcService.getInterval() * 1000);
 						} catch (InterruptedException e) {
-							AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
+							LOGGER.debug("Synchronization thread interrupted !");
 						}
 					}
 				}
@@ -630,7 +632,7 @@ class SynchronizeTask implements Runnable {
 			 */
 			if (entry == null) {
 				counter.incrementCountError();
-				AbstractSynchronize.LOGGER.error("Unable to get object for id={}", id.getKey());
+				LOGGER.error("Unable to get object for id={}", id.getKey());
 				return false;
 			}
 
@@ -704,14 +706,14 @@ class SynchronizeTask implements Runnable {
 			// we lost the connection to the source or destination, stop
 			// everything!
 			counter.incrementCountError();
-			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
+			LOGGER.error("Connection lost! Aborting.");
 			abstractSynchronize.logActionError(jm, id, e);
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);
 			
 			if (e.getCause() instanceof CommunicationException) {
-				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
+				LOGGER.error("Connection lost! Aborting.");
 			}
 		} catch (Exception e) {
 			counter.incrementCountError();

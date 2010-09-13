@@ -94,6 +94,8 @@ public class FullDNJndiSrcService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param props
 	 *            the properties used to identify the directory parameters and context
+	 * @param beanClassName
+	 *            the bean class name that will be instantiated and feed up
 	 */
 	@SuppressWarnings("unchecked")
 	public FullDNJndiSrcService(final Properties props, final String beanClassName) {
@@ -101,7 +103,8 @@ public class FullDNJndiSrcService extends AbstractSimpleJndiService implements I
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
+			LOGGER.error("Bean class {} not found. Check this class name really exists.", beanClassName);
+			throw new RuntimeException(e);
 		}
 	}
 

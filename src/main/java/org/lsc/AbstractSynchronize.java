@@ -706,7 +706,6 @@ class SynchronizeTask implements Runnable {
 			counter.incrementCountError();
 			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
 			abstractSynchronize.logActionError(jm, id, e);
-			return false;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);
@@ -714,12 +713,13 @@ class SynchronizeTask implements Runnable {
 			if (e.getCause() instanceof CommunicationException) {
 				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
 			}
-			return false;
 		} catch (Exception e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(jm, id, e);
-			return false;
 		}
+		
+		// default fallback after exceptions
+		return false;
 	}
 
 	public String getSyncName() {

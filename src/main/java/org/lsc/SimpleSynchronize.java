@@ -113,7 +113,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	public SimpleSynchronize() {
 		super();
-		setThreads(5);
 	}
 
 	/**

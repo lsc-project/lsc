@@ -161,8 +161,10 @@ public class FullDNJndiSrcService extends AbstractSimpleJndiService implements I
 			Collections.sort(idList, new StringShortestLengthComparator());
 		} catch (ClassCastException e) {
 			// ignore errors, just leave list unsorted
+			LOGGER.error("Error while sorting list of DNs: ", e);
 		} catch (UnsupportedOperationException e) {
 			// ignore errors, just leave list unsorted
+			LOGGER.error("Error while sorting list of DNs: ", e);
 		}
 
 		// add DN suffix to obtain full DN

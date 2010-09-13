@@ -74,10 +74,9 @@ public class BeanComparatorTest {
 
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)}.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)}.
 	 */
 	@Test
-	public void testCalculateModificationType() throws CloneNotSupportedException {
+	public void testCalculateModificationType() {
 		dummySyncOptions syncOptions = new dummySyncOptions();
 		IBean srcBean = new SimpleBean();
 		IBean dstBean = new SimpleBean();
@@ -119,10 +118,9 @@ public class BeanComparatorTest {
 	 *
 	 * With an invalid syntax error.
 	 * @throws NamingException As thrown when reading JNDI Attribute values.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)}.
 	 */
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException {
+	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException {
 		ISyncOptions syncOptions = new ForceSyncOptions();
 		IBean srcBean, destBean;
 		Object customLibrary = null;
@@ -147,7 +145,7 @@ public class BeanComparatorTest {
 	}
 
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException, CloneNotSupportedException {
+	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException {
 		ISyncOptions syncOptions = new ForceSyncOptions();
 		IBean srcBean, destBean;
 		Object customLibrary = null;

@@ -78,22 +78,22 @@ public final class Launcher {
 	/** List of the cleaning types. */
 	private List<String> cleanType;
 
-	/** Configuration files location */
+	/** Configuration directory location. */
 	private String configurationLocation;
 
 	/** Default synchronize instance. */
 	private SimpleSynchronize sync;
 
-	/** Number of parallel threads to run a task */
+	/** Number of parallel threads to run a task. */
 	private int threads;
 
-	/** Time limit in seconds*/
+	/** Time limit in seconds. */
 	private int timeLimit;
 	
-	/** Available command line options definition */
+	/** Available command line options definition. */
 	private static Options options;
 	
-	/** Parsed command line options */
+	/** Parsed command line options. */
 	private CommandLine cmdLine;
 	
 	// define command line options recognized
@@ -163,10 +163,10 @@ public final class Launcher {
 			
 			// do the work!
 			if (threads > 0) {
-				sync.setThreads( threads );
+				sync.setThreads(threads);
 			}
 			if (timeLimit > 0) {
-				sync.setTimeLimit( timeLimit );
+				sync.setTimeLimit(timeLimit);
 			}
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
@@ -210,13 +210,13 @@ public final class Launcher {
 				cleanType = parseSyncType(cmdLine.getOptionValue("c"));
 			}
 		
-			if(cmdLine.getOptions().length == 0 || 
-							cmdLine.hasOption("h") || 
-							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0))) {
+			if (cmdLine.getOptions().length == 0 
+					|| cmdLine.hasOption("h")
+					|| ((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0))) {
 				printHelp();
 				return 1;
 			}
-			if(!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
+			if (!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
 				System.err.println("Asynchronous synchronization is mutually exclusive with synchronous synchronizing and cleaning !");
 				printHelp();
 				return 1;

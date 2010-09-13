@@ -61,16 +61,16 @@ import org.slf4j.LoggerFactory;
  */
 public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 
-	static long keepAliveTime = 60;
+	private static final long KEEP_ALIVE_TIME = 60;
 
-	BlockingQueue<Runnable> queue;
+	private BlockingQueue<Runnable> queue;
 
 	/** Default logger */
-	final Logger LOGGER = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	protected SynchronizeThreadPoolExecutor(int threads) {
-		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		super(threads, threads, KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 		queue = getQueue(); 
 	}
 

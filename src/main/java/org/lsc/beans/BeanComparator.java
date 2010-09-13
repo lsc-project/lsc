@@ -91,7 +91,7 @@ public final class BeanComparator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
 	/**
-	 * Static method to return the kind of operation that would happen
+	 * Static method to return the kind of operation that would happen.	
 	 *
 	 * @param syncOptions SyncOptions object from properties
 	 * @param srcBean Bean from source
@@ -99,7 +99,8 @@ public final class BeanComparator {
 	 * @param customLibrary User-specified object to add to the JavaScript execution environment
 	 * @return JndiModificationType the modification type that would happen
 	 * @throws CloneNotSupportedException
-	 * @deprecated This method forces multiple clones, and should be avoided. Use {@link #calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)} instead.
+	 * @deprecated	This method forces multiple clones, and should be avoided. 
+	 * 			 	Use {@link #calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)} instead.
 	 */
 	public static JndiModificationType calculateModificationType(ISyncOptions syncOptions,
 					IBean srcBean, IBean dstBean, Object customLibrary) throws CloneNotSupportedException {
@@ -111,7 +112,7 @@ public final class BeanComparator {
 
 	
 	/**
-	 * Static method to return the kind of operation that would happen
+	 * Static method to return the kind of operation that would happen.
 	 *
 	 * @param syncOptions SyncOptions object from properties
 	 * @param srcBean Bean from source
@@ -414,7 +415,7 @@ public final class BeanComparator {
 						}
 					} else if (attrStatus == STATUS_TYPE.MERGE) {
 						// check if there are any extra values to be added
-						Set<?> missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
+						Set< ? > missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
 
 						if (missingValues.size() > 0) {
 							Attribute addValuesAttr = SetUtils.setToAttribute(dstAttr.getID(), missingValues);
@@ -524,10 +525,18 @@ public final class BeanComparator {
 			Set<String> defaultAttrsList = syncOptions.getDefaultValuedAttributeNames();
 			Set<String> createAttrsList = syncOptions.getCreateAttributeNames();
 
-			if (itmBeanAttrsList != null) res.addAll(itmBeanAttrsList);
-			if (forceAttrsList != null) res.addAll(forceAttrsList);
-			if (defaultAttrsList != null) res.addAll(defaultAttrsList);
-			if (createAttrsList != null) res.addAll(createAttrsList);
+			if (itmBeanAttrsList != null) {
+				res.addAll(itmBeanAttrsList);
+			}
+			if (forceAttrsList != null) {
+				res.addAll(forceAttrsList);
+			}
+			if (defaultAttrsList != null) {
+				res.addAll(defaultAttrsList);
+			}
+			if (createAttrsList != null) {
+				res.addAll(createAttrsList);
+			}
 		}
 
 		return res;
@@ -551,7 +560,7 @@ public final class BeanComparator {
 	public static JndiModifications[] checkOtherModifications(IBean srcBean, IBean destBean, JndiModifications jm)
 					throws IllegalAccessException, InvocationTargetException {
 		String methodName = "checkDependencies";
-		Class<?>[] params = new Class[]{JndiModifications.class};
+		Class< ? >[] params = new Class[]{JndiModifications.class};
 		try {
 			Method checkDependencies = destBean.getClass().getMethod(methodName, params);
 			if (checkDependencies != null) {
@@ -580,6 +589,8 @@ public final class BeanComparator {
 	 * @param srcBean Original bean from source
 	 * @param dstBean Destination bean
 	 * @param syncOptions
+	 *            {@link ISyncOptions} Object to read syncoptions from
+	 *            configuration.
 	 * @param customLibrary
 	 * @return New bean cloned from srcBean
 	 * @throws CloneNotSupportedException

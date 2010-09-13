@@ -68,8 +68,8 @@ public class SetUtils {
 	 * 
 	 * @param attr
 	 *            An Attribute containing values to extract.
-	 * @return {@link HashSet}<Object> Values as a set. Never null.
-	 * @throws NamingException
+	 * @return {@link Set}&lt;Object&gt; Values as a set. Never null.
+	 * @throws NamingException If a naming exception was encountered while retrieving the values.
 	 */
 	public static Set<Object> attributeToSet(Attribute attr)
 					throws NamingException {
@@ -78,7 +78,7 @@ public class SetUtils {
 		}
 
 		Set<Object> attrValues = new HashSet<Object>(attr.size());
-		NamingEnumeration<?> ne = attr.getAll();
+		NamingEnumeration< ? > ne = attr.getAll();
 		while (ne.hasMore()) {
 			Object value = ne.next();
 
@@ -100,7 +100,7 @@ public class SetUtils {
 	 * @param values Values as a set
 	 * @return Attribute An Attribute containing values from the set. Never null.
 	 */
-	public static Attribute setToAttribute(String attrName, Set<?> values) {
+	public static Attribute setToAttribute(String attrName, Set< ? > values) {
 		Attribute ret = new BasicAttribute(attrName);
 
 		if (values == null || values.size() == 0) {
@@ -126,7 +126,7 @@ public class SetUtils {
 	 *            Set of Objects to search for in the haystack.
 	 * @return {@link Set} of needles that are not in the haystack.
 	 */
-	public static Set<?> findMissingNeedles(Set<?> haystack, Set<?> needles) {
+	public static Set< ? > findMissingNeedles(Set< ? > haystack, Set< ? > needles) {
 		Set<Object> missingNeedles = new HashSet<Object>();
 
 		// no needles? they can't be missing then.
@@ -219,8 +219,8 @@ public class SetUtils {
 	 * Compare two lists of values to see if they contain the same values. This
 	 * method is type-aware and will intelligently compare byte[], String, etc.
 	 * 
-	 * @param srcAttrValues
-	 * @param dstAttrValues
+	 * @param srcAttrValues First set to compare.
+	 * @param dstAttrValues Second set to compare.
 	 * @return true if all values of each set are present in the other set, false otherwise
 	 */
 	public static boolean doSetsMatch(Set<Object> srcAttrValues, Set<Object> dstAttrValues) {
@@ -243,8 +243,15 @@ public class SetUtils {
 		return true;
 	}
 
-	public static void addAllIfNotPresent(Set<Object> set, Set<?> values) {
-		Set<?> valuesToAdd = findMissingNeedles(set, values);
+	/**
+	 * Add a set of values into an existing set, making sure that pre-existing values
+	 * are not added again.
+	 * 
+	 * @param set Existing set to add values to.
+	 * @param values Set of values to add.
+	 */
+	public static void addAllIfNotPresent(Set<Object> set, Set< ? > values) {
+		Set< ? > valuesToAdd = findMissingNeedles(set, values);
 		set.addAll(valuesToAdd);
 	}
 }

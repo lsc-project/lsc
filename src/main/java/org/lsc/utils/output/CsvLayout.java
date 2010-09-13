@@ -93,7 +93,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/**
 	 * Name of the attribute for the dn
 	 */
-	private final static String DN_STRING = "dn";
+	private static final String DN_STRING = "dn";
 
 	/**
 	 * Output log events in CSV format for the JndiModifications class

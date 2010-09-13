@@ -112,31 +112,32 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** The lsc properties. */
 	private Properties lscProperties;
 	
-	Map<String, Task> cache;
+	private Map<String, Task> cache;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 */
 	public SimpleSynchronize() {
 		super();
-		setThreads(5); 
+		setThreads(5);
 		cache = new HashMap<String, Task>();
 	}
 	
 	public void init() {
         // Get the "lsc.tasks" property
         String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
-        if (tasks != null) {
-            // Iterate on each task
-            StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
-    		while (tasksSt.hasMoreTokens()) {
-    			String taskName = tasksSt.nextToken();
-    			if(!cache.containsKey(taskName)) {
-    				cache.put(taskName, new TaskImpl(taskName, getLscProperties()));
-    			}
-    		}
+        if (tasks == null) {
+        	return;
         }
-
+        
+        // Iterate on each task
+        StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
+        while (tasksSt.hasMoreTokens()) {
+        	String taskName = tasksSt.nextToken();
+        	if (!cache.containsKey(taskName)) {
+        		cache.put(taskName, new TaskImpl(taskName, getLscProperties()));
+        	}
+		}
 	}
 	
 	public Iterable<String> getTasksName() {
@@ -179,7 +180,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			init();
 		}
 		
-		for (Task task: cache.values()) {
+		for (Task task : cache.values()) {
 
 			// Launch the task either if explicitly specified or if "all" magic keyword used
 			if (isSyncTaskAll || syncTasks.contains(task.getName())) {
@@ -188,7 +189,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				if (!launchTask(task, Task.Mode.sync)) {
 					return false;
 				} else {
-					if(task.getSyncHook() != null && task.getSyncHook() != "") {
+					if (task.getSyncHook() != null && task.getSyncHook() != "") {
 						runPostHook(task.getName(), task.getSyncHook());
 					}
 				}
@@ -199,7 +200,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				if (!launchTask(task, Task.Mode.clean)) {
 					return false;
 				} else {
-					if(task.getCleanHook() != null && task.getCleanHook() != "") {
+					if (task.getCleanHook() != null && task.getCleanHook() != "") {
 						runPostHook(task.getName(), task.getCleanHook());
 					}
 				}
@@ -207,7 +208,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
 				foundATask = true;
 
-				if(!launchTask(task, Task.Mode.async)) {
+				if (!launchTask(task, Task.Mode.async)) {
 					return false;
 				}
 			}
@@ -245,7 +246,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					synchronize2Ldap(task);
 					break;
 				case async:
-					if(task.getSourceService() instanceof IAsynchronousService) {
+					if (task.getSourceService() instanceof IAsynchronousService) {
 						LscServerImpl.startJmx(this);
 						startAsynchronousSynchronize2Ldap(task);
 					} else {
@@ -293,7 +294,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	}
 
 	/**
-	 * Invoke the hook method whether it's a postsync or postclean
+	 * Invoke the hook method whether it's a postsync or postclean.
 	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke

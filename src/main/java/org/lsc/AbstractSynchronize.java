@@ -115,19 +115,19 @@ public abstract class AbstractSynchronize {
 	protected boolean nomodrdn = false;
 
 	/**
-	 * Number of parallel threads handling synchronization and cleaning
-	 * Defaults to 5
+	 * Number of parallel threads handling synchronization and cleaning.
+	 * Defaults to 5.
 	 */
 	private int threads;
 
 	/**
-	 * Maximum time waiting for synchronizing threads tasks to finish (in seconds)
-	 * This is the global synchronization task time - 3600 by default
+	 * Maximum time waiting for synchronizing threads tasks to finish (in seconds).
+	 * This is the global synchronization task time - 3600 by default.
 	 */
 	private int timeLimit;
 
 	/**
-	 * Map used to keep trace of all runing threads
+	 * Map used to keep trace of all running threads.
 	 */
 	private Map<String, Thread> asynchronousThreads;
 
@@ -332,11 +332,11 @@ public abstract class AbstractSynchronize {
 		Thread asyncThread = asynchronousThreads.get(syncName);
         long startTime = System.currentTimeMillis();
         
-        while(asyncThread.isAlive()) {
+        while (asyncThread.isAlive()) {
         	try {
     			asyncThread.join(1000);
                 if ((System.currentTimeMillis() - startTime) > 5000) {
-                	if(forceStop) {
+                	if (forceStop) {
                     	// After 5 secondes, leaving
             			asyncThread.interrupt();
             			asyncThread.join();
@@ -344,17 +344,17 @@ public abstract class AbstractSynchronize {
                 		break;
                 	}
                 }
-        	} catch(InterruptedException ie) {
+        	} catch (InterruptedException ie) {
         		// Thread has been interrupted, doing nothing
         	}
         }
-        if(!asyncThread.isAlive()) {
+        if (!asyncThread.isAlive()) {
     		asynchronousThreads.remove(syncName);
         }
 	}
 
 	public final synchronized boolean isAsynchronousTaskRunning(final String syncName) {
-		if(asynchronousThreads.get(syncName).isAlive()) {
+		if (asynchronousThreads.get(syncName).isAlive()) {
 			return true; 
 		} else {
 			asynchronousThreads.remove(syncName);
@@ -566,7 +566,7 @@ class SynchronizeTask implements Runnable {
 	}
 
 	/**
-	 * @deprecated
+	 * @deprecated Use SynchronizeTask constructor using a Task
 	 */
 	public SynchronizeTask(final String syncName, InfoCounter counter,
 			final IService srcService, final IJndiWritableService dstService,

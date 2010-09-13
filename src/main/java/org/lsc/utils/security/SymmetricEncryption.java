@@ -263,7 +263,7 @@ public class SymmetricEncryption {
 	 * This main allow user to generate random key file.
 	 * @param argv
 	 */
-	public static void main(String argv[]) {
+	public static void main(String[] argv) {
 		try {
 			Options options = new Options();
 			options.addOption("f", "cfg", true, "Specify configuration directory");

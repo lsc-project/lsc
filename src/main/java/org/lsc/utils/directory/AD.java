@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class to manage specific entries for a Microsoft ActiveDirectory
+ * Utility class to manage specific entries for a Microsoft Active Directory.
  * 
  * @author Rémy-Christophe Schermesser <remy-christophe@schermesser.com>
  *
@@ -61,10 +61,11 @@ import java.util.Map;
 public class AD {
 
 	// Utility class
-	private AD() {}
+	private AD() { }
 	
 	/**
-	 * Set or unset some bits to a UserAccountControl attribute of an AD
+	 * Set or unset some bits in a UserAccountControl attribute of an AD.
+	 * See: http://support.microsoft.com/kb/305144.
 	 *
 	 * @param origValue the original value of UserAccessControl
 	 * @param constToApply an Array of constants to apply
@@ -73,14 +74,14 @@ public class AD {
 	public static int userAccountControlSet(int origValue, String[] constToApply) {
 		int result = origValue;
 
-		for(String str: constToApply) {
+		for (String str : constToApply) {
 			Integer constValue = Integer.parseInt(str);
-			if (setHexValue.containsKey(constValue)) {
-				result = result | setHexValue.get(constValue);
+			if (SET_HEX_VALUES.containsKey(constValue)) {
+				result = result | SET_HEX_VALUES.get(constValue);
 			}
 
-			if (unsetHexValue.containsKey(constValue)) {
-				result = result & unsetHexValue.get(constValue);
+			if (UNSET_HEX_VALUES.containsKey(constValue)) {
+				result = result & UNSET_HEX_VALUES.get(constValue);
 			}
 		}
 
@@ -88,11 +89,12 @@ public class AD {
 	}
 
 	/**
-	 * Check if a bit is set in UserAccountControl
+	 * Check if a bit is set in a UserAccountControl attribute of an AD.
+	 * See: http://support.microsoft.com/kb/305144.
 	 *
 	 * @param value the value of UserAccountControl
 	 * @param constToCheck a constant to test
-	 * @return is the attribute present
+	 * @return true if the bit is set in the given value
 	 */
 	public static boolean userAccountControlCheck(int value, String constToCheck) {
 		Integer constValue = Integer.parseInt(constToCheck);
@@ -100,7 +102,8 @@ public class AD {
 	}
 
 	/**
-	 * Toggle a bit in UserAccountControl
+	 * Toggle a bit in a UserAccountControl attribute of an AD.
+	 * See: http://support.microsoft.com/kb/305144.
 	 *
 	 * @param value the value of UserAccountControl
 	 * @param constToApply the bit to toggle
@@ -121,7 +124,7 @@ public class AD {
 	 *
 	 * @param password The cleartext password to be encoded
 	 * @return The value to write in AD's unicodePwd attribute
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException If the "UTF-16LE" charset is not supported
 	 */
 	public static String getUnicodePwd(String password) throws UnsupportedEncodingException {
 		String quotedPassword = "\"" + password + "\"";
@@ -130,9 +133,10 @@ public class AD {
 
 
 	/**
-	 * The Unix epoch (1 January 1970 00:00:00 UT) in AD's time format 
+	 * The Unix epoch (1 January 1970 00:00:00 UT) in AD's time format.
 	 */
 	private static final Long UNIX_EPOCH_IN_AD_TIME = 116444736000000000L;
+	private static final long AD_TO_UNIX_TIME_MULTIPLIER = (long) Math.pow(10, 7);
 
 	/**
 	 * <p>Transform an AD timestamp to a Unix timestamp.</p>
@@ -150,7 +154,7 @@ public class AD {
 	 */
 	public static int aDTimeToUnixTimestamp(long aDTime) {
 		// Subtract Unix epoch in AD time, and divide by 10^7 to switch from 100 ns intervals to seconds
-		return (int) ( (aDTime - UNIX_EPOCH_IN_AD_TIME) / (long) Math.pow(10, 7) );
+		return (int) ((aDTime - UNIX_EPOCH_IN_AD_TIME) / AD_TO_UNIX_TIME_MULTIPLIER);
 	}
 	
 	/**
@@ -182,7 +186,7 @@ public class AD {
 	 */
 	public static long unixTimestampToADTime(int unixTimestamp) {
 		// Multiply by 10^7 to switch from seconds to 100 ns intervals and add Unix epoch in AD time
-		return ( unixTimestamp * (long) Math.pow(10, 7) ) + UNIX_EPOCH_IN_AD_TIME;
+		return (unixTimestamp * AD_TO_UNIX_TIME_MULTIPLIER) + UNIX_EPOCH_IN_AD_TIME;
 	}
 	
 	/**
@@ -197,11 +201,13 @@ public class AD {
 		return unixTimestampToADTime(Integer.parseInt(unixTimestampString));
 	}
 	
+	/** Number of seconds in a week. */
+	public static final int WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
 	
 	/**
-	 * Return the number of weeks since the last logon
+	 * Return the number of weeks since the last logon.
 	 *
-	 * @param lastLogonTimestamp
+	 * @param lastLogonTimestamp Timestamp in AD format for the last logon, as a String.
 	 * @return the number of weeks since the last logon
 	 */
 	public static int getNumberOfWeeksSinceLastLogon(String lastLogonTimestamp) {
@@ -211,16 +217,16 @@ public class AD {
 		long secondsToUnixTimeStamp = aDTimeToUnixTimestamp(lastLogonTimestamp);
 		long lastLogonTime = (new Date().getTime() / 1000) - secondsToUnixTimeStamp;
 
-		return (int) (lastLogonTime / (60 * 60 * 24 * 7));
+		return (int) (lastLogonTime / WEEK_IN_SECONDS);
 	}
 
 	/**
-	 * Return the accountexpires time in Microsoft format
+	 * Return the accountexpires time in Microsoft AD timestamp format.
 	 *
 	 * @param expireDate the date in any format
 	 * @param format The format of the date expireDate.  See http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html.
 	 * @return the date in Microsoft AD format
-	 * @throws ParseException
+	 * @throws ParseException If the expireDate specified cannot be parsed.
 	 */
 	public static long getAccountExpires(String expireDate, String format) throws ParseException {
 		if (expireDate == null || expireDate.length() == 0) {
@@ -233,44 +239,64 @@ public class AD {
 	}
 
 	/**
-	 * Returns the accountexpires time in Microsoft format
+	 * Return the accountexpires time in Microsoft AD timestamp format.
 	 *
 	 * @param expireDate the date in the format yyyy-MM-dd.
 	 * @return the date in Microsoft AD format
-	 * @throws ParseException
+	 * @throws ParseException If the expireDate specified cannot be parsed.
 	 */
 	public static long getAccountExpires(String expireDate) throws ParseException {
 		return getAccountExpires(expireDate, "yyyy-MM-dd");
 	}
 
 	/* The Hash of values to set or to unset  */
-	private static final Map<Integer, Integer> setHexValue = new HashMap<Integer, Integer>();
-	private static final Map<Integer, Integer> unsetHexValue = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> SET_HEX_VALUES = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> UNSET_HEX_VALUES = new HashMap<Integer, Integer>();
 
-	/**
-	 * Internal values in the AD in Hex
-	 * See : http://support.microsoft.com/kb/305144
-	 */
+	/** AD userAccountControl option: SCRIPT. */
 	public static final Integer UAC_SCRIPT = 0x0001;
+	/** AD userAccountControl option: ACCOUNTDISABLE. */
 	public static final Integer UAC_ACCOUNTDISABLE = 0x0002;
+	/** AD userAccountControl option: HOMEDIR_REQUIRED. */
 	public static final Integer UAC_HOMEDIR_REQUIRED = 0x0008;
+	/** AD userAccountControl option: LOCKOUT. */
 	public static final Integer UAC_LOCKOUT = 0x0010;
+	/** AD userAccountControl option: PASSWD_NOTREQD. */
 	public static final Integer UAC_PASSWD_NOTREQD = 0x0020;
+	/**
+	 * AD userAccountControl option: PASSWD_CANT_CHANGE.
+	 * This property cannot be set simply by changing this flag in userAccountControl. 
+	 */
 	public static final Integer UAC_PASSWD_CANT_CHANGE = 0x0040;
+	/** AD userAccountControl option: ENCRYPTED_TEXT_PWD_ALLOWED. */
 	public static final Integer UAC_ENCRYPTED_TEXT_PWD_ALLOWED = 0x0080;
+	/** AD userAccountControl option: TEMP_DUPLICATE_ACCOUNT. */
 	public static final Integer UAC_TEMP_DUPLICATE_ACCOUNT = 0x0100;
+	/** AD userAccountControl option: NORMAL_ACCOUNT. */
 	public static final Integer UAC_NORMAL_ACCOUNT = 0x0200;
+	/** AD userAccountControl option: INTERDOMAIN_TRUST_ACCOUNT. */
 	public static final Integer UAC_INTERDOMAIN_TRUST_ACCOUNT = 0x0800;
+	/** AD userAccountControl option: WORKSTATION_TRUST_ACCOUNT. */
 	public static final Integer UAC_WORKSTATION_TRUST_ACCOUNT = 0x1000;
+	/** AD userAccountControl option: SERVER_TRUST_ACCOUNT. */
 	public static final Integer UAC_SERVER_TRUST_ACCOUNT = 0x2000;
+	/** AD userAccountControl option: DONT_EXPIRE_PASSWORD. */
 	public static final Integer UAC_DONT_EXPIRE_PASSWORD = 0x10000;
+	/** AD userAccountControl option: MNS_LOGON_ACCOUNT. */
 	public static final Integer UAC_MNS_LOGON_ACCOUNT = 0x20000;
+	/** AD userAccountControl option: SMARTCARD_REQUIRED. */
 	public static final Integer UAC_SMARTCARD_REQUIRED = 0x40000;
+	/** AD userAccountControl option: TRUSTED_FOR_DELEGATION. */
 	public static final Integer UAC_TRUSTED_FOR_DELEGATION = 0x80000;
+	/** AD userAccountControl option: NOT_DELEGATED. */
 	public static final Integer UAC_NOT_DELEGATED = 0x100000;
+	/** AD userAccountControl option: USE_DES_KEY_ONLY. */
 	public static final Integer UAC_USE_DES_KEY_ONLY = 0x200000;
+	/** AD userAccountControl option: DONT_REQ_PREAUTH. */
 	public static final Integer UAC_DONT_REQ_PREAUTH = 0x400000;
+	/** AD userAccountControl option: PASSWORD_EXPIRED. */
 	public static final Integer UAC_PASSWORD_EXPIRED = 0x800000;
+	/** AD userAccountControl option: TRUSTED_TO_AUTH_FOR_DELEGATION. */
 	public static final Integer UAC_TRUSTED_TO_AUTH_FOR_DELEGATION = 0x1000000;
 
 	/**
@@ -321,70 +347,70 @@ public class AD {
 	public static final Integer UAC_SET_TRUSTED_TO_AUTH_FOR_DELEGATION = UAC_TRUSTED_TO_AUTH_FOR_DELEGATION;
 	public static final Integer UAC_UNSET_TRUSTED_TO_AUTH_FOR_DELEGATION = -UAC_TRUSTED_TO_AUTH_FOR_DELEGATION;
 
-	/* Populating the two hash */
+	/* Populating the two hashes */
 	static {
-		setHexValue.put(UAC_SET_SCRIPT, UAC_SCRIPT);
-		unsetHexValue.put(UAC_UNSET_SCRIPT, ~UAC_SCRIPT);
+		SET_HEX_VALUES.put(UAC_SET_SCRIPT, UAC_SCRIPT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_SCRIPT, ~UAC_SCRIPT);
 
-		setHexValue.put(UAC_SET_ACCOUNTDISABLE, UAC_ACCOUNTDISABLE);
-		unsetHexValue.put(UAC_UNSET_ACCOUNTDISABLE, ~UAC_ACCOUNTDISABLE);
+		SET_HEX_VALUES.put(UAC_SET_ACCOUNTDISABLE, UAC_ACCOUNTDISABLE);
+		UNSET_HEX_VALUES.put(UAC_UNSET_ACCOUNTDISABLE, ~UAC_ACCOUNTDISABLE);
 
-		setHexValue.put(UAC_SET_HOMEDIR_REQUIRED, UAC_HOMEDIR_REQUIRED);
-		unsetHexValue.put(UAC_UNSET_HOMEDIR_REQUIRED, ~UAC_HOMEDIR_REQUIRED);
+		SET_HEX_VALUES.put(UAC_SET_HOMEDIR_REQUIRED, UAC_HOMEDIR_REQUIRED);
+		UNSET_HEX_VALUES.put(UAC_UNSET_HOMEDIR_REQUIRED, ~UAC_HOMEDIR_REQUIRED);
 
-		setHexValue.put(UAC_SET_LOCKOUT, UAC_LOCKOUT);
-		unsetHexValue.put(UAC_UNSET_LOCKOUT, ~UAC_LOCKOUT);
+		SET_HEX_VALUES.put(UAC_SET_LOCKOUT, UAC_LOCKOUT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_LOCKOUT, ~UAC_LOCKOUT);
 
-		setHexValue.put(UAC_SET_PASSWD_NOTREQD, UAC_PASSWD_NOTREQD);
-		unsetHexValue.put(UAC_UNSET_PASSWD_NOTREQD, ~UAC_PASSWD_NOTREQD);
+		SET_HEX_VALUES.put(UAC_SET_PASSWD_NOTREQD, UAC_PASSWD_NOTREQD);
+		UNSET_HEX_VALUES.put(UAC_UNSET_PASSWD_NOTREQD, ~UAC_PASSWD_NOTREQD);
 
-		setHexValue.put(UAC_SET_PASSWD_CANT_CHANGE, UAC_PASSWD_CANT_CHANGE);
-		unsetHexValue.put(UAC_UNSET_PASSWD_CANT_CHANGE, ~UAC_PASSWD_CANT_CHANGE);
+		SET_HEX_VALUES.put(UAC_SET_PASSWD_CANT_CHANGE, UAC_PASSWD_CANT_CHANGE);
+		UNSET_HEX_VALUES.put(UAC_UNSET_PASSWD_CANT_CHANGE, ~UAC_PASSWD_CANT_CHANGE);
 
-		setHexValue.put(UAC_SET_ENCRYPTED_TEXT_PWD_ALLOWED, UAC_ENCRYPTED_TEXT_PWD_ALLOWED);
-		unsetHexValue.put(UAC_UNSET_ENCRYPTED_TEXT_PWD_ALLOWED, ~UAC_ENCRYPTED_TEXT_PWD_ALLOWED);
+		SET_HEX_VALUES.put(UAC_SET_ENCRYPTED_TEXT_PWD_ALLOWED, UAC_ENCRYPTED_TEXT_PWD_ALLOWED);
+		UNSET_HEX_VALUES.put(UAC_UNSET_ENCRYPTED_TEXT_PWD_ALLOWED, ~UAC_ENCRYPTED_TEXT_PWD_ALLOWED);
 
-		setHexValue.put(UAC_SET_TEMP_DUPLICATE_ACCOUNT, UAC_TEMP_DUPLICATE_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_TEMP_DUPLICATE_ACCOUNT, ~UAC_TEMP_DUPLICATE_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_TEMP_DUPLICATE_ACCOUNT, UAC_TEMP_DUPLICATE_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_TEMP_DUPLICATE_ACCOUNT, ~UAC_TEMP_DUPLICATE_ACCOUNT);
 
-		setHexValue.put(UAC_SET_NORMAL_ACCOUNT, UAC_NORMAL_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_NORMAL_ACCOUNT, ~UAC_NORMAL_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_NORMAL_ACCOUNT, UAC_NORMAL_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_NORMAL_ACCOUNT, ~UAC_NORMAL_ACCOUNT);
 
-		setHexValue.put(UAC_SET_INTERDOMAIN_TRUST_ACCOUNT, UAC_INTERDOMAIN_TRUST_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_INTERDOMAIN_TRUST_ACCOUNT, ~UAC_INTERDOMAIN_TRUST_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_INTERDOMAIN_TRUST_ACCOUNT, UAC_INTERDOMAIN_TRUST_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_INTERDOMAIN_TRUST_ACCOUNT, ~UAC_INTERDOMAIN_TRUST_ACCOUNT);
 
-		setHexValue.put(UAC_SET_WORKSTATION_TRUST_ACCOUNT, UAC_WORKSTATION_TRUST_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_WORKSTATION_TRUST_ACCOUNT, ~UAC_WORKSTATION_TRUST_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_WORKSTATION_TRUST_ACCOUNT, UAC_WORKSTATION_TRUST_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_WORKSTATION_TRUST_ACCOUNT, ~UAC_WORKSTATION_TRUST_ACCOUNT);
 
-		setHexValue.put(UAC_SET_SERVER_TRUST_ACCOUNT, UAC_SERVER_TRUST_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_SERVER_TRUST_ACCOUNT, ~UAC_SERVER_TRUST_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_SERVER_TRUST_ACCOUNT, UAC_SERVER_TRUST_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_SERVER_TRUST_ACCOUNT, ~UAC_SERVER_TRUST_ACCOUNT);
 
-		setHexValue.put(UAC_SET_DONT_EXPIRE_PASSWORD, UAC_DONT_EXPIRE_PASSWORD);
-		unsetHexValue.put(UAC_UNSET_DONT_EXPIRE_PASSWORD, ~UAC_DONT_EXPIRE_PASSWORD);
+		SET_HEX_VALUES.put(UAC_SET_DONT_EXPIRE_PASSWORD, UAC_DONT_EXPIRE_PASSWORD);
+		UNSET_HEX_VALUES.put(UAC_UNSET_DONT_EXPIRE_PASSWORD, ~UAC_DONT_EXPIRE_PASSWORD);
 
-		setHexValue.put(UAC_SET_MNS_LOGON_ACCOUNT, UAC_MNS_LOGON_ACCOUNT);
-		unsetHexValue.put(UAC_UNSET_MNS_LOGON_ACCOUNT, ~UAC_MNS_LOGON_ACCOUNT);
+		SET_HEX_VALUES.put(UAC_SET_MNS_LOGON_ACCOUNT, UAC_MNS_LOGON_ACCOUNT);
+		UNSET_HEX_VALUES.put(UAC_UNSET_MNS_LOGON_ACCOUNT, ~UAC_MNS_LOGON_ACCOUNT);
 
-		setHexValue.put(UAC_SET_SMARTCARD_REQUIRED, UAC_SMARTCARD_REQUIRED);
-		unsetHexValue.put(UAC_UNSET_SMARTCARD_REQUIRED, ~UAC_SMARTCARD_REQUIRED);
+		SET_HEX_VALUES.put(UAC_SET_SMARTCARD_REQUIRED, UAC_SMARTCARD_REQUIRED);
+		UNSET_HEX_VALUES.put(UAC_UNSET_SMARTCARD_REQUIRED, ~UAC_SMARTCARD_REQUIRED);
 
-		setHexValue.put(UAC_SET_TRUSTED_FOR_DELEGATION, UAC_TRUSTED_FOR_DELEGATION);
-		unsetHexValue.put(UAC_UNSET_TRUSTED_FOR_DELEGATION, ~UAC_TRUSTED_FOR_DELEGATION);
+		SET_HEX_VALUES.put(UAC_SET_TRUSTED_FOR_DELEGATION, UAC_TRUSTED_FOR_DELEGATION);
+		UNSET_HEX_VALUES.put(UAC_UNSET_TRUSTED_FOR_DELEGATION, ~UAC_TRUSTED_FOR_DELEGATION);
 
-		setHexValue.put(UAC_SET_NOT_DELEGATED, UAC_NOT_DELEGATED);
-		unsetHexValue.put(UAC_UNSET_NOT_DELEGATED, ~UAC_NOT_DELEGATED);
+		SET_HEX_VALUES.put(UAC_SET_NOT_DELEGATED, UAC_NOT_DELEGATED);
+		UNSET_HEX_VALUES.put(UAC_UNSET_NOT_DELEGATED, ~UAC_NOT_DELEGATED);
 
-		setHexValue.put(UAC_SET_USE_DES_KEY_ONLY, UAC_USE_DES_KEY_ONLY);
-		unsetHexValue.put(UAC_UNSET_USE_DES_KEY_ONLY, ~UAC_USE_DES_KEY_ONLY);
+		SET_HEX_VALUES.put(UAC_SET_USE_DES_KEY_ONLY, UAC_USE_DES_KEY_ONLY);
+		UNSET_HEX_VALUES.put(UAC_UNSET_USE_DES_KEY_ONLY, ~UAC_USE_DES_KEY_ONLY);
 
-		setHexValue.put(UAC_SET_DONT_REQ_PREAUTH, UAC_DONT_REQ_PREAUTH);
-		unsetHexValue.put(UAC_UNSET_DONT_REQ_PREAUTH, ~UAC_DONT_REQ_PREAUTH);
+		SET_HEX_VALUES.put(UAC_SET_DONT_REQ_PREAUTH, UAC_DONT_REQ_PREAUTH);
+		UNSET_HEX_VALUES.put(UAC_UNSET_DONT_REQ_PREAUTH, ~UAC_DONT_REQ_PREAUTH);
 
-		setHexValue.put(UAC_SET_PASSWORD_EXPIRED, UAC_PASSWORD_EXPIRED);
-		unsetHexValue.put(UAC_UNSET_PASSWORD_EXPIRED, ~UAC_PASSWORD_EXPIRED);
+		SET_HEX_VALUES.put(UAC_SET_PASSWORD_EXPIRED, UAC_PASSWORD_EXPIRED);
+		UNSET_HEX_VALUES.put(UAC_UNSET_PASSWORD_EXPIRED, ~UAC_PASSWORD_EXPIRED);
 
-		setHexValue.put(UAC_SET_TRUSTED_TO_AUTH_FOR_DELEGATION, UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
-		unsetHexValue.put(UAC_UNSET_TRUSTED_TO_AUTH_FOR_DELEGATION, ~UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
+		SET_HEX_VALUES.put(UAC_SET_TRUSTED_TO_AUTH_FOR_DELEGATION, UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
+		UNSET_HEX_VALUES.put(UAC_UNSET_TRUSTED_TO_AUTH_FOR_DELEGATION, ~UAC_TRUSTED_TO_AUTH_FOR_DELEGATION);
 	}
 
 }

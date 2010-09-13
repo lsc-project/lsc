@@ -76,8 +76,8 @@ public final class SyncOptionsFactory {
 				iso.initialize(taskname);
 				cache.put(taskname, iso);
 			} catch (ClassNotFoundException e) {
-				LOGGER.error("Unable to find '{}' name. Please respecify {}.{} value.",
-						new Object[]{Configuration.LSC_SYNCOPTIONS_PREFIX, className, taskname});
+				LOGGER.error("Unable to find '{}' syncoptions class. Please respecify {}.{} value.",
+						new Object[]{className, Configuration.LSC_SYNCOPTIONS_PREFIX, taskname});
 			} catch (InstantiationException e) {
 				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it!", className);
 			} catch (IllegalAccessException e) {

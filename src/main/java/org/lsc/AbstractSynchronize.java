@@ -345,7 +345,7 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
-	 * Log all effective action.
+	 * Log an action error.
 	 *
 	 * @param jm
 	 *                List of modification to do on the Ldap server
@@ -354,7 +354,7 @@ public abstract class AbstractSynchronize {
 	 * @param except
 	 *                synchronization process name
 	 */
-	protected final void logActionError(final JndiModifications jm,
+	public static final void logActionError(final JndiModifications jm,
 					final Entry<String, LscAttributes> identifier,
 					final Exception except) {
 
@@ -377,7 +377,7 @@ public abstract class AbstractSynchronize {
 	 * @param syncName
 	 *            synchronization process name
 	 */
-	protected final void logAction(final JndiModifications jm,
+	public static final void logAction(final JndiModifications jm,
 					final Entry<String, LscAttributes> id,
 					final String syncName) {
 		switch (jm.getOperation()) {
@@ -406,11 +406,16 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
+	 * Log an action that should have happened, but conditionals prevented it.
+	 * 
 	 * @param jm
+	 *            List of modification to do on the Ldap server
 	 * @param id
+	 *            object identifier
 	 * @param syncName
+	 *            synchronization process name
 	 */
-	protected final void logShouldAction(final JndiModifications jm,
+	public static final void logShouldAction(final JndiModifications jm,
 					final Entry<String, LscAttributes> id,
 					final String syncName) {
 		switch (jm.getOperation()) {
@@ -619,7 +624,7 @@ class SynchronizeTask implements Runnable {
 			// Search destination for matching object
 			dstBean = dstService.getBean(id.getKey(), id.getValue());
 			
-			// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
+			// Clone the srcBean for comparisons (this means the srcBean is *never* changed)
 			itmBean = BeanComparator.cloneSrcBean(entry, dstBean, syncOptions, customLibrary);
 			
 			// Calculate operation that would be performed
@@ -664,7 +669,7 @@ class SynchronizeTask implements Runnable {
 				// apply condition is false, log action for debugging purposes
 				// and forget
 				if (!applyCondition || calculateForDebugOnly) {
-					abstractSynchronize.logShouldAction(jm, id, syncName);
+					AbstractSynchronize.logShouldAction(jm, id, syncName);
 					return true;
 				}
 			} else {
@@ -675,11 +680,11 @@ class SynchronizeTask implements Runnable {
 			counter.incrementCountInitiated();
 			if (dstService.apply(jm)) {
 				counter.incrementCountCompleted();
-				abstractSynchronize.logAction(jm, id, syncName);
+				AbstractSynchronize.logAction(jm, id, syncName);
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
+				AbstractSynchronize.logActionError(jm, id, new Exception("Technical problem while applying modifications to directory"));
 				return false;
 			}
 		} catch (CommunicationException e) {
@@ -687,17 +692,17 @@ class SynchronizeTask implements Runnable {
 			// everything!
 			counter.incrementCountError();
 			LOGGER.error("Connection lost! Aborting.");
-			abstractSynchronize.logActionError(jm, id, e);
+			AbstractSynchronize.logActionError(jm, id, e);
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(jm, id, e);
+			AbstractSynchronize.logActionError(jm, id, e);
 			
 			if (e.getCause() instanceof CommunicationException) {
 				LOGGER.error("Connection lost! Aborting.");
 			}
 		} catch (Exception e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(jm, id, e);
+			AbstractSynchronize.logActionError(jm, id, e);
 		}
 		
 		// default fallback after exceptions
@@ -726,10 +731,6 @@ class SynchronizeTask implements Runnable {
 
 	public ISyncOptions getSyncOptions() {
 		return syncOptions;
-	}
-
-	public AbstractSynchronize getAbstractSynchronize() {
-		return abstractSynchronize;
 	}
 
 	public Entry<String, LscAttributes> getId() {

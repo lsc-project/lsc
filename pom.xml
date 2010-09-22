@@ -324,7 +324,7 @@
 		</repository>
 		<repository>
 			<id>Codehaus Snapshot</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
+			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -349,7 +349,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>Codehaus Snapshot</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
+			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -360,7 +360,7 @@
 		</pluginRepository>
 		<pluginRepository>
 			<id>Codehaus</id>
-			<url>http://repository.codehaus.org/</url>
+			<url>https://nexus.codehaus.org/content/repositories/releases/</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>

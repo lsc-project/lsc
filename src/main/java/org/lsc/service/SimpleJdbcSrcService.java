@@ -121,7 +121,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService
 			SimpleBean sb = new SimpleBean();
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
-				sb.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				if(entry.getValue() != null) {
+					sb.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				}
 			}
 			return sb;
 		} catch (SQLException e) {

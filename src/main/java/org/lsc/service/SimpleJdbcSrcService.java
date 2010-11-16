@@ -141,7 +141,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 			}
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
-				srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				if(entry.getValue() != null) {
+					srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				}
 			}
 			return srcBean;
 		} catch (InstantiationException e) {

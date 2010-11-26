@@ -1,6 +1,6 @@
 % Ldap Synchronization Connector (LSC) - User Guide
 % Jonathan Clarke
-% 18/05/2010
+% 26/11/2010
 
 The latest version of this document is available online at
 [http://lsc-project.org/user-guide/](http://lsc-project.org/user-guide/). You
@@ -21,16 +21,7 @@ areas.
 
 It is an open source project, released under the BSD license.
 
-This document is a hands-on guide to all aspects of using LSC:
-
-1.  Basic principles
-2.  Obtaining and installing LSC
-3.  Configuring LSC
-4.  Running LSC
-5.  Integrating LSC to a running system (including best pratices)
-6.  Troubleshooting and getting help
-
-This guide aims to be exhaustive. As such, the reader is not
+This document is a hands-on guide to all aspects of using LSC. This guide aims to be exhaustive. As such, the reader is not
 expected to read it from cover to cover, but is encouraged to skip
 to the sections he's interested in. A
 [quick-start guide](http://lsc-project.org/wiki/documentation/1.2/sample)
@@ -55,7 +46,7 @@ Commonly used pivot attributes include email addresses, or serial numbers (such 
 
 ## One-to-one entry matching
 
-LSC will try and match every entry in the source to one, and only one entry in the destination. Matching is done by searching on the pivot attributes.
+LSC will try and match every entry in the source to one, and only one entry in the destination. Matching is done by searching on the pivot attributes (see details in the Configuration section below).
 
 Synchronizing several entries to one, or one entry to several could be achieved by implementing multiple synchronizations, but is a hack.
 
@@ -165,8 +156,7 @@ directory:
 There are several different aspects to configuring a connector
 using LSC:
 
-1.  Source connector configuration
-2.  Destination connector configuration
+1.  Source and destination connector configuration
 3.  Data transformation configuration
 4.  Logging configuration
 
@@ -176,9 +166,38 @@ except for logging which is setup in **logback.xml**. Each source connector may
 use additional configuration files - such as is the case for the database source
 connector used in **db2ldap** connectors.
 
-## Source connector configuration
+## Source and destination connector configuration
 
-## Destination connector configuration
+### Matching up entries
+
+This sections focuses specifically on the following properties ({src,dst} means "either src or dst"):
+
+- lsc.tasks.*MyTask*.*{src,dst}*Service.filterAll
+- lsc.tasks.*MyTask*.*{src,dst}*Service.pivotAttrs
+- lsc.tasks.*MyTask*.*{src,dst}*Service.filterId
+
+In short, here is what happens when you run LSC in sync mode:
+
+- **Once, on startup:** search source directory with *srcService.filterAll* and read the
+*srcService.pivotAttributes* from each matching entry. This gives us a long list
+of attribute values (possibly couples or tuples, if you use two or more pivots).
+- **For each value (or tuple):** running through this list:
+	- Search the source directory using the *srcService.filterId*, replacing anything
+like *{name}* by the value for the attribute by that *name* read in as a pivot
+attribute. Read in the entry, or at least the attributes specified in
+*srcService.attrs*.
+	- Search the destination directory using the *dstService.filterId*, replacing
+anything like *{name}* by the value for the attribute by that *name* read in as a
+pivot attribute **from the source**. **If an entry is found**, read it in, or at
+least the attributes specified in *dstService.attrs*.
+	- Run through all syncoptions and attributes to build up what we "want" to be
+in the destination, compare it with what we just read from the destination, and
+apply any changes.
+
+In clean mode, the opposite happens: LSC searches the destination with
+*dstService.filterAll*, reads in all the pivot attributes, and does a search with
+each of them on the source, using *srcService.filterId*.
+
 
 ## Data transformation configuration
 

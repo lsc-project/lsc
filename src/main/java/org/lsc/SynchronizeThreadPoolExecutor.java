@@ -45,8 +45,8 @@
  */
 package org.lsc;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -70,7 +70,7 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 			.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	protected SynchronizeThreadPoolExecutor(int threads) {
-		super(threads, threads, KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		super(threads, Integer.MAX_VALUE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(Configuration.MAX_CONCURRENT_SYNCHRONIZED));
 		queue = getQueue(); 
 	}
 

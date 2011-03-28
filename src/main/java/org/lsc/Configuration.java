@@ -136,6 +136,9 @@ public class Configuration {
 	
 	/** Prefix for syncoptions configuration elements in lsc.properties. */
 	public static final String LSC_SYNCOPTIONS_PREFIX = "lsc.syncoptions";
+
+	/** The maximum limit of data that can be synchronized by a synchronous task */
+	public static final int MAX_CONCURRENT_SYNCHRONIZED = 100000;
 	
 	// Default constructor.
 	protected Configuration() {

@@ -89,7 +89,6 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		// check that we have all parameters, or abort
 		Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
 		Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
-		Configuration.assertPropertyNotEmpty("requestNameForNextId", requestNameForNextId, this.getClass().getName());
 		
 		try {
 			interval = Integer.parseInt(props.getProperty("interval"));
@@ -166,6 +165,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 
 	@Override
 	public String getRequestNameForNextId() {
+		if(requestNameForNextId == null) {
+			throw new ExceptionInInitializerError("No 'requestNameForNextId' provided: cannot get the requested next id request !");
+		}
 		return requestNameForNextId;
 	}
 

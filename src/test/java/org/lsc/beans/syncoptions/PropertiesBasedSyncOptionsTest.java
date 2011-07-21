@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,31 +45,63 @@
  */
 package org.lsc.beans.syncoptions;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import mockit.Injectable;
+import mockit.NonStrict;
+import mockit.NonStrictExpectations;
+
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.lsc.utils.JScriptEvaluator;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
+import org.lsc.utils.ScriptingEvaluator;
 
 public class PropertiesBasedSyncOptionsTest {
 
+	@Injectable @NonStrict org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions conf ;
+	@Injectable @NonStrict PBSOAttribute pbsoNonExistingAttr;
+	@Injectable @NonStrict PBSOAttribute pbsoExistingAttr;
+	@Injectable @NonStrict Task task;
+	@Injectable @NonStrict org.lsc.Task taskExec;
+	
 	@Test
 	public final void test1() {
+		new NonStrictExpectations() {
+			{
+				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
+				conf.getAttribute("nonExistantAttrName"); result = pbsoNonExistingAttr; 
+				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
+				conf.getAttribute("sampleAttribute"); result = pbsoExistingAttr; 
+				task.getSyncOptions(); result = conf;
+			}
+		};
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
-		iso.initialize("sampleTask");
-		assertNotSame(iso.getStatus("sampleTask", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
+		iso.initialize(task);
+		assertNotSame(iso.getStatus("objectId", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
 		assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
 	}
 
 	@Test
 	public final void testJS() {
+		new NonStrictExpectations() {
+			@Injectable @NonStrict PBSOAttribute jsAttr;
+			{
+				jsAttr.getDefaultValues(); result = Arrays.asList(new String[] {"\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\""});
+				conf.getAttribute("JsAttribute"); result = jsAttr;
+				task.getSyncOptions(); result = conf;
+			}
+		};
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
-		iso.initialize("sampleTask");
+		iso.initialize(task);
 
 		// get JavaScript enable default value
 		List<String> defaultValues = iso.getDefaultValues(null, "JsAttribute");
@@ -80,16 +112,24 @@ public class PropertiesBasedSyncOptionsTest {
 		assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
 
 		// evaluate JavaScript
-		defaultValues = JScriptEvaluator.evalToStringList(defaultValue, null);
+		defaultValues = ScriptingEvaluator.evalToStringList(taskExec, defaultValue, null);
 		assertEquals(1, defaultValues.size());
 		assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
 	}
 
 	@Test
 	public final void testDelimiters() {
+		new NonStrictExpectations() {
+			@Injectable @NonStrict PBSOAttribute delimitedAttr;
+			{
+				delimitedAttr.getForceValues(); result = Arrays.asList(new String[] {"\"a\"", "\"b\""});
+				conf.getAttribute("DelimitedAttribute"); result = delimitedAttr;
+				task.getSyncOptions(); result = conf;
+			}
+		};
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
-		iso.initialize("sampleTask");
+		iso.initialize(task);
 
 		List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
 

@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -47,16 +47,16 @@ package org.lsc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.TaskImpl;
+import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.jmx.LscServerImpl;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.utils.LSCStructuralLogger;
@@ -77,80 +77,33 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/** the magic keyword for all synchronization. */
 	public static final String ALL_TASKS_KEYWORD = "all";
 
-	/** lsc prefix. */
-	public static final String LSC_PROPS_PREFIX = "lsc";
-
-	/** lsc.tasks property. */
-	public static final String TASKS_PROPS_PREFIX = "tasks";
-
-	/** lsc.tasks.TASKNAME.srcService property. */
-	public static final String SRCSERVICE_PROPS_PREFIX = "srcService";
-
-	/** lsc.tasks.TASKNAME.dstService property. */
-	public static final String DSTSERVICE_PROPS_PREFIX = "dstService";
-
-	/** lsc.tasks.TASKNAME.customLibrary property. */
-	public static final String CUSTOMLIBRARY_PROPS_PREFIX = "customLibrary";
-
-	/** lsc.tasks.TASKNAME.object property. */
-	public static final String OBJECT_PROPS_PREFIX = "object";
-
-	/** lsc.tasks.TASKNAME.bean property. */
-	public static final String BEAN_PROPS_PREFIX = "bean";
-
-	/** lsc.tasks.TASKNAME.bean property. */
-	public static final String ASYNCHRONOUS_PROPS = "async";
-
-	/** lsc.tasks.TASKNAME.postSyncHook property. */
-	public static final String POST_SYNC_HOOK_PROPS_PREFIX = "postSyncHook";
-	
-	/** lsc.tasks.TASKNAME.postCleanHook property. */
-	public static final String POST_CLEAN_HOOK_PROPS_PREFIX = "postCleanHook";
-	    
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleSynchronize.class);
-	
-	/** The lsc properties. */
-	private Properties lscProperties;
-	
-	private Map<String, Task> cache;
+
+	public static final List<String> EMPTY_LIST = new ArrayList<String>();
+
+	Map<String, Task> cache;
 
 	/**
-	 * Default constructor.
+	 * Default constructor
 	 */
 	public SimpleSynchronize() {
 		super();
+		setThreads(5); 
 		cache = new HashMap<String, Task>();
 	}
 	
 	public void init() {
-        // Get the "lsc.tasks" property
-        String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
-        if (tasks == null) {
-        	return;
-        }
-        
-        // Iterate on each task
-        StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
-        while (tasksSt.hasMoreTokens()) {
-        	String taskName = tasksSt.nextToken();
-        	if (!cache.containsKey(taskName)) {
-        		cache.put(taskName, new TaskImpl(taskName, getLscProperties()));
-        	}
+		Collection<org.lsc.configuration.objects.Task> tasks = LscConfiguration.getTasks();
+		for(org.lsc.configuration.objects.Task t: tasks) {
+			cache.put(t.getName(), new Task(t));
 		}
 	}
 	
-	public Iterable<String> getTasksName() {
-		return cache.keySet();
-	}
-	
-	public boolean isAsynchronousTask(String taskName) {
-		return cache.get(taskName).getSourceService() instanceof IAsynchronousService;
-	}
-
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
+	 * @param asyncTasks 
+	 *                string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks string list of the synchronization tasks to launch
 	 * @param cleanTasks string list of the cleaning tasks to launch
 	 *
@@ -163,23 +116,18 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		Boolean foundATask = false;
 
 		// Get the list of defined tasks from LSC properties
-		String tasks = getLscProperties().getProperty(TASKS_PROPS_PREFIX);
-		if (tasks == null) {
-			LOGGER.error("No tasks defined in LSC properties! Exiting ...");
-			return false;
-		}
 		// Iterate on each task
 		boolean isASyncTaskAll = asyncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
 		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
 		
-		if (getTasksName() == null) {
+		if(getTasksName() == null) {
 			return false;
-		} else if (getTasks().length == 0) {
+		} else if(getTasks().length == 0) {
 			init();
 		}
 		
-		for (Task task : cache.values()) {
+		for (Task task: cache.values()) {
 
 			// Launch the task either if explicitly specified or if "all" magic keyword used
 			if (isSyncTaskAll || syncTasks.contains(task.getName())) {
@@ -188,7 +136,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				if (!launchTask(task, Task.Mode.sync)) {
 					return false;
 				} else {
-					if (task.getSyncHook() != null && task.getSyncHook() != "") {
+					if(task.getSyncHook() != null && task.getSyncHook() != "") {
 						runPostHook(task.getName(), task.getSyncHook());
 					}
 				}
@@ -199,7 +147,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				if (!launchTask(task, Task.Mode.clean)) {
 					return false;
 				} else {
-					if (task.getCleanHook() != null && task.getCleanHook() != "") {
+					if(task.getCleanHook() != null && task.getCleanHook() != "") {
 						runPostHook(task.getName(), task.getCleanHook());
 					}
 				}
@@ -207,7 +155,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
 				foundATask = true;
 
-				if (!launchTask(task, Task.Mode.async)) {
+				if(!launchTask(task, Task.Mode.async)) {
 					return false;
 				}
 			}
@@ -245,12 +193,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					synchronize2Ldap(task);
 					break;
 				case async:
-					if (task.getSourceService() instanceof IAsynchronousService) {
+					if(task.getSourceService() instanceof IAsynchronousService) {
 						LscServerImpl.startJmx(this);
 						startAsynchronousSynchronize2Ldap(task);
 					} else {
 						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + task.getSourceService().getClass().getName() + ")");
 					}
+					break;
 				default:
 					//Should not happen
 					LOGGER.error("Unknown task mode type {}", taskMode.toString());
@@ -282,18 +231,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return true;
 	}
 	
-	public Properties getLscProperties() {
-		if (lscProperties == null) {
-			lscProperties = Configuration.getAsProperties(LSC_PROPS_PREFIX);
-			if (lscProperties == null) {
-				throw new RuntimeException("Unable to get LSC properties!");
-			}
-		}
-		return lscProperties;
-	}
-
 	/**
-	 * Invoke the hook method whether it's a postsync or postclean.
+	 * Invoke the hook method whether it's a postsync or postclean
 	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke
@@ -338,6 +277,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 	}
 
+	public Set<Entry<String, Task>> getTasksName() {
+		return cache.entrySet();
+	}
+	
+	public boolean isAsynchronousTask(String taskName) {
+		return cache.get(taskName).getSourceService() instanceof IAsynchronousService;
+	}
+
 	@Override
 	public Task getTask(String taskName) {
 		return cache.get(taskName);
@@ -348,10 +295,15 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return cache.values().toArray(new Task[cache.values().size()]);
 	}
 
-	public final boolean launchById(String taskName, String dn, LscAttributes attributes) {
+	public final boolean launchById(String taskName, Map<String, LscAttributes> entries) {
 		Task task = cache.get(taskName);
-		Entry<String, LscAttributes> id = new MapEntry<String, LscAttributes>(dn, attributes);
 		InfoCounter counter = new InfoCounter();
-		return new SynchronizeTask(task, counter, this, id).run(id);
+		boolean status = true;
+		for(Entry<String, LscAttributes> entry : entries.entrySet()) {
+			if(!new SynchronizeTask(task, counter, this, entry).run(entry)) {
+				status = false;
+			}
+		}
+		return status; 
 	}
 }

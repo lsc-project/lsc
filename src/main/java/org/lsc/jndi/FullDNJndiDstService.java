@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -60,23 +60,21 @@ import javax.naming.directory.SearchResult;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.exception.LscServiceCommunicationException;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
+import org.lsc.exception.LscServiceInitializationException;
 import org.lsc.utils.StringLengthComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>This class is a generic but configurable implementation to read data from the destination directory.</P>
+ * This class is a generic but configurable implementation to read data from the destination directory.
  * 
- * <P>You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
- * (filterAll).</P>
- * 
- * <P>This connector has the particularity of identifying entries by their DN, and not via pivot attributes.
- * For standard behavior with pivot attributes, see {@link SimpleJndiSrcService}. The list of DNs will be
- * returned ordered from longest to shortest, to ensure that "child" entries are deleted before "parent" entries
- * (during a clean operation).</P>
- * 
- * <p><b>WARNING:</b> If you're using several threads, the ordering described above may not be respected. To ensure
- * that it is, run with only one thread (run LSC with "-t 1").</p>
+ * You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
+ * (filterAll and attrId).
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -96,25 +94,30 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 *            the properties used to identify the directory parameters and context
 	 * @param beanClassName
 	 *            the bean class name that will be instantiated and feed up
+	 * @throws LscServiceInitializationException thrown if the bean class name does not exist
+	 * @throws LscServiceConfigurationException 
 	 */
 	@SuppressWarnings("unchecked")
-	public FullDNJndiDstService(final Properties props, final String beanClassName) {
+	@Deprecated
+	public FullDNJndiDstService(final Properties props, final String beanClassName) throws LscServiceException {
 		super(props);
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("Bean class {} not found. Check this class name really exists.", beanClassName);
-			throw new RuntimeException(e);
+			throw new LscServiceInitializationException(e);
 		}
 	}
 
-	/**
-	 * Destination LDAP Services getter.
-	 *
-	 * @return the Destination JndiServices object used to apply directory operations
-	 */
-	public final JndiServices getJndiServices() {
-		return JndiServices.getDstInstance();
+	@SuppressWarnings("unchecked")
+	public FullDNJndiDstService(Task task) throws LscServiceException {
+		super((Ldap)task.getDestinationService());
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
+		} catch (ClassNotFoundException e) {
+			LOGGER.error("Bean class {} not found. Check this class name really exists.", task.getBean());
+			throw new LscServiceInitializationException(e);
+		}
 	}
 
 	/**
@@ -122,11 +125,12 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @param dn DN of the entry to be returned, which is the name returned by {@link #getListPivots()}
 	 * @param pivotAttributes Unused.
+	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
-	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
-	 *             directory, or if more than one object would be returned.
+	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
+	 *             directory, or if more than one object would be returned. 
 	 */
-	public IBean getBean(String dn, LscAttributes pivotAttributes) throws NamingException {
+	public IBean getBean(String dn, LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
 
 		try {
 			SearchControls sc = new SearchControls();
@@ -138,7 +142,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
 			Method method = beanClass.getMethod("getInstance", new Class[]{SearchResult.class, String.class,
 								Class.class});
-			return (IBean) method.invoke(null, new Object[]{srObject, dn, beanClass});
+			return (IBean) method.invoke(null, new Object[]{srObject, jndiServices.completeDn(dn), beanClass});
 			
 		} catch (SecurityException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
@@ -160,6 +164,10 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
 							beanClass.getName(), e);
 			LOGGER.debug(e.toString(), e);
+		} catch (NamingException e) {
+			LOGGER.error("JNDI error while synchronizing {}: {} ", beanClass.getName(), e);
+			LOGGER.debug(e.toString(), e);
+			throw new LscServiceException(e.toString(), e);
 		}
 		return null;
 	}
@@ -169,29 +177,24 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
      * 
      * @return	Map of all entries DNs (this is not for display only!)
      * 			that are returned by the directory with an associated map of attribute names and values (never null)
-     * @throws NamingException May throw a {@link NamingException} if an error occurs during the search in the directory
+     * @throws LscServiceException 
+     * @throws NamingException 
      */
 	@SuppressWarnings("unchecked")
-	public Map<String, LscAttributes> getListPivots() throws NamingException {
-		// get list of DNs
-		List<String> idList = JndiServices.getDstInstance().getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
-
-		// sort the list by shortest first - this makes sure clean operations delete leaf elements first
+	public Map<String, LscAttributes> getListPivots() throws LscServiceException {
+		List<String> idList = null;
 		try {
+			// get list of DNs
+			idList = jndiServices.getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
+			
+			// sort the list by shortest first - this makes sure clean operations delete leaf elements first
 			Collections.sort(idList, new StringLengthComparator());
 		} catch (ClassCastException e) {
 			// ignore errors, just leave list unsorted
 		} catch (UnsupportedOperationException e) {
 			// ignore errors, just leave list unsorted
-		}
-
-		// add DN suffix to obtain full DN
-		String contextDN = getJndiServices().getContextDn();
-		for (int i = 0; i < idList.size(); i++) {
-			String id = idList.get(i);
-			if (!id.endsWith("," + contextDN)) {
-				idList.set(i, idList.get(i) + "," + contextDN);
-			}
+		} catch (NamingException e) {
+			throw new LscServiceException(e.toString(), e);
 		}
 
 		// convert to correct return format
@@ -203,9 +206,10 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		Map<String, LscAttributes> ids = new ListOrderedMap();
 
 		for (String dn : idList) {
+			String completedDn = jndiServices.completeDn(dn);
 			LscAttributes attrs = new LscAttributes();
-			attrs.put("dn", dn);
-			ids.put(dn, attrs);
+			attrs.put("dn", completedDn);
+			ids.put(completedDn, attrs);
 		}
 
 		return ids;
@@ -219,7 +223,11 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws CommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
-	public boolean apply(JndiModifications jm) throws CommunicationException {
-		return JndiServices.getDstInstance().apply(jm);
+	public boolean apply(JndiModifications jm) throws LscServiceCommunicationException {
+		try {
+			return jndiServices.apply(jm);
+		} catch (CommunicationException e) {
+			throw new LscServiceCommunicationException(e);
+		}
 	}
 }

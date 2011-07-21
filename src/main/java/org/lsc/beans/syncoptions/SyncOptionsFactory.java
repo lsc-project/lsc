@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -47,50 +47,46 @@ package org.lsc.beans.syncoptions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
+import org.lsc.configuration.objects.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.lsc.Configuration;
 
 public final class SyncOptionsFactory {
 
-	private static final SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
+	private static SyncOptionsFactory INSTANCE = new SyncOptionsFactory();
 	private Map<String, ISyncOptions> cache;
-	private static final Logger LOGGER = LoggerFactory.getLogger(SyncOptionsFactory.class);
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(SyncOptionsFactory.class);
 
 	private SyncOptionsFactory() {
 		cache = new HashMap<String, ISyncOptions>();
-		this.loadOptions();
 	}
 
-	private void loadOptions() {
-		String tasks = Configuration.getString(Configuration.LSC_TASKS_PREFIX, "default");
-		StringTokenizer stok = new StringTokenizer(tasks, ",");
-		while (stok.hasMoreTokens()) {
-			String taskname = stok.nextToken();
-			String className = Configuration.getString(Configuration.LSC_SYNCOPTIONS_PREFIX + "." + taskname, "org.lsc.beans.syncoptions.ForceSyncOptions");
-			try {
-				Class<?> cSyncOptions = Class.forName(className);
-				ISyncOptions iso = (ISyncOptions) cSyncOptions.newInstance();
-				iso.initialize(taskname);
-				cache.put(taskname, iso);
-			} catch (ClassNotFoundException e) {
-				LOGGER.error("Unable to find '{}' syncoptions class. Please respecify {}.{} value.",
-						new Object[]{className, Configuration.LSC_SYNCOPTIONS_PREFIX, taskname});
-			} catch (InstantiationException e) {
-				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it!", className);
-			} catch (IllegalAccessException e) {
-				LOGGER.error("Internal error while instanciating '{}' name. Choose another implementation or fix it!", className);
-			}
+	private void convertFromTask(Task task) {
+		try {
+			ISyncOptions iso = (ISyncOptions) task.getSyncOptions().getImplementation().newInstance();
+			iso.initialize(task);
+			cache.put(task.getName(), iso);
+		} catch (InstantiationException e) {
+			LOGGER.error(
+					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
+					task.getSyncOptions().getClass().getName());
+		} catch (IllegalAccessException e) {
+			LOGGER.error(
+					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
+					task.getSyncOptions().getClass().getName());
 		}
 	}
 
-	public static ISyncOptions getInstance(String syncName) {
-		return INSTANCE.get(syncName);
+	public static ISyncOptions convert(Task task) {
+		return INSTANCE.get(task);
 	}
 
-	private ISyncOptions get(String syncName) {
-		return cache.get(syncName);
+	private ISyncOptions get(Task task) {
+		if (!cache.containsKey(task.getName())) {
+			convertFromTask(task);
+		}
+		return cache.get(task.getName());
 	}
 }

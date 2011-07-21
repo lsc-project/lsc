@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -71,6 +71,7 @@ import org.apache.commons.cli.ParseException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
+import org.lsc.configuration.objects.LscConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,9 +104,9 @@ public class SymmetricEncryption {
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public SymmetricEncryption() throws GeneralSecurityException {
-		this(SymmetricEncryption.getDefaultKeyPath(),
-						SymmetricEncryption.getDefaultAlgorithm(),
-						SymmetricEncryption.getDefaultStrength());
+		this(SymmetricEncryption.getKeyPath(),
+						SymmetricEncryption.getAlgorithm(),
+						SymmetricEncryption.getStrength());
 	}
 
 	/**
@@ -193,9 +194,8 @@ public class SymmetricEncryption {
 	 * lsc.security.encryption.keyfile property.
 	 * @return A filename
 	 */
-	public static String getDefaultKeyPath() {
-		return Configuration.getString("lsc.security.encryption.keyfile",
-						Configuration.getConfigurationDirectory() + "lsc.key");
+	public static String getKeyPath() {
+		return LscConfiguration.getSecurity().getEncryption().getKeyfile();
 	}
 
 	/**
@@ -205,9 +205,8 @@ public class SymmetricEncryption {
 	 * in this class which specified supported algorithms.
 	 * @return A supported algorithm
 	 */
-	public static String getDefaultAlgorithm() {
-		return Configuration.getString("lsc.security.encryption.algorithm",
-						SymmetricEncryption.DEFAULT_CIPHER_ALGORITHM);
+	public static String getAlgorithm() {
+		return LscConfiguration.getSecurity().getEncryption().getAlgorithm();
 	}
 
 	/**
@@ -216,9 +215,8 @@ public class SymmetricEncryption {
 	 * through the lsc.security.encryption.strength property.
 	 * @return int
 	 */
-	public static int getDefaultStrength() {
-		return Configuration.getInt("lsc.security.encryption.strength",
-						SymmetricEncryption.DEFAULT_CIPHER_STRENGTH);
+	public static int getStrength() {
+		return LscConfiguration.getSecurity().getEncryption().getStrength();
 	}
 
 	/**
@@ -263,7 +261,7 @@ public class SymmetricEncryption {
 	 * This main allow user to generate random key file.
 	 * @param argv
 	 */
-	public static void main(String[] argv) {
+	public static void main(String argv[]) {
 		try {
 			Options options = new Options();
 			options.addOption("f", "cfg", true, "Specify configuration directory");
@@ -290,7 +288,7 @@ public class SymmetricEncryption {
 		try {
 			SymmetricEncryption se = new SymmetricEncryption();
 			if (se.generateDefaultRandomKeyFile()) {
-				LOGGER.info("Key generated: {}", SymmetricEncryption.getDefaultKeyPath());
+				LOGGER.info("Key generated: {}", SymmetricEncryption.getKeyPath());
 			}
 		} catch (GeneralSecurityException ex) {
 			LOGGER.debug(ex.toString(), ex);

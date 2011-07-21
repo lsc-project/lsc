@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -87,7 +87,7 @@ public class LscAgent implements NotificationListener {
 	private String taskName;
 
 	/** The different asynchronous task operation types */
-	private enum OperationType {
+	public enum OperationType {
 		START, STOP, STATUS, TASKS_LIST, UNKNOWN,
 	}
 
@@ -114,7 +114,7 @@ public class LscAgent implements NotificationListener {
 	/**
 	 * Default constructor
 	 */
-	protected LscAgent() {
+	public LscAgent() {
 		operation = OperationType.UNKNOWN;
 		attrsToSync = new HashMap<String, String>(); 
 	}
@@ -125,10 +125,10 @@ public class LscAgent implements NotificationListener {
 		if (retCode > 0) {
 			System.exit(retCode);
 		}
-		System.exit(jmxAgent.run());
+		System.exit(jmxAgent.run(jmxAgent.getOperation()));
 	}
 
-	protected int run() {
+	public int run(OperationType operation) {
 		if(!jmxBind()) {System.exit(1);
 			return 1;
 		}
@@ -269,7 +269,7 @@ public class LscAgent implements NotificationListener {
 	/**
 	 * Bind to the JMX Server 
 	 */
-	protected boolean jmxBind() {
+	public boolean jmxBind() {
 		try {
 			String sUrl = "service:jmx:rmi:///jndi/rmi://" + hostname + ":" + port + "/jmxrmi";
 			LOGGER.info("Connecting to remote engine on : " + sUrl);
@@ -307,5 +307,9 @@ public class LscAgent implements NotificationListener {
 
 	public void handleNotification(Notification notification, Object handback) {
 		LOGGER.info("\nReceived notification: " + notification);
+	}
+
+	public OperationType getOperation() {
+		return operation;
 	}
 }

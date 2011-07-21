@@ -1,0 +1,159 @@
+#!/bin/bash
+
+#====================================================================
+# Script for remote interaction with LDAP Synchronization Connector
+#
+# Launch synchronize task with correct classpath
+#
+#                  ==LICENSE NOTICE==
+#
+# Copyright (c) 2008-2010, LSC Project
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+
+#    * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the 
+# documentation and/or other materials provided with the distribution.
+#     * Neither the name of the LSC Project nor the names of its 
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS 
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#                  ==LICENSE NOTICE==
+#
+#                (C) 2008-2010 LSC Project
+#             Clement OUDOT <clem@lsc-project.org>
+#             Jonathan CLARKE <jon@lsc-project.org>
+#
+#====================================================================
+# Possible exit codes:
+#	- 0: success, LSC finished running
+#	- 1: LSC seems to be already running, aborting
+#	- 2: 'java' executable not found on PATH or in JAVA_HOME, aborting
+#====================================================================
+
+
+#====================================================================
+# Changelog
+#====================================================================
+# Version 0.1 (07/2011):
+# - copy from lsc
+# Author: Sebastien Bahloul
+#====================================================================
+
+# work out where LSC lives
+LSC_HOME=$(dirname "${BASH_SOURCE}")/..
+if [ ${LSC_HOME:0:1} != "/" ] ; then
+	LSC_HOME="${PWD}/${LSC_HOME}"
+fi
+
+#====================================================================
+# Configuration
+#====================================================================
+
+CFG_DIR="$LSC_HOME/etc"
+LIB_DIR="$LSC_HOME/lib"
+LOG_DIR="/tmp"
+LOG_FILE="$LOG_DIR/lsc-agent.log"
+
+mkdir -p "$LOG_DIR"
+
+#====================================================================
+# Functions
+#====================================================================
+function log() {
+	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" >> "$LOG_FILE"
+}
+
+function fatal() {
+	log $1
+	echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [lsc] $1" 1>&2
+}
+
+# Determine where the java exectuable is
+function get_java() {
+	# Do we have a JAVA_HOME environment variable?
+	if [ "z" != "z${JAVA_HOME}" ]; then
+		JAVA_COMMAND="${JAVA_HOME}/bin/java"
+		return
+	fi
+
+	# Try java command on PATH as an alternative
+	JAVA_COMMAND="$(which java)"
+	if [ $? -eq 0 ]; then return; fi
+
+	# Nothing seems approprite, warn and exit
+	fatal "No java executable found on PATH or in JAVA_HOME! Aborting."
+	fatal "Define JAVA_HOME or adjust your PATH variable to include java."
+	exit 2
+}
+
+function build_classpath() {
+	CLASSPATH="$CLASSPATH:."
+	for jar in "$LIB_DIR"/*.jar
+	do
+		CLASSPATH="$CLASSPATH:$jar"
+	done
+
+	# is this Cygwin? if so, convert path to Windows format for the JVM
+	CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
+	if [ $? -eq 0 ]; then
+		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
+	fi
+
+	export CLASSPATH
+}
+
+#====================================================================
+# Main
+#====================================================================
+
+# check if we have java executable
+get_java
+
+# check if LSC is not already running
+if [ $(grep -ahv ^grep /proc/*/cmdline | grep -a org.lsc.jmx.LscAgent | wc -l) -ne 0 ] 
+then
+	# LSC already running
+	fatal "LSC already running - launch aborted"
+
+	# since LSC already running, don't launch and exit
+	exit 1
+fi
+
+# LSC not already running
+log "Starting LSC Remote Agent"
+
+build_classpath
+"${JAVA_COMMAND}" -cp "$CLASSPATH" org.lsc.jmx.LscAgent $* 
+
+status=$?
+
+# LSC finished running
+log "LSC Remote Agent finished running"
+
+if [ $status -ne 0 ]
+then
+	echo "Last log file line: `tail -2 "$LOG_FILE" | head -1`" 1>&2
+	exit $status
+fi
+
+#====================================================================
+# Exit
+#====================================================================
+exit 0

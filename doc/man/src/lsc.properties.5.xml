@@ -1,14 +1,14 @@
 <?xml version="1.0" standalone='no'?>
-<!DOCTYPE manpage SYSTEM "http://masqmail.cx/lsc-acd-passwords/lsc-acd-passwords.dtd">
-<?xml-stylesheet type="text/xsl" href="http://masqmail.cx/lsc-acd-passwords/lsc-acd-passwords.xsl" ?>
+<?xml-stylesheet type="text/xsl" href="xmltoman.xsl" ?>
 
-<manpage name="lsc.properties" section="1" desc="LSC configuration file">
+<manpage name="lsc.properties" section="5" desc="LSC configuration file">
 
   <synopsis>
-    /usr/local/lsc-acd-passwords/etc/lsc.properties
+    /etc/lsc/lsc.properties or $LSC_HOME/etc/lsc.properties
   </synopsis>
 
   <description>
+  	IMPORTANT NOTE: This file format is now DEPRECATED. Please consider moving to lsc.xml file format ! Take a look at the first section "Moving to XML new configuration format"
     <p>
       lsc.properties is the configuration file of the
       <manref name="lsc" section="1"/> command. It defines all
@@ -24,6 +24,12 @@
     </p>
   </description>
 
+  <section name="Moving to XML new configuration file format">
+    <p>
+      Options described in this section apply to all source and destination
+      services.
+    </p>
+  </section>
   <section name="Global configuration options">
     <p>
       Options described in this section apply to all source and destination
@@ -367,16 +373,18 @@
 
   <section name = "Authors">
     <p>
-      lsc-acd-passwords was written by
-        Sebastien Bahloul &lt;sbahloul@linagora.com&gt;,
-        Jonathan Clarke &lt;jclarke@linagora.com&gt;,
-        Thomas Chemineau &lt;tchemineau@linagora.com&gt;.
+      lsc-passwords was written by
+        Sebastien Bahloul &lt;sbahloul@lsc-project.org&gt;,
+        Jonathan Clarke &lt;jclarke@lsc-project.org&gt;,
+        Remy-Christophe Schermesser &lt;rschermesser@lsc-project.org&gt;,
+        Thomas Chemineau &lt;tchemineau@lsc-project.org&gt;.
     </p>
   </section>
 
   <section name = "See also">
     <p>
       <manref name="lsc" section="1"/>
+      <manref name="lsc.xml" section="5"/>
     </p>
     <p>
       <url href="http://lsc-project.org/"/>

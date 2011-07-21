@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,15 +45,20 @@
  */
 package org.lsc.utils.directory;
 
-import com.unboundid.ldap.sdk.LDAPException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.naming.NamingException;
 
+import mockit.Mocked;
+
 import org.junit.Test;
+import org.lsc.Task;
+import org.lsc.utils.ScriptingEvaluator;
 
-import static org.junit.Assert.*;
-
-import org.lsc.utils.JScriptEvaluator;
+import com.unboundid.ldap.sdk.LDAPException;
+;
+;
 
 /**
  * Test LDAP function library.
@@ -62,18 +67,20 @@ import org.lsc.utils.JScriptEvaluator;
  */
 public class LDAPTest {
 
+	@Mocked Task task;
+	
 	@Test
 	public final void testCanBind() throws NamingException, LDAPException {
 		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "public"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=nobody", "secret"));
 
-		assertTrue(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
-						+ "\"cn=Directory Manager\", \"secret\")", null));
-		assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
-						+ "\"cn=Directory Manager\", \"public\")", null));
-		assertFalse(JScriptEvaluator.evalToBoolean("LDAP.canBind(\"ldap://localhost:33389/\", "
-						+ "\"cn=nobody\", \"secret\")", null));
+		assertTrue(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
+				+ "\"cn=Directory Manager\", \"secret\")", null));
+		assertFalse(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
+				+ "\"cn=Directory Manager\", \"public\")", null));
+		assertFalse(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
+				+ "\"cn=nobody\", \"secret\")", null));
 
 		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager",
 						"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "secret"));

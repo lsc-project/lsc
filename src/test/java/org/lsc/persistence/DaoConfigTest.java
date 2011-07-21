@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,20 +45,23 @@
  */
 package org.lsc.persistence;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
-import org.junit.Test;
+import org.apache.commons.configuration.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
-
-import static org.junit.Assert.*;
-
+import org.junit.Test;
+import org.lsc.configuration.PropertiesConfigurationHelper;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.connection.Database;
+import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,12 +75,13 @@ public class DaoConfigTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
 	@Before
-	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException {
-		Properties pc = org.lsc.persistence.DaoConfig.getSqlMapProperties();
-		pc.put("url", "jdbc:hsqldb:file:target/hsqldb/lsc");
+	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, ConfigurationException {
+		PropertiesConfigurationHelper.loadConfigurationFrom("etc/lsc.properties");
+		Database pc = (Database) LscConfiguration.getConnection("src-jdbc");
+		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
-		Class.forName((String) pc.get("driver")).newInstance();
-		con = DriverManager.getConnection((String) pc.get("url"));
+		Class.forName(pc.getDriver()).newInstance();
+		con = DriverManager.getConnection(pc.getUrl());
 	}
 
 	@Test
@@ -94,8 +98,8 @@ public class DaoConfigTest {
 	}
 
 	@Test
-	public final void testGetSqlMapClient() {
-		assertNotNull(DaoConfig.getSqlMapClient());
+	public final void testGetSqlMapClient() throws LscServiceConfigurationException {
+		assertNotNull(DaoConfig.getSqlMapClient((Database)LscConfiguration.getConnection("src-jdbc")));
 	}
 
 	/**

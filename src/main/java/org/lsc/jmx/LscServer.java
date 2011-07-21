@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -93,4 +93,41 @@ public interface LscServer {
 	 * @param taskName
 	 */
 	public void shutdownAsyncTask(String taskName);
+
+	/**
+	 * Just ping the LSC instance
+	 * @return the server status
+	 */
+	public boolean ping();
+
+	/**
+	 * Return LSC process identifier
+	 * @return the process identifier
+	 */
+	public String getPid();
+
+	/**
+	 * Return the status of the current LSC instance
+	 * @return the instance status
+	 */
+	public String status();
+
+	/**
+	 * Stop the whole LSC instance
+	 */
+	public void stop();
+	
+	/**
+	 * Accessor
+	 * @return the configuration directory
+	 */
+	public String getConfigurationDirectory();
+
+	/**
+	 * Launch a clean task
+	 * @param taskName
+	 * @throws Exception
+	 */
+	public void launchCleanTask(String taskName) throws Exception;
+
 }

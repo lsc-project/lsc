@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008 - 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2009 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  ****************************************************************************
  */
@@ -53,15 +53,18 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
+import org.lsc.configuration.objects.Task;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.service.IAsynchronousService;
 
 /**
  * This directory service class is handling either full 
  * synchronization, or partial updates.
  *  
- * @TODO Manage an history of updates to avoid resynchronizing two
+ * TODO: Manage an history of updates to avoid resynchronizing two
  * 		 or three times partial identical updates
- * @TODO Handling of timezone
+ * TODO: Handling of timezone
  * 
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
@@ -83,7 +86,8 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 	/** The interval in seconds */
 	private int interval;
 
-	public PullableJndiSrcService(Properties props, String beanClassName) {
+	@Deprecated
+	public PullableJndiSrcService(Properties props, String beanClassName) throws LscServiceConfigurationException {
 		super(props, beanClassName);
 		// Default LDAP date filter
 		filterTimestamp = props.getProperty("filterAsync", "modifytimestamp>={0}");
@@ -91,10 +95,29 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		dateFormat = props.getProperty("dateFormat", "yyyyMMddHHmmss'Z'");
 		// Default interval
 		interval = Integer.parseInt(props.getProperty("interval", "5"));
-		dateFormater = new SimpleDateFormat(dateFormat);
+		try {
+			dateFormater = new SimpleDateFormat(dateFormat);
+		} catch(IllegalArgumentException e) {
+			throw new LscServiceConfigurationException(e);
+		}
 	}
 
-	public Entry<String, LscAttributes> getNextId() throws NamingException {
+	public PullableJndiSrcService(Task task) throws LscServiceConfigurationException {
+		super(task);
+		// Default LDAP date filter
+		filterTimestamp = task.getOtherSetting("filterAsync", "modifytimestamp>={0}");
+		// Default LDAP date format
+		dateFormat = task.getOtherSetting("dateFormat", "yyyyMMddHHmmss'Z'");
+		// Default interval
+		interval = Integer.parseInt(task.getOtherSetting("interval", "5"));
+		try {
+			dateFormater = new SimpleDateFormat(dateFormat);
+		} catch(IllegalArgumentException e) {
+			throw new LscServiceConfigurationException(e);
+		}
+	}
+
+	public Entry<String, LscAttributes> getNextId() throws LscServiceException {
 		if (listPivots != null && !listPivots.isEmpty()) {
 			Entry<String, LscAttributes> entry = listPivots.iterator().next();
 			listPivots.remove(entry);
@@ -130,9 +153,13 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 			// We may replay some synchronization two times but there's now simple way to avoid it
 			lastSuccessfulSync = new Date();
 
-			listPivots = JndiServices.getSrcInstance().getAttrsList(getBaseDn(),
-							filterTimestamp.replaceAll("\\{0\\}", date), SearchControls.SUBTREE_SCOPE,
-							getAttrsId()).entrySet();
+			try {
+				listPivots = jndiServices.getAttrsList(getBaseDn(),
+								filterTimestamp.replaceAll("\\{0\\}", date), SearchControls.SUBTREE_SCOPE,
+								getAttrsId()).entrySet();
+			} catch (NamingException e) {
+				throw new LscServiceException(e);
+			}
 			if (listPivots.isEmpty()) {
 				return null;
 			}
@@ -143,6 +170,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 	/**
 	 * The interval accessor
 	 */
+	@Override
 	public long getInterval() {
 		return interval;
 	}

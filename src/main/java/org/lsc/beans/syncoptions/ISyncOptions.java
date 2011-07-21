@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -48,7 +48,8 @@ package org.lsc.beans.syncoptions;
 import java.util.List;
 import java.util.Set;
 
-import org.lsc.jndi.JndiModificationType;
+import org.lsc.LscModificationType;
+import org.lsc.configuration.objects.Task;
 
 /**
  * 
@@ -74,9 +75,9 @@ public interface ISyncOptions {
 
 	/**
 	 * Initialize the synchronization options policy.
-	 * @param taskname the task name on which applying syncopts
+	 * @param task the task configuration object on which applying syncopts
 	 */
-	void initialize(String taskname);
+	void initialize(Task task);
 
 	/**
 	 * Analyze the context to get the right synchronization status to apply.
@@ -161,31 +162,18 @@ public interface ISyncOptions {
 	String getDeleteCondition();
 
 	/**
-	 * Returns the condition for a modrdn
+	 * Returns the condition for a id change
 	 *
 	 * @return the condition or "true" if none is specified (default)
 	 */
-	String getModrdnCondition();
+	String getChangeIdCondition();
+	
+
+	String getCondition(LscModificationType operation);
 
 	/**
-	 * Returns the condition for this operation
-	 *
-	 * @param operation The operation type
-	 * @return the condition or "true" if none is specified (default)
-	 */
-	String getCondition(JndiModificationType operation);
-
-	/**
-	 * Get the setting to generate a DN
-	 *
-	 * @return String The script to generate a DN
+	 * Return the expression used to infer the new object DN
+	 * @return the new object dn pattern
 	 */
 	String getDn();
-
-	/**
-	 * Get the task name
-	 *
-	 * @return String The current task name.
-	 */
-	String getTaskName();
 }

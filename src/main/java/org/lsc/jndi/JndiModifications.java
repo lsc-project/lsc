@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -53,8 +53,11 @@ import java.util.Map;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
+import org.lsc.LscAttributeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,5 +208,33 @@ public class JndiModifications {
 	 */
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
+	}
+
+	public static List<ModificationItem> fromLscAttributeModifications(
+			List<LscAttributeModification> lams) {
+		if(lams == null) {
+			return null;
+		}
+		List<ModificationItem> mis = new ArrayList<ModificationItem>();
+		for(LscAttributeModification lam: lams) {
+			int operationType = DirContext.REPLACE_ATTRIBUTE;
+			switch(lam.getOperation()) {
+				case ADD_VALUES:
+					operationType = DirContext.ADD_ATTRIBUTE;
+					break;
+				case DELETE_VALUES:
+					operationType = DirContext.REMOVE_ATTRIBUTE;
+					break;
+				case REPLACE_VALUES:
+					operationType = DirContext.REPLACE_ATTRIBUTE;
+					break;
+			}
+			Attribute attr = new BasicAttribute(lam.getAttributeName());
+			for(Object val : lam.getValues()) {
+				attr.add(val);
+			}
+			mis.add(new ModificationItem(operationType, attr));
+		}
+		return mis;
 	}
 }

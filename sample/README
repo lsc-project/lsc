@@ -7,4 +7,4 @@ Both the database (HSQLDB) and the directory (OpenDS) are included as
 dependencies of LSC, and will be launched automatically.
 
 See full details about running this sample online:
-http://lsc-project.org/wiki/documentation/1.2/sample
+http://lsc-project.org/wiki/documentation/2.0/sample

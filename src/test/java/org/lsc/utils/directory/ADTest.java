@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -62,10 +62,10 @@ public class ADTest {
 
 	// various representations of the reference date 01/10/08 8:12:34 UTC
 	private static Calendar refTimeCalendar;
-	private static final String REF_TIME_AD_STRING = "128673223540000000";
-	private static final long REF_TIME_AD_LONG = 128673223540000000L;
-	private static final String REF_TIME_UNIX_STRING = "1222848754";
-	private static final int REF_TIME_UNIX_INT= 1222848754;
+	private static final String refTimeADString = "128673223540000000";
+	private static final long refTimeADLong = 128673223540000000L;
+	private static final String refTimeUnixString = "1222848754";
+	private static final int refTimeUnixInt= 1222848754;
 
 	@Before
 	public void setUp() {
@@ -116,7 +116,7 @@ public class ADTest {
 	@Test
 	public final void testNumberWeeksLastLogon() {
 		// get result from tested class
-		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon(REF_TIME_AD_STRING);
+		int numWeeksFromLastLogon = AD.getNumberOfWeeksSinceLastLogon(refTimeADString);
 
 		// calculate result from known date to now
 		Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -133,7 +133,7 @@ public class ADTest {
 	public final void testADTimeToUnixTimestampWithString() {
 		Calendar testedTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		testedTime.clear();
-		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(REF_TIME_AD_STRING) * (long) 1000);
+		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(refTimeADString) * (long) 1000);
 		
 		assertEquals(refTimeCalendar, testedTime);
 	}
@@ -145,7 +145,7 @@ public class ADTest {
 	public final void testADTimeToUnixTimestampWithLong() {
 		Calendar testedTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		testedTime.clear();
-		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(REF_TIME_AD_LONG) * (long) 1000);
+		testedTime.setTimeInMillis(AD.aDTimeToUnixTimestamp(refTimeADLong) * (long) 1000);
 		
 		assertEquals(refTimeCalendar, testedTime);
 	}
@@ -155,7 +155,7 @@ public class ADTest {
 	 */
 	@Test
 	public final void testUnixTimestampToADTimeWithString() {
-		assertEquals(REF_TIME_AD_LONG, AD.unixTimestampToADTime(REF_TIME_UNIX_STRING));
+		assertEquals(refTimeADLong, AD.unixTimestampToADTime(refTimeUnixString));
 	}
 	
 	/**
@@ -163,7 +163,7 @@ public class ADTest {
 	 */
 	@Test
 	public final void testUnixTimestampToADTimeWithInt() {
-		assertEquals(REF_TIME_AD_LONG, AD.unixTimestampToADTime(REF_TIME_UNIX_INT));
+		assertEquals(refTimeADLong, AD.unixTimestampToADTime(refTimeUnixInt));
 	}
 	
 }

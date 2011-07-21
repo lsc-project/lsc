@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -46,6 +46,7 @@
 package org.lsc;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -56,6 +57,10 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.configuration.ConfigurationException;
+import org.lsc.configuration.PropertiesConfigurationHelper;
+import org.lsc.configuration.XmlConfigurationHelper;
+import org.lsc.configuration.objects.LscConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,22 +83,24 @@ public final class Launcher {
 	/** List of the cleaning types. */
 	private List<String> cleanType;
 
-	/** Configuration directory location. */
+	/** Configuration files location */
 	private String configurationLocation;
 
 	/** Default synchronize instance. */
 	private SimpleSynchronize sync;
 
-	/** Number of parallel threads to run a task. */
+	/** Number of parallel threads to run a task */
 	private int threads;
 
-	/** Time limit in seconds. */
+	/** Time limit in seconds*/
 	private int timeLimit;
 	
-	/** Available command line options definition. */
+	/** Available command line options definition */
 	private static Options options;
 	
-	/** Parsed command line options. */
+	private boolean convertConfiguration;
+	
+	/** Parsed command line options */
 	private CommandLine cmdLine;
 	
 	// define command line options recognized
@@ -104,10 +111,9 @@ public final class Launcher {
 		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
 		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
 		options.addOption("f", "config", true, "Specify configuration directory");
-		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: "
-													+ AbstractSynchronize.DEFAULT_NUMBER_THREADS + ")");
-		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: "
-													+ AbstractSynchronize.MAX_THREAD_WAIT + ")");
+		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: 5)");
+		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
+		options.addOption("x", "convert", false, "Convert lsc.properties to lsc.xml (-f is mandatory while converting)");
 		options.addOption("h", "help", false, "Get this text");
 	}
 	
@@ -126,17 +132,25 @@ public final class Launcher {
 	 * @param args parameters passed by the JRE
 	 */
 	public static void main(final String[] args) {
+		int status = launch(args);
+		if(status != 0) {
+			System.exit(status);
+		}
+	}
+
+		
+	public static int launch(final String[] args) {
 		try {
 			// Create the object and parse options
 			Launcher obj = new Launcher();
 			int retCode = obj.parseOptions(args);
 	
 			if (retCode != 0) {
-				System.exit(retCode);
+				return retCode;
 			}
 	
 			// Wrap the launcher
-			obj.run();
+			return obj.run();
 		} catch (Exception e) {
 			if (!Configuration.isLoggingSetup()) {
 				System.err.println("Error: " + e.getMessage());
@@ -144,14 +158,14 @@ public final class Launcher {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
-			System.exit(1);
+			return 1;
 		}
 	}
 
 	/**
 	 * Launch the synchronization and cleaning process.
 	 */
-	public void run() {
+	public int run() {
 		try {
 			// if a configuration directory was set on command line, use it to set up Configuration
 			Configuration.setUp(configurationLocation);
@@ -160,15 +174,22 @@ public final class Launcher {
 			sync = new SimpleSynchronize();
 			if (!sync.parseOptions(cmdLine)) {
 				printHelp();
-				System.exit(1);
+				return 1;
+			}
+			if(convertConfiguration) {
+				if(configurationLocation == null) {
+					printHelp();
+					return 1;
+				}
+				return convertConfiguration();
 			}
 			
 			// do the work!
 			if (threads > 0) {
-				sync.setThreads(threads);
+				sync.setThreads( threads );
 			}
 			if (timeLimit > 0) {
-				sync.setTimeLimit(timeLimit);
+				sync.setTimeLimit( timeLimit );
 			}
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
@@ -178,8 +199,9 @@ public final class Launcher {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
-			System.exit(1);
+			return 1;
 		}
+		return 0;
 	}
 
 	/**
@@ -211,14 +233,17 @@ public final class Launcher {
 			if (cmdLine.hasOption("c")) {
 				cleanType = parseSyncType(cmdLine.getOptionValue("c"));
 			}
+			if (cmdLine.hasOption("x")) {
+				convertConfiguration = true;
+			}
 		
-			if (cmdLine.getOptions().length == 0 
-					|| cmdLine.hasOption("h")
-					|| ((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0))) {
+			if(cmdLine.getOptions().length == 0 || 
+							cmdLine.hasOption("h") || 
+							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0)) && ! convertConfiguration) {
 				printHelp();
 				return 1;
 			}
-			if (!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
+			if(!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
 				System.err.println("Asynchronous synchronization is mutually exclusive with synchronous synchronizing and cleaning !");
 				printHelp();
 				return 1;
@@ -257,4 +282,25 @@ public final class Launcher {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("lsc", options);
 	}
+
+	private int convertConfiguration() {
+		try {
+			File xmlFile = new File(configurationLocation, XmlConfigurationHelper.LSC_CONF_XML);
+			if(!xmlFile.exists()) {
+				PropertiesConfigurationHelper.loadConfigurationFrom(new File(configurationLocation, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
+				new XmlConfigurationHelper().saveConfiguration(new File(configurationLocation, XmlConfigurationHelper.LSC_CONF_XML).getAbsolutePath(),
+						LscConfiguration.getInstance());
+				LOGGER.info("Configuration file format successfully converted to " + xmlFile.getAbsolutePath());
+				return 0;
+			} else {
+				LOGGER.error(xmlFile.getAbsolutePath() + " already exists. Please move it away to avoid overriding it !");
+			}
+		} catch (ConfigurationException e) {
+			LOGGER.error(e.toString(), e);
+		} catch (IOException e) {
+			LOGGER.error(e.toString(), e);
+		}
+		return 1;
+	}
+
 }

@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,15 +45,19 @@
  */
 package org.lsc.configuration.objects;
 
-import com.unboundid.ldap.sdk.LDAPURL;
-import java.net.URI;
+import java.util.Properties;
+
+import org.apache.tapestry5.beaneditor.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
- *
  * @author rschermesser
  */
-//public abstract class Connection {
-public class Connection {
+@XStreamAlias("connection")
+public abstract class Connection {
 
 	/**
 	 * <connection type="ldap">
@@ -76,10 +80,74 @@ public class Connection {
 			<password></password>
 			<driver>org.hsqldb.blabla</driver>
 		</connection>
+		<connection type="nis">
+			<name>myisSServer</name>
+			<url>nis://server:port/domain</url>
+		</connection>
 	 */
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+
+	@Validate("required")
+	@XStreamAlias("id")
+	protected String name;
 	
-	private String name;
-	private LDAPURL url;
-	private String username;
-	private String password;
+	@Validate("required")
+	protected String url;
+	
+	protected String username;
+	
+	protected String password;
+	
+	public void load(String name, Properties props) {
+		this.name = name;
+		for(String key : props.stringPropertyNames()) {
+			if(key.endsWith("url")) {
+				url  = props.getProperty(key);
+			} else {
+				LOGGER.error("Unknown \"" + name + "\" parameter !");
+			}
+		}
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * This method provides the service class
+	 * @param isSource give service status : source or destination
+	 * @return the corresponding service class
+	 */
+	public abstract Class<?> getService(boolean isSource);
+
+	public abstract String getConnectionTypeName();
 }

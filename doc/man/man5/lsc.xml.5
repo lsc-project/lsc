@@ -1,0 +1,133 @@
+.TH lsc.xml 5 User Manuals
+.SH NAME
+lsc.xml \- LSC configuration file
+.SH SYNOPSIS
+\fB /etc/lsc/lsc.xml or $LSC_HOME/etc/lsc.xml \f1
+.SH DESCRIPTION
+lsc.xml is the configuration file of the \fBlsc(1)\f1 command. It defines all parameters to work on the appropriate server. 
+
+Ldap Synchronization Connector, or LSC, is a tool for synchronizing data repositories, with a particular focus on identity information. 
+
+It can read from a variety of different sources, perform limitless transformations of data on-the-fly and write the results to a LDAP directory. The tool is designed to be fast, and extensible in all areas. 
+
+It is an open source project, released under the BSD license.
+
+Requirements: JRE 1.6. Most tests are run against Sun / Oracle JRE but basic build is also achieved through OpenJDK 6. 
+.SH GENERAL DESCRIPTION
+The LSC XML file format is directly map with configuration objects. The settings full description is included as the Javadoc class comments. You will find there a shorter version excluding plugins. 
+
+Each parameter can be either a static or a dynamic value. If dynamic the value is interpreted as a scripting string, Javascript by default or any JSR 223 supported language. 
+
+In the XML file, you will find 3 main sections : - tasks - connections - security settings 
+
+The tasks described how the source service is synchronized with the destination service. It mainly contains specific services settings (LDAP filter, SQL request, ...) and synchronization options (mapping from a dataset to another). The connections zone contains the description of the basic services settings (url, login, password, ...). The security zone includes severeals shared settings about encryption, hashing, ... 
+
+This documentation is organized in a "A.B.C = TEXT" format that must be understood in XML notation like : <lsc> <A> <B> <C>TEXT</C> </B> </A> </lsc> The lsc xml node is not included in the following options description but is implied and mandatory </p> <p> The id attribute that may be included inside node is forced by the XML to object mapping engine (XStream) and does not have any particular meaning. If you manipulate the XML file format by your own, just remove it, XStream will do the job. Take core not to copy it to avoid giving the same id to two different nodes. 
+.SH TASK SECTION
+.TP
+\fBtask.name\f1
+Each task must be uniquely named to identify it inside the engine and it inside log messages. MANDATORY - STATIC 
+.TP
+\fBtask.bean\f1
+This option describes the Java object i OPTIONAL - STATIC - Default to "org.lsc.beans.SimpleBean" 
+.TP
+\fBdn.real_root\f1
+LSC also has to know the real root DN (used to build factice DN for service as database for example). You should specify a complete LDAP DN, like \fBdn.real_root = dc=lsc-project,dc=org\f1 for example. 
+.TP
+\fBdn.people\f1
+LSC also has to know the RDN of the people's tree. You should specify a LDAP RDN, like \fBdn.people = ou=people\f1 for example. 
+.TP
+\fBlsc.tasks\f1
+Name of available LSC tasks, separated by commas. For example, you could have \fBtask1, task2, task3\f1 as a value. Be careful that tasks also have to be defined. 
+.SH SERVICE CONFIGURATION OPTIONS
+These are global configuration options to define the source and destination services. You must replace the term \fBX\f1 in option label by \fBsrc\f1 to configure source service, or \fBdst\f1 to configure destination service. 
+.TP
+X\fB.java.naming.factory.initial\f1
+Initial context factory to use for data abstraction layer. You could specify the value \fBcom.sun.jndi.ldap.LdapCtxFactory\f1. It should be the same value for both LDAP source and destination services. 
+.TP
+X\fB.java.naming.ldap.version\f1
+Version of the LDAP protocol to use to connect to the LDAP server. \fB3\f1 is recommended. 
+.TP
+X\fB.java.naming.provider.url\f1
+URI LDAP to connect to. Note that specifying the search base in the URI is not necessary, but could improve performance. 
+.TP
+X\fB.java.naming.security.authentication\f1
+LDAP authentication mechanism to use. Generally, this value does not need to be changed. Put \fBsimple\f1 value to use authentication based on DN and password. 
+.TP
+X\fB.java.naming.security.principal\f1
+LSC uses a DN on the LDAP server to authenticate itself and get rights on LDAP data. The value is a complete DN of an existing entry in the specified LDAP server. 
+.TP
+X\fB.java.naming.security.credentials\f1
+The appropriate password for the DN used above, in case you use simple LDAP authentication. 
+.TP
+X\fB.java.naming.referral\f1
+Choose how to follow LDAP referrals. Values could be \fBignore\f1, \fBfollow\f1, or \fBthrow\f1. 
+.TP
+X\fB.java.naming.ldap.derefAliases\f1
+Choose how to follow LDAP aliases. Values could be \fBnever\f1, \fBalways\f1, \fBsearch\f1 or \fBfind\f1. 
+.SH TASK CONFIGURATION OPTIONS
+This section describes available options to configure a LSC task. You should replace \fBTASKNAME\f1 by a task name specified in the global configuration option \fBlsc.tasks\f1. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.object\f1
+The full name of the JAVA class to use for plain LDAP object. For example, for person, you could use \fBorg.lsc.objects.inetOrgPerson\f1. Be careful that this class has to exist in this instance of LSC. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.bean\f1
+The full name of the JAVA BEAN class to use for specialisation of the synchronization. For example, for person, you could use \fBorg.lsc.beans.inetOrgPersonBean\f1. Be careful that this class has to exist in this instance of LSC. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.type\f1
+The synchronisation type for this task between the two defined services. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService\f1
+The fullname of the JAVA JNDI class to use to retrieve information from source service. There is a generic class for LDAP connection, which is \fBorg.lsc.jndi.SimpleJndiSrcService\f1. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService.baseDn\f1
+The RDN of the people tree on the source service. Generally, it should be \fBou=people\f1. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService.attrId\f1
+The attribute used to identify a user in the source service. This attribute must be used in the identity LDAP filter (see filterId below). For example, if users have a unique value of the LDAP attribute "uid", then you could use the value \fBuid\f1 here. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService.filterAll\f1
+This is the "global LDAP filter" used to retrieve all user DNs from the source service. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService.filterId\f1
+This is the "identity LDAP filter" used to retrieve one entry from the source service. You have to use the string \fB{0}\f1 in the filter. This string represents a user identifier found in user entry returned by the global LDAP filter. So, for example, a filter could be \fB(&(objectclass=inetOrgPerson)(mail=*)(uid={0}))\f1
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.srcService.attrs\f1
+Here, you specify all returned attributes from the source service for one LDAP entry. Generally, these attributes will be used to build the new SASL userPassword. Be careful that the value of this option has to be same as in the source code of this instance of LSC. In fact, the algorithm used is in the JAVA BEAN, in the method named by attributes specified here. So, it strictly not recommended to modify this value (\fBloginName userPassword\f1). 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService\f1
+The fullname of the JAVA JNDI class to use to retrieve information from destination service. There is a generic class for LDAP connection, which is \fBorg.lsc.jndi.SimpleJndiSrcService\f1. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService.baseDn\f1
+The RDN of the people tree on the destination service. Generally, it should be \fBou=people\f1. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService.attrId\f1
+The attribute used to identify a user in the destination service. This attribute must be used in the identity LDAP filter (see filterId below). For example, if users have a unique value of the LDAP attribute "uid", then you could use the value \fBuid\f1 here. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService.filterAll\f1
+This is the "global LDAP filter" used to retrieve all user DNs from the destination service. 
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService.filterId\f1
+This is the "identity LDAP filter" used to retrieve one entry from the destination service. You have to use the string \fB{0}\f1 in the filter. This string represents a user identifier found in user entry returned by the global LDAP filter. So, for example, a filter could be \fB(&(objectclass=inetOrgPerson)(mail=*)(uid={0}))\f1
+.TP
+\fBlsc.tasks.\f1TASKNAME\fB.dstService.attrs\f1
+Here, you specify all returned attributes from the destination service one LDAP entry. Generally, these attributes will be used to build the new SASL userPassword. Be careful that the value of this option has to be same as in the source code of this instance of LSC. In fact, the algorithm used is in the JAVA BEAN, in the method named by attributes specified here. So, it strictly not recommended to modify this value (\fBloginName userPassword\f1). 
+.SH SYNCHRONIZATION RULE OPTIONS
+This section describes synchronization rule options available for this instance of LSC. You should replace \fBTASKNAME\f1 by a task name specified in the global configuration option \fBlsc.tasks\f1. 
+.TP
+\fBlsc.syncoptions.\f1TASKNAME 
+This is the full name of the JAVA class used to provide synchronization option mechanism. For this instance of LSC, you must use the \fBorg.lsc.beans.syncoptions.PropertiesBasedSyncOptions\f1 value. 
+.TP
+\fBlsc.syncoptions.\f1TASKNAME\fB.default.action\f1
+Default action on the destination directory. Here, two values are possible, \fBK\f1 to keep data (means no modification at all), or \fBF\f1 for allowing modification on the data (update, create or delete). For this instance of LSC, you must use \fBK\f1 because source and destination service are in fact the same real server. 
+.TP
+\fBlsc.syncoptions.\f1TASKNAME\fB.userPassword.action\f1
+Choose the action to use onto the userPassword LDAP attribute. As default action, you could put \fBK\f1 to keep password updates, or \fBF\f1 to force modifications. 
+.SH AUTHORS
+lsc-passwords was written by Sebastien Bahloul <sbahloul@lsc-project.org>, Jonathan Clarke <jclarke@lsc-project.org>, Remy-Christophe Schermesser <rschermesser@lsc-project.org>, Thomas Chemineau <tchemineau@lsc-project.org>. 
+.SH SEE ALSO
+\fBlsc(1)\f1
+
+\fBhttp://lsc-project.org/\f1
+.SH COMMENTS
+This man page was written using \fBxmltoman(1)\f1. 

@@ -32,7 +32,7 @@
 		<fail unless="execution.path" message="'execution.path' must be set"/>
         
 		<forget daemon="true">
-			<java classname="org.lsc.utils.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+			<java classname="org.lsc.opends.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 				<arg line="-a" />
 			</java>
 		</forget>
@@ -51,7 +51,7 @@
 		<echo message="Stopping OpenDS embedded server"/>
 
 		<fail unless="execution.path" message="'execution.path' must be set"/>
-		<java classname="org.lsc.utils.LdapServer" classpath="${execution.path}:${plugin.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+		<java classname="org.lsc.opends.LdapServer" classpath="${execution.path}:${plugin.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 			<arg line="-o" />
 		</java>
 	</target>

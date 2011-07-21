@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,15 +45,15 @@
  */
 package org.lsc.utils;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-import org.lsc.utils.security.SymmetricEncryption;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.lsc.utils.security.SymmetricEncryption;
 
 /**
  * Test security tools.

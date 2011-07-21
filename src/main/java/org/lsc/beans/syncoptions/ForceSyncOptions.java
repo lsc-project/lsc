@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -49,8 +49,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.lsc.Configuration;
-import org.lsc.jndi.JndiModificationType;
+import org.lsc.LscModificationType;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.Ldap;
 
 /**
  * Always return a Force status.
@@ -61,7 +62,7 @@ public class ForceSyncOptions implements ISyncOptions {
 	/**
 	 * The name of the task
 	 */
-	private String taskname;
+	private Task task;
 
 	public final STATUS_TYPE getStatus(final String id, final String attributeName) {
 		return STATUS_TYPE.FORCE;
@@ -75,8 +76,9 @@ public class ForceSyncOptions implements ISyncOptions {
 		return null;
 	}
 
-	public final void initialize(final String taskname) {
-		this.taskname = taskname;
+	@Override
+	public final void initialize(Task task) {
+		 this.task = task;
 	}
 
 	public final Set<String> getCreateAttributeNames() {
@@ -100,11 +102,12 @@ public class ForceSyncOptions implements ISyncOptions {
 	}
 
 	public List<String> getWriteAttributes() {
-		String property = Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + taskname + ".dstService.attrs");
-		if (property == null) {
-			return null;
-		}
-		return Arrays.asList(property.split(" "));
+		String[] attrs = ((Ldap)task.getDestinationService()).getFetchedAttributes();
+		return (attrs != null ? Arrays.asList(attrs) : null);
+	}
+
+	public String getTaskName() {
+		return task.getName();
 	}
 
 	public String getCreateCondition() {
@@ -119,23 +122,19 @@ public class ForceSyncOptions implements ISyncOptions {
 		return DEFAULT_CONDITION;
 	}
 
-	public String getModrdnCondition() {
+	public String getChangeIdCondition() {
 		return DEFAULT_CONDITION;
 	}
 
-	public String getCondition(JndiModificationType operation) {
+	public String getCondition(LscModificationType operation) {
 		return DEFAULT_CONDITION;
 	}
 
 	public String getDn() {
-		return Configuration.getString(Configuration.LSC_TASKS_PREFIX + "." + taskname + ".dn");
+		return null;//((Ldap)task.getDestinationService()).getDn();
 	}
 
 	public List<String> getForceValues(String id, String attributeName) {
 		return null;
-	}
-
-	public String getTaskName() {
-		return taskname;
 	}
 }

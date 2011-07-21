@@ -6,21 +6,21 @@
 	<select id="getInetOrgPerson" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 		Select
 			'inetOrgPerson' objectClass,
-			pers."id",
-			pers."uid",
-			pers."sn",
-			pers."givenName",
-			pers."cn",
-			pers."mail",
-			pers."givenName",
-			pers."address",
-			pers."telephoneNumber"
+			pers."ID",
+			pers."UID",
+			pers."SN",
+			pers."GIVENNAME",
+			pers."CN",
+			pers."MAIL",
+			pers."GIVENNAME",
+			pers."ADDRESS",
+			pers."TELEPHONENUMBER"
 		FROM csvdata pers
-		WHERE pers."mail" LIKE #mail#
+		WHERE pers."MAIL" LIKE #mail#
 	</select>
 
 	<select id="getInetOrgPersonList" resultClass="java.util.HashMap">
-		SELECT pers."mail" AS mail
+		SELECT pers."MAIL" AS mail
 		FROM csvdata pers
 	</select>
 

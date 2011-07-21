@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, 2009 LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -50,6 +50,7 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
+import org.lsc.exception.LscServiceException;
 
 /**
  * Extende default IService interface to add an asynchronous method
@@ -60,8 +61,9 @@ public interface IAsynchronousService extends IService {
      * This call is blocking until a data available on the data source
      * @return the next available bean
      * @throws NamingException 
+     * @throws LscServiceException 
      */
-	Entry<String, LscAttributes> getNextId() throws NamingException;
+	Entry<String, LscAttributes> getNextId() throws LscServiceException;
 
     /**
      * The delay in seconds to look for available updates

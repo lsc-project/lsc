@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,15 +45,20 @@
  */
 package org.lsc.configuration.objects;
 
+import org.apache.tapestry5.beaneditor.Validate;
+import org.lsc.jndi.JndiModificationType;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 /**
  *
  * @author rschermesser
  */
-//public abstract class Audit {
-public class Audit {
+@XStreamAlias("audit")
+public abstract class Audit {
 
 	/**
-	 * 		<audit type="csv">
+	 * 	<audit type="csv">
 			<name>csv</name>
 			<operations>create, delete</operations>
 			<attributes>cn, dn</attributes>
@@ -69,8 +74,38 @@ public class Audit {
 		</audit>
 	 */
 	
+	@Validate("required")
 	private String name;
+	
+	@Validate("required")
 	private String file;
 	
+	private JndiModificationType[] operations;
 
+
+	public JndiModificationType[] getOperations() {
+		return operations;
+	}
+
+	public void setOperations(JndiModificationType[] operations) {
+		this.operations = operations;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getFile() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	public abstract String getAuditTypeName();
 }

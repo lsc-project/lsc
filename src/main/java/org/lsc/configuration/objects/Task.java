@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
@@ -44,46 +44,247 @@
  */
 package org.lsc.configuration.objects;
 
-import javax.management.MXBean;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import org.lsc.beans.IBean;
-import org.lsc.beans.syncoptions.ISyncOptions;
-import org.lsc.jndi.IJndiWritableService;
-import org.lsc.service.IService;
+import org.apache.tapestry5.beaneditor.Validate;
+import org.apache.tapestry5.ioc.annotations.Inject;
+import org.apache.tapestry5.ioc.annotations.Value;
+import org.lsc.Configuration;
+import org.lsc.configuration.PropertiesConfigurationHelper;
+import org.lsc.configuration.objects.syncoptions.ForceSyncOptions;
+import org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 /**
- * This class represent a LSC task
+ * This class represent the parameter of a LSC task
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-@MXBean
-public interface Task {
+@XStreamAlias("task")
+public class Task {
 
-	/**
-	 * Enum for the type of mode
-	 */
-	public enum Mode {
-		clean,
-		sync,
-		async;
+	private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
+
+	@Inject @Value("ANewTask")
+	@Validate("required")
+	private String name;
+
+	@Inject @Value("org.lsc.beans.SimpleBean")
+	@Validate("required")
+	private String bean;
+
+	@XStreamAlias("destination")
+	private Service destinationService;
+	
+	@XStreamAlias("source")
+	private Service sourceService;
+
+	private SyncOptions syncOptions;
+	
+	private String customLibrary;
+
+	private String cleanHook;
+	
+	private String syncHook;
+	
+	private Map<String, String> otherSettings;
+
+	@XStreamImplicit
+	private List<Audit> auditLogs;
+	
+	public Task() {
+		otherSettings = new HashMap<String, String>();
+		auditLogs = new ArrayList<Audit>();
 	}
 
-	public String getType();
+	@Deprecated
+	public Task(String taskName, Properties lscProperties) {
+		otherSettings = new HashMap<String, String>();
+		this.name = taskName;
+		String prefix = PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + ".";
 	
-	public String getDn();
-	
-	public IBean getBean();
-	
-	public String getName();
-	
-	public IService getSourceService();
-	
-	public IJndiWritableService getDestinationService();
-	
-	public ISyncOptions getSyncOptions();
+		checkTaskOldProperty(lscProperties, taskName, PropertiesConfigurationHelper.OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
+		bean = getTaskPropertyAndCheckNotNull(taskName, lscProperties, PropertiesConfigurationHelper.BEAN_PROPS_PREFIX);
+		cleanHook = lscProperties.getProperty(prefix + PropertiesConfigurationHelper.POST_CLEAN_HOOK_PROPS_PREFIX);
+		syncHook = lscProperties.getProperty(prefix + PropertiesConfigurationHelper.POST_SYNC_HOOK_PROPS_PREFIX);
 
-	public Object getCustomLibrary();
+		Connection sourceConn = null;
+		if(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.service.SimpleJdbcSrcService")) {
+			sourceConn = LscConfiguration.getConnection("src-jdbc");
+		} else if (lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.jndi.SimpleJndiSrcService")
+				|| lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.jndi.PullableJndiSrcService")) {
+			sourceConn = LscConfiguration.getConnection("src-ldap");
+		} else {
+			// Unknown connection type !
+		}
+		Connection destinationConn = LscConfiguration.getConnection("dst-ldap");
+		String syncOptionsType = lscProperties.getProperty(PropertiesConfigurationHelper.SYNCOPTIONS_PREFIX + "." + taskName, "org.lsc.beans.syncoptions.ForceSyncOptions");
+		try {
+			sourceService = (Service) sourceConn.getService(true).newInstance();
+			sourceService.setName(taskName + "-src");
+			Properties srcProps = Configuration.getPropertiesSubset(lscProperties, prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX);
+			for(Object srcProp :  srcProps.keySet()) {
+				sourceService.setOtherSetting((String)srcProp, srcProps.getProperty((String)srcProp));
+			}
+			sourceService.setConnection(sourceConn);
+			
+			destinationService = (Service) destinationConn.getService(false).newInstance();
+			destinationService.setName(taskName + "-dst");
+			Properties dstProps = Configuration.getPropertiesSubset(lscProperties, prefix + PropertiesConfigurationHelper.DSTSERVICE_PROPS_PREFIX);
+			for(Object dstProp :  dstProps.keySet()) {
+				destinationService.setOtherSetting((String)dstProp, dstProps.getProperty((String)dstProp));
+			}
+			destinationService.setConnection(destinationConn);
 
-	public String getCleanHook();
+			if(syncOptionsType == null || 
+					"org.lsc.beans.syncoptions.PropertiesBasedSyncOptions".equals(syncOptionsType)) {
+				syncOptions = new PropertiesBasedSyncOptions();
+			} else if ("org.lsc.beans.syncoptions.ForceSyncOptions".equals(syncOptionsType)) {
+				syncOptions = new ForceSyncOptions();
+			} else {
+				// Unknown sync options type !
+			}
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		customLibrary = lscProperties.getProperty(prefix + PropertiesConfigurationHelper.CUSTOMLIBRARY_PROPS_PREFIX);
+		syncOptions.setMainIdentifier(lscProperties.getProperty(prefix + "dn"));
+		syncOptions.load(taskName, Configuration.getPropertiesSubset(lscProperties, PropertiesConfigurationHelper.SYNCOPTIONS_PREFIX + "." + taskName));
+	}
 	
-	public String getSyncHook();
+	private void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
+		if (props.getProperty(PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
+			String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+	}
+
+	private String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
+		String value = props.getProperty(PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
+
+		if (value == null) {
+			String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+
+		return value;
+	}
+
+	public String getBean() {
+		return bean;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public Service getSourceService() {
+		return sourceService;
+	}
+	
+	public Service getDestinationService() {
+		return destinationService;
+	}
+	
+	public SyncOptions getSyncOptions() {
+		return syncOptions;
+	}
+	
+	public String getCustomLibrary() {
+		return customLibrary;
+	}
+
+	public String getCleanHook() {
+		return cleanHook;
+	}
+	
+	public String getSyncHook() {
+		return syncHook;
+	}
+
+	public void setSyncOptions(SyncOptions syncOptions) {
+		this.syncOptions = syncOptions;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setObject(String name, Object obj) {
+		
+	}
+	
+	public void setOtherSetting(String name, String value) {
+		if("bean".equals(name)) {
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Setting bean to " + value);
+			}
+			this.bean = value;
+		} else {
+			otherSettings.put(name, value);
+			//LOGGER.warn("Ignoring unknown parameter " + name + " / " + value);
+		}
+	}
+	
+	public String getOtherSetting(String key) {
+		return getOtherSetting(key, null);
+	}
+
+	public String getOtherSetting(String key, String defaultValue) {
+		return (otherSettings.containsKey(key) ? otherSettings.get(key) : defaultValue);
+	}
+
+	public void setBean(String bean) {
+		this.bean = bean;
+	}
+
+	public void setDestinationService(Service destinationService) {
+		this.destinationService = destinationService;
+	}
+
+	public void setSourceService(Service sourceService) {
+		this.sourceService = sourceService;
+	}
+
+	public void setCustomLibrary(String customLibrary) {
+		this.customLibrary = customLibrary;
+	}
+
+	public void setCleanHook(String cleanHook) {
+		this.cleanHook = cleanHook;
+	}
+
+	public void setSyncHook(String syncHook) {
+		this.syncHook = syncHook;
+	}
+	
+	public Collection<Audit> getAudits() {
+		return auditLogs;
+	}
+	
+	public void setAudits(List<Audit> auditLogs) {
+		this.auditLogs = auditLogs;
+	}
+	
+	public void addAudit(Audit audit) {
+		if(auditLogs == null) {
+			auditLogs = new ArrayList<Audit>();
+		}
+		auditLogs.add(audit);
+	}
 }

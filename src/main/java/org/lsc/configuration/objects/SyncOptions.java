@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,10 +45,75 @@
  */
 package org.lsc.configuration.objects;
 
-/**
- *
- * @author rschermesser
- */
-public interface SyncOptions {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
+import org.lsc.beans.syncoptions.ISyncOptions;
+
+/**
+ * This class represent the generic synchronization options configuration
+ * container. This object is used to return the settings required to identify
+ * how and when construct the virtual destination object through source
+ * and destination object datasets.
+ * 
+ * It must be subtyped to provide the real implementation.
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ */
+public abstract class SyncOptions {
+
+	private HashMap<String, String> otherSettings;
+	
+	/**
+	 * These conditions will describe if the object has to be
+	 * created, updated, delete or renamed if required
+	 */
+	private Conditions conditions;
+	
+	/** 
+	 * Rule to build the object identifier
+	 * 'cn=' + srcBean.getAttributeValueById('uid')
+	 */
+	private String mainIdentifier;
+	
+	public SyncOptions() {
+		otherSettings = new HashMap<String, String>();
+		conditions = new Conditions();
+	}
+	
+	public void load(String taskname, Properties props) {
+		for(String name: props.stringPropertyNames()) {
+			otherSettings.put(name, props.getProperty(name));
+		}	
+	}
+	
+	public void setOtherSetting(String name, String value) {
+		otherSettings.put(name, value);
+	}
+
+	public void setOtherSettings(HashMap<String, String> otherSettings) {
+		this.otherSettings = otherSettings;
+	}
+
+	public Map<String, String> getOtherSettings() {
+		return otherSettings;
+	}
+
+	public String getMainIdentifier() {
+		return mainIdentifier;
+	}
+	
+	public void setMainIdentifier(String value) {
+		this.mainIdentifier = value;
+	}
+
+	public Conditions getConditions() {
+		return conditions;
+	}
+
+	/**
+	 * Return the implementation of this configuration object
+	 * @return the syncoption implementation
+	 */
+	public abstract Class<? extends ISyncOptions> getImplementation();
 }

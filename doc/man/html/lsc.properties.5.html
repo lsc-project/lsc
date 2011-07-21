@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>lsc.properties(5) 
+      </title><link rel="stylesheet" type="text/css" href="xmltoman.css"></link></head><body><h1>Name</h1><p>lsc.properties
+          - LSC configuration file</p>
+
+  <h1>Synopsis</h1>
+    /etc/lsc/lsc.properties or $LSC_HOME/etc/lsc.properties
+  
+
+  <h1>Description</h1>
+  	IMPORTANT NOTE: This file format is now DEPRECATED. Please consider moving to lsc.xml file format ! Take a look at the first section "Moving to XML new configuration format"
+    <p>
+      lsc.properties is the configuration file of the
+      <span class="manref">lsc(1)</span> command. It defines all
+      parameters to work on the appropriate server.
+    </p>
+    <p>
+      lsc is a command-line tool to synchronize datas in a LDAP directory. This
+      tool is generally a special instanciation of the generic LSC
+      JAVA tool.
+    </p>
+    <p>
+      Some requirements: JRE 1.5.
+    </p>
+  
+
+  <h1>Moving to XML new configuration file format</h1>
+    <p>
+      Options described in this section apply to all source and destination
+      services.
+    </p>
+  
+  <h1>Global configuration options</h1>
+    <p>
+      Options described in this section apply to all source and destination
+      services.
+    </p>
+    <div class="option">
+      <p>
+        <span class="opt">dn.ldap_schema</span>
+      </p>
+      <div class="optdesc">
+        LSC needs to know which LDAP tree to interrogate to retrieve the schema
+        of all LDAP servers. You should specify a complete LDAP DN, like
+        <span class="opt">dn.ldap_schema = cn=subschema</span> for example.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">dn.real_root</span>
+      </p>
+      <div class="optdesc">
+        LSC also has to know the real root DN (used to build factice DN for
+        service as database for example). You should specify a complete LDAP DN,
+        like <span class="opt">dn.real_root = dc=lsc-project,dc=org</span> for example.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">dn.people</span>
+      </p>
+      <div class="optdesc">
+        LSC also has to know the RDN of the people's tree. You should specify
+        a LDAP RDN, like <span class="opt">dn.people = ou=people</span> for example.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks</span>
+      </p>
+      <div class="optdesc">
+        Name of available LSC tasks, separated by commas. For example, you could
+        have <span class="opt">task1, task2, task3</span> as a value. Be careful that tasks
+        also have to be defined.
+      </div>
+    </div>
+  
+
+  <h1>Service configuration options</h1>
+    <p>
+      These are global configuration options to define the source and destination
+      services. You must replace the term <span class="opt">X</span> in option label by
+      <span class="opt">src</span> to configure source service, or <span class="opt">dst</span> to configure
+      destination service.
+    </p>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.factory.initial</span>
+      </p>
+      <div class="optdesc">
+        Initial context factory to use for data abstraction layer. You could specify the value
+        <span class="opt">com.sun.jndi.ldap.LdapCtxFactory</span>. It should be the same value
+        for both LDAP source and destination services.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.ldap.version</span>
+      </p>
+      <div class="optdesc">
+        Version of the LDAP protocol to use to connect to the LDAP server.
+        <span class="opt">3</span> is recommended.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.provider.url</span>
+      </p>
+      <div class="optdesc">
+        URI LDAP to connect to. Note that specifying the search base in the URI is not
+        necessary, but could improve performance.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.security.authentication</span>
+      </p>
+      <div class="optdesc">
+        LDAP authentication mechanism to use. Generally, this value does not
+        need to be changed. Put <span class="opt">simple</span> value to use authentication
+        based on DN and password.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.security.principal</span>
+      </p>
+      <div class="optdesc">
+        LSC uses a DN on the LDAP server to authenticate itself and get rights
+        on LDAP data. The value is a complete DN of an existing entry in
+        the specified LDAP server.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.security.credentials</span>
+      </p>
+      <div class="optdesc">
+        The appropriate password for the DN used above, in case you use simple
+        LDAP authentication.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.referral</span>
+      </p>
+      <div class="optdesc">
+        Choose how to follow LDAP referrals. Values could be <span class="opt">ignore</span>,
+        <span class="opt">follow</span>, or <span class="opt">throw</span>.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        X<span class="opt">.java.naming.ldap.derefAliases</span>
+      </p>
+      <div class="optdesc">
+        Choose how to follow LDAP aliases. Values could be <span class="opt">never</span>,
+        <span class="opt">always</span>, <span class="opt">search</span> or <span class="opt">find</span>.
+      </div>
+    </div>
+  
+
+  <h1>Task configuration options</h1>
+    <p>
+      This section describes available options to configure a LSC task. You
+      should replace <span class="opt">TASKNAME</span> by a task name specified in the
+      global configuration option <span class="opt">lsc.tasks</span>.
+    </p>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.object</span>
+      </p>
+      <div class="optdesc">
+        The full name of the JAVA class to use for plain LDAP object. For
+        example, for person, you could use
+        <span class="opt">org.lsc.objects.inetOrgPerson</span>. Be careful that
+        this class has to exist in this instance of LSC.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.bean</span>
+      </p>
+      <div class="optdesc">
+        The full name of the JAVA BEAN class to use for specialisation of the
+        synchronization. For example, for person, you could use
+        <span class="opt">org.lsc.beans.inetOrgPersonBean</span>. Be careful that
+        this class has to exist in this instance of LSC.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.type</span>
+      </p>
+      <div class="optdesc">
+        The synchronisation type for this task between the two defined services.
+      </div>
+    </div>
+    
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService</span>
+      </p>
+      <div class="optdesc">
+        The fullname of the JAVA JNDI class to use to retrieve information
+        from source service. There is a generic class for LDAP connection, which
+        is <span class="opt">org.lsc.jndi.SimpleJndiSrcService</span>.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService.baseDn</span>
+      </p>
+      <div class="optdesc">
+        The RDN of the people tree on the source service. Generally, it should
+        be <span class="opt">ou=people</span>.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService.attrId</span>
+      </p>
+      <div class="optdesc">
+        The attribute used to identify a user in the source service. This
+        attribute must be used in the identity LDAP filter (see filterId below).
+        For example, if users have a unique value of the LDAP attribute "uid",
+        then you could use the value <span class="opt">uid</span> here.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService.filterAll</span>
+      </p>
+      <div class="optdesc">
+        This is the "global LDAP filter" used to retrieve all user DNs from the
+        source service.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService.filterId</span>
+      </p>
+      <div class="optdesc">
+        This is the "identity LDAP filter" used to retrieve one entry from the
+        source service. You have to use the string <span class="opt">{0}</span> in the
+        filter. This string represents a user identifier found in user entry
+        returned by the global LDAP filter. So, for example, a filter could be
+        <span class="opt">(&amp;(objectclass=inetOrgPerson)(mail=*)(uid={0}))</span>
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.srcService.attrs</span>
+      </p>
+      <div class="optdesc">
+        Here, you specify all returned attributes from the source service for
+        one LDAP entry. Generally, these attributes will be used to build
+        the new SASL userPassword. Be careful that the value of this option
+        has to be same as in the source code of this instance of
+        LSC. In fact, the algorithm used is in the JAVA BEAN, in the method
+        named by attributes specified here. So, it strictly not recommended
+        to modify this value (<span class="opt">loginName userPassword</span>).
+      </div>
+    </div>
+    
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService</span>
+      </p>
+      <div class="optdesc">
+        The fullname of the JAVA JNDI class to use to retrieve information
+        from destination service. There is a generic class for LDAP connection,
+        which is <span class="opt">org.lsc.jndi.SimpleJndiSrcService</span>.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService.baseDn</span>
+      </p>
+      <div class="optdesc">
+        The RDN of the people tree on the destination service. Generally, it
+        should be <span class="opt">ou=people</span>.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService.attrId</span>
+      </p>
+      <div class="optdesc">
+        The attribute used to identify a user in the destination service. This
+        attribute must be used in the identity LDAP filter (see filterId below).
+        For example, if users have a unique value of the LDAP attribute "uid",
+        then you could use the value <span class="opt">uid</span> here.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService.filterAll</span>
+      </p>
+      <div class="optdesc">
+        This is the "global LDAP filter" used to retrieve all user DNs from the
+        destination service.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService.filterId</span>
+      </p>
+      <div class="optdesc">
+        This is the "identity LDAP filter" used to retrieve one entry from the
+        destination service. You have to use the string <span class="opt">{0}</span> in the
+        filter. This string represents a user identifier found in user entry
+        returned by the global LDAP filter. So, for example, a filter could be
+        <span class="opt">(&amp;(objectclass=inetOrgPerson)(mail=*)(uid={0}))</span>
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.tasks.</span>TASKNAME<span class="opt">.dstService.attrs</span>
+      </p>
+      <div class="optdesc">
+        Here, you specify all returned attributes from the destination service
+        one LDAP entry. Generally, these attributes will be used to build
+        the new SASL userPassword. Be careful that the value of this option
+        has to be same as in the source code of this instance of
+        LSC. In fact, the algorithm used is in the JAVA BEAN, in the method
+        named by attributes specified here. So, it strictly not recommended
+        to modify this value (<span class="opt">loginName userPassword</span>).
+      </div>
+    </div>
+  
+
+  <h1>Synchronization rule options</h1>
+    <p>
+      This section describes synchronization rule options available for this
+      instance of LSC. You should replace <span class="opt">TASKNAME</span> by a task name
+      specified in the global configuration option <span class="opt">lsc.tasks</span>.
+    </p>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.syncoptions.</span>TASKNAME
+      </p>
+      <div class="optdesc">
+        This is the full name of the JAVA class used to provide synchronization
+        option mechanism. For this instance of LSC, you must use the
+        <span class="opt">org.lsc.beans.syncoptions.PropertiesBasedSyncOptions</span>
+        value.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.syncoptions.</span>TASKNAME<span class="opt">.default.action</span>
+      </p>
+      <div class="optdesc">
+        Default action on the destination directory. Here, two values are
+        possible, <span class="opt">K</span> to keep data (means no modification at all), or
+        <span class="opt">F</span> for allowing modification on the data (update, create or
+        delete). For this instance of LSC, you must use <span class="opt">K</span> because
+        source and destination service are in fact the same real server.
+      </div>
+    </div>
+    <div class="option">
+      <p>
+        <span class="opt">lsc.syncoptions.</span>TASKNAME<span class="opt">.userPassword.action</span>
+      </p>
+      <div class="optdesc">
+        Choose the action to use onto the userPassword LDAP attribute. As
+        default action, you could put <span class="opt">K</span> to keep password updates,
+        or <span class="opt">F</span> to force modifications.
+      </div>
+    </div>
+  
+
+  <h1>Authors</h1>
+    <p>
+      lsc-passwords was written by
+        Sebastien Bahloul &lt;sbahloul@lsc-project.org&gt;,
+        Jonathan Clarke &lt;jclarke@lsc-project.org&gt;,
+        Remy-Christophe Schermesser &lt;rschermesser@lsc-project.org&gt;,
+        Thomas Chemineau &lt;tchemineau@lsc-project.org&gt;.
+    </p>
+  
+
+  <h1>See also</h1>
+    <p>
+      <span class="manref">lsc(1)</span>
+      <span class="manref">lsc.xml(5)</span>
+    </p>
+    <p>
+      <a class="url" href="http://lsc-project.org/">http://lsc-project.org/</a>
+    </p>
+  
+
+  <h1>Comments</h1>
+    <p>
+      This man page was written using <a class="manref" href="http://masqmail.cx/xmltoman/">xmltoman(1)</a>.
+    </p>
+  
+
+</body></html>

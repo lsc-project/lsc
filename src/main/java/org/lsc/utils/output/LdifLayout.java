@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,8 +45,7 @@
  */
 package org.lsc.utils.output;
 
-import ch.qos.logback.classic.PatternLayout;
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,10 +60,11 @@ import javax.naming.directory.ModificationItem;
 import javax.naming.ldap.LdapName;
 
 import org.apache.commons.codec.binary.Base64;
-
-import org.lsc.Configuration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
+
+import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * Provides a localized logback layout for LDAP entries.
@@ -114,16 +114,9 @@ public class LdifLayout extends PatternLayout {
 	
 	public static String format(JndiModifications jm) {
 		StringBuilder msgBuffer = new StringBuilder();
-		String baseUrl = (String) Configuration.getDstProperties().get("java.naming.provider.url");
-		baseUrl = baseUrl.substring(baseUrl.lastIndexOf('/') + 1);
 		String dn = "";
 		if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
 			dn = jm.getDistinguishName();
-			if (!dn.endsWith(baseUrl)) {
-				dn += "," + baseUrl;
-			}
-		} else {
-			dn = baseUrl;
 		}
 
 		// print dn and base64 encode if it's not a SAFE-STRING
@@ -147,12 +140,8 @@ public class LdifLayout extends PatternLayout {
 					msgBuffer.append("changetype: modrdn\nnewrdn: ");
 					msgBuffer.append(ln.get(ln.size()-1));
 					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
-					if(ln.size() <= 1) {
-						msgBuffer.append(baseUrl);
-					} else if (jm.getNewDistinguishName().endsWith(baseUrl)) {
+					if (ln.size() > 1) {
 						msgBuffer.append(ln.getPrefix(ln.size()-1));
-					} else {
-						msgBuffer.append(ln.getPrefix(ln.size()-1) + "," + baseUrl);
 					}
 					msgBuffer.append("\n");
 				} catch (InvalidNameException e) {
@@ -160,8 +149,6 @@ public class LdifLayout extends PatternLayout {
 					msgBuffer.append(jm.getNewDistinguishName());
 					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
 					msgBuffer.append(jm.getNewDistinguishName());
-					msgBuffer.append(",");
-					msgBuffer.append(baseUrl);
 					msgBuffer.append("\n");
 				}
 				break;
@@ -250,7 +237,7 @@ public class LdifLayout extends PatternLayout {
 	}
 
 	private static String toBase64(String value) {
-		return new String(new Base64().encode(value.getBytes()));
+		return new String(new Base64().encode(value.getBytes(Charset.forName("utf-8"))));
 	}
 
 	/**

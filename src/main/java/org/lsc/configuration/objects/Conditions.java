@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,22 +36,42 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
 package org.lsc.configuration.objects;
 
+
 /**
- *
- * @author rschermesser
+ * 
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class Conditions {
+
 	private String create;
+	
 	private String update;
+	
 	private String delete;
-	private String modrdn;
+	
+	private String changeId;
+
+	public String getCreate() {
+		return create;
+	}
+
+	public String getUpdate() {
+		return update;
+	}
+
+	public String getDelete() {
+		return delete;
+	}
+
+	public String getChangeId() {
+		return changeId;
+	}
 }

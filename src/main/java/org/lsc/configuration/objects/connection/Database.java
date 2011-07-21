@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,14 +45,39 @@
  */
 package org.lsc.configuration.objects.connection;
 
-import org.lsc.configuration.objects.Connection;
+import org.apache.tapestry5.beaneditor.Validate;
+import org.lsc.configuration.objects.AuthenticatedConnection;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 /**
  *
  * @author rschermesser
  */
-public class Database extends Connection{
+@XStreamAlias("databaseConnection")
+public class Database extends AuthenticatedConnection {
 
+	@Validate("required")
 	private String driver;
 
+	public String getDriver() {
+		return driver;
+	}
+
+	public void setDriver(String driver) {
+		this.driver = driver;
+	}
+
+	public Class<?> getService(boolean isSource) {
+		if(isSource) {
+			return org.lsc.configuration.objects.services.Database.class;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String getConnectionTypeName() {
+		return "Database connection";
+	}
 }

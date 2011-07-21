@@ -15,7 +15,7 @@
 	<!-- this file is rotated every 10000KB, compressed and 7 files are kept for history -->
 	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<Append>true</Append>
-		<File>/tmp/lsc.log</File>
+		<File>${LSC_HOME}/logs/lsc.log</File>
 
 		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>

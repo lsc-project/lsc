@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -44,6 +44,12 @@
  ****************************************************************************
  */
 package org.lsc;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -56,10 +62,12 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.service.IService;
@@ -87,6 +95,16 @@ public class Ldap2LdapSyncTest {
 	public final static String DN_MODRDN_DST_BEFORE = "cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	public final static String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 
+	private JndiServices srcJndiServices;
+	
+	private JndiServices dstJndiServices;
+	
+	@Before
+	public void setup() {
+		srcJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("src-ldap"));
+		dstJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+	}
+	
 	/**
 	 * Test reading the userPassword attribute from our source directory through Object
 	 * and Bean. This attribute has a binary syntax, so we must confirm we can parse it as a String.
@@ -94,17 +112,18 @@ public class Ldap2LdapSyncTest {
 	 * @throws InvocationTargetException 
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
+	 * @throws LscServiceException 
 	 */
 	@Test
-	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, LscServiceException {
 		Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
 		attributeValues.put("sn", "SN0001");
 		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
 
-		IService srcService = new SimpleJndiSrcService(Configuration.getAsProperties(Configuration.LSC_TASKS_PREFIX + "." + TASK_NAME + ".srcService"), "org.lsc.beans.SimpleBean");
+		IService srcService = new SimpleJndiSrcService(LscConfiguration.getTask(TASK_NAME));
 		Entry<String, LscAttributes> obj = ids.entrySet().iterator().next();
-		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue());
+		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue(), true);
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
 
 		// OpenDS automatically hashes the password using seeded SHA,
@@ -119,29 +138,29 @@ public class Ldap2LdapSyncTest {
 		// make sure the contents of the directory are as we expect to begin with
 
 		// check MODRDN
-		assertTrue(JndiServices.getSrcInstance().exists(DN_MODRDN_SRC));
-		assertTrue(JndiServices.getDstInstance().exists(DN_MODRDN_DST_BEFORE));
-		assertFalse(JndiServices.getDstInstance().exists(DN_MODRDN_DST_AFTER));
+		assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
+		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
+		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
 
 		// check ADD
-		assertTrue(JndiServices.getSrcInstance().exists(DN_ADD_SRC));
-		assertFalse(JndiServices.getDstInstance().exists(DN_ADD_DST));
+		assertTrue(srcJndiServices.exists(DN_ADD_SRC));
+		assertFalse(dstJndiServices.exists(DN_ADD_DST));
 		checkAttributeIsEmpty(DN_ADD_SRC, "userPassword");
 		checkAttributeIsEmpty(DN_ADD_SRC, "telephoneNumber");
 		checkAttributeValue(DN_ADD_SRC, "description", "Number three's descriptive text");
 		checkAttributeValue(DN_ADD_SRC, "sn", "SN0003");
 
 		// check MODIFY
-		assertTrue(JndiServices.getSrcInstance().exists(DN_MODIFY_SRC));
-		assertTrue(JndiServices.getDstInstance().exists(DN_MODIFY_DST));
+		assertTrue(srcJndiServices.exists(DN_MODIFY_SRC));
+		assertTrue(dstJndiServices.exists(DN_MODIFY_DST));
 		checkAttributeIsEmpty(DN_MODIFY_SRC, "telephoneNumber");
 		checkAttributeValue(DN_MODIFY_SRC, "description", "Number one's descriptive text");
 		checkAttributeValue(DN_MODIFY_SRC, "sn", "SN0001");
 		// the original password is present and can be used
-		assertTrue(LDAP.canBind(Configuration.getSrcProperties().getProperty("java.naming.provider.url"), DN_MODIFY_SRC, "secret0001"));
+		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secret0001"));
 		// the new password can not be used yet
-		assertFalse(LDAP.canBind(Configuration.getSrcProperties().getProperty("java.naming.provider.url"), DN_MODIFY_SRC, "secretCN0001"));
-		assertFalse(LDAP.canBind(Configuration.getSrcProperties().getProperty("java.naming.provider.url"), DN_MODIFY_DST, "secretCN0001"));
+		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
+		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
 
 		// perform the sync
 		launchSyncCleanTask(TASK_NAME, false, true, false);
@@ -194,12 +213,12 @@ public class Ldap2LdapSyncTest {
 		// check MODRDN
 
 		// the password was set and can be used
-		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_MODRDN_DST_AFTER, "secretCN0002"));
+		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
 
 		// the description was copied over since this is an existing object and it description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("Number two's descriptive text");
-		attributeValues.add(new String((byte[]) JndiServices.getSrcInstance().getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "description", attributeValues);
 
 		// the telephoneNumber was added
@@ -226,16 +245,16 @@ public class Ldap2LdapSyncTest {
 		List<String> attributeValues = null;
 
 		// check MODRDN
-		assertTrue(JndiServices.getDstInstance().exists(DN_MODRDN_DST_AFTER));
-		assertFalse(JndiServices.getDstInstance().exists(DN_MODRDN_DST_BEFORE));
+		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
+		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
 
 		// check ADD
 		// the object has been created
-		assertTrue(JndiServices.getDstInstance().exists(DN_ADD_DST));
+		assertTrue(dstJndiServices.exists(DN_ADD_DST));
 		// the description was copied over
 		checkAttributeValue(DN_ADD_DST, "description", "Number three's descriptive text");
 		// the password was set and can be used
-		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_ADD_DST, "secretCN0003"));
+		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_ADD_DST, "secretCN0003"));
 
 		// objectClass has inetOrgPerson and all above classes, since it was created with a create_value and MERGE status
 		attributeValues = new ArrayList<String>(2);
@@ -249,11 +268,11 @@ public class Ldap2LdapSyncTest {
 		// sn shouldn't have changed
 		checkAttributeValue(DN_MODIFY_DST, "sn", "SN0001");
 		// the password was set and can be used
-		assertTrue(LDAP.canBind(Configuration.getDstProperties().getProperty("java.naming.provider.url"), DN_MODIFY_DST, "secretCN0001"));
+		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
 		// the description was copied over since this is an existing object and it description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("Number one's descriptive text");
-		attributeValues.add(new String((byte[]) JndiServices.getSrcInstance().getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
 		checkAttributeValues(DN_MODIFY_DST, "description", attributeValues);
 		// the telephoneNumber was merged with existing values
 		attributeValues = new ArrayList<String>(3);
@@ -274,14 +293,14 @@ public class Ldap2LdapSyncTest {
 	@Test
 	public final void testCleanLdap2Ldap() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
-		assertTrue(JndiServices.getDstInstance().exists(DN_DELETE_DST));
-		assertFalse(JndiServices.getSrcInstance().exists(DN_DELETE_SRC));
+		assertTrue(dstJndiServices.exists(DN_DELETE_DST));
+		assertFalse(srcJndiServices.exists(DN_DELETE_SRC));
 
 		// perform the clean
 		launchSyncCleanTask(TASK_NAME, false, false, true);
 
 		// check the results of the clean
-		assertFalse(JndiServices.getDstInstance().exists(DN_DELETE_DST));
+		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
 	}
 
 	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync,
@@ -311,7 +330,7 @@ public class Ldap2LdapSyncTest {
 
 	private void checkAttributeIsEmpty(String dn, String attributeName)
 					throws NamingException {
-		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
+		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		assertNull(sr.getAttributes().get(attributeName));
 	}
 
@@ -328,7 +347,7 @@ public class Ldap2LdapSyncTest {
 	 * @throws NamingException
 	 */
 	private void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
-		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
+		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		assertNotNull(at);
 		assertEquals(1, at.size());
@@ -350,7 +369,7 @@ public class Ldap2LdapSyncTest {
 	 * @throws NamingException
 	 */
 	private void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
-		SearchResult sr = JndiServices.getDstInstance().readEntry(dn, false);
+		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		if (expectedValues.size() > 0) {
 			assertNotNull(at);

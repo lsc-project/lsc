@@ -150,28 +150,22 @@ sn: SN0004
 objectClass: person
 objectClass: top
 
-dn: cn=One / One,ou=Test Data,dc=lsc-project,dc=org
+# Jmx Script Destination
+
+dn: ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapJmxTestTaskSrc
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0003,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0003
+sn: SN0003
 objectClass: person
 objectClass: top
-cn: One / One
-sn: One One
+description: Number three's descriptive text
 
-dn: cn=OneFriend,cn=One / One,ou=Test Data,dc=lsc-project,dc=org
-objectClass: person
+dn: ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapJmxTestTaskDst
+objectClass: organizationalUnit
 objectClass: top
-cn: OneFriend
-sn: OneFriend
-
-dn: o=Père,dc=lsc-project,dc=org
-objectClass: organization
-o: Père
-
-dn: o=bla bla,dc=lsc-project,dc=org
-objectClass: organization
-o: bla bla
-
-dn: cn=test,o=bla bla,dc=lsc-project,dc=org
-objectClass: person
-cn: test
-sn: test
 

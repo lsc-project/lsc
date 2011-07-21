@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" targetNamespace="http://lsc-project.org/XSD/lsc-core-1.0.xsd" elementFormDefault="qualified">
+
+    <xsd:annotation>
+        <xsd:documentation>
+            This schema specifies the configuration options for LSC implementations.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:complexType name="ldapConnectionType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the ldap connections.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+ 			<xsd:element name="id" type="idType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="url" type="urlType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="authentication" type="authenticationType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="referral" type="referralType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="derefAliases" type="derefAliasesType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="version" type="versionType" minOccurs="1" maxOccurs="1"/> 
+			<xsd:element name="pageSize" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="factory" type="xsd:integer" minOccurs="1" maxOccurs="1"/>-->
+			<xsd:element name="tlsActivated" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+    
+    <xsd:element name="lsc">
+    	<xsd:annotation>
+    		<xsd:documentation>
+    			Root of a profile handler configuration file.
+    		</xsd:documentation>
+    	</xsd:annotation>
+    	<xsd:complexType>
+	    	<xsd:sequence>
+	<!--     		<xsd:element name="task" type="taskType" minOccurs="1" maxOccurs="unbounded" />
+	    		<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded" /> -->
+	    		<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+	    	</xsd:sequence>
+	    	<xsd:attribute name="id" type="xsd:integer">
+	    		<xsd:annotation>
+	    			<xsd:documentation>
+	    				Optional attribute added by XStream parser / dumper.
+	    				You can leave it or remove it but if you copy a
+	    				node, do not use the same number twice.
+	    			</xsd:documentation>
+	    		</xsd:annotation>
+	    	</xsd:attribute>
+    	</xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

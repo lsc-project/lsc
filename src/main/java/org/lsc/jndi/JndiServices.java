@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,9 +45,6 @@
  */
 package org.lsc.jndi;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,14 +53,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.naming.CommunicationException;
-import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
-import javax.naming.Name;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.SizeLimitExceededException;
@@ -83,10 +76,16 @@ import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
+import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPURL;
 
 /**
  * General LDAP services wrapper.
@@ -133,28 +132,10 @@ public final class JndiServices {
 	 * @throws NamingException thrown if a directory error is encountered
 	 * @throws IOException thrown if an error occurs negotiating StartTLS operation
 	 */
-	private JndiServices(final Properties props) throws NamingException, IOException {
+	private JndiServices(final Properties connProps) throws NamingException, IOException {
 
-		// duplicate properties to avoid changing original ones
-		Properties connProps = (Properties) props.clone();
-		
 		// log new connection with it's details
 		logConnectingTo(connProps);
-		
-		// rewrite connection URI
-		try {
-			StringBuilder uriString = new StringBuilder();
-			Matcher uriMatcher = Pattern.compile("ldaps?://[^/]+/.*?(?=( ldaps?://)|$)", Pattern.CASE_INSENSITIVE).matcher(connProps.getProperty(Context.PROVIDER_URL));
-			while (uriMatcher.find()) {
-				uriString.append(new LDAPURL(uriMatcher.group()).toNormalizedString() + " ");
-			}
-			connProps.setProperty(Context.PROVIDER_URL, uriString.toString());
-			LOGGER.debug("Using JNDI URL setting of \"" + connProps.getProperty(Context.PROVIDER_URL) + "\"");
-		} catch (LDAPException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-			throw new NamingException(e.getMessage());
-		}
 
 		/* should we negotiate TLS? */
 		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
@@ -251,6 +232,7 @@ public final class JndiServices {
 	 * Get the source directory connected service.
 	 * @return the source directory connected service
 	 */
+	@Deprecated
 	public static JndiServices getSrcInstance() {
 		try {
 			Properties srcProperties = Configuration.getSrcProperties();
@@ -268,6 +250,7 @@ public final class JndiServices {
 	 * Get the target directory connected service.
 	 * @return the target directory connected service
 	 */
+	@Deprecated
 	public static JndiServices getDstInstance() {
 		try {
 			return getInstance(Configuration.getDstProperties());
@@ -289,6 +272,39 @@ public final class JndiServices {
 			cache.put(props, new JndiServices(props));
 		}
 		return (JndiServices) cache.get(props);
+	}
+
+	public static Properties getLdapProperties(Ldap connection) {
+		Properties props = new Properties();
+		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, connection.getFactory());
+		if(connection.getUsername() != null) {
+			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "simple");
+			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
+			props.setProperty(DirContext.SECURITY_CREDENTIALS, connection.getPassword());
+		} else {
+			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");
+		}
+		props.setProperty(DirContext.PROVIDER_URL, connection.getUrl());
+		props.setProperty(DirContext.REFERRAL, connection.getReferralHandling().getValue());
+		props.setProperty("java.naming.ldap.derefAliases", connection.getAliasesHandling().getValue());
+		if(connection.getBinaryAttributes() != null) {
+			props.setProperty("java.naming.ldap.binaryAttributes", StringUtils.join(connection.getBinaryAttributes(), ", "));
+		}
+		props.setProperty("java.naming.ldap.pageSize", "" + connection.getPageSize());
+		if(connection.getSortedBy() != null) {
+			props.setProperty("java.naming.ldap.sortedBy", connection.getSortedBy());
+		}
+		props.setProperty("java.naming.ldap.version", "" + connection.getVersion().getValue());
+		return props;
+	}
+	
+	public static JndiServices getInstance(Ldap connection) {
+		try {
+			return getInstance(getLdapProperties(connection));
+		} catch (Exception e) {
+			LOGGER.error("Error opening the LDAP connection to the destination!");
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -363,11 +379,7 @@ public final class JndiServices {
 			} else {
 				rewrittenBase = searchBase;
 			}
-			Name nBase = new CompositeName();
-			if (rewrittenBase.length() > 0) {
-				nBase.add(rewrittenBase);
-			}
-			ne = ctx.search(nBase, searchFilter, sc);
+			ne = ctx.search(rewrittenBase, searchFilter, sc);
 
 		} catch (NamingException nex) {
 			LOGGER.error("Error while looking for {} in {}: {}",
@@ -445,15 +457,11 @@ public final class JndiServices {
 	}
 
 	public String rewriteBase(final String base) {
-		if (base == null) {
-			return null;
-		}
-		
 		String rewrittenBase = null;
 		if (base.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
 			if (!base.equalsIgnoreCase(contextDn.toString())) {
-				rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
-			} else {
+			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
+		} else {
 				rewrittenBase = "";
 			}
 		} else {
@@ -467,12 +475,7 @@ public final class JndiServices {
 		NamingEnumeration<SearchResult> ne = null;
 		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 		try {
-			String rewrittenBase = rewriteBase(base);
-			Name nBase = new CompositeName();
-			if (rewrittenBase.length() > 0) {
-				nBase.add(rewrittenBase);
-			}
-			ne = ctx.search(nBase, filter, sc);
+			ne = ctx.search(rewriteBase(base), filter, sc);
 		} catch (NamingException nex) {
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
@@ -519,24 +522,14 @@ public final class JndiServices {
 			sc.setReturningAttributes(new String[]{"1.1"});
 			sc.setSearchScope(scope);
 			sc.setReturningObjFlag(true);
-			Name nBase = new CompositeName();
-			if (base.length() > 0) {
-				nBase.add(base);
-			}
-			ne = ctx.search(nBase, filter, sc);
+			ne = ctx.search(base, filter, sc);
 			
+			String completedBaseDn = "";
+			if (base.length() > 0) {
+				completedBaseDn = "," + base;
+			}
 			while (ne.hasMoreElements()) {
-				Name ndn = new CompositeName(((SearchResult) ne.next()).getName());
-				String dn = "";
-				if (ndn.size() > 0) {
-					dn = ndn.get(0);
-				}
-				if (dn.length() != 0 && 0 != base.length()) {
-					dn += ",";
-				}
-				dn += base;
-				
-				iist.add(dn);
+				iist.add(((SearchResult) ne.next()).getName() + completedBaseDn);
 			}
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
@@ -646,15 +639,10 @@ public final class JndiServices {
 	private void deleteChildrenRecursively(String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-		Name nBase = new CompositeName();
-		if (distinguishName.length() > 0) {
-			nBase.add(distinguishName);
-		}
-		NamingEnumeration<SearchResult> ne = ctx.search(nBase, DEFAULT_FILTER, sc);
+		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
 		while (ne.hasMore()) {
 			SearchResult sr = (SearchResult) ne.next();
-			Name ndn = new CompositeName(sr.getName());
-			String childrenDn = rewriteBase(ndn.get(0) + "," + distinguishName);
+			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
 			deleteChildrenRecursively(childrenDn);
 		}
 		ctx.destroySubcontext(new LdapName(distinguishName));
@@ -696,7 +684,7 @@ public final class JndiServices {
 		Map<String, List<String>> attrsResult = new HashMap<String, List<String>>();
 
 		// connect to directory
-		Hashtable props = ctx.getEnvironment();
+		Hashtable<String, String> props = (Hashtable<String, String>) ctx.getEnvironment();
 		String baseUrl = (String) props.get(Context.PROVIDER_URL);
 		baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf('/'));
 		props.put(Context.PROVIDER_URL, baseUrl);
@@ -823,11 +811,7 @@ public final class JndiServices {
 
 			byte[] pagedResultsResponse = null;
 			do {
-				Name nBase = new CompositeName();
-				if (searchBase.length() > 0) {
-					nBase.add(searchBase);
-				}
-				NamingEnumeration<SearchResult> results = ctx.search(nBase, searchFilter, constraints);
+				NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
 
 				if (results != null) {
 					Map<String, String> attrsValues = null;
@@ -913,5 +897,16 @@ public final class JndiServices {
 	 */
 	public LdapContext getContext() {
 		return ctx;
+	}
+
+	public String completeDn(String dn) {
+		if(!dn.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+			if(dn.length() > 0) {
+				return dn + ","  + contextDn.toString();
+			} else {
+				return contextDn.toString();
+			}
+		}
+		return dn;
 	}
 }

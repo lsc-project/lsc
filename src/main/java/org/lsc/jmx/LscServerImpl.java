@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -46,8 +46,10 @@
 package org.lsc.jmx;
 
 import java.beans.ConstructorProperties;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,9 +61,11 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.lsc.AbstractSynchronize;
+import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.SimpleSynchronize;
-import org.lsc.configuration.objects.Task;
+import org.lsc.Task;
+import org.lsc.utils.PidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  
@@ -73,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LscServerImpl implements LscServer {
+public class LscServerImpl implements LscServer, Runnable {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
 
@@ -148,14 +152,61 @@ public class LscServerImpl implements LscServer {
 	}
 
 	public boolean launchSyncTaskById(String taskName, String id, Map<String, String> attributes) {
-		return synchronize.launchById(taskName, id, new LscAttributes(attributes));
+		Map<String, LscAttributes> entries = new HashMap<String, LscAttributes>();
+		entries.put(id, new LscAttributes(attributes));
+		return synchronize.launchById(taskName, entries);
+	}
+	
+	public void launchCleanTask(String taskName) throws Exception {
+		List<String> cleanList = new ArrayList<String>();
+		cleanList.add(taskName);
+		synchronize.launch(SimpleSynchronize.EMPTY_LIST, SimpleSynchronize.EMPTY_LIST, cleanList);
 	}
 
 	public void shutdownAsyncTask(String taskName) {
-		synchronize.shutdownAsynchronousSynchronize2Ldap(taskName, false);
+		synchronize.shutdownAsynchronousSynchronize2Ldap(taskName, true);
 	}
 
 	public void startAsyncTask(String taskName) {
 		synchronize.startAsynchronousSynchronize2Ldap(synchronize.getTask(taskName));
+	}
+
+	public boolean ping() {
+		return true;
+	}
+	
+	public String getPid() {
+		try {
+			return PidUtil.getPID();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+	
+	public String status() {
+		return "Running";
+	}
+	
+	public void stop() {
+		for(Task task: synchronize.getTasks()) {
+			String taskName = task.getName();
+			if(synchronize.isAsynchronousTask(taskName)
+					&& synchronize.isAsynchronousTaskRunning(taskName)) {
+				synchronize.shutdownAsynchronousSynchronize2Ldap(taskName, false);
+			}
+		}
+		new Thread(this).start();
+	}
+	
+	public void run() {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+		}
+		System.exit(0);
+	}
+	
+	public String getConfigurationDirectory() {
+		return Configuration.getConfigurationDirectory();
 	}
 }

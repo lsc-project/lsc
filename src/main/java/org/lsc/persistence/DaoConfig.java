@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -46,15 +46,16 @@
 package org.lsc.persistence;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.lsc.Configuration;
 import org.lsc.beans.BeanComparator;
+import org.lsc.configuration.objects.connection.Database;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibatis.common.resources.Resources;
 import com.ibatis.sqlmap.client.SqlMapClient;
@@ -86,64 +87,61 @@ public final class DaoConfig {
 	 */
 	private static SqlMapClient sqlMapper;
 
-	static {
-		try {
-			Reader reader = null;
-
-			// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
-			// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
-			// file always used to be in a JAR file. It should be removed in the future.
-			File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
-			if (configFile.exists()) {
-				// read the file from the configuration directory
-				String pathToFile = configFile.toURI().toURL().toString();
-				LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
-				reader = Resources.getUrlAsReader(pathToFile);
-			} else {
-				// read the file from the classpath (it's in a JAR file)
-				reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
-			}
-
-			Properties props = getSqlMapProperties();
-			sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, props);
-
-			// clean up
-			reader.close();
-		} catch (IOException e) {
-			throw new RuntimeException("Something bad happened while building the SqlMapClient instance." + e, e);
-		}
-	}
-
 	/** Tool class. */
 	private DaoConfig() {
+		
 	}
 
 	/**
 	 * Return the SQLMap object who manage data access.
 	 * 
 	 * @return the data accessor manager
+	 * @throws LscServiceConfigurationException 
 	 */
-	public static SqlMapClient getSqlMapClient() {
+	public static SqlMapClient getSqlMapClient(Properties databaseProps) throws LscServiceConfigurationException {
+		if(sqlMapper == null) {
+			try {
+				Reader reader = null;
+
+				// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
+				// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
+				// file always used to be in a JAR file. It should be removed in the future.
+				File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+				if (configFile.exists()) {
+					// read the file from the configuration directory
+					String pathToFile = configFile.toURI().toURL().toString();
+					LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
+					reader = Resources.getUrlAsReader(pathToFile);
+				} else {
+//					// read the file from the classpath (it's in a JAR file)
+					LOGGER.info("File {} not found in {}. Trying in embedded archives", IBATIS_SQLMAP_CONFIGURATION_FILENAME, configFile.getAbsoluteFile());
+					reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
+//					throw new LscServiceConfigurationException("Unable to find iBatis SQL map file in " + Configuration.getConfigurationDirectory());
+				}
+
+				// add the configuration directory to properties so that sql-map-config can use relative paths
+				databaseProps.put("lsc.config", new File(Configuration.getConfigurationDirectory()).toURI().toURL().getFile());
+				try {
+					sqlMapper = SqlMapClientBuilder.buildSqlMapClient(reader, databaseProps);
+				} catch(RuntimeException re) {
+					throw new LscServiceConfigurationException("Something bad happened while building the SqlMapClient instance." + re, re);
+				}
+
+				// clean up
+				reader.close();
+			} catch (IOException e) {
+				throw new LscServiceConfigurationException("Something bad happened while building the SqlMapClient instance." + e, e);
+			}
+		}
 		return sqlMapper;
 	}
 
-	protected static Properties getSqlMapProperties() throws IOException {
-		Properties props = new Properties();
-
-		// read the database configuration file to pass to sql-map-config XML file
-		// this is maintained for backwards compatibility, although the database.properties file no longer exists
-		try {
-			props.putAll(Configuration.getPropertiesFromFileInConfigDir(Configuration.DATABASE_PROPERTIES_FILENAME));
-		} catch (FileNotFoundException e) {
-			// ignore this, it probably just means that we're not using database.properties file anymore
-		}
-
-		// add the database configuration properties from lsc.properties
-		props.putAll(Configuration.getAsProperties("src.database"));
-
-		// add the configuration directory to properties so that sql-map-config can use relative paths
-		props.put("lsc.config", Configuration.getConfigurationDirectory());
-
-		return props;
+	public static SqlMapClient getSqlMapClient(Database connection) throws LscServiceConfigurationException {
+		Properties databaseProps = new Properties();
+		databaseProps.put("username", connection.getUsername());
+		databaseProps.put("password", connection.getPassword());
+		databaseProps.put("url", connection.getUrl());
+		databaseProps.put("driver", connection.getDriver());
+		return getSqlMapClient(databaseProps);
 	}
 }

@@ -1,13 +1,14 @@
 % Ldap Synchronization Connector (LSC) - User Guide
 % Jonathan Clarke
-% 26/11/2010
+% Sébastien Bahloul
+% 06/07/2011
 
 The latest version of this document is available online at
 [http://lsc-project.org/user-guide/](http://lsc-project.org/user-guide/). You
 can also download a [PDF
 version](http://lsc-project.org/user-guide/LSC-User-Guide.pdf).
 
-This guide covers versions **1.3.\*** of LSC. Other versions are available.
+This guide covers versions **2.0.\*** of LSC. Other versions are available (**1.3.\***).
 
 # Introduction
 
@@ -21,51 +22,73 @@ areas.
 
 It is an open source project, released under the BSD license.
 
-This document is a hands-on guide to all aspects of using LSC. This guide aims to be exhaustive. As such, the reader is not
+This document is a hands-on guide to all aspects of using LSC:
+
+1.  Basic principles
+2.  Obtaining and installing LSC
+3.  Configuring LSC
+4.  Running LSC
+5.  Integrating LSC to a running system (including best pratices)
+6.  Troubleshooting and getting help
+
+This guide aims to be exhaustive. As such, the reader is not
 expected to read it from cover to cover, but is encouraged to skip
 to the sections he's interested in. A
-[quick-start guide](http://lsc-project.org/wiki/documentation/1.2/sample)
+[quick-start guide](http://lsc-project.org/wiki/documentation/2.0/sample)
 is also available for the impatient.
 
 # Basic principles
 
-## Entries and attributes
+As LSC was originally developed for LDAP server, some vocabulary are related to these types of servers. In fact some chapters also
+describe data integration for database, ESB, ...
+
+## Objects and datasets
 
 All data is split up into two elements:
 
-- **Entries**, which are containers. It can be considered equivalent to an *account* ("this account exists or it does not")
-- **Attributes**, which qualify the entry. These are also commonly called fields, elements or keys ("this account is called jdoe")
+- **Object**, which are containers. It can be considered equivalent to an *entry* inside a directory, a *table line* inside a database
+or simply an *account* ("this account exists or it does not")
+- **Datasets**, which qualify the object. These are also commonly called attributes, fields, elements or keys ("this account is called jdoe")
 
-## Pivot attributes
+## Pivot datasets
 
-To synchronize data, LSC must be able to match up entries in the source and in the destination. This is an important prerequisite to synchronizing your data: a **unique identifier** must be available in all entries and in both your source and your destination.
+To synchronize data, LSC must be able to match up objects in the source and in the destination. This is an important prerequisite to synchronizing your data: 
+a **unique pivot dataset** must be available in all objects and in both your source and your destination.
 
-This unique identifier may be a combination of several fields (for example: surname and first name).
+This unique set may be a combination of several data (for example: surname and first name).
 
-Commonly used pivot attributes include email addresses, or serial numbers (such as UUIDs).
+Commonly used pivot datasets include email addresses, or serial numbers (such as UUIDs).
 
-## One-to-one entry matching
+## Unique identifier
 
-LSC will try and match every entry in the source to one, and only one entry in the destination. Matching is done by searching on the pivot attributes (see details in the Configuration section below).
+LSC is looking for the data inside the source and the destination service by listing available objects. Most datasource provides a unique identifier
+that is used by the LSC to get the full datasets of the corresponding object (and also to fill the log !). 
+It can be either a distinguish name in a directory, a primary key inside a database table,
+a UUID for the event in a ESB, ...
 
-Synchronizing several entries to one, or one entry to several could be achieved by implementing multiple synchronizations, but is a hack.
+## One-to-one object matching
+
+LSC will try and match every object in the source to one, and only one object in the destination. Matching is done by searching on the pivot datasets.
+
+Synchronizing several objects to one, or one objects to several could be achieved by implementing multiple synchronizations, but is a hack.
 
 ## One-way only
 
 LSC synchronizations are **one-way only**: from a source to a destination.
 
-It usually only makes sense to copy data in one direction. However, if you need to copy a different set of data back, you can simply implement a separate synchronization.
+It usually only makes sense to copy data in one direction. However, if you need to copy a different set of data back, you can simply implement a separate synchronization by reverting
+the source and the destination.
 
 ## Four operations available
 
-For every entry, LSC may perform one of the following operations (or nothing):
+For every object, LSC may perform one of the following operations (or nothing):
 
-1. Add a new entry (if an entry from the source was not found in the destination)
-2. Delete an old entry (if an entry in the destination was not found in the source)
-3. Update an existing entry (if attributes vary between the destination and the calculated transformations from the source)
-4. Rename an existing entry (if the LDAP DN should be changed)
+1. Create a new object : if an object from the source was not found in the destination service
+2. Delete an old object : if an object in the destination was not found in the source service
+3. Update an existing object : if attributes vary between the destination and the calculated transformations from the source service
+4. Change the unique identifier of an existing object : if the object 
 
-Please note that one and only one of these operations is performed on each run. So, if an entry is renamed, but some of it's attributes also need updating, this will only happen over two runs.
+Please note that one and only one of these operations is performed on each run. So, if a change of the unique object identifier is done, but some of it's datasets also need updating, this will only happen over two runs.
 
 ## Transformations
 
@@ -84,7 +107,7 @@ This section offers guidance.
 
 ### Version numbering
 
-A full version number looks something like **1.1.0**. LSC version numbers are in two parts:
+A full version number looks something like **1.3.0**. LSC version numbers are in two parts:
 
 - The first two digits represent the **major** branch number, for example
   **1.1**.
@@ -97,29 +120,27 @@ functionality, and is only released to fix bugs.
 
 ### Current version
 
-At the time of writing, the **1.2** branch is the most recent version available,
+At the time of writing, the **1.3** branch is the most recent version available,
 and is fully supported.
 
-The **1.1** branch is no longer actively developed, and will no longer be
-supported in the near future. The latest and most stable versions of LSC are
+The **1.1** and **1.2** branches bop no longer actively developed, and are no longer
+supported. The latest and most stable versions of LSC are
 always shown on the project's website at [http://lsc-project.org/](http://lsc-project.org).
 
 Development work is currently transitioning between improving this branch,
-**1.2**, and implementing new features for future versions.
+**2.0**, and implementing new features for future versions.
 
 ## Downloading and installing the software
 
 ### Dependencies
 
-To run LSC you need Sun's Java Virtual Machine (JVM), version 1.5 or higher. Download and install [Sun's Java Runtime Edition (JRE)](http://java.sun.com/javase/downloads/index.jsp#jre), if you don't already have it installed. Please note that it may be simpler to use a pre-packaged version from your operating system.
+To run LSC you need Oracle's Java Virtual Machine (JVM), version 1.6 or higher. Download and install [Oracle's Java Runtime Edition (JRE)](http://java.oracle.com/), if you don't already have it installed. Please note that it may be simpler to use a pre-packaged version from your operating system.
 
 All other dependencies required by LSC are included in the download.
 
 ### Downloading
 
-In the past, two separate components were required to use LSC (*lsc-core* and
-*lsc-sample*). This is no longer the case. LSC is distributed like most programs,
-as an archive to download and install.
+LSC is distributed like most programs, as an archive to download and install.
 
 There are several formats available. They all lead to the same result, just
 choose your preference from the following:
@@ -153,51 +174,23 @@ directory:
 
 # Configuring LSC
 
-There are several different aspects to configuring a connector
+There are several different aspects to configuring a task
 using LSC:
 
-1.  Source and destination connector configuration
+1.  Source connector configuration
+2.  Destination connector configuration
 3.  Data transformation configuration
 4.  Logging configuration
 
 Within the installation directory, all configuration files are located in the
-**etc/** directory. Most configuration is done in the **lsc.properties** file,
+**etc/** directory. Most configuration is done in the **lsc.xml** file,
 except for logging which is setup in **logback.xml**. Each source connector may
 use additional configuration files - such as is the case for the database source
-connector used in **db2ldap** connectors.
+connector used in **Database** connectors.
 
-## Source and destination connector configuration
+## Source connector configuration
 
-### Matching up entries
-
-This sections focuses specifically on the following properties ({src,dst} means "either src or dst"):
-
-- lsc.tasks.*MyTask*.*{src,dst}*Service.filterAll
-- lsc.tasks.*MyTask*.*{src,dst}*Service.pivotAttrs
-- lsc.tasks.*MyTask*.*{src,dst}*Service.filterId
-
-In short, here is what happens when you run LSC in sync mode:
-
-- **Once, on startup:** search source directory with *srcService.filterAll* and read the
-*srcService.pivotAttributes* from each matching entry. This gives us a long list
-of attribute values (possibly couples or tuples, if you use two or more pivots).
-- **For each value (or tuple):** running through this list:
-	- Search the source directory using the *srcService.filterId*, replacing anything
-like *{name}* by the value for the attribute by that *name* read in as a pivot
-attribute. Read in the entry, or at least the attributes specified in
-*srcService.attrs*.
-	- Search the destination directory using the *dstService.filterId*, replacing
-anything like *{name}* by the value for the attribute by that *name* read in as a
-pivot attribute **from the source**. **If an entry is found**, read it in, or at
-least the attributes specified in *dstService.attrs*.
-	- Run through all syncoptions and attributes to build up what we "want" to be
-in the destination, compare it with what we just read from the destination, and
-apply any changes.
-
-In clean mode, the opposite happens: LSC searches the destination with
-*dstService.filterAll*, reads in all the pivot attributes, and does a search with
-each of them on the source, using *srcService.filterId*.
-
+## Destination connector configuration
 
 ## Data transformation configuration
 

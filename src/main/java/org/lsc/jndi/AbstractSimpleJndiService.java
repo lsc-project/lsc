@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,10 +45,10 @@
  */
 package org.lsc.jndi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -61,6 +61,9 @@ import javax.naming.directory.SearchResult;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,9 +81,14 @@ public abstract class AbstractSimpleJndiService {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);
 	/**
 	 * The filter to be completed by replacing {0} by the id to find a unique
-	 * entry.
+	 * entry. Use with source attributes while getting the object to synchronize
 	 */
-	private String filterId;
+	private String filterIdSync;
+	/**
+	 * The filter to be completed by replacing {0} by the id to find a unique
+	 * entry. Use with destination attributes while getting the object to check for suppression
+	 */
+	private String filterIdClean;
 	/**
 	 * The filter used to identify all the entries that have to be synchronized
 	 * by this JndiSrcService.
@@ -100,15 +108,19 @@ public abstract class AbstractSimpleJndiService {
 	private List<String> attrs;
 	private SearchControls _filteredSc;
 
+	protected JndiServices jndiServices;
+
 	/**
 	 * The default initializer.
 	 * 
 	 * @param serviceProps
 	 *            The default simple JNDI properties
+	 * @throws LscServiceConfigurationException
 	 */
-	public AbstractSimpleJndiService(final Properties serviceProps) {
+	@Deprecated
+	public AbstractSimpleJndiService(final Properties serviceProps) throws LscServiceConfigurationException {
 		baseDn = serviceProps.getProperty("baseDn");
-		filterId = serviceProps.getProperty("filterId");
+		filterIdSync = serviceProps.getProperty("filterId");
 		filterAll = serviceProps.getProperty("filterAll");
 		_filteredSc = new SearchControls();
 
@@ -125,8 +137,41 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		// check that we have all parameters, or abort
-		Configuration.assertPropertyNotEmpty("filterId", filterId, this.getClass().getName());
-		Configuration.assertPropertyNotEmpty("filterAll", filterAll, this.getClass().getName());
+		try {
+			Configuration.assertPropertyNotEmpty("filterId", filterIdSync, this.getClass().getName());
+			Configuration.assertPropertyNotEmpty("filterAll", filterAll, this.getClass().getName());
+		} catch (LscConfigurationException e) {
+			throw new LscServiceConfigurationException(e);
+		}
+		filterIdClean = serviceProps.getProperty("filterIdClean");
+		try {
+			jndiServices = JndiServices.getInstance(serviceProps);
+		} catch (NamingException e) {
+			throw new LscServiceConfigurationException(e);
+		} catch (IOException e) {
+			throw new LscServiceConfigurationException(e);
+		}
+		LOGGER.warn("Properties configuration is not any more supported ! Please consider upgrading your LSC version !");
+	}
+
+	/**
+	 * The default initializer.
+	 * 
+	 * @param ldapService The Ldap settings object
+	 * @throws LscServiceConfigurationException 
+	 */
+	public AbstractSimpleJndiService(final Ldap ldapService) throws LscServiceConfigurationException {
+		baseDn = ldapService.getBaseDn();
+		filterIdSync = ldapService.getGetOneFilter();
+		filterAll = ldapService.getGetAllFilter();
+		filterIdClean = ldapService.getGetCleanFilter();
+		_filteredSc = new SearchControls();
+		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes());
+		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().length); 
+		for(String pivotAttr : ldapService.getPivotAttributes()) {
+			attrsId.add(pivotAttr);
+		}
+		jndiServices = JndiServices.getInstance((org.lsc.configuration.objects.connection.directory.Ldap)ldapService.getConnection());
 	}
 
 	/**
@@ -191,8 +236,13 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public final SearchResult get(String id, LscAttributes pivotAttrs) throws NamingException {
-		String searchString = filterId;
+	public final SearchResult get(String id, LscAttributes pivotAttrs, boolean fromSource) throws NamingException {
+		String searchString = null;
+		if(fromSource || filterIdClean == null) {
+			searchString = filterIdSync;
+		} else {
+			searchString = filterIdClean; 
+		}
 
 		if (pivotAttrs != null && pivotAttrs.getAttributes() != null && pivotAttrs.getAttributes().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
@@ -203,31 +253,20 @@ public abstract class AbstractSimpleJndiService {
 			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
 		} else {
 			// this is kept for backwards compatibility but will be removed
-			searchString = filterId.replaceAll("\\{0\\}", id);
+			searchString = filterIdSync.replaceAll("\\{0\\}", id);
 		}
 
-		return getJndiServices().getEntry(getBaseDn(), searchString, _filteredSc);
+		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
 	}
-	
-	/**
-	 * Returns a list of all the objects' identifiers.
-	 * Generic method that can be used by connectors extending this class.
-	 * 
-	 * @return Map of all entries names that are returned by the directory with an associated map of
-	 *         attribute names and values (never null)
-	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
-	 *             searching the directory.
-	 */
-	protected Map<String, LscAttributes> getListPivots(JndiServices jndiServices) throws NamingException {
-		return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE, getAttrsId());
-    }
 
 	/**
 	 * LDAP Services getter to fit to the context - source or destination.
 	 * 
 	 * @return the JndiServices object used to apply directory operations
 	 */
-	public abstract JndiServices getJndiServices();
+	public final JndiServices getJndiServices() {
+		return jndiServices;
+	}
 
 	/**
 	 * Default attrId getter.
@@ -271,6 +310,14 @@ public abstract class AbstractSimpleJndiService {
 	 * @return the attrId value
 	 */
 	public final String getFilterId() {
-		return filterId;
+		return filterIdSync;
+	}
+
+	/*
+	 * Default filter getter, for one corresponding entry.
+	 * @return the attrId value
+	 */
+	public final String getFilterIdClean() {
+		return filterIdClean;
 	}
 }

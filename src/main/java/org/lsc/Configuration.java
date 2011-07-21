@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,19 +45,12 @@
  */
 package org.lsc;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.FileAppender;
-import ch.qos.logback.core.joran.spi.JoranException;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -67,13 +60,32 @@ import java.util.Properties;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.lsc.configuration.PropertiesConfigurationHelper;
+import org.lsc.configuration.XmlConfigurationHelper;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.jndi.JndiServices;
 import org.lsc.utils.output.CsvLayout;
 import org.lsc.utils.output.LdifLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.joran.spi.JoranException;
+
 /**
  * Ldap Synchronization Connector Configuration.
+ * 
+ * This class was initially handling only properties configuration types
+ * but with XML evolution, LscConfiguration is now the central point. This point
+ * is maintained for historic compatibility issues 
+ * 
+ * It contains deprecated properties based methods to allow smooth updates of 
+ * plugins and external methods components 
  * 
  * @author Sebastien Bahloul <seb@lsc-project.org>
  * @author Remy-Christophe Schermesser <rcs@lsc-project.org>
@@ -83,16 +95,16 @@ public class Configuration {
 	// Logger
 	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 
-	/** Filename of the <code>lsc.properties</code> file. */
+	/** Filename of the <code>lsc.properties</code> file */
 	public static final String PROPERTIES_FILENAME = "lsc.properties";
 
-	/** Filename of the <code>database.properties</code> file. */
+	/** Filename of the <code>database.properties</code> file */
 	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
 
-	/** Default location for configuration filename. */
-	private static String location = PROPERTIES_FILENAME;
+	/** Default location for configuration filename */
+	public static String location;
 
-	/** Flag to detect if logging is configured or not yet. */
+	/** Flag to detect if logging is configured or not yet */
 	private static boolean loggingSetup = false;
 	
 	// People DN
@@ -131,11 +143,18 @@ public class Configuration {
 	// LSC configuration of the application
 	private static PropertiesConfiguration config = null;
 
-	/** Prefix for tasks configuration elements in lsc.properties. */
+	/** Prefix for tasks configuration elements in lsc.properties */
 	public static final String LSC_TASKS_PREFIX = "lsc.tasks";
 	
-	/** Prefix for syncoptions configuration elements in lsc.properties. */
+	/** Prefix for syncoptions configuration elements in lsc.properties */
 	public static final String LSC_SYNCOPTIONS_PREFIX = "lsc.syncoptions";
+
+	/** The maximum limit of data that can be synchronized by a synchronous task */
+	public static final int MAX_CONCURRENT_SYNCHRONIZED = 100000;
+	
+	static {
+		setUp();
+	}
 	
 	// Default constructor.
 	protected Configuration() {
@@ -145,46 +164,22 @@ public class Configuration {
 	 * Get data source connection properties.
 	 * 
 	 * @return the data source connection properties
+	 * @throws LscConfigurationException 
 	 */
-	public static Properties getSrcProperties() {
-		Properties srcProps = getAsProperties("src");
-		if (srcProps.size() > 0) {
-			checkLdapProperties(srcProps);
-		}
-		return srcProps;
-	}
-
-	private static void checkLdapProperties(Properties props) {
-		// sanity check
-		String contextDn = null;
-		String ldapUrl = (String) props.get("java.naming.provider.url");
-
-		if (ldapUrl == null) {
-			throw new RuntimeException("No LDAP provider url specified. Aborting.");
-		}
-		try {
-			contextDn = new LDAPURL(ldapUrl).getBaseDN().toString();
-		} catch (LDAPException e) {
-			throw new RuntimeException("Error getting context DN from LDAP provider url", e);
-		}
-
-		if (contextDn == null || contextDn.length() == 0) {
-			throw new RuntimeException("No context DN specified in LDAP provider url (" + props.get("java.naming.provider.url") + "). Aborting.");
-		}
+	@Deprecated
+	public static Properties getSrcProperties() throws LscConfigurationException {
+		return JndiServices.getLdapProperties((Ldap) LscConfiguration.getConnection("src-ldap"));
 	}
 
 	/**
 	 * Get data destination connection properties.
 	 * 
 	 * @return the data destination connection properties
+	 * @throws LscConfigurationException 
 	 */
-	public static Properties getDstProperties() {
-		Properties dst = getAsProperties("dst");
-		if (dst == null || dst.size() == 0) {
-			dst = getAsProperties("ldap");
-		}
-		checkLdapProperties(dst);
-		return dst;
+	@Deprecated
+	public static Properties getDstProperties() throws LscConfigurationException {
+		return JndiServices.getLdapProperties((Ldap) LscConfiguration.getConnection("dst-ldap"));
 	}
 
 	public static Properties getCsvProperties() {
@@ -204,12 +199,13 @@ public class Configuration {
 	 *            The prefix used to select the properties.
 	 * @return Properties object with the requests properties without the prefix
 	 */
+	@Deprecated
 	public static Properties getAsProperties(final String prefix) {
 		org.apache.commons.configuration.Configuration conf = getConfiguration().subset(prefix);
 		if (conf == null) {
 			return null;
 		}
-		Iterator< ? > it = conf.getKeys();
+		Iterator<?> it = conf.getKeys();
 		Properties result = new Properties();
 		String key = null;
 		Object value = null;
@@ -221,15 +217,16 @@ public class Configuration {
 		return result;
 	}
 	
+	@Deprecated
 	public static Properties getPropertiesSubset(final Properties originalProperties, String prefix) {
 		if (originalProperties == null) {
 			return null;
 		}
 		Properties result = new Properties();
-		for (Object propertyName : originalProperties.keySet()) {
+		for (Object propertyName: originalProperties.keySet()) {
 			String propertyNameStr = (String) propertyName;
-			if (propertyNameStr.startsWith(prefix + ".")) {
-				String newPropertyName = propertyNameStr.substring(prefix.length() + 1);
+			if(propertyNameStr.startsWith(prefix + ".")) {
+				String newPropertyName = propertyNameStr.substring(prefix.length()+1);
 				result.put(newPropertyName, originalProperties.getProperty(propertyNameStr));
 			}
 		}
@@ -237,7 +234,7 @@ public class Configuration {
 	}
 
 	/**
-	 * Get an int associated with the given property key.
+	 * Get a int associated with the given property key
 	 * 
 	 * @param key
 	 *            The property key.
@@ -245,24 +242,26 @@ public class Configuration {
 	 *            The default value.
 	 * @return The associated int.
 	 */
+	@Deprecated
 	public static int getInt(final String key, int defaultValue) {
 		return getConfiguration().getInt(key, defaultValue);
 	}
 
 	/**
-	 * Get a string associated with the given property key.
+	 * Get a string associated with the given property key
 	 * 
 	 * @param key
 	 *            The property key.
 	 * @return The associated string.
 	 */
+	@Deprecated
 	public static String getString(final String key) {
 		// beware of List problems, so get the object and convert it to a string
 		return asString(getConfiguration().getProperty(key));
 	}
 
 	/**
-	 * Get a string associated with the given property key.
+	 * Get a string associated with the given property key
 	 * 
 	 * @param key
 	 *            The property key.
@@ -270,6 +269,7 @@ public class Configuration {
 	 *            The default value.
 	 * @return The associated string.
 	 */
+	@Deprecated
 	public static String getString(final String key, String defaultValue) {
 		// beware of List problems, so get the object and convert it to a string
 		Object o = getConfiguration().getProperty(key);
@@ -277,30 +277,6 @@ public class Configuration {
 			return defaultValue;
 		}
 		return asString(o);
-	}
-
-	/**
-	 * Set the configuration properties location.
-	 * 
-	 * @param configurationLocation
-	 *            the user defined location
-	 */
-	public static void setLocation(String configurationLocation) {
-		configurationLocation = cleanup(configurationLocation);
-		location = appendDirSeparator(configurationLocation);
-		
-		// check the new location actually exists
-		if (!new File(location).exists()) {
-			// no point logging anything here, the logging configuration can't be read if we don't have a config location
-			throw new RuntimeException("Configuration location doesn't exist! (" + location + "). Aborting.");
-		}
-	}
-
-	private static String appendDirSeparator(String path) {
-		if (!path.endsWith(getSeparator())) {
-			return path + getSeparator();
-		}
-		return path;
 	}
 
 	private static String cleanup(String path) {
@@ -322,31 +298,7 @@ public class Configuration {
 	 * @return Path to configuration directory
 	 */
 	public static String getConfigurationDirectory() {
-		String ret;
-
-		if (new File(location).isDirectory()) {
-			ret = location;
-		} else {
-			String errorMessage = "Could not understand where the configuration is! Try using -f option. Aborting.";
-			
-			/* Backward compatibility: if no directory was specified,
-			 * we must find the directory where configuration files are.
-			 * This is in the classpath, so we look for "lsc.properties"
-			 * in the classpath and use that directory.
-			 */
-			URL propertiesURL = Configuration.class.getClassLoader().getResource(PROPERTIES_FILENAME);
-			if (propertiesURL == null) {
-				throw new RuntimeException(errorMessage);
-			}
-
-			try {
-				// convert the URL to a URI to reverse any character encoding (" " -> "%20" for example)
-				ret = appendDirSeparator(new File(propertiesURL.toURI().getPath()).getParent());
-			} catch (URISyntaxException e) {
-				throw new RuntimeException(errorMessage, e);
-			}
-		}
-		return ret;
+		return new File(location).getAbsolutePath() + File.separator;
 	}
 
 	/**
@@ -355,12 +307,15 @@ public class Configuration {
 	 * 
 	 * @return the configuration instance used by this class.
 	 */
+	@Deprecated
 	protected static PropertiesConfiguration getConfiguration() {
 		if (config == null) {
 			URL url = null;
 			try {
 				url = new File(getConfigurationDirectory(), PROPERTIES_FILENAME).toURI().toURL();
-				setConfiguration(url);
+				LOGGER.debug("Loading configuration url: {}", url);
+				config = new PropertiesConfiguration(url);
+				config.getKeys();
 
 				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
 				DN_LDAP_SCHEMA = Configuration.getString("dn.ldap_schema",
@@ -403,46 +358,10 @@ public class Configuration {
 	 */
 	private static String asString(Object value) {
 		if (value instanceof List) {
-			List< ? > list = (List< ? >) value;
+			List<?> list = (List<?>) value;
 			value = StringUtils.join(list.iterator(), ",");
 		}
 		return (String) value;
-	}
-
-	/**
-	 * Look for a configuration file in the classpath and set it. This is mainly
-	 * a hook for testing purposes.
-	 * 
-	 * @param url
-	 *            the url of the configuration file to load
-	 * @throws ConfigurationException If an error occurs while setting the properties
-	 */
-	static void setConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Loading configuration url: {}", url);
-		config = new PropertiesConfiguration(url);
-		config.getKeys();
-	}
-
-	/**
-	 * Look for a configuration file in the classpath and add it.
-	 * 
-	 * @param url
-	 *            the url of the configuration file to load
-	 * @throws ConfigurationException If an error occurs while setting the properties
-	 */
-	static void addConfiguration(URL url) throws ConfigurationException {
-		LOGGER.debug("Adding configuration: {}", url);
-		PropertiesConfiguration configTmp = new PropertiesConfiguration(url);
-		Iterator< ? > configKeys = configTmp.getKeys();
-		while (configKeys.hasNext()) {
-			String key = (String) configKeys.next();
-			String value = (String) configTmp.getProperty(key);
-			if (config.containsKey(key)) {
-				LOGGER.warn("Property {} ({}) in file {} override main value ({})",
-								new Object[] { key, configTmp.getProperty(key), url, config.getProperty(key) });
-			}
-			config.addProperty(key, value);
-		}
 	}
 
 	/**
@@ -469,6 +388,7 @@ public class Configuration {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
+	@Deprecated
 	public static Properties getPropertiesFromFile(String pathToFile) throws FileNotFoundException, IOException {
 		File propertiesFile = new File(pathToFile);
 		Properties props = new Properties();
@@ -489,23 +409,61 @@ public class Configuration {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
+	@Deprecated
 	public static Properties getPropertiesFromFileInConfigDir(String fileName) throws FileNotFoundException, IOException {
 		return getPropertiesFromFile(Configuration.getConfigurationDirectory() + fileName);
-	}
-
-	public static String getSeparator() {
-		return System.getProperty("file.separator");
 	}
 
 	/**
 	 * Set up configuration for the given location, including logback.
 	 * IMPORTANT: don't log ANYTHING before calling this method!
-	 * 
-	 * @param configurationLocation Absolute path to the configuration directory, as a String
 	 */
-	public static void setUp(String configurationLocation) {
-		if (configurationLocation != null) {
-			Configuration.setLocation(configurationLocation);
+	private static void setUp() {
+		if(new File(System.getProperty("LSC_HOME") + File.separator + "etc").isDirectory()) {
+			Configuration.setUp(System.getProperty("LSC_HOME") + File.separator + "etc");
+		} else {
+			// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
+			if(Configuration.class.getClassLoader().getResource("etc") != null) {
+				Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath());
+			}
+		}
+	}
+	
+	/**
+	 * Set up configuration for the given location, including logback.
+	 * IMPORTANT: don't log ANYTHING before calling this method!
+	 * @param lscConfigurationPath
+	 */
+	public static void setUp(String lscConfigurationPath) {
+		String message = null;
+		if(lscConfigurationPath == null 
+				|| ! new File(lscConfigurationPath).isDirectory()
+				|| ( ! new File(lscConfigurationPath, XmlConfigurationHelper.LSC_CONF_XML).isFile()
+						&& ! new File(lscConfigurationPath, PROPERTIES_FILENAME).isFile())) {
+			message = "Defined configuration location (" + lscConfigurationPath + ") points to a non existing LSC configured instance. " +
+				"LSC configuration loading will fail !";
+			LOGGER.error(message);
+			throw new RuntimeException(message);
+		}
+		try {
+			location = cleanup(lscConfigurationPath);
+			if(!LscConfiguration.isInitialized()) {
+				File xml = new File(location, XmlConfigurationHelper.LSC_CONF_XML);
+				if(xml.exists() && xml.isFile()) {
+					LscConfiguration.loadFromInstance(new XmlConfigurationHelper().getConfiguration(xml.toString()));
+				} else {
+					LOGGER.warn("Configuration loaded from old properties file format !");
+					PropertiesConfigurationHelper.loadConfigurationFrom(location);
+				}
+			} else {
+				LOGGER.error("LSC already configured. Unable to load new parameters ...");
+			}
+		} catch (ConfigurationException e) {
+			message = "Unable to load configuration (" + e + ")";
+			LOGGER.error(e.toString(),e);
+		} catch (FileNotFoundException e) {
+			message = "Unable to load configuration (" + e + ")";
+			LOGGER.error(e.toString(),e);
 		}
 
 		// setup LogBack
@@ -516,15 +474,15 @@ public class Configuration {
 		configurator.setContext(context);
 		context.reset(); //reset configuration
 
-		String logBackXMLPropertiesFile = Configuration.getConfigurationDirectory() + "logback.xml";
 
+		String logBackXMLPropertiesFile = new File(Configuration.getConfigurationDirectory(), "logback.xml").getAbsolutePath();
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
-			if (!getCsvProperties().isEmpty()) {
+			if(!getCsvProperties().isEmpty()) {
 				setUpCsvLogging(context);
 			}
 
-			if (!getLdifProperties().isEmpty()) {
+			if(!getLdifProperties().isEmpty()) {
 				setUpLdifLogging(context);
 			}
 		} catch (JoranException je) {
@@ -535,36 +493,36 @@ public class Configuration {
 		setLoggingSetup(true);
 
 		// WARNING: don't log anything before HERE!
-		LOGGER.debug("Reading configuration from {}", Configuration.getConfigurationDirectory());
+		LOGGER.debug("Configuration successfully read from {}", Configuration.getConfigurationDirectory());
 	}
 	
 	/**
-	 * <P>Helper method to check that a String read in from a property is not empty or null.</P>
+	 * <P>Helper method to check that a String read in from a property is not empty or null</P>
 	 * 
 	 * @param propertyName Name of the property key as read from lsc.properties
 	 * @param propertyValue Value read from the configuration
 	 * @param location Where this property is read from, to display a meaningful error message (example: class name, task name, etc)
 	 * @throws RuntimeException If the property is null or empty.
 	 */
-	public static void assertPropertyNotEmpty(String propertyName, String propertyValue, String location) throws RuntimeException {
-		if (propertyValue == null || propertyValue.length() == 0) {
+	public static void assertPropertyNotEmpty(String propertyName, String propertyValue, String location) throws LscConfigurationException {
+		if (propertyValue == null || propertyValue.length() == 0	) {
 			throw new RuntimeException("No " + propertyName + " property specified in " + location + ". Aborting.");
 		}
 	}
 
 	/**
-	 * Set the flag to determine if logging is configured or not yet.
+	 * Set the flag to determine if logging is configured or not yet
 	 * 
-	 * @param loggingSetup boolean: is logging setup yet?
+	 * @param loggingSetup Is logging setup yet?
 	 */
 	public static void setLoggingSetup(boolean loggingSetup) {
 		Configuration.loggingSetup = loggingSetup;
 	}
 
 	/**
-	 * Get the flag to determine if logging is configured or not yet.
+	 * Get the flag to determine if logging is configured or not yet
 	 * 
-	 * @return boolean: is logging setup yet?
+	 * @return boolean loggingSetup
 	 */
 	public static boolean isLoggingSetup() {
 		return loggingSetup;
@@ -573,7 +531,7 @@ public class Configuration {
 	protected static void setUpCsvLogging(LoggerContext context) {
 		Properties properties = getCsvProperties();
 
-		FileAppender appender = new FileAppender();
+		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
 		appender.setName("csv");
 		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
 		appender.setFile(properties.getProperty("file"));
@@ -597,7 +555,7 @@ public class Configuration {
 	protected static void setUpLdifLogging(LoggerContext context) {
 		Properties properties = getLdifProperties();
 
-		FileAppender appender = new FileAppender();
+		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
 		appender.setName("ldif");
 		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
 		appender.setFile(properties.getProperty("file"));

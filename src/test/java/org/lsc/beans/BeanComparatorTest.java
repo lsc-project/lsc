@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,7 +45,13 @@
  */
 package org.lsc.beans;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,15 +61,16 @@ import java.util.Set;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
+import mockit.Injectable;
+import mockit.Mocked;
+import mockit.NonStrict;
+import mockit.NonStrictExpectations;
+
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.lsc.beans.syncoptions.ForceSyncOptions;
+import org.lsc.LscModificationType;
+import org.lsc.LscModifications;
 import org.lsc.beans.syncoptions.ISyncOptions;
-import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.SetUtils;
 
 /**
@@ -72,38 +79,51 @@ import org.lsc.utils.SetUtils;
  */
 public class BeanComparatorTest {
 
+	@Mocked org.lsc.Task task;
+	
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, IBean, Object)}.
+	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 */
 	@Test
-	public void testCalculateModificationType() {
-		dummySyncOptions syncOptions = new dummySyncOptions();
+	public void testCalculateModificationType() throws CloneNotSupportedException {
+		new NonStrictExpectations() {
+			@Injectable @NonStrict ISyncOptions syncOptions;
+			{
+				syncOptions.getDn(); result = "\"destination DN\"";
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
 		IBean srcBean = new SimpleBean();
 		IBean dstBean = new SimpleBean();
-		IBean itmBean;
+
 
 		// test null and null --> null
-		assertNull(BeanComparator.calculateModificationType(syncOptions, null, null, null, null));
+		assertNull(BeanComparator.calculateModificationType(task, null, null));
 
 		// test not null and null --> add
-		itmBean = BeanComparator.cloneSrcBean(srcBean, dstBean, syncOptions, null);
-		assertEquals(JndiModificationType.ADD_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, null, null));
+		assertEquals(LscModificationType.CREATE_OBJECT, BeanComparator.calculateModificationType(task, srcBean, null));
 
 		// test null and not null --> delete
-		assertEquals(JndiModificationType.DELETE_ENTRY, BeanComparator.calculateModificationType(syncOptions, null, null, dstBean, null));
+		assertEquals(LscModificationType.DELETE_OBJECT, BeanComparator.calculateModificationType(task, null, dstBean));
 
 		// test both not null, and syncoptions to make DNs identical --> modify
-		syncOptions.setDn("\"destination DN\"");
 		dstBean.setDistinguishedName("destination DN");
-		itmBean = BeanComparator.cloneSrcBean(srcBean, dstBean, syncOptions, null);
-		assertEquals(JndiModificationType.MODIFY_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, dstBean, null));
+		assertEquals(LscModificationType.UPDATE_OBJECT, BeanComparator.calculateModificationType(task, srcBean, dstBean));
+
+
+		new NonStrictExpectations() {
+			@Injectable @NonStrict ISyncOptions syncOptions;
+			{
+				syncOptions.getDn(); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
 
 		// test both not null, with different DNs and no DN in syncoptions --> modrdn
-		syncOptions.setDn(null);
 		srcBean.setDistinguishedName("source DN");
 		dstBean.setDistinguishedName("destination DN");
-		itmBean = BeanComparator.cloneSrcBean(srcBean, dstBean, syncOptions, null);
-		assertEquals(JndiModificationType.MODRDN_ENTRY, BeanComparator.calculateModificationType(syncOptions, srcBean, itmBean, dstBean, null));
+		assertEquals(LscModificationType.CHANGE_ID, BeanComparator.calculateModificationType(task, srcBean, dstBean));
 	}
 
 	/**
@@ -118,12 +138,22 @@ public class BeanComparatorTest {
 	 *
 	 * With an invalid syntax error.
 	 * @throws NamingException As thrown when reading JNDI Attribute values.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 */
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException {
-		ISyncOptions syncOptions = new ForceSyncOptions();
+	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException {
+
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
 		IBean srcBean, destBean;
-		Object customLibrary = null;
 		boolean condition = true;
 
 		// test add
@@ -132,23 +162,28 @@ public class BeanComparatorTest {
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 		destBean = null;
-		
-		// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
-		IBean itmBean = BeanComparator.cloneSrcBean(srcBean, destBean, syncOptions, customLibrary);
 
-		JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, itmBean, destBean, customLibrary, condition);
+		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
 
-		assertEquals("something", jm.getDistinguishName());
-		assertEquals(1, jm.getModificationItems().size());
-		assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
-		assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
+		assertEquals("something", lm.getMainIdentifier());
+		assertEquals(1, lm.getLscAttributeModifications().size());
+		assertEquals("cn", lm.getLscAttributeModifications().get(0).getAttributeName());
+		assertEquals("real cn", lm.getLscAttributeModifications().get(0).getValues().get(0));
 	}
 
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException {
-		ISyncOptions syncOptions = new ForceSyncOptions();
+	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException, CloneNotSupportedException {
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
 		IBean srcBean, destBean;
-		Object customLibrary = null;
 		boolean condition = true;
 
 		// test mod
@@ -161,15 +196,12 @@ public class BeanComparatorTest {
 		destBean.setDistinguishedName("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 
-		// Clone the srcBean for comparaisons (this means the srcBean is *never* changed)
-		IBean itmBean = BeanComparator.cloneSrcBean(srcBean, destBean, syncOptions, customLibrary);
-		
-		JndiModifications jm = BeanComparator.calculateModifications(syncOptions, srcBean, itmBean, destBean, customLibrary, condition);
+		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
 
-		assertEquals("something", jm.getDistinguishName());
-		assertEquals(1, jm.getModificationItems().size());
-		assertEquals("cn", jm.getModificationItems().get(0).getAttribute().getID());
-		assertEquals("real cn", jm.getModificationItems().get(0).getAttribute().get());
+		assertEquals("something", lam.getMainIdentifier());
+		assertEquals(1, lam.getLscAttributeModifications().size());
+		assertEquals("cn", lam.getLscAttributeModifications().get(0).getAttributeName());
+		assertEquals("real cn", lam.getLscAttributeModifications().get(0).getValues().get(0));
 
 	}
 
@@ -179,30 +211,33 @@ public class BeanComparatorTest {
 	@Test
 	public void testGetValuesToSet() {
 
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
 		// Set up objects needed to test
 		String attrName = "cn";
 
 		Set<Object> srcAttrValues = null;
-		ISyncOptions syncOptions = null;
 		Map<String, Object> javaScriptObjects = null;
 
-		Map<String, List<String>> createValuesMap = new HashMap<String, List<String>>();
-		Map<String, List<String>> defaultValuesMap = new HashMap<String, List<String>>();
-		Map<String, List<String>> forceValuesMap = new HashMap<String, List<String>>();
-		Map<String, STATUS_TYPE> statusMap = null;
+//		Map<String, STATUS_TYPE> statusMap = null;
 
-		List<String> jsValues = new ArrayList<String>();
+		final List<String> jsValues = new ArrayList<String>();
 		jsValues.add("\"JavaScript \" + (true ? \"has\" : \"hasn't\") + \" parsed this value (0)\"");
 		jsValues.add("\"JavaScript \" + (true ? \"has\" : \"hasn't\") + \" parsed this value (1)\"");
 
-		List<String> jsCreateValues = new ArrayList<String>();
+		final List<String> jsCreateValues = new ArrayList<String>();
 		jsCreateValues.add("\"Created by JavaScript \" + (true ? \"successfully\" : \"or not\") + \" (0)\"");
 		jsCreateValues.add("\"Created by JavaScript \" + (true ? \"successfully\" : \"or not\") + \" (1)\"");
-
-
-		createValuesMap.put("cn", jsCreateValues);
-		defaultValuesMap.put("cn", jsValues);
-		forceValuesMap.put("cn", jsValues);
 
 		Set<Object> res = null;
 
@@ -210,10 +245,9 @@ public class BeanComparatorTest {
 		// First test: no default values, no force values, no source values (empty list)
 		// Should return an empty List
 		srcAttrValues = new HashSet<Object>();
-		syncOptions = new dummySyncOptions(null, null, null, null);
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
@@ -222,10 +256,9 @@ public class BeanComparatorTest {
 		// First test again: no default values, no force values, no source values (null list)
 		// Should return an empty List
 		srcAttrValues = null;
-		syncOptions = new dummySyncOptions(null, null, null, null);
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
@@ -236,9 +269,21 @@ public class BeanComparatorTest {
 		srcAttrValues = new HashSet<Object>();
 		srcAttrValues.add("Megan Fox");
 		srcAttrValues.add("Lucy Liu");
-		syncOptions = new dummySyncOptions(createValuesMap, null, null, null);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(srcAttrValues.size(), res.size());
@@ -247,12 +292,20 @@ public class BeanComparatorTest {
 
 		// Third test: source values to be replaced with force values
 		// Should return just the force values
-		srcAttrValues = new HashSet<Object>();
-		srcAttrValues.add("Megan Fox");
-		srcAttrValues.add("Lucy Liu");
-		syncOptions = new dummySyncOptions(null, null, forceValuesMap, null);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = jsValues;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -264,9 +317,20 @@ public class BeanComparatorTest {
 		// Fourth test: no source values, no force values, just default values
 		// Should return just the default values
 		srcAttrValues = new HashSet<Object>();
-		syncOptions = new dummySyncOptions(null, defaultValuesMap, null, null);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -278,11 +342,20 @@ public class BeanComparatorTest {
 		// 5th test: source values, and default values, attribute status "Force"
 		// Should return just source values
 		srcAttrValues = new HashSet<Object>();
-		statusMap = new HashMap<String, STATUS_TYPE>();
-		statusMap.put(attrName, STATUS_TYPE.FORCE);
-		syncOptions = new dummySyncOptions(null, defaultValuesMap, null, statusMap);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -296,11 +369,20 @@ public class BeanComparatorTest {
 		srcAttrValues = new HashSet<Object>();
 		srcAttrValues.add("Megan Fox");
 		srcAttrValues.add("Lucy Liu");
-		statusMap = new HashMap<String, STATUS_TYPE>();
-		statusMap.put(attrName, STATUS_TYPE.MERGE);
-		syncOptions = new dummySyncOptions(null, defaultValuesMap, null, statusMap);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.MERGE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size() + srcAttrValues.size(), res.size());
@@ -319,11 +401,21 @@ public class BeanComparatorTest {
 		srcAttrValues = new HashSet<Object>();
 		srcAttrValues.add("Megan Fox");
 		srcAttrValues.add("Lucy Liu");
-		statusMap = new HashMap<String, STATUS_TYPE>();
-		statusMap.put(attrName, STATUS_TYPE.MERGE);
-		syncOptions = new dummySyncOptions(createValuesMap, defaultValuesMap, null, statusMap);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.ADD_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.MERGE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsCreateValues.size() + srcAttrValues.size(), res.size());
@@ -341,131 +433,22 @@ public class BeanComparatorTest {
 		// (no force_values, default_values or source values)
 		// are ignored if this is not an Add operation
 		srcAttrValues = new HashSet<Object>();
-		syncOptions = new dummySyncOptions(createValuesMap, null, null, null);
 
-		res = BeanComparator.getValuesToSet(attrName, srcAttrValues, syncOptions, javaScriptObjects, JndiModificationType.MODIFY_ENTRY);
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
+				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNull(res);
 	}
 
-	public class dummySyncOptions implements ISyncOptions {
-
-		Map<String, List<String>> createValuesMap;
-		Map<String, List<String>> defaultValuesMap;
-		Map<String, List<String>> forceValuesMap;
-		Map<String, STATUS_TYPE> statusMap;
-		String dn;
-
-		public dummySyncOptions(Map<String, List<String>> createValuesMap,
-						Map<String, List<String>> defaultValuesMap,
-						Map<String, List<String>> forceValuesMap,
-						Map<String, STATUS_TYPE> statusMap) {
-			if (createValuesMap != null) {
-				this.createValuesMap = createValuesMap;
-			} else {
-				this.createValuesMap = new HashMap<String, List<String>>();
-			}
-
-			if (defaultValuesMap != null) {
-				this.defaultValuesMap = defaultValuesMap;
-			} else {
-				this.defaultValuesMap = new HashMap<String, List<String>>();
-			}
-
-			if (forceValuesMap != null) {
-				this.forceValuesMap = forceValuesMap;
-			} else {
-				this.forceValuesMap = new HashMap<String, List<String>>();
-			}
-
-			if (statusMap != null) {
-				this.statusMap = statusMap;
-			} else {
-				this.statusMap = new HashMap<String, STATUS_TYPE>();
-			}
-
-		}
-
-		public dummySyncOptions() {
-			// TODO Auto-generated constructor stub
-		}
-
-		public String getCondition(JndiModificationType operation) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public Set<String> getCreateAttributeNames() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public String getCreateCondition() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public List<String> getCreateValues(String id, String attributeName) {
-			return createValuesMap.get(attributeName);
-		}
-
-		public Set<String> getDefaultValuedAttributeNames() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public List<String> getDefaultValues(String id, String attributeName) {
-			return defaultValuesMap.get(attributeName);
-		}
-
-		public String getDeleteCondition() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public void setDn(String dn) {
-			this.dn = dn;
-		}
-
-		public String getDn() {
-			return dn;
-		}
-
-		public Set<String> getForceValuedAttributeNames() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public List<String> getForceValues(String id, String attributeName) {
-			return forceValuesMap.get(attributeName);
-		}
-
-		public String getModrdnCondition() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public STATUS_TYPE getStatus(String id, String attributeName) {
-			return statusMap.get(attributeName);
-		}
-
-		public String getTaskName() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public String getUpdateCondition() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public List<String> getWriteAttributes() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public void initialize(String taskname) {
-			// TODO Auto-generated method stub
-		}
-	}
 }

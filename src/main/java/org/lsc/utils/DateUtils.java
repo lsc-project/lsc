@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -62,7 +62,7 @@ import java.util.TimeZone;
 public final class DateUtils {
 
 	// Utility class
-	private DateUtils() { }
+	private DateUtils() {}
 	
 	/**
 	 * This is the standard LDAP date format : yyyyMMddHHmmss.S'Z'.
@@ -95,7 +95,7 @@ public final class DateUtils {
 					new SimpleDateFormat(LDAP_DATE_SIMPLIFIED_STORAGE_FORMAT);
 
 	/** The UTC time zone. */
-	private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault(); //getTimeZone("UTC");
+	private static final TimeZone UTC_TIME_ZONE = TimeZone.getDefault();//getTimeZone("UTC");
 
 	static {
 		FORMATTER.setLenient(false);

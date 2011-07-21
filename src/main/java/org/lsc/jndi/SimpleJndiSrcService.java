@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -49,9 +49,14 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.naming.directory.SearchControls;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.service.IService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +83,34 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @param props the properties used to identify the directory parameters
 	 * and context
+	 * @throws LscServiceConfigurationException 
 	 */
 	@SuppressWarnings("unchecked")
-	public SimpleJndiSrcService(final Properties props, final String beanClassName) {
+	@Deprecated
+	public SimpleJndiSrcService(final Properties props, final String beanClassName) throws LscServiceConfigurationException {
 		super(props);
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
+			throw new LscServiceConfigurationException(e);
+		}
+	}
+
+	/**
+	 * Constructor adapted to the context properties and the bean class name
+	 * to instantiate.
+	 * 
+	 * @param task Initialized task containing all necessary pieces of information to initiate connection
+	 * 				and load settings 
+	 * @throws LscServiceConfigurationException 
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleJndiSrcService(final Task task) throws LscServiceConfigurationException {
+		super((Ldap)task.getSourceService());
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
+		} catch (ClassNotFoundException e) {
+			throw new LscServiceConfigurationException(e);
 		}
 	}
 
@@ -97,33 +122,26 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
 	 *            entry in the source.
+	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
-	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
+	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	public final IBean getBean(final String pivotName, final LscAttributes pivotAttributes) throws NamingException {
+	public final IBean getBean(final String pivotName, final LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();
-			return this.getBeanFromSR(get(pivotName, pivotAttributes), srcBean);
+			return this.getBeanFromSR(get(pivotName, pivotAttributes, fromSameService), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
+		} catch (NamingException e) {
+			throw new LscServiceException(e);
 		}
 		return null;
-	}
-
-	/**
-	 * Source LDAP Services getter.
-	 *
-	 * @return the Source JndiServices object used to apply directory
-	 *         operations
-	 */
-	public final JndiServices getJndiServices() {
-		return JndiServices.getSrcInstance();
 	}
 
 	/**
@@ -131,10 +149,17 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @return Map of all entries names that are returned by the directory with an associated map of
 	 *         attribute names and values (never null)
+	 * @throws LscServiceException 
 	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
 	 *             searching the directory.
 	 */
-	public Map<String, LscAttributes> getListPivots() throws NamingException {
-		return this.getListPivots(getJndiServices());
+	public Map<String, LscAttributes> getListPivots() throws LscServiceException {
+		try {
+			return jndiServices.getAttrsList(getBaseDn(),
+							getFilterAll(), SearchControls.SUBTREE_SCOPE,
+							getAttrsId());
+		} catch (NamingException e) {
+			throw new LscServiceException(e);
+		}
 	}
 }

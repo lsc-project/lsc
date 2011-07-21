@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -53,6 +53,9 @@ import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.DstLdap;
+import org.lsc.exception.LscServiceConfigurationException;
 
 /**
  * This class is a generic implementation to simulate an empty destination directory.
@@ -64,12 +67,15 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.
 	 * 
-	 * @param props
-	 *            the properties used to identify the directory parameters and context
-	 * @param beanClassName
-	 *            the bean class name that will be instantiated and feed up
+	 * @param task the task parameter - unused
+	 * @throws LscServiceConfigurationException 
 	 */
-	public EmptyJndiDstService(final Properties props, @SuppressWarnings("unused") final String beanClassName) {
+	public EmptyJndiDstService(final Task task) throws LscServiceConfigurationException {
+		super((DstLdap)task.getDestinationService());
+	}
+
+	@Deprecated
+	public EmptyJndiDstService(final Properties props, final String beanClassName) throws LscServiceConfigurationException {
 		super(props);
 	}
 
@@ -81,20 +87,12 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique entry in the
 	 *            source.
+	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return Always returns null since this simulates an empty directory
 	 * @throws NamingException Never thrown.
 	 */
-	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException {
+	public IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService) {
 		return null;
-	}
-
-	/**
-	 * Destination LDAP Services getter.
-	 * 
-	 * @return the Destination JndiServices object used to apply directory operations
-	 */
-	public final JndiServices getJndiServices() {
-		return JndiServices.getDstInstance();
 	}
 
     /**
@@ -103,7 +101,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
      * @return Map Always null since this simulates an empty directory
      * @throws NamingException Never thrown.
      */
-	public Map<String, LscAttributes> getListPivots() throws NamingException {
+	public Map<String, LscAttributes> getListPivots() {
 		return null;
 	}
 
@@ -114,7 +112,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @return Operation status, always true.
 	 * @throws CommunicationException Never thrown.
 	 */
-	public boolean apply(JndiModifications jm) throws CommunicationException {
+	public boolean apply(JndiModifications jm) {
 		return true;
 	}
 }

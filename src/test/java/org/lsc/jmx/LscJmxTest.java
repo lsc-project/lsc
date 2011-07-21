@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -51,8 +51,12 @@ import static org.junit.Assert.assertTrue;
 import javax.naming.CommunicationException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.lsc.Ldap2LdapSyncTest;
+import org.lsc.SimpleSynchronize;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -68,47 +72,61 @@ public class LscJmxTest extends Thread {
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LscJmxTest.class);
 	
+	public final static String TASK_NAME = "ldap2ldapJmxTestTask";
+	public final static String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DN_ADD_DST = "cn=CN0003,ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+
+	private JndiServices jndiServices;
+	
+	@Before
+	public void setup() {
+		jndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+	}
+	
 	@Test
 	public final void testList() throws Exception {
 		clean();
-		assertTrue(JndiServices.getSrcInstance().exists(Ldap2LdapSyncTest.DN_ADD_SRC));
-		assertFalse(JndiServices.getDstInstance().exists(Ldap2LdapSyncTest.DN_ADD_DST));
+		assertTrue(jndiServices.exists(DN_ADD_SRC));
+		assertFalse(jndiServices.exists(DN_ADD_DST));
 		
 		Thread syncThread = new Thread(this);
 		this.start(); 
-		Thread.sleep(2000);
+		Thread.sleep(3500);
 
 		// Check that the regular sync goes well
-		assertTrue(JndiServices.getDstInstance().exists(Ldap2LdapSyncTest.DN_ADD_DST));
+		assertTrue(jndiServices.exists(DN_ADD_DST));
 		// Then clean
 		clean();
 		// And launch it through JMX
 		LscAgent lscAgent = new LscAgent();
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
-		Assert.assertEquals(lscAgent.run(), 0);
-		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", Ldap2LdapSyncTest.TASK_NAME, 
-				"-i", Ldap2LdapSyncTest.DN_ADD_SRC, "-t", "sn=SN0003"} );
-		Assert.assertEquals(lscAgent.run(), 0);
+		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
+				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
+		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
 		
-		assertTrue(JndiServices.getDstInstance().exists(Ldap2LdapSyncTest.DN_ADD_DST));
+		assertTrue(jndiServices.exists(DN_ADD_DST));
 		
 		syncThread.interrupt();
 	}
 
 	public void run() {
 		try {
-			Ldap2LdapSyncTest.launchSyncCleanTask(Ldap2LdapSyncTest.TASK_NAME, true, false, false);
+			SimpleSynchronize sync = new SimpleSynchronize();
+			sync.init();
+			sync.setThreads(1);
+			LscServerImpl.startJmx(sync);
+			Ldap2LdapSyncTest.launchSyncCleanTask(TASK_NAME, true, false, false);
 		} catch (Exception e) {
 			LOGGER.debug(e.toString(), e);
 		}
 	}
 	
 	private void clean() throws CommunicationException {
-		if(JndiServices.getDstInstance().exists(Ldap2LdapSyncTest.DN_ADD_DST)) {
-			JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, Ldap2LdapSyncTest.TASK_NAME);
-			jm.setDistinguishName(Ldap2LdapSyncTest.DN_ADD_DST);
-			JndiServices.getDstInstance().apply(jm);
+		if(jndiServices.exists(DN_ADD_DST)) {
+			JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, TASK_NAME);
+			jm.setDistinguishName(DN_ADD_DST);
+			jndiServices.apply(jm);
 		}
 	}
-	
 }

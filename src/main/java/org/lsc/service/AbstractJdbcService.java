@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -50,14 +50,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.naming.CommunicationException;
-import javax.naming.NamingException;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.services.Database;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.persistence.DaoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +85,13 @@ public abstract class AbstractJdbcService implements IService {
 
 	public abstract String getRequestNameForNextId();
 
-	public AbstractJdbcService() {
-		sqlMapper = DaoConfig.getSqlMapClient();
+	@Deprecated
+	public AbstractJdbcService(Properties databaseProps) throws LscServiceConfigurationException {
+		sqlMapper = DaoConfig.getSqlMapClient(databaseProps);
+	}
+
+	public AbstractJdbcService(Database destinationService) throws LscServiceConfigurationException {
+		sqlMapper = DaoConfig.getSqlMapClient((org.lsc.configuration.objects.connection.Database)destinationService.getConnection());
 	}
 
 	/**
@@ -95,10 +103,9 @@ public abstract class AbstractJdbcService implements IService {
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
 	 *            entry in the source.
 	 * @return The bean, or null if not found
-	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
-	 *             directory, or if more than one object would be returned.
+	 * @throws LscServiceException May throw a embedded {@link CommunicationException} if an SQLException is encountered 
 	 */
-	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException {
+	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws LscServiceException {
 		Map<String, Object> attributeMap = pivotAttributes.getAttributes();
 		try {
 			return (IBean) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
@@ -107,7 +114,7 @@ public abstract class AbstractJdbcService implements IService {
 			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
-			throw new CommunicationException(e.getMessage());
+			throw new LscServiceException(new CommunicationException(e.getMessage()));
 		}
 	}
 

@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -45,6 +45,11 @@
  */
 package org.lsc.jndi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,12 +57,16 @@ import java.util.Map;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
-import org.junit.Test;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
-import org.lsc.utils.JScriptEvaluator;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.utils.ScriptingEvaluator;
 import org.mozilla.javascript.EcmaError;
 
 /**
@@ -68,11 +77,13 @@ import org.mozilla.javascript.EcmaError;
  */
 public class JScriptEvaluatorTest {
 
+	@Mocked Task task;
+	
 	@Test
 	public void testOk() {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
-		assertEquals("b", JScriptEvaluator.evalToString("srcAttr.get()", table));
+		assertEquals("b", ScriptingEvaluator.evalToString(task, "srcAttr.get()", table));
 	}
 
 	@Test //(expected=EcmaError.class)
@@ -80,8 +91,8 @@ public class JScriptEvaluatorTest {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
-		assertNull(JScriptEvaluator.evalToString("src.get()", table));
-		assertNull(JScriptEvaluator.evalToStringList("src.get()", table));
+		assertNull(ScriptingEvaluator.evalToString(task, "src.get()", table));
+		assertNull(ScriptingEvaluator.evalToStringList(task, "src.get()", table));
 	}
 
 	@Test
@@ -89,7 +100,7 @@ public class JScriptEvaluatorTest {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("sn", new BasicAttribute("sn", "Doe"));
 		table.put("givenName", new BasicAttribute("givenName", "John"));
-		assertEquals(JScriptEvaluator.evalToString("givenName.get() + ' ' + sn.get()", table), "John Doe");
+		assertEquals(ScriptingEvaluator.evalToString(task, "givenName.get() + ' ' + sn.get()", table), "John Doe");
 	}
 
 	@Test
@@ -107,34 +118,41 @@ public class JScriptEvaluatorTest {
 
 		table.put("srcBean", bean);
 
-		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
-		assertEquals("John Doe", JScriptEvaluator.evalToString("srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeFirstValueById('sn')", table));
+		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
+		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeFirstValueById('sn')", table));
 
-		List<String> res = JScriptEvaluator.evalToStringList("srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table);
+		List<String> res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table);
 		assertNotNull(res);
 		assertEquals("John Doe", res.get(0));
 
-		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValuesById('cn')", table);
+		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeValuesById('cn')", table);
 		assertNotNull(res);
 		assertEquals(2, res.size());
 		assertTrue(res.contains("John Doe"));
 		assertTrue(res.contains("DOE John"));
 
-		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeValuesById('nonexistent')", table);
+		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeValuesById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 		
-		res = JScriptEvaluator.evalToStringList("srcBean.getAttributeFirstValueById('nonexistent')", table);
+		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeFirstValueById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 
 	}
 
 	@Test
-	public void testOkLdap() {
+	public void testOkLdap() throws LscServiceConfigurationException {
 		Map<String, Object> table = new HashMap<String, Object>();
 
-		List<String> res = JScriptEvaluator.evalToStringList("ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
+		new NonStrictExpectations() {
+			{
+				org.lsc.configuration.objects.Task taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
+				task.getDestinationService(); result = new SimpleJndiDstService(taskConf);
+			}
+		};
+		
+		List<String> res = ScriptingEvaluator.evalToStringList(task, "ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
 		assertEquals("[People, dc=lsc-project,dc=org]", res.toString());
 	}
 }

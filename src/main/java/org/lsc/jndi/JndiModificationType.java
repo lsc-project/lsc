@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -44,6 +44,8 @@
  ****************************************************************************
  */
 package org.lsc.jndi;
+
+import org.lsc.LscModificationType;
 
 /**
  * Enumeration for the modifications type of an directory
@@ -90,5 +92,24 @@ public enum JndiModificationType {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Get the JndiModificationType from LscModificationType
+	 * @param lmt the original modification type
+	 * @return the JNDI modification type
+	 */
+	public static JndiModificationType getFromLscModificationType(LscModificationType lmt) {
+		switch (lmt) {
+			case CREATE_OBJECT:
+				return JndiModificationType.ADD_ENTRY;
+			case DELETE_OBJECT:
+				return JndiModificationType.DELETE_ENTRY;
+			case CHANGE_ID:
+				return JndiModificationType.MODRDN_ENTRY;
+			case UPDATE_OBJECT:
+			default:
+				return JndiModificationType.MODIFY_ENTRY;
+		}
 	}
 }

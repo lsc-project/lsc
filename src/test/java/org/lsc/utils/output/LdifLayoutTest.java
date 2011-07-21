@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -95,7 +95,7 @@ public class LdifLayoutTest {
 		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("description", "")));
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
-		jm.setDistinguishName("givenName=Sébastien");
+		jm.setDistinguishName("givenName=Sébastien,dc=lsc-project,dc=org");
 		jm.setModificationItems(mi);
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
@@ -107,7 +107,7 @@ public class LdifLayoutTest {
 		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 
-		jm.setDistinguishName(null);
+		jm.setDistinguishName("dc=lsc-project,dc=org");
 		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 	}
@@ -127,7 +127,7 @@ public class LdifLayoutTest {
 
 
 		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
-		jm.setDistinguishName("");
+		jm.setDistinguishName("dc=lsc-project,dc=org");
 		jm.setModificationItems(mi);
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
@@ -161,7 +161,7 @@ public class LdifLayoutTest {
 	@Test
 	public final void testRemove() throws IOException {
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
-		jm.setDistinguishName("uid=a");
+		jm.setDistinguishName("uid=a,dc=lsc-project,dc=org");
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 

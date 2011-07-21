@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2010, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -47,22 +47,50 @@ package org.lsc.configuration.objects.audit;
 
 import org.lsc.configuration.objects.Audit;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 /**
- *
  * @author rschermesser
  */
+@XStreamAlias("csvAudit")
 public class Csv extends Audit {
 
 	/**
-	 * 			<operations>create, delete</operations>
-			<attributes>cn, dn</attributes>
-			<separator>;</separator>
-			<append>true</append>
-
+	 * <separator>;</separator>
+	 * <append>true</append>
 	 */
-	 private String operations;
-	 private String attributes;
-	 private String separator;
-	 private Boolean append;
+	private String attributes;
+	
+	private String separator;
 
+	private Boolean append;
+
+	public String getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(String attributes) {
+		this.attributes = attributes;
+	}
+
+	public String getSeparator() {
+		return separator;
+	}
+
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
+
+	public Boolean getAppend() {
+		return append;
+	}
+
+	public void setAppend(Boolean append) {
+		this.append = append;
+	}
+
+	@Override
+	public String getAuditTypeName() {
+		return "CSV log file";
+	}
 }

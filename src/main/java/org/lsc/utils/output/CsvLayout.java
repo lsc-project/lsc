@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- * Copyright (c) 2008, LSC Project
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -93,7 +93,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/**
 	 * Name of the attribute for the dn
 	 */
-	private static final String DN_STRING = "dn";
+	private final static String DN_STRING = "dn";
 
 	/**
 	 * Output log events in CSV format for the JndiModifications class

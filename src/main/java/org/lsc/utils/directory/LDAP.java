@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2009, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -48,6 +48,7 @@ package org.lsc.utils.directory;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.Map.Entry;
 
@@ -77,12 +78,12 @@ import org.lsc.jndi.JndiServices;
  * utilization.
  * </P>
  * 
- * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
+ * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
 public class LDAP {
 
 	// Utility class
-	private LDAP() { }
+	private LDAP() {}
 	
 	/**
 	 * Connects to a LDAP server anonymously and tries to rebind with the
@@ -189,7 +190,7 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
-	 * @throws LDAPException
+	 * @throws MalformedURLException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
@@ -220,7 +221,7 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
-	 * @throws LDAPException
+	 * @throws MalformedURLException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,

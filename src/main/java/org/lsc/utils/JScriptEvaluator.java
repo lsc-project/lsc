@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -46,19 +46,17 @@
 package org.lsc.utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.lsc.jndi.JndiServices;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+
+import org.lsc.Task;
+import org.lsc.jndi.AbstractSimpleJndiService;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
-import org.mozilla.javascript.Script;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,42 +65,26 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public final class JScriptEvaluator {
+public final class JScriptEvaluator implements ScriptableEvaluator {
 
 	// Logger
 	private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
-	/** The private unique instance. */
-	private static Map<String,JScriptEvaluator> instances = new HashMap<String,JScriptEvaluator>();
+//	/** The precompiled Javascript cache. */
+//	private Map<String, Script> cache;
 
-	/** The precompiled Javascript cache. */
-	private Map<String, Script> cache;
-
+	private ScriptEngine engine;
+	
 	/** The local Rhino context. */
-	private Context cx;
+//	private ScriptContext cx;
 
 	/**
-	 * Default private constructor.
-	 *
-	 * @see #getInstance()
+	 * Default public constructor.
 	 */
-	private JScriptEvaluator() {
-		cache = new HashMap<String, Script>();
-		// When removing 1.5 compatibility prefer enterContext() method
-		cx = new ContextFactory().enter();
-	}
-
-	/**
-	 * Local instance getter.
-	 *
-	 * @return the instance
-	 */
-	public static JScriptEvaluator getInstance() {
-		String threadName = Thread.currentThread().getName();
-		if(instances.get(threadName) == null) {
-			instances.put(threadName, new JScriptEvaluator());
-		}
-		return instances.get(threadName);
+	public JScriptEvaluator(ScriptEngine se) {
+//		cache = new HashMap<String, Script>();
+		this.engine = se;
+//		cx = se.getContext();//new ContextFactory().enterContext();
 	}
 
 	/**
@@ -115,9 +97,9 @@ public final class JScriptEvaluator {
 	 *                the keys are the name used in the
 	 * @return the evaluation result
 	 */
-	public static String evalToString(final String expression,
+	public String evalToString(final Task task, final String expression,
 					final Map<String, Object> params) {
-		Object result = getInstance().instanceEval(expression, params);
+		Object result = instanceEval(task, expression, params);
 
 		if (result == null) {
 			return null;
@@ -127,9 +109,9 @@ public final class JScriptEvaluator {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<String> evalToStringList(final String expression,
+	public List<String> evalToStringList(final Task task, final String expression,
 					final Map<String, Object> params) {
-		Object result = getInstance().instanceEval(expression, params);
+		Object result = instanceEval(task, expression, params);
 
 		// First try to convert to Array, else to List, and finally to String
 		try {
@@ -155,8 +137,8 @@ public final class JScriptEvaluator {
 		return resultsArray;
 	}
 
-	public static Boolean evalToBoolean(final String expression, final Map<String, Object> params) {
-		return Context.toBoolean(getInstance().instanceEval(expression, params));
+	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
+		return Context.toBoolean(instanceEval(task, expression, params));
 	}
 
 	/**
@@ -168,53 +150,49 @@ public final class JScriptEvaluator {
 	 *                the keys are the name used in the
 	 * @return the evaluation result
 	 */
-	private Object instanceEval(final String expression,
+	private Object instanceEval(final Task task, final String expression,
 					final Map<String, Object> params) {
-		Script script = null;
-		Scriptable scope = cx.initStandardObjects();
+//		Script script = null;
+		Bindings bindings = engine.createBindings();
 
-		Map<String, Object> localParams = new HashMap<String, Object>();
-		if (params != null) {
-			localParams.putAll(params);
-		}
 
 		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
 		String expressionImport =
-						"with (new JavaImporter(Packages.org.lsc.utils.directory)) {" +
-						"with (new JavaImporter(Packages.org.lsc.utils)) { " + expression + "}}";
+						"importPackage(org.lsc.utils.directory);\n" +
+						"importPackage(org.lsc.utils);\n" + expression;
 
-		if (cache.containsKey(expressionImport)) {
-			script = cache.get(expressionImport);
-		} else {
-			script = cx.compileString(expressionImport, "<cmd>", 1, null);
-			cache.put(expressionImport, script);
-		}
+//		if (cache.containsKey(expressionImport)) {
+//			script = cache.get(expressionImport);
+//		} else {
+//			script = cx.compileString(expressionImport, "<cmd>", 1, null);
+//			cache.put(expressionImport, script);
+//		}
 
 		// add LDAP interface for destination if necessary
-		if (expression.contains("ldap.") && !localParams.containsKey("ldap")) {
+		if (expression.contains("ldap.") && !bindings.containsKey("ldap")
+				&& 	task.getDestinationService() instanceof AbstractSimpleJndiService) {
 			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-			dstSjs.setJndiServices(JndiServices.getDstInstance());
-			localParams.put("ldap", dstSjs);
+			dstSjs.setJndiServices(((AbstractSimpleJndiService)task.getDestinationService()).getJndiServices());
+			bindings.put("ldap", dstSjs);
 		}
 
 		// add LDAP interface for source if necessary
-		if (expression.contains("srcLdap.") && !localParams.containsKey("srcLdap")) {
-			JndiServices srcInstance = JndiServices.getSrcInstance();
-			if (srcInstance != null) {
-				ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-				srcSjs.setJndiServices(srcInstance);
-				localParams.put("srcLdap", srcSjs);
+		if (expression.contains("srcLdap.") && !bindings.containsKey("srcLdap")
+				&& task.getSourceService() instanceof AbstractSimpleJndiService) {
+			ScriptableJndiServices srcSjs = new ScriptableJndiServices();
+			srcSjs.setJndiServices(((AbstractSimpleJndiService)task.getSourceService()).getJndiServices());
+			bindings.put("srcLdap", srcSjs);
+		}
+
+		if(params != null) {
+			for(String paramName: params.keySet()) {
+				bindings.put(paramName, params.get(paramName));
 			}
 		}
-
-		for (Entry<String, Object> entry : localParams.entrySet()) {
-			Object jsObj = Context.javaToJS(entry.getValue(), scope);
-			ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
-		}
-
+		
 		Object ret = null;
 		try {
-			ret = script.exec(cx, scope);
+			ret = engine.eval(expressionImport, bindings);
 		} catch (EcmaError e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);

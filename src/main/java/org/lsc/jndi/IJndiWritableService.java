@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008-2010 LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2010 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -47,6 +47,7 @@ package org.lsc.jndi;
 
 import javax.naming.CommunicationException;
 
+import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.service.IService;
 
 
@@ -73,5 +74,5 @@ public interface IJndiWritableService extends IService {
 	 * @throws CommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
-	public boolean apply(final JndiModifications jm) throws CommunicationException;
+	public boolean apply(final JndiModifications jm) throws LscServiceCommunicationException;
 }

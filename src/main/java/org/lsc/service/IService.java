@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, 2009 LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -51,6 +51,7 @@ import javax.naming.NamingException;
 
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.exception.LscServiceException;
 
 /**
  * Interface used by services.
@@ -78,11 +79,12 @@ public interface IService {
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
 	 *            entry in the source.
+	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
 	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	IBean getBean(String pivotName, LscAttributes pivotAttributes) throws NamingException;
+	IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException;
 
 	/**
 	 * Returns a list of all the objects' identifiers.
@@ -92,5 +94,5 @@ public interface IService {
 	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
 	 *             searching the directory.
 	 */
-	Map<String, LscAttributes> getListPivots() throws NamingException;
+	Map<String, LscAttributes> getListPivots() throws LscServiceException;
 }

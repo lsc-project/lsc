@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -50,16 +50,21 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.naming.CommunicationException;
-import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.Database;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
+import org.lsc.exception.LscServiceInitializationException;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -78,30 +83,61 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
 	 * and calls the appropriate SQL requests defined in sql-map-config.d
 	 * 
+	 * @deprecated
 	 * @param props Configuration properties
+	 * @throws LscServiceInitializationException 
 	 */
 	@SuppressWarnings("unchecked")
-	public SimpleJdbcSrcService(Properties props, String beanClassName) {
+	@Deprecated
+	public SimpleJdbcSrcService(Properties props, String beanClassName) throws LscServiceException {
+		super(Configuration.getAsProperties("src.database"));
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
 		requestNameForNextId = props.getProperty("requestNameForNextId");
 		
-		// check that we have all parameters, or abort
-		Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
-		Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
-		Configuration.assertPropertyNotEmpty("requestNameForNextId", requestNameForNextId, this.getClass().getName());
-		
 		try {
-			interval = Integer.parseInt(props.getProperty("interval"));
-		}
-		catch (NumberFormatException e) {
-			interval = 0;
-		}
-		
-		try {
+			// check that we have all parameters, or abort
+			Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
+			Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
+			
+			if(props.getProperty("interval") != null) {
+				interval = Integer.parseInt(props.getProperty("interval"));
+			} else {
+				interval = -1;
+			}
+
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
+		} catch (NumberFormatException e) {
+			throw new LscServiceInitializationException(e);
+		} catch (LscConfigurationException e) {
+			throw new LscServiceConfigurationException(e);
 		} catch (ClassNotFoundException e) {
-			throw new ExceptionInInitializerError(e);
+			throw new LscServiceConfigurationException(e);
+		}
+	}
+
+	/**
+	 * Simple JDBC source service that gets SQL request names from lsc.properties
+	 * and calls the appropriate SQL requests defined in sql-map-config.d
+	 * 
+	 * @param task Initialized task containing all necessary pieces of information to initiate connection
+	 * 				and load settings 
+	 * @throws LscServiceInitializationException 
+	 */
+	@SuppressWarnings("unchecked")
+	public SimpleJdbcSrcService(final Task task) throws LscServiceException {
+		super((Database)task.getSourceService());
+		Database serviceConf = (Database)task.getSourceService();
+		requestNameForList = serviceConf.getRequestNameForList();
+		requestNameForObject = serviceConf.getRequestNameForObject();
+		requestNameForNextId = serviceConf.getRequestNameForNextId();
+		
+		try {
+			interval = serviceConf.getInterval();
+
+			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
+		} catch (ClassNotFoundException e) {
+			throw new LscServiceConfigurationException(e);
 		}
 	}
 
@@ -124,26 +160,25 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	/**
 	 * Override default AbstractJdbcSrcService to get a SimpleBean
 	 * TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
+	 * @throws LscServiceException 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBean getBean(String id, LscAttributes attributes) throws NamingException {
+	public IBean getBean(String id, LscAttributes attributes, boolean fromSource) throws LscServiceException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
 			Map<String, Object> attributeMap = attributes.getAttributes();
-			List records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
+			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
 			if(records.size() > 1) {
-				throw new RuntimeException("Only a single record can be returned from a getObject request ! " +
+				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
 						"For id=" + attributeMap + ", there are " + records.size() + " records !");
 			} else if (records.size() == 0) {
 				return null;
 			}
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
-				if(entry.getValue() != null) {
-					srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
-				}
+				srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
 			}
 			return srcBean;
 		} catch (InstantiationException e) {
@@ -159,7 +194,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
-			throw new CommunicationException(e.getMessage());
+			throw new LscServiceException(new CommunicationException(e.getMessage()));
 		}
 		return null;
 	}
@@ -169,7 +204,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForNextId;
 	}
 
-	private static int count = 0;
+	static int count = 0;
 
 	@SuppressWarnings("unchecked")
 	public Entry<String, LscAttributes> getNextId() {
@@ -177,7 +212,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		try {
 			idMap = (Map<String, Object>) sqlMapper.queryForObject(getRequestNameForNextId());
 			String key = getMapKey(idMap, count++);
-			Map<String, LscAttributes> ret = new HashMap();
+			Map<String, LscAttributes> ret = new HashMap<String, LscAttributes>();
 			ret.put(key, new LscAttributes(idMap));
 			return ret.entrySet().iterator().next();
 		} catch (SQLException e) {

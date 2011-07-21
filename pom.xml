@@ -5,11 +5,11 @@
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
 	<name>Ldap Synchronization Connector</name>
-	<version>trunk-SNAPSHOT</version>
+	<version>branch-webai-SNAPSHOT</version>
 	<description>
-		Open source connector to synchronize identities to a LDAP directory
-		from any data source including any database with a JDBC connector,
-		another LDAP server or flat files ... 
+		This project is the Ldap Synchronization Connector which
+		simplifies synchronizations between relation databases and LDAP
+		directories.
 	</description>
 	<url>http://lsc-project.org/</url>
 	<issueManagement>
@@ -130,7 +130,8 @@
 	<properties>
 		<!--Force UTF-8 for the build-->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	    <staging.dir>${project.build.directory}/staging</staging.dir>
+		<staging.dir>${project.build.directory}/staging</staging.dir>
+		<tapestry-release-version>5.2.5</tapestry-release-version>
 	</properties>
 
 	<build>
@@ -140,19 +141,23 @@
 		
 		<plugins>
 
-			<plugin>                                                                                                            
-				<groupId>org.apache.maven.plugins</groupId>                                                                 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.7.1</version>
 				<configuration>
-					<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false</argLine>
+					<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:"${settings.localRepository}"/mockit/jmockit/0.999.10/jmockit-0.999.10.jar</argLine>
 				</configuration>
 			</plugin>  
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<encoding>utf-8</encoding>
 				</configuration>
 				<executions>
 					<execution>
@@ -165,28 +170,14 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<configuration>
-					<instrumentation>
-						<ignores>
-							<ignore>.*Test</ignore>
-							<ignore>org.lsc.opends.EmbeddedOpenDS</ignore>
-							<ignore>org.lsc.utils.LdapServer</ignore>
-						</ignores>
-						<excludes>
-							<exclude>**/*Test.class</exclude>
-						</excludes>
-					</instrumentation>
-				</configuration>
-			</plugin>
-
-			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.8</version>
 				<configuration>
 					<show>public</show>
+					<quiet>true</quiet>
 					<links>
-						<link>http://java.sun.com/j2se/1.5.0/docs/api/</link>
+						<link>http://download.oracle.com/javase/6/docs/api/</link>
 					</links>
 				</configuration>
 				<executions>
@@ -200,7 +191,9 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.3</version><!--$NO-MVN-MAN-VER$-->
 				<executions>
 					<execution>
 						<id>startLdapServer</id>
@@ -249,8 +242,9 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-5</version>
+				<version>2.2-beta-5</version><!--$NO-MVN-MAN-VER$-->
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/dist.xml</descriptor>
@@ -292,18 +286,53 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
+		
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.3,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<profiles>
 		<profile>
-			<id>jdk15</id>
+			<id>jdk17</id>
 			<activation>
-				<jdk>1.5</jdk>
+				<jdk>1.7</jdk>
 			</activation>
 			<properties>
-				<jdk-version>jdk15</jdk-version>
+				<jdk-version>jdk17</jdk-version>
 			</properties>
 		</profile>
 		<profile>
@@ -315,34 +344,88 @@
 				<jdk-version>jdk16</jdk-version>
 			</properties>
 		</profile>
+		<profile>
+			<id>opends</id>
+		    <activation>
+		      <activeByDefault>true</activeByDefault>
+		    </activation>
+   			<build>
+			  <plugins>
+			    <plugin>
+			      <groupId>org.codehaus.mojo</groupId>
+			      <artifactId>build-helper-maven-plugin</artifactId>
+			      <version>1.7</version>
+			      <executions>
+			        <execution>
+			          <id>add-source</id>
+			          <phase>generate-sources</phase>
+			          <goals>
+			            <goal>add-source</goal>
+			          </goals>
+			          <configuration>
+			            <sources>
+			              <source>src/test/java/org/lsc/opends</source>
+			            </sources>
+			          </configuration>
+			        </execution>
+			      </executions>
+			    </plugin>
+			  </plugins>
+			</build>
+			<dependencies>
+				<dependency>
+					<groupId>org.opends</groupId>
+					<artifactId>opends-core</artifactId>
+					<version>2.0</version>
+					<type>jar</type>
+					<scope>compile</scope>
+					<optional>false</optional>
+				</dependency>
+			</dependencies>
+  		</profile>
 	</profiles>
 
 	<repositories>
 		<repository>
 			<id>IBiblio - Maven2</id>
 			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 		<repository>
 			<id>Codehaus Snapshot</id>
 			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
+			<releases><enabled>false</enabled></releases>
+			<snapshots><enabled>true</enabled></snapshots>
 		</repository>
 		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots><enabled>false</enabled></snapshots>
 		</repository>
 		<repository>
 			<id>JBoss repository</id>
 			<url>http://repository.jboss.org/maven2/</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository>
+		<repository>
+		   <id>jmockit-svn</id>
+		   <url>http://jmockit.googlecode.com/svn/maven-repo</url>
+		   <releases><checksumPolicy>ignore</checksumPolicy></releases>
 		</repository>
 		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
+			<releases><enabled>true</enabled></releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
 		</repository>
 	</repositories>
 
@@ -372,140 +455,167 @@
 	</pluginRepositories>
 
 	<dependencies>
+		<!-- Logging -->
 		<dependency>
 			<groupId>org.apache.ibatis</groupId>
 			<artifactId>ibatis-sqlmap</artifactId>
 			<version>2.3.4.726</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 			<version>1.4</version>
+			<type>jar</type>
+			<optional>false</optional>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>xmlrpc</groupId>
+			<artifactId>xmlrpc-client</artifactId>
+			<version>3.0</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.2</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
 			<version>1.3.1</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
-
-		<!-- Logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<version>1.6.0</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>0.9.21</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 			<version>0.9.21</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
 			<version>1.8.0.10</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
-		
 		<dependency>
 			<groupId>rhino</groupId>
 			<artifactId>js</artifactId>
 			<version>1.7R2</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.unboundid</groupId>
 			<artifactId>unboundid-ldapsdk</artifactId>
 			<version>1.1.4</version>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
 			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>org.opends</groupId>
 			<artifactId>opends-core</artifactId>
 			<version>2.0</version>
+			<type>jar</type>
 			<scope>runtime</scope>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>
 			<artifactId>bcprov-${jdk-version}</artifactId>
 			<version>140</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
 		<dependency>
-			<groupId>javax.management</groupId>
-			<artifactId>jmxri</artifactId>
-			<version>1.2.1</version>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.2</version>
+			<type>jar</type>
+			<optional>false</optional>
 		</dependency>
-                <dependency>
-                        <groupId>commons-cli</groupId>
-                        <artifactId>commons-cli</artifactId>
-                        <version>1.0</version>
-                </dependency>
+		<dependency>
+			<groupId>org.samba.jcifs</groupId>
+			<artifactId>jcifs</artifactId>
+			<version>1.2.19</version>
+			<type>jar</type>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tapestry</groupId>
+			<artifactId>tapestry5-annotations</artifactId>
+			<version>${tapestry-release-version}</version>
+			<type>jar</type>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.stax-utils</groupId>
+			<artifactId>stax-utils</artifactId>
+			<version>20060502</version>
+			<type>jar</type>
+			<optional>false</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>com.bea.xml</groupId>
+					<artifactId>jsr173-ri</artifactId>
+				</exclusion>
+ 	 	     </exclusions>
+		</dependency>
+		<dependency>
+		   <groupId>mockit</groupId>
+		   <artifactId>jmockit</artifactId>
+		   <version>0.999.10</version>
+		   <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<type>jar</type>
+			<optional>false</optional>
+		</dependency>
 	</dependencies>
-
-	<reporting>
-		<outputDirectory>${basedir}/target/site</outputDirectory>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>changelog-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>dependency-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jdepend-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<configuration>
-					<formats>
-						<format>html</format>
-						<format>xml</format>
-					</formats>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</reporting>
 
 	<distributionManagement>
 		<repository>
@@ -535,7 +645,5 @@
 			</notifier>
 		</notifiers>
 	</ciManagement>
-
+	
 </project>
-
-

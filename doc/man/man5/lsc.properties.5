@@ -1,14 +1,16 @@
-.TH lsc.properties 1 User Manuals
+.TH lsc.properties 5 User Manuals
 .SH NAME
 lsc.properties \- LSC configuration file
 .SH SYNOPSIS
-\fB /usr/local/lsc-acd-passwords/etc/lsc.properties \f1
+\fB /etc/lsc/lsc.properties or $LSC_HOME/etc/lsc.properties \f1
 .SH DESCRIPTION
-lsc.properties is the configuration file of the \fBlsc(1)\f1 command. It defines all parameters to work on the appropriate server. 
+IMPORTANT NOTE: This file format is now DEPRECATED. Please consider moving to lsc.xml file format ! Take a look at the first section "Moving to XML new configuration format" lsc.properties is the configuration file of the \fBlsc(1)\f1 command. It defines all parameters to work on the appropriate server. 
 
 lsc is a command-line tool to synchronize datas in a LDAP directory. This tool is generally a special instanciation of the generic LSC JAVA tool. 
 
 Some requirements: JRE 1.5. 
+.SH MOVING TO XML NEW CONFIGURATION FILE FORMAT
+Options described in this section apply to all source and destination services. 
 .SH GLOBAL CONFIGURATION OPTIONS
 Options described in this section apply to all source and destination services. 
 .TP
@@ -108,9 +110,9 @@ Default action on the destination directory. Here, two values are possible, \fBK
 \fBlsc.syncoptions.\f1TASKNAME\fB.userPassword.action\f1
 Choose the action to use onto the userPassword LDAP attribute. As default action, you could put \fBK\f1 to keep password updates, or \fBF\f1 to force modifications. 
 .SH AUTHORS
-lsc-acd-passwords was written by Sebastien Bahloul <sbahloul@linagora.com>, Jonathan Clarke <jclarke@linagora.com>, Thomas Chemineau <tchemineau@linagora.com>. 
+lsc-passwords was written by Sebastien Bahloul <sbahloul@lsc-project.org>, Jonathan Clarke <jclarke@lsc-project.org>, Remy-Christophe Schermesser <rschermesser@lsc-project.org>, Thomas Chemineau <tchemineau@lsc-project.org>. 
 .SH SEE ALSO
-\fBlsc(1)\f1
+\fBlsc(1)\f1 \fBlsc.xml(5)\f1
 
 \fBhttp://lsc-project.org/\f1
 .SH COMMENTS

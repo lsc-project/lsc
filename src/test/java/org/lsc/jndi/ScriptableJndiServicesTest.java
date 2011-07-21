@@ -7,7 +7,7 @@
  *
  *                  ==LICENSE NOTICE==
  * 
- * Copyright (c) 2008, LSC Project 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  *                  ==LICENSE NOTICE==
  *
- *               (c) 2008 - 2009 LSC Project
+ *               (c) 2008 - 2011 LSC Project
  *         Sebastien Bahloul <seb@lsc-project.org>
  *         Thomas Chemineau <thomas@lsc-project.org>
  *         Jonathan Clarke <jon@lsc-project.org>
@@ -47,16 +47,26 @@ package org.lsc.jndi;
 
 import javax.naming.NamingException;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.connection.directory.Ldap;
 
 import static org.junit.Assert.*;
 
 public class ScriptableJndiServicesTest {
 
+	private JndiServices dstJndiServices;
+	
+	@Before
+	public void setup() {
+		dstJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+	}
+	
 	@Test
 	public void testValuesOutOfRange() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-		sjs.setJndiServices(JndiServices.getDstInstance());
+		sjs.setJndiServices(dstJndiServices);
 //		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "-1"), null);
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "5").size(), 0);
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "4").size(), 0);
@@ -65,7 +75,7 @@ public class ScriptableJndiServicesTest {
 	@Test
 	public void testValidNonNullValues() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-		sjs.setJndiServices(JndiServices.getDstInstance());
+		sjs.setJndiServices(dstJndiServices);
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "3").get(0), "dc=org");
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "2").get(0), "dc=lsc-project,dc=org");
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "1").get(0), "ou=People,dc=lsc-project,dc=org");
@@ -74,7 +84,7 @@ public class ScriptableJndiServicesTest {
 	@Test
 	public void testSup0() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();
-		sjs.setJndiServices(JndiServices.getDstInstance());
+		sjs.setJndiServices(dstJndiServices);
 		assertEquals(sjs.sup("uid=seb,ou=People,dc=lsc-project,dc=org", "0").size(), 3);
 	}
 }

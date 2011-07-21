@@ -1,0 +1,246 @@
+<?xml version="1.0" ?>
+<lsc id="1">
+  <ldapConnection id="3">
+    <id>src-ldap</id>
+    <url defined-in="org.lsc.configuration.objects.Connection">ldap://localhost:33389/dc=lsc-project,dc=org</url>
+    <username>cn=Directory Manager</username>
+    <password>secret</password>
+    <authentication>SIMPLE</authentication>
+    <referral>IGNORE</referral>
+    <derefAliases>NEVER</derefAliases>
+    <version>VERSION_3</version>
+    <pageSize>-1</pageSize>
+    <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+    <tlsActivated>false</tlsActivated>
+  </ldapConnection>
+  <databaseConnection id="4">
+    <id>src-jdbc</id>
+    <url>jdbc:hsqldb:file:hsqldb/lsc</url>
+    <username>sa</username>
+    <password></password>
+    <driver>org.hsqldb.jdbcDriver</driver>
+  </databaseConnection>
+  <ldapConnection id="5">
+    <id>dst-ldap</id>
+    <url defined-in="org.lsc.configuration.objects.Connection">ldap://localhost:33389/dc=lsc-project,dc=org</url>
+    <username>cn=Directory Manager</username>
+    <password>secret</password>
+    <authentication>SIMPLE</authentication>
+    <referral>IGNORE</referral>
+    <derefAliases>NEVER</derefAliases>
+    <version>VERSION_3</version>
+    <pageSize>-1</pageSize>
+    <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+    <tlsActivated>false</tlsActivated>
+  </ldapConnection>
+  <csvAudit id="7">
+    <name>csvAudit</name>
+    <attributes>cn, sn, givenName</attributes>
+    <separator>;</separator>
+    <append>false</append>
+  </csvAudit>
+  <task id="9">
+    <name>ldap2ldapTestTask</name>
+    <bean>org.lsc.beans.SimpleBean</bean>
+    <destination class="ldapDstService" id="10">
+      <name>ldap2ldapTestTask-dst</name>
+      <connection class="ldapConnection" reference="5"></connection>
+      <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data</baseDn>
+      <pivotAttributes id="11">
+        <string>cn</string>
+        <string>sn</string>
+      </pivotAttributes>
+      <fetchedAttributes id="12">
+        <string>description</string>
+        <string>cn</string>
+        <string>objectClass</string>
+        <string>userPassword</string>
+        <string>sn</string>
+        <string>telephoneNumber</string>
+        <string>seeAlso</string>
+        <string>mail</string>
+      </fetchedAttributes>
+      <getAllFilter>(sn=*)</getAllFilter>
+      <getOneFilter>(sn={sn})</getOneFilter>
+    </destination>
+    <source class="ldapSrcService" id="13">
+      <name>ldap2ldapTestTask-src</name>
+      <connection class="ldapConnection" reference="3"></connection>
+      <baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data</baseDn>
+      <pivotAttributes id="14">
+        <string>cn</string>
+        <string>sn</string>
+      </pivotAttributes>
+      <fetchedAttributes id="15">
+        <string>description</string>
+        <string>cn</string>
+        <string>sn</string>
+        <string>userPassword</string>
+        <string>telephoneNumber</string>
+        <string>seeAlso</string>
+      </fetchedAttributes>
+      <getAllFilter>(&amp;(sn=*))</getAllFilter>
+      <getOneFilter>(sn={sn})</getOneFilter>
+      <filterAsync>(&amp;(sn=*)(modifytimestamp&gt;={0}))</filterAsync>
+      <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+      <interval>5</interval>
+    </source>
+    <syncOptions class="org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions" id="16">
+      <otherSettings id="17">
+        <entry>
+          <string>telephoneNumber.action</string>
+          <string>M</string>
+        </entry>
+        <entry>
+          <string>default.action</string>
+          <string>K</string>
+        </entry>
+        <entry>
+          <string>default.delimiter</string>
+          <string>,</string>
+        </entry>
+        <entry>
+          <string>objectclass.create_value</string>
+          <string>"inetOrgPerson"</string>
+        </entry>
+        <entry>
+          <string>telephoneNumber.create_value</string>
+          <string>"000000","11111"</string>
+        </entry>
+        <entry>
+          <string>initials.create_value</string>
+          <string>"cn=oops"</string>
+        </entry>
+        <entry>
+          <string>seeAlso.action</string>
+          <string>F</string>
+        </entry>
+        <entry>
+          <string>description.action</string>
+          <string>M</string>
+        </entry>
+        <entry>
+          <string>telephoneNumber.default_value</string>
+          <string>"123456","789987"</string>
+        </entry>
+        <entry>
+          <string>description.default_value</string>
+          <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+        </entry>
+        <entry>
+          <string>userPassword.force_value</string>
+          <string>"secret" + srcBean.getAttributeFirstValueById("cn")</string>
+        </entry>
+        <entry>
+          <string>mail.create_value</string>
+          <string>"ok@domain.net"</string>
+        </entry>
+        <entry>
+          <string>userPassword.action</string>
+          <string>F</string>
+        </entry>
+        <entry>
+          <string>objectclass.action</string>
+          <string>M</string>
+        </entry>
+        <entry>
+          <string>objectclass.default_value</string>
+          <string>"person","top"</string>
+        </entry>
+      </otherSettings>
+      <defaultDelimiter>;</defaultDelimiter>
+      <defaultPolicy>FORCE</defaultPolicy>
+      <mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
+    </syncOptions>
+    <otherSettings id="19"></otherSettings>
+    <csvAudit reference="7"></csvAudit>
+  </task>
+  <task id="21">
+    <name>db2ldapTestTask</name>
+    <bean>org.lsc.beans.SimpleBean</bean>
+    <destination class="ldapDstService" id="22">
+      <name>db2ldapTestTask-dst</name>
+      <connection class="ldapConnection" reference="5"></connection>
+      <baseDn>ou=db2ldap2TestTaskDst,ou=Test Data</baseDn>
+      <pivotAttributes id="23">
+        <string>givenName</string>
+        <string>sn</string>
+      </pivotAttributes>
+      <fetchedAttributes id="24">
+        <string>description</string>
+        <string>cn</string>
+        <string>objectClass</string>
+        <string>userPassword</string>
+        <string>sn</string>
+        <string>mail</string>
+      </fetchedAttributes>
+      <getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
+      <getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
+    </destination>
+    <source class="org.lsc.configuration.objects.services.Database" id="25">
+      <name>db2ldapTestTask-src</name>
+      <connection class="databaseConnection" reference="4"></connection>
+      <requestNameForObject>getObjectTestDb2Ldap</requestNameForObject>
+      <requestNameForList>getListTestDb2Ldap</requestNameForList>
+    </source>
+    <syncOptions class="org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions" id="26">
+      <otherSettings id="27">
+        <entry>
+          <string>telephoneNumber.action</string>
+          <string>M</string>
+        </entry>
+        <entry>
+          <string>default.action</string>
+          <string>K</string>
+        </entry>
+        <entry>
+          <string>default.delimiter</string>
+          <string>,</string>
+        </entry>
+        <entry>
+          <string>telephoneNumber.create_value</string>
+          <string>"000000","11111"</string>
+        </entry>
+        <entry>
+          <string>description.action</string>
+          <string>M</string>
+        </entry>
+        <entry>
+          <string>telephoneNumber.default_value</string>
+          <string>"123456","789987"</string>
+        </entry>
+        <entry>
+          <string>description.default_value</string>
+          <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+        </entry>
+        <entry>
+          <string>cn.force_value</string>
+          <string>srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn")</string>
+        </entry>
+        <entry>
+          <string>userPassword.force_value</string>
+          <string>srcBean.getAttributeFirstValueById("password")</string>
+        </entry>
+        <entry>
+          <string>userPassword.action</string>
+          <string>F</string>
+        </entry>
+        <entry>
+          <string>cn.action</string>
+          <string>F</string>
+        </entry>
+        <entry>
+          <string>objectclass.action</string>
+          <string>F</string>
+        </entry>
+        <entry>
+          <string>objectclass.default_value</string>
+          <string>"person","top","organizationalPerson","inetOrgPerson"</string>
+        </entry>
+      </otherSettings>
+      <defaultDelimiter>;</defaultDelimiter>
+      <defaultPolicy>FORCE</defaultPolicy>
+    </syncOptions>
+    <otherSettings id="29"></otherSettings>
+  </task>
+</lsc>

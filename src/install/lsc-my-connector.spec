@@ -3,7 +3,8 @@
 #
 # Install LSC connector
 #
-# Copyright (C) 2008 Clement OUDOT
+# Copyright (c) 2009 - 2011 LSC Project
+# Originally contributed by Clement OUDOT
 #=================================================
 
 #=================================================

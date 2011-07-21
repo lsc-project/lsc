@@ -5,7 +5,7 @@
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
 	<name>Ldap Synchronization Connector</name>
-	<version>branch-webai-SNAPSHOT</version>
+	<version>trunk-SNAPSHOT</version>
 	<description>
 		This project is the Ldap Synchronization Connector which
 		simplifies synchronizations between relation databases and LDAP

@@ -50,6 +50,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.lsc.Configuration;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.connection.Database;
@@ -159,8 +160,8 @@ public class PropertiesConfigurationHelper {
         }
         Security sec = new Security();
         sec.setEncryption(new Encryption());
-        if(new File("lsc.key").isFile()) {
-        	sec.getEncryption().setKeyfile(new File("lsc.key").getAbsolutePath());
+        if(new File(Configuration.getConfigurationDirectory(), "lsc.key").exists()) {
+        	sec.getEncryption().setKeyfile(new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath());
         }
         LscConfiguration.getInstance().setSecurity(sec);
         

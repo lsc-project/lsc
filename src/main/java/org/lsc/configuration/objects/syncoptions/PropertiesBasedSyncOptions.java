@@ -12,6 +12,7 @@ import java.util.StringTokenizer;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.configuration.objects.SyncOptions;
+import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,5 +206,9 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 
 	public Class<? extends ISyncOptions> getImplementation() {
 		return org.lsc.beans.syncoptions.PropertiesBasedSyncOptions.class;
+	}
+
+	@Override
+	public void validate() throws LscConfigurationException {
 	}
 }

@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.lsc.configuration.objects.security.Security;
+import org.lsc.exception.LscException;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
@@ -309,5 +310,15 @@ public class LscConfiguration {
 
 	public void setSecurity(Security sec) {
 		security = sec;
+	}
+
+	public void validate() throws LscException {
+		// Tasks will check used audits and connections
+		for(Task task: getTasks()) {
+			task.validate();
+		}
+		if(security != null) {
+			this.security.validate();
+		}
 	}
 }

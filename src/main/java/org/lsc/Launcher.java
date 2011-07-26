@@ -148,12 +148,12 @@ public final class Launcher {
 			if (retCode != 0) {
 				return retCode;
 			}
-	
 			// Wrap the launcher
 			return obj.run();
 		} catch (Exception e) {
 			if (!Configuration.isLoggingSetup()) {
 				System.err.println("Error: " + e.getMessage());
+				e.printStackTrace();
 			} else {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);
@@ -194,7 +194,8 @@ public final class Launcher {
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
 			if (!Configuration.isLoggingSetup()) {
-				System.err.println("Error: " + e.getMessage());
+				System.err.println("Error: " + e.toString());
+				e.printStackTrace();
 			} else {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);

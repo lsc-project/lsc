@@ -10,6 +10,12 @@ objectClass: organizationalUnit
 objectClass: top
 description: People subtree
 
+dn: ou=Sample,dc=lsc-project,dc=org
+ou: Sample
+objectClass: organizationalUnit
+objectClass: top
+description: Sample subtree
+
 dn: ou=Groups,dc=lsc-project,dc=org
 ou: Groups
 objectClass: organizationalUnit

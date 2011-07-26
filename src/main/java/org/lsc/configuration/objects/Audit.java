@@ -46,7 +46,8 @@
 package org.lsc.configuration.objects;
 
 import org.apache.tapestry5.beaneditor.Validate;
-import org.lsc.jndi.JndiModificationType;
+import org.lsc.LscModificationType;
+import org.lsc.exception.LscConfigurationException;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -80,14 +81,14 @@ public abstract class Audit {
 	@Validate("required")
 	private String file;
 	
-	private JndiModificationType[] operations;
+	private LscModificationType[] operations;
 
 
-	public JndiModificationType[] getOperations() {
+	public LscModificationType[] getOperations() {
 		return operations;
 	}
 
-	public void setOperations(JndiModificationType[] operations) {
+	public void setOperations(LscModificationType[] operations) {
 		this.operations = operations;
 	}
 
@@ -108,4 +109,6 @@ public abstract class Audit {
 	}
 
 	public abstract String getAuditTypeName();
+	
+	public abstract void validate() throws LscConfigurationException;
 }

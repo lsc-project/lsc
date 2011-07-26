@@ -3,6 +3,7 @@ package org.lsc.configuration.objects.security;
 import java.io.File;
 
 import org.lsc.Configuration;
+import org.lsc.exception.LscConfigurationException;
 import org.lsc.utils.security.SymmetricEncryption;
 
 public class Encryption {
@@ -16,7 +17,9 @@ public class Encryption {
 	public Encryption() {
 		algorithm = SymmetricEncryption.DEFAULT_CIPHER_ALGORITHM;
 		strength = SymmetricEncryption.DEFAULT_CIPHER_STRENGTH;
-		keyfile = new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath();
+		if(new File(Configuration.getConfigurationDirectory(), "lsc.key").exists()) {
+			keyfile = new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath();
+		}
 	}
 	
 	public String getKeyfile() {
@@ -33,5 +36,16 @@ public class Encryption {
 
 	public void setKeyfile(String absoluteFile) {
 		keyfile = absoluteFile;
+	}
+
+	public void validate() throws LscConfigurationException {
+		if(keyfile != null) {
+			File key = new File(keyfile);
+			if(!key.exists()) {
+				throw new LscConfigurationException("Encryption keyfile (" + keyfile + ") does not exists !");
+			} else if (!key.canRead()) { 
+				throw new LscConfigurationException("Encryption keyfile (" + keyfile + ") is not readable !");
+			}
+		}
 	}
 }

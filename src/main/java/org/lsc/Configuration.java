@@ -63,8 +63,11 @@ import org.apache.commons.lang.StringUtils;
 import org.lsc.configuration.PropertiesConfigurationHelper;
 import org.lsc.configuration.XmlConfigurationHelper;
 import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.audit.Csv;
+import org.lsc.configuration.objects.audit.Ldif;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscException;
 import org.lsc.jndi.JndiServices;
 import org.lsc.utils.output.CsvLayout;
 import org.lsc.utils.output.LdifLayout;
@@ -180,14 +183,6 @@ public class Configuration {
 	@Deprecated
 	public static Properties getDstProperties() throws LscConfigurationException {
 		return JndiServices.getLdapProperties((Ldap) LscConfiguration.getConnection("dst-ldap"));
-	}
-
-	public static Properties getCsvProperties() {
-		return getAsProperties("lsc.output.csv");
-	}
-
-	public static Properties getLdifProperties() {
-		return getAsProperties("lsc.output.ldif");
 	}
 
 	/**
@@ -419,13 +414,17 @@ public class Configuration {
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 */
 	private static void setUp() {
-		if(new File(System.getProperty("LSC_HOME") + File.separator + "etc").isDirectory()) {
-			Configuration.setUp(System.getProperty("LSC_HOME") + File.separator + "etc");
-		} else {
-			// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
-			if(Configuration.class.getClassLoader().getResource("etc") != null) {
-				Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath());
+		try {
+			if(new File(System.getProperty("LSC_HOME") + File.separator + "etc").isDirectory()) {
+				Configuration.setUp(System.getProperty("LSC_HOME") + File.separator + "etc", false);
+			} else {
+				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
+				if(Configuration.class.getClassLoader().getResource("etc") != null) {
+					Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
+				}
 			}
+		} catch (LscException le) {
+			// Silently forget le
 		}
 	}
 	
@@ -433,8 +432,19 @@ public class Configuration {
 	 * Set up configuration for the given location, including logback.
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 * @param lscConfigurationPath
+	 * @throws LscException 
 	 */
-	public static void setUp(String lscConfigurationPath) {
+	public static void setUp(String lscConfigurationPath) throws LscException {
+		setUp(lscConfigurationPath, true);
+	}
+	
+	/**
+	 * Set up configuration for the given location, including logback.
+	 * IMPORTANT: don't log ANYTHING before calling this method!
+	 * @param lscConfigurationPath
+	 * @throws LscException 
+	 */
+	public static void setUp(String lscConfigurationPath, boolean validate) throws LscException {
 		String message = null;
 		if(lscConfigurationPath == null 
 				|| ! new File(lscConfigurationPath).isDirectory()
@@ -458,6 +468,9 @@ public class Configuration {
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
+			if(validate) {
+				LscConfiguration.getInstance().validate();
+			}
 		} catch (ConfigurationException e) {
 			message = "Unable to load configuration (" + e + ")";
 			LOGGER.error(e.toString(),e);
@@ -478,11 +491,11 @@ public class Configuration {
 		String logBackXMLPropertiesFile = new File(Configuration.getConfigurationDirectory(), "logback.xml").getAbsolutePath();
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
-			if(!getCsvProperties().isEmpty()) {
+			if(LscConfiguration.getAudit("CSV") != null) {
 				setUpCsvLogging(context);
 			}
 
-			if(!getLdifProperties().isEmpty()) {
+			if(LscConfiguration.getAudit("LDIF") != null) {
 				setUpLdifLogging(context);
 			}
 		} catch (JoranException je) {
@@ -529,20 +542,20 @@ public class Configuration {
 	}
 
 	protected static void setUpCsvLogging(LoggerContext context) {
-		Properties properties = getCsvProperties();
+		Csv audit = (Csv) LscConfiguration.getAudit("CSV");
 
 		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
-		appender.setName("csv");
-		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
-		appender.setFile(properties.getProperty("file"));
+		appender.setName(audit.getName());
+		appender.setAppend(audit.getAppend());
+		appender.setFile(audit.getFile());
 		appender.setContext(context);
 
 		CsvLayout csvLayout = new CsvLayout();
-		csvLayout.setLogOperations(properties.getProperty("logOperations"));
-		csvLayout.setAttrs(properties.getProperty("attrs"));
-		csvLayout.setSeparator(properties.getProperty("separator", ";"));
-		csvLayout.setOutputHeader(Boolean.parseBoolean(properties.getProperty("outputHeader", "true")));
-		csvLayout.setTaskNames(properties.getProperty("taskNames"));
+		csvLayout.setLogOperations(audit.getOperations());
+		csvLayout.setAttrs(audit.getAttributes());
+		csvLayout.setSeparator(audit.getSeparator());
+		csvLayout.setOutputHeader(audit.getOutputHeader());
+		csvLayout.setTaskNames(audit.getTaskNames());
 		csvLayout.setContext(context);
 		csvLayout.start();
 
@@ -553,17 +566,17 @@ public class Configuration {
 	}
 
 	protected static void setUpLdifLogging(LoggerContext context) {
-		Properties properties = getLdifProperties();
+		Ldif audit = (Ldif) LscConfiguration.getAudit("LDIF");
 
 		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
-		appender.setName("ldif");
-		appender.setAppend(Boolean.parseBoolean(properties.getProperty("append", "false")));
-		appender.setFile(properties.getProperty("file"));
+		appender.setName(audit.getName());
+		appender.setAppend(audit.getAppend());
+		appender.setFile(audit.getFile());
 		appender.setContext(context);
 
 		LdifLayout ldifLayout = new LdifLayout();
-		ldifLayout.setLogOperations(properties.getProperty("logOperations"));
-		ldifLayout.setOnlyLdif(Boolean.parseBoolean(properties.getProperty("onlyLdif", "false")));
+		ldifLayout.setLogOperations(audit.getOperations());
+		ldifLayout.setOnlyLdif(audit.getLogOnlyLdif());
 		ldifLayout.setContext(context);
 		ldifLayout.start();
 

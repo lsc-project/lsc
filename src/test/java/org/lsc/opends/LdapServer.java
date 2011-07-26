@@ -54,6 +54,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.lsc.Configuration;
+import org.lsc.exception.LscException;
 import org.opends.server.api.Backend;
 import org.opends.server.core.DirectoryServer;
 import org.opends.server.types.DN;
@@ -67,7 +68,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * Used to manage directory state (start/stop/status/...)
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class LdapServer {
 
@@ -158,6 +159,9 @@ public class LdapServer {
 				LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
 			}
 			LOGGER.debug(e.toString(), e);
+		} catch (LscException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}	
 	}
 	

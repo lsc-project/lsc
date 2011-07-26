@@ -72,6 +72,7 @@ import org.apache.commons.cli.ParseException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
 import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.exception.LscException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,7 +154,7 @@ public class SymmetricEncryption {
 	 * @throws NoSuchProviderException 
 	 */
 	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException {
-		return this.generateRandomKeyFile(this.keyPath, this.algorithm, this.strength);
+		return this.generateRandomKeyFile(new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath(), this.algorithm, this.strength);
 	}
 
 	/**
@@ -269,7 +270,7 @@ public class SymmetricEncryption {
 
 			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f")) {
 				// if a configuration directory was set on command line, use it to set up Configuration
-				Configuration.setUp(cmdLine.getOptionValue("f"));
+				Configuration.setUp(cmdLine.getOptionValue("f"), false);
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("lsc", options);
@@ -283,6 +284,9 @@ public class SymmetricEncryption {
 			
 			LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
 			System.exit(1);
+		} catch (LscException e) {
+			LOGGER.error("Something goes wrong while loading configuration: " + e.toString(), e);
+			System.exit(2);
 		}
 
 		try {

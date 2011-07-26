@@ -47,6 +47,7 @@ package org.lsc.utils;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -67,7 +68,7 @@ public class SecurityUtilsTest {
 		// do all encryption operations.
 		//
 		SymmetricEncryption se = new SymmetricEncryption();
-		assertTrue(se.generateDefaultRandomKeyFile());
+		assertTrue(se.generateRandomKeyFile(new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath(), "AES", 128));
 
 		//
 		// Now, the test consist to encrypt a random value. Then, we compare the

@@ -45,6 +45,7 @@
  */
 package org.lsc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ public class LscModifications {
 	 */
 	public LscModifications(final LscModificationType operation) {
 		this.operation = operation;
+		attributesModifications = new ArrayList<LscAttributeModification>();	
 	}
 
 	/**
@@ -84,6 +86,7 @@ public class LscModifications {
 	public LscModifications(final LscModificationType operation, String taskName) {
 		this.operation = operation;
 		this.taskName = taskName;
+		attributesModifications = new ArrayList<LscAttributeModification>();	
 	}
 
 	/**

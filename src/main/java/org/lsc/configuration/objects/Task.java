@@ -58,6 +58,8 @@ import org.lsc.Configuration;
 import org.lsc.configuration.PropertiesConfigurationHelper;
 import org.lsc.configuration.objects.syncoptions.ForceSyncOptions;
 import org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +104,6 @@ public class Task {
 	
 	public Task() {
 		otherSettings = new HashMap<String, String>();
-		auditLogs = new ArrayList<Audit>();
 	}
 
 	@Deprecated
@@ -152,6 +153,7 @@ public class Task {
 			} else {
 				// Unknown sync options type !
 			}
+			auditLogs = new ArrayList<Audit>();
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -274,6 +276,9 @@ public class Task {
 	}
 	
 	public Collection<Audit> getAudits() {
+		if(auditLogs == null) {
+			auditLogs = new ArrayList<Audit>();
+		}
 		return auditLogs;
 	}
 	
@@ -286,5 +291,27 @@ public class Task {
 			auditLogs = new ArrayList<Audit>();
 		}
 		auditLogs.add(audit);
+	}
+
+	public void validate() throws LscException {
+		sourceService.validate();
+		destinationService.validate();
+		syncOptions.validate();
+		for(Audit audit : getAudits()) {
+			audit.validate();
+		}
+		try {
+			Class.forName(this.bean).newInstance();
+		} catch (ClassNotFoundException e) {
+			throw new LscConfigurationException("Unable to resolve bean class " + bean + " for task " + name, e);
+		} catch (InstantiationException e) {
+			throw new LscConfigurationException("Unable to instanciate bean class " + bean + " for task " + name, e);
+		} catch (IllegalAccessException e) {
+			throw new LscConfigurationException("Unable to instanciate bean class " + bean + " for task " + name, e);
+		}
+
+		// TODO check hooks
+//		this.cleanHook
+//		this.syncHook
 	}
 }

@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.lsc.beans.syncoptions.ISyncOptions;
+import org.lsc.exception.LscConfigurationException;
 
 /**
  * This class represent the generic synchronization options configuration
@@ -116,4 +117,6 @@ public abstract class SyncOptions {
 	 * @return the syncoption implementation
 	 */
 	public abstract Class<? extends ISyncOptions> getImplementation();
+
+	public abstract void validate() throws LscConfigurationException;
 }

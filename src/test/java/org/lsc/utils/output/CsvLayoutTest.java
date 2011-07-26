@@ -45,24 +45,24 @@
  */
 package org.lsc.utils.output;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+import org.lsc.LscAttributeModification;
+import org.lsc.LscAttributeModification.LscAttributeModificationType;
+import org.lsc.LscModificationType;
+import org.lsc.LscModifications;
+import org.lsc.jndi.JndiModificationType;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.ModificationItem;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
 
 /**
  * Test CSV layout for sfl4j.
@@ -90,14 +90,14 @@ public class CsvLayoutTest {
 		return layout;
 	}
 
-	private JndiModifications makeJndiModifications(JndiModificationType type, String task) {
-		JndiModifications jm = new JndiModifications(type, task);
-		jm.setDistinguishName("cn=test,o=testing");
-		List<ModificationItem> mi = new ArrayList<ModificationItem>();
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Jon")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "Tester CN")));
-		jm.setModificationItems(mi);
-		return jm;
+	private LscModifications makeLscModifications(LscModificationType type, String task) {
+		LscModifications lm = new LscModifications(type, task);
+		lm.setMainIdentifer("cn=test,o=testing");
+		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] { "Jon" } )));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] { "Tester CN" } )));
+		lm.setLscAttributeModifications(mi);
+		return lm;
 	}
 
 	@Test
@@ -118,8 +118,8 @@ public class CsvLayoutTest {
 		assertEquals(true, layout.taskNamesList.contains("otherTestTask".toLowerCase()));
 
 		// test that all task names passed as a string have been interpreted		
-		assertEquals(1, layout.operations.size());
-		assertEquals(true, layout.operations.contains(JndiModificationType.ADD_ENTRY));
+		assertEquals(1, layout.getLogOperations().size());
+		assertEquals(true, layout.getLogOperations().contains(LscModificationType.CREATE_OBJECT));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class CsvLayoutTest {
 		CsvLayout layout = getDefaultOptionsLayout();
 
 		// create a JndiModifications object to test logging
-		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
+		LscModifications jm = makeLscModifications(LscModificationType.CREATE_OBJECT, "testTask");
 
 		// test simple logging of the modifications for a valid task
 		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
@@ -146,7 +146,7 @@ public class CsvLayoutTest {
 		CsvLayout layout = getDefaultOptionsLayout();
 
 		// change the task name to test logging a modification for an excluded task
-		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "notInList");
+		LscModifications jm = makeLscModifications(LscModificationType.CREATE_OBJECT, "notInList");
 
 		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("", layout.doLayout(event));
@@ -157,7 +157,7 @@ public class CsvLayoutTest {
 		CsvLayout layout = getDefaultOptionsLayout();
 
 		// go back to a valid task, but try an excluded operation
-		JndiModifications jm = makeJndiModifications(JndiModificationType.MODIFY_ENTRY, "testTask");
+		LscModifications jm = makeLscModifications(LscModificationType.UPDATE_OBJECT, "testTask");
 		
 		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
 		assertEquals("", layout.doLayout(event));
@@ -174,7 +174,7 @@ public class CsvLayoutTest {
 		layout.setOutputHeader(true);
 		layout.start();
 
-		JndiModifications jm = makeJndiModifications(JndiModificationType.ADD_ENTRY, "testTask");
+		LscModifications jm = makeLscModifications(LscModificationType.CREATE_OBJECT, "testTask");
 
 		// log one line to check that the outputHeader is prepended
 		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);

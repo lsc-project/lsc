@@ -46,22 +46,20 @@
 package org.lsc.utils.output;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.naming.InvalidNameException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.ModificationItem;
 import javax.naming.ldap.LdapName;
 
 import org.apache.commons.codec.binary.Base64;
-import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
+import org.lsc.LscAttributeModification;
+import org.lsc.LscModificationType;
+import org.lsc.LscModifications;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -81,8 +79,12 @@ public class LdifLayout extends PatternLayout {
 	private boolean onlyLdif = false;
 
 	/* The operations to log */
-	protected Set<JndiModificationType> operations;
+	protected Set<LscModificationType> operations;
 
+	public LdifLayout() {
+		operations = new HashSet<LscModificationType>();
+	}
+	
 	/**
 	 * Format the logging event. This formatter will use the default formatter
 	 * or a LDIF pretty printer
@@ -99,24 +101,24 @@ public class LdifLayout extends PatternLayout {
 		if (messages == null || 
 						messages.length == 0 ||
 						messages[0] == null ||
-						!(JndiModifications.class.isAssignableFrom(messages[0].getClass()))) {
+						!(LscModifications.class.isAssignableFrom(messages[0].getClass()))) {
 			if (!onlyLdif) {
 				msg = super.doLayout(le);
 			}
 		} else {
-			JndiModifications jm = (JndiModifications) messages[0];
-			if (operations.contains(jm.getOperation())) {
-				msg = format(jm);
+			LscModifications lm = (LscModifications) messages[0];
+			if (operations.contains(lm.getOperation())) {
+				msg = format(lm);
 			}
 		}
 		return msg;
 	}
 	
-	public static String format(JndiModifications jm) {
+	public static String format(LscModifications lm) {
 		StringBuilder msgBuffer = new StringBuilder();
 		String dn = "";
-		if (jm.getDistinguishName() != null && jm.getDistinguishName().length() > 0) {
-			dn = jm.getDistinguishName();
+		if (lm.getMainIdentifier() != null && lm.getMainIdentifier().length() > 0) {
+			dn = lm.getMainIdentifier();
 		}
 
 		// print dn and base64 encode if it's not a SAFE-STRING
@@ -128,15 +130,15 @@ public class LdifLayout extends PatternLayout {
 		}
 		msgBuffer.append("\n");
 
-		switch (jm.getOperation()) {
-			case ADD_ENTRY:
+		switch (lm.getOperation()) {
+			case CREATE_OBJECT:
 				msgBuffer.append("changetype: add\n");
-				msgBuffer.append(listToLdif(jm.getModificationItems(), true));
+				msgBuffer.append(listToLdif(lm.getLscAttributeModifications(), true));
 				break;
-			case MODRDN_ENTRY:
+			case CHANGE_ID:
 				LdapName ln;
 				try {
-					ln = new LdapName(jm.getNewDistinguishName());
+					ln = new LdapName(lm.getNewMainIdentifier());
 					msgBuffer.append("changetype: modrdn\nnewrdn: ");
 					msgBuffer.append(ln.get(ln.size()-1));
 					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
@@ -146,17 +148,17 @@ public class LdifLayout extends PatternLayout {
 					msgBuffer.append("\n");
 				} catch (InvalidNameException e) {
 					msgBuffer.append("changetype: modrdn\nnewrdn: ");
-					msgBuffer.append(jm.getNewDistinguishName());
+					msgBuffer.append(lm.getNewMainIdentifier());
 					msgBuffer.append("\ndeleteoldrdn: 1\nnewsuperior: ");
-					msgBuffer.append(jm.getNewDistinguishName());
+					msgBuffer.append(lm.getNewMainIdentifier());
 					msgBuffer.append("\n");
 				}
 				break;
-			case MODIFY_ENTRY:
+			case UPDATE_OBJECT:
 				msgBuffer.append("changetype: modify\n");
-				msgBuffer.append(listToLdif(jm.getModificationItems(), false));
+				msgBuffer.append(listToLdif(lm.getLscAttributeModifications(), false));
 				break;
-			case DELETE_ENTRY:
+			case DELETE_OBJECT:
 				msgBuffer.append("changetype: delete\n");
 				break;
 			default:
@@ -174,52 +176,50 @@ public class LdifLayout extends PatternLayout {
 	 *            is this a new entry
 	 * @return the string to log
 	 */
-	private static String listToLdif(final List<ModificationItem> modificationItems, final boolean addEntry) {
+	private static String listToLdif(final List<LscAttributeModification> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
 
-		for(ModificationItem mi: modificationItems) {
-			Attribute attr = mi.getAttribute();
+		for(LscAttributeModification mi: modificationItems) {
 			try {
 				if (!addEntry) {
 					if (!first) {
 						sb.append("-\n");
 					}
-					switch (mi.getModificationOp()) {
-						case DirContext.REMOVE_ATTRIBUTE:
-							sb.append("delete: ").append(attr.getID()).append("\n");
+					switch (mi.getOperation()) {
+						case DELETE_VALUES:
+							sb.append("delete: ").append(mi.getAttributeName()).append("\n");
 							break;
-						case DirContext.REPLACE_ATTRIBUTE:
-							sb.append("replace: ").append(attr.getID()).append("\n");
+						case REPLACE_VALUES:
+							sb.append("replace: ").append(mi.getAttributeName()).append("\n");
 							break;
-						case DirContext.ADD_ATTRIBUTE:
+						case ADD_VALUES:
 						default:
-							sb.append("add: ").append(attr.getID()).append("\n");
+							sb.append("add: ").append(mi.getAttributeName()).append("\n");
 					}
 				}
-				printAttributeToStringBuffer(sb, attr);
+				printAttributeToStringBuffer(sb, mi.getAttributeName(), mi.getValues());
 			} catch (NamingException e) {
-				sb.append(attr.getID()).append(": ").append("!!! Unable to print value !!!\n");
+				sb.append(mi.getAttributeName()).append(": ").append("!!! Unable to print value !!!\n");
 			}
 			first = false;
 		}
 		return sb.toString();
 	}
 
-	public static void printAttributeToStringBuffer(StringBuilder sb, Attribute attr) throws NamingException {
-		NamingEnumeration<?> ne = attr.getAll();
-		String value = null;
-		while (ne.hasMore()) {
+	public static void printAttributeToStringBuffer(StringBuilder sb, String attrName, List<Object> values) throws NamingException {
+		String sValue = null;
+		for (Object value: values) {
 			// print attribute name
-			sb.append(attr.getID());
+			sb.append(attrName);
 
 			// print value and base64 encode it if it's not a
 			// SAFE-STRING per RFC2849
-			value = getStringValue(ne.next());
-			if(isLdifSafeString(value)) {
+			sValue = getStringValue(value);
+			if(isLdifSafeString(sValue)) {
 				sb.append(": ").append(value);
 			} else {
-				sb.append(":: ").append(toBase64(value));
+				sb.append(":: ").append(toBase64(sValue));
 			}
 			
 			// new line
@@ -349,27 +349,25 @@ public class LdifLayout extends PatternLayout {
 	}
 
 	/**
-	 * Parse options
-	 *
+	 * Parse logOpertaions string for backward compatibility to configuration old style
 	 */
 	@Override
 	public void start() {
 		/* Parse logOperations */
-		operations = new HashSet<JndiModificationType>();
 		if (logOperations != null) {
 			/* We only add valid options */
 			StringTokenizer st = new StringTokenizer(logOperations, LOG_OPERATIONS_SEPARATOR);
 			String token = null;
 			while (st.hasMoreTokens()) {
 				token = st.nextToken().toLowerCase();
-				JndiModificationType op = JndiModificationType.getFromDescription(token);
+				LscModificationType op = LscModificationType.getFromDescription(token);
 				if (op != null) {
 					operations.add(op);
 				}
 			}
-		} else {
+		} else if (operations.isEmpty()){
 			/* Add all the operations */
-			for(JndiModificationType type: JndiModificationType.values()) {
+			for(LscModificationType type: LscModificationType.values()) {
 				operations.add(type);
 			}
 		}
@@ -381,6 +379,10 @@ public class LdifLayout extends PatternLayout {
 	 */
 	public void setOnlyLdif(boolean onlyLdif) {
 		this.onlyLdif = onlyLdif;
+	}
+
+	public void setLogOperations(LscModificationType[] lscModificationTypes) {
+		operations.addAll(Arrays.asList(lscModificationTypes));
 	}
 
 	public void setLogOperations(String logOperations) {

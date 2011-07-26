@@ -45,7 +45,10 @@
  */
 package org.lsc.configuration.objects.audit;
 
+import java.io.File;
+
 import org.lsc.configuration.objects.Audit;
+import org.lsc.exception.LscConfigurationException;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -56,22 +59,41 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("ldifAudit")
 public class Ldif extends Audit {
 
-	private Boolean append;
+	/** If set, the file is not overwritten, but appended */
+	private Boolean appendToLogFile;
+	
+	/** If set, only LDIF message will be send to appender, otherwise, all the log messages will be written, LDIF messages formatted only */
+	private Boolean logOnlyLdif;
 	
 	public Ldif() {
-		append = true;
+		appendToLogFile = true;
 	}
 
 	public Boolean getAppend() {
-		return append;
+		return appendToLogFile;
 	}
 
 	public void setAppend(Boolean append) {
-		this.append = append;
+		this.appendToLogFile = append;
 	}
 
 	@Override
 	public String getAuditTypeName() {
 		return "LDIF log file";
+	}
+	
+	public void setLogOnlyLdif(Boolean onlyLdif) {
+		this.logOnlyLdif = onlyLdif;
+	}
+
+	public boolean getLogOnlyLdif() {
+		return logOnlyLdif;
+	}
+	
+	public void validate() throws LscConfigurationException {
+		File logFile = new File(getFile());
+		if(!logFile.canWrite()) {
+			throw new LscConfigurationException("Can not write to slog file (" + getFile() + ") !");
+		}
 	}
 }

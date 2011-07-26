@@ -46,6 +46,7 @@
 package org.lsc.configuration.objects.audit;
 
 import org.lsc.configuration.objects.Audit;
+import org.lsc.exception.LscConfigurationException;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -64,6 +65,10 @@ public class Csv extends Audit {
 	private String separator;
 
 	private Boolean append;
+	
+	private Boolean outputHeader;
+
+	private String[] taskNames;
 
 	public String getAttributes() {
 		return attributes;
@@ -92,5 +97,25 @@ public class Csv extends Audit {
 	@Override
 	public String getAuditTypeName() {
 		return "CSV log file";
+	}
+
+	public void setTaskNames(String[] taskNames) {
+		this.taskNames = taskNames;
+	}
+	
+	public String[] getTaskNames() {
+		return taskNames;
+	}
+
+	public Boolean getOutputHeader() {
+		return outputHeader;
+	}
+	
+	public void setOutputHeader(Boolean outputHeader) {
+		this.outputHeader = outputHeader;
+	}
+	
+	public void validate() throws LscConfigurationException {
+		
 	}
 }

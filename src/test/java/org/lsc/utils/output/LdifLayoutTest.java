@@ -45,25 +45,24 @@
  */
 package org.lsc.utils.output;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+import org.lsc.LscAttributeModification;
+import org.lsc.LscAttributeModification.LscAttributeModificationType;
+import org.lsc.LscModificationType;
+import org.lsc.LscModifications;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.ModificationItem;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
 
 /**
  * Provide a complete test.
@@ -88,15 +87,15 @@ public class LdifLayoutTest {
 	 */
 	@Test
 	public final void testAdd() throws IOException {
-		List<ModificationItem> mi = new ArrayList<ModificationItem>();
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("cn", "name")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("sn", "<non safe string>")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("givenName", "Sébastien")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("description", "")));
+		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] {"name"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "sn", Arrays.asList(new Object[] {"<non safe string>"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] {"Sébastien"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {""})));
 
-		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
-		jm.setDistinguishName("givenName=Sébastien,dc=lsc-project,dc=org");
-		jm.setModificationItems(mi);
+		LscModifications jm = new LscModifications(LscModificationType.CREATE_OBJECT);
+		jm.setMainIdentifer("givenName=Sébastien,dc=lsc-project,dc=org");
+		jm.setLscAttributeModifications(mi);
 
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 
@@ -107,7 +106,7 @@ public class LdifLayoutTest {
 		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 
-		jm.setDistinguishName("dc=lsc-project,dc=org");
+		jm.setMainIdentifer("dc=lsc-project,dc=org");
 		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 	}
@@ -119,18 +118,18 @@ public class LdifLayoutTest {
 	 */
 	@Test
 	public final void testModify() throws IOException {
-		List<ModificationItem> mi = new ArrayList<ModificationItem>();
-		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("cn", "new_name")));
-		mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, new BasicAttribute("uid", "old_id")));
-		mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("sn", "À là bas")));
-		mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute("description", "Multi-line\ndescription")));
+		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
+		mi.add(new LscAttributeModification(LscAttributeModificationType.REPLACE_VALUES, "cn", Arrays.asList(new Object[] {"new_name"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.DELETE_VALUES, "uid", Arrays.asList(new Object[] {"old_id"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.REPLACE_VALUES, "sn", Arrays.asList(new Object[] {"À là bas"})));
+		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {"Multi-line\ndescription"})));
 
 
-		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
-		jm.setDistinguishName("dc=lsc-project,dc=org");
-		jm.setModificationItems(mi);
+		LscModifications lm = new LscModifications(LscModificationType.UPDATE_OBJECT);
+		lm.setMainIdentifer("dc=lsc-project,dc=org");
+		lm.setLscAttributeModifications(mi);
 
-		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
+		ILoggingEvent loggingEvent = makeLoggingEvent(lm.toString(), lm);
 
 		LdifLayout layout = new LdifLayout();
 		layout.setPattern("%m%n");
@@ -160,10 +159,10 @@ public class LdifLayoutTest {
 	 */
 	@Test
 	public final void testRemove() throws IOException {
-		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
-		jm.setDistinguishName("uid=a,dc=lsc-project,dc=org");
+		LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT);
+		lm.setMainIdentifer("uid=a,dc=lsc-project,dc=org");
 
-		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
+		ILoggingEvent loggingEvent = makeLoggingEvent(lm.toString(), lm);
 
 		LdifLayout layout = new LdifLayout();
 		layout.setPattern("%m%n");

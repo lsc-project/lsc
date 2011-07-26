@@ -46,14 +46,15 @@
 package org.lsc.utils.output;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.lsc.jndi.JndiModificationType;
-import org.lsc.jndi.JndiModifications;
+import org.lsc.LscModificationType;
+import org.lsc.LscModifications;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.LayoutBase;
@@ -69,11 +70,12 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/* Default values for the parameters */
 	protected static final String DEFAULT_SEPARATOR = ";";
 
-	/* The separator of the log operations */
+	/* The separator of the array options */
 	protected static final String OPTIONS_SEPARATOR = ",";
 
-	/* Configurations from the log configuration */
+	/* Configurations from the logback.xml */
 	private String logOperations;
+
 	private String attrs;
 	private String separator = DEFAULT_SEPARATOR;
 	private String taskNames;
@@ -85,7 +87,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	protected Set<String> taskNamesList;
 
 	/* The operations to log */
-	protected Set<JndiModificationType> operations;
+	protected Set<LscModificationType> operations;
 
 	/* Output header to a CSV file? */
 	private Boolean outputHeader = false;
@@ -95,6 +97,11 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 */
 	private final static String DN_STRING = "dn";
 
+	public CsvLayout() {
+		operations = new HashSet<LscModificationType>();
+		taskNamesList = new HashSet<String>();
+	}
+	
 	/**
 	 * Output log events in CSV format for the JndiModifications class
 	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
@@ -108,18 +115,18 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		if (messages != null &&
 						messages.length != 0 &&
 						messages[0] != null &&
-						JndiModifications.class.isAssignableFrom(messages[0].getClass()) ) {
-			JndiModifications jm = (JndiModifications) messages[0];
+						LscModifications.class.isAssignableFrom(messages[0].getClass()) ) {
+			LscModifications lm = (LscModifications) messages[0];
 
 
-			if (operations.contains(jm.getOperation()) && 
+			if (operations.contains(lm.getOperation()) && 
 							( taskNamesList.size() == 0 ||
-							  taskNamesList.contains(jm.getTaskName().toLowerCase()))) {
+							  taskNamesList.contains(lm.getTaskName().toLowerCase()))) {
 				StringBuilder sb = new StringBuilder(1024);
 
-				Map<String, List<String>> modifications = jm.getModificationsItemsByHash();
+				Map<String, List<Object>> modifications = lm.getModificationsItemsByHash();
 
-				List<String> values = null;
+				List<Object> values = null;
 
 				for(String attributeName: attributes) {
 					/* Does the modification has the attribute ? */
@@ -129,7 +136,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 							sb.append(values.get(0));
 						}
 					} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
-						sb.append(jm.getDistinguishName());
+						sb.append(lm.getMainIdentifier());
 					}
 					
 					sb.append(separator);
@@ -151,29 +158,25 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
-	 * Parse options
-	 *
+	 * Parse logOpertaions string for backward compatibility to configuration old style
 	 */
 	@Override
 	public void start() {
 		/* Parse logOperations */
-		operations = new HashSet<JndiModificationType>();
 		if (logOperations != null) {
 			/* We only add valid options */
-			StringTokenizer st = new StringTokenizer(logOperations, CsvLayout.OPTIONS_SEPARATOR);
+			StringTokenizer st = new StringTokenizer(logOperations, OPTIONS_SEPARATOR);
 			String token = null;
-			for (int i = 0; st.hasMoreTokens(); i++) {
+			while (st.hasMoreTokens()) {
 				token = st.nextToken().toLowerCase();
-				JndiModificationType op = JndiModificationType.getFromDescription(token);
+				LscModificationType op = LscModificationType.getFromDescription(token);
 				if (op != null) {
 					operations.add(op);
-				} else {
-					addError("Invalid operation in the CSV export ( + token + )");
 				}
 			}
-		} else {
+		} else if (operations.isEmpty()){
 			/* Add all the operations */
-			for(JndiModificationType type: JndiModificationType.values()) {
+			for(LscModificationType type: LscModificationType.values()) {
 				operations.add(type);
 			}
 		}
@@ -189,7 +192,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		}
 
 		/* Parse task names to log for */
-		taskNamesList = new HashSet<String>();
 		if (taskNames != null) {
 			/* We only add valid options */
 			StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
@@ -199,6 +201,15 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				taskNamesList.add(token);
 			}
 		}
+		
+		super.start();
+	}
+
+    /**
+	 * @param logOperations the logOperation to set
+	 */
+	public void setLogOperations(LscModificationType[] logOperations) {
+		operations.addAll(Arrays.asList(logOperations));
 	}
 
     /**
@@ -230,9 +241,20 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
+	 * @param taskNames the taskNames to set
+	 */
+	public void setTaskNames(String[] taskNames) {
+		this.taskNamesList.addAll(Arrays.asList(taskNames));
+	}
+
+	/**
 	 * @param outputHeader the outputHeader to set
 	 */
 	public void setOutputHeader(Boolean outputHeader) {
 		this.outputHeader = outputHeader;
+	}
+	
+	public Set<LscModificationType> getLogOperations() {
+		return operations;
 	}
 }

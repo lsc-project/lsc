@@ -81,8 +81,9 @@ public class LscAttributes {
 		return (Boolean) values.get(attribute);
 	}
 
-	public List<?> getListValueAttribute(String attribute) {
-		return (List<?>) values.get(attribute);
+	@SuppressWarnings("unchecked")
+	public List<Object> getListValueAttribute(String attribute) {
+		return (List<Object>) values.get(attribute);
 	}
 
 	@SuppressWarnings("unchecked")

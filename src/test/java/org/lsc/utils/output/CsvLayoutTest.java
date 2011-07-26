@@ -56,7 +56,6 @@ import org.lsc.LscAttributeModification;
 import org.lsc.LscAttributeModification.LscAttributeModificationType;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
-import org.lsc.jndi.JndiModificationType;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

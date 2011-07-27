@@ -56,8 +56,9 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.security.Security;
 import java.security.SecureRandom;
+import java.security.Security;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -68,7 +69,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
 import org.lsc.configuration.objects.LscConfiguration;
@@ -154,7 +154,14 @@ public class SymmetricEncryption {
 	 * @throws NoSuchProviderException 
 	 */
 	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException {
-		return this.generateRandomKeyFile(new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath(), this.algorithm, this.strength);
+		File keypath = new File(Configuration.getConfigurationDirectory(), "lsc.key");
+		if(keypath.exists()) {
+			LOGGER.error("Existing key file in {}. Please move it away before generating a new key !", keypath.getAbsolutePath());
+			return false;
+		}
+		boolean status = this.generateRandomKeyFile(keypath.getAbsolutePath(), this.algorithm, this.strength);
+		this.keyPath = keypath.getAbsolutePath();
+		return status;
 	}
 
 	/**
@@ -292,7 +299,7 @@ public class SymmetricEncryption {
 		try {
 			SymmetricEncryption se = new SymmetricEncryption();
 			if (se.generateDefaultRandomKeyFile()) {
-				LOGGER.info("Key generated: {}", SymmetricEncryption.getKeyPath());
+				LOGGER.info("Key generated: {}. Do not forget to update lsc>security>encryption>keyfile option in your configuration file !", se.keyPath );
 			}
 		} catch (GeneralSecurityException ex) {
 			LOGGER.debug(ex.toString(), ex);

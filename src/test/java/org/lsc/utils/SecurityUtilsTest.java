@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import org.junit.Test;
+import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
 
 /**
@@ -67,9 +68,12 @@ public class SecurityUtilsTest {
 		// First generate a random symmetric key. We could use it then to
 		// do all encryption operations.
 		//
+		String tmpKeyPath = new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath();
 		SymmetricEncryption se = new SymmetricEncryption();
-		assertTrue(se.generateRandomKeyFile(new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath(), "AES", 128));
+		assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
 
+		LscConfiguration.getSecurity().getEncryption().setKeyfile(tmpKeyPath);
+		
 		//
 		// Now, the test consist to encrypt a random value. Then, we compare the
 		// decrypted value with the initial one, they should be equal.

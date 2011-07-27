@@ -57,7 +57,6 @@ import org.lsc.exception.LscException;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
@@ -78,13 +77,10 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 @XStreamAlias("lsc")
 public class LscConfiguration {
 	
-	@XStreamImplicit
 	private ArrayList<Connection> connections;
 	
-	@XStreamImplicit
 	private ArrayList<Audit> audits;
 	
-	@XStreamImplicit
 	private ArrayList<Task> tasks;
 
 	@XStreamOmitField
@@ -259,6 +255,9 @@ public class LscConfiguration {
 		}
 		if(tasks != null) {
 			clone.tasks 			= (ArrayList<Task>) tasks.clone();
+		}
+		if(security != null) {
+			clone.security = (Security) security.clone();
 		}
 		return clone;
 	}

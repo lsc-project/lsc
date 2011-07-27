@@ -145,7 +145,7 @@ public class LdapServer {
 
 			if (cmdLine.getOptions().length > 0 && !cmdLine.hasOption("h")) {
 				if (cmdLine.hasOption("f")) {
-					Configuration.setUp(new File(cmdLine.getOptionValue("f")).getAbsolutePath());
+					Configuration.setUp(new File(cmdLine.getOptionValue("f")).getAbsolutePath(), false);
 				}
 			} else {
 				printHelp(options);
@@ -176,9 +176,6 @@ public class LdapServer {
 			CommandLine cmdLine = getOptionsCmdLine(args);
 
 			if (cmdLine.getOptions().length > 0 && !cmdLine.hasOption("h")) {
-				if (cmdLine.hasOption("f")) {
-					Configuration.setUp(new File(cmdLine.getOptionValue("f")).getAbsolutePath());
-				}
 				if (cmdLine.hasOption("a")) {
 					start();
 				} else if (cmdLine.hasOption("o")) {

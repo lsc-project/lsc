@@ -20,4 +20,10 @@ public class Security {
 	public void validate() throws LscException {
 		encryption.validate();
 	}
+	
+	public Object clone() {
+		Security clone = new Security();
+		clone.setEncryption((Encryption) encryption.clone());
+		return clone;
+	}
 }

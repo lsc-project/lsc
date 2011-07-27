@@ -6,6 +6,9 @@ import org.lsc.Configuration;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.utils.security.SymmetricEncryption;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+@XStreamAlias("encryption")
 public class Encryption {
 
 	private String keyfile;
@@ -47,5 +50,13 @@ public class Encryption {
 				throw new LscConfigurationException("Encryption keyfile (" + keyfile + ") is not readable !");
 			}
 		}
+	}
+	
+	public Object clone() {
+		Encryption clone = new Encryption();
+		clone.algorithm = this.algorithm;
+		clone.keyfile = this.keyfile;
+		clone.strength = this.strength;
+		return clone;
 	}
 }

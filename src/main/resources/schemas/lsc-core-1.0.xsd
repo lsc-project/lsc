@@ -12,18 +12,99 @@
  		<xsd:annotation>
 		    <xsd:documentation>Definition for the ldap connections.</xsd:documentation>
 		</xsd:annotation>
-		<xsd:sequence>
- 			<xsd:element name="id" type="idType" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="url" type="urlType" minOccurs="1" maxOccurs="1"/>
+		<xsd:all>
+ 			<xsd:element name="id" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="authentication" type="authenticationType" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="referral" type="referralType" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="derefAliases" type="derefAliasesType" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="version" type="versionType" minOccurs="1" maxOccurs="1"/> 
-			<xsd:element name="pageSize" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="factory" type="xsd:integer" minOccurs="1" maxOccurs="1"/>-->
-			<xsd:element name="tlsActivated" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+
+ 			<xsd:element name="authentication" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="url" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="referral" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="derefAliases" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> 
+
+ 			<xsd:element name="pageSize" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="factory" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="tlsActivated" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
+		</xsd:all>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Mandatory attribute added by XStream parser / dumper. 
+		        	You will use it as a reference in the lsc>tasks>task>source or lsc>tasks>task>destination node to map service to connection
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+    
+    <xsd:complexType name="databaseConnectionType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the SQL database connections.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:all>
+ 			<xsd:element name="id" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="url" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="driver" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+		</xsd:all>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Mandatory attribute added by XStream parser / dumper. 
+		        	You will use it as a reference in the lsc&gt;tasks&gt;task&gt;source or lsc&gt;tasks&gt;task&gt;destination node to map service to connection
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+    
+    <xsd:complexType name="encryptionType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the encryption properties.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:all>
+ 			<xsd:element name="keyfile" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="algorithm" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="strength" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
+		</xsd:all>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="ldifAuditType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the LDIF audit properties.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:all>
+ 			<xsd:element name="appendToLogFile" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
+			<xsd:element name="logOnlyLdif" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
+		</xsd:all>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="csvAuditType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the CSV audit properties.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+ 			<xsd:element name="attributes" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="seperator" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="append" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="outputHeader" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
+			<xsd:element name="taskNames" minOccurs="0" maxOccurs="1">
+				<xsd:complexType><xsd:sequence><xsd:element name="taskName" type="xsd:string" /></xsd:sequence></xsd:complexType>
+			</xsd:element>
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
@@ -33,7 +114,77 @@
 		    </xsd:annotation>
 		</xsd:attribute>
     </xsd:complexType>
-    
+
+    <xsd:complexType name="serviceType">
+		<xsd:sequence>
+ 			<xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="connection" minOccurs="1" maxOccurs="1">
+ 				<xsd:complexType>
+					<xsd:attribute name="class" type="xsd:string">
+					    <xsd:annotation>
+					        <xsd:documentation>
+					        	Alias to identify the connection class
+					        </xsd:documentation>
+					    </xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="id" type="xsd:integer">
+					    <xsd:annotation>
+					        <xsd:documentation>
+					        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+					        </xsd:documentation>
+					    </xsd:annotation>
+					</xsd:attribute>
+ 				</xsd:complexType>
+ 			</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Alias to identify the service class
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+    <xsd:complexType name="syncOptionsType">
+		<xsd:sequence>
+ 			<xsd:element name="conditions" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	
+    <xsd:complexType name="taskType">
+		<xsd:all>
+ 			<xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="bean" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="cleanHook" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+ 			<xsd:element name="syncHook" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+ 			<xsd:element name="destination" type="serviceType" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="source" type="serviceType" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="syncOptions" type="syncOptionsType" minOccurs="1" maxOccurs="1"/>
+ 		</xsd:all>
+		<xsd:attribute name="id" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+    </xsd:complexType>
+
     <xsd:element name="lsc">
     	<xsd:annotation>
     		<xsd:documentation>
@@ -41,17 +192,80 @@
     		</xsd:documentation>
     	</xsd:annotation>
     	<xsd:complexType>
-	    	<xsd:sequence>
-	<!--     		<xsd:element name="task" type="taskType" minOccurs="1" maxOccurs="unbounded" />
-	    		<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded" /> -->
-	    		<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
-	    	</xsd:sequence>
+	    	<xsd:all>
+	     		<xsd:element name="connections">
+	     			<xsd:complexType>
+	     				<xsd:sequence>
+				    		<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded" />
+				    		<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+	     				</xsd:sequence>
+						<xsd:attribute name="id" type="xsd:integer">
+						    <xsd:annotation>
+						        <xsd:documentation>
+						        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+						        </xsd:documentation>
+						    </xsd:annotation>
+						</xsd:attribute>
+	     			</xsd:complexType>
+	     		</xsd:element>
+	     		<xsd:element name="audits">
+	     			<xsd:complexType>
+	     				<xsd:sequence>
+				    		<xsd:element name="ldif" type="ldifAuditType" minOccurs="0" maxOccurs="unbounded" />
+				    		<xsd:element name="csv" type="csvAuditType" minOccurs="0" maxOccurs="unbounded"/>
+	     				</xsd:sequence>
+						<xsd:attribute name="id" type="xsd:integer">
+						    <xsd:annotation>
+						        <xsd:documentation>
+						        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+						        </xsd:documentation>
+						    </xsd:annotation>
+						</xsd:attribute>
+	     			</xsd:complexType>
+	     		</xsd:element>
+	     		<xsd:element name="tasks">
+	     			<xsd:complexType>
+	     				<xsd:sequence>
+	     					<xsd:element name="task" type="taskType" minOccurs="1" maxOccurs="unbounded"/>
+	     				</xsd:sequence>
+						<xsd:attribute name="id" type="xsd:integer">
+						    <xsd:annotation>
+						        <xsd:documentation>
+						        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+						        </xsd:documentation>
+						    </xsd:annotation>
+						</xsd:attribute>
+	     			</xsd:complexType>
+	     		</xsd:element>
+	     		<xsd:element name="security" minOccurs="1" maxOccurs="1">
+	     			<xsd:complexType>
+	     				<xsd:sequence>
+				    		<xsd:element name="encryption" type="encryptionType" minOccurs="0" maxOccurs="1" />
+	     				</xsd:sequence>
+						<xsd:attribute name="id" type="xsd:integer">
+						    <xsd:annotation>
+						        <xsd:documentation>
+						        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+						        </xsd:documentation>
+						    </xsd:annotation>
+						</xsd:attribute>
+	     			</xsd:complexType>
+	     		</xsd:element>
+	    	</xsd:all>
 	    	<xsd:attribute name="id" type="xsd:integer">
 	    		<xsd:annotation>
 	    			<xsd:documentation>
 	    				Optional attribute added by XStream parser / dumper.
 	    				You can leave it or remove it but if you copy a
 	    				node, do not use the same number twice.
+	    			</xsd:documentation>
+	    		</xsd:annotation>
+	    	</xsd:attribute>
+	    	<xsd:attribute name="revision" type="xsd:integer">
+	    		<xsd:annotation>
+	    			<xsd:documentation>
+	    				This mandatory attribute indicates the revision number of this configuration file. This number starts at 0
+	    				when the XML configuration is generated from the properties file and must be incremented one by one.
 	    			</xsd:documentation>
 	    		</xsd:annotation>
 	    	</xsd:attribute>

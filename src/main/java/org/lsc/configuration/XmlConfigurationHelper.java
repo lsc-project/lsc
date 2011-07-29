@@ -90,7 +90,7 @@ import com.thoughtworks.xstream.io.xml.StaxWriter;
 public class XmlConfigurationHelper {
 
 	public static final String LSC_CONF_XML = "lsc.xml";
-	public static final String LSC_NAMESPACE = "http://lsc-project.org/lsc-configuration-1.0"; 
+	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-1.0.xsd"; 
 	private XStream xstream;
 
 	/**
@@ -102,12 +102,10 @@ public class XmlConfigurationHelper {
 		qnm.setDefaultNamespace(LSC_NAMESPACE);
 		qnm.setDefaultPrefix("");
 
-//		StaxDriver sd = new StaxDriver(qnm);
-
 		xstream = new XStream(new Sun14ReflectionProvider(), new StaxDriver(qnm) {
 			public HierarchicalStreamWriter createWriter(OutputStream out) {
 				try {
-					return new StaxWriter(this.getQnameMap(), new IndentingXMLStreamWriter(getOutputFactory().createXMLStreamWriter(out)));
+					return new StaxWriter(this.getQnameMap(), new IndentingXMLStreamWriter(getOutputFactory().createXMLStreamWriter(out)), true, false);
 				} catch (XMLStreamException e) {
 					throw new StreamException(e);
 				}

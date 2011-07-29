@@ -52,6 +52,8 @@ import java.util.Properties;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.exception.LscConfigurationException;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
 /**
  * This class represent the generic synchronization options configuration
  * container. This object is used to return the settings required to identify
@@ -63,6 +65,7 @@ import org.lsc.exception.LscConfigurationException;
  */
 public abstract class SyncOptions {
 
+	@XStreamOmitField
 	private HashMap<String, String> otherSettings;
 	
 	/**

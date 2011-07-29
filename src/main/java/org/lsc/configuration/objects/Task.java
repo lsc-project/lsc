@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * This class represent the parameter of a LSC task
@@ -97,6 +98,7 @@ public class Task {
 	
 	private String syncHook;
 	
+	@XStreamOmitField
 	private Map<String, String> otherSettings;
 
 	@XStreamImplicit

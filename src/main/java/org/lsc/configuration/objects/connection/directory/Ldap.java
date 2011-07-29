@@ -68,7 +68,7 @@ public class Ldap extends AuthenticatedConnection {
 	 * ldap://ldap.openldap.org:389/
 	 */
 	@Validate("required,regexp=^ldap(s)?://[_a-zA-A0-9][_a-zA-Z0-9\\-\\.]+(:\\d+)?(/\\S*)?$")
-	protected String url;
+	private String url;
 
 	/** */
 	@Validate("required")
@@ -209,5 +209,15 @@ public class Ldap extends AuthenticatedConnection {
 	@Override
 	public String getConnectionTypeName() {
 		return "LDAP connection";
+	}
+
+	@Override
+	public String getUrl() {
+		return url;
+	}
+
+	@Override
+	public void setUrl(String url) {
+		this.url = url;
 	}
 }

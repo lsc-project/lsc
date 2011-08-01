@@ -83,6 +83,7 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 			String attributeName = stok.nextToken();
 			String typeName = stok.nextToken();
 			PBSOAttribute attribute = getAttribute(attributeName);
+			attributes.add(attribute);
 			if (typeName.equalsIgnoreCase("action")) {
 				STATUS_TYPE policy = parseSyncType(value);
 				if (policy == STATUS_TYPE.UNKNOWN) {
@@ -138,7 +139,6 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 			}
 		}
 		PBSOAttribute attr = new PBSOAttribute(attributeName);
-		attributes.add(attr);
 		return attr;
 	}
 

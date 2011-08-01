@@ -167,6 +167,16 @@ public final class Launcher {
 	 */
 	public int run() {
 		try {
+			if(convertConfiguration) {
+				if(configurationLocation == null) {
+					printHelp();
+					return 1;
+				}
+				// if a configuration directory was set on command line, use it to set up Configuration
+				Configuration.setUp(configurationLocation, false);
+				return convertConfiguration();
+			}
+			
 			// if a configuration directory was set on command line, use it to set up Configuration
 			Configuration.setUp(configurationLocation);
 
@@ -176,14 +186,6 @@ public final class Launcher {
 				printHelp();
 				return 1;
 			}
-			if(convertConfiguration) {
-				if(configurationLocation == null) {
-					printHelp();
-					return 1;
-				}
-				return convertConfiguration();
-			}
-			
 			// do the work!
 			if (threads > 0) {
 				sync.setThreads( threads );

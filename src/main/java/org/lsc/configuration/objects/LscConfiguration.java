@@ -100,18 +100,17 @@ public class LscConfiguration {
 	
 	private Security security;
 	
-	static {
-		instance = new LscConfiguration();
-		// Force static instantiation
-		org.lsc.Configuration.isLoggingSetup();
-	}
-
 	public static void loadFromInstance(LscConfiguration original) {
 		instance = original.clone();
 		finalizeInitialization();
 	}
 	
 	public static LscConfiguration getInstance() {
+		if(instance == null) {
+			instance = new LscConfiguration();
+			// Force static instantiation
+			org.lsc.Configuration.setUp();
+		}
 		return instance;
 	}
 
@@ -126,11 +125,11 @@ public class LscConfiguration {
 	}
 
 	public static Collection<Audit> getAudits() {
-		return Collections.unmodifiableCollection(instance.audits);
+		return Collections.unmodifiableCollection(getInstance().audits);
 	}
 
 	public static Audit getAudit(String name) {
-		for(Audit audit: instance.audits) {
+		for(Audit audit: getInstance().audits) {
 			if(audit.getName().equalsIgnoreCase(name)) {
 				return audit;
 			}
@@ -139,11 +138,11 @@ public class LscConfiguration {
 	}
 
 	public static Collection<Connection> getConnections() {
-		return Collections.unmodifiableCollection(instance.connections);
+		return Collections.unmodifiableCollection(getInstance().connections);
 	}
 
 	public static Connection getConnection(String name) {
-		for(Connection connection: instance.connections) {
+		for(Connection connection: getInstance().connections) {
 			if(connection.getName().equalsIgnoreCase(name)) {
 				return connection;
 			}
@@ -152,7 +151,7 @@ public class LscConfiguration {
 	}
 
 	public static Task getTask(String name) {
-		for(Task task: instance.tasks) {
+		for(Task task: getInstance().tasks) {
 			if(task.getName().equalsIgnoreCase(name)) {
 				return task;
 			}
@@ -161,7 +160,7 @@ public class LscConfiguration {
 	}
 	
 	public static Collection<Task> getTasks() {
-		return Collections.unmodifiableCollection(instance.tasks);
+		return Collections.unmodifiableCollection(getInstance().tasks);
 	}
 	
 	/**
@@ -169,7 +168,7 @@ public class LscConfiguration {
 	 */
 	public static void setSrc(Connection sourceConnection) {
 		logModification(sourceConnection);
-		instance.connections.add(sourceConnection);
+		getInstance().connections.add(sourceConnection);
 	}
  
 	/**
@@ -185,7 +184,7 @@ public class LscConfiguration {
 	 */
 	public static void setDst(Connection destinationConnection) {
 		logModification(destinationConnection);
-		instance.connections.add(destinationConnection);
+		getInstance().connections.add(destinationConnection);
 	}
 
 	/**
@@ -197,41 +196,41 @@ public class LscConfiguration {
 	
 	public static void setOtherSetting(String name, String value) {
 		logModification(name + "/" + value);
-		instance.otherSettings.put(name, value);
+		getInstance().otherSettings.put(name, value);
 	}
 
 	public static String getOtherSetting(String name) {
-		return instance.otherSettings.get(name);
+		return getInstance().otherSettings.get(name);
 	}
 	
 	public static void addTask(Task task) {
 		logModification(task);
-		instance.tasks.add(task);
+		getInstance().tasks.add(task);
 	}
 	
 	public static void removeTask(Task task) {
 		logModification(task);
-		instance.tasks.remove(task);
+		getInstance().tasks.remove(task);
 	}
 	
 	public static void addConnection(Connection connection) {
 		logModification(connection);
-		instance.connections.add(connection);
+		getInstance().connections.add(connection);
 	}
 
 	public static void removeConnection(Connection connection) {
 		logModification(connection);
-		instance.connections.remove(connection);
+		getInstance().connections.remove(connection);
 	}
 
 	public static void addAudit(Audit audit) {
 		logModification(audit);
-		instance.audits.add(audit);
+		getInstance().audits.add(audit);
 	}
 
 	public static void removeAudit(Audit audit) {
 		logModification(audit);
-		instance.audits.remove(audit);
+		getInstance().audits.remove(audit);
 	}
 
 	public static void reinitialize() {
@@ -240,7 +239,7 @@ public class LscConfiguration {
 	
 	public static void finalizeInitialization() {
 		original = instance.clone();
-		instance.underInitialization = false;
+		getInstance().underInitialization = false;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -263,7 +262,7 @@ public class LscConfiguration {
 	}
 	
 	public static void saving() {
-		instance.revision++;
+		getInstance().revision++;
 	}
 	
 	public static void saved() {
@@ -271,9 +270,9 @@ public class LscConfiguration {
 	}
 	
 	public static void logModification(Object o) {
-		if(!instance.underInitialization) {
+		if(!getInstance().underInitialization) {
 			// Store updates
-			instance.modified = true;
+			getInstance().modified = true;
 		}
 	}
 	
@@ -304,7 +303,7 @@ public class LscConfiguration {
 	}
 	
 	public static Security getSecurity() {
-		return instance.security;
+		return getInstance().security;
 	}
 
 	public void setSecurity(Security sec) {

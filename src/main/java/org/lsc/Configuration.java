@@ -155,10 +155,6 @@ public class Configuration {
 	/** The maximum limit of data that can be synchronized by a synchronous task */
 	public static final int MAX_CONCURRENT_SYNCHRONIZED = 100000;
 	
-	static {
-		setUp();
-	}
-	
 	// Default constructor.
 	protected Configuration() {
 	}
@@ -196,7 +192,17 @@ public class Configuration {
 	 */
 	@Deprecated
 	public static Properties getAsProperties(final String prefix) {
-		org.apache.commons.configuration.Configuration conf = getConfiguration().subset(prefix);
+		return getAsProperties(getConfiguration(), prefix);
+	}
+
+	@Deprecated
+	public static Properties getAsProperties(final String filename, final String prefix) {
+		return getAsProperties(getConfiguration(filename), prefix);
+	}
+
+	@Deprecated
+	public static Properties getAsProperties(PropertiesConfiguration propsConf, final String prefix) {
+		org.apache.commons.configuration.Configuration conf =  propsConf.subset(prefix);
 		if (conf == null) {
 			return null;
 		}
@@ -293,6 +299,9 @@ public class Configuration {
 	 * @return Path to configuration directory
 	 */
 	public static String getConfigurationDirectory() {
+		if(location == null) {
+			setUp();
+		}
 		return new File(location).getAbsolutePath() + File.separator;
 	}
 
@@ -304,10 +313,15 @@ public class Configuration {
 	 */
 	@Deprecated
 	protected static PropertiesConfiguration getConfiguration() {
+		return getConfiguration(new File(location, PROPERTIES_FILENAME).getAbsolutePath());
+	}
+
+	@Deprecated
+	protected static PropertiesConfiguration getConfiguration(String filename) {
 		if (config == null) {
 			URL url = null;
 			try {
-				url = new File(getConfigurationDirectory(), PROPERTIES_FILENAME).toURI().toURL();
+				url = new File(filename).toURI().toURL();
 				LOGGER.debug("Loading configuration url: {}", url);
 				config = new PropertiesConfiguration(url);
 				config.getKeys();
@@ -411,9 +425,14 @@ public class Configuration {
 
 	/**
 	 * Set up configuration for the given location, including logback.
+	 * MUST NEVER BE CALLED DIRECTLY : ONLY USED BY LscConfiguration static code instanciation
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 */
-	private static void setUp() {
+	public static void setUp() {
+		if(LscConfiguration.isInitialized()) {
+			// Nothing to do there : default configuration must only be used if LSC is not already configured
+			return;
+		}
 		try {
 			if(new File(System.getProperty("LSC_HOME") + File.separator + "etc").isDirectory()) {
 				Configuration.setUp(System.getProperty("LSC_HOME") + File.separator + "etc", false);
@@ -463,7 +482,7 @@ public class Configuration {
 					LscConfiguration.loadFromInstance(new XmlConfigurationHelper().getConfiguration(xml.toString()));
 				} else {
 					LOGGER.warn("Configuration loaded from old properties file format !");
-					PropertiesConfigurationHelper.loadConfigurationFrom(location);
+					PropertiesConfigurationHelper.loadConfigurationFrom(new File(location, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
 				}
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");

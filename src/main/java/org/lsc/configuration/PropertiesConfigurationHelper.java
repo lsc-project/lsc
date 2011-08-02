@@ -106,7 +106,7 @@ public class PropertiesConfigurationHelper {
 	@SuppressWarnings("deprecation")
 	public static void loadConfigurationFrom(String filename) throws ConfigurationException {
 		LscConfiguration.reinitialize();
-		Properties conf = org.lsc.Configuration.getAsProperties(LSC_PROPS_PREFIX);
+		Properties conf = org.lsc.Configuration.getAsProperties(filename, LSC_PROPS_PREFIX);
 		
         // Get the "lsc.tasks" property
         String tasks = conf.getProperty(TASKS_PROPS_PREFIX);

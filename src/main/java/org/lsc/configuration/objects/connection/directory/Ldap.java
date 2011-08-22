@@ -63,6 +63,10 @@ public class Ldap extends AuthenticatedConnection {
 	@Validate("required")
 	private AuthenticationType authentication;
 
+	/** Request mutual authentication in case of a GSSAPI through SASL authentication */
+	@Validate("required")
+	private boolean saslMutualAuthentication;
+	
 	/**
 	 * A simple directory URL with protocol, host and port, ie
 	 * ldap://ldap.openldap.org:389/
@@ -219,5 +223,13 @@ public class Ldap extends AuthenticatedConnection {
 	@Override
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public void setSaslMutualAuthentication(boolean status) {
+		this.saslMutualAuthentication = status;
+	}
+	
+	public boolean isSaslMutualAuthentication() {
+		return saslMutualAuthentication;
 	}
 }

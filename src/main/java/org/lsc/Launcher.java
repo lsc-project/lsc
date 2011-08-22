@@ -98,7 +98,11 @@ public final class Launcher {
 	/** Available command line options definition */
 	private static Options options;
 	
+	/** Convert the old properties format to new XML */
 	private boolean convertConfiguration;
+	
+	/** Perform a complete configuration validation */
+	private boolean validateConfiguration;
 	
 	/** Parsed command line options */
 	private CommandLine cmdLine;
@@ -110,6 +114,7 @@ public final class Launcher {
 						"Asynchronous synchronization task (one of the available tasks or 'all')");
 		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
 		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
+		options.addOption("v", "validate", false, "Validate configuration (check connections ...)");
 		options.addOption("f", "config", true, "Specify configuration directory");
 		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: 5)");
 		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
@@ -174,7 +179,20 @@ public final class Launcher {
 				}
 				// if a configuration directory was set on command line, use it to set up Configuration
 				Configuration.setUp(configurationLocation, false);
-				return convertConfiguration();
+				int status = convertConfiguration();
+				if(status == 0) {
+					LOGGER.info("Configuration successfully converted !");
+				}
+				return status;
+			} else if (validateConfiguration) {
+				if(configurationLocation == null) {
+					printHelp();
+					return 1;
+				}
+				// if a configuration directory was set on command line, use it to set up Configuration
+				Configuration.setUp(configurationLocation, true);
+				LOGGER.info("Configuration and environment successfully checked !");
+				return 0;
 			}
 			
 			// if a configuration directory was set on command line, use it to set up Configuration
@@ -239,10 +257,14 @@ public final class Launcher {
 			if (cmdLine.hasOption("x")) {
 				convertConfiguration = true;
 			}
+			if (cmdLine.hasOption("v")) {
+				validateConfiguration = true;
+			}
 		
 			if(cmdLine.getOptions().length == 0 || 
 							cmdLine.hasOption("h") || 
-							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0)) && ! convertConfiguration) {
+							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0)) 
+							&& ! convertConfiguration && ! validateConfiguration ) {
 				printHelp();
 				return 1;
 			}

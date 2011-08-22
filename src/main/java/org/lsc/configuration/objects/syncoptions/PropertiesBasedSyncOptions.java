@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
-@XStreamAlias("propertiesBasedSyncOption")
+@XStreamAlias("propertiesBasedSyncOptions")
 public class PropertiesBasedSyncOptions extends SyncOptions {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);

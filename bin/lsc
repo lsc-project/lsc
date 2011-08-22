@@ -139,7 +139,7 @@ function build_classpath() {
 get_java
 
 # check if LSC is not already running
-if [ $(grep -ahv ^grep /proc/*/cmdline | grep -a org.lsc.Launcher | wc -l) -ne 0 ] 
+if [ $(ps aux | grep -a org.lsc.Launcher | grep -av grep | wc -l) -ne 0 ] 
 then
 	# LSC already running
 	fatal "LSC already running - launch aborted"

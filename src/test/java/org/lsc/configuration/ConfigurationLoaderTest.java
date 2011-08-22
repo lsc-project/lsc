@@ -13,7 +13,6 @@ import java.io.IOException;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Test;
-import org.lsc.Configuration;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.configuration.objects.audit.Csv;
 
@@ -49,7 +48,7 @@ public class ConfigurationLoaderTest {
 		csvAudit.setSeparator(";");
 		LscConfiguration.addAudit(csvAudit);
 		LscConfiguration.getTasks().iterator().next().addAudit(csvAudit);
-		new XmlConfigurationHelper().saveConfiguration(new File(Configuration.getConfigurationDirectory(),"test.xml").toString(), LscConfiguration.getInstance());
+		new XmlConfigurationHelper().saveConfiguration(new File(this.getClass().getClassLoader().getResource("etc").getFile(),"test-dump.xml").toString(), LscConfiguration.getInstance());
 	}
 
 	public static void main(String[] args) {

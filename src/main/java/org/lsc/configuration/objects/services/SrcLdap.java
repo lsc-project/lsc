@@ -5,7 +5,7 @@ import org.lsc.jndi.PullableJndiSrcService;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias("ldapSrcService")
+@XStreamAlias("ldapSourceService")
 public class SrcLdap extends Ldap {
 
 	/**

@@ -4,7 +4,7 @@ import org.lsc.jndi.SimpleJndiDstService;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias("ldapDstService")
+@XStreamAlias("ldapDestinationService")
 public class DstLdap extends Ldap {
 
 	@Override

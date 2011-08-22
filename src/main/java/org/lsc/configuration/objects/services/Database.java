@@ -58,7 +58,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-@XStreamAlias("databaseService")
+@XStreamAlias("databaseSourceService")
 public class Database extends Service {
 
 	/** Contains the name of the SQL request to get an object */

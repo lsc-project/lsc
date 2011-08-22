@@ -1,18 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>lsc.xml(5) 
-      </title><link rel="stylesheet" type="text/css" href="xmltoman.css"></link></head><body><h1>Name</h1><p>lsc.xml
-          - LSC configuration file</p>
+<title>lsc(1) 
+      </title><link rel="stylesheet" type="text/css" href="xmltoman.css"></link></head><body><h1>Name</h1><p>lsc
+          - LSC command</p>
 
   <h1>Synopsis</h1>
-    /etc/lsc/lsc.xml or $LSC_HOME/etc/lsc.xml
+    $LSC_HOME/bin/lsc or $LSC_HOME/bin/lsc.bat
   
 
   <h1>Description</h1>
     <p>
-      lsc.xml is the configuration file of the
-      <span class="manref">lsc(1)</span> command. It defines all
-      parameters to work on the appropriate server.
+      lsc is the command line that will launch LSC synchronization engine.
+      It may be a run-and-stop or a run-and-block command depending on the
+      synchronization mode. Connections and synchronization options are defined in
+      <span class="manref">lsc.xml(5)</span> file. 
     </p>
     <p>
 Ldap Synchronization Connector, or LSC, is a tool for synchronizing
@@ -430,8 +431,8 @@ areas.
 
   <h1>See also</h1>
     <p>
-      <span class="manref">lsc(1)</span>
-      <span class="manref">lsc.properties(5)</span>
+      <span class="manref">lsc-agent(1)</span>
+      <span class="manref">lsc.xml(5)</span>
     </p>
     <p>
       <a class="url" href="http://lsc-project.org/">http://lsc-project.org/</a>

@@ -1,10 +1,10 @@
-.TH lsc.xml 5 User Manuals
+.TH lsc-agent 1 User Manuals
 .SH NAME
-lsc.xml \- LSC configuration file
+lsc-agent \- LSC remote command
 .SH SYNOPSIS
-\fB /etc/lsc/lsc.xml or $LSC_HOME/etc/lsc.xml \f1
+\fB $LSC_HOME/bin/lsc-agent or $LSC_HOME/bin/lsc-agent.bat \f1
 .SH DESCRIPTION
-lsc.xml is the configuration file of the \fBlsc(1)\f1 command. It defines all parameters to work on the appropriate server. 
+lsc-agent is the remote command line tool used to achieve various action againt a daemonized LSC. It can start or stop an asynchronous task, force a synchronous task on a particular, check LSC status. It supposes that the main LSC instance has been started by a \fBlsc(1)\f1 command. Connections and synchronization options are defined in \fBlsc.xml(5)\f1 file. 
 
 Ldap Synchronization Connector, or LSC, is a tool for synchronizing data repositories, with a particular focus on identity information. 
 
@@ -126,7 +126,7 @@ Choose the action to use onto the userPassword LDAP attribute. As default action
 .SH AUTHORS
 lsc-passwords was written by Sebastien Bahloul <sbahloul@lsc-project.org>, Jonathan Clarke <jclarke@lsc-project.org>, Remy-Christophe Schermesser <rschermesser@lsc-project.org>, Thomas Chemineau <tchemineau@lsc-project.org>. 
 .SH SEE ALSO
-\fBlsc(1)\f1 \fBlsc.properties(5)\f1
+\fBlsc(1)\f1 \fBlsc.xml(5)\f1
 
 \fBhttp://lsc-project.org/\f1
 .SH COMMENTS

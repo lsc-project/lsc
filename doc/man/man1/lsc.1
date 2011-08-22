@@ -1,10 +1,10 @@
-.TH lsc.xml 5 User Manuals
+.TH lsc 1 User Manuals
 .SH NAME
-lsc.xml \- LSC configuration file
+lsc \- LSC command
 .SH SYNOPSIS
-\fB /etc/lsc/lsc.xml or $LSC_HOME/etc/lsc.xml \f1
+\fB $LSC_HOME/bin/lsc or $LSC_HOME/bin/lsc.bat \f1
 .SH DESCRIPTION
-lsc.xml is the configuration file of the \fBlsc(1)\f1 command. It defines all parameters to work on the appropriate server. 
+lsc is the command line that will launch LSC synchronization engine. It may be a run-and-stop or a run-and-block command depending on the synchronization mode. Connections and synchronization options are defined in \fBlsc.xml(5)\f1 file. 
 
 Ldap Synchronization Connector, or LSC, is a tool for synchronizing data repositories, with a particular focus on identity information. 
 
@@ -126,7 +126,7 @@ Choose the action to use onto the userPassword LDAP attribute. As default action
 .SH AUTHORS
 lsc-passwords was written by Sebastien Bahloul <sbahloul@lsc-project.org>, Jonathan Clarke <jclarke@lsc-project.org>, Remy-Christophe Schermesser <rschermesser@lsc-project.org>, Thomas Chemineau <tchemineau@lsc-project.org>. 
 .SH SEE ALSO
-\fBlsc(1)\f1 \fBlsc.properties(5)\f1
+\fBlsc-agent(1)\f1 \fBlsc.xml(5)\f1
 
 \fBhttp://lsc-project.org/\f1
 .SH COMMENTS

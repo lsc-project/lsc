@@ -8,7 +8,7 @@
 
 all: html man
 
-html: html/lsc.properties.5.html html/lsc.xml.5.html
+html: html/lsc.1.html html/lsc-agent.1.html html/lsc.properties.5.html html/lsc.xml.5.html
 
 man: man1/lsc.1 man1/lsc-agent.1 man5/lsc.properties.5 man5/lsc.xml.5
 

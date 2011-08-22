@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +80,7 @@ import javax.naming.ldap.StartTlsResponse;
 import org.apache.commons.lang.StringUtils;
 import org.lsc.Configuration;
 import org.lsc.LscAttributes;
+import org.lsc.configuration.objects.connection.directory.AuthenticationType;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -278,9 +280,13 @@ public final class JndiServices {
 		Properties props = new Properties();
 		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, connection.getFactory());
 		if(connection.getUsername() != null) {
-			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "simple");
+			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthenticationType().toString());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
 			props.setProperty(DirContext.SECURITY_CREDENTIALS, connection.getPassword());
+			if(connection.getAuthenticationType().equals(AuthenticationType.GSSAPI)) {
+				System.setProperty("java.security.krb5.conf", new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
+				props.setProperty("javax.security.sasl.server.authentication", ""+connection.isSaslMutualAuthentication());
+			}
 		} else {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");
 		}

@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <lsc id="1">
 	<connections>
-		<ldapConnection id="3">
+		<connection class="ldapConnection" id="3">
 			<id>src-ldap</id>
 			<url defined-in="org.lsc.configuration.objects.Connection">ldap://localhost:33389/dc=lsc-project,dc=org</url>
 			<username>cn=Directory Manager</username>
@@ -13,15 +13,15 @@
 			<pageSize>-1</pageSize>
 			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 			<tlsActivated>false</tlsActivated>
-		</ldapConnection>
-		<databaseConnection id="4">
+		</connection>
+		<connection class="databaseConnection" id="4">
 			<id>src-jdbc</id>
 			<url>jdbc:hsqldb:file:hsqldb/lsc</url>
 			<username>sa</username>
 			<password/>
 			<driver>org.hsqldb.jdbcDriver</driver>
-		</databaseConnection>
-		<ldapConnection id="5">
+		</connection>
+		<connection class="ldapConnection" id="5">
 			<id>dst-ldap</id>
 			<url defined-in="org.lsc.configuration.objects.Connection">ldap://localhost:33389/dc=lsc-project,dc=org</url>
 			<username>cn=Directory Manager</username>
@@ -33,21 +33,21 @@
 			<pageSize>-1</pageSize>
 			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 			<tlsActivated>false</tlsActivated>
-		</ldapConnection>
+		</connection>
 	</connections>
 	<audits>
-		<csvAudit id="7">
+		<audit class="csvAudit" id="7">
 			<name>csvAudit</name>
 			<attributes>cn, sn, givenName</attributes>
 			<separator>;</separator>
 			<append>false</append>
-		</csvAudit>
+		</audit>
 	</audits>
 	<tasks>
 		<task id="9">
 			<name>ldap2ldapTestTask</name>
 			<bean>org.lsc.beans.SimpleBean</bean>
-			<destination class="ldapDstService" id="10">
+			<destination class="ldapDestinationService" id="10">
 				<name>ldap2ldapTestTask-dst</name>
 				<connection class="ldapConnection" reference="5"/>
 				<baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data</baseDn>
@@ -68,7 +68,7 @@
 				<getAllFilter>(sn=*)</getAllFilter>
 				<getOneFilter>(sn={sn})</getOneFilter>
 			</destination>
-			<source class="ldapSrcService" id="13">
+			<source class="ldapSourceService" id="13">
 				<name>ldap2ldapTestTask-src</name>
 				<connection class="ldapConnection" reference="3"/>
 				<baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data</baseDn>
@@ -163,7 +163,7 @@
 		<task id="21">
 			<name>db2ldapTestTask</name>
 			<bean>org.lsc.beans.SimpleBean</bean>
-			<destination class="ldapDstService" id="22">
+			<destination class="ldapDestinationService" id="22">
 				<name>db2ldapTestTask-dst</name>
 				<connection class="ldapConnection" reference="5"/>
 				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data</baseDn>
@@ -182,7 +182,7 @@
 				<getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
 				<getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
 			</destination>
-			<source class="org.lsc.configuration.objects.services.Database" id="25">
+			<source class="databaseSourceService" id="25">
 				<name>db2ldapTestTask-src</name>
 				<connection class="databaseConnection" reference="4"/>
 				<requestNameForObject>getObjectTestDb2Ldap</requestNameForObject>

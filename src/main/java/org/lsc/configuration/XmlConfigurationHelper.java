@@ -116,7 +116,8 @@ public class XmlConfigurationHelper {
 	
 		xstream.processAnnotations(new Class[] { LscConfiguration.class, Connection.class, Ldap.class, Database.class, SrcLdap.class, 
 				DstLdap.class, Csv.class, Ldif.class, Audit.class, Task.class, Conditions.class, PropertiesBasedSyncOptions.class, 
-				ForceSyncOptions.class, Security.class, Encryption.class, PBSOAttribute.class });
+				ForceSyncOptions.class, Security.class, Encryption.class, PBSOAttribute.class,
+				org.lsc.configuration.objects.services.Database.class});
 //		xstream.autodetectAnnotations(true);
 
 		// Set generic type

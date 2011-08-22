@@ -25,12 +25,18 @@
 		</fileSet>
 			
 		<!-- Include the bin and etc directories -->
-		<fileSet> <directory>bin</directory> </fileSet>
+		<fileSet>
+			<directory>bin</directory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
 		<fileSet>
 			<directory>etc</directory>
 			<excludes>
 				<exclude>**/.placeholder</exclude>
 			</excludes>
+			<fileMode>0600</fileMode>
+			<directoryMode>0755</directoryMode>
 		</fileSet>
 
 		<!-- Include the sample directory and all required files -->
@@ -40,17 +46,24 @@
 			<directory>target</directory>
 			<includes> <include>lsc-core-1.2-SNAPSHOT-tests.jar</include> </includes>
 			<outputDirectory>sample/lib</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
 			<directory>src/test/resources/etc/config</directory>
 			<outputDirectory>sample/etc/config</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
 			<directory>src/test/resources</directory>
 			<includes>
 				<include>logback-opends.xml</include>
+				<include>config</include>
 			</includes>
 			<outputDirectory>sample/etc</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</fileSet>
 	</fileSets>
 

@@ -50,10 +50,12 @@ package org.lsc.configuration.objects.connection.directory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public enum AuthenticationType {
-	/** */
+	/** To use with a bind distinguish name and a bind password*/
 	SIMPLE,
-	/** */
+	/** To use with external, GSSAPPI or other delegated authentication methods */
 	SASL,
-	/** */
+	/** To use to bind anonymously to the directory */
 	ANONYMOUS,
+	/** SASL Delegated authentication, used for Unix Kerberos and Active Directory */
+	GSSAPI,
 }

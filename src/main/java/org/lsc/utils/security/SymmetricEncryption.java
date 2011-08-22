@@ -183,6 +183,7 @@ public class SymmetricEncryption {
 			os = new FileOutputStream(keyPath);
 			os.write(cipherKey.getEncoded());
 		} catch (IOException e) {
+			LOGGER.error("Unable to write new generated key in " + keyPath + ". Encountered exception is : " + e.getLocalizedMessage(), e);
 			return false;
 		} finally {
 			try {

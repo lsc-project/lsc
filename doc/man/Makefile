@@ -10,7 +10,7 @@ all: html man
 
 html: html/lsc.properties.5.html html/lsc.xml.5.html
 
-man: man5/lsc.properties.5 man5/lsc.xml.5
+man: man1/lsc.1 man1/lsc-agent.1 man5/lsc.properties.5 man5/lsc.xml.5
 
 html/%.html : src/%.xml
 	xsltproc /usr/share/xmltoman/xmltoman.xsl $< > $@
@@ -19,8 +19,12 @@ html/%.html : src/%.xml
 man5/% : src/%.xml
 	xmltoman $< > $@
 	
+man1/% : src/%.xml
+	xmltoman $< > $@
+	
 clean:
-	rm -f man5/lsc.*.5
+	rm -f man1/*.1
+	rm -f man5/*.5
 	rm -f html/lsc.*.html
 
 .PHONY: all man html clean

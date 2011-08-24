@@ -382,7 +382,9 @@ public class LdifLayout extends PatternLayout {
 	}
 
 	public void setLogOperations(LscModificationType[] lscModificationTypes) {
-		operations.addAll(Arrays.asList(lscModificationTypes));
+		if(lscModificationTypes != null && lscModificationTypes.length > 0) {
+			operations.addAll(Arrays.asList(lscModificationTypes));
+		}
 	}
 
 	public void setLogOperations(String logOperations) {

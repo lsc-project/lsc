@@ -64,6 +64,13 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
+			<directory>src/install</directory>
+			<includes> <include>check_lsc.sh</include> </includes>
+			<outputDirectory>bin</outputDirectory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+		<fileSet>
 			<directory>src/test/resources/etc/config</directory>
 			<outputDirectory>sample/etc/config</outputDirectory>
 			<fileMode>0644</fileMode>

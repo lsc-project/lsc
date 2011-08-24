@@ -250,7 +250,7 @@ public class Task {
 	}
 
 	public String getOtherSetting(String key, String defaultValue) {
-		return (otherSettings.containsKey(key) ? otherSettings.get(key) : defaultValue);
+		return (otherSettings != null && otherSettings.containsKey(key) ? otherSettings.get(key) : defaultValue);
 	}
 
 	public void setBean(String bean) {

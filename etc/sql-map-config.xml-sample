@@ -46,10 +46,7 @@
        or http://).  There can be any number of sqlMap elements. -->
 
   <!--
-  <sqlMap url="file://${lsc.config}/sql-map-config.d/Activity.xml"/>
-  <sqlMap resource="org/lsc/persistence/xml/Activity.xml"/>
-  <sqlMap url="file://C:/config/FileSqlMap.xml" />
-  <sqlMap url="http://www.ibatis.com/maps/WebSqlMap.xml" />
+  <sqlMap url="file://${lsc.config}/sql-map-config.d/InetOrgPerson.xml"/>
   -->
 
 </sqlMapConfig>

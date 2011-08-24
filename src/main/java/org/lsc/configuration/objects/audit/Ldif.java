@@ -47,6 +47,7 @@ package org.lsc.configuration.objects.audit;
 
 import java.io.File;
 
+import org.lsc.LscModificationType;
 import org.lsc.configuration.objects.Audit;
 import org.lsc.exception.LscConfigurationException;
 
@@ -60,21 +61,21 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class Ldif extends Audit {
 
 	/** If set, the file is not overwritten, but appended */
-	private Boolean appendToLogFile;
+	private boolean append;
 	
 	/** If set, only LDIF message will be send to appender, otherwise, all the log messages will be written, LDIF messages formatted only */
-	private Boolean logOnlyLdif;
+	private boolean logOnlyLdif;
 	
 	public Ldif() {
-		appendToLogFile = true;
+		setOperations( new LscModificationType[] {});
 	}
 
 	public Boolean getAppend() {
-		return appendToLogFile;
+		return append;
 	}
 
 	public void setAppend(Boolean append) {
-		this.appendToLogFile = append;
+		this.append = append;
 	}
 
 	@Override
@@ -82,7 +83,7 @@ public class Ldif extends Audit {
 		return "LDIF log file";
 	}
 	
-	public void setLogOnlyLdif(Boolean onlyLdif) {
+	public void setLogOnlyLdif(boolean onlyLdif) {
 		this.logOnlyLdif = onlyLdif;
 	}
 

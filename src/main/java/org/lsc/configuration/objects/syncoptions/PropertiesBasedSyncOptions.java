@@ -133,12 +133,15 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 	}
 	
 	public PBSOAttribute getAttribute(String attributeName) {
-		for(PBSOAttribute attribute : attributes) {
-			if(attribute.getName().equalsIgnoreCase(attributeName)) {
-				return attribute;
+		if(attributes != null) {
+			for(PBSOAttribute attribute : attributes) {
+				if(attribute.getName().equalsIgnoreCase(attributeName)) {
+					return attribute;
+				}
 			}
 		}
 		PBSOAttribute attr = new PBSOAttribute(attributeName);
+		attr.setPolicy(this.defaultPolicy);
 		return attr;
 	}
 

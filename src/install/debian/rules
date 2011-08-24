@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+# Put depended upon jars in here
+# export CLASSPATH=
+
+%:
+	dh --with javahelper $@
+

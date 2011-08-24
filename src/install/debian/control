@@ -1,0 +1,14 @@
+Source: lsc
+Section: contrib/misc
+Priority: optional
+Maintainer: Sebastien Bahloul <sebastien@lsc-project.org>
+Build-Depends: debhelper (>> 7), javahelper (>= 0.32) 
+Build-Depends-Indep: sun-java6-jdk
+Standards-Version: 3.8.3
+Homepage: http://lsc-project.org/
+
+Package: lsc
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Description: Ldap Synchronization Engine
+ LSC offers a powerful transformation engine, based on a scripting language, to easily manipulate data on the fly. Various identity management functions are included for directory-specific compatibility - most notably Active Directory (changing passwords, account status, last logon, etc ...). LSC is an open source project written in Java, available under the BSD license.

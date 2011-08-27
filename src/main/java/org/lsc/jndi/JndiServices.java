@@ -262,6 +262,10 @@ public final class JndiServices {
 		}
 	}
 
+	public static JndiServices getInstance(final Properties props) throws NamingException, IOException {
+		return getInstance(props, false);
+	}
+
 	/**
 	 * Instance getter. Manage a connections cache and return the good service
 	 * @param props the connection properties
@@ -269,11 +273,15 @@ public final class JndiServices {
 	 * @throws IOException
 	 * @throws NamingException
 	 */
-	public static JndiServices getInstance(final Properties props) throws NamingException, IOException {
-		if (!cache.containsKey(props)) {
-			cache.put(props, new JndiServices(props));
+	public static JndiServices getInstance(final Properties props, boolean forceNewConnection) throws NamingException, IOException {
+		if(forceNewConnection) {
+			return new JndiServices(props);
+		} else {
+			if (!cache.containsKey(props)) {
+				cache.put(props, new JndiServices(props));
+			}
+			return (JndiServices) cache.get(props);
 		}
-		return (JndiServices) cache.get(props);
 	}
 
 	public static Properties getLdapProperties(Ldap connection) {
@@ -282,10 +290,13 @@ public final class JndiServices {
 		if(connection.getUsername() != null) {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthenticationType().toString());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
-			props.setProperty(DirContext.SECURITY_CREDENTIALS, connection.getPassword());
 			if(connection.getAuthenticationType().equals(AuthenticationType.GSSAPI)) {
-				System.setProperty("java.security.krb5.conf", new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
+				System.setProperty("javax.security.krb5.conf", new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
 				props.setProperty("javax.security.sasl.server.authentication", ""+connection.isSaslMutualAuthentication());
+//				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
+				props.put("javax.security.auth.useSubjectCredsOnly", "false");
+			} else {
+				props.setProperty(DirContext.SECURITY_CREDENTIALS, connection.getPassword());
 			}
 		} else {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");

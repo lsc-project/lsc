@@ -83,30 +83,31 @@ public abstract class AbstractSimpleJndiService {
 	 * The filter to be completed by replacing {0} by the id to find a unique
 	 * entry. Use with source attributes while getting the object to synchronize
 	 */
-	private String filterIdSync;
+	protected String filterIdSync;
 	/**
 	 * The filter to be completed by replacing {0} by the id to find a unique
 	 * entry. Use with destination attributes while getting the object to check for suppression
 	 */
-	private String filterIdClean;
+	protected String filterIdClean;
 	/**
 	 * The filter used to identify all the entries that have to be synchronized
 	 * by this JndiSrcService.
 	 */
-	private String filterAll;
+	protected String filterAll;
+	
 	/** Where to find the entries. */
-	private String baseDn;
+	protected  String baseDn;
 	/**
 	 * When finding entries with 'filterAll' filter, the attribute to read to
 	 * reuse it in 'filterId' filter.
 	 */
-	private List<String> attrsId;
+	protected List<String> attrsId;
 	/**
 	 * When a single entry is read in the directory, the attributes array to
 	 * read - Used to limit at the source, the synchronization perimeter.
 	 */
-	private List<String> attrs;
-	private SearchControls _filteredSc;
+	protected List<String> attrs;
+	protected  SearchControls _filteredSc;
 
 	protected JndiServices jndiServices;
 
@@ -236,7 +237,7 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public final SearchResult get(String id, LscAttributes pivotAttrs, boolean fromSource) throws NamingException {
+	public SearchResult get(String id, LscAttributes pivotAttrs, boolean fromSource) throws NamingException {
 		String searchString = null;
 		if(fromSource || filterIdClean == null) {
 			searchString = filterIdSync;

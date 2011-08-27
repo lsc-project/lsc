@@ -75,7 +75,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
 	 */
-	private Class<IBean> beanClass;
+	protected Class<IBean> beanClass;
 	
 	/**
 	 * Constructor adapted to the context properties and the bean class name
@@ -127,7 +127,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	public final IBean getBean(final String pivotName, final LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(final String pivotName, final LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();

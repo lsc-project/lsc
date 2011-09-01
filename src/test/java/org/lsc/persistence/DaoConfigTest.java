@@ -61,6 +61,7 @@ import org.junit.Test;
 import org.lsc.configuration.PropertiesConfigurationHelper;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.configuration.objects.connection.Database;
+import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class DaoConfigTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
 	@Before
-	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, ConfigurationException {
+	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, ConfigurationException, LscConfigurationException {
 		PropertiesConfigurationHelper.loadConfigurationFrom("etc/lsc.properties");
 		Database pc = (Database) LscConfiguration.getConnection("src-jdbc");
 		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");

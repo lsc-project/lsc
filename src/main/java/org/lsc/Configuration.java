@@ -490,7 +490,7 @@ public class Configuration {
 			if(validate) {
 				LscConfiguration.getInstance().validate();
 			}
-		} catch (ConfigurationException e) {
+		} catch (LscConfigurationException e) {
 			message = "Unable to load configuration (" + e + ")";
 			LOGGER.error(e.toString(),e);
 		} catch (FileNotFoundException e) {

@@ -58,6 +58,7 @@ import org.lsc.configuration.objects.connection.directory.AuthenticationType;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.configuration.objects.security.Encryption;
 import org.lsc.configuration.objects.security.Security;
+import org.lsc.exception.LscConfigurationException;
 
 /**
  * Properties configuration loader
@@ -104,7 +105,7 @@ public class PropertiesConfigurationHelper {
 	 * @throws ConfigurationException
 	 */
 	@SuppressWarnings("deprecation")
-	public static void loadConfigurationFrom(String filename) throws ConfigurationException {
+	public static void loadConfigurationFrom(String filename) throws LscConfigurationException {
 		LscConfiguration.reinitialize();
 		Properties conf = org.lsc.Configuration.getAsProperties(filename, LSC_PROPS_PREFIX);
 		

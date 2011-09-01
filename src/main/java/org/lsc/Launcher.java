@@ -55,12 +55,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.configuration.ConfigurationException;
 import org.lsc.configuration.PropertiesConfigurationHelper;
 import org.lsc.configuration.XmlConfigurationHelper;
 import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -273,6 +274,10 @@ public final class Launcher {
 				printHelp();
 				return 1;
 			}
+		} catch (MissingArgumentException e) {
+			LOGGER.error("Missing arguments ({})", e.toString());
+			LOGGER.debug(e.toString(), e);
+			return 1;
 		} catch (ParseException e) {
 			LOGGER.error("Unable to parse the options ({})", e.toString());
 			LOGGER.debug(e.toString(), e);
@@ -320,7 +325,7 @@ public final class Launcher {
 			} else {
 				LOGGER.error(xmlFile.getAbsolutePath() + " already exists. Please move it away to avoid overriding it !");
 			}
-		} catch (ConfigurationException e) {
+		} catch (LscConfigurationException e) {
 			LOGGER.error(e.toString(), e);
 		} catch (IOException e) {
 			LOGGER.error(e.toString(), e);

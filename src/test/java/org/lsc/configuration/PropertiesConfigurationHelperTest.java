@@ -45,8 +45,8 @@
  */
 package org.lsc.configuration;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Test;
+import org.lsc.exception.LscConfigurationException;
 
 /**
  * Tests properties injector
@@ -54,7 +54,7 @@ import org.junit.Test;
 public class PropertiesConfigurationHelperTest {
 
 	@Test
-	public void testOk() throws ConfigurationException {
+	public void testOk() throws LscConfigurationException {
 		PropertiesConfigurationHelper.loadConfigurationFrom(this.getClass().getClassLoader().getResource("etc/lsc.properties").getPath());
 	}
 	

@@ -15,6 +15,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Test;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.configuration.objects.audit.Csv;
+import org.lsc.exception.LscConfigurationException;
 
 /**
  *
@@ -24,13 +25,13 @@ public class ConfigurationLoaderTest {
 
 //	private String path = "src/test/resources/test-config-xml/";
 
-	private LscConfiguration getFile(String filename) throws FileNotFoundException {
+	private LscConfiguration getFile(String filename) throws FileNotFoundException, LscConfigurationException {
 		XmlConfigurationHelper c = new XmlConfigurationHelper();
 		return c.getConfiguration(filename);
 	}
 
 	@Test
-	public void testLoadSimpleConfiguration() throws FileNotFoundException {
+	public void testLoadSimpleConfiguration() throws FileNotFoundException, LscConfigurationException {
 		LscConfiguration c = getFile(this.getClass().getClassLoader().getResource("test.xml").getPath());
 		assertNotNull(c);
 		LscConfiguration.loadFromInstance(c);
@@ -40,7 +41,7 @@ public class ConfigurationLoaderTest {
 	}
 
 	@Test
-	public void testDumpSimpleConfiguration() throws ConfigurationException, IOException {
+	public void testDumpSimpleConfiguration() throws ConfigurationException, IOException, LscConfigurationException {
 		Csv csvAudit = new Csv();
 		csvAudit.setAppend(false);
 		csvAudit.setAttributes("cn, sn, givenName");
@@ -59,6 +60,9 @@ public class ConfigurationLoaderTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (LscConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

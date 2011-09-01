@@ -63,7 +63,7 @@ public abstract class Audit {
 			<name>csv</name>
 			<operations>create, delete</operations>
 			<attributes>cn, dn</attributes>
-			<separator>;</separator>
+			<separator>,</separator>
 			<append>true</append>
 			<file>/tmp/log.csv</file>
 		</audit>

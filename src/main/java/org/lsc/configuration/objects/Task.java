@@ -109,7 +109,7 @@ public class Task {
 	}
 
 	@Deprecated
-	public Task(String taskName, Properties lscProperties) {
+	public Task(String taskName, Properties lscProperties) throws LscConfigurationException {
 		otherSettings = new HashMap<String, String>();
 		this.name = taskName;
 		String prefix = PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + ".";
@@ -126,7 +126,7 @@ public class Task {
 				|| lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.jndi.PullableJndiSrcService")) {
 			sourceConn = LscConfiguration.getConnection("src-ldap");
 		} else {
-			// Unknown connection type !
+			throw new LscConfigurationException("Unknown connection type: " + lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX));
 		}
 		Connection destinationConn = LscConfiguration.getConnection("dst-ldap");
 		String syncOptionsType = lscProperties.getProperty(PropertiesConfigurationHelper.SYNCOPTIONS_PREFIX + "." + taskName, "org.lsc.beans.syncoptions.ForceSyncOptions");
@@ -153,7 +153,7 @@ public class Task {
 			} else if ("org.lsc.beans.syncoptions.ForceSyncOptions".equals(syncOptionsType)) {
 				syncOptions = new ForceSyncOptions();
 			} else {
-				// Unknown sync options type !
+				throw new LscConfigurationException("Unknown sync options type: " + lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX));
 			}
 			auditLogs = new ArrayList<Audit>();
 		} catch (InstantiationException e) {

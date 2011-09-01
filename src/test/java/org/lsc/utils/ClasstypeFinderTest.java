@@ -2,10 +2,10 @@ package org.lsc.utils;
 
 import java.io.File;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.lsc.service.IService;
 import org.lsc.utils.ClasstypeFinder;
-import org.lsc.webai.base.EditSettings;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public class ClasstypeFinderTest {
 
@@ -15,7 +15,7 @@ public class ClasstypeFinderTest {
 				new File(this.getClass().getClassLoader().getResource(".").getFile())
 		};
 		ClasstypeFinder.getInstance().loadClasspath(cp);
-		Assert.assertNotNull(ClasstypeFinder.getInstance().findEquivalence("EditAudit", EditSettings.class));
+		Assert.assertNotNull(ClasstypeFinder.getInstance().findEquivalence("JdbcService", IService.class));
 	}
 	
 }

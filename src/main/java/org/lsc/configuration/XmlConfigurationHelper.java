@@ -51,6 +51,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import javanet.staxutils.IndentingXMLStreamWriter;
 
@@ -61,18 +65,14 @@ import org.lsc.configuration.objects.Audit;
 import org.lsc.configuration.objects.Conditions;
 import org.lsc.configuration.objects.Connection;
 import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.objects.Service;
+import org.lsc.configuration.objects.SyncOptions;
 import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.audit.Csv;
-import org.lsc.configuration.objects.audit.Ldif;
-import org.lsc.configuration.objects.connection.Database;
-import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.configuration.objects.security.Encryption;
 import org.lsc.configuration.objects.security.Security;
-import org.lsc.configuration.objects.services.DstLdap;
-import org.lsc.configuration.objects.services.SrcLdap;
-import org.lsc.configuration.objects.syncoptions.ForceSyncOptions;
 import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
-import org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.utils.ClasstypeFinder;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
@@ -95,8 +95,9 @@ public class XmlConfigurationHelper {
 
 	/**
 	 * Initiate helper by adding XML aliases
+	 * @throws LscConfigurationException 
 	 */
-	public XmlConfigurationHelper() {
+	public XmlConfigurationHelper() throws LscConfigurationException {
 
 		QNameMap qnm = new QNameMap();
 		qnm.setDefaultNamespace(LSC_NAMESPACE);
@@ -114,15 +115,36 @@ public class XmlConfigurationHelper {
 
 		xstream.setMode(XStream.ID_REFERENCES);
 	
-		xstream.processAnnotations(new Class[] { LscConfiguration.class, Connection.class, Ldap.class, Database.class, SrcLdap.class, 
-				DstLdap.class, Csv.class, Ldif.class, Audit.class, Task.class, Conditions.class, PropertiesBasedSyncOptions.class, 
-				ForceSyncOptions.class, Security.class, Encryption.class, PBSOAttribute.class,
-				org.lsc.configuration.objects.services.Database.class});
-//		xstream.autodetectAnnotations(true);
+		List<Class<?>> annotatedClasses = new ArrayList<Class<?>>();
+		annotatedClasses.addAll(Arrays.asList(new Class<?>[] {
+				LscConfiguration.class, Task.class, Conditions.class, 
+				Security.class, Encryption.class, PBSOAttribute.class
+		}));
+		ClasstypeFinder.getInstance().loadClasspath(new File[] { new File(".")});
+		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(SyncOptions.class)));
+		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Connection.class)));
+		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Service.class)));
+		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Audit.class)));
+		
+		
+		xstream.processAnnotations(annotatedClasses.toArray(new Class[annotatedClasses.size()]));
 
 		// Set generic type
 		xstream.aliasType("url", String.class);
 
+	}
+
+	private Collection<? extends Class<?>> getClasses(
+			Collection<String> extensions) throws LscConfigurationException {
+		List<Class<?>> classes = new ArrayList<Class<?>>();
+		for(String extension: extensions) {
+			try {
+				classes.add(Class.forName(extension));
+			} catch (ClassNotFoundException e) {
+				throw new LscConfigurationException("Unable to resolve following class name: " + extension);
+			}
+		}
+		return classes;
 	}
 
 	/**

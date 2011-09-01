@@ -327,21 +327,22 @@
 
 	<profiles>
 		<profile>
-			<id>jdk17</id>
-			<activation>
-				<jdk>1.7</jdk>
-			</activation>
-			<properties>
-				<jdk-version>jdk17</jdk-version>
-			</properties>
-		</profile>
-		<profile>
 			<id>jdk16</id>
 			<activation>
+				<activeByDefault>true</activeByDefault>
 				<jdk>1.6</jdk>
 			</activation>
 			<properties>
 				<jdk-version>jdk16</jdk-version>
+			</properties>
+		</profile>
+		<profile>
+			<id>jdk15</id>
+			<activation>
+				<jdk>1.5</jdk>
+			</activation>
+			<properties>
+				<jdk-version>jdk15</jdk-version>
 			</properties>
 		</profile>
 		<profile>
@@ -372,6 +373,16 @@
 			    </plugin>
 			  </plugins>
 			</build>
+<!-- 			<dependencies>
+				<dependency>
+					<groupId>org.forgerock.opendj</groupId>
+					<artifactId>opendj-server</artifactId>
+					<version>2.5.0-SNAPSHOT</version>
+					<type>jar</type>
+					<scope>compile</scope>
+					<optional>false</optional>
+				</dependency>
+			</dependencies> -->
 			<dependencies>
 				<dependency>
 					<groupId>org.opends</groupId>
@@ -418,6 +429,15 @@
 		   <url>http://jmockit.googlecode.com/svn/maven-repo</url>
 		   <releases><checksumPolicy>ignore</checksumPolicy></releases>
 		</repository>
+<!-- 	    <repository>
+	        <id>maven.forgerock.org</id>
+	        <name>maven.forgerock.org-snapshot</name>
+	        <url>http://maven.forgerock.org/repo/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+	    </repository> -->
 		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
@@ -615,6 +635,11 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
+        <dependency>
+            <groupId>org.clapper</groupId>
+            <artifactId>ocutil</artifactId>
+            <version>2.5.2</version>
+        </dependency>
 	</dependencies>
 
 	<distributionManagement>

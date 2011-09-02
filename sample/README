@@ -3,7 +3,7 @@ This directory contains a fully configured demonstration for LSC.
 This demonstration comes with some sample data, in a CSV file, to be loaded into
 a simple SQL database table, and synchronized to a directory.
 
-Both the database (HSQLDB) and the directory (OpenDS) are included as
+Both the database (HSQLDB) and the directory (OpenDJ) are included as
 dependencies of LSC, and will be launched automatically.
 
 See full details about running this sample online:

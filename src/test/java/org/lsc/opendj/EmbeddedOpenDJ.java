@@ -43,7 +43,7 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.opends;
+package org.lsc.opendj;
 
 import static org.opends.server.util.ServerConstants.EOL;
 import static org.opends.server.util.StaticUtils.createEntry;
@@ -78,20 +78,20 @@ import org.opends.server.util.LDIFException;
 import org.opends.server.util.LDIFReader;
 
 /**
- * Embedded OpenDS directory
+ * Embedded OpenDJ directory
  */
-public final class EmbeddedOpenDS {
+public final class EmbeddedOpenDJ {
 
     /** Tool class */
-    private EmbeddedOpenDS() {}
+    private EmbeddedOpenDJ() {}
 
     /**
      * A logger for the class
      */
-    private static Log logger = LogFactory.getLog(EmbeddedOpenDS.class);
+    private static Log logger = LogFactory.getLog(EmbeddedOpenDJ.class);
 
     /**
-     * The of the system property that specifies the target working directory, where OpenDS do its business (db datas,
+     * The of the system property that specifies the target working directory, where OpenDJ do its business (db datas,
      * locks, logs, etc)
      */
     public static final String PROPERTY_WORKING_DIR = "org.opends.server.workingDir";
@@ -99,7 +99,7 @@ public final class EmbeddedOpenDS {
     /**
      * A default value for the working dir
      */
-    public static final String DEFAULT_WORKING_DIR_NAME = "opends-test";
+    public static final String DEFAULT_WORKING_DIR_NAME = "opendj-test";
 
     public static boolean SERVER_STARTED = false;
 
@@ -138,7 +138,7 @@ public final class EmbeddedOpenDS {
         	workingDirectory = tempDir + DEFAULT_WORKING_DIR_NAME;
         }
         // copy to r/w location and init directory structure
-        initOpendsDirectory(conf, workingDirectory);
+        initOpenDJDirectory(conf, workingDirectory);
 
         DirectoryServer directoryServer = DirectoryServer.getInstance();
         directoryServer.bootstrapServer();
@@ -211,21 +211,27 @@ public final class EmbeddedOpenDS {
     }
 
     /**
-     * Create the directory layer mandatory to OpenDS All directory and files has to be read/write, because the server
-     * save, update, locks and do other stuff here. so, we need to have an initial config directory, wich contains at
-     * least : - config/config.ldif : root config file for OpenDS - config/schemas/ : standard schema for the directory -
-     * config/upgrade/config.ldif.1834 and config/upgrade/schema.ldif.1834 : heu... mandotory :) These files are
-     * provided if you download a standard distrib of OpenDS.
+     * Create the directory layer mandatory to OpenDJ
      * 
-     * Moreover, we have to create these directories : - db/ : Directory for Berkeley BD JE data storage - logs/ : here
-     * go logs - locks/ : here go locks
+     * All directory and files has to be read/write, because the server
+     * save, update, locks and do other stuff here. so, we need to have an initial config directory, wich contains at
+     * least : 
+     * - config/config.ldif : root config file for OpenDJ
+     * - config/schemas/ : standard schema for the directory 
+     * - config/upgrade/config.ldif.1834 and config/upgrade/schema.ldif.1834 : heu... mandatory :) 
+     * These files are provided if you download a standard distrib of OpenDJ.
+     * 
+     * Moreover, we have to create these directories : 
+     * - db/ : Directory for Berkeley BD JE data storage 
+     * - logs/ : here go logs
+     * - locks/ : here go locks
      * 
      * @param copyFromConfigDirectory : the source directory which contains config.ldif, schemas, upgrade
-     * @param targetRootDirectory the target directory which will be used as openDS root directory (create if non
+     * @param targetRootDirectory the target directory which will be used as openDJ root directory (create if non
      *            existing)
      * @throws IOException
      */
-    private static void initOpendsDirectory(String copyFromConfigDirectory, String targetRootDirectory)
+    private static void initOpenDJDirectory(String copyFromConfigDirectory, String targetRootDirectory)
     throws IOException {
 
         File workingDirectory = new File(targetRootDirectory);
@@ -458,7 +464,7 @@ public final class EmbeddedOpenDS {
     	String res = null;
         
         try {
-            URL configUrl = EmbeddedOpenDS.class.getResource(fileName);
+            URL configUrl = EmbeddedOpenDJ.class.getResource(fileName);
 	        if (configUrl != null) {
 				res = configUrl.toURI().getPath();
 			}
@@ -467,7 +473,7 @@ public final class EmbeddedOpenDS {
 		}
         
         if (res == null || "".equals(res)) {
-            // try getting the OpenDS config directory from the main configuration directory
+            // try getting the OpenDJ config directory from the main configuration directory
         	res = new File(Configuration.getConfigurationDirectory() + fileName).getAbsolutePath();
         }
         

@@ -18,7 +18,7 @@
 	    ===================================================================
 	-->
 	<target name="startLdapServer" description="Start the ldap server">
-		<echo message="Starting OpenDS embedded server from ${build.test-classes.dir}"/>
+		<echo message="Starting OpenDJ embedded server from ${build.test-classes.dir}"/>
 		<copy todir="${build.test-classes.dir}">
 			<fileset dir="${src.test.dir}/java" includes="**/*.ldif*"/>
 		</copy>
@@ -32,7 +32,7 @@
 		<fail unless="execution.path" message="'execution.path' must be set"/>
         
 		<forget daemon="true">
-			<java classname="org.lsc.opends.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+			<java classname="org.lsc.opendj.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 				<arg line="-a" />
 			</java>
 		</forget>
@@ -48,10 +48,10 @@
 	    ===================================================================
 	-->
 	<target name="stopLdapServer" description="Start the ldap server">
-		<echo message="Stopping OpenDS embedded server"/>
+		<echo message="Stopping OpenDJ embedded server"/>
 
 		<fail unless="execution.path" message="'execution.path' must be set"/>
-		<java classname="org.lsc.opends.LdapServer" classpath="${execution.path}:${plugin.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
+		<java classname="org.lsc.opendj.LdapServer" classpath="${execution.path}:${plugin.path}:${build.test-classes.dir}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 			<arg line="-o" />
 		</java>
 	</target>
@@ -67,10 +67,10 @@
             Ldap Synchronization Connector project
             *****************************************
             
-            To start the embedded OpenDS
+            To start the embedded OpenDJ
             &gt; ant startLdapServer
             
-            To stop the embedded OpenDS
+            To stop the embedded OpenDJ
             &gt; ant stopLdapServer
             
 		</echo>

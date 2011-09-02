@@ -43,7 +43,7 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc.opends;
+package org.lsc.opendj;
 
 import java.io.File;
 
@@ -77,22 +77,22 @@ public class LdapServer {
 	private static Options options;
 	
 	public final static void start() throws Exception {
-		EmbeddedOpenDS.startServer();
-		EmbeddedOpenDS.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
+		EmbeddedOpenDJ.startServer();
+		EmbeddedOpenDJ.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
 		
-		String ldifPath = EmbeddedOpenDS.getPathToConfigFile("test.ldif");
+		String ldifPath = EmbeddedOpenDJ.getPathToConfigFile("test.ldif");
 		if(ldifPath == null || "".equals(ldifPath)) {
 			LOGGER.error("Unable to load LDIF sample content !");
 		} else {
-			EmbeddedOpenDS.importLdif(ldifPath);
+			EmbeddedOpenDJ.importLdif(ldifPath);
 			LOGGER.info("LDIF sample content loaded successfully");
 		}
 	}
 	
 	public final static void stop() {
-		EmbeddedOpenDS.shutdownServer("Normal stop process");
+		EmbeddedOpenDJ.shutdownServer("Normal stop process");
 	}
 
 	/**

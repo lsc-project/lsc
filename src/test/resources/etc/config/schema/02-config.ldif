@@ -21,7 +21,8 @@
 # CDDL HEADER END
 #
 #
-#      Copyright 2006-2009 Sun Microsystems, Inc.
+#      Copyright 2006-2010 Sun Microsystems, Inc.
+#      Portions Copyright 2010 ForgeRock AS.
 #
 #
 # This file contains the attribute type and objectclass definitions for use
@@ -593,7 +594,8 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.118
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.119
   NAME 'ds-sync-hist'
   ORDERING historicalCsnOrderingMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+  NO-USER-MODIFICATION
   USAGE directoryOperation
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.120
@@ -885,6 +887,11 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.179
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.598
+  NAME 'ds-task-import-tmp-directory'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.180
   NAME 'ds-task-import-overwrite-rejects'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
@@ -892,6 +899,11 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.180
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.181
   NAME 'ds-task-import-skip-schema-validation'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.597
+  NAME 'ds-task-import-skip-dn-validation'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
@@ -908,6 +920,11 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.182
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.183
   NAME 'ds-task-import-is-encrypted'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.222
+  NAME 'ds-cfg-import-queue-size'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.184
@@ -1083,11 +1100,6 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.218
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.219
   NAME 'ds-cfg-preload-time-limit'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  SINGLE-VALUE
-  X-ORIGIN 'OpenDS Directory Server' )
-attributeTypes: ( 1.3.6.1.4.1.26027.1.1.222
-  NAME 'ds-cfg-import-queue-size'
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.223
@@ -1413,8 +1425,8 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.290
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.291
-  NAME 'ds-task-rebuild-max-threads'
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  NAME 'ds-task-rebuild-tmp-directory'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.292
@@ -1541,7 +1553,8 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.316
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.317
   NAME 'ds-sync-conflict'
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  EQUALITY distinguishedNameMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   USAGE directoryOperation
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.319
@@ -2114,19 +2127,9 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.434
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
-attributeTypes: ( 1.3.6.1.4.1.26027.1.1.436
-  NAME 'ds-cfg-workflow-id'
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  SINGLE-VALUE
-  X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.437
   NAME 'ds-cfg-workflow'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-  X-ORIGIN 'OpenDS Directory Server' )
-attributeTypes: ( 1.3.6.1.4.1.26027.1.1.438
-  NAME 'ds-cfg-workflow-element-id'
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  SINGLE-VALUE
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.439
   NAME 'ds-cfg-workflow-element'
@@ -2224,6 +2227,10 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.459
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.460
   NAME 'ds-task-import-random-seed'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.596
+  NAME 'ds-task-import-thread-count'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
   X-ORIGIN 'OpenDS Directory Server' )
 attributeTypes: ( 1.3.6.1.4.1.26027.1.1.461
@@ -2397,6 +2404,156 @@ attributeTypes: ( 1.3.6.1.4.1.26027.1.1.518
   NAME 'ds-cfg-index-extensible-matching-rule'
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.586
+  NAME 'ds-cfg-fractional-include'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.587
+  NAME 'ds-cfg-fractional-exclude'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.588
+  NAME 'ds-sync-fractional-include'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.589
+  NAME 'ds-sync-fractional-exclude'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.595
+  NAME 'ds-cfg-changetime-heartbeat-interval'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.592
+  NAME 'ds-cfg-solve-conflicts'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.599
+  NAME 'ds-cfg-plugin-order-ldif-import-end'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.600
+  NAME 'ds-cfg-plugin-order-ldif-import-begin'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.601
+  NAME 'ds-cfg-ecl-include'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.603
+  NAME 'ds-cfg-weight'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.605
+  NAME 'ds-cfg-monitoring-period'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.607
+  NAME 'ds-cfg-initialization-window-size'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.608
+  NAME 'ds-cfg-log-changenumber'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.609
+  NAME 'ds-cfg-plugin-order-subordinate-delete'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.610
+  NAME 'ds-cfg-disk-full-threshold'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.611
+  NAME 'ds-cfg-disk-low-threshold'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.612
+  NAME 'ds-cfg-index-filter-analyzer-enabled'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.613
+  NAME 'ds-cfg-max-psearches'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.614
+  NAME 'ds-cfg-conflicts-historical-purge-delay'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.615
+  NAME 'ds-task-purge-conflicts-historical-domain-dn'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.616
+  NAME 'ds-task-purge-conflicts-historical-maximum-duration'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.617
+  NAME 'ds-task-purge-conflicts-historical-last-purged-changenumber'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.618
+  NAME 'ds-task-purge-conflicts-historical-purge-completed-in-time'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.619
+  NAME 'ds-task-purge-conflicts-historical-purged-values-count'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.620
+  NAME 'ds-task-purge-conflicts-historical-first-purged-changenumber'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.627
+  NAME 'ds-cfg-max-ops-per-interval'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.628
+  NAME 'ds-cfg-max-ops-interval'
+  SYNTAX  1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.1.1.1
+  NAME 'ds-cfg-crypt-password-storage-encryption-algorithm'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDJ Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.1.1.2
+  NAME 'ds-cfg-db-evictor-core-threads'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDJ Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.1.1.3
+  NAME 'ds-cfg-db-evictor-max-threads'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDJ Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.1.1.4
+  NAME 'ds-cfg-db-evictor-keep-alive'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'OpenDJ Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.1
   NAME 'ds-cfg-access-control-handler'
   SUP top
@@ -2446,8 +2603,8 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.6
   MUST ds-cfg-db-directory
   MAY ( ds-cfg-index-entry-limit $
         ds-cfg-preload-time-limit $
-        ds-cfg-import-queue-size $
         ds-cfg-import-thread-count $
+        ds-cfg-import-queue-size $
         ds-cfg-entries-compressed $
         ds-cfg-db-directory-permissions $
         ds-cfg-db-cache-percent $
@@ -2457,6 +2614,9 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.6
         ds-cfg-db-run-cleaner $
         ds-cfg-db-cleaner-min-utilization $
         ds-cfg-db-evictor-lru-only $
+        ds-cfg-db-evictor-core-threads $
+        ds-cfg-db-evictor-max-threads $
+        ds-cfg-db-evictor-keep-alive $
         ds-cfg-db-evictor-nodes-per-scan $
         ds-cfg-db-log-file-max $
         ds-cfg-db-logging-file-handler-on $
@@ -2466,7 +2626,11 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.6
         ds-cfg-db-num-lock-tables $
         ds-cfg-db-num-cleaner-threads $
         ds-cfg-compact-encoding $
-        ds-cfg-je-property )
+        ds-cfg-je-property $
+        ds-cfg-disk-full-threshold $
+        ds-cfg-disk-low-threshold $
+        ds-cfg-index-filter-analyzer-enabled $
+        ds-cfg-max-entries )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.7
   NAME 'ds-cfg-local-db-index'
@@ -2540,7 +2704,8 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.13
         ds-cfg-trust-manager-provider $
         ds-cfg-ssl-protocol $
         ds-cfg-ssl-cipher-suite $
-        ds-cfg-max-blocked-write-time-limit )
+        ds-cfg-max-blocked-write-time-limit $
+        ds-cfg-buffer-size )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.14
   NAME 'ds-cfg-entry-cache'
@@ -2793,7 +2958,8 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.39
         ds-cfg-save-config-on-successful-startup $
         ds-cfg-etime-resolution $
         ds-cfg-entry-cache-preload $
-        ds-cfg-max-allowed-client-connections)
+        ds-cfg-max-allowed-client-connections $
+        ds-cfg-max-psearches )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.40
   NAME 'ds-cfg-root-dn-user'
@@ -2955,7 +3121,14 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.57
         ds-cfg-assured-sd-level $
         ds-cfg-assured-timeout $
         ds-cfg-group-id $
-        ds-cfg-referrals-url)
+        ds-cfg-referrals-url $
+        ds-cfg-fractional-exclude $
+        ds-cfg-fractional-include $
+        ds-cfg-solve-conflicts $
+        ds-cfg-conflicts-historical-purge-delay $
+        ds-cfg-changetime-heartbeat-interval $
+        ds-cfg-log-changenumber $
+        ds-cfg-initialization-window-size )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.58
   NAME 'ds-cfg-length-based-password-validator'
@@ -3047,9 +3220,12 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.63
         ds-task-import-overwrite-rejects $
         ds-task-import-skip-file $
         ds-task-import-skip-schema-validation $
+        ds-task-import-skip-dn-validation $
+        ds-task-import-tmp-directory $
         ds-task-import-is-compressed $
         ds-task-import-is-encrypted $
         ds-task-import-backend-id $
+        ds-task-import-thread-count $
         ds-task-import-clear-backend )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.64
@@ -3066,7 +3242,9 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.64
         ds-cfg-replication-purge-delay $
         ds-cfg-group-id $
         ds-cfg-assured-timeout $
-        ds-cfg-degraded-status-threshold)
+        ds-cfg-degraded-status-threshold $
+        ds-cfg-weight $
+        ds-cfg-monitoring-period)
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.65
   NAME 'ds-backup-directory'
@@ -3339,7 +3517,7 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.97
   STRUCTURAL
   MUST ( ds-task-rebuild-base-dn $
          ds-task-rebuild-index )
-  MAY ds-task-rebuild-max-threads
+  MAY ds-task-rebuild-tmp-directory
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.98
   NAME 'ds-virtual-static-group'
@@ -3447,6 +3625,8 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.111
         ds-cfg-plugin-order-post-connect $
         ds-cfg-plugin-order-post-disconnect $
         ds-cfg-plugin-order-ldif-import $
+        ds-cfg-plugin-order-ldif-import-end $
+        ds-cfg-plugin-order-ldif-import-begin $
         ds-cfg-plugin-order-ldif-export $
         ds-cfg-plugin-order-pre-parse-abandon $
         ds-cfg-plugin-order-pre-parse-add $
@@ -3491,6 +3671,7 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.111
         ds-cfg-plugin-order-search-result-entry $
         ds-cfg-plugin-order-search-result-reference $
         ds-cfg-plugin-order-subordinate-modify-dn $
+        ds-cfg-plugin-order-subordinate-delete $
         ds-cfg-plugin-order-intermediate-response )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.112
@@ -3681,6 +3862,7 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.142
   NAME 'ds-cfg-crypt-password-storage-scheme'
   SUP ds-cfg-password-storage-scheme
   STRUCTURAL
+  MUST ds-cfg-crypt-password-storage-encryption-algorithm
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.143
   NAME 'ds-cfg-md5-password-storage-scheme'
@@ -3899,7 +4081,7 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.177
   NAME 'ds-cfg-workflow'
   SUP top
   STRUCTURAL
-  MUST ( ds-cfg-workflow-id $
+  MUST ( cn $
          ds-cfg-enabled $
          ds-cfg-workflow-element $
          ds-cfg-base-dn )
@@ -3908,7 +4090,7 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.178
   NAME 'ds-cfg-workflow-element'
   SUP top
   STRUCTURAL
-  MUST ( ds-cfg-workflow-element-id $
+  MUST ( cn $
          ds-cfg-enabled $
          ds-cfg-java-class )
   X-ORIGIN 'OpenDS Directory Server' )
@@ -3971,7 +4153,9 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.185
         ds-cfg-max-concurrent-ops-per-connection $
         ds-cfg-size-limit $
         ds-cfg-time-limit $
-        ds-cfg-min-substring-length)
+        ds-cfg-min-substring-length $
+        ds-cfg-max-ops-per-interval $
+        ds-cfg-max-ops-interval)
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.186
   NAME 'ds-cfg-network-group-plugin'
@@ -4015,8 +4199,8 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.196
         ds-cfg-ndb-thread-count $
         ds-cfg-ndb-num-connections $
         ds-cfg-deadlock-retry-limit $
-        ds-cfg-import-queue-size $
         ds-cfg-import-thread-count $
+        ds-cfg-import-queue-size $
         ds-cfg-index-entry-limit )
   X-ORIGIN 'OpenDS Directory Server' )
 objectClasses: ( 1.3.6.1.4.1.26027.1.2.197
@@ -4038,5 +4222,60 @@ objectClasses: ( 1.3.6.1.4.1.26027.1.2.200
   NAME 'ds-cfg-null-backend'
   SUP ds-cfg-backend
   STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.201
+  NAME 'ds-cfg-structural-object-class-virtual-attribute'
+  SUP ds-cfg-virtual-attribute
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.202
+  NAME 'ds-cfg-governing-structure-rule-virtual-attribute'
+  SUP ds-cfg-virtual-attribute
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.231
+  NAME 'ds-cfg-extensible-matching-rule'
+  SUP ds-cfg-matching-rule
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.232
+  NAME 'ds-cfg-fractional-ldif-import-plugin'
+  SUP ds-cfg-plugin
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.233
+  NAME 'ds-cfg-parallel-work-queue'
+  SUP ds-cfg-work-queue
+  STRUCTURAL
+  MAY ( ds-cfg-num-worker-threads )
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.234
+  NAME 'ds-cfg-external-changelog-domain'
+  SUP top
+  STRUCTURAL
+  MUST ( cn $
+         ds-cfg-enabled )
+  MAY  ( ds-cfg-ecl-include )
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.235
+  NAME 'ds-cfg-collective-attribute-subentries-virtual-attribute'
+  SUP ds-cfg-virtual-attribute
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.236
+  NAME 'ds-cfg-password-policy-subentry-virtual-attribute'
+  SUP ds-cfg-virtual-attribute
+  STRUCTURAL
+  X-ORIGIN 'OpenDS Directory Server' )
+objectClasses: ( 1.3.6.1.4.1.26027.1.2.237
+  NAME 'ds-task-purge-conflicts-historical'
+  SUP ds-task
+  STRUCTURAL
+  MUST ( ds-task-purge-conflicts-historical-domain-dn )
+  MAY ( ds-task-purge-conflicts-historical-maximum-duration $
+        ds-task-purge-conflicts-historical-first-purged-changenumber $
+        ds-task-purge-conflicts-historical-last-purged-changenumber $
+        ds-task-purge-conflicts-historical-purge-completed-in-time $
+        ds-task-purge-conflicts-historical-purged-values-count )
   X-ORIGIN 'OpenDS Directory Server' )
 

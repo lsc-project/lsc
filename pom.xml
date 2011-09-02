@@ -345,8 +345,8 @@
 				<jdk-version>jdk15</jdk-version>
 			</properties>
 		</profile>
-		<profile>
-			<id>opends</id>
+<!-- 		<profile>
+			<id>opendj</id>
 		    <activation>
 		      <activeByDefault>true</activeByDefault>
 		    </activation>
@@ -365,7 +365,7 @@
 			          </goals>
 			          <configuration>
 			            <sources>
-			              <source>src/test/java/org/lsc/opends</source>
+			              <source>src/test/java/org/lsc/opendj</source>
 			            </sources>
 			          </configuration>
 			        </execution>
@@ -373,17 +373,9 @@
 			    </plugin>
 			  </plugins>
 			</build>
-<!-- 			<dependencies>
-				<dependency>
-					<groupId>org.forgerock.opendj</groupId>
-					<artifactId>opendj-server</artifactId>
-					<version>2.5.0-SNAPSHOT</version>
-					<type>jar</type>
-					<scope>compile</scope>
-					<optional>false</optional>
-				</dependency>
-			</dependencies> -->
-			<dependencies>
+ 			<dependencies>
+			</dependencies>
+ 			<dependencies>
 				<dependency>
 					<groupId>org.opends</groupId>
 					<artifactId>opends-core</artifactId>
@@ -393,7 +385,7 @@
 					<optional>false</optional>
 				</dependency>
 			</dependencies>
-  		</profile>
+  		</profile> -->
 	</profiles>
 
 	<repositories>
@@ -429,7 +421,7 @@
 		   <url>http://jmockit.googlecode.com/svn/maven-repo</url>
 		   <releases><checksumPolicy>ignore</checksumPolicy></releases>
 		</repository>
-<!-- 	    <repository>
+ 	    <repository>
 	        <id>maven.forgerock.org</id>
 	        <name>maven.forgerock.org-snapshot</name>
 	        <url>http://maven.forgerock.org/repo/snapshots</url>
@@ -437,8 +429,14 @@
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
-	    </repository> -->
-		<repository>
+	    </repository>
+	    <repository>
+			<id>oracleReleases</id>
+			<name>Oracle Released Java Packages</name>
+			<url>http://download.oracle.com/maven</url>
+			<layout>default</layout>
+	    </repository>
+   		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
 			<releases><enabled>true</enabled></releases>
@@ -573,13 +571,26 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-		<dependency>
+<!-- 	<dependency>
 			<groupId>org.opends</groupId>
 			<artifactId>opends-core</artifactId>
 			<version>2.0</version>
 			<type>jar</type>
 			<scope>runtime</scope>
 			<optional>false</optional>
+		</dependency>-->
+		<dependency>
+			<groupId>org.forgerock.opendj</groupId>
+			<artifactId>opendj-server</artifactId>
+			<version>2.4.4-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+		   <groupId>com.sleepycat</groupId>
+		   <artifactId>je</artifactId>
+		   <version>4.1.10</version>
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>

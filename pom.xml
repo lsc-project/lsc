@@ -345,7 +345,7 @@
 				<jdk-version>jdk15</jdk-version>
 			</properties>
 		</profile>
-<!-- 		<profile>
+ 		<profile>
 			<id>opendj</id>
 		    <activation>
 		      <activeByDefault>true</activeByDefault>
@@ -374,8 +374,6 @@
 			  </plugins>
 			</build>
  			<dependencies>
-			</dependencies>
- 			<dependencies>
 				<dependency>
 					<groupId>org.opends</groupId>
 					<artifactId>opends-core</artifactId>
@@ -385,7 +383,7 @@
 					<optional>false</optional>
 				</dependency>
 			</dependencies>
-  		</profile> -->
+  		</profile>
 	</profiles>
 
 	<repositories>

@@ -73,6 +73,8 @@ import org.lsc.configuration.objects.security.Security;
 import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.utils.ClasstypeFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
@@ -93,6 +95,8 @@ public class XmlConfigurationHelper {
 	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-1.0.xsd"; 
 	private XStream xstream;
 
+	private static Logger LOGGER = LoggerFactory.getLogger(XmlConfigurationHelper.class);
+	
 	/**
 	 * Initiate helper by adding XML aliases
 	 * @throws LscConfigurationException 
@@ -120,11 +124,13 @@ public class XmlConfigurationHelper {
 				LscConfiguration.class, Task.class, Conditions.class, 
 				Security.class, Encryption.class, PBSOAttribute.class
 		}));
+		LOGGER.info("Loading plugins ...");
 		ClasstypeFinder.getInstance().loadClasspath(new File[] { new File(".")});
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(SyncOptions.class)));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Connection.class)));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Service.class)));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Audit.class)));
+		LOGGER.info("Plugins loaded ...");
 		
 		
 		xstream.processAnnotations(annotatedClasses.toArray(new Class[annotatedClasses.size()]));

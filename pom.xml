@@ -95,7 +95,7 @@
 			<timezone>+1</timezone>
 		</developer>
 	</developers>
-	
+
 	<contributors>
 		<contributor>
 			<name>Clement Oudot</name>
@@ -108,27 +108,27 @@
 			<timezone>+1</timezone>
 		</contributor>
 	</contributors>
-	
+
 	<licenses>
 		<license>
 			<name>BSD</name>
 			<url>http://www.opensource.org/licenses/bsd-license.php</url>
 		</license>
 	</licenses>
-	
+
 	<scm>
 		<connection>scm:svn:https://lsc-project.org/svn/lsc/trunk</connection>
 		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/trunk</developerConnection>
 		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc</url>
 	</scm>
-	
+
 	<organization>
 		<name>LSC project</name>
 		<url>http://lsc-project.org/</url>
 	</organization>
-	
+
 	<properties>
-		<!--Force UTF-8 for the build-->
+		<!--Force UTF-8 for the build -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<tapestry-release-version>5.2.5</tapestry-release-version>
@@ -136,9 +136,9 @@
 
 	<build>
 		<defaultGoal>package</defaultGoal>
-		
+
 		<finalName>${project.artifactId}-${project.version}</finalName>
-		
+
 		<plugins>
 
 			<plugin>
@@ -146,9 +146,13 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.7.1</version>
 				<configuration>
-					<argLine>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:"${settings.localRepository}"/mockit/jmockit/0.999.10/jmockit-0.999.10.jar</argLine>
+					<argLine>-Dcom.sun.management.jmxremote
+						-Dcom.sun.management.jmxremote.port=1099
+						-Dcom.sun.management.jmxremote.authenticate=false
+						-Dcom.sun.management.jmxremote.ssl=false
+						-javaagent:"${settings.localRepository}"/mockit/jmockit/0.999.10/jmockit-0.999.10.jar</argLine>
 				</configuration>
-			</plugin>  
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -193,7 +197,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.3</version><!--$NO-MVN-MAN-VER$-->
+				<version>1.3</version><!--$NO-MVN-MAN-VER$ -->
 				<executions>
 					<execution>
 						<id>startLdapServer</id>
@@ -223,11 +227,11 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin> 
+			</plugin>
 
 			<!-- build a JAR of the test classes for use in the sample -->
-			<!-- this MUST appear before the assembly plugin in the pom.xml file
-				 to make sure that the JAR exists before packaging -->
+			<!-- this MUST appear before the assembly plugin in the pom.xml file to 
+				make sure that the JAR exists before packaging -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -244,7 +248,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-5</version><!--$NO-MVN-MAN-VER$-->
+				<version>2.2-beta-5</version><!--$NO-MVN-MAN-VER$ -->
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/dist.xml</descriptor>
@@ -287,10 +291,11 @@
 				</executions>
 			</plugin>
 		</plugins>
-		
+
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -345,35 +350,35 @@
 				<jdk-version>jdk15</jdk-version>
 			</properties>
 		</profile>
- 		<profile>
+		<profile>
 			<id>opendj</id>
-		    <activation>
-		      <activeByDefault>true</activeByDefault>
-		    </activation>
-   			<build>
-			  <plugins>
-			    <plugin>
-			      <groupId>org.codehaus.mojo</groupId>
-			      <artifactId>build-helper-maven-plugin</artifactId>
-			      <version>1.7</version>
-			      <executions>
-			        <execution>
-			          <id>add-source</id>
-			          <phase>generate-sources</phase>
-			          <goals>
-			            <goal>add-source</goal>
-			          </goals>
-			          <configuration>
-			            <sources>
-			              <source>src/test/java/org/lsc/opendj</source>
-			            </sources>
-			          </configuration>
-			        </execution>
-			      </executions>
-			    </plugin>
-			  </plugins>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.7</version>
+						<executions>
+							<execution>
+								<id>add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/test/java/org/lsc/opendj</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
 			</build>
- 			<dependencies>
+			<dependencies>
 				<dependency>
 					<groupId>org.opends</groupId>
 					<artifactId>opends-core</artifactId>
@@ -383,61 +388,79 @@
 					<optional>false</optional>
 				</dependency>
 			</dependencies>
-  		</profile>
+		</profile>
 	</profiles>
 
 	<repositories>
 		<repository>
 			<id>IBiblio - Maven2</id>
 			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-			<releases><enabled>true</enabled></releases>
-			<snapshots><enabled>false</enabled></snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>Codehaus Snapshot</id>
 			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<releases><enabled>false</enabled></releases>
-			<snapshots><enabled>true</enabled></snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
-			<releases><enabled>true</enabled></releases>
-			<snapshots><enabled>false</enabled></snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 		<repository>
 			<id>JBoss repository</id>
 			<url>http://repository.jboss.org/maven2/</url>
-			<releases><enabled>true</enabled></releases>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 			<snapshots>
 				<enabled>false</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
 		</repository>
 		<repository>
-		   <id>jmockit-svn</id>
-		   <url>http://jmockit.googlecode.com/svn/maven-repo</url>
-		   <releases><checksumPolicy>ignore</checksumPolicy></releases>
+			<id>jmockit-svn</id>
+			<url>http://jmockit.googlecode.com/svn/maven-repo</url>
+			<releases>
+				<checksumPolicy>ignore</checksumPolicy>
+			</releases>
 		</repository>
- 	    <repository>
-	        <id>maven.forgerock.org</id>
-	        <name>maven.forgerock.org-snapshot</name>
-	        <url>http://maven.forgerock.org/repo/snapshots</url>
+		<repository>
+			<id>maven.forgerock.org</id>
+			<name>maven.forgerock.org-snapshot</name>
+			<url>http://maven.forgerock.org/repo/snapshots</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
-	    </repository>
-	    <repository>
+		</repository>
+		<repository>
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>
 			<url>http://download.oracle.com/maven</url>
 			<layout>default</layout>
-	    </repository>
-   		<repository>
+		</repository>
+		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
-			<releases><enabled>true</enabled></releases>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -569,14 +592,9 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-<!-- 	<dependency>
-			<groupId>org.opends</groupId>
-			<artifactId>opends-core</artifactId>
-			<version>2.0</version>
-			<type>jar</type>
-			<scope>runtime</scope>
-			<optional>false</optional>
-		</dependency>-->
+		<!-- <dependency> <groupId>org.opends</groupId> <artifactId>opends-core</artifactId> 
+			<version>2.0</version> <type>jar</type> <scope>runtime</scope> <optional>false</optional> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.forgerock.opendj</groupId>
 			<artifactId>opendj-server</artifactId>
@@ -586,9 +604,9 @@
 			<optional>false</optional>
 		</dependency>
 		<dependency>
-		   <groupId>com.sleepycat</groupId>
-		   <artifactId>je</artifactId>
-		   <version>4.1.10</version>
+			<groupId>com.sleepycat</groupId>
+			<artifactId>je</artifactId>
+			<version>4.1.10</version>
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>
@@ -629,13 +647,13 @@
 					<groupId>com.bea.xml</groupId>
 					<artifactId>jsr173-ri</artifactId>
 				</exclusion>
- 	 	     </exclusions>
+			</exclusions>
 		</dependency>
 		<dependency>
-		   <groupId>mockit</groupId>
-		   <artifactId>jmockit</artifactId>
-		   <version>0.999.10</version>
-		   <scope>test</scope>
+			<groupId>mockit</groupId>
+			<artifactId>jmockit</artifactId>
+			<version>0.999.10</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -644,11 +662,11 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-        <dependency>
-            <groupId>org.clapper</groupId>
-            <artifactId>ocutil</artifactId>
-            <version>2.5.2</version>
-        </dependency>
+		<dependency>
+			<groupId>org.clapper</groupId>
+			<artifactId>ocutil</artifactId>
+			<version>2.5.2</version>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>
@@ -679,5 +697,5 @@
 			</notifier>
 		</notifiers>
 	</ciManagement>
-	
+
 </project>

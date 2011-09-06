@@ -12,8 +12,8 @@ LSC offers a powerful transformation engine, based on a scripting language, to
 easily manipulate data on the fly.
 
 Various identity management functions are included for directory-specific
-compatibility — most notably Active Directory (changing passwords, account
-status, last logon, etc …). 
+compatibility - most notably Active Directory (changing passwords, account
+status, last logon, etc ...). 
 
 LSC is an open source project written in Java, available under the BSD license.
 
@@ -41,7 +41,7 @@ reusing!
 * Multiple source connectors: any LDAPv3 server, any database with a JDBC
   connector, flat files (or anything else you write a connector for)
 * Support for LDAPv3 niceties and extensions: StartTLS, LDAPS, paged results,
-  schema retrieval
+  schema retrieval, LDAP Sync (rfc4533), LDAP persistent search
 * Graphical setup wizard (use is optional)
 * Fully configurable through plain text configuration files
 * Written in Java, leveraging the ecosystem of available tools

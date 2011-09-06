@@ -5,26 +5,20 @@ REM  work out where LSC lives
 
 setLocal EnableDelayedExpansion
 
-
 for /f %%i in ("%0") do set LSC_HOME=%%~dpi..
-
-
 
 REM ====================================================================
 REM  Configuration
 REM ====================================================================
-
 
 SET CFG_DIR=%LSC_HOME%\etc
 SET LIB_DIR=%LSC_HOME%\lib
 SET LOG_DIR=%TEMP%
 SET LOG_FILE=%LOG_DIR%\lsc.log
 
-
 call:get_java
 
 call:log "Starting LSC"
-
 
 set CLASSPATH=.
  for  %%a in ("%LIB_DIR%\*.jar") do (
@@ -32,8 +26,10 @@ set CLASSPATH=.
  )
 set CLASSPATH=!CLASSPATH!
 
+REM if LSC options include the "-a" flag, set the required JMX options
+FOR %%i IN ( %* ) DO IF "%%i"=="-a" (SET JAVA_OPTS=-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false)
 
-"%JAVA_COMMAND%" -cp "%CLASSPATH%" org.lsc.Launcher %*
+"%JAVA_COMMAND%" -cp "%CLASSPATH%" %JAVA_OPTS% org.lsc.Launcher %*
 
 REM LSC finished running
 call:log "LSC finished running"

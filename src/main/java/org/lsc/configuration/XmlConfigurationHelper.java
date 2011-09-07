@@ -125,7 +125,7 @@ public class XmlConfigurationHelper {
 				Security.class, Encryption.class, PBSOAttribute.class
 		}));
 		LOGGER.info("Loading plugins ...");
-		ClasstypeFinder.getInstance().loadClasspath(new File[] { new File(".")});
+		ClasstypeFinder.getInstance().setupClasspath(new File(this.getClass().getResource("../../..").getFile()));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(SyncOptions.class)));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Connection.class)));
 		annotatedClasses.addAll(getClasses(ClasstypeFinder.getInstance().findExtensions(Service.class)));

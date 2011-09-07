@@ -3,7 +3,7 @@
 <installation version="1.0">
 
 	<info>
-		<appname>@{project.name}</appname>
+		<appname>LSC</appname>
 		<appversion>@{project.version}</appversion>
 		<url>@{project.url}</url>
 		<uninstaller name="uninstall.jar" path="${INSTALL_PATH}" write="yes" />
@@ -11,7 +11,7 @@
 		<requiresjdk>no</requiresjdk>
 	</info>
 
-	<guiprefs width="600" height="480" resizable="no">
+	<guiprefs width="700" height="480" resizable="yes">
 		<laf name="kunststoff">
 			<os family="unix" />
 		</laf>

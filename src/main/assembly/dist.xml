@@ -106,6 +106,15 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+<!--		<fileSet>
+			<directory>src/install</directory>
+			<includes>
+				<include>install-help.html</include>
+			</includes>
+			<outputDirectory>doc</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>-->
 	</fileSets>
 
 	<!-- Include all runtime dependencies of the project -->
@@ -115,7 +124,7 @@
 			<outputDirectory>lib</outputDirectory>
 			<excludes>
 				<exclude>junit:junit</exclude>
-				<exclude>org.opends:opends-core</exclude>
+				<exclude>org.forgerock.opendj:opendj-server</exclude>
 				<exclude>hsqldb:hsqldb</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
@@ -124,7 +133,7 @@
 		<dependencySet>
 			<outputDirectory>sample/lib</outputDirectory>
 			<includes>
-				<include>org.opends:opends-core</include>
+				<include>org.forgerock.opendj:opendj-server</include>
 				<include>hsqldb:hsqldb</include>
 				<!-- see also the tests jar included in a fileSet above -->
 			</includes>

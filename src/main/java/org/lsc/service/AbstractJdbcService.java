@@ -50,15 +50,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.naming.CommunicationException;
+import javax.naming.directory.BasicAttribute;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.lsc.LscAttributes;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.services.Database;
+import org.lsc.configuration.objects.connection.Database;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.persistence.DaoConfig;
@@ -78,6 +80,8 @@ public abstract class AbstractJdbcService implements IService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
 	protected SqlMapClient sqlMapper;
+	
+	private Class<IBean> beanClass;
 
 	public abstract String getRequestNameForList();
 
@@ -90,8 +94,15 @@ public abstract class AbstractJdbcService implements IService {
 		sqlMapper = DaoConfig.getSqlMapClient(databaseProps);
 	}
 
-	public AbstractJdbcService(Database destinationService) throws LscServiceConfigurationException {
-		sqlMapper = DaoConfig.getSqlMapClient((org.lsc.configuration.objects.connection.Database)destinationService.getConnection());
+	@SuppressWarnings("unchecked")
+	public AbstractJdbcService(Database destinationConnection, String beanClassname) throws LscServiceConfigurationException {
+		sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
+		
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(beanClassname);
+		} catch (ClassNotFoundException e) {
+			throw new LscServiceConfigurationException(e);
+		}
 	}
 
 	/**
@@ -165,4 +176,48 @@ public abstract class AbstractJdbcService implements IService {
 		}
 		return key;
 	}
+	
+	/**
+	 * Override default AbstractJdbcSrcService to get a SimpleBean
+	 * TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
+	 * @throws LscServiceException 
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public IBean getBean(String id, LscAttributes attributes, boolean fromSource) throws LscServiceException {
+		IBean srcBean = null;
+		try {
+			srcBean = beanClass.newInstance();
+			Map<String, Object> attributeMap = attributes.getAttributes();
+			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
+			if(records.size() > 1) {
+				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
+						"For id=" + attributeMap + ", there are " + records.size() + " records !");
+			} else if (records.size() == 0) {
+				return null;
+			}
+			Map<String, Object> record = (Map<String, Object>) records.get(0);
+			for(Entry<String, Object> entry: record.entrySet()) {
+				srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+			}
+			return srcBean;
+		} catch (InstantiationException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+					beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
+		} catch (IllegalAccessException e) {
+			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
+					beanClass.getName(), e.toString());
+			LOGGER.debug(e.toString(), e);
+		} catch (SQLException e) {
+			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
+			LOGGER.debug(e.toString(), e);
+			// TODO This SQLException may mean we lost the connection to the DB
+			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
+			throw new LscServiceException(new CommunicationException(e.getMessage()));
+		}
+		return null;
+	}
+
+
 }

@@ -53,6 +53,7 @@ import java.util.Set;
 
 import org.lsc.LscModificationType;
 import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.services.DstDatabase;
 import org.lsc.configuration.objects.services.DstLdap;
 import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
 
@@ -112,7 +113,12 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public List<String> getWriteAttributes() {
-		return Arrays.asList(((DstLdap)task.getDestinationService()).getFetchedAttributes());
+		if(task.getDestinationService() instanceof DstLdap) {
+			return Arrays.asList(((DstLdap)task.getDestinationService()).getFetchedAttributes());
+		} else if (task.getDestinationService() instanceof DstDatabase) {
+			return ((DstDatabase)task.getDestinationService()).getFetchedAttributes();
+		}
+		return new ArrayList<String>();
 	}
 
 	@Override

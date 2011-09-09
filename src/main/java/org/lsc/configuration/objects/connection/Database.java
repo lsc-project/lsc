@@ -45,10 +45,13 @@
  */
 package org.lsc.configuration.objects.connection;
 
+import java.util.Map;
+
 import org.apache.tapestry5.beaneditor.Validate;
 import org.lsc.configuration.objects.AuthenticatedConnection;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  *
@@ -68,9 +71,12 @@ public class Database extends AuthenticatedConnection {
 		this.driver = driver;
 	}
 
+	@XStreamOmitField
+	private Map<String, String> otherSettings;
+
 	public Class<?> getService(boolean isSource) {
 		if(isSource) {
-			return org.lsc.configuration.objects.services.Database.class;
+			return org.lsc.configuration.objects.services.SrcDatabase.class;
 		} else {
 			return null;
 		}
@@ -80,4 +86,18 @@ public class Database extends AuthenticatedConnection {
 	public String getConnectionTypeName() {
 		return "Database connection";
 	}
+	
+	public void setOtherSetting(String name, String value) {
+		otherSettings.put(name, value);
+	}
+	
+	public String getOtherSetting(String key) {
+		return getOtherSetting(key, null);
+	}
+
+	public String getOtherSetting(String key, String defaultValue) {
+		return (otherSettings != null && otherSettings.containsKey(key) ? otherSettings.get(key) : defaultValue);
+	}
+
 }
+

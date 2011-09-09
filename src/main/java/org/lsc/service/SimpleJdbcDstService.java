@@ -48,31 +48,28 @@ package org.lsc.service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.lsc.Configuration;
-import org.lsc.LscAttributes;
+import org.lsc.IWritableService;
+import org.lsc.LscAttributeModification;
+import org.lsc.LscModifications;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.connection.Database;
-import org.lsc.configuration.objects.services.SrcDatabase;
-import org.lsc.exception.LscConfigurationException;
+import org.lsc.configuration.objects.services.DstDatabase;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
 
 /**
- * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
- *
+ * This class is a Database Service destination service
+ * 
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynchronousService {
+public class SimpleJdbcDstService extends AbstractJdbcService implements IWritableService {
 
-	private final String requestNameForList;
-	private final String requestNameForNextId;
-	private final String requestNameForObject;
-	
-	private int interval;
+	private DstDatabase serviceConf;
 
 	/**
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
@@ -83,27 +80,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * @throws LscServiceInitializationException 
 	 */
 	@Deprecated
-	public SimpleJdbcSrcService(Properties props, String beanClassName) throws LscServiceException {
-		super(Configuration.getAsProperties("src.database"));
-		requestNameForList = props.getProperty("requestNameForList");
-		requestNameForObject = props.getProperty("requestNameForObject");
-		requestNameForNextId = props.getProperty("requestNameForNextId");
-		
-		try {
-			// check that we have all parameters, or abort
-			Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
-			Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
-			
-			if(props.getProperty("interval") != null) {
-				interval = Integer.parseInt(props.getProperty("interval"));
-			} else {
-				interval = -1;
-			}
-		} catch (NumberFormatException e) {
-			throw new LscServiceInitializationException(e);
-		} catch (LscConfigurationException e) {
-			throw new LscServiceConfigurationException(e);
-		}
+	public SimpleJdbcDstService(Properties props, String beanClassName) throws LscServiceException {
+		super(props);
+		throw new LscServiceConfigurationException("Unsupported ! Please convert your configuration to XML.");
 	}
 
 	/**
@@ -114,14 +93,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * 				and load settings 
 	 * @throws LscServiceInitializationException 
 	 */
-	public SimpleJdbcSrcService(final Task task) throws LscServiceException {
-		super((Database)task.getSourceService().getConnection(), task.getBean());
-		SrcDatabase serviceConf = (SrcDatabase)task.getSourceService();
-		requestNameForList = serviceConf.getRequestNameForList();
-		requestNameForObject = serviceConf.getRequestNameForObject();
-		requestNameForNextId = serviceConf.getRequestNameForNextId();
-		
-		interval = serviceConf.getInterval();
+	public SimpleJdbcDstService(final Task task) throws LscServiceException {
+		super((Database)task.getDestinationService().getConnection(), task.getBean());
+		serviceConf = (DstDatabase)task.getDestinationService();
 	}
 
 	/* (non-Javadoc)
@@ -129,7 +103,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 */
 	@Override
 	public String getRequestNameForList() {
-		return requestNameForList;
+		return serviceConf.getRequestNameForList();
 	}
 
 	/* (non-Javadoc)
@@ -137,7 +111,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 */
 	@Override
 	public String getRequestNameForObject() {
-		return requestNameForObject;
+		return serviceConf.getRequestNameForObject();
 	}
 
 	/* (non-Javadoc)
@@ -145,29 +119,49 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 */
 	@Override
 	public String getRequestNameForNextId() {
-		return requestNameForNextId;
-	}
-
-	static int count = 0;
-
-	@SuppressWarnings("unchecked")
-	public Entry<String, LscAttributes> getNextId() {
-		Map<String, Object> idMap;
-		try {
-			idMap = (Map<String, Object>) sqlMapper.queryForObject(getRequestNameForNextId());
-			String key = getMapKey(idMap, count++);
-			Map<String, LscAttributes> ret = new HashMap<String, LscAttributes>();
-			ret.put(key, new LscAttributes(idMap));
-			return ret.entrySet().iterator().next();
-		} catch (SQLException e) {
-			LOGGER.warn("Error while looking for next entry ({})", e);
-			LOGGER.debug(e.toString(), e);
-		}
-		
 		return null;
 	}
-	
-	public long getInterval() {
-		return interval;
+
+	@Override
+	public boolean apply(LscModifications lm) throws LscServiceException {
+		Map<String, Object> attributeMap = getAttributesMap(lm.getLscAttributeModifications());
+		try {
+			sqlMapper.startTransaction();
+			switch(lm.getOperation()) {
+			case CHANGE_ID:
+				// Silently return without doing anything
+				break;
+			case CREATE_OBJECT:
+				sqlMapper.insert(serviceConf.getRequestNameForInsert(), attributeMap);
+				break;
+			case DELETE_OBJECT:
+				sqlMapper.delete(serviceConf.getRequestNameForDelete(), attributeMap);
+				break;
+			case UPDATE_OBJECT:
+				sqlMapper.update(serviceConf.getRequestNameForUpdate(), attributeMap);
+			}
+			sqlMapper.commitTransaction();
+		} catch (SQLException e) {
+			LOGGER.error(e.toString(), e);
+			return false;
+		} finally {
+			try {
+				sqlMapper.endTransaction();
+			} catch (SQLException e) {
+				LOGGER.error(e.toString(), e);
+				return false;
+			}
+		}
+		return true;
 	}
+
+	private Map<String, Object> getAttributesMap(
+			List<LscAttributeModification> lscAttributeModifications) {
+		Map<String, Object> values = new HashMap<String, Object>();
+		for(LscAttributeModification lam : lscAttributeModifications) {
+			values.put(lam.getAttributeName(), lam.getValues().get(0));
+		}
+		return values;
+	}
+	
 }

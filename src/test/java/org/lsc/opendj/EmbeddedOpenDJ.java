@@ -178,8 +178,6 @@ public final class EmbeddedOpenDJ {
     /**
      * Sets the system context root to null.
      * @param reason Message to log when shutting down
-     * 
-     * @see junit.framework.TestCase#tearDown()
      */
     public static void shutdownServer(String reason) {
         if (SERVER_STARTED) {

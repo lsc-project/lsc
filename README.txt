@@ -23,17 +23,17 @@ LSC is an open source project written in Java, available under the BSD license.
 Make it possible: The main goal is to provide a simple and efficient way of
 synchronizing any data source to a LDAP directory quickly.
 
-Make it stable and safe: Many companies use home-grown scripts for this kind of
-synchronization. LSC is an open source tool, and all the bugs you might write in
-your scripts have been fixed already (and a few more). The code is in use
-worldwide and is heavily tested. Simply put, LSC is about not reinventing the
-wheel to synchronize data.
+Make it stable and safe: Many companies use home-grown scripts for this kind
+of synchronization. LSC is an open source tool, and all the bugs you might
+write in your scripts have been fixed already (and a few more). The code is in
+use worldwide and is heavily tested. Simply put, LSC is about not reinventing 
+the wheel to synchronize data.
 
 Make it faster and simpler: The added-value of LSC resides in the focus on
 identity management tools - common transformations and directory-specific
 behaviour come as part of the software. These functions are extensible to
-include your own, to integrate into your existing infrastructure. Save time, by
-reusing!
+include your own, to integrate into your existing infrastructure. Save time,
+by reusing!
 
 
 ===== Feature overview =====
@@ -48,8 +48,8 @@ reusing!
 * Simple wrapper shell scripts are provided, to ease use and system integration
 * Runs on any Java-enabled platform - tested on Windows, Linux and MacOS X
 * Simple attribute mapping from source to destination
-* Three policies to update attributes, including forcing values, non-destructive
-  updates and merging
+* Three policies to update attributes, including forcing values, 
+  non-destructive updates and merging
 * Advanced attribute manipulation via a built-in JavaScript engine
 * Predefined libraries for use in JavaScript attribute manipulation:
 	- LDAP server tools: standard bind operation can be checked on any

@@ -198,8 +198,13 @@ public abstract class AbstractJdbcService implements IService {
 			}
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
-				srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				if(entry.getValue() != null) {
+					srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+				} else {
+					srcBean.setAttribute(new BasicAttribute(entry.getKey()));
+				}
 			}
+			srcBean.setDistinguishedName(id);
 			return srcBean;
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",

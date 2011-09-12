@@ -31,6 +31,7 @@ objectClass: top
 sn: Test 00000001
 cn: Test 00000001
 userPassword: secret
+mail: test@lsc-project.org
 
 dn: ou=Test Data,dc=lsc-project,dc=org
 ou: Test Data

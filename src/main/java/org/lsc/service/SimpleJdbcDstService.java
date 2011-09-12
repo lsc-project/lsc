@@ -132,13 +132,19 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 				// Silently return without doing anything
 				break;
 			case CREATE_OBJECT:
-				sqlMapper.insert(serviceConf.getRequestNameForInsert(), attributeMap);
+				for(String request: serviceConf.getRequestNameForInsert()) {
+					sqlMapper.insert(request, attributeMap);
+				}
 				break;
 			case DELETE_OBJECT:
-				sqlMapper.delete(serviceConf.getRequestNameForDelete(), attributeMap);
+				for(String request: serviceConf.getRequestNameForDelete()) {
+					sqlMapper.delete(request, attributeMap);
+				}
 				break;
 			case UPDATE_OBJECT:
-				sqlMapper.update(serviceConf.getRequestNameForUpdate(), attributeMap);
+				for(String request: serviceConf.getRequestNameForUpdate()) {
+					sqlMapper.update(request, attributeMap);
+				}
 			}
 			sqlMapper.commitTransaction();
 		} catch (SQLException e) {
@@ -159,7 +165,9 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 			List<LscAttributeModification> lscAttributeModifications) {
 		Map<String, Object> values = new HashMap<String, Object>();
 		for(LscAttributeModification lam : lscAttributeModifications) {
-			values.put(lam.getAttributeName(), lam.getValues().get(0));
+			if(lam.getValues().size() > 0) {
+				values.put(lam.getAttributeName(), lam.getValues().get(0));
+			}
 		}
 		return values;
 	}

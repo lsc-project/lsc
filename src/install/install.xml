@@ -3,17 +3,24 @@
 <installation version="1.0">
 
 	<info>
-		<appname>LSC</appname>
+		<appname>${project.name}</appname>
 		<appversion>@{project.version}</appversion>
+		<appsubpath>LSC</appsubpath>
 		<url>@{project.url}</url>
+		<appsubpath>LSC</appsubpath>
 		<uninstaller name="uninstall.jar" path="${INSTALL_PATH}" write="yes" />
-		<javaversion>1.5</javaversion>
+		<javaversion>1.6</javaversion>
 		<requiresjdk>no</requiresjdk>
+		<summarylogfilepath>$INSTALL_PATH/install-log.log</summarylogfilepath>
 	</info>
 
 	<guiprefs width="700" height="480" resizable="yes">
 		<laf name="kunststoff">
 			<os family="unix" />
+		</laf>
+		<laf name="looks">
+			<os family="windows" />
+			<param name="variant" value="windows" />
 		</laf>
 		<modifier key="useHeadingPanel" value="yes" />
 		<modifier key="useHeadingForSummary" value="yes" />

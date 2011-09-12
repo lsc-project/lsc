@@ -106,15 +106,6 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
-<!--		<fileSet>
-			<directory>src/install</directory>
-			<includes>
-				<include>install-help.html</include>
-			</includes>
-			<outputDirectory>doc</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>-->
 	</fileSets>
 
 	<!-- Include all runtime dependencies of the project -->

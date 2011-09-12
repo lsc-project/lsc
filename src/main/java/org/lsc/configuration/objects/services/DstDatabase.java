@@ -54,6 +54,8 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.persistence.DaoConfig;
 import org.lsc.service.SimpleJdbcDstService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.engine.impl.SqlMapClientImpl;
@@ -67,6 +69,8 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("databaseDestinationService")
 public class DstDatabase extends Service {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DstDatabase.class);
+
 	/** Contains the name of the SQL request to get an object */
 	@Validate("required")
 	protected String requestNameForObject;
@@ -75,15 +79,18 @@ public class DstDatabase extends Service {
 	@Validate("required")
 	protected String requestNameForList;
 	
-	/** Contains the name of the SQL request to execute to add a new record */
-	protected String requestNameForInsert;
+	/** Contains the comma separated list of the name of the SQL requests to execute to add a new record */
+	protected List<String> requestsNameForInsert;
 	
-	/** Contains the name of the SQL request to execute to update an existing record */
-	protected String requestNameForUpdate;
+	/** Contains the comma separated list of the name of the SQL requests to execute to update an existing record */
+	protected List<String> requestsNameForUpdate;
 	
-	/** Contains the name of the SQL request to execute to delete an existing record */
-	protected String requestNameForDelete;
-	
+	/** Contains the comma separated list of the name of the SQL requests to execute to delete an existing record */
+	protected List<String> requestsNameForDelete;
+
+	/** Fetched attributes name cache */
+	private List<String> attributesNameCache;
+
 	@Override
 	public Class<?> getImplementation() {
 		return SimpleJdbcDstService.class;
@@ -105,28 +112,28 @@ public class DstDatabase extends Service {
 		this.requestNameForList = requestNameForList;
 	}
 	
-	public String getRequestNameForInsert() {
-		return requestNameForInsert;
+	public List<String> getRequestNameForInsert() {
+		return requestsNameForInsert;
 	}
 
-	public void setRequestNameForInsert(String requestNameForInsert) {
-		this.requestNameForInsert = requestNameForInsert;
+	public void setRequestNameForInsert(List<String> requestsNameForInsert) {
+		this.requestsNameForInsert = requestsNameForInsert;
 	}
 
-	public String getRequestNameForUpdate() {
-		return requestNameForUpdate;
+	public List<String> getRequestNameForUpdate() {
+		return requestsNameForUpdate;
 	}
 
-	public void setRequestNameForUpdate(String requestNameForUpdate) {
-		this.requestNameForUpdate = requestNameForUpdate;
+	public void setRequestNameForUpdate(List<String> requestsNameForUpdate) {
+		this.requestsNameForUpdate = requestsNameForUpdate;
 	}
 
-	public String getRequestNameForDelete() {
-		return requestNameForDelete;
+	public List<String> getRequestNameForDelete() {
+		return requestsNameForDelete;
 	}
 
-	public void setRequestNameForDelete(String requestNameForDelete) {
-		this.requestNameForDelete = requestNameForDelete;
+	public void setRequestNameForDelete(List<String> requestsNameForDelete) {
+		this.requestsNameForDelete = requestsNameForDelete;
 	}
 
 	@Override
@@ -146,21 +153,25 @@ public class DstDatabase extends Service {
 		}
 	}
 
-
 	public List<String> getFetchedAttributes() {
+		if(attributesNameCache != null && attributesNameCache.size() > 0) {
+			return attributesNameCache;
+		}
+		attributesNameCache = new ArrayList<String>();
 		SqlMapClient sqlMapper = null;
-		List<String> attributesName = new ArrayList<String>();
 		try {
 			sqlMapper = DaoConfig.getSqlMapClient((org.lsc.configuration.objects.connection.Database)this.getConnection());
 			if(sqlMapper instanceof SqlMapClientImpl) {
-				for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(this.getRequestNameForInsert()).getParameterMap().getParameterMappings()) {
-					attributesName.add(pm.getPropertyName());
+				for(String request: this.getRequestNameForInsert()) {
+					for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
+						attributesNameCache.add(pm.getPropertyName());
+					}
 				}
 			}
 		} catch (LscServiceConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("Error while looking for fetched attributes through JDBC destination service: " + e.toString(), e);
+			return null;
 		}
-		return attributesName;
+		return attributesNameCache;
 	}
 }

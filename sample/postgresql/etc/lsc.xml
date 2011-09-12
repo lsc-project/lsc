@@ -1,0 +1,79 @@
+<?xml version="1.0" ?>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
+  <connections id="2">
+    <connection class="ldapConnection" id="3">
+      <id>ldap-src-conn</id>
+      <url>ldap://127.0.0.1:33389/dc=lsc-project,dc=org</url>
+      <username>cn=Directory Manager</username>
+      <password>secret</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+    </connection>
+    <connection class="databaseConnection" id="4">
+      <id>ldap-dst-conn</id>
+      <url>jdbc:postgresql://127.0.0.1:5432/lsc</url>
+      <username>lsc</username>
+      <password>lsc</password>
+      <driver>org.postgresql.Driver</driver>
+    </connection>
+  </connections>
+  <audits id="5">
+	<audit class="csvAudit">
+		<name>csv</name>
+		<operations>create, delete</operations>
+		<attributes>cn, dn</attributes>
+		<separator>;</separator>
+		<append>true</append>
+	</audit>
+	<audit class="ldifAudit">
+		<name>ldif</name>
+		<append>false</append>
+	</audit>
+  </audits>
+  <tasks id="6">
+    <task id="7">
+      <name>People</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <sourceService class="ldapSourceService" id="11">
+        <name>openldap-source-service</name>
+        <!-- <serverType>OpenLDAP</serverType> -->
+        <connection reference="3" />
+        <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>mail</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>userPassword</string>
+          <string>objectClass</string>
+          <string>uid</string>
+          <string>mail</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
+        <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
+      </sourceService>
+      <destinationService class="databaseDestinationService" id="8">
+        <name>opends-dst-service</name>
+        <connection reference="4" />
+        <requestNameForObject>getInetOrgPerson</requestNameForObject>
+        <requestNameForList>getInetOrgPersonList</requestNameForList>
+        <requestsNameForInsert><string>insertInetOrgPerson</string></requestsNameForInsert>
+        <requestsNameForUpdate><string>updateInetOrgPerson</string></requestsNameForUpdate>
+        <requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
+      </destinationService>
+      <syncOptions class="propertiesBasedSyncOptions" id="12">
+        <conditions id="13"></conditions>
+        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>;</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+      </syncOptions>
+    </task>
+  </tasks>
+</lsc>

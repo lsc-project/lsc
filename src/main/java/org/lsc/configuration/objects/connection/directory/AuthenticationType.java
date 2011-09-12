@@ -51,11 +51,23 @@ package org.lsc.configuration.objects.connection.directory;
  */
 public enum AuthenticationType {
 	/** To use with a bind distinguish name and a bind password*/
-	SIMPLE,
+	SIMPLE("SIMPLE"),
 	/** To use with external, GSSAPPI or other delegated authentication methods */
-	SASL,
+	SASL("SASL"),
 	/** To use to bind anonymously to the directory */
-	ANONYMOUS,
+	ANONYMOUS("ANONYMOUS"),
+	/** To use to bind with DIGEST-MD6 method to the directory */
+	DIGEST_MD5("DIGEST-MD5"),
 	/** SASL Delegated authentication, used for Unix Kerberos and Active Directory */
-	GSSAPI,
-}
+	GSSAPI("GSSAPI");
+
+
+	private String value;
+	
+	AuthenticationType (String value) {
+		this.value = value;	
+	}
+	
+	public String getValue() {
+		return value;
+	}}

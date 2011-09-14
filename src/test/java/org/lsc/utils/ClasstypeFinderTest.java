@@ -15,7 +15,7 @@ public class ClasstypeFinderTest {
 				new File(this.getClass().getClassLoader().getResource(".").getFile())
 		};
 		ClasstypeFinder.getInstance().loadClasspath(cp);
-		Assert.assertNotNull(ClasstypeFinder.getInstance().findEquivalence("JdbcService", IService.class));
+		Assert.assertNotNull(ClasstypeFinder.getInstance().findEquivalence("SimpleJdbcDstService", IService.class));
 	}
 	
 }

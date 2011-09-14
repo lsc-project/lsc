@@ -233,11 +233,11 @@ run_java_command()
 	# check if we have java executable
 	get_java
 
-	for jar in "$SAMPLE_HOME"/../lib/*.jar; do
+	for jar in "$SAMPLE_HOME"/../../lib/*.jar; do
 		LDAPCP="$LDAPCP:$jar"
 	done
 
-	for jar in "$SAMPLE_HOME"/lib/*.jar; do
+	for jar in "$SAMPLE_HOME"/../lib/*.jar; do
 		LDAPCP="$LDAPCP:$jar"
 	done
 
@@ -252,11 +252,11 @@ run_java_command()
 
 start_ldap() {
 	echo "Starting LDAP server on ldap://localhost:33389/ ..."
-	run_java_command "org.lsc.opends.LdapServer -a -f $SAMPLE_CONFIG_DIR"
+	run_java_command "org.lsc.opendj.LdapServer -a -f $SAMPLE_CONFIG_DIR"
 }
 
 stop_ldap() {
-	run_java_command "org.lsc.opends.LdapServer -o -f $SAMPLE_CONFIG_DIR"
+	run_java_command "org.lsc.opendj.LdapServer -o -f $SAMPLE_CONFIG_DIR"
 }
 
 run() {
@@ -333,8 +333,8 @@ case "$1" in
     echo "   --import <file> [<separator>]    Import data from CSV file"
     echo "   --show    Show data from database"
     echo "   --drop    Drop the table $HSQLDB_TABLE from database"
-    echo "   --start-ldap-server    Launch an embedded OpenDS LDAP server"
-    echo "   --stop-ldap-server     Halt an embedded OpenDS LDAP server"
+    echo "   --start-ldap-server    Launch an embedded OpenDJ LDAP server"
+    echo "   --stop-ldap-server     Halt an embedded OpenDJ LDAP server"
     echo "   --run     Run the synchronization task"
 	echo "   --clean   Remove all files from disk"
     echo "   --help    Print informations"
@@ -368,7 +368,7 @@ for action in $ACTIONS; do
 	  ;;
     "cleandata")
       hsqldb_cleanData
-	  rm -rf /tmp/opends-test
+	  rm -rf /tmp/opendj-test
       ;;
 
   esac

@@ -70,7 +70,7 @@
       </destinationService>
       <syncOptions class="propertiesBasedSyncOptions" id="12">
         <conditions id="13"></conditions>
-        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>srcBean.getDN()</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
       </syncOptions>

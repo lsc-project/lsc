@@ -3,7 +3,8 @@
   <connections id="2">
     <connection class="nisConnection" id="3">
       <id>nis-src-conn</id>
-      <url>nis://127.0.0.1/lsc-project.org</url>
+<!--       <url>nis://NIS-SERVER-ADDRESS/lsc-project.org</url> -->
+      <url>nis://192.168.18.128/lsc-project.org</url>
     </connection>
     <connection class="ldapConnection" id="4">
       <id>ldap-dst-conn</id>
@@ -34,7 +35,7 @@
   </audits>
   <tasks id="6">
     <task id="7">
-      <name>People</name>
+      <name>passwd</name>
       <bean>org.lsc.beans.SimpleBean</bean>
       <sourceService class="nisSourceService" id="11">
         <name>nis-source-service</name>
@@ -62,9 +63,39 @@
       </destinationService>
       <syncOptions class="propertiesBasedSyncOptions" id="12">
         <conditions id="13"></conditions>
-        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("uid") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
+        <attribute id="23">
+          <name>mail</name>
+          <policy>FORCE</policy>
+          <forceValues id="25">
+            <string>srcBean.getAttributeFirstValueById("uid")</string>
+          </forceValues>
+        </attribute>
+        <attribute id="23">
+          <name>userPassword</name>
+          <policy>FORCE</policy>
+          <defaultValues id="24"></defaultValues>
+          <forceValues id="25">
+            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+          </forceValues>
+          <createValues id="26"></createValues>
+        </attribute>
+        <attribute id="23">
+          <name>objectClass</name>
+          <policy>KEEP</policy>
+          <createValues id="25">
+            <string>"inetOrgPerson"</string>
+          </createValues>
+        </attribute>
+        <attribute id="23">
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues id="25">
+            <string>srcBean.getAttributeFirstValueById("gecos")</string>
+          </forceValues>
+        </attribute>
       </syncOptions>
     </task>
   </tasks>

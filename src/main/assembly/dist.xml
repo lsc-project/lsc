@@ -72,7 +72,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>src/test/resources/etc/config</directory>
-			<outputDirectory>sample/etc/config</outputDirectory>
+			<outputDirectory>sample/hsqldb/etc/config</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -82,7 +82,7 @@
 				<include>logback-opends.xml</include>
 				<include>config</include>
 			</includes>
-			<outputDirectory>sample/etc</outputDirectory>
+			<outputDirectory>sample/hsqldb/etc</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -117,6 +117,7 @@
 				<exclude>junit:junit</exclude>
 				<exclude>org.forgerock.opendj:opendj-server</exclude>
 				<exclude>hsqldb:hsqldb</exclude>
+				<exclude>org.postgresql:postgresql</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
@@ -126,6 +127,7 @@
 			<includes>
 				<include>org.forgerock.opendj:opendj-server</include>
 				<include>hsqldb:hsqldb</include>
+				<include>org.postgresql:postgresql</include>
 				<!-- see also the tests jar included in a fileSet above -->
 			</includes>
 		</dependencySet>

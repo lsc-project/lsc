@@ -352,9 +352,6 @@
 		</profile>
 		<profile>
 			<id>opendj</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -362,7 +359,7 @@
 						<artifactId>build-helper-maven-plugin</artifactId>
 						<version>1.7</version>
 						<executions>
-							<execution>
+ 							<execution>
 								<id>add-source</id>
 								<phase>generate-sources</phase>
 								<goals>
@@ -378,14 +375,18 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+ 		<profile>
+			<id>postgresql</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.opends</groupId>
-					<artifactId>opends-core</artifactId>
-					<version>2.0</version>
-					<type>jar</type>
-					<scope>compile</scope>
-					<optional>false</optional>
+					<groupId>org.postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+					<version>8.4-702</version>
+					<scope>provided</scope>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -592,9 +593,6 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-		<!-- <dependency> <groupId>org.opends</groupId> <artifactId>opends-core</artifactId> 
-			<version>2.0</version> <type>jar</type> <scope>runtime</scope> <optional>false</optional> 
-			</dependency> -->
 		<dependency>
 			<groupId>org.forgerock.opendj</groupId>
 			<artifactId>opendj-server</artifactId>

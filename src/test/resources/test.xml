@@ -38,7 +38,7 @@
 	<audits>
 		<audit class="csvAudit" id="7">
 			<name>csvAudit</name>
-			<attributes>cn, sn, givenName</attributes>
+			<datasets>cn, sn, givenName</datasets>
 			<separator>;</separator>
 			<append>false</append>
 		</audit>
@@ -90,71 +90,59 @@
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</sourceService>
-			<syncOptions class="propertiesBasedSyncOptions" id="16">
-				<otherSettings id="17">
-					<entry>
-						<string>telephoneNumber.action</string>
-						<string>M</string>
-					</entry>
-					<entry>
-						<string>default.action</string>
-						<string>K</string>
-					</entry>
-					<entry>
-						<string>default.delimiter</string>
-						<string>,</string>
-					</entry>
-					<entry>
-						<string>objectclass.create_value</string>
-						<string>"inetOrgPerson"</string>
-					</entry>
-					<entry>
-						<string>telephoneNumber.create_value</string>
-						<string>"000000","11111"</string>
-					</entry>
-					<entry>
-						<string>initials.create_value</string>
-						<string>"cn=oops"</string>
-					</entry>
-					<entry>
-						<string>seeAlso.action</string>
-						<string>F</string>
-					</entry>
-					<entry>
-						<string>description.action</string>
-						<string>M</string>
-					</entry>
-					<entry>
-						<string>telephoneNumber.default_value</string>
-						<string>"123456","789987"</string>
-					</entry>
-					<entry>
-						<string>description.default_value</string>
-						<string>srcBean.getAttributeFirstValueById("userPassword")</string>
-					</entry>
-					<entry>
-						<string>userPassword.force_value</string>
-						<string>"secret" + srcBean.getAttributeFirstValueById("cn")</string>
-					</entry>
-					<entry>
-						<string>mail.create_value</string>
-						<string>"ok@domain.net"</string>
-					</entry>
-					<entry>
-						<string>userPassword.action</string>
-						<string>F</string>
-					</entry>
-					<entry>
-						<string>objectclass.action</string>
-						<string>M</string>
-					</entry>
-					<entry>
-						<string>objectclass.default_value</string>
+			<syncOptions class="propertiesBasedSyncOptions">
+		        <defaultPolicy>KEEP</defaultPolicy>
+		        <defaultDelimiter>,</defaultDelimiter>
+		        <dataset>
+		          <name>telephoneNumber</name>
+		          <policy>MERGE</policy>
+		          <defaultValues>
+		          	<string>"123456","789987"</string>
+		          </defaultValues>
+		          <createValues>
+		            <string>"000000","11111"</string>
+		          </createValues>
+		        </dataset>
+		        <dataset>
+		          <name>objectclass</name>
+		          <policy>MERGE</policy>
+		          <createValues>
+		            <string>"inetOrgPerson"</string>
+		          </createValues>
+		          <defaultValues>
 						<string>"person","top"</string>
-					</entry>
-				</otherSettings>
-				<defaultDelimiter>;</defaultDelimiter>
-				<defaultPolicy>FORCE</defaultPolicy>
+		          </defaultValues>
+		        </dataset>
+		        <dataset>
+		          <name>initials</name>
+		          <createValues>
+		            <string>"cn=oops"</string>
+		          </createValues>
+		        </dataset>
+		        <dataset>
+		          <name>seeAlso</name>
+		          <policy>FORCE</policy>
+		        </dataset>
+		        <dataset>
+		          <name>description</name>
+		          <policy>MERGE</policy>
+		          <defaultValues>
+		          	<string>srcBean.getAttributeFirstValueById("userPassword")</string>
+		          </defaultValues>
+		        </dataset>
+		        <dataset>
+		          <name>userPassword</name>
+		          <policy>FORCE</policy>
+		          <forceValues>
+		            <string>"secret" + srcBean.getAttributeFirstValueById("cn")</string>
+		          </forceValues>
+		        </dataset>
+		        <dataset>
+		          <name>mail</name>
+		          <createValues>
+		            <string>"ok@domain.net"</string>
+		          </createValues>
+		        </dataset>
 				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
 			</syncOptions>
 			<auditLog class="csvAudit" reference="7"/>
@@ -188,62 +176,53 @@
 				<requestNameForList>getListTestDb2Ldap</requestNameForList>
 			</sourceService>
 			<syncOptions class="propertiesBasedSyncOptions" id="26">
-				<otherSettings id="27">
-					<entry>
-						<string>telephoneNumber.action</string>
-						<string>M</string>
-					</entry>
-					<entry>
-						<string>default.action</string>
-						<string>K</string>
-					</entry>
-					<entry>
-						<string>default.delimiter</string>
-						<string>,</string>
-					</entry>
-					<entry>
-						<string>telephoneNumber.create_value</string>
-						<string>"000000","11111"</string>
-					</entry>
-					<entry>
-						<string>description.action</string>
-						<string>M</string>
-					</entry>
-					<entry>
-						<string>telephoneNumber.default_value</string>
-						<string>"123456","789987"</string>
-					</entry>
-					<entry>
-						<string>description.default_value</string>
-						<string>srcBean.getAttributeFirstValueById("userPassword")</string>
-					</entry>
-					<entry>
-						<string>cn.force_value</string>
-						<string>srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn")</string>
-					</entry>
-					<entry>
-						<string>userPassword.force_value</string>
-						<string>srcBean.getAttributeFirstValueById("password")</string>
-					</entry>
-					<entry>
-						<string>userPassword.action</string>
-						<string>F</string>
-					</entry>
-					<entry>
-						<string>cn.action</string>
-						<string>F</string>
-					</entry>
-					<entry>
-						<string>objectclass.action</string>
-						<string>F</string>
-					</entry>
-					<entry>
-						<string>objectclass.default_value</string>
+		        <defaultPolicy>KEEP</defaultPolicy>
+		        <defaultDelimiter>,</defaultDelimiter>
+		        <dataset>
+		          <name>telephoneNumber</name>
+		          <policy>MERGE</policy>
+		          <defaultValues>
+		          	<string>"123456","789987"</string>
+		          </defaultValues>
+		          <createValues>
+		            <string>"000000","11111"</string>
+		          </createValues>
+		        </dataset>
+		        <dataset>
+		          <name>objectclass</name>
+		          <policy>FORCE</policy>
+		          <defaultValues>
 						<string>"person","top","organizationalPerson","inetOrgPerson"</string>
-					</entry>
-				</otherSettings>
-				<defaultDelimiter>;</defaultDelimiter>
-				<defaultPolicy>FORCE</defaultPolicy>
+		          </defaultValues>
+		        </dataset>
+		        <dataset>
+		          <name>description</name>
+		          <policy>MERGE</policy>
+		          <defaultValues>
+		          	<string>srcBean.getAttributeFirstValueById("userPassword")</string>
+		          </defaultValues>
+		        </dataset>
+		        <dataset>
+		          <name>userPassword</name>
+		          <policy>FORCE</policy>
+		          <forceValues>
+		            <string>srcBean.getAttributeFirstValueById("password")</string>
+		          </forceValues>
+		        </dataset>
+		        <dataset>
+		          <name>mail</name>
+		          <createValues>
+		            <string>"ok@domain.net"</string>
+		          </createValues>
+		        </dataset>
+		        <dataset>
+		          <name>cn</name>
+		          <policy>FORCE</policy>
+		          <forceValues>
+		            <string>srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn")</string>
+		          </forceValues>
+		        </dataset>
+				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
 			</syncOptions>
 		</task>
 	</tasks>

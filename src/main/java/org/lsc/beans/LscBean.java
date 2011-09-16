@@ -201,7 +201,7 @@ public abstract class LscBean implements IBean {
 
 	public final List<String> getAttributeValuesById(final String id)
 				throws NamingException {
-		return getAttributeValuesById(id);
+		return getDatasetValuesById(id);
 	}
 	/**
 	 * Get the attributes name list.

@@ -76,10 +76,17 @@ import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang.StringUtils;
 import org.lsc.Configuration;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.configuration.objects.connection.directory.AuthenticationType;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.slf4j.Logger;
@@ -288,13 +295,32 @@ public final class JndiServices {
 		Properties props = new Properties();
 		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, connection.getFactory());
 		if(connection.getUsername() != null) {
-			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthenticationType().toString());
+			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthenticationType().getValue());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
 			if(connection.getAuthenticationType().equals(AuthenticationType.GSSAPI)) {
-				System.setProperty("javax.security.krb5.conf", new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
+				if(System.getProperty("java.security.krb5.conf") != null) {
+					throw new RuntimeException("Multiple Kerberos connections not supported (existing value: " 
+							+ System.getProperty("java.security.krb5.conf") + "). Need to set another LSC instance or unset system property !");
+				} else {
+					System.setProperty("java.security.krb5.conf", new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
+				}
+				if(System.getProperty("java.security.auth.login.config") != null) {
+					throw new RuntimeException("Multiple JAAS not supported (existing value: " 
+							+ System.getProperty("java.security.auth.login.config") + "). Need to set another LSC instance or unset system property !");
+				} else {
+					System.setProperty("java.security.auth.login.config" , new File(Configuration.getConfigurationDirectory(), "gsseg_jaas.conf").getAbsolutePath());
+				}
 				props.setProperty("javax.security.sasl.server.authentication", ""+connection.isSaslMutualAuthentication());
 //				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
-				props.put("javax.security.auth.useSubjectCredsOnly", "false");
+				props.put("javax.security.auth.useSubjectCredsOnly", "true");
+				props.put("com.sun.jndi.ldap.trace.ber", System.err); //debug trace
+				try {
+					LoginContext lc = new LoginContext(JndiServices.class.getName(), new KerberosCallbackHandler(connection.getUsername(), connection.getPassword()));
+					lc.login();
+				} catch (LoginException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				props.setProperty(DirContext.SECURITY_CREDENTIALS, connection.getPassword());
 			}
@@ -784,15 +810,15 @@ public final class JndiServices {
 	 * @return Map of DNs of all entries that are returned by the directory with an associated map of attribute names and values (never null)
 	 * @throws NamingException thrown if something goes wrong
 	 */
-	public Map<String, LscAttributes> getAttrsList(final String base,
+	public Map<String, LscDatasets> getAttrsList(final String base,
 					final String filter, final int scope, final List<String> attrsNames)
 					throws NamingException {
 
 		// sanity checks
-		String searchBase = base == null ? "" : base;
+		String searchBase = base == null ? "" : rewriteBase(base);
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
 
-		Map<String, LscAttributes> res = new HashMap<String, LscAttributes>();
+		Map<String, LscDatasets> res = new HashMap<String, LscDatasets>();
 
 		if (attrsNames == null || attrsNames.size() == 0) {
 			LOGGER.error("No attribute names to read! Check configuration.");
@@ -845,7 +871,7 @@ public final class JndiServices {
 							}
 						}
 
-						res.put(ldapResult.getNameInNamespace(), new LscAttributes(attrsValues));
+						res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
 					}
 				}
 				
@@ -925,5 +951,30 @@ public final class JndiServices {
 			}
 		}
 		return dn;
+	}
+}
+
+class KerberosCallbackHandler implements CallbackHandler {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(KerberosCallbackHandler.class);
+	private String user;
+	private String pass;
+	
+	public KerberosCallbackHandler(String user, String pass) {
+		this.user = user;
+		this.pass = pass;
+	}
+
+	public void handle(Callback[] cbs) throws IOException,
+			UnsupportedCallbackException {
+		for(Callback cb: cbs) {
+			if(cb instanceof NameCallback) {
+				((NameCallback)cb).setName(user);
+			} else if(cb instanceof PasswordCallback) {
+				((PasswordCallback)cb).setPassword(pass.toCharArray());
+			} else {
+				LOGGER.error("Unknown callback: " + cb.toString());
+			}
+		}
 	}
 }

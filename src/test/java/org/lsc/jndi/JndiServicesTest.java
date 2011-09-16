@@ -64,7 +64,7 @@ import javax.naming.directory.SearchControls;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.slf4j.Logger;
@@ -96,7 +96,7 @@ public class JndiServicesTest {
 
 	@Test
 	public final void testGetAttrList() throws NamingException {
-		Map<String, LscAttributes> values = null;
+		Map<String, LscDatasets> values = null;
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add("objectClass");
 		values = dstJndiServices.getAttrsList("",
@@ -144,7 +144,7 @@ public class JndiServicesTest {
 		String attrName = "description";
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add(attrName);
-		Map<String, LscAttributes> values = dstJndiServices.getAttrsList("ou=People",
+		Map<String, LscDatasets> values = dstJndiServices.getAttrsList("ou=People",
 						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
 		Attribute descAttr = new BasicAttribute(attrName);
 		String descValue = (String) values.get(values.keySet().iterator().next()).getStringValueAttribute(attrName);
@@ -187,13 +187,13 @@ public class JndiServicesTest {
 		LOGGER.debug("Counting all the directory entries ...");
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add(attrName);
-		Map<String, LscAttributes> results = dstJndiServices.
+		Map<String, LscDatasets> results = dstJndiServices.
 						getAttrsList("", attrName + "=*", SearchControls.ONELEVEL_SCOPE, attrsName);
 		Iterator<String> iter = results.keySet().iterator();
 		int i = 0;
 		for (; iter.hasNext(); i++) {
 			String key = (String) iter.next();
-			LscAttributes value = results.get(key);
+			LscDatasets value = results.get(key);
 			LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
 		}
 		LOGGER.debug(" Final count : {}", i);

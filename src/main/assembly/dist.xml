@@ -89,19 +89,15 @@
 		<fileSet>
 			<directory>doc/man</directory>
 			<includes>
-				<include>man1</include>
-				<include>man5</include>
+				<include>man1/*</include>
+				<include>man5/*</include>
 			</includes>
 			<outputDirectory>doc/man</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		<fileSet>
-			<directory>doc/man</directory>
-			<includes>
-				<include>html</include>
-				<include>man5</include>
-			</includes>
+			<directory>doc/man/html</directory>
 			<outputDirectory>doc/html</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>

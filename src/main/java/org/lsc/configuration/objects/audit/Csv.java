@@ -60,7 +60,7 @@ public class Csv extends Audit {
 	 * <separator>;</separator>
 	 * <append>true</append>
 	 */
-	private String attributes;
+	private String datasets;
 	
 	private String separator;
 
@@ -70,12 +70,12 @@ public class Csv extends Audit {
 
 	private String[] taskNames;
 
-	public String getAttributes() {
-		return attributes;
+	public String getDatasets() {
+		return datasets;
 	}
 
-	public void setAttributes(String attributes) {
-		this.attributes = attributes;
+	public void setDatasets(String datasets) {
+		this.datasets = datasets;
 	}
 
 	public String getSeparator() {

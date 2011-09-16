@@ -70,7 +70,7 @@ import org.lsc.configuration.objects.SyncOptions;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.security.Encryption;
 import org.lsc.configuration.objects.security.Security;
-import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
+import org.lsc.configuration.objects.syncoptions.PBSODataset;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.utils.ClasstypeFinder;
 import org.slf4j.Logger;
@@ -122,7 +122,7 @@ public class XmlConfigurationHelper {
 		List<Class<?>> annotatedClasses = new ArrayList<Class<?>>();
 		annotatedClasses.addAll(Arrays.asList(new Class<?>[] {
 				LscConfiguration.class, Task.class, Conditions.class, 
-				Security.class, Encryption.class, PBSOAttribute.class
+				Security.class, Encryption.class, PBSODataset.class
 		}));
 		LOGGER.info("Loading plugins ...");
 		ClasstypeFinder.getInstance().setupClasspath(new File(this.getClass().getResource("../../..").getFile()));

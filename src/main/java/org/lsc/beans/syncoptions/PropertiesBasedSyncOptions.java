@@ -55,7 +55,7 @@ import org.lsc.LscModificationType;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.services.DstDatabase;
 import org.lsc.configuration.objects.services.DstLdap;
-import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
+import org.lsc.configuration.objects.syncoptions.PBSODataset;
 
 /**
  * Synchronization options based on a properties file
@@ -81,12 +81,12 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 	
 	public final STATUS_TYPE getStatus(final String id, final String attributeName) {
-		STATUS_TYPE  statusType = conf.getAttribute(attributeName).getPolicy();
+		STATUS_TYPE  statusType = conf.getDataset(attributeName).getPolicy();
 		return (statusType == STATUS_TYPE.UNKNOWN ? conf.getDefaultPolicy() : statusType);
 	}
 
 	public final List<String> getDefaultValues(final String id, final String attributeName) {
-		List<String> values = conf.getAttribute(attributeName).getDefaultValues();
+		List<String> values = conf.getDataset(attributeName).getDefaultValues();
 		ArrayList<String> copy = null;
 		if (values != null && values.size() > 0) {
 			copy = new ArrayList<String>(values);
@@ -95,7 +95,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public final List<String> getCreateValues(final String id, final String attributeName) {
-		List<String> values = conf.getAttribute(attributeName).getCreateValues();
+		List<String> values = conf.getDataset(attributeName).getCreateValues();
 		ArrayList<String> copy = null;
 		if (values != null && values.size() > 0) {
 			copy = new ArrayList<String>(values);
@@ -104,7 +104,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public final List<String> getForceValues(final String id, final String attributeName) {
-		List<String> values = conf.getAttribute(attributeName).getForceValues();
+		List<String> values = conf.getDataset(attributeName).getForceValues();
 		ArrayList<String> copy = null;
 		if (values != null && values.size() > 0) {
 			copy = new ArrayList<String>(values);
@@ -124,7 +124,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSOAttribute attr : conf.getAttributes()) {
+		for(PBSODataset attr : conf.getDatasets()) {
 			if(!attr.getCreateValues().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
@@ -136,7 +136,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getDefaultValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSOAttribute attr : conf.getAttributes()) {
+		for(PBSODataset attr : conf.getDatasets()) {
 			if(!attr.getDefaultValues().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
@@ -148,7 +148,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getForceValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSOAttribute attr : conf.getAttributes()) {
+		for(PBSODataset attr : conf.getDatasets()) {
 			if(!attr.getForceValues().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}

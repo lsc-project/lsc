@@ -58,7 +58,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.services.Ldap;
@@ -130,7 +130,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned. 
 	 */
-	public IBean getBean(String dn, LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(String dn, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 
 		try {
 			SearchControls sc = new SearchControls();
@@ -181,7 +181,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
      * @throws NamingException 
      */
 	@SuppressWarnings("unchecked")
-	public Map<String, LscAttributes> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		List<String> idList = null;
 		try {
 			// get list of DNs
@@ -203,11 +203,11 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		 * since it may be important when cleaning by full DN (for different levels).
 		 * This is really an API bug, getListPivots() should return a List, not a Map.
 		 */
-		Map<String, LscAttributes> ids = new ListOrderedMap();
+		Map<String, LscDatasets> ids = new ListOrderedMap();
 
 		for (String dn : idList) {
 			String completedDn = jndiServices.completeDn(dn);
-			LscAttributes attrs = new LscAttributes();
+			LscDatasets attrs = new LscDatasets();
 			attrs.put("dn", completedDn);
 			ids.put(completedDn, attrs);
 		}

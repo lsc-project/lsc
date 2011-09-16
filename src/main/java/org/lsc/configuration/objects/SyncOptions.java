@@ -121,5 +121,5 @@ public abstract class SyncOptions {
 	 */
 	public abstract Class<? extends ISyncOptions> getImplementation();
 
-	public abstract void validate() throws LscConfigurationException;
+	public abstract void validate(Task task) throws LscConfigurationException;
 }

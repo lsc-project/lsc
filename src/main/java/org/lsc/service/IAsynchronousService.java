@@ -49,7 +49,7 @@ import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.exception.LscServiceException;
 
 /**
@@ -63,7 +63,7 @@ public interface IAsynchronousService extends IService {
      * @throws NamingException 
      * @throws LscServiceException 
      */
-	Entry<String, LscAttributes> getNextId() throws LscServiceException;
+	Entry<String, LscDatasets> getNextId() throws LscServiceException;
 
     /**
      * The delay in seconds to look for available updates

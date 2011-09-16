@@ -52,20 +52,20 @@ import java.util.Map;
 import org.lsc.utils.CaseIgnoreStringHashMap;
 
 /**
- * Class used to represent a set of attributes and their values.
+ * Class used to represent a set of datasets and their values.
  * 
  * @author rschermesser
  */
-public class LscAttributes {
+public class LscDatasets {
 
-	/** The heart of this class - a map of attribute names to values */
+	/** The heart of this class - a map of datasets names to values */
 	protected Map<String, Object> values;
 
-	public LscAttributes() {
+	public LscDatasets() {
 		values = new CaseIgnoreStringHashMap<Object>();
 	}
 
-	public LscAttributes(Map<String, ?> values) {
+	public LscDatasets(Map<String, ?> values) {
 		this.values = new CaseIgnoreStringHashMap<Object>(values);
 	}
 
@@ -101,15 +101,15 @@ public class LscAttributes {
 	}
 
 	/**
-	 * Get the attributes' values
+	 * Get the datasets' values
 	 * 
-	 * @return Map of the attributes, indexed by name
+	 * @return Map of the datasets, indexed by name
 	 */
-	public Map<String, Object> getAttributes() {
+	public Map<String, Object> getDatasets() {
 		return (Map<String, Object>) values;
 	}
 
-	public void setAttributes(Map<String, Object> values) {
+	public void setDatasets(Map<String, Object> values) {
 		this.values = values;
 	}
 

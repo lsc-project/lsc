@@ -298,7 +298,7 @@ public class Task {
 	public void validate() throws LscException {
 		sourceService.validate();
 		destinationService.validate();
-		syncOptions.validate();
+		syncOptions.validate(this);
 		for(Audit audit : getAudits()) {
 			audit.validate();
 		}

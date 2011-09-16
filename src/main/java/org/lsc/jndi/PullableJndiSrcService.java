@@ -52,7 +52,7 @@ import java.util.Map.Entry;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.configuration.objects.Task;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -74,7 +74,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 	/** This field is storing the last successful synchronization date */
 	private Date lastSuccessfulSync;
 	/** */
-	private Set<Entry<String, LscAttributes>> listPivots;
+	private Set<Entry<String, LscDatasets>> listPivots;
 	/** The filter to use to get partial updates
 	 * {0} will be replaced by the lastSuccessful synchronization date formatted according to dateFormat
 	 */
@@ -117,9 +117,9 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		}
 	}
 
-	public Entry<String, LscAttributes> getNextId() throws LscServiceException {
+	public Entry<String, LscDatasets> getNextId() throws LscServiceException {
 		if (listPivots != null && !listPivots.isEmpty()) {
-			Entry<String, LscAttributes> entry = listPivots.iterator().next();
+			Entry<String, LscDatasets> entry = listPivots.iterator().next();
 			listPivots.remove(entry);
 			if (listPivots.isEmpty()) {
 				listPivots = null;

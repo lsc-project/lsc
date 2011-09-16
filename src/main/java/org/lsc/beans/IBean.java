@@ -146,7 +146,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * 
 	 * @param dn The distinguishedName to set
 	 */
-	void setDistinguishedName(String dn);
+	void setDistinguishName(String dn);
 
 	/**
 	 * Generate the distinguish name according to the information on the bean.

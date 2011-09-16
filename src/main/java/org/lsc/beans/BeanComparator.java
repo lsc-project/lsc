@@ -58,8 +58,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 
 import org.lsc.Configuration;
-import org.lsc.LscAttributeModification;
-import org.lsc.LscAttributeModification.LscAttributeModificationType;
+import org.lsc.LscDatasetModification;
+import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.Task;
@@ -258,7 +258,7 @@ public final class BeanComparator {
 		LOGGER.debug("{} List of attributes considered for writing in destination: {}", logPrefix, writeAttributes);
 
 		// Iterate over attributes we may write
-		List<LscAttributeModification> modificationItems = new ArrayList<LscAttributeModification>();
+		List<LscDatasetModification> modificationItems = new ArrayList<LscDatasetModification>();
 		for (String attrName : writeAttributes) {
 			// Get attribute status type
 			STATUS_TYPE attrStatus = task.getSyncOptions().getStatus(id, attrName);
@@ -290,15 +290,15 @@ public final class BeanComparator {
 			}
 			
 			// What operation do we need to do on this attribute?
-			LscAttributeModificationType operationType = getRequiredOperationForAttribute(toSetAttrValues, dstAttrValues);
+			LscDatasetModificationType operationType = getRequiredOperationForAttribute(toSetAttrValues, dstAttrValues);
 
 			// Build the modification
-			LscAttributeModification mi = null;
+			LscDatasetModification mi = null;
 			switch (operationType) {
 				case DELETE_VALUES:
 					if (attrStatus == STATUS_TYPE.FORCE) {
 						LOGGER.debug("{} Deleting attribute  \"{}\"", logPrefix, attrName);
-						mi = new LscAttributeModification(operationType, attrName, new HashSet<Object>());
+						mi = new LscDatasetModification(operationType, attrName, new HashSet<Object>());
 					}
 
 					break;
@@ -314,10 +314,10 @@ public final class BeanComparator {
 						// - FORCE action is used;
 						// - A value is specified by the create_value parameter.
 						// So, instead of add the attribute, we replace it.
-						operationType = LscAttributeModificationType.REPLACE_VALUES;
+						operationType = LscDatasetModificationType.REPLACE_VALUES;
 					}
 
-					mi = new LscAttributeModification(operationType, attrName, toSetAttrValues);
+					mi = new LscDatasetModification(operationType, attrName, toSetAttrValues);
 
 					break;
 
@@ -326,7 +326,7 @@ public final class BeanComparator {
 						if (!SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues)) {
 							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
 											new Object[]{logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues});
-							mi = new LscAttributeModification(operationType, dstAttr.getID(), toSetAttrValues);
+							mi = new LscDatasetModification(operationType, dstAttr.getID(), toSetAttrValues);
 						}
 					} else if (attrStatus == STATUS_TYPE.MERGE) {
 						// check if there are any extra values to be added
@@ -335,7 +335,7 @@ public final class BeanComparator {
 						if (missingValues.size() > 0) {
 							LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
 											new Object[]{logPrefix, attrName, missingValues});
-							mi = new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, dstAttr.getID(), missingValues);
+							mi = new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, dstAttr.getID(), missingValues);
 						}
 					}
 
@@ -385,19 +385,19 @@ public final class BeanComparator {
 	 *            Target set of values
 	 * @param currentAttrValues
 	 *            Current set of values
-	 * @return Operation to perform: {@link LscAttributeModificationType} constants, or 0 for no operation.
+	 * @return Operation to perform: {@link LscDatasetModificationType} constants, or 0 for no operation.
 	 */
-	private static LscAttributeModificationType getRequiredOperationForAttribute (
+	private static LscDatasetModificationType getRequiredOperationForAttribute (
 					Set<Object> toSetAttrValues, Set<Object> currentAttrValues) {
 		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0) {
-			return LscAttributeModificationType.DELETE_VALUES;
+			return LscDatasetModificationType.DELETE_VALUES;
 		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0) {
-			return LscAttributeModificationType.ADD_VALUES;
+			return LscDatasetModificationType.ADD_VALUES;
 		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0) {
-			return LscAttributeModificationType.REPLACE_VALUES;
+			return LscDatasetModificationType.REPLACE_VALUES;
 		} else {
 //			LOGGER.warn("Check your default / create / force values because the expression has returned a null value !");
-			return LscAttributeModificationType.UNKNOWN;
+			return LscDatasetModificationType.UNKNOWN;
 		}
 	}
 
@@ -516,7 +516,7 @@ public final class BeanComparator {
 				if (task.getCustomLibrary() != null) {
 					table.put("custom", task.getCustomLibrary());
 				}
-				itmBean.setDistinguishedName(ScriptingEvaluator.evalToString(task, dn, table));
+				itmBean.setDistinguishName(ScriptingEvaluator.evalToString(task, dn, table));
 			}
 		}
 

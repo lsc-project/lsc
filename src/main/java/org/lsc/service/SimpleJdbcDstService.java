@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.lsc.IWritableService;
-import org.lsc.LscAttributeModification;
+import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.connection.Database;
@@ -162,9 +162,9 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	}
 
 	private Map<String, Object> getAttributesMap(
-			List<LscAttributeModification> lscAttributeModifications) {
+			List<LscDatasetModification> lscAttributeModifications) {
 		Map<String, Object> values = new HashMap<String, Object>();
-		for(LscAttributeModification lam : lscAttributeModifications) {
+		for(LscDatasetModification lam : lscAttributeModifications) {
 			if(lam.getValues().size() > 0) {
 				values.put(lam.getAttributeName(), lam.getValues().get(0));
 			}

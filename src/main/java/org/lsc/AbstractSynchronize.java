@@ -152,7 +152,7 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 
 		// Get list of all entries from the destination
-		Set<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscDatasets>> ids = null;
 		try {
 			ids = task.getDestinationService().getListPivots().entrySet();
 		} catch (LscServiceException e) {
@@ -178,7 +178,7 @@ public abstract class AbstractSynchronize {
 
 		// Loop on all entries in the destination and delete them if they're not
 		// found in the source
-		for (Entry<String, LscAttributes> id : ids) {
+		for (Entry<String, LscDatasets> id : ids) {
 			counter.incrementCountAll();
 
 			try {
@@ -295,7 +295,7 @@ public abstract class AbstractSynchronize {
 
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
-		Set<Entry<String, LscAttributes>> ids = null;
+		Set<Entry<String, LscDatasets>> ids = null;
 		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
@@ -318,7 +318,7 @@ public abstract class AbstractSynchronize {
 		 * Loop on all entries in the source and add or update them in the
 		 * destination
 		 */
-		for (Entry<String, LscAttributes> id : ids) {
+		for (Entry<String, LscDatasets> id : ids) {
 			threadPool.runTask(new SynchronizeTask(task, counter, this, id));
 		}
 		try {
@@ -401,7 +401,7 @@ public abstract class AbstractSynchronize {
 	 *            synchronization process name
 	 */
 	protected final void logActionError(final LscModifications lm,
-			final Entry<String, LscAttributes> identifier,
+			final Entry<String, LscDatasets> identifier,
 			final Exception except) {
 
 		LOGGER.error("Error while synchronizing ID {}: {}", (lm != null ? lm.getMainIdentifier() : identifier.getValue()), except.toString());
@@ -424,7 +424,7 @@ public abstract class AbstractSynchronize {
 	 *            synchronization process name
 	 */
 	protected final void logAction(final LscModifications lm,
-			final Entry<String, LscAttributes> id, final String syncName) {
+			final Entry<String, LscDatasets> id, final String syncName) {
 		switch (lm.getOperation()) {
 			case CREATE_OBJECT:
 				LSCStructuralLogger.DESTINATION.info("# Adding new object {} for {}", lm.getMainIdentifier(), syncName);
@@ -456,7 +456,7 @@ public abstract class AbstractSynchronize {
 	 * @param syncName
 	 */
 	protected final void logShouldAction(final LscModifications lm,
-			final Entry<String, LscAttributes> id, final String syncName) {
+			final Entry<String, LscDatasets> id, final String syncName) {
 		switch (lm.getOperation()) {
 			case CREATE_OBJECT:
 				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}", lm.getMainIdentifier());
@@ -567,12 +567,12 @@ class SynchronizeTask implements Runnable {
 	private String syncName;
 	private InfoCounter counter;
 	private AbstractSynchronize abstractSynchronize;
-	private Entry<String, LscAttributes> id;
+	private Entry<String, LscDatasets> id;
 	private Task task;
 
 	public SynchronizeTask(final Task task, InfoCounter counter,
 			AbstractSynchronize abstractSynchronize,
-			Entry<String, LscAttributes> id) {
+			Entry<String, LscDatasets> id) {
 		this.syncName = task.getName();
 		this.counter = counter;
 		this.task = task;
@@ -587,7 +587,7 @@ class SynchronizeTask implements Runnable {
 			final IService srcService, final IWritableService dstService,
 			final Object customLibrary, ISyncOptions syncOptions,
 			AbstractSynchronize abstractSynchronize,
-			Entry<String, LscAttributes> id) {
+			Entry<String, LscDatasets> id) {
 		this.syncName = syncName;
 		this.counter = counter;
 		this.abstractSynchronize = abstractSynchronize;
@@ -608,7 +608,7 @@ class SynchronizeTask implements Runnable {
 				IAsynchronousService aSrcService = (IAsynchronousService) task.getSourceService();
 				boolean interrupted = false;
 				while (!interrupted) {
-					Entry<String, LscAttributes> nextId = aSrcService.getNextId();
+					Entry<String, LscDatasets> nextId = aSrcService.getNextId();
 					if (nextId != null) {
 						run(nextId);
 					} else {
@@ -627,7 +627,7 @@ class SynchronizeTask implements Runnable {
 		}
 	}
 
-	public boolean run(Entry<String, LscAttributes> id) {
+	public boolean run(Entry<String, LscDatasets> id) {
 
 		LscModifications lm = null;
 		IBean dstBean = null;
@@ -743,7 +743,7 @@ class SynchronizeTask implements Runnable {
 		return abstractSynchronize;
 	}
 
-	public Entry<String, LscAttributes> getId() {
+	public Entry<String, LscDatasets> getId() {
 		return id;
 	}
 

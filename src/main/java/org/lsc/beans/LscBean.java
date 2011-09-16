@@ -87,16 +87,16 @@ public abstract class LscBean implements IBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LscBean.class);
 
 	/** The distinguished name. */
-	private String distinguishedName;
+	private String mainIdentifier;
 
 	/** The attributes map. */
-	private Map<String, Set<Object>> attrs;
+	private Map<String, Set<Object>> datasets;
 
 	/** Data schema related to this bean - must always be set just after initiating the bean */
 	private DataSchemaProvider dataSchemaProvider;
 
 	public LscBean() {
-		attrs = new HashMap<String, Set<Object>>();
+		datasets = new HashMap<String, Set<Object>>();
 	}
 
 	/**
@@ -105,22 +105,31 @@ public abstract class LscBean implements IBean {
 	 * @param id the name
 	 * @return the LDAP attribute
 	 */
-	public final Attribute getAttributeById(final String id) {
+	public final Attribute getDatasetById(final String id) {
 		// use lower case since attribute names are case-insensitive
-		return SetUtils.setToAttribute(id, attrs.get(id.toLowerCase()));
+		return SetUtils.setToAttribute(id, datasets.get(id.toLowerCase()));
 	}
 
+	@Deprecated
+	public final Attribute getAttributeById(final String id) {
+		return getDatasetById(id);
+	}
+	
 	/**
 	 * Get an attribute from its name as a Set.
 	 *
 	 * @param id the name
 	 * @return the LDAP attribute
 	 */
-	public final Set<Object> getAttributeAsSetById(final String id) {
+	public final Set<Object> getDatasetAsSetById(final String id) {
 		// use lower case since attribute names are case-insensitive
-		return attrs.get(id.toLowerCase());
+		return datasets.get(id.toLowerCase());
 	}
 
+	@Deprecated
+	public final Set<Object> getAttributeAsSetById(final String id) {
+		return getDatasetAsSetById(id);
+	}
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
 	 * 
@@ -133,7 +142,7 @@ public abstract class LscBean implements IBean {
 	 */
 	public final String getAttributeValueById(final String id)
 					throws NamingException {
-		LOGGER.warn("The method getAttributeValueById() is deprecated and will be removed in a future version of LSC. Please use getAttributeFirstValueById() instead.");
+		LOGGER.warn("The method getDatasetValueById() is deprecated and will be removed in a future version of LSC. Please use getAttributeFirstValueById() instead.");
 		return getAttributeFirstValueById(id);
 	}
 
@@ -145,12 +154,17 @@ public abstract class LscBean implements IBean {
 	 * @return String The first value of the attribute, or the empty string ("")
 	 * @throws NamingException
 	 */
-	public final String getAttributeFirstValueById(final String id)
+	public final String getDatasetFirstValueById(final String id)
 					throws NamingException {
 		List<String> allValues = getAttributeValuesById(id);
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
 
+	@Deprecated
+	public final String getAttributeFirstValueById(final String id)
+					throws NamingException {
+		return getDatasetFirstValueById(id);
+	}
 	/**
 	 * Get all values of an attribute from its name
 	 * 
@@ -159,11 +173,11 @@ public abstract class LscBean implements IBean {
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException
 	 */
-	public final List<String> getAttributeValuesById(final String id)
+	public final List<String> getDatasetValuesById(final String id)
 					throws NamingException {
 		List<String> resultsArray = new ArrayList<String>();
 
-		Set<Object> attributeValues = attrs.get(id.toLowerCase());
+		Set<Object> attributeValues = datasets.get(id.toLowerCase());
 
 		if (attributeValues != null) {
 			for (Object value : attributeValues) {
@@ -185,15 +199,22 @@ public abstract class LscBean implements IBean {
 		return resultsArray;
 	}
 
+	public final List<String> getAttributeValuesById(final String id)
+				throws NamingException {
+		return getAttributeValuesById(id);
+	}
 	/**
 	 * Get the attributes name list.
 	 *
 	 * @return the attributes list
 	 */
-	public final Set<String> getAttributesNames() {
-		return attrs.keySet();
+	public final Set<String> getDatasetsNames() {
+		return datasets.keySet();
 	}
 
+	public final Set<String> getAttributesNames() {
+		return getDatasetsNames();
+	}
 	/**
 	 * Set an attribute.
 	 * API CHANGE: Do nothing if attribute is empty
@@ -219,27 +240,37 @@ public abstract class LscBean implements IBean {
 	 * @param attrName The attribute name.
 	 * @param attrValues A set of values for the attribute.
 	 */
-	public final void setAttribute(String attrName, Set<Object> attrValues) {
+	public final void setDataset(String name, Set<Object> values) {
 		// use lower case since attribute names are case-insensitive
-		attrs.put(attrName.toLowerCase(), attrValues);
+		datasets.put(name.toLowerCase(), values);
 	}
 
+	@Deprecated
+	public final void setAttribute(String name, Set<Object> values) {
+		setDataset(name, values);
+	}
+	
 	/**
 	 * Default distinguished name getter.
 	 *
 	 * @return the distinguishedName
 	 */
+	public final String getMainIdentifier() {
+		return mainIdentifier;
+	}
+
+	@Deprecated
 	public final String getDistinguishedName() {
-		return distinguishedName;
+		return getMainIdentifier();
 	}
-
 	/**
 	 * Default distinguished name getter.
 	 *
 	 * @return the distinguishedName
 	 */
+	@Deprecated
 	public final String getDN() {
-		return getDistinguishedName();
+		return getMainIdentifier();
 	}
 
 
@@ -249,7 +280,7 @@ public abstract class LscBean implements IBean {
 	 * @return the distinguishedName
 	 */
 	public final String getFullDistinguishedName() {
-		String dn = getDistinguishedName();
+		String dn = getMainIdentifier();
 		if (!dn.endsWith("," + Configuration.DN_REAL_ROOT)) {
 			return dn + "," + Configuration.DN_REAL_ROOT;
 		} else {
@@ -262,16 +293,16 @@ public abstract class LscBean implements IBean {
 	 *
 	 * @param dn The distinguishedName to set
 	 */
-	public final void setDistinguishedName(final String dn) {
-		distinguishedName = null;
+	public final void setMainIdentifier(final String id) {
+		mainIdentifier = id;
+	}
+
+	public final void setDistinguishName(final String dn) {
 		if (dn != null) {
-			distinguishedName = (String) Rdn.unescapeValue(dn);
+			setMainIdentifier((String) Rdn.unescapeValue(dn));
 		}
 	}
-
-	public void generateDn() throws NamingException {
-	}
-
+	
 	/**
 	 * Bean pretty printer.
 	 *
@@ -280,10 +311,10 @@ public abstract class LscBean implements IBean {
 	@Override
 	public final String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("dn: ").append(distinguishedName).append('\n');
+		sb.append("id: ").append(mainIdentifier).append('\n');
 
-		for (String key : attrs.keySet()) {
-			Set<Object> values = attrs.get(key);
+		for (String key : datasets.keySet()) {
+			Set<Object> values = datasets.get(key);
 			if (values != null) {
 				sb.append("=> " + key);
 				for (Object value : values) {
@@ -304,7 +335,7 @@ public abstract class LscBean implements IBean {
 	public LscBean clone() throws CloneNotSupportedException {
 		try {
 			LscBean bean = (LscBean) this.getClass().newInstance();
-			bean.setDistinguishedName(this.getDistinguishedName());
+			bean.setDistinguishName(this.getDistinguishedName());
 
 			for (String attributeName : this.getAttributesNames()) {
 				bean.setAttribute(attributeName, this.getAttributeAsSetById(attributeName));
@@ -357,12 +388,12 @@ public abstract class LscBean implements IBean {
 
 				if ((baseDn != null) && (baseDn.length() > 0)) {
 					if (dn.length() > 0) {
-						ab.setDistinguishedName(dn + "," + baseDn);
+						ab.setDistinguishName(dn + "," + baseDn);
 					} else {
-						ab.setDistinguishedName(baseDn);
+						ab.setDistinguishName(baseDn);
 					}
 				} else {
-					ab.setDistinguishedName(dn);
+					ab.setDistinguishName(dn);
 				}
 
 				NamingEnumeration<?> ne = entry.getAttributes().getAll();

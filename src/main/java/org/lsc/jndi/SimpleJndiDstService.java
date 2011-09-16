@@ -56,7 +56,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.lsc.IWritableService;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.Task;
@@ -136,7 +136,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	public final IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		try {
 			SearchResult srObject = get(pivotName, pivotAttributes, true);
 			Method method = beanClass.getMethod("getInstance", 
@@ -176,7 +176,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if an error occurs while
 	 *             searching the directory.
 	 */
-	public Map<String, LscAttributes> getListPivots() throws LscServiceException  {
+	public Map<String, LscDatasets> getListPivots() throws LscServiceException  {
         try {
 			return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
 			        getAttrsId());

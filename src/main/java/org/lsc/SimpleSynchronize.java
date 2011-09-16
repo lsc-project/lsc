@@ -295,11 +295,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return cache.values().toArray(new Task[cache.values().size()]);
 	}
 
-	public final boolean launchById(String taskName, Map<String, LscAttributes> entries) {
+	public final boolean launchById(String taskName, Map<String, LscDatasets> entries) {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();
 		boolean status = true;
-		for(Entry<String, LscAttributes> entry : entries.entrySet()) {
+		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
 			if(!new SynchronizeTask(task, counter, this, entry).run(entry)) {
 				status = false;
 			}

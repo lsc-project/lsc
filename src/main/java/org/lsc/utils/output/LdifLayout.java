@@ -57,7 +57,7 @@ import javax.naming.NamingException;
 import javax.naming.ldap.LdapName;
 
 import org.apache.commons.codec.binary.Base64;
-import org.lsc.LscAttributeModification;
+import org.lsc.LscDatasetModification;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 
@@ -176,11 +176,11 @@ public class LdifLayout extends PatternLayout {
 	 *            is this a new entry
 	 * @return the string to log
 	 */
-	private static String listToLdif(final List<LscAttributeModification> modificationItems, final boolean addEntry) {
+	private static String listToLdif(final List<LscDatasetModification> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
 
-		for(LscAttributeModification mi: modificationItems) {
+		for(LscDatasetModification mi: modificationItems) {
 			try {
 				if (!addEntry) {
 					if (!first) {

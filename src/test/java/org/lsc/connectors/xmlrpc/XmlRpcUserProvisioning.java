@@ -55,8 +55,8 @@ import javax.naming.directory.Attribute;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.lsc.IWritableService;
-import org.lsc.LscAttributeModification;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasetModification;
+import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceException;
@@ -204,13 +204,13 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 	}
 
 	private List<Attribute> attributeModificationsToAttributes(
-			List<LscAttributeModification> lscAttributeModifications) {
+			List<LscDatasetModification> lscAttributeModifications) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService)
+	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService)
 			throws LscServiceException {
 		try {
 			get(pivotName);
@@ -221,11 +221,11 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 	}
 
 	@Override
-	public Map<String, LscAttributes> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
-			Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>();
+			Map<String, LscDatasets> ids = new HashMap<String, LscDatasets>();
 			for(String id : listIds()) {
-				ids.put(id, new LscAttributes());
+				ids.put(id, new LscDatasets());
 			}
 			return ids;
 		} catch(XmlRpcException e) {

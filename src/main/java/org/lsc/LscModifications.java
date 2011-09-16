@@ -64,7 +64,7 @@ public class LscModifications {
 	/** Operation must be DirContext. */
 	private LscModificationType operation;
 	/** This list contains attributes modifications. */
-	private List<LscAttributeModification> attributesModifications;
+	private List<LscDatasetModification> attributesModifications;
 	/** The task that these modifications concern */
 	private String taskName;
 
@@ -74,7 +74,7 @@ public class LscModifications {
 	 */
 	public LscModifications(final LscModificationType operation) {
 		this.operation = operation;
-		attributesModifications = new ArrayList<LscAttributeModification>();	
+		attributesModifications = new ArrayList<LscDatasetModification>();	
 	}
 
 	/**
@@ -86,14 +86,14 @@ public class LscModifications {
 	public LscModifications(final LscModificationType operation, String taskName) {
 		this.operation = operation;
 		this.taskName = taskName;
-		attributesModifications = new ArrayList<LscAttributeModification>();	
+		attributesModifications = new ArrayList<LscDatasetModification>();	
 	}
 
 	/**
 	 * Default modifications items getter.
 	 * @return the modifications items list
 	 */
-	public final List<LscAttributeModification> getLscAttributeModifications() {
+	public final List<LscDatasetModification> getLscAttributeModifications() {
 		return attributesModifications;
 	}
 
@@ -101,7 +101,7 @@ public class LscModifications {
 	 * Attribute modifications list setter.
 	 * @param attrsMod a list of LscAttributeModification objects
 	 */
-	public final void setLscAttributeModifications(final List<LscAttributeModification> attrsMod) {
+	public final void setLscAttributeModifications(final List<LscDatasetModification> attrsMod) {
 		attributesModifications = attrsMod;
 	}
 
@@ -160,10 +160,10 @@ public class LscModifications {
 	 */
 	public Map<String, List<Object>> getModificationsItemsByHash() {
 		HashMap<String, List<Object>> result = new HashMap<String, List<Object>>();
-		List<LscAttributeModification> mi = this.getLscAttributeModifications();
+		List<LscDatasetModification> mi = this.getLscAttributeModifications();
 
 		if (mi != null) {
-			for (LscAttributeModification attributeModification : mi) {
+			for (LscDatasetModification attributeModification : mi) {
 				result.put(attributeModification.getAttributeName().toLowerCase(), attributeModification.getValues());
 			}
 		}
@@ -190,7 +190,7 @@ public class LscModifications {
 		sb.append("mainid: ").append(getMainIdentifier()).append("\n");
 		if(getNewMainIdentifier() != null) { sb.append("newmainid: ").append(getNewMainIdentifier()).append("\n"); }
 		sb.append("operation: ").append(getOperation().toString()).append("\n");
-		for(LscAttributeModification lam: getLscAttributeModifications()) {
+		for(LscDatasetModification lam: getLscAttributeModifications()) {
 			sb.append(lam.getAttributeName()).append(": ").append(lam.getOperation().toString()).append("\n");
 			for(Object value: lam.getValues()) {
 				sb.append(" - ").append(value).append("\n");

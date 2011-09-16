@@ -49,7 +49,7 @@ import java.util.Map;
 
 import javax.naming.NamingException;
 
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceException;
 
@@ -84,7 +84,7 @@ public interface IService {
 	 * @throws NamingException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService) throws LscServiceException;
+	IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException;
 
 	/**
 	 * Returns a list of all the objects' identifiers.
@@ -94,5 +94,5 @@ public interface IService {
 	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
 	 *             searching the directory.
 	 */
-	Map<String, LscAttributes> getListPivots() throws LscServiceException;
+	Map<String, LscDatasets> getListPivots() throws LscServiceException;
 }

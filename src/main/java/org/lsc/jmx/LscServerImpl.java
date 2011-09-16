@@ -62,7 +62,7 @@ import javax.management.ObjectName;
 
 import org.lsc.AbstractSynchronize;
 import org.lsc.Configuration;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.SimpleSynchronize;
 import org.lsc.Task;
 import org.lsc.utils.PidUtil;
@@ -152,8 +152,8 @@ public class LscServerImpl implements LscServer, Runnable {
 	}
 
 	public boolean launchSyncTaskById(String taskName, String id, Map<String, String> attributes) {
-		Map<String, LscAttributes> entries = new HashMap<String, LscAttributes>();
-		entries.put(id, new LscAttributes(attributes));
+		Map<String, LscDatasets> entries = new HashMap<String, LscDatasets>();
+		entries.put(id, new LscDatasets(attributes));
 		return synchronize.launchById(taskName, entries);
 	}
 	

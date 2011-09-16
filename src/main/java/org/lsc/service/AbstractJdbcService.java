@@ -58,7 +58,7 @@ import javax.naming.directory.BasicAttribute;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.connection.Database;
 import org.lsc.exception.LscServiceConfigurationException;
@@ -116,8 +116,8 @@ public abstract class AbstractJdbcService implements IService {
 	 * @return The bean, or null if not found
 	 * @throws LscServiceException May throw a embedded {@link CommunicationException} if an SQLException is encountered 
 	 */
-	public IBean getBean(String pivotName, LscAttributes pivotAttributes) throws LscServiceException {
-		Map<String, Object> attributeMap = pivotAttributes.getAttributes();
+	public IBean getBean(String pivotName, LscDatasets pivotAttributes) throws LscServiceException {
+		Map<String, Object> attributeMap = pivotAttributes.getDatasets();
 		try {
 			return (IBean) sqlMapper.queryForObject(getRequestNameForObject(), attributeMap);
 		} catch (SQLException e) {
@@ -137,12 +137,12 @@ public abstract class AbstractJdbcService implements IService {
 	 *         attribute names and values (never null)
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, LscAttributes> getListPivots() {
+	public Map<String, LscDatasets> getListPivots() {
 		/* TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the list returned,
 		 * since it may be important when coming from a database.
 		 * This is really an API bug, getListPivots() should return a List, not a Map.
 		 */
-		Map<String, LscAttributes> ret = new ListOrderedMap();
+		Map<String, LscDatasets> ret = new ListOrderedMap();
 
 		try {
 			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList());
@@ -151,7 +151,7 @@ public abstract class AbstractJdbcService implements IService {
 			
 			for (int count = 1; idsIter.hasNext(); count++) {
 				idMap = idsIter.next();
-				ret.put(getMapKey(idMap, count), new LscAttributes(idMap));
+				ret.put(getMapKey(idMap, count), new LscDatasets(idMap));
 			}
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for the entries list: {}", e.toString());
@@ -184,11 +184,11 @@ public abstract class AbstractJdbcService implements IService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBean getBean(String id, LscAttributes attributes, boolean fromSource) throws LscServiceException {
+	public IBean getBean(String id, LscDatasets attributes, boolean fromSource) throws LscServiceException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			Map<String, Object> attributeMap = attributes.getAttributes();
+			Map<String, Object> attributeMap = attributes.getDatasets();
 			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
 			if(records.size() > 1) {
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
@@ -204,7 +204,7 @@ public abstract class AbstractJdbcService implements IService {
 					srcBean.setAttribute(new BasicAttribute(entry.getKey()));
 				}
 			}
-			srcBean.setDistinguishedName(id);
+			srcBean.setDistinguishName(id);
 			return srcBean;
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",

@@ -2,6 +2,7 @@ package org.lsc.configuration.objects.syncoptions;
 
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.objects.SyncOptions;
+import org.lsc.configuration.objects.Task;
 import org.lsc.exception.LscConfigurationException;
 
 /**
@@ -17,7 +18,7 @@ public class ForceSyncOptions extends SyncOptions {
 	}
 
 	@Override
-	public void validate() throws LscConfigurationException {
+	public void validate(Task task) throws LscConfigurationException {
 		// Always validate
 	}
 }

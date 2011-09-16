@@ -60,14 +60,14 @@ import mockit.NonStrictExpectations;
 
 import org.junit.Test;
 import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.syncoptions.PBSOAttribute;
+import org.lsc.configuration.objects.syncoptions.PBSODataset;
 import org.lsc.utils.ScriptingEvaluator;
 
 public class PropertiesBasedSyncOptionsTest {
 
 	@Injectable @NonStrict org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions conf ;
-	@Injectable @NonStrict PBSOAttribute pbsoNonExistingAttr;
-	@Injectable @NonStrict PBSOAttribute pbsoExistingAttr;
+	@Injectable @NonStrict PBSODataset pbsoNonExistingAttr;
+	@Injectable @NonStrict PBSODataset pbsoExistingAttr;
 	@Injectable @NonStrict Task task;
 	@Injectable @NonStrict org.lsc.Task taskExec;
 	
@@ -76,9 +76,9 @@ public class PropertiesBasedSyncOptionsTest {
 		new NonStrictExpectations() {
 			{
 				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
-				conf.getAttribute("nonExistantAttrName"); result = pbsoNonExistingAttr; 
+				conf.getDataset("nonExistantAttrName"); result = pbsoNonExistingAttr; 
 				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
-				conf.getAttribute("sampleAttribute"); result = pbsoExistingAttr; 
+				conf.getDataset("sampleAttribute"); result = pbsoExistingAttr; 
 				task.getSyncOptions(); result = conf;
 			}
 		};
@@ -92,10 +92,10 @@ public class PropertiesBasedSyncOptionsTest {
 	@Test
 	public final void testJS() {
 		new NonStrictExpectations() {
-			@Injectable @NonStrict PBSOAttribute jsAttr;
+			@Injectable @NonStrict PBSODataset jsAttr;
 			{
 				jsAttr.getDefaultValues(); result = Arrays.asList(new String[] {"\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\""});
-				conf.getAttribute("JsAttribute"); result = jsAttr;
+				conf.getDataset("JsAttribute"); result = jsAttr;
 				task.getSyncOptions(); result = conf;
 			}
 		};
@@ -120,10 +120,10 @@ public class PropertiesBasedSyncOptionsTest {
 	@Test
 	public final void testDelimiters() {
 		new NonStrictExpectations() {
-			@Injectable @NonStrict PBSOAttribute delimitedAttr;
+			@Injectable @NonStrict PBSODataset delimitedAttr;
 			{
 				delimitedAttr.getForceValues(); result = Arrays.asList(new String[] {"\"a\"", "\"b\""});
-				conf.getAttribute("DelimitedAttribute"); result = delimitedAttr;
+				conf.getDataset("DelimitedAttribute"); result = delimitedAttr;
 				task.getSyncOptions(); result = conf;
 			}
 		};

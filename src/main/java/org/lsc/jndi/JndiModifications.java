@@ -57,7 +57,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 
-import org.lsc.LscAttributeModification;
+import org.lsc.LscDatasetModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,12 +211,12 @@ public class JndiModifications {
 	}
 
 	public static List<ModificationItem> fromLscAttributeModifications(
-			List<LscAttributeModification> lams) {
+			List<LscDatasetModification> lams) {
 		if(lams == null) {
 			return null;
 		}
 		List<ModificationItem> mis = new ArrayList<ModificationItem>();
-		for(LscAttributeModification lam: lams) {
+		for(LscDatasetModification lam: lams) {
 			int operationType = DirContext.REPLACE_ATTRIBUTE;
 			switch(lam.getOperation()) {
 				case ADD_VALUES:

@@ -116,13 +116,13 @@ public class Ldap2LdapSyncTest {
 	 */
 	@Test
 	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, LscServiceException {
-		Map<String, LscAttributes> ids = new HashMap<String, LscAttributes>(1);
+		Map<String, LscDatasets> ids = new HashMap<String, LscDatasets>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
 		attributeValues.put("sn", "SN0001");
-		ids.put(DN_MODIFY_SRC, new LscAttributes(attributeValues));
+		ids.put(DN_MODIFY_SRC, new LscDatasets(attributeValues));
 
 		IService srcService = new SimpleJndiSrcService(LscConfiguration.getTask(TASK_NAME));
-		Entry<String, LscAttributes> obj = ids.entrySet().iterator().next();
+		Entry<String, LscDatasets> obj = ids.entrySet().iterator().next();
 		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue(), true);
 		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
 

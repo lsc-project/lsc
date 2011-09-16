@@ -44,7 +44,7 @@ public class ConfigurationLoaderTest {
 	public void testDumpSimpleConfiguration() throws ConfigurationException, IOException, LscConfigurationException {
 		Csv csvAudit = new Csv();
 		csvAudit.setAppend(false);
-		csvAudit.setAttributes("cn, sn, givenName");
+		csvAudit.setDatasets("cn, sn, givenName");
 		csvAudit.setName("csvAudit");
 		csvAudit.setSeparator(";");
 		LscConfiguration.addAudit(csvAudit);

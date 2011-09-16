@@ -51,7 +51,7 @@ import java.util.Properties;
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.services.DstLdap;
@@ -91,7 +91,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @return Always returns null since this simulates an empty directory
 	 * @throws NamingException Never thrown.
 	 */
-	public IBean getBean(String pivotName, LscAttributes pivotAttributes, boolean fromSameService) {
+	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) {
 		return null;
 	}
 
@@ -101,7 +101,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
      * @return Map Always null since this simulates an empty directory
      * @throws NamingException Never thrown.
      */
-	public Map<String, LscAttributes> getListPivots() {
+	public Map<String, LscDatasets> getListPivots() {
 		return null;
 	}
 

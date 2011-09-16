@@ -12,7 +12,10 @@ import java.util.StringTokenizer;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.configuration.objects.SyncOptions;
+import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.exception.LscConfigurationException;
+import org.lsc.jndi.JndiServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +31,11 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 	private ISyncOptions.STATUS_TYPE defaultPolicy;
 
 	@XStreamImplicit
-	private List<PBSOAttribute> attributes;
+	private List<PBSODataset> datasets;
 	
 	public PropertiesBasedSyncOptions() {
 		defaultPolicy = ISyncOptions.STATUS_TYPE.FORCE;
-		attributes = new ArrayList<PBSOAttribute>();
+		datasets = new ArrayList<PBSODataset>();
 		defaultDelimiter = ";";
 	}
 
@@ -52,12 +55,12 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 		this.defaultPolicy = defaultPolicy;
 	}
 
-	public List<PBSOAttribute> getAttributes() {
-		return attributes;
+	public List<PBSODataset> getDatasets() {
+		return datasets;
 	}
 
-	public void setAttributes(List<PBSOAttribute> attributes) {
-		this.attributes = attributes;
+	public void setDatasets(List<PBSODataset> datasets) {
+		this.datasets = datasets;
 	}
 	
 	@Override
@@ -80,41 +83,41 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 				LOGGER.error("Unable to use invalid name : lsc.{}.{} ! Bypassing ...", syncName, key);
 				continue;
 			}
-			String attributeName = stok.nextToken();
+			String datasetName = stok.nextToken();
 			String typeName = stok.nextToken();
-			PBSOAttribute attribute = getAttribute(attributeName);
-			attributes.add(attribute);
+			PBSODataset dataset = getDataset(datasetName);
+			datasets.add(dataset);
 			if (typeName.equalsIgnoreCase("action")) {
 				STATUS_TYPE policy = parseSyncType(value);
 				if (policy == STATUS_TYPE.UNKNOWN) {
-					LOGGER.error("Unable to analyze action type \"{}\" for the following attribute : lsc.{}.{} ! Bypassing ...",
+					LOGGER.error("Unable to analyze action type \"{}\" for the following dataset : lsc.{}.{} ! Bypassing ...",
 									new Object[]{value, syncName, key});
 					continue;
 				}
-				LOGGER.debug("Adding '{}' sync type for attribute name {}.", value, attributeName);
-				if (attributeName.equalsIgnoreCase("default")) {
+				LOGGER.debug("Adding '{}' sync type for dataset name {}.", value, datasetName);
+				if (datasetName.equalsIgnoreCase("default")) {
 					defaultPolicy = policy;
 				} else {
-					attribute.setPolicy(policy);
+					dataset.setPolicy(policy);
 				}
 			} else if (typeName.equalsIgnoreCase("default_value")) {
-				defaultValueStrings.put(attributeName.toLowerCase(), value);
+				defaultValueStrings.put(datasetName.toLowerCase(), value);
 			} else if (typeName.equalsIgnoreCase("create_value")) {
-				createValueStrings.put(attributeName.toLowerCase(), value);
+				createValueStrings.put(datasetName.toLowerCase(), value);
 			} else if (typeName.equalsIgnoreCase("force_value")) {
-				forceValueStrings.put(attributeName.toLowerCase(), value);
+				forceValueStrings.put(datasetName.toLowerCase(), value);
 			} else if (typeName.equalsIgnoreCase("delimiter")) {
 				if (value.length() > 1) {
-					LOGGER.error("Invalid delimiter for {} attribute. Delimiters must be 1 character maximum. Ignoring.", attributeName);
+					LOGGER.error("Invalid delimiter for {} dataset. Delimiters must be 1 character maximum. Ignoring.", datasetName);
 					continue;
 				}
-				if (attributeName.equalsIgnoreCase("default")) {
+				if (datasetName.equalsIgnoreCase("default")) {
 					defaultDelimiter = value;
 				} else {
-					attribute.setDelimiter(value);
+					dataset.setDelimiter(value);
 				}
 			} else {
-				LOGGER.error("Unable to identify attribute option \"{}\" in this name : lsc.{}.{} ! Bypassing.",
+				LOGGER.error("Unable to identify dataset option \"{}\" in this name : lsc.{}.{} ! Bypassing.",
 								new Object[]{typeName, syncName, key});
 				continue;
 			}
@@ -124,23 +127,23 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 		cutUpValues(defaultValueStrings, createValueStrings, forceValueStrings);
 
 		// use default values for create values if there aren't specific ones
-		for (PBSOAttribute attribute : attributes) {
-			if (attribute.getCreateValues() == null
-					&& attribute.getDefaultValues() != null) {
-				attribute.setCreateValues(attribute.getDefaultValues());
+		for (PBSODataset dataset : datasets) {
+			if (dataset.getCreateValues() == null
+					&& dataset.getDefaultValues() != null) {
+				dataset.setCreateValues(dataset.getDefaultValues());
 			}
 		}
 	}
 	
-	public PBSOAttribute getAttribute(String attributeName) {
-		if(attributes != null) {
-			for(PBSOAttribute attribute : attributes) {
-				if(attribute.getName().equalsIgnoreCase(attributeName)) {
-					return attribute;
+	public PBSODataset getDataset(String datasetName) {
+		if(datasets != null) {
+			for(PBSODataset dataset : datasets) {
+				if(dataset.getName().equalsIgnoreCase(datasetName)) {
+					return dataset;
 				}
 			}
 		}
-		PBSOAttribute attr = new PBSOAttribute(attributeName);
+		PBSODataset attr = new PBSODataset(datasetName);
 		attr.setPolicy(this.defaultPolicy);
 		return attr;
 	}
@@ -150,8 +153,8 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 			Map<String, String> forceValues) {
 
 		for (Entry<String, String> entry : defaultValues.entrySet()) {
-			PBSOAttribute attribute = getAttribute(entry.getKey());
-			String delimiter = (attribute.getDelimiter() != null ? attribute.getDelimiter() : defaultDelimiter);
+			PBSODataset dataset = getDataset(entry.getKey());
+			String delimiter = (dataset.getDelimiter() != null ? dataset.getDelimiter() : defaultDelimiter);
 
 			if(delimiter != null && entry.getValue() != null) {
 				// cut up the existing string on the delimiter
@@ -160,13 +163,13 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 				while (st.hasMoreTokens()) {
 					values.add(st.nextToken());
 				}
-				attribute.setDefaultValues(values);
+				dataset.setDefaultValues(values);
 			}
 		}
 
 		for (Entry<String, String> entry : createValues.entrySet()) {
-			PBSOAttribute attribute = getAttribute(entry.getKey());
-			String delimiter = (attribute.getDelimiter() != null ? attribute.getDelimiter() : defaultDelimiter);
+			PBSODataset dataset = getDataset(entry.getKey());
+			String delimiter = (dataset.getDelimiter() != null ? dataset.getDelimiter() : defaultDelimiter);
 
 			if(delimiter != null && entry.getValue() != null) {
 				// cut up the existing string on the delimiter
@@ -175,13 +178,13 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 				while (st.hasMoreTokens()) {
 					values.add(st.nextToken());
 				}
-				attribute.setCreateValues(values);
+				dataset.setCreateValues(values);
 			}
 		}
 		
 		for (Entry<String, String> entry : forceValues.entrySet()) {
-			PBSOAttribute attribute = getAttribute(entry.getKey());
-			String delimiter = (attribute.getDelimiter() != null ? attribute.getDelimiter() : defaultDelimiter);
+			PBSODataset dataset = getDataset(entry.getKey());
+			String delimiter = (dataset.getDelimiter() != null ? dataset.getDelimiter() : defaultDelimiter);
 
 			if(delimiter != null && entry.getValue() != null) {
 				// cut up the existing string on the delimiter
@@ -190,7 +193,7 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 				while (st.hasMoreTokens()) {
 					values.add(st.nextToken());
 				}
-				attribute.setForceValues(values);
+				dataset.setForceValues(values);
 			}
 		}
 	}
@@ -212,6 +215,12 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 	}
 
 	@Override
-	public void validate() throws LscConfigurationException {
+	public void validate(Task task) throws LscConfigurationException {
+		if(task.getDestinationService().getConnection() instanceof Ldap) {
+			String contextDn = JndiServices.getInstance((Ldap)task.getDestinationService().getConnection()).getContextDn();
+			if(!getMainIdentifier().endsWith(contextDn)) {
+				LOGGER.warn("Your main identifier will be used as a DN (" + getMainIdentifier() + ") in LDAP destination service and does not end with the context dn (" + contextDn + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
+			}
+		} 
 	}
 }

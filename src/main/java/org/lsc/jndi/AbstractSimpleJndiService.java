@@ -59,7 +59,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
 import org.lsc.Configuration;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.services.Ldap;
 import org.lsc.exception.LscConfigurationException;
@@ -173,6 +173,9 @@ public abstract class AbstractSimpleJndiService {
 			attrsId.add(pivotAttr);
 		}
 		jndiServices = JndiServices.getInstance((org.lsc.configuration.objects.connection.directory.Ldap)ldapService.getConnection());
+		if(!baseDn.endsWith(jndiServices.getContextDn())) {
+			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
+		}
 	}
 
 	/**
@@ -196,7 +199,7 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		// get dn
-		beanToFill.setDistinguishedName(sr.getNameInNamespace());
+		beanToFill.setDistinguishName(sr.getNameInNamespace());
 
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {
@@ -237,7 +240,7 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public SearchResult get(String id, LscAttributes pivotAttrs, boolean fromSource) throws NamingException {
+	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource) throws NamingException {
 		String searchString = null;
 		if(fromSource || filterIdClean == null) {
 			searchString = filterIdSync;
@@ -245,7 +248,7 @@ public abstract class AbstractSimpleJndiService {
 			searchString = filterIdClean; 
 		}
 
-		if (pivotAttrs != null && pivotAttrs.getAttributes() != null && pivotAttrs.getAttributes().size() > 0) {
+		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());
 				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);

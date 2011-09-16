@@ -52,8 +52,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.lsc.LscAttributeModification;
-import org.lsc.LscAttributeModification.LscAttributeModificationType;
+import org.lsc.LscDatasetModification;
+import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 
@@ -92,9 +92,9 @@ public class CsvLayoutTest {
 	private LscModifications makeLscModifications(LscModificationType type, String task) {
 		LscModifications lm = new LscModifications(type, task);
 		lm.setMainIdentifer("cn=test,o=testing");
-		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] { "Jon" } )));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] { "Tester CN" } )));
+		List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] { "Jon" } )));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] { "Tester CN" } )));
 		lm.setLscAttributeModifications(mi);
 		return lm;
 	}

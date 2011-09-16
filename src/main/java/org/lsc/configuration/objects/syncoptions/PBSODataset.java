@@ -7,8 +7,8 @@ import org.lsc.beans.syncoptions.ISyncOptions;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias("attribute")
-public class PBSOAttribute {
+@XStreamAlias("dataset")
+public class PBSODataset {
 	
 	private String name;
 	
@@ -22,14 +22,14 @@ public class PBSOAttribute {
 	
 	private String delimiter;
 	
-	public PBSOAttribute() {
+	public PBSODataset() {
 		defaultValues = new ArrayList<String>();
 		createValues = new ArrayList<String>();
 		forceValues = new ArrayList<String>();
 		policy = ISyncOptions.STATUS_TYPE.UNKNOWN;
 	}
 
-	public PBSOAttribute(String name) {
+	public PBSODataset(String name) {
 		setName(name);
 		defaultValues = new ArrayList<String>();
 		createValues = new ArrayList<String>();
@@ -87,7 +87,7 @@ public class PBSOAttribute {
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("PBSOAttribute name=").append(name);
+		sb.append("PBSODataset name=").append(name);
 		sb.append(", delimiter='").append(this.getDelimiter()).append("'");
 		sb.append(", policy=").append(this.getPolicy());
 		return sb.append("\n").toString();

@@ -571,7 +571,7 @@ public class Configuration {
 
 		CsvLayout csvLayout = new CsvLayout();
 		csvLayout.setLogOperations(audit.getOperations());
-		csvLayout.setAttrs(audit.getAttributes());
+		csvLayout.setAttrs(audit.getDatasets());
 		csvLayout.setSeparator(audit.getSeparator());
 		csvLayout.setOutputHeader(audit.getOutputHeader());
 		csvLayout.setTaskNames(audit.getTaskNames());

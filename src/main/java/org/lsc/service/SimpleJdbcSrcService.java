@@ -53,7 +53,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.lsc.Configuration;
-import org.lsc.LscAttributes;
+import org.lsc.LscDatasets;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.connection.Database;
 import org.lsc.configuration.objects.services.SrcDatabase;
@@ -151,13 +151,13 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	static int count = 0;
 
 	@SuppressWarnings("unchecked")
-	public Entry<String, LscAttributes> getNextId() {
+	public Entry<String, LscDatasets> getNextId() {
 		Map<String, Object> idMap;
 		try {
 			idMap = (Map<String, Object>) sqlMapper.queryForObject(getRequestNameForNextId());
 			String key = getMapKey(idMap, count++);
-			Map<String, LscAttributes> ret = new HashMap<String, LscAttributes>();
-			ret.put(key, new LscAttributes(idMap));
+			Map<String, LscDatasets> ret = new HashMap<String, LscDatasets>();
+			ret.put(key, new LscDatasets(idMap));
 			return ret.entrySet().iterator().next();
 		} catch (SQLException e) {
 			LOGGER.warn("Error while looking for next entry ({})", e);

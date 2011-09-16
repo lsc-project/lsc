@@ -53,8 +53,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.lsc.LscAttributeModification;
-import org.lsc.LscAttributeModification.LscAttributeModificationType;
+import org.lsc.LscDatasetModification;
+import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 
@@ -87,11 +87,11 @@ public class LdifLayoutTest {
 	 */
 	@Test
 	public final void testAdd() throws IOException {
-		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] {"name"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "sn", Arrays.asList(new Object[] {"<non safe string>"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] {"Sébastien"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {""})));
+		List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] {"name"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "sn", Arrays.asList(new Object[] {"<non safe string>"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] {"Sébastien"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {""})));
 
 		LscModifications jm = new LscModifications(LscModificationType.CREATE_OBJECT);
 		jm.setMainIdentifer("givenName=Sébastien,dc=lsc-project,dc=org");
@@ -118,11 +118,11 @@ public class LdifLayoutTest {
 	 */
 	@Test
 	public final void testModify() throws IOException {
-		List<LscAttributeModification> mi = new ArrayList<LscAttributeModification>();
-		mi.add(new LscAttributeModification(LscAttributeModificationType.REPLACE_VALUES, "cn", Arrays.asList(new Object[] {"new_name"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.DELETE_VALUES, "uid", Arrays.asList(new Object[] {"old_id"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.REPLACE_VALUES, "sn", Arrays.asList(new Object[] {"À là bas"})));
-		mi.add(new LscAttributeModification(LscAttributeModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {"Multi-line\ndescription"})));
+		List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
+		mi.add(new LscDatasetModification(LscDatasetModificationType.REPLACE_VALUES, "cn", Arrays.asList(new Object[] {"new_name"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, "uid", Arrays.asList(new Object[] {"old_id"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.REPLACE_VALUES, "sn", Arrays.asList(new Object[] {"À là bas"})));
+		mi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {"Multi-line\ndescription"})));
 
 
 		LscModifications lm = new LscModifications(LscModificationType.UPDATE_OBJECT);

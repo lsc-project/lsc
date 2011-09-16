@@ -51,28 +51,28 @@ import java.util.List;
 
 
 /**
- * Single object used to store modifications on an LscAttribute.
+ * Single object used to store modifications on an LscDataset.
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LscAttributeModification {
+public class LscDatasetModification {
 
 	private String attributeName;
 	
 	private List<Object> values;
 	
-	private LscAttributeModificationType operation;
+	private LscDatasetModificationType operation;
 	
-	public enum LscAttributeModificationType {
+	public enum LscDatasetModificationType {
 		ADD_VALUES,
 		REPLACE_VALUES,
 		DELETE_VALUES,
 		UNKNOWN,
 	}
 
-	public LscAttributeModification(LscAttributeModificationType operationType, String name, Collection<Object> values) {
+	public LscDatasetModification(LscDatasetModificationType operationType, String name, Collection<Object> values) {
 		setOperation(operationType);
-		setAttributeName(name);
+		setDatasetName(name);
 		this.values = new ArrayList<Object>();
 		this.values.addAll(values);
 	}
@@ -81,7 +81,7 @@ public class LscAttributeModification {
 		return attributeName;
 	}
 
-	public void setAttributeName(String attributeName) {
+	public void setDatasetName(String attributeName) {
 		this.attributeName = attributeName;
 	}
 
@@ -93,11 +93,11 @@ public class LscAttributeModification {
 		this.values = values;
 	}
 
-	public LscAttributeModificationType getOperation() {
+	public LscDatasetModificationType getOperation() {
 		return operation;
 	}
 
-	public void setOperation(LscAttributeModificationType operation) {
+	public void setOperation(LscDatasetModificationType operation) {
 		this.operation = operation;
 	}
 }

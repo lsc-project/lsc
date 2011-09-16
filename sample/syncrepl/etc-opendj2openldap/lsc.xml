@@ -32,7 +32,7 @@
 	<audit class="csvAudit">
 		<name>csv</name>
 		<operations>create, delete</operations>
-		<attributes>cn, dn</attributes>
+		<datasets>cn, dn</datasets>
 		<separator>;</separator>
 		<append>true</append>
 	</audit>

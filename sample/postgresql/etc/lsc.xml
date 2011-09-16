@@ -26,7 +26,7 @@
 	<audit class="csvAudit">
 		<name>csv</name>
 		<operations>create, delete</operations>
-		<attributes>cn, dn</attributes>
+		<datasets>cn, dn</datasets>
 		<separator>;</separator>
 		<append>true</append>
 	</audit>
@@ -39,7 +39,7 @@
     <task id="7">
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <sourceService class="ldapSourceService" id="11">
+      <destinationService class="ldapDestinationService" id="11">
         <name>openldap-source-service</name>
         <!-- <serverType>OpenLDAP</serverType> -->
         <connection reference="3" />
@@ -58,19 +58,22 @@
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </sourceService>
-      <destinationService class="databaseDestinationService" id="8">
-        <name>opends-dst-service</name>
+      </destinationService>
+<!--       <sourceService class="databaseSourceService">
+        <name>postgresql-src-service</name>
         <connection reference="4" />
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
         <requestNameForList>getInetOrgPersonList</requestNameForList>
-        <requestsNameForInsert><string>insertInetOrgPerson</string></requestsNameForInsert>
-        <requestsNameForUpdate><string>updateInetOrgPerson</string></requestsNameForUpdate>
-        <requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
-      </destinationService>
+      </sourceService> -->
+      <sourceService class="databaseSourceService" id="8">
+        <name>postgresql-src-service</name>
+        <connection reference="4" />
+        <requestNameForObject>getInetOrgPerson</requestNameForObject>
+        <requestNameForList>getInetOrgPersonList</requestNameForList>
+      </sourceService>
       <syncOptions class="propertiesBasedSyncOptions" id="12">
         <conditions id="13"></conditions>
-        <mainIdentifier>srcBean.getDN()</mainIdentifier>
+        <mainIdentifier>"mail="+srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
       </syncOptions>

@@ -24,7 +24,7 @@
 	<audit class="csvAudit">
 		<name>csv</name>
 		<operations>create, delete</operations>
-		<attributes>cn, dn</attributes>
+		<datasets>cn, dn</datasets>
 		<separator>;</separator>
 		<append>true</append>
 	</audit>
@@ -66,14 +66,14 @@
         <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("uid") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
-        <attribute id="23">
+        <dataset id="23">
           <name>mail</name>
           <policy>FORCE</policy>
           <forceValues id="25">
             <string>srcBean.getAttributeFirstValueById("uid")</string>
           </forceValues>
-        </attribute>
-        <attribute id="23">
+        </dataset>
+        <dataset id="23">
           <name>userPassword</name>
           <policy>FORCE</policy>
           <defaultValues id="24"></defaultValues>
@@ -81,21 +81,21 @@
             <string>srcBean.getAttributeFirstValueById("userPassword")</string>
           </forceValues>
           <createValues id="26"></createValues>
-        </attribute>
-        <attribute id="23">
+        </dataset>
+        <dataset id="23">
           <name>objectClass</name>
           <policy>KEEP</policy>
           <createValues id="25">
             <string>"inetOrgPerson"</string>
           </createValues>
-        </attribute>
-        <attribute id="23">
+        </dataset>
+        <dataset id="23">
           <name>sn</name>
           <policy>FORCE</policy>
           <forceValues id="25">
             <string>srcBean.getAttributeFirstValueById("gecos")</string>
           </forceValues>
-        </attribute>
+        </dataset>
       </syncOptions>
     </task>
   </tasks>

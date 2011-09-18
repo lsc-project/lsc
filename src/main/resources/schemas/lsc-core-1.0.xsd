@@ -4,7 +4,7 @@
 
     <xsd:annotation>
         <xsd:documentation>
-            This schema specifies the configuration options for LSC implementations.
+            This schema specifies the configuration options for LSC synchronizations tasks.
         </xsd:documentation>
     </xsd:annotation>
 
@@ -13,20 +13,14 @@
 		    <xsd:documentation>Definition for the ldap connections.</xsd:documentation>
 		</xsd:annotation>
 		<xsd:all>
- 			<xsd:element name="id" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-
- 			<xsd:element name="authentication" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="url" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="referral" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="derefAliases" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="version" type="xsd:string" minOccurs="1" maxOccurs="1"/> 
-
- 			<xsd:element name="pageSize" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="factory" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="tlsActivated" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
 		</xsd:all>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+					Java class type or shortname to identify implementation
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
 		        <xsd:documentation>
@@ -37,17 +31,26 @@
 		</xsd:attribute>
     </xsd:complexType>
     
-    <xsd:complexType name="databaseConnectionType">
+    <xsd:complexType name="connectionType">
  		<xsd:annotation>
-		    <xsd:documentation>Definition for the SQL database connections.</xsd:documentation>
+		    <xsd:documentation>Definition for the connection options.</xsd:documentation>
 		</xsd:annotation>
-		<xsd:all>
+		<xsd:sequence>
  			<xsd:element name="id" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="url" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="username" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 			<xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1"/>
- 			<xsd:element name="driver" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-		</xsd:all>
+			<!-- Extensibility -->
+			<xsd:any namespace="##any" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+					Java class type to identify implementation. Known shortnames are : ldapConnection, sqlConnection.
+					You may add yours by adding the XStreamAlias annotation to your new connection class. 
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
 		        <xsd:documentation>
@@ -58,6 +61,18 @@
 		</xsd:attribute>
     </xsd:complexType>
     
+	<!-- SQL connection type specific parameters -->
+	<xsd:element name="driver" type="xsd:string"/>
+	
+	<!-- LDAP connection type specific parameter -->
+	<xsd:element name="authentication" type="xsd:string" />
+	<xsd:element name="referral" type="xsd:string" />
+	<xsd:element name="derefAliases" type="xsd:string" />
+	<xsd:element name="version" type="xsd:string" /> 
+	<xsd:element name="pageSize" type="xsd:integer" />
+	<xsd:element name="factory" type="xsd:string" />
+	<xsd:element name="tlsActivated" type="xsd:boolean" default="false"/>
+	
     <xsd:complexType name="encryptionType">
  		<xsd:annotation>
 		    <xsd:documentation>Definition for the encryption properties.</xsd:documentation>
@@ -76,14 +91,44 @@
 		</xsd:attribute>
     </xsd:complexType>
 
-    <xsd:complexType name="ldifAuditType">
+	<xsd:complexType name="auditLogRef">
  		<xsd:annotation>
-		    <xsd:documentation>Definition for the LDIF audit properties.</xsd:documentation>
+		    <xsd:documentation>Definition for the auditLog node used in task.</xsd:documentation>
 		</xsd:annotation>
-		<xsd:all>
- 			<xsd:element name="appendToLogFile" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
-			<xsd:element name="logOnlyLdif" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/>
-		</xsd:all>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Alias to identify the connection class
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="reference" type="xsd:integer">
+		    <xsd:annotation>
+		        <xsd:documentation>
+		        	Mandatory attribute that will reference the corresponding audit
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+    <xsd:complexType name="auditType">
+ 		<xsd:annotation>
+		    <xsd:documentation>Definition for the generic audit properties.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+ 			<xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="appendToLogFile" type="xsd:boolean" minOccurs="0" maxOccurs="1" default="true"/>
+			<!-- Extensibility -->
+			<xsd:any namespace="##any" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+					Java class type or short name to identify implementation.
+					Known shortcuts are csvAudit or ldifAudit.
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
 		        <xsd:documentation>
@@ -91,20 +136,24 @@
 		        </xsd:documentation>
 		    </xsd:annotation>
 		</xsd:attribute>
+		<!-- 			<xsd:element name="logOnlyLdif" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="false"/> -->
     </xsd:complexType>
+	
+	<!-- -->
+	<xsd:element name="attributes" type="xsd:string" />
+	<xsd:element name="separator" type="xsd:string" />
+	<xsd:element name="append" type="xsd:boolean" />
+	<xsd:element name="outputHeader" type="xsd:boolean"/>
+	<xsd:element name="operations" type="xsd:string"/>
+	<xsd:element name="taskNames">
+		<xsd:complexType><xsd:sequence><xsd:element name="taskName" type="xsd:string" /></xsd:sequence></xsd:complexType>
+	</xsd:element>
 
     <xsd:complexType name="csvAuditType">
  		<xsd:annotation>
 		    <xsd:documentation>Definition for the CSV audit properties.</xsd:documentation>
 		</xsd:annotation>
 		<xsd:sequence>
- 			<xsd:element name="attributes" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-			<xsd:element name="seperator" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="append" type="xsd:boolean" minOccurs="1" maxOccurs="1"/>
-			<xsd:element name="outputHeader" type="xsd:boolean" minOccurs="1" maxOccurs="1" default="true"/>
-			<xsd:element name="taskNames" minOccurs="0" maxOccurs="1">
-				<xsd:complexType><xsd:sequence><xsd:element name="taskName" type="xsd:string" /></xsd:sequence></xsd:complexType>
-			</xsd:element>
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
@@ -127,10 +176,10 @@
 					        </xsd:documentation>
 					    </xsd:annotation>
 					</xsd:attribute>
-					<xsd:attribute name="id" type="xsd:integer">
+					<xsd:attribute name="reference" type="xsd:integer">
 					    <xsd:annotation>
 					        <xsd:documentation>
-					        	Optional attribute added by XStream parser / dumper. You can leave it or remove it but if you copy a node, do not use the same number twice.
+					        	Mandatory attribute that will reference the corresponding connection
 					        </xsd:documentation>
 					    </xsd:annotation>
 					</xsd:attribute>
@@ -157,6 +206,14 @@
 		<xsd:sequence>
  			<xsd:element name="conditions" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 		</xsd:sequence>
+		<xsd:attribute name="class" type="xsd:string">
+		    <xsd:annotation>
+		        <xsd:documentation>
+					Java class type to identify implementation. Known shortnames are : ldapConnection,  Connection.
+					You may add yours by adding the XStreamAlias annotation to your new connection class. 
+		        </xsd:documentation>
+		    </xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
 		        <xsd:documentation>
@@ -172,9 +229,10 @@
  			<xsd:element name="bean" type="xsd:string" minOccurs="1" maxOccurs="1"/>
  			<xsd:element name="cleanHook" type="xsd:string" minOccurs="0" maxOccurs="1"/>
  			<xsd:element name="syncHook" type="xsd:string" minOccurs="0" maxOccurs="1"/>
- 			<xsd:element name="destination" type="serviceType" minOccurs="1" maxOccurs="1"/>
- 			<xsd:element name="source" type="serviceType" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="destinationService" type="serviceType" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="sourceService" type="serviceType" minOccurs="1" maxOccurs="1"/>
  			<xsd:element name="syncOptions" type="syncOptionsType" minOccurs="1" maxOccurs="1"/>
+ 			<xsd:element name="auditLog" type="auditLogRef" minOccurs="0"/>
  		</xsd:all>
 		<xsd:attribute name="id" type="xsd:integer">
 		    <xsd:annotation>
@@ -196,8 +254,7 @@
 	     		<xsd:element name="connections">
 	     			<xsd:complexType>
 	     				<xsd:sequence>
-				    		<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded" />
-				    		<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+				    		<xsd:element name="connection" type="connectionType" minOccurs="0" maxOccurs="unbounded" />
 	     				</xsd:sequence>
 						<xsd:attribute name="id" type="xsd:integer">
 						    <xsd:annotation>
@@ -207,12 +264,16 @@
 						    </xsd:annotation>
 						</xsd:attribute>
 	     			</xsd:complexType>
+					<!-- Connection id uniqueness
+					<xs:key name="uniqueConnectionIdentifier">
+						<xs:selector xpath="connection"/>
+						<xs:field xpath="@name"/>
+					</xs:key> -->
 	     		</xsd:element>
 	     		<xsd:element name="audits">
 	     			<xsd:complexType>
 	     				<xsd:sequence>
-				    		<xsd:element name="ldif" type="ldifAuditType" minOccurs="0" maxOccurs="unbounded" />
-				    		<xsd:element name="csv" type="csvAuditType" minOccurs="0" maxOccurs="unbounded"/>
+				    		<xsd:element name="audit" type="auditType" minOccurs="0" maxOccurs="unbounded" />
 	     				</xsd:sequence>
 						<xsd:attribute name="id" type="xsd:integer">
 						    <xsd:annotation>
@@ -222,6 +283,11 @@
 						    </xsd:annotation>
 						</xsd:attribute>
 	     			</xsd:complexType>
+					<!-- Audit name uniqueness
+					<xs:key name="uniqueAuditIdentifier">
+						<xs:selector xpath="audit"/>
+						<xs:field xpath="@name"/>
+					</xs:key> -->
 	     		</xsd:element>
 	     		<xsd:element name="tasks">
 	     			<xsd:complexType>
@@ -237,7 +303,7 @@
 						</xsd:attribute>
 	     			</xsd:complexType>
 	     		</xsd:element>
-	     		<xsd:element name="security" minOccurs="1" maxOccurs="1">
+	     		<xsd:element name="security" minOccurs="0" maxOccurs="1">
 	     			<xsd:complexType>
 	     				<xsd:sequence>
 				    		<xsd:element name="encryption" type="encryptionType" minOccurs="0" maxOccurs="1" />

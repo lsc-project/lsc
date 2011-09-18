@@ -43,6 +43,6 @@
  ****************************************************************************
 
 This development has been done on top of other components, which are
-licensed under their own license : dbmonster, ibatis, hsqldb or opends
+licensed under their own license : ibatis, hsqldb, tapestry or opendj
 -------------------------------------------------------------------------------
 

@@ -47,8 +47,12 @@ package org.lsc.jmx;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 
 import javax.management.JMX;
@@ -67,6 +71,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang.ArrayUtils;
+import org.lsc.beans.SimpleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,6 +178,18 @@ public class LscAgent implements NotificationListener {
 		}
 		jmxUnbind();
 		return 0;
+	}
+	
+	public boolean syncByObject(String taskName, String id, Map<String, List<String>> map) {
+		if(!jmxBind()) {
+			return false;
+		}
+		SimpleBean bean = new SimpleBean();
+		bean.setMainIdentifier(id);
+		for(Entry<String, List<String>> entry: map.entrySet()) {
+			bean.setDataset(entry.getKey(), new HashSet<Object>(Arrays.asList(entry.getValue().toArray())));
+		}
+		return lscServer.launchSyncTask(taskName, bean);
 	}
 
 	/**

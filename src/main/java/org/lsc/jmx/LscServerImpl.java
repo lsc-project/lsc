@@ -65,6 +65,7 @@ import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.SimpleSynchronize;
 import org.lsc.Task;
+import org.lsc.beans.SimpleBean;
 import org.lsc.utils.PidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,5 +209,10 @@ public class LscServerImpl implements LscServer, Runnable {
 	
 	public String getConfigurationDirectory() {
 		return Configuration.getConfigurationDirectory();
+	}
+
+	@Override
+	public boolean launchSyncTask(String taskName, SimpleBean bean) {
+		return synchronize.launch(taskName, bean);
 	}
 }

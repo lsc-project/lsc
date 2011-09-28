@@ -49,6 +49,8 @@ import java.util.Map;
 
 import javax.management.MXBean;
 
+import org.lsc.beans.SimpleBean;
+
 
 /**
  * This object is used by JMX as public interface for Lsc Server
@@ -87,6 +89,13 @@ public interface LscServer {
 	 * @param taskName
 	 */
 	public boolean launchSyncTaskById(String taskName, String id, Map<String, String> attributes);
+	
+	/**
+	 * Start a task with the corresponding bean object (bypass the source lookup)
+	 * @param taskName the corresponding task name
+	 * @param bean the object bean
+	 */
+	public boolean launchSyncTask(String taskName, SimpleBean bean);
 	
 	/**
 	 * Schedule for shutdown a named task
@@ -129,5 +138,5 @@ public interface LscServer {
 	 * @throws Exception
 	 */
 	public void launchCleanTask(String taskName) throws Exception;
-
+	
 }

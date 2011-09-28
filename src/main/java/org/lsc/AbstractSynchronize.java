@@ -62,6 +62,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
+import org.lsc.service.IWritableService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
@@ -628,14 +629,31 @@ class SynchronizeTask implements Runnable {
 	}
 
 	public boolean run(Entry<String, LscDatasets> id) {
+		try {
+			IBean entry = task.getSourceService().getBean(id.getKey(), id.getValue(), true);
+			return run(entry);
+		} catch (RuntimeException e) {
+			counter.incrementCountError();
+			abstractSynchronize.logActionError(null, id, e);
+			
+			if (e.getCause() instanceof LscServiceCommunicationException) {
+				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
+			}
+		} catch (Exception e) {
+			counter.incrementCountError();
+			abstractSynchronize.logActionError(null, id, e);
+		}
+		return false;
+	}
 
+	public boolean run(IBean entry) {
+		
 		LscModifications lm = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;
 
 		try {
-			IBean entry = task.getSourceService().getBean(id.getKey(), id.getValue(), true);
 			/*
 			 * Log an error if the source object could not be retrieved! This
 			 * shouldn't happen.

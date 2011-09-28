@@ -45,6 +45,7 @@
  */
 package org.lsc.beans;
 
+import java.io.Serializable;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,8 +59,9 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.Rdn;
 
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.xml.serialize.SerializerFactory;
 import org.lsc.Configuration;
-import org.lsc.service.DataSchemaProvider;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +82,7 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public abstract class LscBean implements IBean {
+public abstract class LscBean implements IBean,Serializable {
 
 	private static final long serialVersionUID = 5074469517356449901L;
 
@@ -92,8 +94,8 @@ public abstract class LscBean implements IBean {
 	/** The attributes map. */
 	private Map<String, Set<Object>> datasets;
 
-	/** Data schema related to this bean - must always be set just after initiating the bean */
-	private DataSchemaProvider dataSchemaProvider;
+//	/** Data schema related to this bean - must always be set just after initiating the bean */
+//	private DataSchemaProvider dataSchemaProvider;
 
 	public LscBean() {
 		datasets = new HashMap<String, Set<Object>>();
@@ -348,13 +350,13 @@ public abstract class LscBean implements IBean {
 		}
 	}
 
-	public void setDataSchema(DataSchemaProvider dataSchema) {
-		this.dataSchemaProvider = dataSchema;
-	}
-
-	public DataSchemaProvider getDataSchema() {
-		return dataSchemaProvider;
-	}
+//	public void setDataSchema(DataSchemaProvider dataSchema) {
+//		this.dataSchemaProvider = dataSchema;
+//	}
+//
+//	public DataSchemaProvider getDataSchema() {
+//		return dataSchemaProvider;
+//	}
 
 	/**
 	 * Manage something there !
@@ -415,5 +417,9 @@ public abstract class LscBean implements IBean {
 		}
 
 		return null;
+	}
+	
+	public byte[] getDatasets()  {
+		return SerializationUtils.serialize((Serializable) datasets);
 	}
 }

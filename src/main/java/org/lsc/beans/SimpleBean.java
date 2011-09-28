@@ -45,6 +45,14 @@
  */
 package org.lsc.beans;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.management.openmbean.CompositeData;
+
+import org.apache.commons.lang.SerializationUtils;
+
 
 /**
  * Empty simple bean
@@ -66,4 +74,14 @@ public class SimpleBean extends LscBean {
 		// Do nothing
 	}
 	
+	
+	@SuppressWarnings("unchecked")
+	public static SimpleBean from(CompositeData cd) {
+		SimpleBean lb = new SimpleBean();
+		lb.setMainIdentifier((String) cd.get("mainIdentifier"));
+		for(Entry<String, Set<Object>> entry: ((Map<String, Set<Object>>)SerializationUtils.deserialize((byte[])cd.get("datasets"))).entrySet()) {
+			lb.setDataset(entry.getKey(), entry.getValue());
+		}
+		return lb;
+	}
 }

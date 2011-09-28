@@ -56,6 +56,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.jmx.LscServerImpl;
 import org.lsc.service.IAsynchronousService;
@@ -305,5 +306,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 		}
 		return status; 
+	}
+
+	public final boolean launch(String taskName, IBean bean) {
+		Task task = cache.get(taskName);
+		InfoCounter counter = new InfoCounter();
+		return new SynchronizeTask(task, counter, this, null).run(bean);
 	}
 }

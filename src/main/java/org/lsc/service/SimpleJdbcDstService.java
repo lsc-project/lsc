@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.lsc.IWritableService;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
 import org.lsc.configuration.objects.Task;

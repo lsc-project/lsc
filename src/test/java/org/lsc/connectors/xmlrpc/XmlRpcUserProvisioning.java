@@ -54,12 +54,12 @@ import java.util.Map;
 import javax.naming.directory.Attribute;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.lsc.IWritableService;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceException;
+import org.lsc.service.IWritableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

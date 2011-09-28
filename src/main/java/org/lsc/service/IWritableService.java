@@ -43,10 +43,10 @@
  *         Remy-Christophe Schermesser <rcs@lsc-project.org>
  ****************************************************************************
  */
-package org.lsc;
+package org.lsc.service;
 
+import org.lsc.LscModifications;
 import org.lsc.exception.LscServiceException;
-import org.lsc.service.IService;
 
 
 /**

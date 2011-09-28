@@ -52,6 +52,7 @@ import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
 import org.lsc.service.IService;
+import org.lsc.service.IWritableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

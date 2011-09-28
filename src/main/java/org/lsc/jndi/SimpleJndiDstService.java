@@ -55,7 +55,6 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.lsc.IWritableService;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
@@ -64,6 +63,7 @@ import org.lsc.configuration.objects.services.Ldap;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
+import org.lsc.service.IWritableService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

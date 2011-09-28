@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.lsc.Task;
 
 public class ScriptingEvaluator {
@@ -15,15 +16,15 @@ public class ScriptingEvaluator {
 	 * The instances, one per thread to protect non thread safe engines like
 	 * Rhino.!
 	 */
-	private static Map<String, ScriptingEvaluator> instances = new HashMap<String, ScriptingEvaluator>();
+	private static LRUMap instances = new LRUMap(15, 0.75f);
 
 	private static Map<String, Class<? extends ScriptableEvaluator>> implementetionsCache;
 
 	private Map<String, ScriptableEvaluator> instancesCache;
 
-//	// Logger
-//	private static final Logger LOGGER = LoggerFactory
-//			.getLogger(ScriptingEvaluator.class);
+	// // Logger
+	// private static final Logger LOGGER = LoggerFactory
+	// .getLogger(ScriptingEvaluator.class);
 
 	private ScriptableEvaluator defaultImplementation;
 
@@ -37,7 +38,7 @@ public class ScriptingEvaluator {
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
 		for (ScriptEngineFactory sef : factories) {
 			for (String name : sef.getNames()) {
-				if("js".equals(name)) {
+				if ("js".equals(name)) {
 					instancesCache.put(name,
 							new JScriptEvaluator(sef.getScriptEngine()));
 				}
@@ -49,18 +50,21 @@ public class ScriptingEvaluator {
 
 	public static ScriptingEvaluator getInstance() {
 		String threadName = Thread.currentThread().getName();
-		if (instances.get(threadName) == null) {
-			instances.put(threadName, new ScriptingEvaluator());
+		ScriptingEvaluator scriptingEvaluator = (ScriptingEvaluator) instances
+				.get(threadName);
+		if (scriptingEvaluator == null) {
+			scriptingEvaluator = new ScriptingEvaluator();
+			instances.put(threadName, scriptingEvaluator);
 		}
-		return instances.get(threadName);
+		return scriptingEvaluator;
 	}
 
-	public static void contribute(String implementationName, Class<? extends ScriptableEvaluator> implementationClass) {
+	public static void contribute(String implementationName,
+			Class<? extends ScriptableEvaluator> implementationClass) {
 		implementetionsCache.put(implementationName, implementationClass);
 	}
-	
-	private ScriptableEvaluator identifyScriptingEngine(
-			String expression) {
+
+	private ScriptableEvaluator identifyScriptingEngine(String expression) {
 		String[] parts = expression.split(":");
 		if (parts != null && parts.length > 0
 				&& instancesCache.containsKey(parts[0])) {

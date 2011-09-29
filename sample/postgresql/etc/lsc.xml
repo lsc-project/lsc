@@ -35,13 +35,21 @@
 		<append>false</append>
 	</audit>
   </audits>
-  <tasks id="6">
-    <task id="7">
+  <tasks>
+    <task>
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <destinationService class="ldapDestinationService" id="11">
+      <destinationService class="databaseDestinationService">
+        <name>postgresql-src-service</name>
+        <connection reference="4" />
+       	<requestNameForCreate>insertInetOrgPerson</requestNameForCreate>
+       	<requestNameForUpdate>updateInetOrgPerson</requestNameForUpdate>
+       	<requestNameForDelete>deleteInetOrgPerson</requestNameForDelete>
+       	<requestNameForObject>getInetOrgPerson</requestNameForObject>
+       	<requestNameForList>getInetOrgPersonList</requestNameForList>
+      </destinationService>
+      <sourceService class="ldapSourceService">
         <name>openldap-source-service</name>
-        <!-- <serverType>OpenLDAP</serverType> -->
         <connection reference="3" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
@@ -58,18 +66,6 @@
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </destinationService>
-<!--       <sourceService class="databaseSourceService">
-        <name>postgresql-src-service</name>
-        <connection reference="4" />
-        <requestNameForObject>getInetOrgPerson</requestNameForObject>
-        <requestNameForList>getInetOrgPersonList</requestNameForList>
-      </sourceService> -->
-      <sourceService class="databaseSourceService" id="8">
-        <name>postgresql-src-service</name>
-        <connection reference="4" />
-        <requestNameForObject>getInetOrgPerson</requestNameForObject>
-        <requestNameForList>getInetOrgPersonList</requestNameForList>
       </sourceService>
       <syncOptions class="propertiesBasedSyncOptions" id="12">
         <conditions id="13"></conditions>

@@ -665,7 +665,11 @@ class SynchronizeTask implements Runnable {
 			}
 
 			// Search destination for matching object
-			dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), false);
+			if(id != null) {
+				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), false);
+			} else {
+				dstBean = task.getDestinationService().getBean(entry.getDistinguishedName(), null, false);
+			}
 
 			// Calculate operation that would be performed
 			LscModificationType modificationType = BeanComparator.calculateModificationType(task, entry, dstBean);

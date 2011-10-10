@@ -34,6 +34,7 @@ public class FrenchFiltersTest {
 	public void testToUpperCaseAllBeginningNames() {
 		String name = "toto titi-tata.tutu_tyty";
 		assertEquals("Toto Titi-Tata.tutu_Tyty", FrenchFilters.toUpperCaseAllBeginningNames(name));
+		assertEquals("Jean-Francois Test", FrenchFilters.toUpperCaseAllBeginningNames("Jean-Francois Test"));
 	}
 
 	@Test

@@ -47,11 +47,8 @@ package org.lsc.utils;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.Random;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manage all common string manipulation for french
@@ -63,8 +60,6 @@ public final class FrenchFilters {
 	// Utility class
 	private FrenchFilters() {}
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(FrenchFilters.class);
-
 	/** The regexep for authorized characters */
 	private static final String REGEXP_CHARACTERS =
 					"[\\p{Alpha}\\s'\"áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;" + "&egrave;êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç-]+";
@@ -266,35 +261,21 @@ public final class FrenchFilters {
 		if (string.length() == 0) {
 			return "";
 		}
-
-		String returned = "";
-		String tmp = string;
-
+		
+		char[] tmp = string.toLowerCase().toCharArray();
 		// The string must start with a upper case
-		tmp = tmp.substring(0, 1).toUpperCase() + tmp.substring(1, tmp.length()).toLowerCase();
-
-		for (int j = 0; j < SEPARATORS_FOR_UPPER_BEGINNING_NAME.length; j++) {
-			int i = tmp.indexOf(SEPARATORS_FOR_UPPER_BEGINNING_NAME[j]);
-
-			while ((i != -1) && (i < (tmp.length() - 1))) {
-				returned += tmp.substring(0, i + 1);
-
-				try {
-					tmp = tmp.substring(i + 1, i + 2).toUpperCase() + tmp.substring(i + 2, tmp.length());
-				} catch (StringIndexOutOfBoundsException e) {
-					LOGGER.error("{} caused by '{}'", e, string);
-					throw e;
+		tmp[0] = Character.toUpperCase(tmp[0]);
+		
+		for (int i = 1; i < tmp.length - 1; i++) {
+			char c = tmp[i];
+			for (int j = 0; j < SEPARATORS_FOR_UPPER_BEGINNING_NAME.length; j++) {
+				if (c == SEPARATORS_FOR_UPPER_BEGINNING_NAME[j].charAt(0)) {
+					tmp[i + 1] = Character.toUpperCase(tmp[i + 1]);
+					break;
 				}
-
-				i = tmp.indexOf(SEPARATORS_FOR_UPPER_BEGINNING_NAME[j]);
 			}
 		}
-
-		if (tmp.length() > 0) {
-			returned += tmp;
-		}
-
-		return returned;
+		return new String(tmp);
 	}
 
 	/**

@@ -70,7 +70,8 @@ public class LscDatasets {
 	}
 
 	public String getStringValueAttribute(String attribute) {
-		return values.get(attribute).toString();
+		Object value = values.get(attribute);
+		return value != null ? value.toString() : null;
 	}
 
 	public Integer getIntegerValueAttribute(String attribute) {

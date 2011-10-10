@@ -42,9 +42,9 @@
       <destinationService class="databaseDestinationService">
         <name>postgresql-src-service</name>
         <connection reference="4" />
-       	<requestNameForInsert>insertInetOrgPerson</requestNameForInsert>
-       	<requestNameForUpdate>updateInetOrgPerson</requestNameForUpdate>
-       	<requestNameForDelete>deleteInetOrgPerson</requestNameForDelete>
+       	<requestsNameForInsert>insertInetOrgPerson</requestsNameForInsert>
+       	<requestsNameForUpdate>updateInetOrgPerson</requestsNameForUpdate>
+       	<requestsNameForDelete>deleteInetOrgPerson</requestsNameForDelete>
        	<requestNameForObject>getInetOrgPerson</requestNameForObject>
        	<requestNameForList>getInetOrgPersonList</requestNameForList>
       </destinationService>

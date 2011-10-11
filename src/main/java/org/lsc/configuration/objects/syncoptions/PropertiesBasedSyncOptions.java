@@ -56,6 +56,9 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 	}
 
 	public List<PBSODataset> getDatasets() {
+		if(datasets == null) {
+			return new ArrayList<PBSODataset>();
+		}
 		return datasets;
 	}
 
@@ -218,9 +221,9 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 	public void validate(Task task) throws LscConfigurationException {
 		if(task.getDestinationService().getConnection() instanceof Ldap) {
 			String contextDn = JndiServices.getInstance((Ldap)task.getDestinationService().getConnection()).getContextDn();
-			if(!getMainIdentifier().endsWith(contextDn)) {
-				LOGGER.warn("Your main identifier will be used as a DN (" + getMainIdentifier() + ") in LDAP destination service and does not end with the context dn (" + contextDn + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
-			}
+//			if(!getMainIdentifier().toLowerCase().endsWith(contextDn.toLowerCase())) {
+//				LOGGER.warn("Your main identifier will be used as a DN (" + getMainIdentifier() + ") in LDAP destination service and does not end with the context dn (" + contextDn + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
+//			}
 		} 
 	}
 }

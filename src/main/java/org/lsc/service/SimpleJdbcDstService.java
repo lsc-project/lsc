@@ -131,17 +131,17 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 				// Silently return without doing anything
 				break;
 			case CREATE_OBJECT:
-				for(String request: serviceConf.getRequestNameForInsert()) {
+				for(String request: serviceConf.getRequestsNameForInsert()) {
 					sqlMapper.insert(request, attributeMap);
 				}
 				break;
 			case DELETE_OBJECT:
-				for(String request: serviceConf.getRequestNameForDelete()) {
+				for(String request: serviceConf.getRequestsNameForDelete()) {
 					sqlMapper.delete(request, attributeMap);
 				}
 				break;
 			case UPDATE_OBJECT:
-				for(String request: serviceConf.getRequestNameForUpdate()) {
+				for(String request: serviceConf.getRequestsNameForUpdate()) {
 					sqlMapper.update(request, attributeMap);
 				}
 			}

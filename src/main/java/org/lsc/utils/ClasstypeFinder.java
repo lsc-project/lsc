@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.clapper.util.classutil.AndClassFilter;
 import org.clapper.util.classutil.ClassFilter;
 import org.clapper.util.classutil.ClassFinder;
@@ -107,7 +107,7 @@ public class ClasstypeFinder {
 			if(!libSubDirectory.isDirectory() || libSubDirectory.list() == null) {
 				throw new ExceptionInInitializerError("Unable to find LSC libraries in lib directory ! Please check your installation ...");
 			}
-			String[] jars = libSubDirectory.list(new NameFileFilter("jar"));
+			String[] jars = libSubDirectory.list(new SuffixFileFilter(".jar"));
 			File[] libs = new File[1+jars.length];
 			libs[0] = libSubDirectory;
 			for(int i = 0; i < jars.length; i++) {

@@ -42,7 +42,6 @@
 	</logger>
 	<logger name="org.lsc" level="INFO">
 		<appender-ref ref="LSC"/>
-		<appender-ref ref="CONSOLE"/>
 	</logger>
 	<logger name="lsc" level="INFO">
 		<appender-ref ref="LDIF"/>

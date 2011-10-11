@@ -112,27 +112,27 @@ public class DstDatabase extends Service {
 		this.requestNameForList = requestNameForList;
 	}
 	
-	public List<String> getRequestNameForInsert() {
+	public List<String> getRequestsNameForInsert() {
 		return requestsNameForInsert;
 	}
 
-	public void setRequestNameForInsert(List<String> requestsNameForInsert) {
+	public void setRequestsNameForInsert(List<String> requestsNameForInsert) {
 		this.requestsNameForInsert = requestsNameForInsert;
 	}
 
-	public List<String> getRequestNameForUpdate() {
+	public List<String> getRequestsNameForUpdate() {
 		return requestsNameForUpdate;
 	}
 
-	public void setRequestNameForUpdate(List<String> requestsNameForUpdate) {
+	public void setRequestsNameForUpdate(List<String> requestsNameForUpdate) {
 		this.requestsNameForUpdate = requestsNameForUpdate;
 	}
 
-	public List<String> getRequestNameForDelete() {
+	public List<String> getRequestsNameForDelete() {
 		return requestsNameForDelete;
 	}
 
-	public void setRequestNameForDelete(List<String> requestsNameForDelete) {
+	public void setRequestsNameForDelete(List<String> requestsNameForDelete) {
 		this.requestsNameForDelete = requestsNameForDelete;
 	}
 
@@ -162,7 +162,7 @@ public class DstDatabase extends Service {
 		try {
 			sqlMapper = DaoConfig.getSqlMapClient((org.lsc.configuration.objects.connection.Database)this.getConnection());
 			if(sqlMapper instanceof SqlMapClientImpl) {
-				for(String request: this.getRequestNameForInsert()) {
+				for(String request: this.getRequestsNameForInsert()) {
 					for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
 						attributesNameCache.add(pm.getPropertyName());
 					}

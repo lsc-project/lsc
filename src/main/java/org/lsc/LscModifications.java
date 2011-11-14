@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lsc.beans.IBean;
+
 /**
  * Single object used to store all modifications on one object.
  *
@@ -67,6 +69,10 @@ public class LscModifications {
 	private List<LscDatasetModification> attributesModifications;
 	/** The task that these modifications concern */
 	private String taskName;
+	/** The source object */
+	private IBean sourceBean;
+	/** The destination object */
+	private IBean destinationBean;
 
 	/**
 	 * Standard constructor.
@@ -197,5 +203,21 @@ public class LscModifications {
 			}
 		}
 		return sb.append("\n").toString();
+	}
+
+	public IBean getSourceBean() {
+		return sourceBean;
+	}
+
+	public void setSourceBean(IBean sourceBean) {
+		this.sourceBean = sourceBean;
+	}
+
+	public IBean getDestinationBean() {
+		return destinationBean;
+	}
+
+	public void setDestinationBean(IBean destinationBean) {
+		this.destinationBean = destinationBean;
 	}
 }

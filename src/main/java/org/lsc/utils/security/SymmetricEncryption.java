@@ -81,10 +81,10 @@ import org.slf4j.LoggerFactory;
  * installed. Three new configuration parameters could be added to the
  * configuration:</p>
  * <ul>
- *   <li>lsc.security.encryption.keyfile: the path to the file used to
+ *   <li>lsc>security>encryption>keyfile: the path to the file used to
  *   encrypt/decrypt data</li>
- *   <li>lsc.security.encryption.algorithm: the algorithm to use</li>
- *   <li>lsc.security.encryption.strength: the strength in bits</li>
+ *   <li>lsc>security>encryption>algorithm: the algorithm to use</li>
+ *   <li>lsc>security>encryption>strength: the strength in bits</li>
  * </ul>
  */
 public class SymmetricEncryption {

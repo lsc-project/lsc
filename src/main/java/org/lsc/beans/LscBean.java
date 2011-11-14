@@ -49,6 +49,7 @@ import java.io.Serializable;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +62,7 @@ import javax.naming.ldap.Rdn;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.lsc.Configuration;
+import org.lsc.LscDatasets;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -418,7 +420,34 @@ public abstract class LscBean implements IBean,Serializable {
 		return null;
 	}
 	
-	public byte[] getDatasets()  {
+	public LscDatasets getDatasets()  {
+		return new LscDatasets(datasets);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void setDatasets(LscDatasets datasets) {
+		Map<String, Set<Object>> tmp = new HashMap<String, Set<Object>>();
+		for(String name: datasets.getAttributesNames()) {
+			Object values = datasets.getDatasets().get(name);
+			if(values instanceof Set<?>) {
+				tmp.put(name, (Set<Object>) values);
+			} else if (values instanceof List<?>) {
+				Set<Object> valuesAsSet = new HashSet<Object>();
+				valuesAsSet.addAll((List<?>) values);
+				tmp.put(name, valuesAsSet);
+			} else if (values instanceof String) {
+				Set<Object> valuesAsSet = new HashSet<Object>();
+				valuesAsSet.add(values);
+				tmp.put(name, valuesAsSet);
+			} else {
+				LOGGER.warn("Appending unknown type inside lsc bean as Set: " + values);
+				tmp.put(name, (Set<Object>) values);
+			}
+		}
+		this.datasets = tmp;
+	}
+	
+	public byte[] getDatasetsBytes()  {
 		return SerializationUtils.serialize((Serializable) datasets);
 	}
 }

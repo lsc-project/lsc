@@ -69,12 +69,6 @@ public class SimpleBean extends LscBean {
 
 	private static final long serialVersionUID = -4500840611218768461L;
 	
-	@Override
-	public void generateDn() {
-		// Do nothing
-	}
-	
-	
 	@SuppressWarnings("unchecked")
 	public static SimpleBean from(CompositeData cd) {
 		SimpleBean lb = new SimpleBean();

@@ -52,19 +52,20 @@ import java.util.Set;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 
+import org.lsc.LscDatasets;
+
 /**
- * General interface of a bean. A bean in LSC describes an entry in a
+ * General interface of a bean. A bean in LSC describes an object in a
  * source or destination. It has nothing to do with Java beans (in fact,
  * LSC beans do not have any get- or set- methods).
  * 
  * <p>
- * An entry is described in this bean in a similar way to an LDAP entry.
- * Each bean has a distinguishedName which can be set and get. Each bean
- * also has a set of attributes, each of which has a set of values.
+ * An object is described in this bean as datasets (set of named values)
+ * and main identifier.
  * </p>
  * 
  * <p>
- * Most methods are convenience methods to get the values of each attribute.
+ * Most methods are convenience methods to get the values of each dataset.
  * </p>
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
@@ -148,14 +149,13 @@ public interface IBean extends Cloneable, Serializable {
 	 */
 	void setDistinguishName(String dn);
 
-	/**
-	 * Generate the distinguish name according to the information on the bean.
-	 * 
-	 * @throws NamingException
-	 *             thrown is a directory exception is encountered while
-	 *             generating the new distinguish name
-	 */
-	void generateDn() throws NamingException;
+	void setDatasets(LscDatasets datasets);
+	
+	LscDatasets getDatasets();
+	
+	String getMainIdentifier();
+
+	void setMainIdentifier(String mainIdentifier);
 
 	/**
 	 * Clone this object.

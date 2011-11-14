@@ -138,7 +138,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 */
 	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		try {
-			SearchResult srObject = get(pivotName, pivotAttributes, true);
+			SearchResult srObject = get(pivotName, pivotAttributes, true, filterIdSync);
 			Method method = beanClass.getMethod("getInstance", 
 							new Class[] { SearchResult.class, String.class, Class.class });
 			return (IBean) method.invoke(null, new Object[] { srObject, jndiServices.completeDn(getBaseDn()), beanClass });

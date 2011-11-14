@@ -85,16 +85,14 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.configuration.objects.connection.directory.AuthenticationType;
 import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPURL;
 
 /**
  * General LDAP services wrapper.
@@ -118,7 +116,7 @@ public final class JndiServices {
 	private StartTlsResponse tlsResponse;
 
 	/** The context base dn. */
-	private DN contextDn;
+	private org.apache.directory.shared.ldap.name.DN contextDn;
 
 	/** The instances cache. */
 	private static Map<Properties, JndiServices> cache = new HashMap<Properties, JndiServices>();
@@ -126,7 +124,7 @@ public final class JndiServices {
 	/** Number of results per page (through PagedResults extended control). */
 	private int pageSize;
 
-	private LDAPURL namingContext;
+	private LdapURL namingContext;
 
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
@@ -189,15 +187,15 @@ public final class JndiServices {
 
 		/* get LDAP naming context */
 		try {
-			namingContext = new LDAPURL((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
-		} catch (LDAPException e) {
+			namingContext = new LdapURL((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
+		} catch (LdapURLEncodingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 			throw new NamingException(e.getMessage());
 		}
 
 		/* handle options */
-		contextDn = namingContext.getBaseDN() != null ? namingContext.getBaseDN() : null;
+		contextDn = namingContext.getDn() != null ? namingContext.getDn() : null;
 
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null) {
@@ -951,6 +949,10 @@ public final class JndiServices {
 			}
 		}
 		return dn;
+	}
+	
+	public static CallbackHandler getCallbackHandler(String user, String pass) {
+		return new KerberosCallbackHandler(user, pass);
 	}
 }
 

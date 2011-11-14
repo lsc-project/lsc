@@ -16,7 +16,7 @@
     </connection>
     <connection class="ldapConnection" id="3">
       <id>ldap-src-conn</id>
-      <url>ldap://127.0.0.1/dc=lsc-project,dc=org</url>
+      <url>ldap://192.168.183.129/dc=lsc-project,dc=org</url>
       <username>cn=Manager,dc=lsc-project,dc=org</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
@@ -48,7 +48,7 @@
       <destinationService class="ldapDestinationService" id="8">
         <name>opends-dst-service</name>
         <connection reference="4" />
-        <baseDn>ou=People</baseDn>
+        <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes id="9">
           <string>mail</string>
         </pivotAttributes>
@@ -84,11 +84,18 @@
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
       </sourceService>
-      <syncOptions class="propertiesBasedSyncOptions" id="12">
-        <conditions id="13"></conditions>
+      <syncOptions class="propertiesBasedSyncOptions">
+        <conditions></conditions>
         <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
+        <dataset>
+          <name>description</name>
+          <policy>FORCE</policy>
+          <forceValues>
+              <string>js:srcBean.getAttributeFirstValueById("sn").toUpperCase() + " (" + srcBean.getAttributeFirstValueById("mail") + ")"</string>
+          </forceValues>
+        </dataset>
       </syncOptions>
     </task>
   </tasks>

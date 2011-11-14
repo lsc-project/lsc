@@ -29,6 +29,8 @@ public class SrcLdap extends Ldap {
 	 */
 	protected String interval;
 	
+	private String getCleanFilter;
+	
 	@Override
 	public Class<?> getImplementation() {
 		return PullableJndiSrcService.class;
@@ -56,5 +58,13 @@ public class SrcLdap extends Ldap {
 
 	public void setInterval(String interval) {
 		this.interval = interval;
+	}
+
+	public String getGetCleanFilter() {
+		return getCleanFilter;
+	}
+
+	public void setGetCleanFilter(String getCleanFilter) {
+		this.getCleanFilter = getCleanFilter;
 	}
 }

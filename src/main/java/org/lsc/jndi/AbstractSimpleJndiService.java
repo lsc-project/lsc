@@ -85,11 +85,6 @@ public abstract class AbstractSimpleJndiService {
 	 */
 	protected String filterIdSync;
 	/**
-	 * The filter to be completed by replacing {0} by the id to find a unique
-	 * entry. Use with destination attributes while getting the object to check for suppression
-	 */
-	protected String filterIdClean;
-	/**
 	 * The filter used to identify all the entries that have to be synchronized
 	 * by this JndiSrcService.
 	 */
@@ -144,7 +139,6 @@ public abstract class AbstractSimpleJndiService {
 		} catch (LscConfigurationException e) {
 			throw new LscServiceConfigurationException(e);
 		}
-		filterIdClean = serviceProps.getProperty("filterIdClean");
 		try {
 			jndiServices = JndiServices.getInstance(serviceProps);
 		} catch (NamingException e) {
@@ -165,7 +159,6 @@ public abstract class AbstractSimpleJndiService {
 		baseDn = ldapService.getBaseDn();
 		filterIdSync = ldapService.getGetOneFilter();
 		filterAll = ldapService.getGetAllFilter();
-		filterIdClean = ldapService.getGetCleanFilter();
 		_filteredSc = new SearchControls();
 		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes());
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().length); 
@@ -240,14 +233,7 @@ public abstract class AbstractSimpleJndiService {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource) throws NamingException {
-		String searchString = null;
-		if(fromSource || filterIdClean == null) {
-			searchString = filterIdSync;
-		} else {
-			searchString = filterIdClean; 
-		}
-
+	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource, String searchString) throws NamingException {
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());
@@ -315,13 +301,5 @@ public abstract class AbstractSimpleJndiService {
 	 */
 	public final String getFilterId() {
 		return filterIdSync;
-	}
-
-	/*
-	 * Default filter getter, for one corresponding entry.
-	 * @return the attrId value
-	 */
-	public final String getFilterIdClean() {
-		return filterIdClean;
 	}
 }

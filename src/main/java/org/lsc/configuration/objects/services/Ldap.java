@@ -90,8 +90,6 @@ public abstract class Ldap extends Service {
 	@Validate("required")
 	private String getOneFilter;
 
-	private String getCleanFilter;
-	
 	public String getBaseDn() {
 		return baseDn;
 	}
@@ -154,14 +152,6 @@ public abstract class Ldap extends Service {
 
 	public void setGetOneFilter(String getOneFilter) {
 		this.getOneFilter = getOneFilter;
-	}
-
-	public String getGetCleanFilter() {
-		return getCleanFilter;
-	}
-
-	public void setGetCleanFilter(String getCleanFilter) {
-		this.getCleanFilter = getCleanFilter;
 	}
 
 	@Override

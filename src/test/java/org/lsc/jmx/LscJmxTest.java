@@ -48,6 +48,12 @@ package org.lsc.jmx;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.naming.CommunicationException;
 
 import org.junit.Assert;
@@ -110,6 +116,28 @@ public class LscJmxTest extends Thread {
 		syncThread.interrupt();
 	}
 
+	@Test
+	public final void testSyncByObject() throws Exception {
+
+//		Thread syncThread = new Thread(this);
+		this.start(); 
+		Thread.sleep(3500);
+
+		LscAgent lscAgent = new LscAgent();
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
+		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
+				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
+		Map<String, List<String>> values = new HashMap<String, List<String>>();
+		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
+		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
+		List<String> objectClassValues = new ArrayList<String>();
+		objectClassValues.add("person");
+		objectClassValues.add("top");
+		values.put("cn", objectClassValues);
+		Assert.assertTrue(lscAgent.syncByObject(TASK_NAME, DN_ADD_DST, values));
+	}
+	
 	public void run() {
 		try {
 			SimpleSynchronize sync = new SimpleSynchronize();

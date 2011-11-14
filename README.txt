@@ -38,7 +38,7 @@ by reusing!
 
 ===== Feature overview =====
 
-* Multiple source connectors: any LDAPv3 server, any database with a JDBC
+* Multiple connectors: any LDAPv3 server, any database with a JDBC
   connector, flat files (or anything else you write a connector for)
 * Support for LDAPv3 niceties and extensions: StartTLS, LDAPS, paged results,
   schema retrieval, LDAP Sync (rfc4533), LDAP persistent search
@@ -50,7 +50,8 @@ by reusing!
 * Simple attribute mapping from source to destination
 * Three policies to update attributes, including forcing values, 
   non-destructive updates and merging
-* Advanced attribute manipulation via a built-in JavaScript engine
+* Advanced attribute manipulation via a built-in Script engine (include
+  support for JavaScript and Groovy scripting languages)
 * Predefined libraries for use in JavaScript attribute manipulation:
 	- LDAP server tools: standard bind operation can be checked on any
 	  LDAPv3 server

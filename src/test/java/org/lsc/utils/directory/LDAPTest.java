@@ -52,11 +52,10 @@ import javax.naming.NamingException;
 
 import mockit.Mocked;
 
+import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.junit.Test;
 import org.lsc.Task;
 import org.lsc.utils.ScriptingEvaluator;
-
-import com.unboundid.ldap.sdk.LDAPException;
 ;
 ;
 
@@ -70,7 +69,7 @@ public class LDAPTest {
 	@Mocked Task task;
 	
 	@Test
-	public final void testCanBind() throws NamingException, LDAPException {
+	public final void testCanBind() throws NamingException, LdapURLEncodingException {
 		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "public"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=nobody", "secret"));
@@ -109,7 +108,7 @@ public class LDAPTest {
 
 	// this should fail with a NamingException (no such object)
 	@Test(expected = NamingException.class)
-	public void testCanBindSearchRebindNoSuchObject() throws NamingException, LDAPException {
+	public void testCanBindSearchRebindNoSuchObject() throws NamingException, LdapURLEncodingException {
 		LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?cn=CN0001",
 						"cn=Directory Manager", "secret", "secret");
 	}

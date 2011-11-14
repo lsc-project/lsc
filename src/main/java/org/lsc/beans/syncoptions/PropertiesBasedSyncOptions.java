@@ -162,35 +162,31 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 
 	public String getCreateCondition() {
-		String condition = conf.getConditions().getCreate();
-		if (condition == null) {
+		if (conf.getConditions() == null || conf.getConditions().getCreate() == null) {
 			return DEFAULT_CONDITION;
 		}
-		return condition;
+		return conf.getConditions().getCreate();
 	}
 
 	public String getDeleteCondition() {
-		String condition = conf.getConditions().getDelete();
-		if (condition == null) {
+		if (conf.getConditions() == null || conf.getConditions().getDelete() == null) {
 			return DEFAULT_CONDITION;
 		}
-		return condition;
+		return conf.getConditions().getDelete();
 	}
 
 	public String getUpdateCondition() {
-		String condition = conf.getConditions().getUpdate();
-		if (condition == null) {
+		if (conf.getConditions() == null || conf.getConditions().getUpdate() == null) {
 			return DEFAULT_CONDITION;
 		}
-		return condition;
+		return conf.getConditions().getUpdate();
 	}
 
 	public String getChangeIdCondition() {
-		String condition = conf.getConditions().getChangeId();
-		if (condition == null) {
+		if (conf.getConditions() == null || conf.getConditions().getChangeId() == null) {
 			return DEFAULT_CONDITION;
 		}
-		return condition;
+		return conf.getConditions().getChangeId();
 	}
 
 	public String getCondition(LscModificationType operation) {

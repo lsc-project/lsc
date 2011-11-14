@@ -45,12 +45,10 @@
  */
 package org.lsc.utils.directory;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.naming.AuthenticationException;
 import javax.naming.CommunicationException;
@@ -61,6 +59,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 
+import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.jndi.JndiServices;
 
 /**
@@ -190,11 +190,12 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
+	 * @throws LdapURLEncodingException 
 	 * @throws MalformedURLException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
-					throws NamingException, LDAPException {
+					throws NamingException, LdapURLEncodingException {
 		return canBindSearchRebind(url, null, null, passwordToCheck);
 	}
 
@@ -221,17 +222,18 @@ public class LDAP {
 	 * @throws NamingException
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
+	 * @throws LdapURLEncodingException 
 	 * @throws MalformedURLException
 	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,
 					String bindPassword, String passwordToCheck)
-					throws NamingException, LDAPException {
+					throws NamingException, LdapURLEncodingException {
 
 		// interpret the search URL to feed to JndiServices
 		// this is done first to thrown MalformedURLException ASAP, not after
 		// connecting...
-		LDAPURL urlInstance = new LDAPURL(url);
+		LdapURL urlInstance = new LdapURL(url);
 
 		// get JndiServices for this bindDn and bindPassword
 		JndiServices bindJndiServices;
@@ -245,7 +247,7 @@ public class LDAP {
 		}
 
 		// transform to a relative DN for our JndiServices...
-		String baseDn = urlInstance.getBaseDN().toString();
+		String baseDn = urlInstance.getDn().toString();
 		String contextDn = bindJndiServices.getContextDn();
 		if (contextDn != null && baseDn.endsWith(contextDn)) {
 			baseDn = baseDn.substring(0, baseDn.length() - contextDn.length());
@@ -254,7 +256,7 @@ public class LDAP {
 		// perform the search and get back matching DNS
 		SearchResult matchingDns;
 		try {
-			matchingDns = bindJndiServices.getEntry(baseDn, urlInstance.getFilter().toString(), new SearchControls(), urlInstance.getScope().intValue());
+			matchingDns = bindJndiServices.getEntry(baseDn, urlInstance.getFilter().toString(), new SearchControls(), urlInstance.getScope().getScope());
 		} catch (SizeLimitExceededException e) {
 			// more than one result was returned!
 			// only one user account may match, anything else is an error

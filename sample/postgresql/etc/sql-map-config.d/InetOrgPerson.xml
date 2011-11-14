@@ -26,7 +26,7 @@
 
 	<update id="updateInetOrgPerson" parameterClass="java.util.Map">
 		UPDATE inetorgperson
-			SET uid=#uid# , sn=#sn# , givenname=#givenname# , cn=#cn# , address=#address# , telephonenumber=#telephonenumber#
+			SET uid = #uid#, sn = #sn# , givenname = #givenname#, cn = #cn#, address = #address#, telephonenumber = #telephonenumber#
 			WHERE mail = #mail#
 	</update>
 

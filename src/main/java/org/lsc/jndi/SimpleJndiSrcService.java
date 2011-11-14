@@ -55,6 +55,7 @@ import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.configuration.objects.services.SrcLdap;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IService;
@@ -78,6 +79,11 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	protected Class<IBean> beanClass;
 	
 	/**
+	 * The filter to be completed by replacing {0} by the id to find a unique
+	 * entry. Use with destination attributes while getting the object to check for suppression
+	 */
+	protected String filterIdClean;
+	/**
 	 * Constructor adapted to the context properties and the bean class name
 	 * to instantiate.
 	 * 
@@ -89,6 +95,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	@Deprecated
 	public SimpleJndiSrcService(final Properties props, final String beanClassName) throws LscServiceConfigurationException {
 		super(props);
+		filterIdClean = props.getProperty("filterIdClean");
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
 		} catch (ClassNotFoundException e) {
@@ -107,6 +114,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	@SuppressWarnings("unchecked")
 	public SimpleJndiSrcService(final Task task) throws LscServiceConfigurationException {
 		super((Ldap)task.getSourceService());
+		filterIdClean = ((SrcLdap)task.getSourceService()).getGetCleanFilter();
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
@@ -131,7 +139,14 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();
-			return this.getBeanFromSR(get(pivotName, pivotAttributes, fromSameService), srcBean);
+			String searchString = null;
+			if(fromSameService || filterIdClean == null) {
+				searchString = filterIdSync;
+			} else {
+				searchString = filterIdClean; 
+			}
+
+			return this.getBeanFromSR(get(pivotName, pivotAttributes, fromSameService, searchString), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
@@ -161,5 +176,13 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}
+	}
+
+	/*
+	 * Default filter getter, for one corresponding entry.
+	 * @return the attrId value
+	 */
+	public final String getFilterIdClean() {
+		return filterIdClean;
 	}
 }

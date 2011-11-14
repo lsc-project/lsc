@@ -316,4 +316,21 @@ public class Task {
 //		this.cleanHook
 //		this.syncHook
 	}
+	
+	@Override
+	public Object clone() {
+		Task clone = new Task();
+		clone.name = name;
+		clone.bean = bean;
+		clone.syncHook = syncHook;
+		clone.cleanHook = cleanHook;
+		clone.auditLogs = auditLogs;
+		clone.syncOptions = syncOptions;
+		clone.otherSettings = otherSettings;
+		clone.customLibrary = customLibrary;
+		clone.sourceService = sourceService;
+		clone.destinationService = destinationService;
+		return clone;
+	}
+
 }

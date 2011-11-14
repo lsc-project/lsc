@@ -165,6 +165,7 @@ public class XmlConfigurationHelper {
 	 */
 	public LscConfiguration getConfiguration(String filename)
 			throws FileNotFoundException {
+		LOGGER.info("Loading XML configuration from: " + filename);
 		return (LscConfiguration) xstream.fromXML(new FileInputStream(filename));
 	}
 

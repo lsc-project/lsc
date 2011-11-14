@@ -163,6 +163,8 @@ public final class BeanComparator {
 
 		// prepare JndiModifications object
 		lm = new LscModifications(modificationType, task.getName());
+		lm.setSourceBean(srcBean);
+		lm.setDestinationBean(dstBean);
 		lm.setMainIdentifer(getDstDN(itmBean, dstBean, condition));
 
 		switch (modificationType) {

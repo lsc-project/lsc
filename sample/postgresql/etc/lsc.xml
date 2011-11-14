@@ -3,8 +3,8 @@
   <connections id="2">
     <connection class="ldapConnection" id="3">
       <id>ldap-src-conn</id>
-      <url>ldap://127.0.0.1:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
+      <url>ldap://192.168.18.128:389/dc=lsc-project,dc=org</url>
+      <username>cn=Manager,dc=lsc-project,dc=org</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>
@@ -42,14 +42,15 @@
       <destinationService class="databaseDestinationService">
         <name>postgresql-src-service</name>
         <connection reference="4" />
-       	<requestsNameForInsert>insertInetOrgPerson</requestsNameForInsert>
-       	<requestsNameForUpdate>updateInetOrgPerson</requestsNameForUpdate>
-       	<requestsNameForDelete>deleteInetOrgPerson</requestsNameForDelete>
+       	<requestsNameForInsert><string>insertInetOrgPerson</string></requestsNameForInsert>
+       	<requestsNameForUpdate><string>updateInetOrgPerson</string></requestsNameForUpdate>
+       	<requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
        	<requestNameForObject>getInetOrgPerson</requestNameForObject>
        	<requestNameForList>getInetOrgPersonList</requestNameForList>
       </destinationService>
-      <sourceService class="ldapSourceService">
+      <sourceService class="syncreplSourceService" id="11">
         <name>openldap-source-service</name>
+        <serverType>OpenLDAP</serverType>
         <connection reference="3" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>

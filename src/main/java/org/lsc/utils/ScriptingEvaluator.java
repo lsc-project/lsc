@@ -9,9 +9,13 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.commons.collections.map.LRUMap;
 import org.lsc.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScriptingEvaluator {
 
+	private static Logger LOGGER = LoggerFactory.getLogger(ScriptingEvaluator.class);
+	
 	/**
 	 * The instances, one per thread to protect non thread safe engines like
 	 * Rhino.!
@@ -41,6 +45,11 @@ public class ScriptingEvaluator {
 				if ("js".equals(name)) {
 					instancesCache.put(name,
 							new JScriptEvaluator(sef.getScriptEngine()));
+				} else if ("groovy".equals(name)) {
+					instancesCache.put("gr",
+							new GroovyEvaluator(sef.getScriptEngine()));
+				} else {
+					LOGGER.debug("Unsupported scripting engine: " + name);
 				}
 			}
 		}

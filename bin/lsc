@@ -51,6 +51,8 @@
 #====================================================================
 # Changelog
 #====================================================================
+# Version 0.5 (09/2011):
+# - Add the JAVA_OPTS environment variable usage
 # Version 0.4 (01/2010):
 # - Include a fatal error message in JAVA_HOME missing
 # - Notice log file location
@@ -152,7 +154,7 @@ fi
 log "Starting LSC"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" org.lsc.Launcher $* 
+"${JAVA_COMMAND}" -cp "$CLASSPATH" "$JAVA_OPTS" org.lsc.Launcher $* 
 
 status=$?
 

@@ -50,7 +50,7 @@
 			<destinationService class="ldapDestinationService" id="10">
 				<name>ldap2ldapTestTask-dst</name>
 				<connection class="ldapConnection" reference="5"/>
-				<baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data</baseDn>
+				<baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes id="11">
 					<string>cn</string>
 					<string>sn</string>
@@ -71,7 +71,7 @@
 			<sourceService class="ldapSourceService" id="13">
 				<name>ldap2ldapTestTask-src</name>
 				<connection class="ldapConnection" reference="3"/>
-				<baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data</baseDn>
+				<baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes id="14">
 					<string>cn</string>
 					<string>sn</string>
@@ -153,7 +153,7 @@
 			<destinationService class="ldapDestinationService" id="22">
 				<name>db2ldapTestTask-dst</name>
 				<connection class="ldapConnection" reference="5"/>
-				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data</baseDn>
+				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes id="23">
 					<string>givenName</string>
 					<string>sn</string>

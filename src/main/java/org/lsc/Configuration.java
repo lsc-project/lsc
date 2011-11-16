@@ -487,9 +487,6 @@ public class Configuration {
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
-			if(validate) {
-				LscConfiguration.getInstance().validate();
-			}
 		} catch (LscConfigurationException e) {
 			message = "Unable to load configuration (" + e + ")";
 			LOGGER.error(e.toString(),e);
@@ -510,6 +507,7 @@ public class Configuration {
 		String logBackXMLPropertiesFile = new File(Configuration.getConfigurationDirectory(), "logback.xml").getAbsolutePath();
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
+			LOGGER.info("Logback configuration " + logBackXMLPropertiesFile + " successfully loaded ");
 			if(LscConfiguration.getAudit("CSV") != null) {
 				setUpCsvLogging(context);
 			}
@@ -524,6 +522,10 @@ public class Configuration {
 		// Logging configured
 		setLoggingSetup(true);
 
+		if(validate) {
+			LscConfiguration.getInstance().validate();
+		}
+		
 		// WARNING: don't log anything before HERE!
 		LOGGER.debug("Configuration successfully read from {}", Configuration.getConfigurationDirectory());
 	}

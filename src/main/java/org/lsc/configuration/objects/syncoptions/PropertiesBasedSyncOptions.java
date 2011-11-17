@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
-import org.apache.directory.shared.ldap.util.LdapURL;
+import org.apache.directory.shared.ldap.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.name.DN;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
 import org.lsc.configuration.objects.SyncOptions;
@@ -224,11 +224,11 @@ public class PropertiesBasedSyncOptions extends SyncOptions {
 		if(task.getDestinationService().getConnection() instanceof Ldap) {
 			String contextDn = JndiServices.getInstance((Ldap)task.getDestinationService().getConnection()).getContextDn();
 			try {
-				LdapURL contextDnURL = new LdapURL(contextDn);
-				if(!contextDnURL.getDn().isParentOf(getMainIdentifier())) {
+				DN contextDnObject = new DN(contextDn);
+				if(!contextDnObject.isParentOf(getMainIdentifier())) {
 					LOGGER.warn("Your main identifier will be used as a DN (" + getMainIdentifier() + ") in LDAP destination service and does not end with the context dn (" + contextDn + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
 				}
-			} catch (LdapURLEncodingException e) {
+			} catch (LdapInvalidDnException e) {
 				throw new LscConfigurationException("The context DN (" + contextDn + ") does not seem to be a valid LDAP DN: " + e.toString(), e);
 			}
 		} 

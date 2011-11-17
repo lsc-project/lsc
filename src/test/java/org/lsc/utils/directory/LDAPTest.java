@@ -48,6 +48,7 @@ package org.lsc.utils.directory;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import mockit.Mocked;
@@ -88,15 +89,15 @@ public class LDAPTest {
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager",
 						"secret", "uid=nobody,ou=People,dc=lsc-project,dc=org", "secret"));
 
-		assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=00000001",
+		assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=00000001)",
 						"cn=Directory Manager", "secret", "secret"));
-		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=00000001",
+		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=00000001)",
 						"cn=Directory Manager", "secret", "public"));
-		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?uid=nonexistant",
+		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=nonexistant)",
 						"cn=Directory Manager", "secret", "secret"));
 
 		// this should fail since there are two cn=CN0001 entries
-		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?cn=CN0001",
+		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(cn=CN0001)",
 						"cn=Directory Manager", "secret", "secret"));
 	}
 
@@ -107,9 +108,9 @@ public class LDAPTest {
 	}
 
 	// this should fail with a NamingException (no such object)
-	@Test(expected = NamingException.class)
+	@Test(expected = NameNotFoundException.class)
 	public void testCanBindSearchRebindNoSuchObject() throws NamingException, LdapURLEncodingException {
-		LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?cn=CN0001",
+		LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?(cn=CN0001)",
 						"cn=Directory Manager", "secret", "secret");
 	}
 }

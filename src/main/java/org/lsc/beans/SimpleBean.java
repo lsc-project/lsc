@@ -73,7 +73,7 @@ public class SimpleBean extends LscBean {
 	public static SimpleBean from(CompositeData cd) {
 		SimpleBean lb = new SimpleBean();
 		lb.setMainIdentifier((String) cd.get("mainIdentifier"));
-		for(Entry<String, Set<Object>> entry: ((Map<String, Set<Object>>)SerializationUtils.deserialize((byte[])cd.get("datasets"))).entrySet()) {
+		for(Entry<String, Set<Object>> entry: ((Map<String, Set<Object>>)SerializationUtils.deserialize((byte[])cd.get("datasetsBytes"))).entrySet()) {
 			lb.setDataset(entry.getKey(), entry.getValue());
 		}
 		return lb;

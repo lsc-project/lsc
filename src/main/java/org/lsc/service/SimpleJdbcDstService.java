@@ -52,8 +52,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.NamingException;
+
 import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
+import org.lsc.beans.IBean;
 import org.lsc.configuration.objects.Task;
 import org.lsc.configuration.objects.connection.Database;
 import org.lsc.configuration.objects.services.DstDatabase;
@@ -141,6 +144,8 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 				}
 				break;
 			case UPDATE_OBJECT:
+				// Push the destination value
+				attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
 				for(String request: serviceConf.getRequestsNameForUpdate()) {
 					sqlMapper.update(request, attributeMap);
 				}
@@ -158,6 +163,20 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 			}
 		}
 		return true;
+	}
+
+	private Map<String, Object> fillAttributesMap(
+			Map<String, Object> attributeMap, IBean destinationBean) {
+		for(String attributeName : destinationBean.getAttributesNames()) {
+			if(!attributeMap.containsKey(attributeName)) {
+				try {
+					attributeMap.put(attributeName, destinationBean.getAttributeById(attributeName).get());
+				} catch (NamingException e) {
+					// Nothing there
+				}
+			}
+		}
+		return attributeMap;
 	}
 
 	private Map<String, Object> getAttributesMap(

@@ -151,7 +151,7 @@ public interface IBean extends Cloneable, Serializable {
 
 	void setDatasets(LscDatasets datasets);
 	
-	LscDatasets getDatasets();
+	LscDatasets datasets();
 	
 	String getMainIdentifier();
 

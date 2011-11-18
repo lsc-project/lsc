@@ -419,8 +419,8 @@ public abstract class LscBean implements IBean,Serializable {
 
 		return null;
 	}
-	
-	public LscDatasets getDatasets()  {
+
+	public LscDatasets datasets()  {
 		return new LscDatasets(datasets);
 	}
 	

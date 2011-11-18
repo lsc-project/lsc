@@ -45,6 +45,7 @@
  */
 package org.lsc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +57,11 @@ import org.lsc.utils.CaseIgnoreStringHashMap;
  * 
  * @author rschermesser
  */
-public class LscDatasets {
+public class LscDatasets implements Serializable {
 
+	/**	 */
+	private static final long serialVersionUID = 746918525778409642L;
+	
 	/** The heart of this class - a map of datasets names to values */
 	protected Map<String, Object> values;
 

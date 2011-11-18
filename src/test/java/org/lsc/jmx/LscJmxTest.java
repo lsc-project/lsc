@@ -145,7 +145,9 @@ public class LscJmxTest extends Thread {
 			sync.setThreads(1);
 			LscServerImpl.startJmx(sync);
 			Ldap2LdapSyncTest.launchSyncCleanTask(TASK_NAME, true, false, false);
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
+			LOGGER.debug(e.toString(), e);
+		} catch (Throwable e) {
 			LOGGER.debug(e.toString(), e);
 		}
 	}

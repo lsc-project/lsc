@@ -132,7 +132,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<tapestry-release-version>5.2.5</tapestry-release-version>
-		<jmockit-version>0.999.10</jmockit-version>
+		<jmockit-version>0.999.11</jmockit-version>
 	</properties>
 
 	<build>
@@ -145,13 +145,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.7.1</version>
+				<version>2.11</version>
 				<configuration>
 					<argLine>-Dcom.sun.management.jmxremote
 						-Dcom.sun.management.jmxremote.port=1099
 						-Dcom.sun.management.jmxremote.authenticate=false
 						-Dcom.sun.management.jmxremote.ssl=false
-						-javaagent:"${settings.localRepository}"/mockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar</argLine>
+						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar</argLine>
+					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
 			</plugin>
 
@@ -162,6 +163,7 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<compilerVersion>1.6</compilerVersion>
 					<encoding>utf-8</encoding>
 				</configuration>
 				<executions>
@@ -438,7 +440,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-		<repository>
+<!-- 		<repository>
 			<id>JBoss repository</id>
 			<url>http://repository.jboss.org/maven2/</url>
 			<releases>
@@ -448,7 +450,7 @@
 				<enabled>false</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
-		</repository>
+		</repository> -->
 		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
@@ -458,13 +460,6 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
-		</repository>
-		<repository>
-			<id>jmockit-svn</id>
-			<url>http://jmockit.googlecode.com/svn/maven-repo</url>
-			<releases>
-				<checksumPolicy>ignore</checksumPolicy>
-			</releases>
 		</repository>
 		<repository>
 			<id>maven.forgerock.org</id>
@@ -658,7 +653,7 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>mockit</groupId>
+			<groupId>com.googlecode.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
 			<version>${jmockit-version}</version>
 			<scope>test</scope>
@@ -666,7 +661,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
+			<version>4.10</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -719,11 +714,6 @@
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-core-integ</artifactId>
 	      <version>1.5.7</version>
-	    </dependency>  
-	    <dependency>
-	      <groupId>commons-io</groupId>
-	      <artifactId>commons-io</artifactId>
-	      <version>1.4</version>
 	    </dependency>
 	</dependencies>
 

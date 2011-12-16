@@ -105,9 +105,13 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 
 		if (result == null) {
 			return null;
+		} else if (result instanceof String) {
+			return (String)result;
+		} else {
+			return result.toString();
 		}
 
-		return (String) Context.jsToJava(result, String.class);
+//		return (String) Context.jsToJava(result, String.class);
 	}
 
 	public List<String> evalToStringList(final Task task, final String expression,

@@ -90,7 +90,26 @@ public class LscJmxTest extends Thread {
 	}
 	
 	@Test
-	public final void testList() throws Exception {
+	public final void test1SyncByObject() throws Exception {
+
+//		Thread syncThread = new Thread(this);
+		this.start(); 
+		Thread.sleep(3500);
+
+		LscAgent lscAgent = new LscAgent();
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
+		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
+				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
+		Map<String, List<String>> values = new HashMap<String, List<String>>();
+		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
+		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
+		values.put("objectClass", Arrays.asList(new String[] {"person", "top"}));
+		Assert.assertTrue(lscAgent.syncByObject(TASK_NAME, DN_ADD_DST, values));
+	}
+	
+	@Test
+	public final void test2List() throws Exception {
 		clean();
 		assertTrue(jndiServices.exists(DN_ADD_SRC));
 		assertFalse(jndiServices.exists(DN_ADD_DST));
@@ -116,25 +135,6 @@ public class LscJmxTest extends Thread {
 		syncThread.interrupt();
 	}
 
-	@Test
-	public final void testSyncByObject() throws Exception {
-
-//		Thread syncThread = new Thread(this);
-		this.start(); 
-		Thread.sleep(3500);
-
-		LscAgent lscAgent = new LscAgent();
-		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
-		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
-		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
-				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
-		Map<String, List<String>> values = new HashMap<String, List<String>>();
-		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
-		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
-		values.put("objectClass", Arrays.asList(new String[] {"person", "top"}));
-		Assert.assertTrue(lscAgent.syncByObject(TASK_NAME, DN_ADD_DST, values));
-	}
-	
 	public void run() {
 		try {
 			SimpleSynchronize sync = new SimpleSynchronize();

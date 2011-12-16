@@ -57,6 +57,7 @@ import java.util.Set;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.Rdn;
 
@@ -110,15 +111,16 @@ public abstract class LscBean implements IBean, Serializable {
 	 *            the name
 	 * @return the LDAP attribute
 	 */
-	public final Attribute getDatasetById(final String id) {
+	public final Set<Object> getDatasetById(final String id) {
 		// use lower case since attribute names are case-insensitive
-		return SetUtils.setToAttribute(id, datasets.get(id.toLowerCase()));
+		return datasets.get(id.toLowerCase());
 	}
 
 	@Deprecated
 	public final Attribute getAttributeById(final String id) {
 		LOGGER.warn("The method getAttributeById() is deprecated and will be removed in a future version of LSC. Please use getDatasetById() instead.");
-		return getDatasetById(id);
+		Set<Object> values = getDatasetById(id);
+		return (values != null ? new BasicAttribute(id, values) : null);
 	}
 
 	/**

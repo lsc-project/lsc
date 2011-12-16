@@ -670,7 +670,7 @@ class SynchronizeTask implements Runnable {
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
 				for(String datasetName: entry.getAttributesNames()) {
-					entryDatasets.getDatasets().put(datasetName, entry.getAttributeById(datasetName).get());
+					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
 				dstBean = task.getDestinationService().getBean(entry.getDistinguishedName(), entryDatasets, false);
 			}

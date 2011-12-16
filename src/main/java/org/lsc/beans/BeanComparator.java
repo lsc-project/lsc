@@ -56,6 +56,7 @@ import java.util.Set;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
 
 import org.lsc.Configuration;
 import org.lsc.LscDatasetModification;
@@ -268,20 +269,24 @@ public final class BeanComparator {
 							new Object[]{logPrefix, attrName, attrStatus});
 
 			// Get the current attribute values from source and destination
-			Attribute srcAttr = (itmBean != null ? itmBean.getAttributeById(attrName) : null);
-			Attribute dstAttr = (dstBean != null ? dstBean.getAttributeById(attrName) : null);
+			Set<Object> srcAttrValues = (itmBean != null && itmBean.getDatasetById(attrName)!= null ? itmBean.getDatasetById(attrName) : new HashSet<Object>());
+			Set<Object> dstAttrValues = (dstBean != null && dstBean.getDatasetById(attrName)!= null ? dstBean.getDatasetById(attrName) : new HashSet<Object>());
+			Attribute srcAttr = (itmBean != null ? new BasicAttribute(attrName, srcAttrValues) : null);
+			Attribute dstAttr = (dstBean != null ? new BasicAttribute(attrName, dstAttrValues) : null);
 
 			// Add attributes to JavaScript objects
-			if (srcAttr != null) {
+			if (srcAttrValues != null) {
+				javaScriptObjects.put("srcValues", srcAttrValues);
 				javaScriptObjects.put("srcAttr", srcAttr);
 			}
-			if (dstAttr != null) {
+			if (dstAttrValues != null) {
+				javaScriptObjects.put("dstValues", dstAttrValues);
 				javaScriptObjects.put("dstAttr", dstAttr);
 			}
 
-			// Use a list of values for easier handling
-			Set<Object> srcAttrValues = SetUtils.attributeToSet(srcAttr);
-			Set<Object> dstAttrValues = SetUtils.attributeToSet(dstAttr);
+//			// Use a list of values for easier handling
+//			Set<Object> srcAttrValues = SetUtils.attributeToSet(srcAttr);
+//			Set<Object> dstAttrValues = SetUtils.attributeToSet(dstAttr);
 
 			// Get list of values that the attribute should be set to in the destination
 			Set<Object> toSetAttrValues = getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, modType);

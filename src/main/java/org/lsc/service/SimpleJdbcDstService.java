@@ -52,8 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.naming.NamingException;
-
 import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
@@ -166,17 +164,13 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	}
 
 	private Map<String, Object> fillAttributesMap(
-			Map<String, Object> attributeMap, IBean destinationBean) {
+			Map<String, Object> datasets, IBean destinationBean) {
 		for(String attributeName : destinationBean.getAttributesNames()) {
-			if(!attributeMap.containsKey(attributeName)) {
-				try {
-					attributeMap.put(attributeName, destinationBean.getAttributeById(attributeName).get());
-				} catch (NamingException e) {
-					// Nothing there
-				}
+			if(!datasets.containsKey(attributeName)) {
+				datasets.put(attributeName, destinationBean.getDatasetById(attributeName));
 			}
 		}
-		return attributeMap;
+		return datasets;
 	}
 
 	private Map<String, Object> getAttributesMap(

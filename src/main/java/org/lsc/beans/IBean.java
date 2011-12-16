@@ -83,6 +83,8 @@ public interface IBean extends Cloneable, Serializable {
 	 */
 	Attribute getAttributeById(final String id);
 
+	Set<Object> getDatasetById(final String id);
+
 	/**
 	 * Get an attribute from its name as a Set.
 	 *

@@ -528,7 +528,7 @@ public class Configuration {
 		}
 		
 		// WARNING: don't log anything before HERE!
-		LOGGER.debug("LSC configuration successfully loaded from {}", Configuration.getConfigurationDirectory());
+		LOGGER.info("LSC configuration successfully loaded from {}", Configuration.getConfigurationDirectory());
 	}
 	
 	/**
@@ -577,7 +577,9 @@ public class Configuration {
 		csvLayout.setAttrs(audit.getDatasets());
 		csvLayout.setSeparator(audit.getSeparator());
 		csvLayout.setOutputHeader(audit.isOutputHeader());
-		csvLayout.setTaskNames(audit.getTaskNames().getString().toArray(new String[audit.getTaskNames().getString().size()]));
+		if(audit.getTaskNames() != null && audit.getTaskNames().getString() != null) {
+			csvLayout.setTaskNames(audit.getTaskNames().getString().toArray(new String[audit.getTaskNames().getString().size()]));
+		}
 		csvLayout.setContext(context);
 		csvLayout.start();
 
@@ -598,7 +600,9 @@ public class Configuration {
 
 		LdifLayout ldifLayout = new LdifLayout();
 		ldifLayout.setLogOperations(audit.getOperations());
-		ldifLayout.setOnlyLdif(audit.isLogOnlyLdif());
+		if(audit.isLogOnlyLdif() != null) {
+			ldifLayout.setOnlyLdif(audit.isLogOnlyLdif());
+		}
 		ldifLayout.setContext(context);
 		ldifLayout.start();
 

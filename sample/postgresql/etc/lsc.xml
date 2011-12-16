@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1" revision="0">
   <connections id="2">
-    <connection class="ldapConnection" id="3">
+    <ldapConnection id="3">
       <id>ldap-src-conn</id>
       <url>ldap://192.168.18.128:389/dc=lsc-project,dc=org</url>
       <username>cn=Manager,dc=lsc-project,dc=org</username>
@@ -13,44 +13,34 @@
       <pageSize>-1</pageSize>
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
-    </connection>
-    <connection class="databaseConnection" id="4">
+    </ldapConnection>
+    <databaseConnection id="4">
       <id>ldap-dst-conn</id>
       <url>jdbc:postgresql://127.0.0.1:5432/lsc</url>
       <username>lsc</username>
       <password>lsc</password>
       <driver>org.postgresql.Driver</driver>
-    </connection>
+    </databaseConnection>
   </connections>
   <audits id="5">
-	<audit class="csvAudit">
+	<csvAudit>
 		<name>csv</name>
+		<append>true</append>
 		<operations>create, delete</operations>
 		<datasets>cn, dn</datasets>
 		<separator>;</separator>
-		<append>true</append>
-	</audit>
-	<audit class="ldifAudit">
+	</csvAudit>
+	<ldifAudit>
 		<name>ldif</name>
 		<append>false</append>
-	</audit>
+	</ldifAudit>
   </audits>
   <tasks>
     <task>
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <destinationService class="databaseDestinationService">
-        <name>postgresql-src-service</name>
-        <connection reference="4" />
-       	<requestsNameForInsert><string>insertInetOrgPerson</string></requestsNameForInsert>
-       	<requestsNameForUpdate><string>updateInetOrgPerson</string></requestsNameForUpdate>
-       	<requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
-       	<requestNameForObject>getInetOrgPerson</requestNameForObject>
-       	<requestNameForList>getInetOrgPersonList</requestNameForList>
-      </destinationService>
-      <sourceService class="syncreplSourceService" id="11">
+      <asyncLdapSourceService>
         <name>openldap-source-service</name>
-        <serverType>OpenLDAP</serverType>
         <connection reference="3" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
@@ -67,13 +57,22 @@
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </sourceService>
-      <syncOptions class="propertiesBasedSyncOptions" id="12">
-        <conditions id="13"></conditions>
+        <serverType>OpenLDAP</serverType>
+      </asyncLdapSourceService>
+      <databaseDestinationService>
+        <name>postgresql-src-service</name>
+        <connection reference="4" />
+       	<requestNameForList>getInetOrgPersonList</requestNameForList>
+       	<requestNameForObject>getInetOrgPerson</requestNameForObject>
+       	<requestsNameForInsert><string>insertInetOrgPerson</string></requestsNameForInsert>
+       	<requestsNameForUpdate><string>updateInetOrgPerson</string></requestsNameForUpdate>
+       	<requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
+      </databaseDestinationService>
+      <propertiesBasedSyncOptions>
         <mainIdentifier>"mail="+srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
-      </syncOptions>
+      </propertiesBasedSyncOptions>
     </task>
   </tasks>
 </lsc>

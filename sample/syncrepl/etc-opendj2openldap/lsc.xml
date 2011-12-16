@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1" revision="0">
   <connections id="2">
     <connection class="ldapConnection" id="3">
       <id>ldap-dst-conn</id>

@@ -48,7 +48,6 @@ package org.lsc.jmx;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -61,8 +60,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.lsc.Ldap2LdapSyncTest;
 import org.lsc.SimpleSynchronize;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -86,7 +85,8 @@ public class LscJmxTest extends Thread {
 	
 	@Before
 	public void setup() {
-		jndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		jndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
 	
 	@Test
@@ -131,10 +131,7 @@ public class LscJmxTest extends Thread {
 		Map<String, List<String>> values = new HashMap<String, List<String>>();
 		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
 		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
-		List<String> objectClassValues = new ArrayList<String>();
-		objectClassValues.add("person");
-		objectClassValues.add("top");
-		values.put("cn", objectClassValues);
+		values.put("objectClass", Arrays.asList(new String[] {"person", "top"}));
 		Assert.assertTrue(lscAgent.syncByObject(TASK_NAME, DN_ADD_DST, values));
 	}
 	

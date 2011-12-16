@@ -45,12 +45,13 @@
 package org.lsc;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.beans.syncoptions.SyncOptionsFactory;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.TaskType;
+import org.lsc.exception.LscConfigurationException;
 import org.lsc.service.IService;
 import org.lsc.service.IWritableService;
 import org.slf4j.Logger;
@@ -81,45 +82,46 @@ public class Task {
 
 	private ISyncOptions syncOptions;
 	
-	private Object customLibrary;
+	private Object[] customLibraries;
 
 	private String cleanHook;
 	
 	private String syncHook;
 	
-	public Task(org.lsc.configuration.objects.Task t) {
+	public Task(TaskType t) throws LscConfigurationException {
 		this.name = t.getName();
 		try {
 			cleanHook = t.getCleanHook();
 			syncHook = t.getSyncHook();
 			
 			// Instantiate the destination service from properties
-			Constructor<?> constr = t.getDestinationService().getImplementation().getConstructor(new Class[]{org.lsc.configuration.objects.Task.class});
+			if (LscConfiguration.getSourceService(t) == null) {
+				throw new LscConfigurationException("Missing source service for task=" + t.getName());
+			} else if(LscConfiguration.getDestinationService(t) == null) {
+				throw new LscConfigurationException("Missing destination service for task=" + t.getName());
+			}
+			Constructor<?> constr = LscConfiguration.getServiceImplementation(LscConfiguration.getDestinationService(t)).getConstructor(new Class[]{TaskType.class});
 			destinationService = (IWritableService) constr.newInstance(new Object[]{t});
 	
 			// Instantiate custom JavaScript library from properties
-			if (t.getCustomLibrary() != null) {
-				String custumLibraryClassName = t.getCustomLibrary();
-				customLibrary = Class.forName(custumLibraryClassName).newInstance();
+			if (t.getCustomLibrary() != null && t.getCustomLibrary().getString() != null) {
+				customLibraries = new Object[t.getCustomLibrary().getString().size()];
+				int customLibrariesIndex = 0;
+				for(String custumLibraryClassName: t.getCustomLibrary().getString()) {
+					customLibraries[customLibrariesIndex++] = Class.forName(custumLibraryClassName).newInstance();
+				}
 			}
 	
 			// Instantiate source service and pass parameters
-			Constructor<?> constrSrcService = t.getSourceService().getImplementation().getConstructor(new Class[]{org.lsc.configuration.objects.Task.class});
+			Constructor<?> constrSrcService = LscConfiguration.getServiceImplementation(LscConfiguration.getSourceService(t)).getConstructor(new Class[]{TaskType.class});
 			sourceService = (IService) constrSrcService.newInstance(new Object[]{t});
 	
 			initializeSyncOptions(t);
 		// Manage exceptions
+		} catch (LscConfigurationException e) {
+			throw e;
 		} catch (Exception e) {
-			Class<?>[] exceptionsCaught = {InstantiationException.class, IllegalAccessException.class,
-				ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,
-				IllegalArgumentException.class, InvocationTargetException.class};
-
-			if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
-				LOGGER.error("Error while launching the following task: {}. Please check your code ! ({})", name, e.getCause().getMessage());
-				LOGGER.debug(e.toString(), e);
-			} else {
-				throw new RuntimeException(e.toString(), e);
-			}
+			throw new LscConfigurationException(e);
 		}
 
 	}
@@ -128,8 +130,9 @@ public class Task {
 	 * @param t 
 	 * @param syncName
 	 * @return ISyncOptions syncoptions object for the specified syncName
+	 * @throws LscConfigurationException 
 	 */
-	protected void initializeSyncOptions(org.lsc.configuration.objects.Task t) {
+	protected void initializeSyncOptions(TaskType t) throws LscConfigurationException {
 		syncOptions = SyncOptionsFactory.convert(t);
 
 		if (syncOptions == null) {
@@ -166,7 +169,7 @@ public class Task {
 		return syncOptions;
 	}
 
-	public Object getCustomLibrary() {
-		return customLibrary;
+	public Object[] getCustomLibraries() {
+		return customLibraries;
 	}
 }

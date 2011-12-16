@@ -53,8 +53,7 @@ import javax.naming.NamingException;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.services.DstLdap;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 
 /**
@@ -70,8 +69,8 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * @param task the task parameter - unused
 	 * @throws LscServiceConfigurationException 
 	 */
-	public EmptyJndiDstService(final Task task) throws LscServiceConfigurationException {
-		super((DstLdap)task.getDestinationService());
+	public EmptyJndiDstService(final TaskType task) throws LscServiceConfigurationException {
+		super(task.getLdapDestinationService());
 	}
 
 	@Deprecated

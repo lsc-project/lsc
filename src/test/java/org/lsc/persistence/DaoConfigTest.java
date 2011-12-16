@@ -58,9 +58,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.lsc.configuration.PropertiesConfigurationHelper;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.Database;
+import org.lsc.configuration.DatabaseConnectionType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
@@ -77,8 +76,8 @@ public class DaoConfigTest {
 
 	@Before
 	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, ConfigurationException, LscConfigurationException {
-		PropertiesConfigurationHelper.loadConfigurationFrom("etc/lsc.properties");
-		Database pc = (Database) LscConfiguration.getConnection("src-jdbc");
+		LscConfiguration.reset();
+		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
 		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
 		Class.forName(pc.getDriver()).newInstance();
@@ -100,7 +99,7 @@ public class DaoConfigTest {
 
 	@Test
 	public final void testGetSqlMapClient() throws LscServiceConfigurationException {
-		assertNotNull(DaoConfig.getSqlMapClient((Database)LscConfiguration.getConnection("src-jdbc")));
+		assertNotNull(DaoConfig.getSqlMapClient((DatabaseConnectionType)LscConfiguration.getConnection("src-jdbc")));
 	}
 
 	/**

@@ -41,16 +41,21 @@ public class ScriptingEvaluator {
 		ScriptEngineManager mgr = new ScriptEngineManager();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
 		for (ScriptEngineFactory sef : factories) {
+			boolean loaded = true;
 			for (String name : sef.getNames()) {
 				if ("js".equals(name)) {
 					instancesCache.put(name,
 							new JScriptEvaluator(sef.getScriptEngine()));
+					break;
 				} else if ("groovy".equals(name)) {
 					instancesCache.put("gr",
 							new GroovyEvaluator(sef.getScriptEngine()));
-				} else {
-					LOGGER.debug("Unsupported scripting engine: " + name);
+					break;
 				}
+				loaded = false;
+			}
+			if(!loaded) {
+				LOGGER.debug("Unsupported scripting engine: " + sef.getEngineName());
 			}
 		}
 		defaultImplementation = new JScriptEvaluator(

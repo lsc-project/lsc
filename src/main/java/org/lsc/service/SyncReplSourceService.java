@@ -82,11 +82,11 @@ import org.apache.directory.shared.ldap.message.control.replication.Synchronizat
 import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.connection.directory.AliasesHandling;
-import org.lsc.configuration.objects.connection.directory.Ldap;
-import org.lsc.configuration.objects.services.ServerType;
-import org.lsc.configuration.objects.services.SyncReplServiceConfiguration;
+import org.lsc.configuration.AsyncLdapSourceServiceType;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdapDerefAliasesType;
+import org.lsc.configuration.LdapServerType;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
@@ -104,28 +104,28 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 
 	private LdapConnection connection;
 	
-	private Ldap ldapConn;
+	private LdapConnectionType ldapConn;
 	
-	private SyncReplServiceConfiguration srsc;
+	private AsyncLdapSourceServiceType srsc;
 	
 	/** The interval in seconds */
 	private int interval;
 	
 	private SearchFuture sf;
 
-	public SyncReplSourceService(final Task task)
+	public SyncReplSourceService(final TaskType task)
 			throws LscServiceConfigurationException {
 		super(task);
+		srsc = task.getAsyncLdapSourceService();
  		// Default interval
-		interval = Integer.parseInt(task.getOtherSetting("interval", "5"));
+		interval = (srsc.getInterval() != null ? srsc.getInterval().intValue() : 5);
 		
-		srsc = (SyncReplServiceConfiguration)task.getSourceService();
-		ldapConn = (Ldap) srsc.getConnection();
+		ldapConn = (LdapConnectionType) srsc.getConnection().getReference();
 		
 		connection = getConnection(ldapConn);
 	}
 
-	public static LdapConnection getConnection(Ldap ldapConn) throws LscServiceConfigurationException {
+	public static LdapConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
 		LdapConnectionConfig lcc = new LdapConnectionConfig();
 		LdapURL url;
 		try {
@@ -241,7 +241,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				searchRequest.add(getSearchContinuationControl(srsc.getServerType()));
 				searchRequest.setBaseDn(getBaseDn());
 				searchRequest.setFilter(getFilterAll());
-				searchRequest.setDerefAliases(getAlias(ldapConn.getAliasesHandling()));
+				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
 				searchRequest.setScope(SearchScope.SUBTREE);
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
 				sf = getConnection(ldapConn).searchAsync(searchRequest);
@@ -268,7 +268,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 	}
 
-	private AliasDerefMode getAlias(AliasesHandling aliasesHandling) {
+	private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
 		switch(aliasesHandling) {
 		case ALWAYS:
 			return AliasDerefMode.DEREF_ALWAYS;
@@ -282,24 +282,24 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 	}
 
-	public static Control getSearchContinuationControl(ServerType serverType) throws LscServiceConfigurationException {
+	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
 		switch(serverType) {
-		case OpenLDAP:
-		case ApacheDS:
+		case OPEN_LDAP:
+		case APACHE_DS:
 			SyncRequestValueControl syncControl = new SyncRequestValueControl();
 			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
 			return syncControl;
-		case OpenDS:
-		case OpenDJ:
-		case OracleDS:
-		case SunDS:
-		case NetscapeDS:
-		case NovellEDirectory:
+		case OPEN_DS:
+		case OPEN_DJ:
+		case ORACLE_DS:
+		case SUN_DS:
+		case NETSCAPE_DS:
+		case NOVELL_E_DIRECTORY:
 			PersistentSearchControl searchControl = new PersistentSearchControl();
 			searchControl.setChangesOnly(true);
 			searchControl.setChangeTypes(ChangeType.ADD_VALUE + ChangeType.DELETE_VALUE + ChangeType.MODDN_VALUE + ChangeType.MODIFY_VALUE);
 			return searchControl;
-		case ActiveDirectory:
+		case ACTIVE_DIRECTORY:
 			Control notificationControl = new ControlImpl("1.2.840.113556.1.4.528");
 			notificationControl.setCritical(true);
 			return notificationControl;

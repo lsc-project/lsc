@@ -45,13 +45,12 @@
  */
 package org.lsc.beans.syncoptions;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import org.lsc.LscModificationType;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.configuration.PolicyType;
+import org.lsc.configuration.TaskType;
 
 /**
  * Always return a Force status.
@@ -62,10 +61,10 @@ public class ForceSyncOptions implements ISyncOptions {
 	/**
 	 * The name of the task
 	 */
-	private Task task;
+	private TaskType task;
 
-	public final STATUS_TYPE getStatus(final String id, final String attributeName) {
-		return STATUS_TYPE.FORCE;
+	public final PolicyType getStatus(final String id, final String attributeName) {
+		return PolicyType.FORCE;
 	}
 
 	public final String getDefaultValue(final String id, final String attributeName) {
@@ -77,7 +76,7 @@ public class ForceSyncOptions implements ISyncOptions {
 	}
 
 	@Override
-	public final void initialize(Task task) {
+	public final void initialize(TaskType task) {
 		 this.task = task;
 	}
 
@@ -102,8 +101,7 @@ public class ForceSyncOptions implements ISyncOptions {
 	}
 
 	public List<String> getWriteAttributes() {
-		String[] attrs = ((Ldap)task.getDestinationService()).getFetchedAttributes();
-		return (attrs != null ? Arrays.asList(attrs) : null);
+		return task.getLdapDestinationService().getFetchedAttributes().getString();
 	}
 
 	public String getTaskName() {

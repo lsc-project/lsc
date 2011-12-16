@@ -57,7 +57,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.TaskType;
+import org.lsc.exception.LscConfigurationException;
 import org.lsc.jmx.LscServerImpl;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.utils.LSCStructuralLogger;
@@ -93,9 +95,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		cache = new HashMap<String, Task>();
 	}
 	
-	public void init() {
-		Collection<org.lsc.configuration.objects.Task> tasks = LscConfiguration.getTasks();
-		for(org.lsc.configuration.objects.Task t: tasks) {
+	public void init() throws LscConfigurationException {
+		Collection<TaskType> tasks = LscConfiguration.getTasks();
+		for(TaskType t: tasks) {
 			cache.put(t.getName(), new Task(t));
 		}
 	}

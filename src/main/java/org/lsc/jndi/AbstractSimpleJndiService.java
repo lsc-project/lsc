@@ -61,7 +61,8 @@ import javax.naming.directory.SearchResult;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdapServiceType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
@@ -155,17 +156,17 @@ public abstract class AbstractSimpleJndiService {
 	 * @param ldapService The Ldap settings object
 	 * @throws LscServiceConfigurationException 
 	 */
-	public AbstractSimpleJndiService(final Ldap ldapService) throws LscServiceConfigurationException {
+	public AbstractSimpleJndiService(final LdapServiceType ldapService) throws LscServiceConfigurationException {
 		baseDn = ldapService.getBaseDn();
 		filterIdSync = ldapService.getGetOneFilter();
 		filterAll = ldapService.getGetAllFilter();
 		_filteredSc = new SearchControls();
-		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes());
-		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().length); 
-		for(String pivotAttr : ldapService.getPivotAttributes()) {
+		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(new String[ldapService.getFetchedAttributes().getString().size()] ));
+		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 
+		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
 			attrsId.add(pivotAttr);
 		}
-		jndiServices = JndiServices.getInstance((org.lsc.configuration.objects.connection.directory.Ldap)ldapService.getConnection());
+		jndiServices = JndiServices.getInstance((LdapConnectionType)ldapService.getConnection().getReference());
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
 			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
 		}

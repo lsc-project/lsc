@@ -51,14 +51,9 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.lsc.Configuration;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.connection.Database;
-import org.lsc.configuration.objects.connection.directory.AuthenticationType;
-import org.lsc.configuration.objects.connection.directory.Ldap;
-import org.lsc.configuration.objects.security.Encryption;
-import org.lsc.configuration.objects.security.Security;
 import org.lsc.exception.LscConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Properties configuration loader
@@ -66,6 +61,8 @@ import org.lsc.exception.LscConfigurationException;
  */
 public class PropertiesConfigurationHelper {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesConfigurationHelper.class);
+	
 	/** lsc prefix. */
 	public static final String LSC_PROPS_PREFIX = "lsc";
 
@@ -106,66 +103,154 @@ public class PropertiesConfigurationHelper {
 	 */
 	@SuppressWarnings("deprecation")
 	public static void loadConfigurationFrom(String filename) throws LscConfigurationException {
-		LscConfiguration.reinitialize();
+		Lsc lscInstance = new Lsc();
 		Properties conf = org.lsc.Configuration.getAsProperties(filename, LSC_PROPS_PREFIX);
 		
         // Get the "lsc.tasks" property
         String tasks = conf.getProperty(TASKS_PROPS_PREFIX);
         
+        lscInstance.setConnections(new ConnectionsType());
+        
         if(org.lsc.Configuration.getString("src.java.naming.provider.url") != null) {
-            Ldap ldapConn = new Ldap();
+        	LdapConnectionType ldapConn = new LdapConnectionType();
             ldapConn.setName("src-ldap");
             ldapConn.setUsername(org.lsc.Configuration.getString("src.java.naming.security.principal"));
             ldapConn.setPassword(org.lsc.Configuration.getString("src.java.naming.security.credentials"));
             if(ldapConn.getUsername() != null) {
-            	ldapConn.setAuthenticationType(AuthenticationType.SIMPLE);
+            	ldapConn.setAuthentication(LdapAuthenticationType.SIMPLE);
             } else {
-            	ldapConn.setAuthenticationType(AuthenticationType.ANONYMOUS);
+            	ldapConn.setAuthentication(LdapAuthenticationType.NONE);
             }
             ldapConn.setUrl(org.lsc.Configuration.getString("src.java.naming.provider.url"));
-            LscConfiguration.addConnection(ldapConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(ldapConn);
         }
 
         if(org.lsc.Configuration.getString("src.database.url") != null)  {
-            Database jdbcConn = new Database();
+            DatabaseConnectionType jdbcConn = new DatabaseConnectionType();
             jdbcConn.setName("src-jdbc");
             jdbcConn.setUsername(org.lsc.Configuration.getString("src.database.username"));
             jdbcConn.setPassword(org.lsc.Configuration.getString("src.database.password"));
             jdbcConn.setUrl(org.lsc.Configuration.getString("src.database.url"));
             jdbcConn.setDriver(org.lsc.Configuration.getString("src.database.driver"));
-            LscConfiguration.addConnection(jdbcConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(jdbcConn);
         }
 
         if(org.lsc.Configuration.getString("dst.java.naming.provider.url") != null) {
-	        Ldap dstConn = new Ldap();
+	        LdapConnectionType dstConn = new LdapConnectionType();
 	        dstConn.setName("dst-ldap");
 	        dstConn.setUsername(org.lsc.Configuration.getString("dst.java.naming.security.principal"));
 	        dstConn.setPassword(org.lsc.Configuration.getString("dst.java.naming.security.credentials"));
 	        if(dstConn.getUsername() != null) {
-	        	dstConn.setAuthenticationType(AuthenticationType.SIMPLE);
+	        	dstConn.setAuthentication(LdapAuthenticationType.SIMPLE);
 	        } else {
-	        	dstConn.setAuthenticationType(AuthenticationType.ANONYMOUS);
+	        	dstConn.setAuthentication(LdapAuthenticationType.NONE);
 	        }
 	        dstConn.setUrl(org.lsc.Configuration.getString("dst.java.naming.provider.url"));
-	        LscConfiguration.addConnection(dstConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(dstConn);
         }
         
+        lscInstance.setTasks(new TasksType());
         if (tasks != null) {
             // Iterate on each task
             StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
     		while (tasksSt.hasMoreTokens()) {
     			String taskName = tasksSt.nextToken();
-    			Task ti = new Task(taskName, conf);
-    			LscConfiguration.addTask(ti);
+    			lscInstance.getTasks().getTask().add(newTask(taskName, conf));
     		}
         }
-        Security sec = new Security();
-        sec.setEncryption(new Encryption());
+        SecurityType sec = new SecurityType();
+        sec.setEncryption(new EncryptionType());
         if(new File(Configuration.getConfigurationDirectory(), "lsc.key").exists()) {
         	sec.getEncryption().setKeyfile(new File(Configuration.getConfigurationDirectory(), "lsc.key").getAbsolutePath());
         }
-        LscConfiguration.getInstance().setSecurity(sec);
+        lscInstance.setSecurity(sec);
         
-        LscConfiguration.finalizeInitialization();
+        LscConfiguration.loadFromInstance(lscInstance);
+	}
+
+	private static TaskType newTask(String taskName, Properties lscProperties) throws LscConfigurationException {
+		TaskType newTask = new TaskType();
+		newTask.setName(taskName);
+
+		String prefix = PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + ".";
+	
+		checkTaskOldProperty(lscProperties, taskName, PropertiesConfigurationHelper.OBJECT_PROPS_PREFIX, "Please take a look at upgrade notes at http://lsc-project.org/wiki/documentation/upgrade/1.1-1.2");
+		newTask.setBean(getTaskPropertyAndCheckNotNull(taskName, lscProperties, PropertiesConfigurationHelper.BEAN_PROPS_PREFIX));
+		newTask.setCleanHook(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.POST_CLEAN_HOOK_PROPS_PREFIX));
+		newTask.setSyncHook(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.POST_SYNC_HOOK_PROPS_PREFIX));
+
+		ConnectionType sourceConn = null;
+		ServiceType sourceService = null;
+		ServiceType destinationService = new LdapDestinationServiceType();
+		if(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.service.SimpleJdbcSrcService")) {
+			sourceConn = LscConfiguration.getConnection("src-jdbc");
+			sourceService = new DatabaseSourceServiceType();
+		} else if (lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.jndi.SimpleJndiSrcService")
+				|| lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX).equals("org.lsc.jndi.PullableJndiSrcService")) {
+			sourceConn = LscConfiguration.getConnection("src-ldap");
+			sourceService = new LdapSourceServiceType();
+		} else {
+			throw new LscConfigurationException("Unknown connection type: " + lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX));
+		}
+		ConnectionType destinationConn = LscConfiguration.getConnection("dst-ldap");
+		String syncOptionsType = lscProperties.getProperty(PropertiesConfigurationHelper.SYNCOPTIONS_PREFIX + "." + taskName, "org.lsc.beans.syncoptions.ForceSyncOptions");
+		sourceService.setName(taskName + "-src");
+		Properties srcProps = Configuration.getPropertiesSubset(lscProperties, prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX);
+		for(Object srcProp :  srcProps.keySet()) {
+			//sourceService.setOtherSetting((String)srcProp, srcProps.getProperty((String)srcProp));
+			LOGGER.warn("Unhandled property to set up source service: " + srcProp);
+		}
+		sourceService.setConnection(new ServiceType.Connection());
+		sourceService.getConnection().setReference(sourceConn);
+		
+		destinationService.setName(taskName + "-dst");
+		Properties dstProps = Configuration.getPropertiesSubset(lscProperties, prefix + PropertiesConfigurationHelper.DSTSERVICE_PROPS_PREFIX);
+		for(Object dstProp :  dstProps.keySet()) {
+			//destinationService.setOtherSetting((String)dstProp, dstProps.getProperty((String)dstProp));
+			LOGGER.warn("Unhandled property to set up destination service: " + dstProp);
+		}
+		destinationService.setConnection(new ServiceType.Connection());
+		destinationService.getConnection().setReference(destinationConn);
+
+		SyncOptionsType syncOptions = null;
+		if(syncOptionsType == null || 
+				"org.lsc.beans.syncoptions.PropertiesBasedSyncOptions".equals(syncOptionsType)) {
+			newTask.setPropertiesBasedSyncOptions(new PropertiesBasedSyncOptionsType());
+		} else if ("org.lsc.beans.syncoptions.ForceSyncOptions".equals(syncOptionsType)) {
+			newTask.setForceSyncOptions(new ForceSyncOptionsType());
+		} else {
+			throw new LscConfigurationException("Unknown sync options type: " + lscProperties.getProperty(prefix + PropertiesConfigurationHelper.SRCSERVICE_PROPS_PREFIX));
+		}
+		ValuesType customLibraries = new ValuesType();
+		if(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.CUSTOMLIBRARY_PROPS_PREFIX) != null) {
+			customLibraries.getString().add(lscProperties.getProperty(prefix + PropertiesConfigurationHelper.CUSTOMLIBRARY_PROPS_PREFIX));
+		}
+		newTask.setCustomLibrary(customLibraries);
+		
+		LscConfiguration.getSyncOptions(newTask).setMainIdentifier(lscProperties.getProperty(prefix + "dn"));
+		
+		LscConfiguration.loadSyncOptions(newTask, taskName, Configuration.getPropertiesSubset(lscProperties, PropertiesConfigurationHelper.SYNCOPTIONS_PREFIX + "." + taskName));
+		
+		return newTask;
+	}
+	
+	private static void checkTaskOldProperty(Properties props, String taskName, String propertyName, String message) {
+		if (props.getProperty(PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName) != null) {
+			String errorMessage = "Deprecated value specified in task " + taskName + " for " + propertyName + "! Please read upgrade notes ! (" + message + ")";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+	}
+
+	private static String getTaskPropertyAndCheckNotNull(String taskName, Properties props, String propertyName) {
+		String value = props.getProperty(PropertiesConfigurationHelper.TASKS_PROPS_PREFIX + "." + taskName + "." + propertyName);
+
+		if (value == null) {
+			String errorMessage = "No value specified in task " + taskName + " for " + propertyName + "! Aborting.";
+			LOGGER.error(errorMessage);
+			throw new ExceptionInInitializerError(errorMessage);
+		}
+
+		return value;
 	}
 }

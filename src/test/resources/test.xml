@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<lsc  xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="1">
 	<connections>
-		<connection class="ldapConnection" id="3">
-			<id>src-ldap</id>
+		<ldapConnection id="src-ldap">
+			<name>src-ldap</name>
 			<url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
 			<username>cn=Directory Manager</username>
 			<password>secret</password>
@@ -13,16 +13,16 @@
 			<pageSize>-1</pageSize>
 			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 			<tlsActivated>false</tlsActivated>
-		</connection>
-		<connection class="databaseConnection" id="4">
-			<id>src-jdbc</id>
+		</ldapConnection>
+		<databaseConnection id="src-jdbc">
+			<name>src-jdbc</name>
 			<url>jdbc:hsqldb:file:hsqldb/lsc</url>
 			<username>sa</username>
 			<password/>
 			<driver>org.hsqldb.jdbcDriver</driver>
-		</connection>
-		<connection class="ldapConnection" id="5">
-			<id>dst-ldap</id>
+		</databaseConnection>
+		<ldapConnection id="dst-ldap">
+			<name>dst-ldap</name>
 			<url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
 			<username>cn=Directory Manager</username>
 			<password>secret</password>
@@ -33,50 +33,30 @@
 			<pageSize>-1</pageSize>
 			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 			<tlsActivated>false</tlsActivated>
-		</connection>
+		</ldapConnection>
 	</connections>
 	<audits>
-		<audit class="csvAudit" id="7">
+		<csvAudit>
 			<name>csvAudit</name>
+			<append>false</append>
+			<file>$TEMP/log.csv</file>
 			<datasets>cn, sn, givenName</datasets>
 			<separator>;</separator>
-			<append>false</append>
-		</audit>
+		</csvAudit>
 	</audits>
 	<tasks>
-		<task id="9">
+		<task>
 			<name>ldap2ldapTestTask</name>
 			<bean>org.lsc.beans.SimpleBean</bean>
-			<destinationService class="ldapDestinationService" id="10">
-				<name>ldap2ldapTestTask-dst</name>
-				<connection class="ldapConnection" reference="5"/>
-				<baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
-				<pivotAttributes id="11">
-					<string>cn</string>
-					<string>sn</string>
-				</pivotAttributes>
-				<fetchedAttributes id="12">
-					<string>description</string>
-					<string>cn</string>
-					<string>objectClass</string>
-					<string>userPassword</string>
-					<string>sn</string>
-					<string>telephoneNumber</string>
-					<string>seeAlso</string>
-					<string>mail</string>
-				</fetchedAttributes>
-				<getAllFilter>(sn=*)</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
-			</destinationService>
-			<sourceService class="ldapSourceService" id="13">
+			<ldapSourceService>
 				<name>ldap2ldapTestTask-src</name>
-				<connection class="ldapConnection" reference="3"/>
+				<connection reference="src-ldap"/>
 				<baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
-				<pivotAttributes id="14">
+				<pivotAttributes >
 					<string>cn</string>
 					<string>sn</string>
 				</pivotAttributes>
-				<fetchedAttributes id="15">
+				<fetchedAttributes>
 					<string>description</string>
 					<string>cn</string>
 					<string>sn</string>
@@ -89,10 +69,32 @@
 				<filterAsync>(&amp;(sn=*)(modifytimestamp&gt;={0}))</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
-			</sourceService>
-			<syncOptions class="propertiesBasedSyncOptions">
-		        <defaultPolicy>KEEP</defaultPolicy>
+			</ldapSourceService>
+			<ldapDestinationService>
+				<name>ldap2ldapTestTask-dst</name>
+				<connection reference="dst-ldap"/>
+				<baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+				<pivotAttributes>
+					<string>cn</string>
+					<string>sn</string>
+				</pivotAttributes>
+				<fetchedAttributes>
+					<string>description</string>
+					<string>cn</string>
+					<string>objectClass</string>
+					<string>userPassword</string>
+					<string>sn</string>
+					<string>telephoneNumber</string>
+					<string>seeAlso</string>
+					<string>mail</string>
+				</fetchedAttributes>
+				<getAllFilter>(sn=*)</getAllFilter>
+				<getOneFilter>(sn={sn})</getOneFilter>
+			</ldapDestinationService>
+			<propertiesBasedSyncOptions>
+				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
 		        <defaultDelimiter>,</defaultDelimiter>
+		        <defaultPolicy>KEEP</defaultPolicy>
 		        <dataset>
 		          <name>telephoneNumber</name>
 		          <policy>MERGE</policy>
@@ -106,12 +108,12 @@
 		        <dataset>
 		          <name>objectclass</name>
 		          <policy>MERGE</policy>
-		          <createValues>
-		            <string>"inetOrgPerson"</string>
-		          </createValues>
 		          <defaultValues>
 						<string>"person","top"</string>
 		          </defaultValues>
+		          <createValues>
+		            <string>"inetOrgPerson"</string>
+		          </createValues>
 		        </dataset>
 		        <dataset>
 		          <name>initials</name>
@@ -143,22 +145,27 @@
 		            <string>"ok@domain.net"</string>
 		          </createValues>
 		        </dataset>
-				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
-			</syncOptions>
-			<auditLog class="csvAudit" reference="7"/>
+			</propertiesBasedSyncOptions>
+			<auditLog reference="csvAudit"/>
 		</task>
-		<task id="21">
+		<task>
 			<name>db2ldapTestTask</name>
 			<bean>org.lsc.beans.SimpleBean</bean>
-			<destinationService class="ldapDestinationService" id="22">
+			<databaseSourceService>
+				<name>db2ldapTestTask-src</name>
+				<connection reference="src-jdbc"/>
+				<requestNameForList>getListTestDb2Ldap</requestNameForList>
+				<requestNameForObject>getObjectTestDb2Ldap</requestNameForObject>
+			</databaseSourceService>
+			<ldapDestinationService>
 				<name>db2ldapTestTask-dst</name>
-				<connection class="ldapConnection" reference="5"/>
+				<connection reference="dst-ldap"/>
 				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
-				<pivotAttributes id="23">
+				<pivotAttributes>
 					<string>givenName</string>
 					<string>sn</string>
 				</pivotAttributes>
-				<fetchedAttributes id="24">
+				<fetchedAttributes>
 					<string>description</string>
 					<string>cn</string>
 					<string>objectClass</string>
@@ -168,16 +175,11 @@
 				</fetchedAttributes>
 				<getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
 				<getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
-			</destinationService>
-			<sourceService class="databaseSourceService" id="25">
-				<name>db2ldapTestTask-src</name>
-				<connection class="databaseConnection" reference="4"/>
-				<requestNameForObject>getObjectTestDb2Ldap</requestNameForObject>
-				<requestNameForList>getListTestDb2Ldap</requestNameForList>
-			</sourceService>
-			<syncOptions class="propertiesBasedSyncOptions" id="26">
-		        <defaultPolicy>KEEP</defaultPolicy>
+			</ldapDestinationService>
+			<propertiesBasedSyncOptions>
+				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
 		        <defaultDelimiter>,</defaultDelimiter>
+		        <defaultPolicy>KEEP</defaultPolicy>
 		        <dataset>
 		          <name>telephoneNumber</name>
 		          <policy>MERGE</policy>
@@ -211,6 +213,7 @@
 		        </dataset>
 		        <dataset>
 		          <name>mail</name>
+		          <policy>KEEP</policy>
 		          <createValues>
 		            <string>"ok@domain.net"</string>
 		          </createValues>
@@ -222,8 +225,7 @@
 		            <string>srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn")</string>
 		          </forceValues>
 		        </dataset>
-				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
-			</syncOptions>
+			</propertiesBasedSyncOptions>
 		</task>
 	</tasks>
 </lsc>

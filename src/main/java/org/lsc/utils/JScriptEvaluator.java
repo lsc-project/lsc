@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +58,7 @@ import org.lsc.Task;
 import org.lsc.jndi.AbstractSimpleJndiService;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.EcmaError;
+import org.mozilla.javascript.UniqueTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,40 +107,45 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 			return null;
 		}
 
-		return Context.toString(result);
+		return (String) Context.jsToJava(result, String.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<String> evalToStringList(final Task task, final String expression,
 					final Map<String, Object> params) {
-		Object result = instanceEval(task, expression, params);
+		Object result = convertJsToJava(instanceEval(task, expression, params));
 
-		// First try to convert to Array, else to List, and finally to String
-		try {
-			Object[] resultsRealArray = (Object[]) Context.jsToJava(result, Object[].class);
+		if(result instanceof String[] || result instanceof Object[] ) {
 			List<String> resultsArray = new ArrayList<String>();
-			for (Object resultValue : resultsRealArray) {
+			for (Object resultValue : (Object[])result) {
 				resultsArray.add(resultValue.toString());
 			}
 			return resultsArray;
-		} catch (Exception e) {
-		} // try next approach
-
-		try {
-			return (List<String>) Context.jsToJava(result, List.class);
-		} catch (Exception e) {
-		} // try next approach
-
-		List<String> resultsArray = new ArrayList<String>();
-		String resultAsString = Context.toString(result);
-		if (resultAsString != null && resultAsString.length() > 0) {
-			resultsArray.add(resultAsString);
+		} else if (result instanceof String) {
+			List<String> resultsArray = new ArrayList<String>();
+			String resultAsString = (String)result;
+			if (resultAsString != null && resultAsString.length() > 0) {
+				resultsArray.add(resultAsString);
+			}
+			return resultsArray;
+		} else if (result instanceof List) {
+			List<String> resultsArray = new ArrayList<String>();
+			for (Object resultValue : (List<?>)result) {
+				resultsArray.add(resultValue.toString());
+			}
+			return resultsArray;
+		} else if(result == null){
+			return null;
+		} else {
+			List<String> resultsArray = new ArrayList<String>();
+			if (result != null) {
+				resultsArray.add(result.toString());
+			}
+			return resultsArray;
 		}
-		return resultsArray;
 	}
 
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
-		return Context.toBoolean(instanceEval(task, expression, params));
+		return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
 	}
 
 	/**
@@ -193,10 +200,6 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		Object ret = null;
 		try {
 			ret = engine.eval(expressionImport, bindings);
-		} catch (EcmaError e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-			return null;
 		} catch (RuntimeException e) {
 			throw e;
 		} catch (Exception e) {
@@ -206,5 +209,43 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		}
 
 		return ret;
+	}
+	
+	private static Object convertJsToJava(Object src) {
+		if (src == null) {
+			return null;
+		} else if(src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
+			return Context.jsToJava(src, Object.class);
+		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
+			try {
+				Method getMethod = src.getClass().getMethod("get", Integer.class, Class.forName("sun.org.mozilla.rhino.ScriptableObject"));
+				Object[] retarr = new Object[(Integer) src.getClass().getMethod("getLength").invoke(src)];
+				for (int index = 0; index < retarr.length; index++) {
+					retarr[index] = getMethod.invoke(src, index, null);
+				}
+				return retarr;
+			} catch(InvocationTargetException e) {
+				
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (src == UniqueTag.NOT_FOUND
+				|| src == UniqueTag.NULL_VALUE) {
+			return null;
+		}
+		return src;
 	}
 }

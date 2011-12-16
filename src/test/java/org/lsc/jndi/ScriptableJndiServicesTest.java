@@ -45,14 +45,15 @@
  */
 package org.lsc.jndi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import javax.naming.NamingException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.directory.Ldap;
-
-import static org.junit.Assert.*;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LscConfiguration;
 
 public class ScriptableJndiServicesTest {
 
@@ -60,7 +61,8 @@ public class ScriptableJndiServicesTest {
 	
 	@Before
 	public void setup() {
-		dstJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
 	
 	@Test

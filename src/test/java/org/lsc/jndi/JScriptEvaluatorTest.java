@@ -64,7 +64,8 @@ import org.junit.Test;
 import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
-import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.utils.ScriptingEvaluator;
 import org.mozilla.javascript.EcmaError;
@@ -145,9 +146,11 @@ public class JScriptEvaluatorTest {
 	public void testOkLdap() throws LscServiceConfigurationException {
 		Map<String, Object> table = new HashMap<String, Object>();
 
+		final TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
+		assertNotNull(taskConf);
+		
 		new NonStrictExpectations() {
 			{
-				org.lsc.configuration.objects.Task taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
 				task.getDestinationService(); result = new SimpleJndiDstService(taskConf);
 			}
 		};

@@ -46,16 +46,17 @@
 package org.lsc.beans.syncoptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.lsc.LscModificationType;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.services.DstDatabase;
-import org.lsc.configuration.objects.services.DstLdap;
-import org.lsc.configuration.objects.syncoptions.PBSODataset;
+import org.lsc.configuration.DatasetType;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.PolicyType;
+import org.lsc.configuration.PropertiesBasedSyncOptionsType;
+import org.lsc.configuration.TaskType;
+import org.lsc.configuration.ValuesType;
 
 /**
  * Synchronization options based on a properties file
@@ -71,61 +72,62 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 //	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
 
-	private Task task;
+	private TaskType task;
 
-	private org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions conf;
+	private PropertiesBasedSyncOptionsType conf;
 
-	public void initialize(Task task) {
+	public void initialize(TaskType task) {
 		this.task = task;
-		conf = (org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions) task.getSyncOptions();
+		conf = task.getPropertiesBasedSyncOptions();
 	}
 	
-	public final STATUS_TYPE getStatus(final String id, final String attributeName) {
-		STATUS_TYPE  statusType = conf.getDataset(attributeName).getPolicy();
-		return (statusType == STATUS_TYPE.UNKNOWN ? conf.getDefaultPolicy() : statusType);
+	public final PolicyType getStatus(final String id, final String attributeName) {
+		PolicyType statusType = LscConfiguration.getDataset(conf, attributeName).getPolicy();
+		return (statusType != null ? statusType : conf.getDefaultPolicy());
 	}
 
 	public final List<String> getDefaultValues(final String id, final String attributeName) {
-		List<String> values = conf.getDataset(attributeName).getDefaultValues();
+		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getDefaultValues();
 		ArrayList<String> copy = null;
-		if (values != null && values.size() > 0) {
-			copy = new ArrayList<String>(values);
+		if (datasetValues != null && datasetValues.getString().size() > 0) {
+			copy = new ArrayList<String>(datasetValues.getString());
 		}
 		return copy;
 	}
 
 	public final List<String> getCreateValues(final String id, final String attributeName) {
-		List<String> values = conf.getDataset(attributeName).getCreateValues();
+		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getCreateValues();
 		ArrayList<String> copy = null;
-		if (values != null && values.size() > 0) {
-			copy = new ArrayList<String>(values);
+		if (datasetValues != null && datasetValues.getString().size() > 0) {
+			copy = new ArrayList<String>(datasetValues.getString());
 		}
 		return copy;
 	}
 
 	public final List<String> getForceValues(final String id, final String attributeName) {
-		List<String> values = conf.getDataset(attributeName).getForceValues();
+		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getForceValues();
 		ArrayList<String> copy = null;
-		if (values != null && values.size() > 0) {
-			copy = new ArrayList<String>(values);
+		if (datasetValues != null && datasetValues.getString().size() > 0) {
+			copy = new ArrayList<String>(datasetValues.getString());
 		}
 		return copy;
 	}
 
 	public List<String> getWriteAttributes() {
-		if(task.getDestinationService() instanceof DstLdap) {
-			return Arrays.asList(((DstLdap)task.getDestinationService()).getFetchedAttributes());
-		} else if (task.getDestinationService() instanceof DstDatabase) {
-			return ((DstDatabase)task.getDestinationService()).getFetchedAttributes();
+		if(task.getLdapDestinationService() != null) {
+			return task.getLdapDestinationService().getFetchedAttributes().getString();
+		} else if (task.getDatabaseDestinationService() != null) {
+			return LscConfiguration.getFetchedAttributesFromDatabaseService(task);
+		} else {
+			throw new UnsupportedOperationException("Unsupported write attributes method usage !");
 		}
-		return new ArrayList<String>();
 	}
 
 	@Override
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSODataset attr : conf.getDatasets()) {
-			if(!attr.getCreateValues().isEmpty()) {
+		for(DatasetType attr : conf.getDataset()) {
+			if(!attr.getCreateValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
@@ -136,8 +138,8 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getDefaultValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSODataset attr : conf.getDatasets()) {
-			if(!attr.getDefaultValues().isEmpty()) {
+		for(DatasetType attr : conf.getDataset()) {
+			if(!attr.getDefaultValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
@@ -148,8 +150,8 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getForceValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(PBSODataset attr : conf.getDatasets()) {
-			if(!attr.getForceValues().isEmpty()) {
+		for(DatasetType attr : conf.getDataset()) {
+			if(!attr.getForceValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}

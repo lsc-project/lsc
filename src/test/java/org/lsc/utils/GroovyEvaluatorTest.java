@@ -13,7 +13,8 @@ import org.codehaus.groovy.jsr223.GroovyScriptEngineFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.lsc.Task;
-import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.jndi.SimpleJndiSrcService;
@@ -35,7 +36,7 @@ public class GroovyEvaluatorTest {
 
 		new NonStrictExpectations() {
 			{
-				org.lsc.configuration.objects.Task taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
+				TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
 				task.getSourceService(); result = new SimpleJndiSrcService(taskConf);
 				task.getDestinationService(); result = new SimpleJndiDstService(taskConf);
 			}

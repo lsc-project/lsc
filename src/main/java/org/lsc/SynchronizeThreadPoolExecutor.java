@@ -36,19 +36,18 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	 * @param task the runnable object
 	 */
 	protected void runTask(SynchronizeTask task) {
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Task count.." + getTaskCount());
-			LOGGER.debug("Queue Size before assigning the task.."
-					+ queue.size());
-		}
+//		if (LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("Task count.." + getTaskCount());
+//			LOGGER.debug("Queue Size before assigning the task.."
+//					+ queue.size());
+//		}
 		execute(task);
 		this.beforeExecute(new Thread(task.getSyncName() + "-" + task.getId().getKey()), task);
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Queue Size after assigning the task: {}", queue.size());
-			LOGGER.debug("Pool Size after assigning the task: {}", getActiveCount());
-			LOGGER.debug("Task count: {}", getTaskCount());
-		}
-
+//		if (LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("Queue Size after assigning the task: {}", queue.size());
+//			LOGGER.debug("Pool Size after assigning the task: {}", getActiveCount());
+//			LOGGER.debug("Task count: {}", getTaskCount());
+//		}
 	}
 	
 	/**

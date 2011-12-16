@@ -52,7 +52,7 @@ import java.util.Properties;
 
 import org.lsc.Configuration;
 import org.lsc.beans.BeanComparator;
-import org.lsc.configuration.objects.connection.Database;
+import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +106,7 @@ public final class DaoConfig {
 				// Test if we have a IBATIS_SQLMAP_CONFIGURATION_FILENAME file in the global config dir.
 				// This test is for backwards compatibility since the IBATIS_SQLMAP_CONFIGURATION_FILENAME
 				// file always used to be in a JAR file. It should be removed in the future.
-				File configFile = new File(Configuration.getConfigurationDirectory() + IBATIS_SQLMAP_CONFIGURATION_FILENAME);
+				File configFile = new File(Configuration.getConfigurationDirectory(), IBATIS_SQLMAP_CONFIGURATION_FILENAME);
 				if (configFile.exists()) {
 					// read the file from the configuration directory
 					String pathToFile = configFile.toURI().toURL().toString();
@@ -136,7 +136,7 @@ public final class DaoConfig {
 		return sqlMapper;
 	}
 
-	public static SqlMapClient getSqlMapClient(Database connection) throws LscServiceConfigurationException {
+	public static SqlMapClient getSqlMapClient(DatabaseConnectionType connection) throws LscServiceConfigurationException {
 		Properties databaseProps = new Properties();
 		databaseProps.put("username", connection.getUsername());
 		databaseProps.put("password", connection.getPassword());

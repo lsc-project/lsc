@@ -54,7 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import org.junit.Test;
-import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
 
 /**

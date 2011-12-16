@@ -48,7 +48,9 @@ package org.lsc.beans.syncoptions;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.TaskType;
+import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,27 +65,27 @@ public final class SyncOptionsFactory {
 		cache = new HashMap<String, ISyncOptions>();
 	}
 
-	private void convertFromTask(Task task) {
+	private void convertFromTask(TaskType task) throws LscConfigurationException {
 		try {
-			ISyncOptions iso = (ISyncOptions) task.getSyncOptions().getImplementation().newInstance();
+			ISyncOptions iso = (ISyncOptions) LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).newInstance();
 			iso.initialize(task);
 			cache.put(task.getName(), iso);
 		} catch (InstantiationException e) {
 			LOGGER.error(
 					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
-					task.getSyncOptions().getClass().getName());
+					LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).getClass().getName());
 		} catch (IllegalAccessException e) {
 			LOGGER.error(
 					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
-					task.getSyncOptions().getClass().getName());
+					LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).getClass().getName());
 		}
 	}
 
-	public static ISyncOptions convert(Task task) {
+	public static ISyncOptions convert(TaskType task) throws LscConfigurationException {
 		return INSTANCE.get(task);
 	}
 
-	private ISyncOptions get(Task task) {
+	private ISyncOptions get(TaskType task) throws LscConfigurationException {
 		if (!cache.containsKey(task.getName())) {
 			convertFromTask(task);
 		}

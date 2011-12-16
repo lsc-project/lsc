@@ -58,8 +58,7 @@ import javax.naming.directory.SearchResult;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -113,8 +112,8 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException 
 	 */
 	@SuppressWarnings({ "unchecked" })
-	public SimpleJndiDstService(final Task task) throws LscServiceConfigurationException {
-		super((Ldap)task.getDestinationService());
+	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
+		super(task.getLdapDestinationService());
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {

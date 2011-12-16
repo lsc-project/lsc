@@ -70,6 +70,7 @@ import org.junit.Test;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.beans.syncoptions.ISyncOptions;
+import org.lsc.configuration.PolicyType;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.utils.SetUtils;
 
@@ -147,7 +148,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
 			}
@@ -177,7 +178,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
 			}
@@ -215,7 +216,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
@@ -275,7 +276,7 @@ public class BeanComparatorTest {
 			{
 
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;
@@ -296,7 +297,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = jsValues;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
@@ -322,7 +323,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.KEEP;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
@@ -347,7 +348,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
@@ -374,7 +375,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.MERGE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
@@ -406,7 +407,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.MERGE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;
@@ -438,7 +439,7 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 				syncOptions.getWriteAttributes(); result = Arrays.asList(new String[] {"cn", "sn"});
-				syncOptions.getStatus(anyString, anyString); result = ISyncOptions.STATUS_TYPE.FORCE;
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = jsCreateValues;

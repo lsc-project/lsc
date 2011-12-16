@@ -60,12 +60,12 @@ import java.util.Properties;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.lsc.configuration.CsvAuditType;
+import org.lsc.configuration.JaxbXmlConfigurationHelper;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdifAuditType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PropertiesConfigurationHelper;
-import org.lsc.configuration.XmlConfigurationHelper;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.audit.Csv;
-import org.lsc.configuration.objects.audit.Ldif;
-import org.lsc.configuration.objects.connection.directory.Ldap;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
 import org.lsc.jndi.JndiServices;
@@ -167,7 +167,7 @@ public class Configuration {
 	 */
 	@Deprecated
 	public static Properties getSrcProperties() throws LscConfigurationException {
-		return JndiServices.getLdapProperties((Ldap) LscConfiguration.getConnection("src-ldap"));
+		return JndiServices.getLdapProperties((org.lsc.configuration.LdapConnectionType) LscConfiguration.getConnection("src-ldap"));
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class Configuration {
 	 */
 	@Deprecated
 	public static Properties getDstProperties() throws LscConfigurationException {
-		return JndiServices.getLdapProperties((Ldap) LscConfiguration.getConnection("dst-ldap"));
+		return JndiServices.getLdapProperties((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class Configuration {
 		if(location == null) {
 			setUp();
 		}
-		return new File(location).getAbsolutePath() + File.separator;
+		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
 	}
 
 	/**
@@ -425,7 +425,7 @@ public class Configuration {
 
 	/**
 	 * Set up configuration for the given location, including logback.
-	 * MUST NEVER BE CALLED DIRECTLY : ONLY USED BY LscConfiguration static code instanciation
+	 * MUST NEVER BE CALLED DIRECTLY : ONLY USED BY LscConfiguration static code instantiation
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 */
 	public static void setUp() {
@@ -434,16 +434,17 @@ public class Configuration {
 			return;
 		}
 		try {
-			if(new File(System.getProperty("LSC_HOME") + File.separator + "etc").isDirectory()) {
-				Configuration.setUp(System.getProperty("LSC_HOME") + File.separator + "etc", false);
+			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory()) {
+				Configuration.setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
 			} else {
 				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
 				if(Configuration.class.getClassLoader().getResource("etc") != null) {
 					Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
+				} else {
 				}
 			}
 		} catch (LscException le) {
-			// Silently forget le
+			System.err.println("Something strange appened: " + le.getMessage());// Silently forget le
 		}
 	}
 	
@@ -467,7 +468,7 @@ public class Configuration {
 		String message = null;
 		if(lscConfigurationPath == null 
 				|| ! new File(lscConfigurationPath).isDirectory()
-				|| ( ! new File(lscConfigurationPath, XmlConfigurationHelper.LSC_CONF_XML).isFile()
+				|| ( ! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()
 						&& ! new File(lscConfigurationPath, PROPERTIES_FILENAME).isFile())) {
 			message = "Defined configuration location (" + lscConfigurationPath + ") points to a non existing LSC configured instance. " +
 				"LSC configuration loading will fail !";
@@ -477,11 +478,11 @@ public class Configuration {
 		try {
 			location = cleanup(lscConfigurationPath);
 			if(!LscConfiguration.isInitialized()) {
-				File xml = new File(location, XmlConfigurationHelper.LSC_CONF_XML);
+				File xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
 				if(xml.exists() && xml.isFile()) {
-					LscConfiguration.loadFromInstance(new XmlConfigurationHelper().getConfiguration(xml.toString()));
+					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString()));
 				} else {
-					LOGGER.warn("Configuration loaded from old properties file format !");
+					LOGGER.warn("LSC configuration loaded from old properties file format !");
 					PropertiesConfigurationHelper.loadConfigurationFrom(new File(location, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
 				}
 			} else {
@@ -507,7 +508,7 @@ public class Configuration {
 		String logBackXMLPropertiesFile = new File(Configuration.getConfigurationDirectory(), "logback.xml").getAbsolutePath();
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
-			LOGGER.info("Logback configuration " + logBackXMLPropertiesFile + " successfully loaded ");
+			LOGGER.info("Logging configuration successfully loaded from " + logBackXMLPropertiesFile + " ");
 			if(LscConfiguration.getAudit("CSV") != null) {
 				setUpCsvLogging(context);
 			}
@@ -516,7 +517,7 @@ public class Configuration {
 				setUpLdifLogging(context);
 			}
 		} catch (JoranException je) {
-			System.err.println("Can not find LogBack configuration file");
+			System.err.println("Can not find logging configuration file (logback.xml) !");
 		}
 		
 		// Logging configured
@@ -527,7 +528,7 @@ public class Configuration {
 		}
 		
 		// WARNING: don't log anything before HERE!
-		LOGGER.debug("Configuration successfully read from {}", Configuration.getConfigurationDirectory());
+		LOGGER.debug("LSC configuration successfully loaded from {}", Configuration.getConfigurationDirectory());
 	}
 	
 	/**
@@ -563,11 +564,11 @@ public class Configuration {
 	}
 
 	protected static void setUpCsvLogging(LoggerContext context) {
-		Csv audit = (Csv) LscConfiguration.getAudit("CSV");
+		CsvAuditType audit = (CsvAuditType) LscConfiguration.getAudit("CSV");
 
 		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
 		appender.setName(audit.getName());
-		appender.setAppend(audit.getAppend());
+		appender.setAppend(audit.isAppend());
 		appender.setFile(audit.getFile());
 		appender.setContext(context);
 
@@ -575,8 +576,8 @@ public class Configuration {
 		csvLayout.setLogOperations(audit.getOperations());
 		csvLayout.setAttrs(audit.getDatasets());
 		csvLayout.setSeparator(audit.getSeparator());
-		csvLayout.setOutputHeader(audit.getOutputHeader());
-		csvLayout.setTaskNames(audit.getTaskNames());
+		csvLayout.setOutputHeader(audit.isOutputHeader());
+		csvLayout.setTaskNames(audit.getTaskNames().getString().toArray(new String[audit.getTaskNames().getString().size()]));
 		csvLayout.setContext(context);
 		csvLayout.start();
 
@@ -587,17 +588,17 @@ public class Configuration {
 	}
 
 	protected static void setUpLdifLogging(LoggerContext context) {
-		Ldif audit = (Ldif) LscConfiguration.getAudit("LDIF");
+		LdifAuditType audit = (LdifAuditType) LscConfiguration.getAudit("LDIF");
 
 		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
 		appender.setName(audit.getName());
-		appender.setAppend(audit.getAppend());
+		appender.setAppend(audit.isAppend());
 		appender.setFile(audit.getFile());
 		appender.setContext(context);
 
 		LdifLayout ldifLayout = new LdifLayout();
 		ldifLayout.setLogOperations(audit.getOperations());
-		ldifLayout.setOnlyLdif(audit.getLogOnlyLdif());
+		ldifLayout.setOnlyLdif(audit.isLogOnlyLdif());
 		ldifLayout.setContext(context);
 		ldifLayout.start();
 

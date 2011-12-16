@@ -57,9 +57,9 @@ import javax.naming.NamingException;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.connection.Database;
-import org.lsc.configuration.objects.services.DstDatabase;
+import org.lsc.configuration.DatabaseConnectionType;
+import org.lsc.configuration.DatabaseDestinationServiceType;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
@@ -71,7 +71,7 @@ import org.lsc.exception.LscServiceInitializationException;
  */
 public class SimpleJdbcDstService extends AbstractJdbcService implements IWritableService {
 
-	private DstDatabase serviceConf;
+	private DatabaseDestinationServiceType serviceConf;
 
 	/**
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
@@ -95,9 +95,9 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	 * 				and load settings 
 	 * @throws LscServiceInitializationException 
 	 */
-	public SimpleJdbcDstService(final Task task) throws LscServiceException {
-		super((Database)task.getDestinationService().getConnection(), task.getBean());
-		serviceConf = (DstDatabase)task.getDestinationService();
+	public SimpleJdbcDstService(final TaskType task) throws LscServiceException {
+		super((DatabaseConnectionType)task.getDatabaseDestinationService().getConnection().getReference(), task.getBean());
+		serviceConf = task.getDatabaseDestinationService();
 	}
 
 	/* (non-Javadoc)
@@ -134,19 +134,19 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 				// Silently return without doing anything
 				break;
 			case CREATE_OBJECT:
-				for(String request: serviceConf.getRequestsNameForInsert()) {
+				for(String request: serviceConf.getRequestsNameForInsert().getString()) {
 					sqlMapper.insert(request, attributeMap);
 				}
 				break;
 			case DELETE_OBJECT:
-				for(String request: serviceConf.getRequestsNameForDelete()) {
+				for(String request: serviceConf.getRequestsNameForDelete().getString()) {
 					sqlMapper.delete(request, attributeMap);
 				}
 				break;
 			case UPDATE_OBJECT:
 				// Push the destination value
 				attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
-				for(String request: serviceConf.getRequestsNameForUpdate()) {
+				for(String request: serviceConf.getRequestsNameForUpdate().getString()) {
 					sqlMapper.update(request, attributeMap);
 				}
 			}

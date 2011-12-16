@@ -79,6 +79,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param id
 	 *            the name
 	 * @return the LDAP attribute
+	 * @deprecated
 	 */
 	Attribute getAttributeById(final String id);
 
@@ -87,6 +88,7 @@ public interface IBean extends Cloneable, Serializable {
 	 *
 	 * @param id the name
 	 * @return the LDAP attribute
+	 * @deprecated
 	 */
 	Set<Object> getAttributeAsSetById(final String id);
 
@@ -97,8 +99,20 @@ public interface IBean extends Cloneable, Serializable {
 	 *            The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
 	 * @throws NamingException
+	 * @deprecated
 	 */
 	public String getAttributeFirstValueById(final String id)
+					throws NamingException;
+
+	/**
+	 * Get the <b>first</b> value of an attribute from its name
+	 * 
+	 * @param id
+	 *            The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or the empty string ("")
+	 * @throws NamingException
+	 */
+	public String getDatasetFirstValueById(final String id)
 					throws NamingException;
 
 	/**
@@ -108,6 +122,7 @@ public interface IBean extends Cloneable, Serializable {
 	 *            The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException
+	 * @deprecated
 	 */
 	public List<String> getAttributeValuesById(final String id)
 					throws NamingException;

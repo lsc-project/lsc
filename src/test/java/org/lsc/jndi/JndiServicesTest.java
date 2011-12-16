@@ -50,6 +50,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,12 +62,14 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.lsc.LscDatasets;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LscConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +86,8 @@ public class JndiServicesTest {
 	
 	@Before
 	public void setup() {
-		dstJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
 	
 	/**
@@ -91,7 +95,8 @@ public class JndiServicesTest {
 	 */
 	@Test
 	public final void testConnection() {
-		assertEquals(true, JndiServices.getInstance((Ldap)LscConfiguration.getConnection("src-ldap")).exists(""));
+		assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		assertEquals(true, JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap")).exists(""));
 	}
 
 	@Test
@@ -197,5 +202,25 @@ public class JndiServicesTest {
 			LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
 		}
 		LOGGER.debug(" Final count : {}", i);
+	}
+	
+	public void testAuthenticationThroughJAAS() {
+		LoginContext lc = null;
+		String user = "";
+		String pass = "";
+
+		URL url = getClass().getResource("jaas.conf");
+		System.setProperty("java.security.auth.login.config", url.toExternalForm());
+		
+		try {
+	 
+		    lc = new LoginContext(JndiServices.class.getName(), JndiServices.getCallbackHandler(user, pass));
+		    lc.login();
+		} catch (LoginException le) {
+		    System.err.println("Authentication attempt failed" + le);
+		    System.exit(-1);
+		}
+		System.out.println("Authenticated via GSS-API");
+		//Subject.doAs(lc.getSubject(), new JndiServices());	
 	}
 }

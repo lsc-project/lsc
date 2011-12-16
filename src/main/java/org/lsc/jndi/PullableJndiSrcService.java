@@ -45,15 +45,16 @@ package org.lsc.jndi;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
 import org.lsc.LscDatasets;
-import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.LdapSourceServiceType;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IAsynchronousService;
@@ -102,14 +103,15 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		}
 	}
 
-	public PullableJndiSrcService(Task task) throws LscServiceConfigurationException {
+	public PullableJndiSrcService(TaskType task) throws LscServiceConfigurationException {
 		super(task);
+		LdapSourceServiceType asyncService = task.getLdapSourceService();
 		// Default LDAP date filter
-		filterTimestamp = task.getOtherSetting("filterAsync", "modifytimestamp>={0}");
+		filterTimestamp = (asyncService.getFilterAsync() != null ? asyncService.getFilterAsync() :  "modifytimestamp>={0}");
 		// Default LDAP date format
-		dateFormat = task.getOtherSetting("dateFormat", "yyyyMMddHHmmss'Z'");
+		dateFormat = (asyncService.getDateFormat() != null ? asyncService.getDateFormat() : "yyyyMMddHHmmss'Z'");
 		// Default interval
-		interval = Integer.parseInt(task.getOtherSetting("interval", "5"));
+		interval = (asyncService.getInterval() != null ? asyncService.getInterval().intValue() : 5);
 		try {
 			dateFormater = new SimpleDateFormat(dateFormat);
 		} catch(IllegalArgumentException e) {

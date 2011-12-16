@@ -64,7 +64,7 @@ import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.Task;
 import org.lsc.beans.syncoptions.ISyncOptions;
-import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
+import org.lsc.configuration.PolicyType;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.ScriptingEvaluator;
@@ -251,8 +251,8 @@ public final class BeanComparator {
 		if (dstBean != null) {
 			javaScriptObjects.put("dstBean", dstBean);
 		}
-		if (task.getCustomLibrary() != null) {
-			javaScriptObjects.put("custom", task.getCustomLibrary());
+		if (task.getCustomLibraries() != null) {
+			javaScriptObjects.put("custom", task.getCustomLibraries());
 		}
 
 		// We're going to iterate over the list of attributes we may write
@@ -263,7 +263,7 @@ public final class BeanComparator {
 		List<LscDatasetModification> modificationItems = new ArrayList<LscDatasetModification>();
 		for (String attrName : writeAttributes) {
 			// Get attribute status type
-			STATUS_TYPE attrStatus = task.getSyncOptions().getStatus(id, attrName);
+			PolicyType attrStatus = task.getSyncOptions().getStatus(id, attrName);
 			LOGGER.debug("{} Attribute \"{}\" is in {} status",
 							new Object[]{logPrefix, attrName, attrStatus});
 
@@ -298,7 +298,7 @@ public final class BeanComparator {
 			LscDatasetModification mi = null;
 			switch (operationType) {
 				case DELETE_VALUES:
-					if (attrStatus == STATUS_TYPE.FORCE) {
+					if (attrStatus == PolicyType.FORCE) {
 						LOGGER.debug("{} Deleting attribute  \"{}\"", logPrefix, attrName);
 						mi = new LscDatasetModification(operationType, attrName, new HashSet<Object>());
 					}
@@ -309,7 +309,7 @@ public final class BeanComparator {
 					LOGGER.debug("{} Adding attribute \"{}\" with values {}",
 									new Object[]{logPrefix, attrName, toSetAttrValues});
 
-					if (modType != LscModificationType.CREATE_OBJECT && attrStatus == STATUS_TYPE.FORCE) {
+					if (modType != LscModificationType.CREATE_OBJECT && attrStatus == PolicyType.FORCE) {
 						// By default, if we try to modify an attribute in
 						// the destination entry, we have to care to replace all
 						// values in the following conditions:
@@ -324,13 +324,13 @@ public final class BeanComparator {
 					break;
 
 				case REPLACE_VALUES:
-					if (attrStatus == STATUS_TYPE.FORCE) {
+					if (attrStatus == PolicyType.FORCE) {
 						if (!SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues)) {
 							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
 											new Object[]{logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues});
 							mi = new LscDatasetModification(operationType, dstAttr.getID(), toSetAttrValues);
 						}
-					} else if (attrStatus == STATUS_TYPE.MERGE) {
+					} else if (attrStatus == PolicyType.MERGE) {
 						// check if there are any extra values to be added
 						Set<Object> missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
 
@@ -515,8 +515,8 @@ public final class BeanComparator {
 				Map<String, Object> table = new HashMap<String, Object>();
 				table.put("srcBean", srcBean);
 				table.put("dstBean", dstBean);
-				if (task.getCustomLibrary() != null) {
-					table.put("custom", task.getCustomLibrary());
+				if (task.getCustomLibraries() != null) {
+					table.put("custom", task.getCustomLibraries());
 				}
 				itmBean.setDistinguishName(ScriptingEvaluator.evalToString(task, dn, table));
 			}
@@ -600,7 +600,7 @@ public final class BeanComparator {
 		// Add default or create values if:
 		// a) there are no values yet, or
 		// b) attribute is in Merge status
-		if (attrValues.size() == 0 || task.getSyncOptions().getStatus(null, attrName) == STATUS_TYPE.MERGE) {
+		if (attrValues.size() == 0 || task.getSyncOptions().getStatus(null, attrName) == PolicyType.MERGE) {
 			List<String> newValuesDefs;
 			if (modType == LscModificationType.CREATE_OBJECT) {
 				newValuesDefs = task.getSyncOptions().getCreateValues(null, attrName);

@@ -47,7 +47,6 @@ package org.lsc.beans.syncoptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -58,47 +57,96 @@ import mockit.Injectable;
 import mockit.NonStrict;
 import mockit.NonStrictExpectations;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.syncoptions.PBSODataset;
+import org.lsc.configuration.DatasetType;
+import org.lsc.configuration.PolicyType;
+import org.lsc.configuration.PropertiesBasedSyncOptionsType;
+import org.lsc.configuration.TaskType;
+import org.lsc.configuration.ValuesType;
 import org.lsc.utils.ScriptingEvaluator;
 
 public class PropertiesBasedSyncOptionsTest {
 
-	@Injectable @NonStrict org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions conf ;
-	@Injectable @NonStrict PBSODataset pbsoNonExistingAttr;
-	@Injectable @NonStrict PBSODataset pbsoExistingAttr;
-	@Injectable @NonStrict Task task;
+	PropertiesBasedSyncOptionsType conf ;
+	DatasetType pbsoNonExistingAttr;
+	DatasetType pbsoExistingAttr;
+	@Injectable @NonStrict TaskType task;
 	@Injectable @NonStrict org.lsc.Task taskExec;
+
+	@Before
+	public void setup() {
+		pbsoNonExistingAttr = new DatasetType();
+		pbsoExistingAttr = new DatasetType();
+		conf = new PropertiesBasedSyncOptionsType();
+	}
 	
 	@Test
-	public final void test1() {
+	public final void testDelimiters() {
+		DatasetType delimitedAttr = new DatasetType();
+		ValuesType vt = new ValuesType();
+		vt.getString().addAll(Arrays.asList(new String[] {"\"a\"", "\"b\""}));
+		delimitedAttr.setForceValues(vt);
+		delimitedAttr.setName("DelimitedAttribute");
+
+		conf.getDataset().add(delimitedAttr);
+		conf.setDefaultPolicy(PolicyType.FORCE);
+
 		new NonStrictExpectations() {
 			{
-				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
-				conf.getDataset("nonExistantAttrName"); result = pbsoNonExistingAttr; 
-				pbsoNonExistingAttr.getPolicy(); result = ISyncOptions.STATUS_TYPE.KEEP;
-				conf.getDataset("sampleAttribute"); result = pbsoExistingAttr; 
-				task.getSyncOptions(); result = conf;
+				task.getPropertiesBasedSyncOptions(); result = conf;
 			}
 		};
+
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
 		iso.initialize(task);
-		assertNotSame(iso.getStatus("objectId", "sampleAttribute"), ISyncOptions.STATUS_TYPE.UNKNOWN);
-		assertEquals(ISyncOptions.STATUS_TYPE.KEEP, iso.getStatus(null, "nonExistantAttrName"));
+
+		List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
+
+		assertEquals(2, forceValues.size());
+		assertEquals("\"a\"", forceValues.get(0));
+		assertEquals("\"b\"", forceValues.get(1));
+	}
+
+	@Test
+	public final void test1() {
+		pbsoNonExistingAttr.setName("nonExistantAttrName");
+		pbsoNonExistingAttr.setPolicy(PolicyType.KEEP);
+		conf.getDataset().add(pbsoNonExistingAttr); 
+
+		pbsoExistingAttr.setPolicy(PolicyType.KEEP);
+		pbsoExistingAttr.setName("sampleAttribute");
+		conf.getDataset().add(pbsoExistingAttr); 
+
+		new NonStrictExpectations() {
+			{
+				task.getPropertiesBasedSyncOptions(); result = conf;
+			}
+		};
+
+		ISyncOptions iso = new PropertiesBasedSyncOptions();
+		assertNotNull(iso);
+		iso.initialize(task);
+		assertEquals(iso.getStatus("objectId", "sampleAttribute"), PolicyType.KEEP);
+		assertEquals(PolicyType.KEEP, iso.getStatus(null, "nonExistantAttrName"));
 	}
 
 	@Test
 	public final void testJS() {
+		DatasetType jsAttr = new DatasetType();
+		ValuesType jsAttrValues = new ValuesType();
+		jsAttrValues.getString().addAll(Arrays.asList(new String[] {"\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\""}));
+		jsAttr.setDefaultValues(jsAttrValues);
+		jsAttr.setName("JsAttribute");
+		conf.getDataset().add(jsAttr);
+
 		new NonStrictExpectations() {
-			@Injectable @NonStrict PBSODataset jsAttr;
 			{
-				jsAttr.getDefaultValues(); result = Arrays.asList(new String[] {"\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\""});
-				conf.getDataset("JsAttribute"); result = jsAttr;
-				task.getSyncOptions(); result = conf;
+				task.getPropertiesBasedSyncOptions(); result = conf;
 			}
 		};
+		
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
 		iso.initialize(task);
@@ -115,26 +163,5 @@ public class PropertiesBasedSyncOptionsTest {
 		defaultValues = ScriptingEvaluator.evalToStringList(taskExec, defaultValue, null);
 		assertEquals(1, defaultValues.size());
 		assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
-	}
-
-	@Test
-	public final void testDelimiters() {
-		new NonStrictExpectations() {
-			@Injectable @NonStrict PBSODataset delimitedAttr;
-			{
-				delimitedAttr.getForceValues(); result = Arrays.asList(new String[] {"\"a\"", "\"b\""});
-				conf.getDataset("DelimitedAttribute"); result = delimitedAttr;
-				task.getSyncOptions(); result = conf;
-			}
-		};
-		ISyncOptions iso = new PropertiesBasedSyncOptions();
-		assertNotNull(iso);
-		iso.initialize(task);
-
-		List<String> forceValues = iso.getForceValues(null, "DelimitedAttribute");
-
-		assertEquals(2, forceValues.size());
-		assertEquals("\"a\"", forceValues.get(0));
-		assertEquals("\"b\"", forceValues.get(1));
 	}
 }

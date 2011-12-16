@@ -71,7 +71,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
-import org.lsc.configuration.objects.LscConfiguration;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,9 +105,8 @@ public class SymmetricEncryption {
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public SymmetricEncryption() throws GeneralSecurityException {
-		this(SymmetricEncryption.getKeyPath(),
-						SymmetricEncryption.getAlgorithm(),
-						SymmetricEncryption.getStrength());
+		this.securityProvider = new BouncyCastleProvider();
+		Security.addProvider(this.securityProvider);
 	}
 
 	/**
@@ -176,7 +175,7 @@ public class SymmetricEncryption {
 	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException {
 		OutputStream os = null;
 		try {
-			KeyGenerator kg = KeyGenerator.getInstance(algo, this.securityProvider.getName());
+			KeyGenerator kg = KeyGenerator.getInstance(algo, securityProvider.getName());
 			SecretKey cipherKey = kg.generateKey();
 			SecureRandom sr = new SecureRandom();
 			kg.init(strength, sr);
@@ -225,7 +224,7 @@ public class SymmetricEncryption {
 	 * @return int
 	 */
 	public static int getStrength() {
-		return LscConfiguration.getSecurity().getEncryption().getStrength();
+		return LscConfiguration.getSecurity().getEncryption().getStrength().intValue();
 	}
 
 	/**

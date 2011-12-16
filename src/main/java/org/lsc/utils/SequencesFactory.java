@@ -12,8 +12,7 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchResult;
 
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.configuration.LdapConnectionType;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -39,21 +38,16 @@ public class SequencesFactory {
 	/**
 	 * The local constructor
 	 */
-	private SequencesFactory(Ldap connection) {
+	private SequencesFactory(LdapConnectionType connection) {
 		jndiServices = JndiServices.getInstance(connection);
 		sequences = new HashMap<String, Sequence>();
 	}
 
-	@Deprecated
-	public static SequencesFactory getInstance() {
-		return getInstance((Ldap) LscConfiguration.getDst());
-	}
-	
 	/**
 	 * Get the factory instance (if needed create and initialize it)
 	 * @return the instance
 	 */
-	public static SequencesFactory getInstance(Ldap connection) {
+	public static SequencesFactory getInstance(LdapConnectionType connection) {
 		if (instance == null) {
 			LOGGER.info("Initializing the sequences factory.");
 			instance = new SequencesFactory(connection);
@@ -68,11 +62,11 @@ public class SequencesFactory {
 	 * @param attributeName The attribute name the sequence is stored in
 	 * @return The next value, a negative value means an error
 	 */
-	public static int getNextValue(String dn, String attributeName) {
+	public int getNextValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
 		LOGGER.debug("Getting the next value for the following sequence {}", hash);
 
-		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
+		Sequence sq = getSequence(dn, attributeName, hash);
 		if (sq == null) {
 			LOGGER.debug("Couldn't get the sequence {}. Returning -1.", hash);
 			return -1;
@@ -88,11 +82,11 @@ public class SequencesFactory {
 	 * @param attributeName The attribute name the sequence is stored in
 	 * @return the current value, a negative value means an error
 	 */
-	public static int getCurrentValue(String dn, String attributeName) {
+	public int getCurrentValue(String dn, String attributeName) {
 		String hash = getHash(dn, attributeName);
 		LOGGER.debug("Getting the current value for the following sequence {}", hash);
 
-		Sequence sq = getInstance().getSequence(dn, attributeName, hash);
+		Sequence sq = getSequence(dn, attributeName, hash);
 		if (sq == null) {
 			LOGGER.debug("Couldn't get the sequence {}. Returning -1.", hash);
 			return -1;

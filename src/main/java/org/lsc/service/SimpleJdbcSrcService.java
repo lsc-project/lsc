@@ -54,9 +54,9 @@ import java.util.Properties;
 
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.connection.Database;
-import org.lsc.configuration.objects.services.SrcDatabase;
+import org.lsc.configuration.DatabaseConnectionType;
+import org.lsc.configuration.DatabaseSourceServiceType;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -114,14 +114,14 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * 				and load settings 
 	 * @throws LscServiceInitializationException 
 	 */
-	public SimpleJdbcSrcService(final Task task) throws LscServiceException {
-		super((Database)task.getSourceService().getConnection(), task.getBean());
-		SrcDatabase serviceConf = (SrcDatabase)task.getSourceService();
+	public SimpleJdbcSrcService(final TaskType task) throws LscServiceException {
+		super((DatabaseConnectionType)task.getDatabaseSourceService().getConnection().getReference(), task.getBean());
+		DatabaseSourceServiceType serviceConf = task.getDatabaseSourceService();
 		requestNameForList = serviceConf.getRequestNameForList();
 		requestNameForObject = serviceConf.getRequestNameForObject();
 		requestNameForNextId = serviceConf.getRequestNameForNextId();
 		
-		interval = serviceConf.getInterval();
+		interval = (serviceConf.getInterval() != null ? serviceConf.getInterval().intValue() : 5);
 	}
 
 	/* (non-Javadoc)

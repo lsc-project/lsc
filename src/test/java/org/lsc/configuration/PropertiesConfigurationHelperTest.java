@@ -55,7 +55,7 @@ public class PropertiesConfigurationHelperTest {
 
 	@Test
 	public void testOk() throws LscConfigurationException {
-		PropertiesConfigurationHelper.loadConfigurationFrom(this.getClass().getClassLoader().getResource("etc/lsc.properties").getPath());
+		PropertiesConfigurationHelper.loadConfigurationFrom(this.getClass().getClassLoader().getResource("etc/lsc-old.properties").getPath());
 	}
 	
 }

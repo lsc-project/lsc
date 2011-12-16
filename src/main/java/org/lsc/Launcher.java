@@ -58,9 +58,9 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.lsc.configuration.JaxbXmlConfigurationHelper;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PropertiesConfigurationHelper;
-import org.lsc.configuration.XmlConfigurationHelper;
-import org.lsc.configuration.objects.LscConfiguration;
 import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -315,11 +315,11 @@ public final class Launcher {
 
 	private int convertConfiguration() {
 		try {
-			File xmlFile = new File(configurationLocation, XmlConfigurationHelper.LSC_CONF_XML);
+			File xmlFile = new File(configurationLocation, JaxbXmlConfigurationHelper.LSC_CONF_XML);
 			if(!xmlFile.exists()) {
 				PropertiesConfigurationHelper.loadConfigurationFrom(new File(configurationLocation, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
-				new XmlConfigurationHelper().saveConfiguration(new File(configurationLocation, XmlConfigurationHelper.LSC_CONF_XML).getAbsolutePath(),
-						LscConfiguration.getInstance());
+				new JaxbXmlConfigurationHelper().saveConfiguration(new File(configurationLocation, JaxbXmlConfigurationHelper.LSC_CONF_XML).getAbsolutePath(),
+						LscConfiguration.getInstance().getLsc());
 				LOGGER.info("Configuration file format successfully converted to " + xmlFile.getAbsolutePath());
 				return 0;
 			} else {

@@ -60,7 +60,7 @@ import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.connection.Database;
+import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.persistence.DaoConfig;
@@ -95,7 +95,7 @@ public abstract class AbstractJdbcService implements IService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractJdbcService(Database destinationConnection, String beanClassname) throws LscServiceConfigurationException {
+	public AbstractJdbcService(DatabaseConnectionType destinationConnection, String beanClassname) throws LscServiceConfigurationException {
 		sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
 		
 		try {

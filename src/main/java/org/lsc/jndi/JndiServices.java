@@ -89,8 +89,11 @@ import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
-import org.lsc.configuration.objects.connection.directory.AuthenticationType;
-import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.configuration.LdapAuthenticationType;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdapDerefAliasesType;
+import org.lsc.configuration.LdapReferralType;
+import org.lsc.configuration.LdapVersionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,13 +292,13 @@ public final class JndiServices {
 		}
 	}
 
-	public static Properties getLdapProperties(Ldap connection) {
+	public static Properties getLdapProperties(LdapConnectionType connection) {
 		Properties props = new Properties();
-		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, connection.getFactory());
+		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, (connection.getFactory() != null ? connection.getFactory() : "com.sun.jndi.ldap.LdapCtxFactory"));
 		if(connection.getUsername() != null) {
-			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthenticationType().getValue());
+			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthentication().value());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
-			if(connection.getAuthenticationType().equals(AuthenticationType.GSSAPI)) {
+			if(connection.getAuthentication().equals(LdapAuthenticationType.GSSAPI)) {
 				if(System.getProperty("java.security.krb5.conf") != null) {
 					throw new RuntimeException("Multiple Kerberos connections not supported (existing value: " 
 							+ System.getProperty("java.security.krb5.conf") + "). Need to set another LSC instance or unset system property !");
@@ -326,20 +329,44 @@ public final class JndiServices {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");
 		}
 		props.setProperty(DirContext.PROVIDER_URL, connection.getUrl());
-		props.setProperty(DirContext.REFERRAL, connection.getReferralHandling().getValue());
-		props.setProperty("java.naming.ldap.derefAliases", connection.getAliasesHandling().getValue());
-		if(connection.getBinaryAttributes() != null) {
-			props.setProperty("java.naming.ldap.binaryAttributes", StringUtils.join(connection.getBinaryAttributes(), ", "));
+		if(connection.getReferral() != null) {
+			props.setProperty(DirContext.REFERRAL, connection.getReferral().value().toLowerCase());
+		} else {
+			props.setProperty(DirContext.REFERRAL, LdapReferralType.IGNORE.value().toLowerCase());
 		}
-		props.setProperty("java.naming.ldap.pageSize", "" + connection.getPageSize());
+		if(connection.getDerefAliases() != null) {
+			props.setProperty("java.naming.ldap.derefAliases", getDerefJndiValue(connection.getDerefAliases()));
+		} else {
+			props.setProperty("java.naming.ldap.derefAliases", getDerefJndiValue(LdapDerefAliasesType.NEVER));
+		}
+		if(connection.getBinaryAttributes() != null) {
+			props.setProperty("java.naming.ldap.binaryAttributes", StringUtils.join(connection.getBinaryAttributes().getString(), ", "));
+		}
+		if(connection.getPageSize() != null) {
+			props.setProperty("java.naming.ldap.pageSize", "" + connection.getPageSize());
+		}
 		if(connection.getSortedBy() != null) {
 			props.setProperty("java.naming.ldap.sortedBy", connection.getSortedBy());
 		}
-		props.setProperty("java.naming.ldap.version", "" + connection.getVersion().getValue());
+		props.setProperty("java.naming.ldap.version", (connection.getVersion() == LdapVersionType.VERSION_2 ? "2" : "3" ));
 		return props;
 	}
 	
-	public static JndiServices getInstance(Ldap connection) {
+	private static String getDerefJndiValue(LdapDerefAliasesType derefAliases) {
+		switch(derefAliases) {
+		case ALWAYS:
+			return "always";
+		case FIND:
+			return "finding";
+		case SEARCH:
+			return "searching";
+		case NEVER:
+			return "never";
+		}
+		return "";
+	}
+
+	public static JndiServices getInstance(LdapConnectionType connection) {
 		try {
 			return getInstance(getLdapProperties(connection));
 		} catch (Exception e) {

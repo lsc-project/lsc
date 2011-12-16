@@ -60,8 +60,7 @@ import javax.naming.directory.SearchResult;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.Task;
-import org.lsc.configuration.objects.services.Ldap;
+import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -110,8 +109,8 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	}
 
 	@SuppressWarnings("unchecked")
-	public FullDNJndiDstService(Task task) throws LscServiceException {
-		super((Ldap)task.getDestinationService());
+	public FullDNJndiDstService(TaskType task) throws LscServiceException {
+		super(task.getLdapDestinationService());
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {

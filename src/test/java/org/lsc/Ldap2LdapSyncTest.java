@@ -62,11 +62,12 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.objects.LscConfiguration;
-import org.lsc.configuration.objects.connection.directory.Ldap;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.SimpleJndiSrcService;
@@ -101,8 +102,10 @@ public class Ldap2LdapSyncTest {
 	
 	@Before
 	public void setup() {
-		srcJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("src-ldap"));
-		dstJndiServices = JndiServices.getInstance((Ldap)LscConfiguration.getConnection("dst-ldap"));
+		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
 	
 	/**
@@ -124,7 +127,7 @@ public class Ldap2LdapSyncTest {
 		IService srcService = new SimpleJndiSrcService(LscConfiguration.getTask(TASK_NAME));
 		Entry<String, LscDatasets> obj = ids.entrySet().iterator().next();
 		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue(), true);
-		String userPassword = srcBean.getAttributeFirstValueById("userPassword");
+		String userPassword = srcBean.getDatasetFirstValueById("userPassword");
 
 		// OpenDS automatically hashes the password using seeded SHA,
 		// so we can't test the full value, just the beginning.

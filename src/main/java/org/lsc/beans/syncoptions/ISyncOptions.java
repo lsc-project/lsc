@@ -49,7 +49,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.lsc.LscModificationType;
-import org.lsc.configuration.objects.Task;
+import org.lsc.configuration.PolicyType;
+import org.lsc.configuration.TaskType;
 
 /**
  * 
@@ -60,24 +61,24 @@ public interface ISyncOptions {
 	/** default condition if none is given */
 	public static final String DEFAULT_CONDITION = "true";
 	
-	/** The strategy to apply to the attribute updates. */
-	public enum STATUS_TYPE {
-
-		/** Keep the destination value. */
-		KEEP,
-		/** Force the source value. */
-		FORCE,
-		/** Merge source and destination values. */
-		MERGE,
-		/** Unknown. */
-		UNKNOWN,
-	}
+//	/** The strategy to apply to the attribute updates. */
+//	public enum STATUS_TYPE {
+//
+//		/** Keep the destination value. */
+//		KEEP,
+//		/** Force the source value. */
+//		FORCE,
+//		/** Merge source and destination values. */
+//		MERGE,
+//		/** Unknown. */
+//		UNKNOWN,
+//	}
 
 	/**
 	 * Initialize the synchronization options policy.
 	 * @param task the task configuration object on which applying syncopts
 	 */
-	void initialize(Task task);
+	void initialize(TaskType task);
 
 	/**
 	 * Analyze the context to get the right synchronization status to apply.
@@ -85,7 +86,7 @@ public interface ISyncOptions {
 	 * @param attributeName the attribute name
 	 * @return the default or create value
 	 */
-	STATUS_TYPE getStatus(String id, String attributeName);
+	PolicyType getStatus(String id, String attributeName);
 
 	/**
 	 * Return the default values for a given attribute name.

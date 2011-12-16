@@ -50,6 +50,7 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Base64;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
 
 /**
@@ -60,9 +61,22 @@ public class SecurityUtils {
 
 	public static final String HASH_MD5 = "MD5";
 	public static final String HASH_SHA1 = "SHA1";
+	public static final String HASH_SHA256 = "SHA256";
+	public static final String HASH_SHA512 = "SHA512";
 
+	private static SymmetricEncryption encryptionInstance;
+	
 	// Utility class
 	private SecurityUtils() {}
+	
+	private static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
+		if(encryptionInstance == null) {
+			encryptionInstance = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption().getKeyfile(),
+					LscConfiguration.getSecurity().getEncryption().getAlgorithm(), 
+					LscConfiguration.getSecurity().getEncryption().getStrength().intValue());
+		}
+		return encryptionInstance;
+	}
 	
 	/**
 	 * Decrypt a base64 value.
@@ -72,7 +86,7 @@ public class SecurityUtils {
 	 * @throws java.io.IOException
 	 */
 	public static String decrypt(String value) throws GeneralSecurityException, IOException {
-		SymmetricEncryption se = new SymmetricEncryption();
+		SymmetricEncryption se = getEncryptionInstance();
 		if (!se.initialize()) {
 			throw new RuntimeException("SecurityUtils: Error initializing SymmetricEncryption!");
 		}
@@ -87,7 +101,7 @@ public class SecurityUtils {
 	 * @throws java.io.IOException
 	 */
 	public static String encrypt(String value) throws GeneralSecurityException, IOException {
-		SymmetricEncryption se = new SymmetricEncryption();
+		SymmetricEncryption se = getEncryptionInstance();
 		if (!se.initialize()) {
 			throw new RuntimeException("SecurityUtils: Error initializing SymmetricEncryption!");
 		}
@@ -96,7 +110,7 @@ public class SecurityUtils {
 
 	/**
 	 * Hash a value within a supported hash type.
-	 * @param type A valid hash type: SecurityUtils.HASH_MD5 or SecurityUtils.HASH_SHA1
+	 * @param type A valid hash type: SecurityUtils.HASH_MD5, SecurityUtils.HASH_SHA1, SecurityUtils.HASH_SHA256 or SecurityUtils.HASH_SHA512
 	 * @param value A value to hash
 	 * @return A valid base64 encoded hash
 	 * @throws java.security.NoSuchAlgorithmException

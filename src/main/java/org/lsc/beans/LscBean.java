@@ -69,21 +69,21 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Basic bean used to centralize methods across all beans
- *
+ * 
  * <P>
- * This object mainly provides methods to store and access "attributes",
- * i.e. named fields and their values.
+ * This object mainly provides methods to store and access "attributes", i.e.
+ * named fields and their values.
  * </P>
  * 
  * <P>
- * This implementation ignores the case of attribute names, and uses Java
- * Sets to store lists of values, so values must be unique and are unordered.
+ * This implementation ignores the case of attribute names, and uses Java Sets
+ * to store lists of values, so values must be unique and are unordered.
  * </P>
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
-public abstract class LscBean implements IBean,Serializable {
+public abstract class LscBean implements IBean, Serializable {
 
 	private static final long serialVersionUID = 5074469517356449901L;
 
@@ -95,8 +95,9 @@ public abstract class LscBean implements IBean,Serializable {
 	/** The attributes map. */
 	private Map<String, Set<Object>> datasets;
 
-//	/** Data schema related to this bean - must always be set just after initiating the bean */
-//	private DataSchemaProvider dataSchemaProvider;
+	// /** Data schema related to this bean - must always be set just after
+	// initiating the bean */
+	// private DataSchemaProvider dataSchemaProvider;
 
 	public LscBean() {
 		datasets = new HashMap<String, Set<Object>>();
@@ -104,8 +105,9 @@ public abstract class LscBean implements IBean,Serializable {
 
 	/**
 	 * Get an attribute from its name.
-	 *
-	 * @param id the name
+	 * 
+	 * @param id
+	 *            the name
 	 * @return the LDAP attribute
 	 */
 	public final Attribute getDatasetById(final String id) {
@@ -115,13 +117,15 @@ public abstract class LscBean implements IBean,Serializable {
 
 	@Deprecated
 	public final Attribute getAttributeById(final String id) {
+		LOGGER.warn("The method getAttributeById() is deprecated and will be removed in a future version of LSC. Please use getDatasetById() instead.");
 		return getDatasetById(id);
 	}
-	
+
 	/**
 	 * Get an attribute from its name as a Set.
-	 *
-	 * @param id the name
+	 * 
+	 * @param id
+	 *            the name
 	 * @return the LDAP attribute
 	 */
 	public final Set<Object> getDatasetAsSetById(final String id) {
@@ -131,22 +135,8 @@ public abstract class LscBean implements IBean,Serializable {
 
 	@Deprecated
 	public final Set<Object> getAttributeAsSetById(final String id) {
+		LOGGER.warn("The method getAttributeAsSetById() is deprecated and will be removed in a future version of LSC. Please use getDatasetAsSetById() instead.");
 		return getDatasetAsSetById(id);
-	}
-	/**
-	 * Get the <b>first</b> value of an attribute from its name
-	 * 
-	 * @param id The attribute name (case insensitive)
-	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
-	 * @deprecated Use {@link #getAttributeFirstValueById(String)} or
-	 *             {@link #getAttributeValuesById(String)}. This method will be removed after LSC
-	 *             1.3.
-	 */
-	public final String getAttributeValueById(final String id)
-					throws NamingException {
-		LOGGER.warn("The method getDatasetValueById() is deprecated and will be removed in a future version of LSC. Please use getAttributeFirstValueById() instead.");
-		return getAttributeFirstValueById(id);
 	}
 
 	/**
@@ -158,16 +148,18 @@ public abstract class LscBean implements IBean,Serializable {
 	 * @throws NamingException
 	 */
 	public final String getDatasetFirstValueById(final String id)
-					throws NamingException {
+			throws NamingException {
 		List<String> allValues = getAttributeValuesById(id);
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
 
 	@Deprecated
 	public final String getAttributeFirstValueById(final String id)
-					throws NamingException {
+			throws NamingException {
+		LOGGER.warn("The method getAttributeFirstValueById() is deprecated and will be removed in a future version of LSC. Please use getDatasetFirstValueById() instead.");
 		return getDatasetFirstValueById(id);
 	}
+
 	/**
 	 * Get all values of an attribute from its name
 	 * 
@@ -177,7 +169,7 @@ public abstract class LscBean implements IBean,Serializable {
 	 * @throws NamingException
 	 */
 	public final List<String> getDatasetValuesById(final String id)
-					throws NamingException {
+			throws NamingException {
 		List<String> resultsArray = new ArrayList<String>();
 
 		Set<Object> attributeValues = datasets.get(id.toLowerCase());
@@ -187,7 +179,8 @@ public abstract class LscBean implements IBean,Serializable {
 				if (value != null) {
 					String stringValue;
 
-					// convert to String because this method only returns Strings
+					// convert to String because this method only returns
+					// Strings
 					if (value instanceof byte[]) {
 						stringValue = new String((byte[]) value);
 					} else {
@@ -203,12 +196,13 @@ public abstract class LscBean implements IBean,Serializable {
 	}
 
 	public final List<String> getAttributeValuesById(final String id)
-				throws NamingException {
+			throws NamingException {
 		return getDatasetValuesById(id);
 	}
+
 	/**
 	 * Get the attributes name list.
-	 *
+	 * 
 	 * @return the attributes list
 	 */
 	public final Set<String> getDatasetsNames() {
@@ -218,12 +212,12 @@ public abstract class LscBean implements IBean,Serializable {
 	public final Set<String> getAttributesNames() {
 		return getDatasetsNames();
 	}
+
 	/**
-	 * Set an attribute.
-	 * API CHANGE: Do nothing if attribute is empty
-	 *
+	 * Set an attribute. API CHANGE: Do nothing if attribute is empty
+	 * 
 	 * @param attr
-	 *                the attribute to set
+	 *            the attribute to set
 	 */
 	public final void setAttribute(final Attribute attr) {
 		if (attr != null && attr.size() > 0) {
@@ -231,7 +225,8 @@ public abstract class LscBean implements IBean,Serializable {
 			try {
 				setAttribute(attr.getID(), SetUtils.attributeToSet(attr));
 			} catch (NamingException e) {
-				LOGGER.error("Error storing the attribute {}: {}", attr.getID(), e.toString());
+				LOGGER.error("Error storing the attribute {}: {}",
+						attr.getID(), e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
 		}
@@ -239,9 +234,11 @@ public abstract class LscBean implements IBean,Serializable {
 
 	/**
 	 * Set an attribute.
-	 *
-	 * @param attrName The attribute name.
-	 * @param attrValues A set of values for the attribute.
+	 * 
+	 * @param attrName
+	 *            The attribute name.
+	 * @param attrValues
+	 *            A set of values for the attribute.
 	 */
 	public final void setDataset(String name, Set<Object> values) {
 		// use lower case since attribute names are case-insensitive
@@ -252,10 +249,10 @@ public abstract class LscBean implements IBean,Serializable {
 	public final void setAttribute(String name, Set<Object> values) {
 		setDataset(name, values);
 	}
-	
+
 	/**
 	 * Default distinguished name getter.
-	 *
+	 * 
 	 * @return the distinguishedName
 	 */
 	public final String getMainIdentifier() {
@@ -266,9 +263,10 @@ public abstract class LscBean implements IBean,Serializable {
 	public final String getDistinguishedName() {
 		return getMainIdentifier();
 	}
+
 	/**
 	 * Default distinguished name getter.
-	 *
+	 * 
 	 * @return the distinguishedName
 	 */
 	@Deprecated
@@ -276,10 +274,10 @@ public abstract class LscBean implements IBean,Serializable {
 		return getMainIdentifier();
 	}
 
-
 	/**
-	 * Distinguish name getter that makes sure to return the FULL DN (including suffix).
-	 *
+	 * Distinguish name getter that makes sure to return the FULL DN (including
+	 * suffix).
+	 * 
 	 * @return the distinguishedName
 	 */
 	public final String getFullDistinguishedName() {
@@ -292,23 +290,27 @@ public abstract class LscBean implements IBean,Serializable {
 	}
 
 	/**
-	 * Default distinguishedName setter.
-	 *
-	 * @param dn The distinguishedName to set
+	 * Default main object identifier setter.
+	 * 
+	 * @param dn
+	 *            The main identifier to set
 	 */
 	public final void setMainIdentifier(final String id) {
 		mainIdentifier = id;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public final void setDistinguishName(final String dn) {
 		if (dn != null) {
 			setMainIdentifier((String) Rdn.unescapeValue(dn));
 		}
 	}
-	
+
 	/**
 	 * Bean pretty printer.
-	 *
+	 * 
 	 * @return the pretty formatted string to display
 	 */
 	@Override
@@ -331,6 +333,7 @@ public abstract class LscBean implements IBean,Serializable {
 
 	/**
 	 * Clone this Bean object.
+	 * 
 	 * @return Object
 	 * @throws java.lang.CloneNotSupportedException
 	 */
@@ -338,10 +341,11 @@ public abstract class LscBean implements IBean,Serializable {
 	public LscBean clone() throws CloneNotSupportedException {
 		try {
 			LscBean bean = (LscBean) this.getClass().newInstance();
-			bean.setDistinguishName(this.getDistinguishedName());
+			bean.setMainIdentifier(this.getMainIdentifier());
 
 			for (String attributeName : this.getAttributesNames()) {
-				bean.setAttribute(attributeName, this.getAttributeAsSetById(attributeName));
+				bean.setAttribute(attributeName,
+						this.getDatasetAsSetById(attributeName));
 			}
 			return bean;
 		} catch (InstantiationException ex) {
@@ -351,16 +355,17 @@ public abstract class LscBean implements IBean,Serializable {
 		}
 	}
 
-//	public void setDataSchema(DataSchemaProvider dataSchema) {
-//		this.dataSchemaProvider = dataSchema;
-//	}
-//
-//	public DataSchemaProvider getDataSchema() {
-//		return dataSchemaProvider;
-//	}
+	// public void setDataSchema(DataSchemaProvider dataSchema) {
+	// this.dataSchemaProvider = dataSchema;
+	// }
+	//
+	// public DataSchemaProvider getDataSchema() {
+	// return dataSchemaProvider;
+	// }
 
 	/**
 	 * Manage something there !
+	 * 
 	 * @param metaData
 	 */
 	public static void setMetadata(ResultSetMetaData metaData) {
@@ -369,23 +374,27 @@ public abstract class LscBean implements IBean,Serializable {
 
 	/**
 	 * Set a bean from an LDAP entry
-	 *
-	 * @param entry the LDAP entry
-	 * @param baseDn the base Dn used to set the right Dn
-	 * @param c class to instantiate
+	 * 
+	 * @param entry
+	 *            the LDAP entry
+	 * @param baseDn
+	 *            the base Dn used to set the right Dn
+	 * @param c
+	 *            class to instantiate
 	 * @return the bean
-	 * @throws NamingException thrown if a directory exception is encountered while
-	 *                 looking at the entry
+	 * @throws NamingException
+	 *             thrown if a directory exception is encountered while looking
+	 *             at the entry
 	 */
 	public static LscBean getInstance(final SearchResult entry,
-					final String baseDn, final Class<?> c) throws NamingException {
+			final String baseDn, final Class<?> c) throws NamingException {
 		try {
 			if (entry != null) {
 				LscBean ab = (LscBean) c.newInstance();
 				String dn = entry.getName();
 
-				if ((dn.length() > 0) && (dn.charAt(0) == '"') &&
-								(dn.charAt(dn.length() - 1) == '"')) {
+				if ((dn.length() > 0) && (dn.charAt(0) == '"')
+						&& (dn.charAt(dn.length() - 1) == '"')) {
 					dn = dn.substring(1, dn.length() - 1);
 				}
 
@@ -420,16 +429,16 @@ public abstract class LscBean implements IBean,Serializable {
 		return null;
 	}
 
-	public LscDatasets datasets()  {
+	public LscDatasets datasets() {
 		return new LscDatasets(datasets);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void setDatasets(LscDatasets datasets) {
 		Map<String, Set<Object>> tmp = new HashMap<String, Set<Object>>();
-		for(String name: datasets.getAttributesNames()) {
+		for (String name : datasets.getAttributesNames()) {
 			Object values = datasets.getDatasets().get(name);
-			if(values instanceof Set<?>) {
+			if (values instanceof Set<?>) {
 				tmp.put(name, (Set<Object>) values);
 			} else if (values instanceof List<?>) {
 				Set<Object> valuesAsSet = new HashSet<Object>();
@@ -440,14 +449,15 @@ public abstract class LscBean implements IBean,Serializable {
 				valuesAsSet.add(values);
 				tmp.put(name, valuesAsSet);
 			} else {
-				LOGGER.warn("Appending unknown type inside lsc bean as Set: " + values);
+				LOGGER.warn("Appending unknown type inside lsc bean as Set: "
+						+ values);
 				tmp.put(name, (Set<Object>) values);
 			}
 		}
 		this.datasets = tmp;
 	}
-	
-	public byte[] getDatasetsBytes()  {
+
+	public byte[] getDatasetsBytes() {
 		return SerializationUtils.serialize((Serializable) datasets);
 	}
 }

@@ -45,11 +45,10 @@
  */
 package org.lsc.beans.syncoptions;
 
-import org.lsc.beans.syncoptions.ISyncOptions.STATUS_TYPE;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.lsc.configuration.PolicyType;
 /**
  * Simple tests.
  */
@@ -63,7 +62,7 @@ public class ForceSyncOptionsTest {
 		ForceSyncOptions fso = new ForceSyncOptions();
 		assertEquals(fso.getDefaultValue(null, null), null);
 		assertEquals(fso.getCreateValue(null, null), null);
-		assertEquals(fso.getStatus(null, null), STATUS_TYPE.FORCE);
+		assertEquals(fso.getStatus(null, null), PolicyType.FORCE);
 		assertEquals(fso.getCreateAttributeNames(), null);
 	}
 }

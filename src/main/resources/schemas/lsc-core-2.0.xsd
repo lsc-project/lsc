@@ -60,12 +60,12 @@
 		    <xsd:documentation>Definition for the connection options.</xsd:documentation>
 		</xsd:annotation>
  -->		<xsd:sequence>
- 			<xsd:element name="name" type="xsd:string"/>
+ 			<xsd:element name="name" type="xsd:ID"/>
 			<xsd:element name="url" type="xsd:string"/>
 			<xsd:element name="username" type="xsd:string"/>
 			<xsd:element name="password" type="xsd:string"/>
 		</xsd:sequence>
-		<xsd:attribute name="id" type="xsd:ID"/>
+		<xsd:attribute name="id" type="xsd:string" use="optional"/>
 	</xsd:complexType>
     
     <xsd:complexType name="nisConnectionType">
@@ -173,13 +173,12 @@
 
 	<xsd:complexType name="auditType" >
 		<xsd:sequence>
- 			<xsd:element name="name" type="xsd:string"/>
+ 			<xsd:element name="name" type="xsd:ID"/>
 			<xsd:element name="append" type="xsd:boolean" minOccurs="0" default="true"/>
 			<xsd:element name="operations" type="xsd:string" minOccurs="0"/>
 			<xsd:element name="file" type="xsd:string"/>
  		</xsd:sequence>
-		<xsd:attribute name="id" type="xsd:ID"/>
-		
+		<xsd:attribute name="id" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 	
 	<xsd:complexType name="ldifAuditType">
@@ -222,7 +221,7 @@
     
     <xsd:complexType name="serviceType">
 		<xsd:sequence>
- 			<xsd:element name="name" type="xsd:string"/>
+ 			<xsd:element name="name" type="xsd:ID"/>
  			<xsd:element name="connection">
 <!-- 			    <xsd:annotation>
 			        <xsd:documentation>
@@ -234,7 +233,7 @@
 			    </xsd:complexType>
  			</xsd:element>
 		</xsd:sequence>
-		<xsd:attribute name="id" type="xsd:ID" use="optional"/>
+		<xsd:attribute name="id" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 	
     <xsd:complexType name="syncOptionsType" abstract="true">

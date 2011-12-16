@@ -102,7 +102,7 @@ public class JaxbXmlConfigurationHelper {
 	 */
 	public Lsc getConfiguration(String filename)
 			throws FileNotFoundException {
-		LOGGER.info("Loading XML configuration from: " + filename);
+		LOGGER.debug("Loading XML configuration from: " + filename);
 	    try {
 	    	Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
 	    	SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

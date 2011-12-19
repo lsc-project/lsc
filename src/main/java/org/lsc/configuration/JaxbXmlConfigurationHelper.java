@@ -99,9 +99,10 @@ public class JaxbXmlConfigurationHelper {
 	 * @throws FileNotFoundException
 	 *             thrown if the file can not be accessed (either because of a
 	 *             misconfiguration or due to a rights issue)
+	 * @throws LscConfigurationException 
 	 */
 	public Lsc getConfiguration(String filename)
-			throws FileNotFoundException {
+			throws LscConfigurationException {
 		LOGGER.debug("Loading XML configuration from: " + filename);
 	    try {
 	    	Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
@@ -110,22 +111,19 @@ public class JaxbXmlConfigurationHelper {
 			try {
 				URL schemapath = this.getClass().getClassLoader().getResource("schemas/lsc-core-2.0.xsd");
 				if(schemapath != null) {
-					
-					lscSchema = schemaFactory.newSchema(new File(schemapath.getPath()));
+					lscSchema = schemaFactory.newSchema(schemapath);
 			    	unmarshaller.setSchema( lscSchema );
 				} else {
 					LOGGER.warn("LSC XML schema not found, no validation of the configuration file will be done !");
 				}
 			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new LscConfigurationException(e);
 			}
 	    	
 			return (Lsc)unmarshaller.unmarshal( new File(filename) );
 		} catch (JAXBException e) {
-			LOGGER.error("Failed to load configuration file: " + e.toString(), e);
+			throw new LscConfigurationException(e);
 		}
-		return null;
 	}
 
 	/**

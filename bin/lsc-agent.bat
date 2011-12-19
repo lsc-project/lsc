@@ -27,6 +27,9 @@ call:log "Starting LSC Remote Agent"
 
 
 set CLASSPATH=.
+ for  %%a in ("%LIB_DIR%\slf4j-api-*.jar") do (
+   set CLASSPATH=!CLASSPATH!;%%a
+ )
  for  %%a in ("%LIB_DIR%\*.jar") do (
    set CLASSPATH=!CLASSPATH!;%%a
  )

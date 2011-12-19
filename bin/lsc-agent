@@ -51,6 +51,8 @@
 #====================================================================
 # Changelog
 #====================================================================
+# Version 0.2 (12/2011):
+# - Fixing SLF4J classpath issue and JAVA_OPTS
 # Version 0.1 (07/2011):
 # - copy from lsc
 # Author: Sebastien Bahloul
@@ -104,7 +106,8 @@ function get_java() {
 }
 
 function build_classpath() {
-	CLASSPATH="$CLASSPATH:."
+	# Force SLF4J API library before anything else !
+	CLASSPATH="$CLASSPATH:.:$(ls $LIB_DIR/slf4j-api*.jar)"
 	for jar in "$LIB_DIR"/*.jar
 	do
 		CLASSPATH="$CLASSPATH:$jar"
@@ -140,7 +143,7 @@ fi
 log "Starting LSC Remote Agent"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" org.lsc.jmx.LscAgent $* 
+"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
 
 status=$?
 

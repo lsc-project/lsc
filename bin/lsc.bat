@@ -1,4 +1,5 @@
-@echo off
+rem @echo off
+
 
 REM ====================================================================
 REM  work out where LSC lives
@@ -21,6 +22,9 @@ call:get_java
 call:log "Starting LSC"
 
 set CLASSPATH=.
+ for  %%a in ("%LIB_DIR%\slf4j-api-*.jar") do (
+   set CLASSPATH=!CLASSPATH!;%%a
+ )
  for  %%a in ("%LIB_DIR%\*.jar") do (
    set CLASSPATH=!CLASSPATH!;%%a
  )

@@ -118,7 +118,8 @@ function get_java() {
 }
 
 function build_classpath() {
-	CLASSPATH="$CLASSPATH:."
+	# Force SLF4J API library before anything else !
+	CLASSPATH="$CLASSPATH:.:$(ls $LIB_DIR/slf4j-api*.jar)"
 	for jar in "$LIB_DIR"/*.jar
 	do
 		CLASSPATH="$CLASSPATH:$jar"
@@ -154,7 +155,7 @@ fi
 log "Starting LSC"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" "$JAVA_OPTS" org.lsc.Launcher $* 
+"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
 
 status=$?
 

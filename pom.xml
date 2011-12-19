@@ -704,16 +704,34 @@
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-all</artifactId>
 	      <version>1.5.7</version>
+	      <exclusions>
+	      	<exclusion>
+	      		<groupId>org.slf4j</groupId>
+	      		<artifactId>slf4j-api</artifactId>
+	      	</exclusion>
+	      </exclusions>
 	    </dependency>  
 	    <dependency>
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-server-integ</artifactId>
 	      <version>1.5.7</version>
+	      <exclusions>
+	      	<exclusion>
+	      		<groupId>org.slf4j</groupId>
+	      		<artifactId>slf4j-api</artifactId>
+	      	</exclusion>
+	      </exclusions>
 	    </dependency>  
 	    <dependency>
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-core-integ</artifactId>
 	      <version>1.5.7</version>
+	      <exclusions>
+	      	<exclusion>
+	      		<groupId>org.slf4j</groupId>
+	      		<artifactId>slf4j-api</artifactId>
+	      	</exclusion>
+	      </exclusions>
 	    </dependency>
 	</dependencies>
 

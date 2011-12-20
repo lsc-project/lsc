@@ -49,6 +49,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.lsc.utils.CaseIgnoreStringHashMap;
 
@@ -73,8 +74,14 @@ public class LscDatasets implements Serializable {
 		this.values = new CaseIgnoreStringHashMap<Object>(values);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public String getStringValueAttribute(String attribute) {
 		Object value = values.get(attribute);
+		if(value instanceof Set) {
+			return ((Set)value).iterator().next().toString();
+		} else if(value instanceof List){
+			return ((List)value).get(0).toString();
+		}
 		return value != null ? value.toString() : null;
 	}
 

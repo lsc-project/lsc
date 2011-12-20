@@ -101,9 +101,11 @@ public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 	private JndiServices jndiServices;
 	
 	@Before
-	public void setup() {
+	public void setupJmx() throws CommunicationException {
+		LscConfiguration.reset();
 		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		jndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
+		clean();
 	}
 	
 	@Test
@@ -116,13 +118,13 @@ public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 		LscAgent lscAgent = new LscAgent();
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
 		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
-		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", getTaskName(), 
 				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
 		Map<String, List<String>> values = new HashMap<String, List<String>>();
 		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
 		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
 		values.put("objectClass", Arrays.asList(new String[] {"person", "top"}));
-		Assert.assertTrue(lscAgent.syncByObject(TASK_NAME, DN_ADD_DST, values));
+		Assert.assertTrue(lscAgent.syncByObject(getTaskName(), DN_ADD_SRC, values));
 	}
 	
 	@Test
@@ -143,7 +145,7 @@ public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 		LscAgent lscAgent = new LscAgent();
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
 		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
-		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", TASK_NAME, 
+		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", getTaskName(), 
 				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
 		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
 		
@@ -158,7 +160,8 @@ public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 			sync.init();
 			sync.setThreads(1);
 			LscServerImpl.startJmx(sync);
-			Ldap2LdapSyncTest.launchSyncCleanTask(TASK_NAME, true, false, false);
+			LOGGER.info("The JMX bean has been registered. Synchronizing data ...");
+			Ldap2LdapSyncTest.launchSyncCleanTask(getTaskName(), true, false, false);
 		} catch (RuntimeException e) {
 			LOGGER.debug(e.toString(), e);
 		} catch (Throwable e) {
@@ -168,7 +171,7 @@ public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 	
 	private void clean() throws CommunicationException {
 		if(jndiServices.exists(DN_ADD_DST)) {
-			JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, TASK_NAME);
+			JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY, getTaskName());
 			jm.setDistinguishName(DN_ADD_DST);
 			jndiServices.apply(jm);
 		}

@@ -87,7 +87,7 @@ public class Ldap2LdapSyncTest {
 
 	public final static String TASK_NAME = "ldap2ldapTestTask";
 	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DESTINATION_DN = "ou=ldap2ldapTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DESTINATION_DN = "ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	
 	public String getTaskName() {
 		return TASK_NAME;
@@ -117,6 +117,8 @@ public class Ldap2LdapSyncTest {
 	
 	@Before
 	public void setup() {
+		LscConfiguration.reset();
+		LscConfiguration.getInstance();
 		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
 		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));

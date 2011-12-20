@@ -60,6 +60,7 @@ import javax.naming.directory.BasicAttribute;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.lsc.Task;
 import org.lsc.beans.IBean;
@@ -79,6 +80,11 @@ import org.mozilla.javascript.EcmaError;
 public class JScriptEvaluatorTest {
 
 	@Mocked Task task;
+	
+	@Before
+	public void before() {
+		LscConfiguration.reset();
+	}
 	
 	@Test
 	public void testOk() {
@@ -119,12 +125,14 @@ public class JScriptEvaluatorTest {
 
 		table.put("srcBean", bean);
 
-		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
+//		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
 		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeFirstValueById('givenName') + ' ' + srcBean.getAttributeFirstValueById('sn')", table));
 
-		List<String> res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table);
+		List<String> res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeById('givenName').get(0) + ' ' + srcBean.getAttributeById('sn').get(0)", table);
 		assertNotNull(res);
-		assertEquals("John Doe", res.get(0));
+		assertEquals("[John] [Doe]", res.get(0));
+
+		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetById('givenName').toArray()[0] + ' ' + srcBean.getDatasetById('sn').toArray()[0]", table));
 
 		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getAttributeValuesById('cn')", table);
 		assertNotNull(res);

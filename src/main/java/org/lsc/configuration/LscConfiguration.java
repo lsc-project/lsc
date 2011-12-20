@@ -368,6 +368,10 @@ public class LscConfiguration {
 			return t.getDatabaseDestinationService();
 		} else if (t.getJndiExecDstService() != null) {
 			return t.getJndiExecDstService();
+		} else if (t.getMultiDestinationService() != null) {
+			return t.getMultiDestinationService();
+		} else if (t.getPluginDestinationService() != null) {
+			return t.getPluginDestinationService();
 		}
 		return null;
 	}
@@ -381,6 +385,8 @@ public class LscConfiguration {
 			return t.getDatabaseSourceService();
 		} else if (t.getNisSourceService() != null) {
 			return t.getNisSourceService();
+		} else if (t.getPluginSourceService() != null) {
+			return t.getPluginSourceService();
 		}
 		return null;
 	}

@@ -58,6 +58,7 @@ import javax.naming.CommunicationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.lsc.CommonLdapSyncTest;
 import org.lsc.Ldap2LdapSyncTest;
 import org.lsc.SimpleSynchronize;
 import org.lsc.configuration.LdapConnectionType;
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * This test covers all the JMX capabilities
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
+public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LscJmxTest.class);

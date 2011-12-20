@@ -83,38 +83,8 @@ import org.lsc.utils.directory.LDAP;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-public class Ldap2LdapSyncTest {
+public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
-	public final static String TASK_NAME = "ldap2ldapTestTask";
-	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DESTINATION_DN = "ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	
-	public String getTaskName() {
-		return TASK_NAME;
-	}
-	
-	public String getSourceDn() {
-		return SOURCE_DN;
-	}
-	
-	public String getDestinationDn() {
-		return DESTINATION_DN;
-	}
-	
-	public String DN_ADD_SRC = "cn=CN0003," + getSourceDn(); 
-	public String DN_ADD_DST = "cn=CN0003," + getDestinationDn();
-	public String DN_MODIFY_SRC = "cn=CN0001," + getSourceDn();
-	public String DN_MODIFY_DST = "cn=CN0001," + getDestinationDn();
-	public String DN_DELETE_SRC = "cn=CN0004," + getSourceDn();
-	public String DN_DELETE_DST = "cn=CN0004," + getDestinationDn();
-	public String DN_MODRDN_SRC = "cn=CN0002," + getSourceDn();
-	public String DN_MODRDN_DST_BEFORE = "cn=CommonName0002," + getDestinationDn();
-	public String DN_MODRDN_DST_AFTER = "cn=CN0002," + getDestinationDn();
-
-	private JndiServices srcJndiServices;
-	
-	private JndiServices dstJndiServices;
-	
 	@Before
 	public void setup() {
 		LscConfiguration.reset();
@@ -374,39 +344,5 @@ public class Ldap2LdapSyncTest {
 
 		String realValue = (String) at.get();
 		assertTrue(realValue.equals(value));
-	}
-
-	/**
-	 * Get an object from the destination directory, and check that a given attribute
-	 * has n values exactly that matches the values provided.
-	 * 
-	 * In these tests we use this function to read from the source too, since
-	 * it is in reality the same directory.
-	 * 
-	 * @param dn The object to read.
-	 * @param attributeName The attribute to check.
-	 * @param expectedValues List of values expected in the attribute.
-	 * @throws NamingException
-	 */
-	private void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
-		SearchResult sr = dstJndiServices.readEntry(dn, false);
-		Attribute at = sr.getAttributes().get(attributeName);
-		if (expectedValues.size() > 0) {
-			assertNotNull(at);
-		} else {
-			if (at == null) {
-				assertEquals(0, expectedValues.size());
-				return;
-			}
-		}
-		assertEquals(expectedValues.size(), at.size());
-
-		// check that each value matches one on one
-		for (String expectedValue : expectedValues) {
-			assertTrue(at.contains(expectedValue));
-		}
-		for (int i = 0; i < at.size(); i++) {
-			assertTrue(expectedValues.contains((String) at.get(i)));
-		}
 	}
 }

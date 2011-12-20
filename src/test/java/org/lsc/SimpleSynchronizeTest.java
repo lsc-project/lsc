@@ -45,11 +45,14 @@
  */
 package org.lsc;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.lsc.configuration.LscConfiguration;
 
 /**
  * Tests for the SimpleSynchronize class.
@@ -60,6 +63,11 @@ import static org.junit.Assert.*;
  */
 public class SimpleSynchronizeTest {
 
+	@Before
+	public void setup() {
+		LscConfiguration.reset();
+	}
+	
 	@Test
 	public void testParameters() throws Exception {
 		SimpleSynchronize sync = new SimpleSynchronize();

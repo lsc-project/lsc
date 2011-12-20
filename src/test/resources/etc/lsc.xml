@@ -179,7 +179,7 @@
         <getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>KEEP</defaultPolicy>
         <dataset id="59">
@@ -187,7 +187,7 @@
           <policy>FORCE</policy>
           <defaultValues id="60"></defaultValues>
           <forceValues id="61">
-            <string>srcBean.getAttributeFirstValueById("givenName") + " " + + srcBean.getAttributeFirstValueById("sn")</string>
+            <string>srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn")</string>
           </forceValues>
         </dataset>
         <dataset id="63">
@@ -241,7 +241,7 @@
       <bean>org.lsc.beans.SimpleBean</bean>
       <ldapSourceService>
         <name>ldap2ldapJmxTestTask-src</name>
-        <connection reference="src-ldap"></connection>
+        <connection reference="src-ldap" />
         <baseDn>ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>cn</string>
@@ -263,7 +263,7 @@
       </ldapSourceService>
       <ldapDestinationService>
         <name>ldap2ldapJmxTestTask-dst</name>
-        <connection reference="dst-ldap"></connection>
+        <connection reference="dst-ldap" />
         <baseDn>ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>cn</string>
@@ -285,17 +285,17 @@
       <propertiesBasedSyncOptions>
         <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
-        <defaultPolicy>KEEP</defaultPolicy>
+        <defaultPolicy>FORCE</defaultPolicy>
         <dataset id="94">
           <name>cn</name>
           <policy>FORCE</policy>
-          <forceValues id="96">
+          <forceValues>
             <string>srcBean.getAttributeFirstValueById("cn")</string>
           </forceValues>
         </dataset>
         <dataset>
           <name>objectclass</name>
-          <policy>FORCE</policy>
+          <policy>KEEP</policy>
           <createValues>
             <string>"person"</string>
             <string>"top"</string>
@@ -303,18 +303,11 @@
             <string>"inetOrgPerson"</string>
           </createValues>
         </dataset>
-        <dataset>
-          <name>default</name>
-          <policy>FORCE</policy>
-          <defaultValues></defaultValues>
-          <forceValues></forceValues>
-          <createValues></createValues>
-        </dataset>
       </propertiesBasedSyncOptions>
     </task>
   </tasks>
-  <security id="107">
-    <encryption id="108">
+  <security>
+    <encryption>
       <keyfile>etc/lsc.key</keyfile>
       <algorithm>AES</algorithm>
       <strength>128</strength>

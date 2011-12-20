@@ -86,15 +86,30 @@ import org.lsc.utils.directory.LDAP;
 public class Ldap2LdapSyncTest {
 
 	public final static String TASK_NAME = "ldap2ldapTestTask";
-	public final static String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_ADD_DST = "cn=CN0003,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_MODIFY_SRC = "cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_MODIFY_DST = "cn=CN0001,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_DELETE_SRC = "cn=CN0004,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_DELETE_DST = "cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_MODRDN_SRC = "cn=CN0002,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_MODRDN_DST_BEFORE = "cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_MODRDN_DST_AFTER = "cn=CN0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String DESTINATION_DN = "ou=ldap2ldapTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	
+	public String getTaskName() {
+		return TASK_NAME;
+	}
+	
+	public String getSourceDn() {
+		return SOURCE_DN;
+	}
+	
+	public String getDestinationDn() {
+		return DESTINATION_DN;
+	}
+	
+	public String DN_ADD_SRC = "cn=CN0003," + getSourceDn(); 
+	public String DN_ADD_DST = "cn=CN0003," + getDestinationDn();
+	public String DN_MODIFY_SRC = "cn=CN0001," + getSourceDn();
+	public String DN_MODIFY_DST = "cn=CN0001," + getDestinationDn();
+	public String DN_DELETE_SRC = "cn=CN0004," + getSourceDn();
+	public String DN_DELETE_DST = "cn=CN0004," + getDestinationDn();
+	public String DN_MODRDN_SRC = "cn=CN0002," + getSourceDn();
+	public String DN_MODRDN_DST_BEFORE = "cn=CommonName0002," + getDestinationDn();
+	public String DN_MODRDN_DST_AFTER = "cn=CN0002," + getDestinationDn();
 
 	private JndiServices srcJndiServices;
 	

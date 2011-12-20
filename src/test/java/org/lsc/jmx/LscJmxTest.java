@@ -72,15 +72,32 @@ import org.slf4j.LoggerFactory;
  * This test covers all the JMX capabilities
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class LscJmxTest extends Thread {
+public class LscJmxTest extends Ldap2LdapSyncTest implements Runnable {
 
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LscJmxTest.class);
 	
-	public final static String TASK_NAME = "ldap2ldapJmxTestTask";
-	public final static String DN_ADD_SRC = "cn=CN0003,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DN_ADD_DST = "cn=CN0003,ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public static String SOURCE_DN = "ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
+	public static String DESTINATION_DN = "ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
+	public static String TASK_NAME = "ldap2ldapJmxTestTask";
 
+	@Override
+	public String getTaskName() {
+		return TASK_NAME;
+	}
+	
+	@Override
+	public String getSourceDn() {
+		return SOURCE_DN;
+	}
+	
+	@Override
+	public String getDestinationDn() {
+		return DESTINATION_DN;
+	}
+	
+
+	
 	private JndiServices jndiServices;
 	
 	@Before
@@ -93,7 +110,7 @@ public class LscJmxTest extends Thread {
 	public final void test1SyncByObject() throws Exception {
 
 //		Thread syncThread = new Thread(this);
-		this.start(); 
+		new Thread(this).start(); 
 		Thread.sleep(3500);
 
 		LscAgent lscAgent = new LscAgent();
@@ -115,7 +132,7 @@ public class LscJmxTest extends Thread {
 		assertFalse(jndiServices.exists(DN_ADD_DST));
 		
 		Thread syncThread = new Thread(this);
-		this.start(); 
+		new Thread(this).start(); 
 		Thread.sleep(3500);
 
 		// Check that the regular sync goes well

@@ -1,5 +1,4 @@
-rem @echo off
-
+@echo off
 
 REM ====================================================================
 REM  work out where LSC lives

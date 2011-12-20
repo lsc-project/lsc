@@ -164,6 +164,15 @@ ou: ldap2ldapJmxTestTaskSrc
 objectClass: organizationalUnit
 objectClass: top
 
+dn: cn=CN0002,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0002
+sn: SN0002
+objectClass: person
+objectClass: top
+userPassword: secret0002
+description: Number two's descriptive text
+telephoneNumber: 987987
+
 dn: cn=CN0003,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0003
 sn: SN0003
@@ -174,5 +183,11 @@ description: Number three's descriptive text
 dn: ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 ou: ldap2ldapJmxTestTaskDst
 objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CommonName0002,ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CommonName0002
+sn: SN0002
+objectClass: person
 objectClass: top
 

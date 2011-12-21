@@ -54,6 +54,7 @@ import javax.naming.directory.SearchControls;
 
 import org.lsc.LscDatasets;
 import org.lsc.configuration.LdapSourceServiceType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -105,7 +106,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 
 	public PullableJndiSrcService(TaskType task) throws LscServiceConfigurationException {
 		super(task);
-		LdapSourceServiceType asyncService = task.getLdapSourceService();
+		LdapSourceServiceType asyncService = (LdapSourceServiceType) LscConfiguration.getSourceService(task);
 		// Default LDAP date filter
 		filterTimestamp = (asyncService.getFilterAsync() != null ? asyncService.getFilterAsync() :  "modifytimestamp>={0}");
 		// Default LDAP date format

@@ -53,6 +53,8 @@ import javax.naming.directory.SearchControls;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.LdapSourceServiceType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -111,8 +113,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 */
 	@SuppressWarnings("unchecked")
 	public SimpleJndiSrcService(final TaskType task) throws LscServiceConfigurationException {
-		super(task.getLdapSourceService());
-		filterIdClean = task.getLdapSourceService().getGetCleanFilter();
+		super((LdapSourceServiceType)LscConfiguration.getSourceService(task));
+		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getGetCleanFilter();
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {

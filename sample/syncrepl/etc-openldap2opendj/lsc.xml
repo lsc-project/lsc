@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
-  <connections id="2">
-    <connection class="ldapConnection" id="4">
-      <id>ldap-dst-conn</id>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1" revision="0">
+  <connections>
+    <ldapConnection>
+      <name>ldap-dst-conn</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
       <username>cn=Directory Manager</username>
       <password>secret</password>
@@ -13,9 +13,9 @@
       <pageSize>-1</pageSize>
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
-    </connection>
-    <connection class="ldapConnection" id="3">
-      <id>ldap-src-conn</id>
+    </ldapConnection>
+    <ldapConnection>
+      <name>ldap-src-conn</name>
       <url>ldap://192.168.183.129/dc=lsc-project,dc=org</url>
       <username>cn=Manager,dc=lsc-project,dc=org</username>
       <password>secret</password>
@@ -26,48 +26,30 @@
       <pageSize>-1</pageSize>
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
-    </connection>
+    </ldapConnection>
   </connections>
-  <audits id="5">
-	<audit class="csvAudit">
+  <audits>
+	<csvAudit>
 		<name>csv</name>
+		<append>true</append>
 		<operations>create, delete</operations>
+		<file>/tmp/audit.csv</file>
 		<datasets>cn, dn</datasets>
 		<separator>;</separator>
-		<append>true</append>
-	</audit>
-	<audit class="ldifAudit">
+	</csvAudit>
+	<ldifAudit>
 		<name>ldif</name>
 		<append>false</append>
-	</audit>
+		<file>/tmp/audit.ldif</file>
+	</ldifAudit>
   </audits>
-  <tasks id="6">
-    <task id="7">
+  <tasks>
+    <task>
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <destinationService class="ldapDestinationService" id="8">
-        <name>opends-dst-service</name>
-        <connection reference="4" />
-        <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
-        <pivotAttributes id="9">
-          <string>mail</string>
-        </pivotAttributes>
-        <fetchedAttributes id="10">
-          <string>description</string>
-          <string>cn</string>
-          <string>sn</string>
-          <string>userPassword</string>
-          <string>objectClass</string>
-          <string>uid</string>
-          <string>mail</string>
-        </fetchedAttributes>
-        <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-        <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </destinationService>
-      <sourceService class="org.lsc.plugins.connectors.syncrepl.SyncReplServiceConfiguration" id="11">
+      <asyncLdapSourceService>
         <name>openldap-source-service</name>
-        <serverType>OpenLDAP</serverType>
-        <connection reference="3" />
+        <connection reference="ldap-src-conn" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>mail</string>
@@ -83,20 +65,39 @@
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </sourceService>
-      <syncOptions class="propertiesBasedSyncOptions">
-        <conditions></conditions>
-        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <serverType>OpenLDAP</serverType>
+      </asyncLdapSourceService>
+      <ldapDestinationService>
+        <name>opends-dst-service</name>
+        <connection reference="ldap-dst-conn" />
+        <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>mail</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>userPassword</string>
+          <string>objectClass</string>
+          <string>uid</string>
+          <string>mail</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
+        <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"mail=" + srcBean.getDatasetFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
         <dataset>
           <name>description</name>
           <policy>FORCE</policy>
           <forceValues>
-              <string>js:srcBean.getAttributeFirstValueById("sn").toUpperCase() + " (" + srcBean.getAttributeFirstValueById("mail") + ")"</string>
+              <string>js:srcBean.getDatasetFirstValueById("sn").toUpperCase() + " (" + srcBean.getDatasetFirstValueById("mail") + ")"</string>
           </forceValues>
         </dataset>
-      </syncOptions>
+      </propertiesBasedSyncOptions>
     </task>
   </tasks>
 </lsc>

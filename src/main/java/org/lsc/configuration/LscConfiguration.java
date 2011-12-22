@@ -392,7 +392,7 @@ public class LscConfiguration {
 	}
 
 	/** Fetched attributes name cache */
-	private static Map<String, List<String>> attributesNameCache;
+	private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
 
 	public static List<String> getFetchedAttributesFromDatabaseService(TaskType task) {
 		String serviceName = task.getDatabaseDestinationService().getName();

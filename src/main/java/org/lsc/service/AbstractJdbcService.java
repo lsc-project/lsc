@@ -52,12 +52,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.naming.CommunicationException;
 import javax.naming.directory.BasicAttribute;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
+import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.DatabaseConnectionType;
@@ -188,11 +190,10 @@ public abstract class AbstractJdbcService implements IService {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			Map<String, Object> attributeMap = attributes.getDatasets();
-			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), attributeMap);
+			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), getAttributesMap(attributes));
 			if(records.size() > 1) {
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
-						"For id=" + attributeMap + ", there are " + records.size() + " records !");
+						"For id=" + id + ", there are " + records.size() + " records !");
 			} else if (records.size() == 0) {
 				return null;
 			}
@@ -225,4 +226,48 @@ public abstract class AbstractJdbcService implements IService {
 	}
 
 
+	public static Map<String, Object> fillAttributesMap(
+			Map<String, Object> datasets, IBean destinationBean) {
+		for(String attributeName : destinationBean.getAttributesNames()) {
+			if(!datasets.containsKey(attributeName)) {
+				if(destinationBean.getDatasetById(attributeName) != null && destinationBean.getDatasetById(attributeName).size() > 0) {
+					datasets.put(attributeName, destinationBean.getDatasetById(attributeName).iterator().next().toString());
+				}
+			}
+		}
+		return datasets;
+	}
+
+	public static Map<String, Object> getAttributesMap(
+			List<LscDatasetModification> lscAttributeModifications) {
+		Map<String, Object> values = new HashMap<String, Object>();
+		for(LscDatasetModification lam : lscAttributeModifications) {
+			if(lam.getValues().size() > 0) {
+				values.put(lam.getAttributeName(), lam.getValues().get(0));
+			}
+		}
+		return values;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static Map<String, String> getAttributesMap(
+			LscDatasets lscAttributes) {
+		Map<String, String> values = new HashMap<String, String>(lscAttributes.getDatasets().size());
+		for(Entry<String, Object> entry : lscAttributes.getDatasets().entrySet()) {
+			if(entry.getValue() != null) {
+				values.put(entry.getKey(), getValue(entry.getValue()));
+			}
+		}
+		return values;
+	}
+	
+	public static String getValue(Object value) {
+		if(value instanceof List) {
+			return ((List)value).iterator().next().toString();
+		} else if(value instanceof Set) {
+			return ((Set)value).iterator().next().toString();
+		} else {
+			return value.toString();
+		}
+	}
 }

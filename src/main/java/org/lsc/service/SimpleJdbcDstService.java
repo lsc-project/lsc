@@ -47,14 +47,10 @@
 package org.lsc.service;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.lsc.LscDatasetModification;
 import org.lsc.LscModifications;
-import org.lsc.beans.IBean;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.DatabaseDestinationServiceType;
 import org.lsc.configuration.TaskType;
@@ -119,7 +115,7 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	 */
 	@Override
 	public String getRequestNameForNextId() {
-		return null;
+		throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
 	}
 
 	@Override
@@ -162,26 +158,4 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 		}
 		return true;
 	}
-
-	private Map<String, Object> fillAttributesMap(
-			Map<String, Object> datasets, IBean destinationBean) {
-		for(String attributeName : destinationBean.getAttributesNames()) {
-			if(!datasets.containsKey(attributeName)) {
-				datasets.put(attributeName, destinationBean.getDatasetById(attributeName));
-			}
-		}
-		return datasets;
-	}
-
-	private Map<String, Object> getAttributesMap(
-			List<LscDatasetModification> lscAttributeModifications) {
-		Map<String, Object> values = new HashMap<String, Object>();
-		for(LscDatasetModification lam : lscAttributeModifications) {
-			if(lam.getValues().size() > 0) {
-				values.put(lam.getAttributeName(), lam.getValues().get(0));
-			}
-		}
-		return values;
-	}
-	
 }

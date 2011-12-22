@@ -732,7 +732,7 @@ class SynchronizeTask implements Runnable {
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, id, new Exception("Technical problem while applying modifications to directory"));
+				abstractSynchronize.logActionError(lm, id, new Exception("Technical problem while applying modifications to the destination"));
 				return false;
 			}
 		} catch (CommunicationException e) {

@@ -22,7 +22,7 @@
 		</layout>
 
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
+			<level>DEBUG</level>
 		</filter>
 
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
@@ -40,10 +40,6 @@
 	<logger name="communicationLogger" level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<logger name="org.lsc" level="INFO">
-		<appender-ref ref="LSC"/>
-		<appender-ref ref="CONSOLE"/>
-	</logger>
 	<logger name="lsc" level="INFO">
 		<appender-ref ref="LDIF"/>
 	</logger>
@@ -53,7 +49,7 @@
 	<logger name="poolLogger" level="ERROR">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </configuration>

@@ -233,6 +233,10 @@ run_java_command()
 	# check if we have java executable
 	get_java
 
+	for jar in "$SAMPLE_HOME"/../../lib/slf4j-api*.jar; do
+		LDAPCP="$LDAPCP:$jar"
+	done
+
 	for jar in "$SAMPLE_HOME"/../../lib/*.jar; do
 		LDAPCP="$LDAPCP:$jar"
 	done
@@ -261,7 +265,7 @@ stop_ldap() {
 
 run() {
 	CLASSPATH=""
-	for jar in "$SAMPLE_HOME"/lib/*.jar; do
+	for jar in "$SAMPLE_HOME"/../lib/*.jar; do
 		CLASSPATH="$CLASSPATH:$jar"
 	done
 	
@@ -277,9 +281,9 @@ run() {
 	export CLASSPATH
 	export CONFIGPATH
 
-	command="\"$SAMPLE_HOME/../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all"
+	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all"
 	echo "Running $command"
-	"$SAMPLE_HOME/../bin/lsc" --config "$CONFIGPATH" --synchronize all
+	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --synchronize all
 }
 
 # ---------------------------------------------------------------------------------

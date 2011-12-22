@@ -118,7 +118,7 @@ public class LscDatasets implements Serializable {
 	 * @return Map of the datasets, indexed by name
 	 */
 	public Map<String, Object> getDatasets() {
-		return (Map<String, Object>) values;
+		return values;
 	}
 
 	public void setDatasets(Map<String, Object> values) {

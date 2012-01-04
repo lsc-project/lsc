@@ -55,7 +55,7 @@ public class LscException extends Exception {
 	/** Generated serial UID */
 	private static final long serialVersionUID = -3941780421277638911L;
 
-	public LscException(String message, Exception origin) {
+	public LscException(String message, Throwable origin) {
 		super(message, origin);
 	}
 	

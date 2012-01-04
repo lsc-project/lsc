@@ -257,7 +257,7 @@ public final class BeanComparator {
 		}
 
 		// We're going to iterate over the list of attributes we may write
-		Set<String> writeAttributes = getWriteAttributes(task.getSyncOptions(), itmBean);
+		Set<String> writeAttributes = getWriteAttributes(task, itmBean);
 		LOGGER.debug("{} List of attributes considered for writing in destination: {}", logPrefix, writeAttributes);
 
 		// Iterate over attributes we may write
@@ -426,11 +426,11 @@ public final class BeanComparator {
 	 *            The original bean read from the source
 	 * @return Set of attribute names to be updated
 	 */
-	private static Set<String> getWriteAttributes(ISyncOptions syncOptions, IBean srcBean) {
+	private static Set<String> getWriteAttributes(Task task, IBean srcBean) {
 		Set<String> res = new HashSet<String>();
 
 		// Check if an explicit list was configured
-		List<String> syncOptionsWriteAttributes = syncOptions.getWriteAttributes();
+		List<String> syncOptionsWriteAttributes = task.getDestinationService().getWriteDatasetIds();
 
 		if (syncOptionsWriteAttributes != null) {
 			for (String attrName : syncOptionsWriteAttributes) {
@@ -442,9 +442,9 @@ public final class BeanComparator {
 		// we build a list from all source attributes, all force and default values
 		if (res.size() == 0) {
 			Set<String> itmBeanAttrsList = srcBean.getAttributesNames();
-			Set<String> forceAttrsList = syncOptions.getForceValuedAttributeNames();
-			Set<String> defaultAttrsList = syncOptions.getDefaultValuedAttributeNames();
-			Set<String> createAttrsList = syncOptions.getCreateAttributeNames();
+			Set<String> forceAttrsList = task.getSyncOptions().getForceValuedAttributeNames();
+			Set<String> defaultAttrsList = task.getSyncOptions().getDefaultValuedAttributeNames();
+			Set<String> createAttrsList = task.getSyncOptions().getCreateAttributeNames();
 
 			if (itmBeanAttrsList != null) res.addAll(itmBeanAttrsList);
 			if (forceAttrsList != null) res.addAll(forceAttrsList);

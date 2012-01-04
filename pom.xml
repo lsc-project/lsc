@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
@@ -119,7 +118,7 @@
 	<scm>
 		<connection>scm:svn:https://lsc-project.org/svn/lsc/trunk</connection>
 		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/trunk</developerConnection>
-		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc</url>
+		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc/trunk</url>
 	</scm>
 
 	<organization>
@@ -287,7 +286,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -302,8 +301,8 @@
 		<profile>
 			<id>jdk16</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
 				<jdk>1.6</jdk>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
 				<jdk-version>jdk16</jdk-version>
@@ -376,8 +375,8 @@
 								<phase>test-compile</phase>
 								<configuration>
 									<tasks unless="maven.test.skip">
-										<property name="execution.path" refid="maven.runtime.classpath"></property>
-										<ant antfile="${basedir}/misc/build-runldap.xml" target="startLdapServer"></ant>
+										<property name="execution.path" refid="maven.runtime.classpath" />
+										<ant antfile="${basedir}/misc/build-runldap.xml" target="startLdapServer" />
 									</tasks>
 								</configuration>
 								<goals>
@@ -389,9 +388,9 @@
 								<phase>test</phase>
 								<configuration>
 									<tasks unless="maven.test.skip">
-										<property name="execution.path" refid="maven.runtime.classpath"></property>
-										<property name="plugin.path" refid="maven.plugin.classpath"></property>
-										<ant antfile="${basedir}/misc/build-runldap.xml" target="stopLdapServer"></ant>
+										<property name="execution.path" refid="maven.runtime.classpath" />
+										<property name="plugin.path" refid="maven.plugin.classpath" />
+										<ant antfile="${basedir}/misc/build-runldap.xml" target="stopLdapServer" />
 									</tasks>
 								</configuration>
 								<goals>

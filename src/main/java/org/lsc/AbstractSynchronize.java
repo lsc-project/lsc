@@ -235,7 +235,7 @@ public abstract class AbstractSynchronize {
 						// or if the condition is false,
 						// log action for debugging purposes and continue
 						if (nodelete) {
-							logShouldAction(lm, id, task.getName());
+							logShouldAction(lm, task.getName());
 							continue;
 						}
 					} else {
@@ -250,12 +250,12 @@ public abstract class AbstractSynchronize {
 						logAction(lm, id, task.getName());
 					} else {
 						counter.incrementCountError();
-						logActionError(lm, id, new Exception("Technical problem while applying modifications to destination service"));
+						logActionError(lm, id.getValue(), new Exception("Technical problem while applying modifications to destination service"));
 					}
 				}
 			} catch (LscServiceException e) {
 				counter.incrementCountError();
-				logActionError(lm, id, e);
+				logActionError(lm, id.getValue(), e);
 				if(e.getCause().getClass().isAssignableFrom(CommunicationException.class)) {
 					// we lost the connection to the source or destination, stop
 					// everything!
@@ -402,10 +402,10 @@ public abstract class AbstractSynchronize {
 	 *            synchronization process name
 	 */
 	protected final void logActionError(final LscModifications lm,
-			final Entry<String, LscDatasets> identifier,
+			final Object data,
 			final Exception except) {
 
-		LOGGER.error("Error while synchronizing ID {}: {}", (lm != null ? lm.getMainIdentifier() : identifier.getValue()), except.toString());
+		LOGGER.error("Error while synchronizing ID {}: {}", (lm != null ? lm.getMainIdentifier() : data), except.toString());
 		LOGGER.debug(except.toString(), except);
 
 		if (lm != null) {
@@ -456,8 +456,7 @@ public abstract class AbstractSynchronize {
 	 * @param id
 	 * @param syncName
 	 */
-	protected final void logShouldAction(final LscModifications lm,
-			final Entry<String, LscDatasets> id, final String syncName) {
+	protected final void logShouldAction(final LscModifications lm, final String syncName) {
 		switch (lm.getOperation()) {
 			case CREATE_OBJECT:
 				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}", lm.getMainIdentifier());
@@ -598,7 +597,7 @@ class SynchronizeTask implements Runnable {
 	public void run() {
 
 		counter.incrementCountAll();
-
+		Entry<String, LscDatasets> nextId = null;
 		try {
 			if (id != null) {
 				AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
@@ -609,7 +608,7 @@ class SynchronizeTask implements Runnable {
 				IAsynchronousService aSrcService = (IAsynchronousService) task.getSourceService();
 				boolean interrupted = false;
 				while (!interrupted) {
-					Entry<String, LscDatasets> nextId = aSrcService.getNextId();
+					nextId = aSrcService.getNextId();
 					if (nextId != null) {
 						run(nextId);
 					} else {
@@ -624,7 +623,7 @@ class SynchronizeTask implements Runnable {
 			}
 		} catch (LscServiceException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, id, e);
+			abstractSynchronize.logActionError(null, (id != null ? id.getValue() : nextId), e);
 		}
 	}
 
@@ -634,14 +633,14 @@ class SynchronizeTask implements Runnable {
 			return run(entry);
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, id, e);
+			abstractSynchronize.logActionError(null, id.getValue(), e);
 			
 			if (e.getCause() instanceof LscServiceCommunicationException) {
 				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
 			}
 		} catch (Exception e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, id, e);
+			abstractSynchronize.logActionError(null, id.getValue(), e);
 		}
 		return false;
 	}
@@ -717,7 +716,7 @@ class SynchronizeTask implements Runnable {
 				// apply condition is false, log action for debugging purposes
 				// and forget
 				if (!applyCondition || calculateForDebugOnly) {
-					abstractSynchronize.logShouldAction(lm, id, syncName);
+					abstractSynchronize.logShouldAction(lm, syncName);
 					return true;
 				}
 			} else {
@@ -732,7 +731,7 @@ class SynchronizeTask implements Runnable {
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, id, new Exception("Technical problem while applying modifications to the destination"));
+				abstractSynchronize.logActionError(lm, id.getValue(), new Exception("Technical problem while applying modifications to the destination"));
 				return false;
 			}
 		} catch (CommunicationException e) {
@@ -740,11 +739,11 @@ class SynchronizeTask implements Runnable {
 			// everything!
 			counter.incrementCountError();
 			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
-			abstractSynchronize.logActionError(lm, id, e);
+			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
 			return false;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, id, e);
+			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
 			
 			if (e.getCause() instanceof LscServiceCommunicationException) {
 				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
@@ -752,7 +751,7 @@ class SynchronizeTask implements Runnable {
 			return false;
 		} catch (Exception e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, id, e);
+			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
 			return false;
 		}
 	}

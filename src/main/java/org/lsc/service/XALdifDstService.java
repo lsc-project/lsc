@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.transaction.HeuristicMixedException;
@@ -250,5 +251,10 @@ public class XALdifDstService implements
 	@Override
 	public void setTransactionManager(TransactionManager xaTM) {
 		this.tm = xaTM;
+	}
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		throw new UnsupportedOperationException("TODO");
 	}
 }

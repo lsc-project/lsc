@@ -47,6 +47,9 @@
 package org.lsc.service;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -57,6 +60,11 @@ import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
+import org.lsc.persistence.DaoConfig;
+
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.ibatis.sqlmap.engine.impl.SqlMapClientImpl;
+import com.ibatis.sqlmap.engine.mapping.parameter.ParameterMapping;
 
 /**
  * This class is a Database Service destination service
@@ -157,5 +165,32 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 			}
 		}
 		return true;
+	}
+
+	/** Fetched attributes name cache */
+	private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		String serviceName = serviceConf.getName();
+		if(attributesNameCache != null && attributesNameCache.size() > 0) {
+			return attributesNameCache.get(serviceName);
+		}
+		attributesNameCache.put(serviceName, new ArrayList<String>());
+		SqlMapClient sqlMapper = null;
+		try {
+			sqlMapper = DaoConfig.getSqlMapClient((DatabaseConnectionType)serviceConf.getConnection().getReference());
+			if(sqlMapper instanceof SqlMapClientImpl) {
+				for(String request: serviceConf.getRequestsNameForInsert().getString()) {
+					for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
+						attributesNameCache.get(serviceName).add(pm.getPropertyName());
+					}
+				}
+			}
+		} catch (LscServiceConfigurationException e) {
+			LOGGER.error("Error while looking for fetched attributes through JDBC destination service: " + e.toString(), e);
+			return null;
+		}
+		return attributesNameCache.get(serviceName);
 	}
 }

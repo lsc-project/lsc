@@ -94,12 +94,16 @@ public class ClasstypeFinder {
 	 * Feed the class path with the required jars/dirs/base directory
 	 * @param args
 	 */
-	public void loadClasspath(File[] args) {
+	private void loadClasspath(File[] args) {
 		finder = new ClassFinder();
 		finder.addClassPath();
 		for (File arg : args) {
 			finder.add(arg);
 		}
+	}
+	
+	public void setup() {
+		setupClasspath(new File(this.getClass().getClassLoader().getResource(".").getFile()));
 	}
 	
 	public void setupClasspath(File libSubDirectory) {
@@ -124,7 +128,7 @@ public class ClasstypeFinder {
 	 */
 	public synchronized Collection<String> findExtensions(Class<?> baseClass) {
 		if(finder == null) {
-			throw new InitializationException("Classpath not initialized !");
+			throw new InitializationException("ClasspathFinder not initialized ! (consider calling either setup() or setupClasspath())");
 		}
 		if(cacheExtensions.containsKey(baseClass.getName())) {
 			return cacheExtensions.get(baseClass.getName());

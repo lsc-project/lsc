@@ -45,8 +45,6 @@
  */
 package org.lsc.jndi;
 
-import java.util.Properties;
-
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 
@@ -60,11 +58,6 @@ import org.lsc.exception.LscServiceConfigurationException;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SimpleJndiFakeDstService extends SimpleJndiDstService {
-
-	@Deprecated
-	public SimpleJndiFakeDstService(Properties props, String beanClassName) throws LscServiceConfigurationException {
-		super(props, beanClassName);
-	}
 
 	public SimpleJndiFakeDstService(final TaskType task) throws LscServiceConfigurationException {
 		super(task);

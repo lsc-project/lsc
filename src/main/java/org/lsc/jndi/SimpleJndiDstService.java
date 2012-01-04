@@ -47,8 +47,8 @@ package org.lsc.jndi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.naming.CommunicationException;
 import javax.naming.NamingException;
@@ -83,27 +83,8 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiDstService.class);
 	
-	/**
-	 * Constructor adapted to the context properties and the bean class name to instantiate.
-	 * 
-	 * @param props
-	 *            the properties used to identify the directory parameters and context
-	 * @param beanClassName
-	 *            the bean class name that will be instantiated and feed up
-	 * @throws LscServiceException 
-	 */
-	@SuppressWarnings({ "unchecked" })
-	@Deprecated
-	public SimpleJndiDstService(final Properties props, final String beanClassName) throws LscServiceConfigurationException {
-		super(props);
-		try {
-			this.beanClass = (Class<IBean>) Class.forName(beanClassName);
-		} catch (ClassNotFoundException e) {
-			LOGGER.error("Bean class {} not found. Check this class name really exists.", beanClassName);
-			throw new LscServiceConfigurationException(e);
-		}
-	}
-
+	private TaskType task;
+	
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.
 	 * 
@@ -114,6 +95,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	@SuppressWarnings({ "unchecked" })
 	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
 		super(task.getLdapDestinationService());
+		this.task = task;
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
@@ -218,5 +200,9 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 		} catch (CommunicationException e) {
 			throw new LscServiceException(e);
 		}
+	}
+	
+	public List<String> getWriteDatasetIds() {
+		return task.getLdapDestinationService().getFetchedAttributes().getString();
 	}
 }

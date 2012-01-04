@@ -72,12 +72,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 //	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
 
-	private TaskType task;
-
 	private PropertiesBasedSyncOptionsType conf;
 
 	public void initialize(TaskType task) {
-		this.task = task;
 		conf = task.getPropertiesBasedSyncOptions();
 	}
 	
@@ -111,16 +108,6 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 			copy = new ArrayList<String>(datasetValues.getString());
 		}
 		return copy;
-	}
-
-	public List<String> getWriteAttributes() {
-		if(task.getLdapDestinationService() != null) {
-			return task.getLdapDestinationService().getFetchedAttributes().getString();
-		} else if (task.getDatabaseDestinationService() != null) {
-			return LscConfiguration.getFetchedAttributesFromDatabaseService(task);
-		} else {
-			throw new UnsupportedOperationException("Unsupported write attributes method usage !");
-		}
 	}
 
 	@Override

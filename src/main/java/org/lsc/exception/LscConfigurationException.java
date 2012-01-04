@@ -58,7 +58,7 @@ public class LscConfigurationException extends LscException {
 		super(message);
 	}
 	
-	public LscConfigurationException(String message, Exception origin) {
+	public LscConfigurationException(String message, Throwable origin) {
 		super(message, origin);
 	}
 	

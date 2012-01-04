@@ -136,12 +136,6 @@ public interface ISyncOptions {
 	Set<String> getForceValuedAttributeNames();
 
 	/**
-	 * Get all the attributes that must be written in the destination
-	 * @return the attributes to write in the destination
-	 */
-	List<String> getWriteAttributes();
-
-	/**
 	 * Returns the condition for a creation
 	 *
 	 * @return the condition or "true" if none is specified (default)

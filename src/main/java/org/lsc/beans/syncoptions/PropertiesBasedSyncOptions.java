@@ -113,16 +113,6 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		return copy;
 	}
 
-	public List<String> getWriteAttributes() {
-		if(task.getLdapDestinationService() != null) {
-			return task.getLdapDestinationService().getFetchedAttributes().getString();
-		} else if (task.getDatabaseDestinationService() != null) {
-			return LscConfiguration.getFetchedAttributesFromDatabaseService(task);
-		} else {
-			throw new UnsupportedOperationException("Unsupported write attributes method usage !");
-		}
-	}
-
 	@Override
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();

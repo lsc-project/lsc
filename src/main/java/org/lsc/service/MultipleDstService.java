@@ -156,4 +156,13 @@ public class MultipleDstService implements IWritableService {
 		}
 		return true;
 	}
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		List<String> writableDatasetIds = new ArrayList<String>();
+		for(IXAWritableService xaService: xaServices) {
+			writableDatasetIds.addAll(xaService.getWriteDatasetIds());
+		}
+		return writableDatasetIds;
+	}
 }

@@ -47,12 +47,14 @@
 package org.lsc.service;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.lsc.LscModifications;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.DatabaseDestinationServiceType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -157,5 +159,10 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		return LscConfiguration.getFetchedAttributesFromDatabaseService(this.serviceConf);
 	}
 }

@@ -45,6 +45,8 @@
  */
 package org.lsc.service;
 
+import java.util.List;
+
 import org.lsc.LscModifications;
 import org.lsc.exception.LscServiceException;
 
@@ -72,4 +74,6 @@ public interface IWritableService extends IService {
 	 * @throws LscServiceException thrown if an error is encountered
 	 */
 	public boolean apply(final LscModifications lm) throws LscServiceException;
+	
+	public List<String> getWriteDatasetIds();
 }

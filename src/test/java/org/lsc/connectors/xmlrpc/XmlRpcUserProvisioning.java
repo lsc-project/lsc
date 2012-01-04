@@ -233,4 +233,9 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 		}
 		
 	}
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		throw new UnsupportedOperationException("TODO");
+	}
 }

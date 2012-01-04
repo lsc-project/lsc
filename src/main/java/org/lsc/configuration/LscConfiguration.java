@@ -60,19 +60,13 @@ import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
-import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.jndi.PullableJndiSrcService;
 import org.lsc.jndi.SimpleJndiDstService;
-import org.lsc.persistence.DaoConfig;
 import org.lsc.service.MultipleDstService;
 import org.lsc.service.SimpleJdbcDstService;
 import org.lsc.service.SimpleJdbcSrcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.engine.impl.SqlMapClientImpl;
-import com.ibatis.sqlmap.engine.mapping.parameter.ParameterMapping;
 
 /**
  * This is the main configuration object. It contains all reference to the other objects, including plugins and third party
@@ -387,49 +381,6 @@ public class LscConfiguration {
 			return t.getNisSourceService();
 		} else if (t.getPluginSourceService() != null) {
 			return t.getPluginSourceService();
-		}
-		return null;
-	}
-
-	/** Fetched attributes name cache */
-	private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
-
-	public static List<String> getFetchedAttributesFromDatabaseService(TaskType task) {
-		String serviceName = task.getDatabaseDestinationService().getName();
-		if(attributesNameCache != null && attributesNameCache.size() > 0) {
-			return attributesNameCache.get(serviceName);
-		}
-		attributesNameCache.put(serviceName, new ArrayList<String>());
-		SqlMapClient sqlMapper = null;
-		try {
-			sqlMapper = DaoConfig.getSqlMapClient((DatabaseConnectionType)task.getDatabaseDestinationService().getConnection().getReference());
-			if(sqlMapper instanceof SqlMapClientImpl) {
-				for(String request: task.getDatabaseDestinationService().getRequestsNameForInsert().getString()) {
-					for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
-						attributesNameCache.get(serviceName).add(pm.getPropertyName());
-					}
-				}
-			}
-		} catch (LscServiceConfigurationException e) {
-			LOGGER.error("Error while looking for fetched attributes through JDBC destination service: " + e.toString(), e);
-			return null;
-		}
-		return attributesNameCache.get(serviceName);
-	}
-
-	private static Map<String, String> types = new HashMap<String, String>();
-	
-	public static void contribute(String key, String value) {
-		types.put(key, value);
-	}
-	
-	public static Class<?> getImplementation(String typename) {
-		if(types.containsKey(typename)) {
-			try {
-				return Class.forName(types.get(typename));
-			} catch (ClassNotFoundException e) {
-				LOGGER.error("Unable to find corresponding class: " + typename);
-			}
 		}
 		return null;
 	}

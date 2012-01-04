@@ -72,12 +72,9 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 //	private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesBasedSyncOptions.class);
 
-	private TaskType task;
-
 	private PropertiesBasedSyncOptionsType conf;
 
 	public void initialize(TaskType task) {
-		this.task = task;
 		conf = task.getPropertiesBasedSyncOptions();
 	}
 	

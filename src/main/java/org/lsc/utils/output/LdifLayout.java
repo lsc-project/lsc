@@ -236,7 +236,7 @@ public class LdifLayout extends PatternLayout {
 		}
 	}
 
-	private static String toBase64(String value) {
+	public static String toBase64(String value) {
 		return new String(new Base64().encode(value.getBytes(Charset.forName("utf-8"))));
 	}
 

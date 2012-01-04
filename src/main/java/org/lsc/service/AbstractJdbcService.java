@@ -249,7 +249,6 @@ public abstract class AbstractJdbcService implements IService {
 		return values;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public static Map<String, String> getAttributesMap(
 			LscDatasets lscAttributes) {
 		Map<String, String> values = new HashMap<String, String>(lscAttributes.getDatasets().size());

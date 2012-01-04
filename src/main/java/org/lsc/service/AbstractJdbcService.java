@@ -262,9 +262,9 @@ public abstract class AbstractJdbcService implements IService {
 	
 	public static String getValue(Object value) {
 		if(value instanceof List) {
-			return ((List)value).iterator().next().toString();
+			return ((List<?>)value).iterator().next().toString();
 		} else if(value instanceof Set) {
-			return ((Set)value).iterator().next().toString();
+			return ((Set<?>)value).iterator().next().toString();
 		} else {
 			return value.toString();
 		}

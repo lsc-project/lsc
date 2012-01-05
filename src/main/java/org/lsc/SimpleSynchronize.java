@@ -185,7 +185,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
 		try {
-			LSCStructuralLogger.DESTINATION.warn("Starting {} for {}", taskMode.name(), task.getName());
+			LSCStructuralLogger.DESTINATION.info("Starting {} for {}", taskMode.name(), task.getName());
 
 			// Do the work!
 			switch (taskMode) {

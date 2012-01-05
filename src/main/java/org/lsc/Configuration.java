@@ -218,7 +218,6 @@ public class Configuration {
 		return result;
 	}
 	
-	@Deprecated
 	public static Properties getPropertiesSubset(final Properties originalProperties, String prefix) {
 		if (originalProperties == null) {
 			return null;

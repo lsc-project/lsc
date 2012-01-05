@@ -439,7 +439,6 @@ public class Configuration {
 				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
 				if(Configuration.class.getClassLoader().getResource("etc") != null) {
 					Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
-				} else {
 				}
 			}
 		} catch (LscException le) {

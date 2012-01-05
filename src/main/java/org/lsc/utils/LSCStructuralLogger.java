@@ -13,8 +13,6 @@ public interface LSCStructuralLogger {
 
 	public static final Logger GLOBAL = LoggerFactory.getLogger("lsc.global");
 
-	public static final Logger GENERATION = LoggerFactory.getLogger("lsc.generation");
-
 	public static final Logger SOURCE = LoggerFactory.getLogger("lsc.source");
 
 	public static final Logger TESTS = LoggerFactory.getLogger("lsc.tests");

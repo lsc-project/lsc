@@ -708,6 +708,10 @@
 	      		<groupId>org.slf4j</groupId>
 	      		<artifactId>slf4j-api</artifactId>
 	      	</exclusion>
+	      	<exclusion>
+	      		<groupId>org.apache.directory.shared</groupId>
+	      		<artifactId>shared-ldap-schema</artifactId>
+	      	</exclusion>
 	      </exclusions>
 	    </dependency>  
 	    <dependency>
@@ -719,6 +723,10 @@
 	      		<groupId>org.slf4j</groupId>
 	      		<artifactId>slf4j-api</artifactId>
 	      	</exclusion>
+	      	<exclusion>
+	      		<groupId>org.apache.directory.shared</groupId>
+	      		<artifactId>shared-ldap-schema</artifactId>
+	      	</exclusion>
 	      </exclusions>
 	    </dependency>  
 	    <dependency>
@@ -729,6 +737,10 @@
 	      	<exclusion>
 	      		<groupId>org.slf4j</groupId>
 	      		<artifactId>slf4j-api</artifactId>
+	      	</exclusion>
+	      	<exclusion>
+	      		<groupId>org.apache.directory.shared</groupId>
+	      		<artifactId>shared-ldap-schema</artifactId>
 	      	</exclusion>
 	      </exclusions>
 	    </dependency>

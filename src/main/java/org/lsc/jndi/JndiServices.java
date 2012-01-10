@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -65,6 +66,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -86,6 +88,8 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.name.DN;
+import org.apache.directory.shared.ldap.name.RDN;
 import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
@@ -94,6 +98,7 @@ import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapDerefAliasesType;
 import org.lsc.configuration.LdapReferralType;
 import org.lsc.configuration.LdapVersionType;
+import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,7 +203,7 @@ public final class JndiServices {
 		}
 
 		/* handle options */
-		contextDn = namingContext.getDn() != null ? namingContext.getDn() : null;
+		contextDn = namingContext.getDn() != null ?  namingContext.getDn() : null;
 
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null) {
@@ -285,14 +290,25 @@ public final class JndiServices {
 		if(forceNewConnection) {
 			return new JndiServices(props);
 		} else {
-			if (!cache.containsKey(props)) {
-				cache.put(props, new JndiServices(props));
-			}
-			return (JndiServices) cache.get(props);
+            JndiServices instance = cache.get(props);
+            if (instance == null) {
+                instance = new JndiServices(props);
+            } else {
+                try {
+                    instance.getContext().lookup("");
+                } catch (Exception e) {
+                    LOGGER.warn("Connection is closed. Create a new JndiServices. " + e.getMessage());
+                    LOGGER.debug("Error checking connection: ", e);
+                    instance = new JndiServices(props);
+                }
+            }
+            cache.put(props, instance);
+            return instance;
+		
 		}
 	}
 
-	public static Properties getLdapProperties(LdapConnectionType connection) {
+	public static Properties getLdapProperties(LdapConnectionType connection) throws LscConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, (connection.getFactory() != null ? connection.getFactory() : "com.sun.jndi.ldap.LdapCtxFactory"));
 		if(connection.getUsername() != null) {
@@ -328,6 +344,24 @@ public final class JndiServices {
 		} else {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");
 		}
+		try {
+		    LdapURL connectionUrl = new LdapURL(connection.getUrl());
+            if(connectionUrl.getHost() == null) {
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("Hostname is empty in LDAP URL, will try to lookup through the naming context ...");
+                String domainExt = convertToDomainExtension(connectionUrl.getDn());
+                if(domainExt != null) {
+                    String hostname = lookupLdapSrvThroughDNS("_ldap._tcp." + domainExt);
+                    if(hostname != null) {
+                        connectionUrl.setHost(hostname.substring(0, hostname.indexOf(":")));
+                        connectionUrl.setPort(Integer.parseInt(hostname.substring(hostname.indexOf(":")+1)));
+                        connection.setUrl(connectionUrl.toString());
+                    }
+                }
+            }
+        }
+        catch (LdapURLEncodingException e) {
+            throw new LscConfigurationException(e);
+        }
 		props.setProperty(DirContext.PROVIDER_URL, connection.getUrl());
 		if(connection.getReferral() != null) {
 			props.setProperty(DirContext.REFERRAL, connection.getReferral().value().toLowerCase());
@@ -352,7 +386,42 @@ public final class JndiServices {
 		return props;
 	}
 	
-	private static String getDerefJndiValue(LdapDerefAliasesType derefAliases) {
+	private static String lookupLdapSrvThroughDNS(String hostname) {
+	    Properties env = new Properties();
+	    env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+	    env.put("java.naming.provider.url", "dns:");
+	    DirContext ctx;
+        try {
+            ctx = new InitialDirContext(env);
+            if(ctx != null) {
+                Attributes attrs = ctx.getAttributes(hostname, new String[] { "SRV" });
+                String[] attributes = ((String)attrs.getAll().next().get()).split(" ");
+                return attributes[3] + ":" + attributes[2];
+            }
+        }
+        catch (NamingException e) {
+        }
+        return hostname + ":389";
+    }
+
+    private static String convertToDomainExtension(DN dn) {
+	    String fqdn = "";
+	    Enumeration<RDN> rdns = dn.getAllRdn();
+	    while(rdns.hasMoreElements()) {
+	        RDN rdn = rdns.nextElement();
+	        if(!rdn.getAtav().getUpType().equalsIgnoreCase("dc")) {
+	            return null;
+	        }
+	        if(fqdn.length() > 0) {
+	            fqdn = rdn.getNormValue() + "." + fqdn;
+	        } else {
+	            fqdn = rdn.getNormValue();
+	        }
+	    }
+	    return fqdn;
+    }
+
+    private static String getDerefJndiValue(LdapDerefAliasesType derefAliases) {
 		switch(derefAliases) {
 		case ALWAYS:
 			return "always";
@@ -920,6 +989,8 @@ public final class JndiServices {
 			if (requestPagedResults) {
 				ctx.setRequestControls(null);
 			}
+        } catch (CommunicationException e) {
+            throw e;
 		} catch (NamingException e) {
 			// clear requestControls for future use of the JNDI context
 			ctx.setRequestControls(null);

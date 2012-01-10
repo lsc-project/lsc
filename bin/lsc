@@ -154,8 +154,21 @@ fi
 # LSC not already running
 log "Starting LSC"
 
+# JMX
+for param in $*; do
+  if [ "$param" == "-a" ]; then
+    if [ -n "$LSC_JMXPORT" ]; then
+	  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=$LSC_JMXPORT -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+    else
+      echo "LSC: to control your asynchronous task(s), consider setting the LSC_JMXPORT "
+	  echo "environment variable to a positive value to bind the JMX interface to that "
+	  echo "TCP port."
+	fi
+  fi
+done
+
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
+"${JAVA_COMMAND}" $JAVA_OPTS -cp "$CLASSPATH" org.lsc.Launcher $* 
 
 status=$?
 

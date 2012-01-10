@@ -14,11 +14,11 @@ To use this connector, setup a task with standard source connection and service.
 from ldapSourceService to "org.lsc.service.SyncReplServiceConfiguration" and a node called "serverType" with
 the corresponding value (OpenLDAP for example). 
 
-      <syncreplSourceService>
+      <asyncLdapSourceService>
         <name>openldap-source-service</name>
-        <serverType>OpenLDAP</serverType>
         <.../>
-      </syncreplSourceService>
+        <serverType>OpenLDAP</serverType>
+      </asyncLdapSourceService>
 
 When this is done, try your new service through an asynchronous task launch :
 $ $LSC_HOME/bin/lsc -f $LSC_HOME/etc -a all -t 1

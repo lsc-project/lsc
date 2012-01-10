@@ -143,7 +143,7 @@ fi
 log "Starting LSC Remote Agent"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
+"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.jmx.LscAgent $* 
 
 status=$?
 

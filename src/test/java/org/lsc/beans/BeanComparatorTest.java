@@ -76,11 +76,12 @@ import org.lsc.utils.SetUtils;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
- *
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class BeanComparatorTest {
 
 	@Mocked org.lsc.Task task;
+    @Mocked org.lsc.jndi.SimpleJndiDstService dstService;
 	
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
@@ -150,7 +151,8 @@ public class BeanComparatorTest {
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+				task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 			}
 		};
 
@@ -177,7 +179,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
@@ -215,12 +218,13 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                task.getSyncOptions(); result = syncOptions;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
 				syncOptions.getCreateValues(anyString, anyString); result = null;
-				task.getSyncOptions(); result = syncOptions;
 			}
 		};
 
@@ -274,8 +278,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -296,7 +300,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = jsValues;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -322,7 +327,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+			    task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -347,7 +353,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -374,7 +381,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -406,7 +414,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -438,7 +447,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;

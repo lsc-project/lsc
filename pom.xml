@@ -257,6 +257,20 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <plugin>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections-maven</artifactId>
+                <version>0.9.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>reflections</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 
 		<pluginManagement>
@@ -287,6 +301,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.reflections
+										</groupId>
+										<artifactId>
+											reflections-maven
+										</artifactId>
+										<versionRange>
+											[0.9.5,)
+										</versionRange>
+										<goals>
+											<goal>reflections</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -422,12 +455,6 @@
 		<repository>
 			<id>IBiblio - Maven2</id>
 			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
 		</repository>
 		<repository>
 			<id>Codehaus Snapshot</id>
@@ -453,12 +480,6 @@
 		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
 		</repository>
 		<repository>
 			<id>maven.forgerock.org</id>
@@ -473,7 +494,11 @@
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>
 			<url>http://download.oracle.com/maven</url>
-			<layout>default</layout>
+		</repository>
+		<repository>
+		    <id>reflections-repo</id>
+		    <name>Reflections Maven2 Repository</name>
+		    <url>http://reflections.googlecode.com/svn/repo</url>
 		</repository>
 		<repository>
 			<id>lsc-site</id>
@@ -511,6 +536,11 @@
 				<enabled>true</enabled>
 			</releases>
 		</pluginRepository>
+		<pluginRepository>
+		    <id>reflections-repo</id>
+		    <name>Reflections Maven2 Repository</name>
+		    <url>http://reflections.googlecode.com/svn/repo</url>
+		</pluginRepository>
 	</pluginRepositories>
 
 	<dependencies>
@@ -540,7 +570,11 @@
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
 				</exclusion>
-			</exclusions>
+            	<exclusion>
+            		<groupId>xml-apis</groupId>
+            		<artifactId>xml-apis</artifactId>
+            	</exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>xmlrpc</groupId>
@@ -548,6 +582,12 @@
 			<version>3.0</version>
 			<type>jar</type>
 			<optional>false</optional>
+            <exclusions>
+            	<exclusion>
+            		<groupId>xml-apis</groupId>
+            		<artifactId>xml-apis</artifactId>
+            	</exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -664,11 +704,17 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.clapper</groupId>
-			<artifactId>ocutil</artifactId>
-			<version>2.5.2</version>
-		</dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.5</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>xml-apis</groupId>
+            		<artifactId>xml-apis</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
@@ -698,8 +744,8 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>1.7.0</version>
-		</dependency>
-		<dependency>
+ 		</dependency>
+<!-- 		<dependency>
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-all</artifactId>
 	      <version>1.5.7</version>
@@ -714,7 +760,7 @@
 	      	</exclusion>
 	      </exclusions>
 	    </dependency>  
-	    <dependency>
+ -->	    <dependency>
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-server-integ</artifactId>
 	      <version>1.5.7</version>
@@ -744,6 +790,11 @@
 	      	</exclusion>
 	      </exclusions>
 	    </dependency>
+        <dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>

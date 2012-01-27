@@ -489,6 +489,7 @@ public class Configuration {
 		} catch (LscConfigurationException e) {
 			message = "Unable to load configuration (" + e + ")";
 			LOGGER.error(e.toString(),e);
+			return;
 		}
 
 		// setup LogBack

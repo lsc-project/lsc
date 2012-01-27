@@ -71,7 +71,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	private final String requestNameForList;
 	private final String requestNameForNextId;
 	private final String requestNameForObject;
+	private final String requestNameForClean;
 	
+	/** Period in (milliseconds) */
 	private int interval;
 
 	/**
@@ -88,6 +90,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
 		requestNameForNextId = props.getProperty("requestNameForNextId");
+		requestNameForClean = props.getProperty("requestNameForClean");
 		
 		try {
 			// check that we have all parameters, or abort
@@ -119,9 +122,13 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		DatabaseSourceServiceType serviceConf = task.getDatabaseSourceService();
 		requestNameForList = serviceConf.getRequestNameForList();
 		requestNameForObject = serviceConf.getRequestNameForObject();
-		requestNameForNextId = serviceConf.getRequestNameForNextId();
+        requestNameForNextId = serviceConf.getRequestNameForNextId();
+		requestNameForClean = serviceConf.getRequestNameForClean();
+		if(requestNameForClean == null) {
+            LOGGER.warn("No clean request has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+		}
 		
-		interval = (serviceConf.getInterval() != null ? serviceConf.getInterval().intValue() : 5);
+		interval = (serviceConf.getInterval() != null ? serviceConf.getInterval().intValue() : 5) * 1000;
 	}
 
 	/* (non-Javadoc)
@@ -141,12 +148,20 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	}
 
 	/* (non-Javadoc)
-	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForId()
+	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForNextId()
 	 */
 	@Override
 	public String getRequestNameForNextId() {
 		return requestNameForNextId;
 	}
+
+    /* (non-Javadoc)
+     * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
+     */
+    @Override
+    public String getRequestNameForClean() {
+        return requestNameForClean;
+    }
 
 	static int count = 0;
 

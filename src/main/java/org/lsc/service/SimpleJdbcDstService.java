@@ -126,7 +126,16 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 		throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
 	}
 
-	@Override
+
+    /* (non-Javadoc)
+     * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
+     */
+    @Override
+    public String getRequestNameForClean() {
+        throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
+    }
+
+    @Override
 	public boolean apply(LscModifications lm) throws LscServiceException {
 		Map<String, Object> attributeMap = getAttributesMap(lm.getLscAttributeModifications());
 		try {

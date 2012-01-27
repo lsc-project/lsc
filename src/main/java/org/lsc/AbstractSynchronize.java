@@ -564,7 +564,9 @@ public abstract class AbstractSynchronize {
  */
 class SynchronizeTask implements Runnable {
 
-	private String syncName;
+    static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeTask.class);
+
+    private String syncName;
 	private InfoCounter counter;
 	private AbstractSynchronize abstractSynchronize;
 	private Entry<String, LscDatasets> id;
@@ -601,19 +603,30 @@ class SynchronizeTask implements Runnable {
 		try {
 			if (id != null) {
 				AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
-				run(id);
-			} else if (task.getSourceService() instanceof IAsynchronousService) {
-				AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", syncName);
+				run(id, true);
+			} else {
+			    IAsynchronousService aService = null;
+			    boolean fromSource = true;
+			    if (task.getDestinationService() instanceof IAsynchronousService) {
+                    aService = (IAsynchronousService) task.getDestinationService();
+                    fromSource = false;
+			    } else if (task.getSourceService() instanceof IAsynchronousService) {
+                    aService = (IAsynchronousService) task.getSourceService();
+			    } else {
+			        LOGGER.error("LSC should never reach this point ! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous servoice !"); 
+			        return;
+			    }
 
-				IAsynchronousService aSrcService = (IAsynchronousService) task.getSourceService();
-				boolean interrupted = false;
+                AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", syncName);
+
+                boolean interrupted = false;
 				while (!interrupted) {
-					nextId = aSrcService.getNextId();
+					nextId = aService.getNextId();
 					if (nextId != null) {
-						run(nextId);
+						run(nextId, fromSource);
 					} else {
 						try {
-							Thread.sleep(aSrcService.getInterval() * 1000);
+							Thread.sleep(aService.getInterval());
 						} catch (InterruptedException e) {
 							AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
 							interrupted = true;
@@ -627,10 +640,9 @@ class SynchronizeTask implements Runnable {
 		}
 	}
 
-	public boolean run(Entry<String, LscDatasets> id) {
+	public boolean run(Entry<String, LscDatasets> id, boolean fromSource) {
 		try {
-			IBean entry = task.getSourceService().getBean(id.getKey(), id.getValue(), true);
-			return run(entry);
+			return run(task.getSourceService().getBean(id.getKey(), id.getValue(), fromSource));
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
@@ -659,13 +671,13 @@ class SynchronizeTask implements Runnable {
 			 */
 			if (entry == null) {
 				counter.incrementCountError();
-				AbstractSynchronize.LOGGER.error("Unable to get object for id={}", id.getKey());
+				AbstractSynchronize.LOGGER.error("Synchronization aborted because no source object has been found !");
 				return false;
 			}
 
 			// Search destination for matching object
 			if(id != null) {
-				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), false);
+				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
 				for(String datasetName: entry.getAttributesNames()) {
@@ -731,7 +743,7 @@ class SynchronizeTask implements Runnable {
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, id.getValue(), new Exception("Technical problem while applying modifications to the destination"));
+				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), new Exception("Technical problem while applying modifications to the destination"));
 				return false;
 			}
 		} catch (CommunicationException e) {
@@ -743,7 +755,7 @@ class SynchronizeTask implements Runnable {
 			return false;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
+			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : ( entry != null ? entry.getMainIdentifier() : e.toString())), e);
 			
 			if (e.getCause() instanceof LscServiceCommunicationException) {
 				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");

@@ -196,7 +196,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					synchronize2Ldap(task);
 					break;
 				case async:
-					if(task.getSourceService() instanceof IAsynchronousService) {
+					if(task.getSourceService() instanceof IAsynchronousService
+					        || task.getDestinationService() instanceof IAsynchronousService) {
 						LscServerImpl.startJmx(this);
 						startAsynchronousSynchronize2Ldap(task);
 					} else {
@@ -303,7 +304,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		boolean status = true;
 		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
-			if(!new SynchronizeTask(task, counter, this, entry).run(entry)) {
+			if(!new SynchronizeTask(task, counter, this, entry).run(entry, true)) {
 				status = false;
 			}
 		}

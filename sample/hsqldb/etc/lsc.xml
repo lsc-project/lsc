@@ -33,6 +33,7 @@
         <connection reference="src-jdbc"/>
         <requestNameForList>getInetOrgPersonList</requestNameForList>
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
+        <requestNameForClean>getInetOrgPersonByMail</requestNameForClean>
       </databaseSourceService>
       <ldapDestinationService>
         <name>MySyncTask-dst</name>
@@ -56,6 +57,9 @@
         <mainIdentifier>"mail=" + srcBean.getDatasetFirstValueById("mail") + ",ou=Sample,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
+        <conditions>
+        	<create>true</create>
+        </conditions>
         <dataset>
           <name>objectClass</name>
           <policy>FORCE</policy>

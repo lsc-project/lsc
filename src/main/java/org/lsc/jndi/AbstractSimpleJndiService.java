@@ -235,6 +235,7 @@ public abstract class AbstractSimpleJndiService {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource, String searchString) throws NamingException {
+        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());

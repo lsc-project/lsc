@@ -175,6 +175,6 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 	 */
 	@Override
 	public long getInterval() {
-		return interval;
+		return interval*1000;
 	}
 }

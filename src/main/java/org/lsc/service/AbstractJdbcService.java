@@ -91,6 +91,8 @@ public abstract class AbstractJdbcService implements IService {
 
 	public abstract String getRequestNameForNextId();
 
+    public abstract String getRequestNameForClean();
+
 	@Deprecated
 	public AbstractJdbcService(Properties databaseProps) throws LscServiceConfigurationException {
 		sqlMapper = DaoConfig.getSqlMapClient(databaseProps);
@@ -190,7 +192,7 @@ public abstract class AbstractJdbcService implements IService {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			List<?> records = sqlMapper.queryForList(getRequestNameForObject(), getAttributesMap(attributes));
+			List<?> records = sqlMapper.queryForList((fromSource ? getRequestNameForObject() : getRequestNameForClean()), getAttributesMap(attributes));
 			if(records.size() > 1) {
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
 						"For id=" + id + ", there are " + records.size() + " records !");

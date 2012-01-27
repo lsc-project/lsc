@@ -385,25 +385,31 @@ public class LscConfiguration {
 		return null;
 	}
 
-	public static Class<?> getServiceImplementation(ServiceType destinationService) {
-		if(destinationService instanceof LdapDestinationServiceType) {
+	public static Class<?> getServiceImplementation(ServiceType service) {
+		if(service instanceof LdapDestinationServiceType) {
 			return SimpleJndiDstService.class;
-		} else if (destinationService instanceof LdapSourceServiceType) {
+		} else if (service instanceof LdapSourceServiceType) {
 			return PullableJndiSrcService.class;
-		} else if (destinationService instanceof DatabaseDestinationServiceType) {
+		} else if (service instanceof DatabaseDestinationServiceType) {
 			return SimpleJdbcDstService.class;
-		} else if (destinationService instanceof DatabaseSourceServiceType) {
+		} else if (service instanceof DatabaseSourceServiceType) {
 			return SimpleJdbcSrcService.class;
-		} else if (destinationService instanceof MultiDestinationServiceType) {
+		} else if (service instanceof MultiDestinationServiceType) {
 			return MultipleDstService.class;
-		} else if (destinationService instanceof PluginDestinationServiceType) {
+		} else if (service instanceof PluginDestinationServiceType) {
 			try {
-				return Class.forName(((PluginDestinationServiceType) destinationService).getImplementationClass());
+				return Class.forName(((PluginDestinationServiceType) service).getImplementationClass());
 			} catch (ClassNotFoundException e) {
-				throw new UnsupportedOperationException("Unknown plugin implementation: " + ((PluginDestinationServiceType) destinationService).getImplementationClass());
+				throw new UnsupportedOperationException("Unknown plugin implementation: " + ((PluginDestinationServiceType) service).getImplementationClass());
 			}
+        } else if (service instanceof PluginSourceServiceType) {
+            try {
+                return Class.forName(((PluginSourceServiceType) service).getImplementationClass());
+            } catch (ClassNotFoundException e) {
+                throw new UnsupportedOperationException("Unknown plugin implementation: " + ((PluginSourceServiceType) service).getImplementationClass());
+            }
 		} else {
-			throw new UnsupportedOperationException("Unknown service type: " + destinationService.getClass().getName());
+			throw new UnsupportedOperationException("Unknown service type: " + service.getClass().getName());
 		}
 	}
 

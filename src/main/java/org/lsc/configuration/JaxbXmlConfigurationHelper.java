@@ -48,18 +48,29 @@ package org.lsc.configuration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.lsc.exception.LscConfigurationException;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -82,77 +93,97 @@ public class JaxbXmlConfigurationHelper {
 	 * @throws LscConfigurationException 
 	 */
 	public JaxbXmlConfigurationHelper() throws LscConfigurationException {
-	    String packageName = Lsc.class.getPackage().getName();
-	    try {
-			jaxbc = JAXBContext.newInstance( packageName );
-		} catch (JAXBException e) {
-			throw new LscConfigurationException(e);
-		}
+        String packagesName = Lsc.class.getPackage().getName();
+        String pluginsPackagePath = System.getProperty("LSC.PLUGINS.PACKAGEPATH");
+        if( pluginsPackagePath != null) {
+            packagesName = packagesName + ":" + pluginsPackagePath;
+        }
+        try {
+            jaxbc = JAXBContext.newInstance( packagesName );
+        } catch (JAXBException e) {
+            throw new LscConfigurationException(e);
+        }
 	}
 
-	/**
-	 * Load an XML file to the object
-	 * 
-	 * @param filename
-	 *            filename to read from
-	 * @return the completed configuration object
-	 * @throws FileNotFoundException
-	 *             thrown if the file can not be accessed (either because of a
-	 *             misconfiguration or due to a rights issue)
-	 * @throws LscConfigurationException 
-	 */
-	public Lsc getConfiguration(String filename)
-			throws LscConfigurationException {
-		LOGGER.debug("Loading XML configuration from: " + filename);
-	    try {
-	    	Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
-	    	SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-	    	Schema lscSchema = null;
-			try {
-				URL schemapath = this.getClass().getClassLoader().getResource("schemas/lsc-core-2.0.xsd");
-				if(schemapath != null) {
-					lscSchema = schemaFactory.newSchema(schemapath);
-			    	unmarshaller.setSchema( lscSchema );
-				} else {
-					LOGGER.warn("LSC XML schema not found, no validation of the configuration file will be done !");
-				}
-			} catch (SAXException e) {
-				throw new LscConfigurationException(e);
-			}
-	    	
-			return (Lsc)unmarshaller.unmarshal( new File(filename) );
-		} catch (JAXBException e) {
-			throw new LscConfigurationException(e);
-		}
-	}
+    /**
+     * Load an XML file to the object
+     * 
+     * @param filename
+     *            filename to read from
+     * @return the completed configuration object
+     * @throws FileNotFoundException
+     *             thrown if the file can not be accessed (either because of a
+     *             misconfiguration or due to a rights issue)
+     * @throws LscConfigurationException 
+     */
+    public Lsc getConfiguration(String filename)
+            throws LscConfigurationException {
+        LOGGER.debug("Loading XML configuration from: " + filename);
+        try {
+            Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema lscSchema = null;
+            try {
+                int i = 0;
+                Set<URL> urls = new HashSet<URL>();
+                urls.addAll(ClasspathHelper.forPackage("org.lsc"));
+                if(System.getProperty("LSC.PLUGINS.PACKAGEPATH") != null) {
+                    String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(System.getProperty("path.separator"));
+                    for(String pathElement: pathElements) {
+                        urls.addAll(ClasspathHelper.forPackage(pathElement));
+                    }
+                }
+                Reflections reflections = new Reflections(new ConfigurationBuilder()
+                    .addUrls(urls).setScanners(new ResourcesScanner(), new SubTypesScanner()));
+                
+                Set<String> xsdFiles = reflections.getResources(Pattern.compile(".*\\.xsd"));
+                Source[] schemasSource = new Source[xsdFiles.size()];
+                for(String schemaFile: xsdFiles) {
+                    LOGGER.debug("Importing XML schema file: " + schemaFile);
+                    InputStream schemaStream = this.getClass().getClassLoader().getResourceAsStream(schemaFile);
+                    schemasSource[i++] = new StreamSource(schemaStream);
+                }
+                lscSchema = schemaFactory.newSchema(schemasSource);
+                unmarshaller.setSchema( lscSchema );
+            } catch (VerifyError e) {
+                throw new LscConfigurationException(e.toString(), e);
+            } catch (SAXException e) {
+                throw new LscConfigurationException(e);
+            }
+            
+            return (Lsc)unmarshaller.unmarshal( new File(filename) );
+        } catch (JAXBException e) {
+            throw new LscConfigurationException(e);
+        }
+    }
 
-	/**
-	 * Dump the object to an XML file (by overriding if necessary)
-	 * 
-	 * @param filename
-	 *            filename to write to
-	 * @param lscConf
-	 *            configuration object
-	 * @throws FileNotFoundException
-	 *             thrown if the file can not be accessed (either because of a
-	 *             misconfiguration or due to a rights issue)
-	 */
-	public void saveConfiguration(String filename, Lsc lscConf)
-			throws IOException {
-		File existing = new File(filename);
-		if(existing.exists()) {
-			File backup = new File(existing + ".bak");
-			if(backup.exists()) {
-				backup.delete();
-			}
-			FileUtils.copyFile(existing, backup);
-		}
-		try {
-			Marshaller marshaller = jaxbc.createMarshaller();
-			marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
-			marshaller.marshal(lscConf, new File(filename));
-		} catch (JAXBException e) {
-			LOGGER.error("Cannot save configuration file: " + e.toString(), e);
-		}
-	}
+    /**
+     * Dump the object to an XML file (by overriding if necessary)
+     * 
+     * @param filename
+     *            filename to write to
+     * @param lscConf
+     *            configuration object
+     * @throws FileNotFoundException
+     *             thrown if the file can not be accessed (either because of a
+     *             misconfiguration or due to a rights issue)
+     */
+    public void saveConfiguration(String filename, Lsc lscConf)
+            throws IOException {
+        File existing = new File(filename);
+        if(existing.exists()) {
+            File backup = new File(existing + ".bak");
+            if(backup.exists()) {
+                backup.delete();
+            }
+            FileUtils.copyFile(existing, backup);
+        }
+        try {
+            Marshaller marshaller = jaxbc.createMarshaller();
+            marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+            marshaller.marshal(lscConf, new File(filename));
+        } catch (JAXBException e) {
+            LOGGER.error("Cannot save configuration file: " + e.toString(), e);
+        }
+    }
 }

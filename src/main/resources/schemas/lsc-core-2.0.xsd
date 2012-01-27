@@ -53,13 +53,10 @@
         <xsd:documentation>
             This schema specifies the configuration options for LSC synchronizations tasks.
         </xsd:documentation>
-    </xsd:annotation> -->
-
+    </xsd:annotation>
+ -->
     <xsd:complexType name="connectionType">
-<!--  		<xsd:annotation>
-		    <xsd:documentation>Definition for the connection options.</xsd:documentation>
-		</xsd:annotation>
- -->		<xsd:sequence>
+		<xsd:sequence>
  			<xsd:element name="name" type="xsd:ID"/>
 			<xsd:element name="url" type="xsd:string"/>
 			<xsd:element name="username" type="xsd:string"/>
@@ -146,7 +143,7 @@
 				<xsd:sequence>
 					<xsd:any namespace="##any" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:sequence>
-				<xsd:attribute name="configurationClass" type="xsd:string"/>
+				<xsd:attribute name="configurationClass" type="xsd:string" use="optional"/>
 				<xsd:attribute name="implementationClass" type="xsd:string"/>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -160,10 +157,7 @@
 	</xsd:complexType>
 	
     <xsd:complexType name="encryptionType">
-<!--  		<xsd:annotation>
-		    <xsd:documentation>Definition for the encryption properties.</xsd:documentation>
-		</xsd:annotation>
- -->		<xsd:all>
+		<xsd:all>
  			<xsd:element name="keyfile" type="xsd:string" minOccurs="0"/>
 			<xsd:element name="algorithm" type="xsd:string"/>
 			<xsd:element name="strength" type="xsd:integer"/>
@@ -192,10 +186,7 @@
 	</xsd:complexType>
 	
     <xsd:complexType name="csvAuditType">
-<!--  		<xsd:annotation>
-		    <xsd:documentation>Definition for the CSV audit properties.</xsd:documentation>
-		</xsd:annotation>
- -->		<xsd:complexContent>
+		<xsd:complexContent>
 			<xsd:extension base="auditType">
 				<xsd:sequence>
 					<xsd:element name="datasets" type="xsd:string" minOccurs="0"/>
@@ -223,13 +214,13 @@
 		<xsd:sequence>
  			<xsd:element name="name" type="xsd:ID"/>
  			<xsd:element name="connection">
-<!-- 			    <xsd:annotation>
-			        <xsd:documentation>
-			        	Mandatory attribute that will reference the corresponding connection
-			        </xsd:documentation>
-			    </xsd:annotation>
- -->			    <xsd:complexType>
-			    	<xsd:attribute name="reference" type="xsd:IDREF" use="required"/>
+			    <xsd:complexType>
+<!-- 	 			    <xsd:annotation>
+				        <xsd:documentation>
+				        	Mandatory attribute that will reference the corresponding connection
+				        </xsd:documentation>
+				    </xsd:annotation>
+ -->			    	<xsd:attribute name="reference" type="xsd:IDREF" use="required"/>
 			    </xsd:complexType>
  			</xsd:element>
 		</xsd:sequence>
@@ -378,16 +369,11 @@
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
 				<xsd:sequence>
-					<xsd:choice>
-						<xsd:sequence>
-							<xsd:element name="requestNameForList" type="xsd:string" />
-						</xsd:sequence>
-						<xsd:sequence>
-							<xsd:element name="requestNameForNextId" type="xsd:string" />
-						</xsd:sequence>
-					</xsd:choice>
-					<xsd:element name="requestNameForObject" type="xsd:string" />
 		 			<xsd:element name="interval" type="xsd:integer" default="5" minOccurs="0"/>
+					<xsd:element name="requestNameForList" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForObject" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForNextId" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForClean" type="xsd:string" minOccurs="0"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -464,7 +450,7 @@
 
     <xsd:complexType name="taskType">
 		<xsd:sequence>
- 			<xsd:element name="name" type="xsd:string" />
+ 			<xsd:element name="name" type="xsd:ID" />
  			<xsd:element name="bean" type="xsd:string" />
  			<xsd:element name="cleanHook" type="xsd:string" minOccurs="0"/>
  			<xsd:element name="syncHook" type="xsd:string" minOccurs="0"/>
@@ -476,10 +462,6 @@
  				<xsd:element name="pluginSourceService" type="pluginSourceServiceType"/>
  			</xsd:choice>
 			<xsd:choice>
-<!-- 				<xsd:annotation>
-					<xsd:documentation>This is the task destination service type</xsd:documentation>
-				</xsd:annotation>
- --><!-- 				<xsd:element name="activeDirectoryDestination" type="activeDirectoryDestinationType" /> -->
 				<xsd:element name="databaseDestinationService" type="databaseDestinationServiceType"/>
 				<xsd:element name="ldapDestinationService" type="ldapDestinationServiceType"/>
 				<xsd:element name="jndiExecDstService" type="jndiExecDstServiceType"/>
@@ -488,10 +470,7 @@
  				<xsd:element name="pluginDestinationService" type="pluginDestinationServiceType" />
 			</xsd:choice>
 			<xsd:choice>
-<!-- 				<xsd:annotation>
-					<xsd:documentation>This is the sync options type</xsd:documentation>
-				</xsd:annotation>
- -->	 			<xsd:element name="propertiesBasedSyncOptions" type="propertiesBasedSyncOptionsType"/>
+	 			<xsd:element name="propertiesBasedSyncOptions" type="propertiesBasedSyncOptionsType"/>
 	 			<xsd:element name="forceSyncOptions" type="forceSyncOptionsType"/>
  				<xsd:element name="pluginSyncOptions" type="pluginSyncOptionsType" />
 			</xsd:choice>
@@ -554,7 +533,7 @@
     			Root of a profile handler configuration file.
     		</xsd:documentation>
     	</xsd:annotation>
- -->    	<xsd:complexType>
+ -->	   	<xsd:complexType>
 	    	<xsd:all>
 	     		<xsd:element name="connections" type="connectionsType"/>
 	     		<xsd:element name="audits" type="auditsType" />
@@ -563,7 +542,7 @@
 	    	</xsd:all>
 			<xsd:attribute name="id" type="xsd:string" use="optional"/>
 	    	<xsd:attribute name="revision" type="xsd:integer">
-<!-- 	    		<xsd:annotation>
+<!--  	    		<xsd:annotation>
 	    			<xsd:documentation>
 	    				This mandatory attribute indicates the revision number of this configuration file. This number starts at 0
 	    				when the XML configuration is generated from the properties file and must be incremented one by one.
@@ -571,25 +550,5 @@
 	    		</xsd:annotation>
  -->	    	</xsd:attribute>
     	</xsd:complexType>
-
-<!-- 	   <xsd:key name="connectionId">
-		   	<xsd:selector xpath="./connections"/> 
-			<xsd:field xpath="name"/>
-	  	</xsd:key> 
-		<xsd:keyref name="connectionIdref" refer="connectionId">
-			<xsd:selector xpath="./tasks/task/connection"/> 
-			<xsd:field xpath="@reference"/> 
-		</xsd:keyref>
-
-	   <xsd:key name="auditId">
-		   	<xsd:selector xpath="./audits"/> 
-			<xsd:field xpath="name"/>
-	  	</xsd:key> 
-		<xsd:keyref name="auditIdref" refer="auditId">
-			<xsd:selector xpath="./tasks/task/auditLog"/> 
-			<xsd:field xpath="@reference"/> 
-		</xsd:keyref>-->
     </xsd:element>
-     
-    
 </xsd:schema>

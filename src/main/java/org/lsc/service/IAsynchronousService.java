@@ -66,7 +66,7 @@ public interface IAsynchronousService extends IService {
 	Entry<String, LscDatasets> getNextId() throws LscServiceException;
 
     /**
-     * The delay in seconds to look for available updates
+     * The delay in milliseconds to look for available updates
      * @return the delay
      */
 	long getInterval();

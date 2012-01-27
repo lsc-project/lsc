@@ -108,7 +108,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	
 	private AsyncLdapSourceServiceType srsc;
 	
-	/** The interval in seconds */
+	/** The interval in milliseconds */
 	private int interval;
 	
 	private SearchFuture sf;
@@ -118,7 +118,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		super(task);
 		srsc = task.getAsyncLdapSourceService();
  		// Default interval
-		interval = (srsc.getInterval() != null ? srsc.getInterval().intValue() : 5);
+		interval = (srsc.getInterval() != null ? srsc.getInterval().intValue() : 5) * 1000;
 		
 		ldapConn = (LdapConnectionType) srsc.getConnection().getReference();
 		

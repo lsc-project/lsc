@@ -10,11 +10,11 @@
 	@revision mandatory, used by the Web Administration Interface to version
 				this file
 	 -->
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="0">
 
 <!--  ./connections Connections list node, must contain at least two connection -->
  
-  <connections id="2">
+  <connections>
 
 <!--  
 	./connection Connection node, include definition of the required parameters.
@@ -25,9 +25,9 @@
 	@id mandatory, identify the connection according to its node number, used in the 
 					service node to specify the source or destination connection -->
  
-    <connection class="databaseConnection" id="3">
+    <databaseConnection>
 <!--  ./id informational only, used in logs -->
-      <id>hsqldb-source-conn</id>
+      <name>hsqldb-source-conn</name>
 <!--  ./url mandatory, the JDBC URL -->
       <url>jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc</url>
 <!--  ./username mandatory, the JDBC username -->
@@ -40,10 +40,10 @@
 	  <otherSettings>
 	  	<entry><key><value></entry>
 	  </otherSettings> -->
-    </connection>
+    </databaseConnection>
  
-    <connection class="ldapConnection" id="4">
-      <id>ldap-dst-conn</id>
+    <ldapConnection>
+      <name>ldap-dst-conn</name>
 <!--  ./url mandatory, the JNDI URL -->
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
 <!--  ./username mandatory, the DN to bind with -->
@@ -64,14 +64,14 @@
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 <!--  ./tlsActivated optional, specify if SSL/TLS is activated to connect to the LDAP server -->
       <tlsActivated>false</tlsActivated>
-    </connection>
+    </ldapConnection>
   </connections>
 
 <!--  ./audits Audits list node -->
-  <audits id="5">
+  <audits>
 
 <!--./audit Audit node, here a CSV audit, may also be a LDIF or any contributed audit type -->
-	<audit class="csvAudit">
+	<csvAudit>
 <!--    ./name mandatory, audit name -->
 		<name>csv</name>
 <!--    ./operations optional, comma separated list of operations (create, delete, update or rename) -->
@@ -82,14 +82,14 @@
 		<separator>,</separator>
 <!--    ./append optional, default to false, specify to create a new log file or to append to the existing one  -->
 		<append>true</append>
-	</audit>
+	</csvAudit>
   </audits>
 
 <!--  ./tasks Task list node, must contain at least one task -->
-  <tasks id="6">
+  <tasks>
 
 <!--  ./task Task node, this is the main node, in which synchronization is defined -->
-    <task id="7">
+    <task>
 <!--  ./name mandatory task node this is the main node, in which synchronization is defined -->
       <name>MySyncTask</name>
 <!--  ./bean optional bean node, default to org.lsc.beans.SimpleBean, define the pivot object used to store datasets and values -->
@@ -99,11 +99,11 @@
 				databaseSourceService, ldapSourceService 
 					Plugins also provides: syncreplSourceService, nisSourceService
 		-->
-      <sourceService class="databaseSourceService">
+      <databaseSourceService>
 <!-- 	A database source service will have to contain at least a name, a connection reference, a request for listing available objects,
 			and a request to get a complete object from its ids -->
         <name>hsqldb-source-service</name>
-        <connection reference="3" />
+        <connection reference="hsqldb-source-conn" />
 <!--	./requestNameForList mandatory node providing the SQL request name to list available objects in the data source -->
         <requestNameForList>getInetOrgPersonList</requestNameForList>
 <!--	./requestNameForObject mandatory node providing the SQL request name to get the full object according to the datasets identifying it uniquely -->
@@ -111,29 +111,29 @@
 <!--	./requestNameForNextId this optional node may be provided to enable a asynchronous mode of the datasource. If provided, this request will be
 				called to get the next updated id. This request may return nothing and LSC will wait until the next modification or its own stop  -->
         <requestNameForNextId>mandatory but not used yet</requestNameForNextId>
-      </sourceService>
+      </databaseSourceService>
 <!--  ./destinationService mandatory node containing definition of the source service settings  
 			@class define the implementation, possible builtin types are :
 				databaseDestinationService, ldapDestinationService 
 					Plugins also provides: jndiExecDstService
 		-->
-      <destinationService class="ldapDestinationService">
+      <ldapDestinationService>
 <!-- 	A ldap destination service will have to contain at least a name, a connection reference, a base DN, a filter to list
 			entries, a filter to get a particular entry, a list of pivot attributes and a list of fetched attributes -->
         <name>ldap-dst-service</name>
-        <connection reference="4" />
+        <connection reference="ldap-dst-conn" />
 <!--	./baseDn This mandatory node provide the directory base branch that will be used to look for entries (list and get) -->
         <baseDn>ou=Users,dc=lsc-project,dc=org</baseDn>
 <!--	./pivotAttributes This mandatory node must include string nodes with attributes name that will be used with their values 
 			as pivot datasets (used to get the corresponding entry and to identify the counter-part object, here in the source database
 			used during the clean phase to delete the corresponding entry if no corresponding object is found)-->
-        <pivotAttributes id="9">
+        <pivotAttributes>
           <string>mail</string>
         </pivotAttributes>
 <!--	./fetchedAttributes This mandatory node must include string nodes with attributes name that will fill the full object.
 			In a LDAP destination service, fetched attributes will be written to the target directory, whereas source provided datasets
 			that are not listed their will silently be canceled, i.e. not synchronized with the directory. -->
-        <fetchedAttributes id="10">
+        <fetchedAttributes>
           <string>description</string>
           <string>cn</string>
           <string>sn</string>
@@ -148,11 +148,17 @@
 <!--	./getOneFilter This mandatory node must include the filter that will be used to get a particular entry. In a LDAP destination service
 					this value is used during the synchronization phase to get the object - in conjonction with fetchedAttributes to synchronize them -->
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </destinationService>
+      </ldapDestinationService>
 <!--  ./syncOptions This mandatory node describes how to handle the various situations encountered while synchronizing datasets.
 			It must contains a main identifier construction rule and a default policy.
 			It may contains synchronization conditions, a default delimiter and datasets synchronization rules (attribute nodes) -->
-      <syncOptions class="propertiesBasedSyncOptions" id="12">
+      <propertiesBasedSyncOptions>
+<!--    ./mainIdentifier This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
+        <mainIdentifier>"cn=" + srcBean.getAttributeValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+<!--    ./defaultDelimiter This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
+        <defaultDelimiter>;</defaultDelimiter>
+<!--    ./defaultPolicy This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
+        <defaultPolicy>FORCE</defaultPolicy>
 <!--    ./conditions This optional node may contain one or more of the four node : create, update, delete and changeId -->
         <conditions>
 <!--       ./create This optional node may contain a boolean Javascript expression that will indicate whenever a new entry must be created or not -->
@@ -164,14 +170,8 @@
 <!--       ./changeId This optional node may contain a boolean Javascript expression that will indicate whenever an existing object main identifier must be changed or not -->
         	<changeId>false</changeId>
         </conditions>
-<!--    ./mainIdentifier This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-        <mainIdentifier>"cn=" + srcBean.getAttributeValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
-<!--    ./defaultDelimiter This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-        <defaultDelimiter>;</defaultDelimiter>
-<!--    ./defaultPolicy This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-        <defaultPolicy>FORCE</defaultPolicy>
 <!--    ./dataset This multi-valued node may contain a structure that will describe how to synchronize the corresponding dataset -->
-        <dataset id="15">
+        <dataset>
 <!--      ./name Mandatory node containing the dataset name -->
           <name>objectClass</name>
 <!--      ./policy Mandatory node containing the policy to apply to this dataset. Contains KEEP, FORCE or MERGE value -->
@@ -188,22 +188,22 @@
 <!--      ./delimiter Used when multiples values are provided in a single joined value -->
           <delimiter>,</delimiter>
         </dataset>
-        <dataset id="23">
+        <dataset>
           <name>userPassword</name>
           <policy>KEEP</policy>
-          <defaultValues id="24">
+          <defaultValues>
             <string>"changethis"</string>
           </defaultValues>
-          <forceValues id="25"></forceValues>
-          <createValues id="26"></createValues>
+          <forceValues></forceValues>
+          <createValues></createValues>
         </dataset>
-      </syncOptions>
+      </propertiesBasedSyncOptions>
     </task>
   </tasks>
 <!-- ./security This mandatory node contains the security settings used by LSC -->
-  <security id="28">
+  <security>
 <!-- ./encryption This optional node contains the encryption settings -->
-    <encryption id="29">
+    <encryption>
 <!--  ./keyfile This optional node contains the keyfile location -->
       <keyfile>c:\workspace_lsc\lsc-full\lsc\trunk\etc\lsc.key</keyfile>
 <!--  ./algorithm This optional node contains the encryption algorithm -->

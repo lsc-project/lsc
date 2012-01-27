@@ -9,6 +9,9 @@
 		</encoder>
 	</appender>
 
+	<logger name="org.lsc" level="DEBUG" additivity="false">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
 	<logger name="org.apache" level="WARN" additivity="false">
 		<appender-ref ref="CONSOLE"/>
 	</logger>

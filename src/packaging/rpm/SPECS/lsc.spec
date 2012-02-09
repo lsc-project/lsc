@@ -13,7 +13,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	1.2.1
+%define lsc_version	1.2.2
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -162,6 +162,10 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Thu Feb 09 2012 - Clement Oudot <clem@lsc-project.org> - 1.2.2-0
+- Upgrade to LSC 1.2.2
+- Change ownership of configuration files (#396)
+- Add symlink for sample (#302)
 * Sun Jul 18 2010 - Clement Oudot <clem@lsc-project.org> - 1.2.1-0
 - Upgrade to LSC 1.2.1
 - Build package from source

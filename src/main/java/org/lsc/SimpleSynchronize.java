@@ -299,21 +299,24 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return cache.values().toArray(new Task[cache.values().size()]);
 	}
 
+	/**
+	 * Launch a sequential synchronization based on identifiers got from the source
+	 * @param taskName the task name to launch
+	 * @param entries the entries to synchronize
+	 * @return false if at least one synchronization has failed, true if all of them have succeeded
+	 */
 	public final boolean launchById(String taskName, Map<String, LscDatasets> entries) {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();
-		boolean status = true;
 		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
-			if(!new SynchronizeTask(task, counter, this, entry).run(entry, true)) {
-				status = false;
-			}
+		    new SynchronizeTask(task, counter, this, entry, true).run();
 		}
-		return status; 
+		return counter.getCountError() > 0; 
 	}
 
 	public final boolean launch(String taskName, IBean bean) {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();
-		return new SynchronizeTask(task, counter, this, null).run(bean);
+		return new SynchronizeTask(task, counter, this, null, true).run(bean);
 	}
 }

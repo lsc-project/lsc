@@ -61,8 +61,6 @@ import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IAsynchronousService;
-import org.lsc.service.IService;
-import org.lsc.service.IWritableService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
@@ -320,7 +318,7 @@ public abstract class AbstractSynchronize {
 		 * destination
 		 */
 		for (Entry<String, LscDatasets> id : ids) {
-			threadPool.runTask(new SynchronizeTask(task, counter, this, id));
+			threadPool.runTask(new SynchronizeTask(task, counter, this, id, true));
 		}
 		try {
 			threadPool.shutdown();
@@ -341,9 +339,7 @@ public abstract class AbstractSynchronize {
 
 	public final synchronized void startAsynchronousSynchronize2Ldap(Task task) {
 
-		InfoCounter counter = new InfoCounter();
-
-		Thread thread = new Thread(new SynchronizeTask(task, counter, this, null));
+		Thread thread = new Thread(new AsynchronousRunner(task, this));
 		thread.setName(task.getName());
 		asynchronousThreads.put(task.getName(), thread);
 		thread.start();
@@ -557,6 +553,62 @@ public abstract class AbstractSynchronize {
 	public void setTimeLimit(int timeLimit) {
 		this.timeLimit = timeLimit;
 	}
+
+}
+
+class AsynchronousRunner implements Runnable {
+    
+    static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousRunner.class);
+
+    private AbstractSynchronize abstractSynchronize;
+    private Task task;
+    
+    public AsynchronousRunner(Task task, AbstractSynchronize abstractSynchronize) {
+        this.task = task;
+        this.abstractSynchronize = abstractSynchronize;
+    }
+
+    public void run() {
+        InfoCounter counter = new InfoCounter();
+
+        SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(abstractSynchronize.getThreads());
+
+        counter.incrementCountAll();
+        Entry<String, LscDatasets> nextId = null;
+        try {
+            IAsynchronousService aService = null;
+            boolean fromSource = true;
+            if (task.getDestinationService() instanceof IAsynchronousService) {
+                aService = (IAsynchronousService) task.getDestinationService();
+                fromSource = false;
+            } else if (task.getSourceService() instanceof IAsynchronousService) {
+                aService = (IAsynchronousService) task.getSourceService();
+            } else {
+                LOGGER.error("LSC should never reach this point ! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous servoice !"); 
+                return;
+            }
+
+            AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", task.getName());
+
+            boolean interrupted = false;
+            while (!interrupted) {
+                nextId = aService.getNextId();
+                if (nextId != null) {
+                    threadPool.runTask(new SynchronizeTask(task, counter, abstractSynchronize, nextId, fromSource));
+                } else {
+                    try {
+                        Thread.sleep(aService.getInterval());
+                    } catch (InterruptedException e) {
+                        AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
+                        interrupted = true;
+                    }
+                }
+            }
+        } catch (LscServiceException e) {
+            counter.incrementCountError();
+            abstractSynchronize.logActionError(null, nextId, e);
+        }
+    }
 }
 
 /**
@@ -571,78 +623,24 @@ class SynchronizeTask implements Runnable {
 	private AbstractSynchronize abstractSynchronize;
 	private Entry<String, LscDatasets> id;
 	private Task task;
+	private boolean fromSource;
 
 	public SynchronizeTask(final Task task, InfoCounter counter,
 			AbstractSynchronize abstractSynchronize,
-			Entry<String, LscDatasets> id) {
+			Entry<String, LscDatasets> id,
+			boolean fromSource) {
 		this.syncName = task.getName();
 		this.counter = counter;
 		this.task = task;
 		this.abstractSynchronize = abstractSynchronize;
 		this.id = id;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public SynchronizeTask(final String syncName, InfoCounter counter,
-			final IService srcService, final IWritableService dstService,
-			final Object customLibrary, ISyncOptions syncOptions,
-			AbstractSynchronize abstractSynchronize,
-			Entry<String, LscDatasets> id) {
-		this.syncName = syncName;
-		this.counter = counter;
-		this.abstractSynchronize = abstractSynchronize;
-		this.id = id;
+		this.fromSource = fromSource;
 	}
 
 	public void run() {
-
-		counter.incrementCountAll();
-		Entry<String, LscDatasets> nextId = null;
+        counter.incrementCountAll();
 		try {
-			if (id != null) {
-				AbstractSynchronize.LOGGER.debug("Synchronizing {} for {}", syncName, id.getValue());
-				run(id, true);
-			} else {
-			    IAsynchronousService aService = null;
-			    boolean fromSource = true;
-			    if (task.getDestinationService() instanceof IAsynchronousService) {
-                    aService = (IAsynchronousService) task.getDestinationService();
-                    fromSource = false;
-			    } else if (task.getSourceService() instanceof IAsynchronousService) {
-                    aService = (IAsynchronousService) task.getSourceService();
-			    } else {
-			        LOGGER.error("LSC should never reach this point ! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous servoice !"); 
-			        return;
-			    }
-
-                AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", syncName);
-
-                boolean interrupted = false;
-				while (!interrupted) {
-					nextId = aService.getNextId();
-					if (nextId != null) {
-						run(nextId, fromSource);
-					} else {
-						try {
-							Thread.sleep(aService.getInterval());
-						} catch (InterruptedException e) {
-							AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
-							interrupted = true;
-						}
-					}
-				}
-			}
-		} catch (LscServiceException e) {
-			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, (id != null ? id.getValue() : nextId), e);
-		}
-	}
-
-	public boolean run(Entry<String, LscDatasets> id, boolean fromSource) {
-		try {
-			return run(task.getSourceService().getBean(id.getKey(), id.getValue(), fromSource));
+            run((fromSource ? task.getSourceService() : task.getDestinationService()).getBean(id.getKey(), id.getValue(), fromSource));
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
@@ -654,7 +652,6 @@ class SynchronizeTask implements Runnable {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
 		}
-		return false;
 	}
 
 	public boolean run(IBean entry) {

@@ -88,6 +88,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.exception.LdapInvalidDnException;
 import org.apache.directory.shared.ldap.name.DN;
 import org.apache.directory.shared.ldap.name.RDN;
 import org.apache.directory.shared.ldap.util.LdapURL;
@@ -594,17 +595,21 @@ public final class JndiServices {
 	}
 
 	public String rewriteBase(final String base) {
-		String rewrittenBase = null;
-		if (base.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
-			if (!base.equalsIgnoreCase(contextDn.toString())) {
-			rewrittenBase = base.substring(0, base.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
-		} else {
-				rewrittenBase = "";
+		try {
+			DN baseDn = new DN(base);
+			if (!baseDn.isChildOf(contextDn)) {
+				return base;
 			}
-		} else {
-			rewrittenBase = base;
+			
+			if (baseDn.equals(contextDn)) {
+				return "";
+			}
+			
+			DN relativeDn = baseDn.getSuffix(contextDn.getRdns().size());
+			return relativeDn.toString();
+		} catch (LdapInvalidDnException e) {
+			throw new RuntimeException(e);
 		}
-		return rewrittenBase;
 	}
 
 	public SearchResult readEntry(final String base, final String filter,

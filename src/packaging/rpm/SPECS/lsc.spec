@@ -124,6 +124,9 @@ fi
 /bin/chown -R %{lsc_user}:%{lsc_group} /usr/%{_lib}/lsc
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 
+# Add symlink for sample to work
+ln -sf /usr/%{_lib}/lsc /usr/share/doc/lsc/%{_lib}
+
 %postun
 #=================================================
 # Post uninstallation

@@ -120,9 +120,6 @@ fi
 
 # Always do this
 # Change owner
-/bin/chown -R %{lsc_user}:%{lsc_group} /etc/lsc
-/bin/chown -R %{lsc_user}:%{lsc_group} /etc/cron.d/lsc
-/bin/chown -R %{lsc_user}:%{lsc_group} /etc/logrotate.d/lsc
 /bin/chown -R %{lsc_user}:%{lsc_group} /usr/bin/lsc
 /bin/chown -R %{lsc_user}:%{lsc_group} /usr/%{_lib}/lsc
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}

@@ -222,8 +222,9 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 			return Context.jsToJava(src, Object.class);
 		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
 			try {
-				Method getMethod = src.getClass().getMethod("get", Integer.class, Class.forName("sun.org.mozilla.rhino.ScriptableObject"));
-				Object[] retarr = new Object[(Integer) src.getClass().getMethod("getLength").invoke(src)];
+				Method getMethod = src.getClass().getMethod("get", int.class, Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
+				Object length = src.getClass().getMethod("getLength").invoke(src);
+				Object[] retarr = new Object[Integer.parseInt(length.toString())];
 				for (int index = 0; index < retarr.length; index++) {
 					retarr[index] = getMethod.invoke(src, index, null);
 				}

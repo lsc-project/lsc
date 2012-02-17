@@ -81,6 +81,7 @@ import org.lsc.utils.SetUtils;
 public class BeanComparatorTest {
 
 	@Mocked org.lsc.Task task;
+    @Mocked org.lsc.jndi.SimpleJndiDstService dstService;
 	
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
@@ -109,7 +110,7 @@ public class BeanComparatorTest {
 		assertEquals(LscModificationType.DELETE_OBJECT, BeanComparator.calculateModificationType(task, null, dstBean));
 
 		// test both not null, and syncoptions to make DNs identical --> modify
-		dstBean.setDistinguishName("destination DN");
+		dstBean.setMainIdentifier("destination DN");
 		assertEquals(LscModificationType.UPDATE_OBJECT, BeanComparator.calculateModificationType(task, srcBean, dstBean));
 
 
@@ -122,8 +123,8 @@ public class BeanComparatorTest {
 		};
 
 		// test both not null, with different DNs and no DN in syncoptions --> modrdn
-		srcBean.setDistinguishName("source DN");
-		dstBean.setDistinguishName("destination DN");
+		srcBean.setMainIdentifier("source DN");
+		dstBean.setMainIdentifier("destination DN");
 		assertEquals(LscModificationType.CHANGE_ID, BeanComparator.calculateModificationType(task, srcBean, dstBean));
 	}
 
@@ -150,7 +151,8 @@ public class BeanComparatorTest {
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 			}
 		};
 
@@ -159,7 +161,7 @@ public class BeanComparatorTest {
 
 		// test add
 		srcBean = new SimpleBean();
-		srcBean.setDistinguishName("something");
+		srcBean.setMainIdentifier("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 		destBean = null;
@@ -177,7 +179,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				task.getSyncOptions(); result = syncOptions;
@@ -189,12 +192,12 @@ public class BeanComparatorTest {
 
 		// test mod
 		srcBean = new SimpleBean();
-		srcBean.setDistinguishName("something");
+		srcBean.setMainIdentifier("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 
 		destBean = new SimpleBean();
-		destBean.setDistinguishName("something");
+		destBean.setMainIdentifier("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
@@ -215,7 +218,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -275,7 +279,8 @@ public class BeanComparatorTest {
 			@NonStrict ISyncOptions syncOptions; 
 			{
 
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -296,7 +301,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = jsValues;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -322,7 +328,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -347,7 +354,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -374,7 +382,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = jsValues;
@@ -406,7 +415,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.MERGE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;
@@ -438,7 +448,8 @@ public class BeanComparatorTest {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
-				task.getDestinationService().getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
 				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
 				syncOptions.getForceValues(anyString, anyString); result = null;
 				syncOptions.getDefaultValues(anyString, anyString); result = null;

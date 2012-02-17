@@ -48,13 +48,16 @@ package org.lsc.configuration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.util.Collection;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -82,13 +85,28 @@ public class JaxbXmlConfigurationHelper {
 	 * @throws LscConfigurationException 
 	 */
 	public JaxbXmlConfigurationHelper() throws LscConfigurationException {
-	    String packageName = Lsc.class.getPackage().getName();
+	    String packagesName = Lsc.class.getPackage().getName();
+	    String pluginsPackagePath = System.getProperty("LSC.PLUGINS.PACKAGEPATH");
+	    if( pluginsPackagePath != null) {
+	    	packagesName = packagesName + ":" + pluginsPackagePath;
+	    }
 	    try {
-			jaxbc = JAXBContext.newInstance( packageName );
+			jaxbc = JAXBContext.newInstance( packagesName );
 		} catch (JAXBException e) {
 			throw new LscConfigurationException(e);
 		}
 	}
+
+//	private String appendAllPackageNames(String packageName,
+//			Collection<String> findExtensions) {
+//		for(String extension: findExtensions) {
+//			String extensionPN = extension.substring(0, extension.lastIndexOf("."));
+//			if(!packageName.contains( extensionPN + ":") && !packageName.endsWith(extensionPN)) {
+//				packageName = packageName + ":" +  extensionPN;
+//			}
+//		}
+//		return packageName;
+//	}
 
 	/**
 	 * Load an XML file to the object
@@ -109,13 +127,23 @@ public class JaxbXmlConfigurationHelper {
 	    	SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 	    	Schema lscSchema = null;
 			try {
-				URL schemapath = this.getClass().getClassLoader().getResource("schemas/lsc-core-2.0.xsd");
-				if(schemapath != null) {
-					lscSchema = schemaFactory.newSchema(schemapath);
+				int i = 0;
+				InputStream lscCoreSchema = this.getClass().getClassLoader().getResourceAsStream("schemas/lsc-core-2.0.xsd");
+				if(lscCoreSchema != null) {
+					@SuppressWarnings("unchecked")
+					Collection<File> schemas = FileUtils.listFiles(new File(this.getClass().getClassLoader().getResource(".").getFile()), new String[] {"xsd"}, true);
+					Source[] schemasSource = new Source[schemas.size() + 1];
+					schemasSource[i++] = new StreamSource(lscCoreSchema);
+					for(File schemaFile: schemas) {
+						schemasSource[i++] = new StreamSource(schemaFile);
+					}
+					lscSchema = schemaFactory.newSchema(schemasSource);
 			    	unmarshaller.setSchema( lscSchema );
 				} else {
 					LOGGER.warn("LSC XML schema not found, no validation of the configuration file will be done !");
 				}
+			} catch (VerifyError e) {
+				throw new LscConfigurationException(e.toString(), e);
 			} catch (SAXException e) {
 				throw new LscConfigurationException(e);
 			}

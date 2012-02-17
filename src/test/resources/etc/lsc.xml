@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="0">
   <connections>
     <ldapConnection id="src-ldap">
       <name>src-ldap</name>
@@ -37,9 +37,9 @@
       <driver>org.hsqldb.jdbcDriver</driver>
     </databaseConnection>
   </connections>
-  <audits id="6"></audits>
-  <tasks id="7">
-    <task id="8">
+  <audits></audits>
+  <tasks>
+    <task>
       <name>ldap2ldapTestTask</name>
       <bean>org.lsc.beans.SimpleBean</bean>
       <ldapSourceService>
@@ -86,71 +86,88 @@
         <getOneFilter>(sn={sn})</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("cn") + ",ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>KEEP</defaultPolicy>
-        <dataset id="18">
+        <dataset>
           <name>telephoneNumber</name>
           <policy>MERGE</policy>
-          <defaultValues id="19">
+          <defaultValues>
             <string>"123456"</string>
             <string>"789987"</string>
           </defaultValues>
-          <createValues id="21">
+          <createValues>
             <string>"000000"</string>
             <string>"11111"</string>
           </createValues>
         </dataset>
-        <dataset id="22">
+        <dataset>
           <name>objectclass</name>
           <policy>MERGE</policy>
-          <defaultValues id="23">
+          <defaultValues>
             <string>"person"</string>
             <string>"top"</string>
           </defaultValues>
-          <createValues id="25">
+          <createValues>
             <string>"inetOrgPerson"</string>
           </createValues>
         </dataset>
-        <dataset id="26">
+        <dataset>
           <name>initials</name>
           <policy>FORCE</policy>
-          <createValues id="29">
+          <createValues>
             <string>"cn=oops"</string>
           </createValues>
         </dataset>
-        <dataset id="30">
+        <dataset>
           <name>default</name>
           <policy>FORCE</policy>
         </dataset>
-        <dataset id="34">
+<!--         <dataset>
           <name>description</name>
           <policy>MERGE</policy>
-          <defaultValues id="35">
-            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+          <defaultValues>
+            <string>srcBean.getDatasetFirstValueById("userPassword")</string>
           </defaultValues>
         </dataset>
-        <dataset id="38">
+ -->        <dataset>
+          <name>description</name>
+          <policy>FORCE</policy>
+          <forceValues>
+<string>
+    var j=0;
+    var proxyAddressValues = new Array();
+    var mailLocalAddressValues = srcBean.getDatasetById ("description").toArray() ;
+    for (var i=0; i &lt; mailLocalAddressValues.length; i++ ) {
+        if ( mailLocalAddressValues[i] != null ) {
+        	proxyAddressValues[j++] = "modified:" + mailLocalAddressValues[i];
+       	}
+    }
+    proxyAddressValues
+</string>
+          </forceValues>
+        </dataset>
+        <dataset>
           <name>seeAlso</name>
           <policy>FORCE</policy>
         </dataset>
-        <dataset id="42">
+        <dataset>
           <name>userPassword</name>
           <policy>FORCE</policy>
-          <forceValues id="44">
-            <string>"secret" + srcBean.getAttributeFirstValueById("cn")</string>
+          <forceValues>
+            <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
         </dataset>
-        <dataset id="46">
+        <dataset>
           <name>mail</name>
           <policy>FORCE</policy>
-          <createValues id="49">
+          <createValues>
             <string>"ok@domain.net"</string>
           </createValues>
         </dataset>
       </propertiesBasedSyncOptions>
     </task>
-    <task id="51">
+    <task>
       <name>db2ldapTestTask</name>
       <bean>org.lsc.beans.SimpleBean</bean>
       <databaseSourceService>
@@ -179,64 +196,64 @@
         <getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>KEEP</defaultPolicy>
-        <dataset id="59">
+        <dataset>
           <name>cn</name>
           <policy>FORCE</policy>
-          <defaultValues id="60"></defaultValues>
-          <forceValues id="61">
-            <string>srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn")</string>
+          <defaultValues></defaultValues>
+          <forceValues>
+            <string>srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn")</string>
           </forceValues>
         </dataset>
-        <dataset id="63">
+        <dataset>
           <name>telephoneNumber</name>
           <policy>MERGE</policy>
-          <defaultValues id="64">
+          <defaultValues>
             <string>"123456"</string>
             <string>"789987"</string>
           </defaultValues>
-          <forceValues id="65"></forceValues>
-          <createValues id="66">
+          <forceValues></forceValues>
+          <createValues>
             <string>"000000"</string>
             <string>"11111"</string>
           </createValues>
         </dataset>
-        <dataset id="67">
+        <dataset>
           <name>objectclass</name>
           <policy>FORCE</policy>
-          <defaultValues id="68">
+          <defaultValues>
             <string>"person"</string>
             <string>"top"</string>
             <string>"organizationalPerson"</string>
             <string>"inetOrgPerson"</string>
           </defaultValues>
-          <forceValues id="69"></forceValues>
-          <createValues id="70"></createValues>
+          <forceValues></forceValues>
+          <createValues></createValues>
         </dataset>
-        <dataset id="71">
+        <dataset>
           <name>default</name>
           <policy>FORCE</policy>
         </dataset>
-        <dataset id="75">
+        <dataset>
           <name>description</name>
           <policy>MERGE</policy>
-          <defaultValues id="76">
-            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+          <defaultValues>
+            <string>srcBean.getDatasetFirstValueById("userPassword")</string>
           </defaultValues>
 
         </dataset>
-        <dataset id="79">
+        <dataset>
           <name>userPassword</name>
           <policy>FORCE</policy>
-          <forceValues id="81">
-            <string>srcBean.getAttributeFirstValueById("password")</string>
+          <forceValues>
+            <string>srcBean.getDatasetFirstValueById("password")</string>
           </forceValues>
         </dataset>
       </propertiesBasedSyncOptions>
     </task>
-    <task id="84">
+    <task>
       <name>ldap2ldapJmxTestTask</name>
       <bean>org.lsc.beans.SimpleBean</bean>
       <ldapSourceService>
@@ -283,14 +300,14 @@
         <getOneFilter>(sn={sn})</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
-        <dataset id="94">
+        <dataset>
           <name>cn</name>
           <policy>FORCE</policy>
           <forceValues>
-            <string>srcBean.getAttributeFirstValueById("cn")</string>
+            <string>srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
         </dataset>
         <dataset>

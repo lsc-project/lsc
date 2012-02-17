@@ -116,9 +116,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:svn:https://lsc-project.org/svn/lsc/tags/lsc-core-2.0rc1</connection>
-		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/tags/lsc-core-2.0rc1</developerConnection>
-		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc/tags/lsc-core-2.0rc1</url>
+		<connection>scm:svn:https://lsc-project.org/svn/lsc/branches/v2.0</connection>
+		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/branches/v2.0</developerConnection>
+		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc/branches/v2.0</url>
 	</scm>
 
 	<organization>

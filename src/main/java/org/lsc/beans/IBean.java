@@ -131,14 +131,14 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Get the attributes name.
-	 * 
+     * @deprecated Since LSC 2.0
 	 * @return a set containing all the attributes name
 	 */
 	Set<String> getAttributesNames();
 
 	/**
 	 * Set an attribute.
-	 * 
+     * @deprecated Since LSC 2.0
 	 * @param attr
 	 *            the attribute to set
 	 */
@@ -146,7 +146,7 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Set an attribute.
-	 *
+     * @deprecated Since LSC 2.0
 	 * @param attrName The attribute name.
 	 * @param attrValues A set of values for the attribute.
 	 */
@@ -154,14 +154,14 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Get the distinguished name.
-	 * 
+     * @deprecated Since LSC 2.0 - switch to getMainIdentifier()
 	 * @return the distinguished name
 	 */
 	String getDistinguishedName();
 
 	/**
 	 * Set the distinguished name.
-	 * 
+     * @deprecated Since LSC 2.0 - switch to setMainIdentifier(String mainIdentifier)
 	 * @param dn The distinguishedName to set
 	 */
 	void setDistinguishName(String dn);

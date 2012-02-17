@@ -110,7 +110,7 @@ public class BeanComparatorTest {
 		assertEquals(LscModificationType.DELETE_OBJECT, BeanComparator.calculateModificationType(task, null, dstBean));
 
 		// test both not null, and syncoptions to make DNs identical --> modify
-		dstBean.setDistinguishName("destination DN");
+		dstBean.setMainIdentifier("destination DN");
 		assertEquals(LscModificationType.UPDATE_OBJECT, BeanComparator.calculateModificationType(task, srcBean, dstBean));
 
 
@@ -123,8 +123,8 @@ public class BeanComparatorTest {
 		};
 
 		// test both not null, with different DNs and no DN in syncoptions --> modrdn
-		srcBean.setDistinguishName("source DN");
-		dstBean.setDistinguishName("destination DN");
+		srcBean.setMainIdentifier("source DN");
+		dstBean.setMainIdentifier("destination DN");
 		assertEquals(LscModificationType.CHANGE_ID, BeanComparator.calculateModificationType(task, srcBean, dstBean));
 	}
 
@@ -161,7 +161,7 @@ public class BeanComparatorTest {
 
 		// test add
 		srcBean = new SimpleBean();
-		srcBean.setDistinguishName("something");
+		srcBean.setMainIdentifier("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 		destBean = null;
@@ -192,12 +192,12 @@ public class BeanComparatorTest {
 
 		// test mod
 		srcBean = new SimpleBean();
-		srcBean.setDistinguishName("something");
+		srcBean.setMainIdentifier("something");
 		srcBean.setAttribute(new BasicAttribute("sn", ""));
 		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
 
 		destBean = new SimpleBean();
-		destBean.setDistinguishName("something");
+		destBean.setMainIdentifier("something");
 		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);

@@ -46,7 +46,7 @@
 			<baseDn>ou=people</baseDn>
 			<pivotAttributes>dn, cn</pivotAttributes>
 			<fetchAttributes>uid, mail, cn</fetchAttributes>
-			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn>
+			<dn>'cn=' + srcBean.getDatasetFirstValueById('uid')</dn>
 			<getAllFilter>(&(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
 			<getOneFilter>(&(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
 		</service>

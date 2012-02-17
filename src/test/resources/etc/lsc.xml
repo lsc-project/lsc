@@ -86,7 +86,7 @@
         <getOneFilter>(sn={sn})</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("cn") + ",ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>KEEP</defaultPolicy>
         <dataset id="18">
@@ -127,7 +127,7 @@
           <name>description</name>
           <policy>MERGE</policy>
           <defaultValues id="35">
-            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+            <string>srcBean.getDatasetFirstValueById("userPassword")</string>
           </defaultValues>
         </dataset>
         <dataset id="38">
@@ -138,7 +138,7 @@
           <name>userPassword</name>
           <policy>FORCE</policy>
           <forceValues id="44">
-            <string>"secret" + srcBean.getAttributeFirstValueById("cn")</string>
+            <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
         </dataset>
         <dataset id="46">
@@ -179,7 +179,7 @@
         <getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>KEEP</defaultPolicy>
         <dataset id="59">
@@ -187,7 +187,7 @@
           <policy>FORCE</policy>
           <defaultValues id="60"></defaultValues>
           <forceValues id="61">
-            <string>srcBean.getAttributeFirstValueById("givenName") + " " + srcBean.getAttributeFirstValueById("sn")</string>
+            <string>srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn")</string>
           </forceValues>
         </dataset>
         <dataset id="63">
@@ -223,7 +223,7 @@
           <name>description</name>
           <policy>MERGE</policy>
           <defaultValues id="76">
-            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
+            <string>srcBean.getDatasetFirstValueById("userPassword")</string>
           </defaultValues>
 
         </dataset>
@@ -231,7 +231,7 @@
           <name>userPassword</name>
           <policy>FORCE</policy>
           <forceValues id="81">
-            <string>srcBean.getAttributeFirstValueById("password")</string>
+            <string>srcBean.getDatasetFirstValueById("password")</string>
           </forceValues>
         </dataset>
       </propertiesBasedSyncOptions>
@@ -283,14 +283,14 @@
         <getOneFilter>(sn={sn})</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"cn=" + srcBean.getAttributeFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>,</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
         <dataset id="94">
           <name>cn</name>
           <policy>FORCE</policy>
           <forceValues>
-            <string>srcBean.getAttributeFirstValueById("cn")</string>
+            <string>srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
         </dataset>
         <dataset>

@@ -256,7 +256,7 @@ public abstract class AbstractSynchronize {
 			} catch (LscServiceException e) {
 				counter.incrementCountError();
 				logActionError(lm, id.getValue(), e);
-				if(e.getCause().getClass().isAssignableFrom(CommunicationException.class)) {
+				if(e.getCause() != null && e.getCause().getClass().isAssignableFrom(CommunicationException.class)) {
 					// we lost the connection to the source or destination, stop
 					// everything!
 					LOGGER.error("Connection lost! Aborting.");

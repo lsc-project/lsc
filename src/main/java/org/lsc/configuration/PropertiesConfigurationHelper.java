@@ -212,7 +212,6 @@ public class PropertiesConfigurationHelper {
 		destinationService.setConnection(new ServiceType.Connection());
 		destinationService.getConnection().setReference(destinationConn);
 
-		SyncOptionsType syncOptions = null;
 		if(syncOptionsType == null || 
 				"org.lsc.beans.syncoptions.PropertiesBasedSyncOptions".equals(syncOptionsType)) {
 			newTask.setPropertiesBasedSyncOptions(new PropertiesBasedSyncOptionsType());

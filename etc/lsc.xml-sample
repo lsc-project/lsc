@@ -12,21 +12,19 @@
 	 -->
 <lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="0">
 
-<!--  ./connections Connections list node, must contain at least two connection -->
+<!--  ./connections Connections list node, must contain at least two connections -->
  
   <connections>
 
 <!--  
 	./connection Connection node, include definition of the required parameters.
 					Depending on the connection type, properties vary.
-	@class identify the shortcut or the full Java class name of the managed connection
 		   			Existing class type are : ldapConnection, databaseConnnection
 		   			Plugins also provides : nisConnection, jndiExecDstConnection
-	@id mandatory, identify the connection according to its node number, used in the 
-					service node to specify the source or destination connection -->
- 
+--> 
     <databaseConnection>
-<!--  ./id informational only, used in logs -->
+<!--  ./name identify the connection according to its node number, used in the 
+					service node to specify the source or destination connection -->
       <name>hsqldb-source-conn</name>
 <!--  ./url mandatory, the JDBC URL -->
       <url>jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc</url>
@@ -74,14 +72,16 @@
 	<csvAudit>
 <!--    ./name mandatory, audit name -->
 		<name>csv</name>
+<!--    ./append optional, default to false, specify to create a new log file or to append to the existing one  -->
+		<append>true</append>
 <!--    ./operations optional, comma separated list of operations (create, delete, update or rename) -->
 		<operations>create, delete</operations>
+<!--	./file mandatory, define the location of the file where the CSV data will be written -->
+		<file>/tmp/dump.csv</file>
 <!--    ./datasets optional, comma separated list of datasets modification to log -->
 		<datasets>cn, dn</datasets>
 <!--    ./separator optional, default to ";", specify the values separator -->
 		<separator>,</separator>
-<!--    ./append optional, default to false, specify to create a new log file or to append to the existing one  -->
-		<append>true</append>
 	</csvAudit>
   </audits>
 
@@ -95,7 +95,7 @@
 <!--  ./bean optional bean node, default to org.lsc.beans.SimpleBean, define the pivot object used to store datasets and values -->
       <bean>org.lsc.beans.SimpleBean</bean>
 <!--  ./sourceService mandatory node containing definition of the source service settings  
-			@class define the implementation, possible builtin types are :
+			possible builtin types are :
 				databaseSourceService, ldapSourceService 
 					Plugins also provides: syncreplSourceService, nisSourceService
 		-->
@@ -106,11 +106,11 @@
         <connection reference="hsqldb-source-conn" />
 <!--	./requestNameForList mandatory node providing the SQL request name to list available objects in the data source -->
         <requestNameForList>getInetOrgPersonList</requestNameForList>
+<!--	./requestNameForNextId this optional node may be provided to enable a asynchronous mode of the datasource. If provided, this request will be
+				called to get the next updated id. This request may return nothing and LSC will wait until the next modification or its own stop
+        <requestNameForNextId>mandatory but not used yet</requestNameForNextId> -->
 <!--	./requestNameForObject mandatory node providing the SQL request name to get the full object according to the datasets identifying it uniquely -->
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
-<!--	./requestNameForNextId this optional node may be provided to enable a asynchronous mode of the datasource. If provided, this request will be
-				called to get the next updated id. This request may return nothing and LSC will wait until the next modification or its own stop  -->
-        <requestNameForNextId>mandatory but not used yet</requestNameForNextId>
       </databaseSourceService>
 <!--  ./destinationService mandatory node containing definition of the source service settings  
 			@class define the implementation, possible builtin types are :
@@ -154,7 +154,7 @@
 			It may contains synchronization conditions, a default delimiter and datasets synchronization rules (attribute nodes) -->
       <propertiesBasedSyncOptions>
 <!--    ./mainIdentifier This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-        <mainIdentifier>"cn=" + srcBean.getAttributeValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
 <!--    ./defaultDelimiter This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
         <defaultDelimiter>;</defaultDelimiter>
 <!--    ./defaultPolicy This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
@@ -205,7 +205,7 @@
 <!-- ./encryption This optional node contains the encryption settings -->
     <encryption>
 <!--  ./keyfile This optional node contains the keyfile location -->
-      <keyfile>c:\workspace_lsc\lsc-full\lsc\trunk\etc\lsc.key</keyfile>
+      <keyfile>etc/lsc.key</keyfile>
 <!--  ./algorithm This optional node contains the encryption algorithm -->
       <algorithm>AES</algorithm>
 <!--  ./strength This optional node contains the algorithm key length -->

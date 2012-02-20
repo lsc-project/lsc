@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="0">
   <connections>
-    <ldapConnection id="src-ldap">
+    <ldapConnection>
       <name>src-ldap</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
       <username>cn=Directory Manager</username>
@@ -15,7 +15,7 @@
       <tlsActivated>false</tlsActivated>
       <saslMutualAuthentication>false</saslMutualAuthentication>
     </ldapConnection>
-    <ldapConnection id="dst-ldap">
+    <ldapConnection>
       <name>dst-ldap</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
       <username>cn=Directory Manager</username>
@@ -29,7 +29,7 @@
       <tlsActivated>false</tlsActivated>
       <saslMutualAuthentication>false</saslMutualAuthentication>
     </ldapConnection>
-    <databaseConnection id="src-jdbc">
+    <databaseConnection>
       <name>src-jdbc</name>
       <url>jdbc:hsqldb:file:hsqldb/lsc</url>
       <username>sa</username>

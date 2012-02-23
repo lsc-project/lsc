@@ -88,6 +88,10 @@ public class ScriptableJndiServices extends ScriptableObject {
 	public final void setJndiServices(JndiServices jndiServices) {
 		this.jndiServices = jndiServices;
 	}
+	
+	public final JndiServices getJndiServices() {
+	    return jndiServices;
+	}
 
 	/**
 	 * <P>Performs a search with subtree scope on a given base DN with a given filter.</P>

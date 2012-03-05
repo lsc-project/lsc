@@ -65,6 +65,7 @@ import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.service.MultipleDstService;
 import org.lsc.service.SimpleJdbcDstService;
 import org.lsc.service.SimpleJdbcSrcService;
+import org.lsc.service.SyncReplSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -388,6 +389,8 @@ public class LscConfiguration {
 	public static Class<?> getServiceImplementation(ServiceType service) {
 		if(service instanceof LdapDestinationServiceType) {
 			return SimpleJndiDstService.class;
+        } else if (service instanceof AsyncLdapSourceServiceType) {
+            return SyncReplSourceService.class;
 		} else if (service instanceof LdapSourceServiceType) {
 			return PullableJndiSrcService.class;
 		} else if (service instanceof DatabaseDestinationServiceType) {

@@ -213,7 +213,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if(searchResponses.next() && searchResponses.get() instanceof SearchResultEntry) {
 				SearchResultEntry sre = (SearchResultEntry) searchResponses.get();
 				// get dn
-				srcBean.setDistinguishName(sre.getObjectName().toString());
+				srcBean.setMainIdentifier(sre.getObjectName().toString());
 				srcBean.setDatasets(convertSearchEntry(sre));
 				return srcBean;
 			}

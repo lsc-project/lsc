@@ -71,6 +71,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.Configuration;
+import org.lsc.configuration.EncryptionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscException;
 import org.slf4j.Logger;
@@ -100,31 +101,38 @@ public class SymmetricEncryption {
 	private Cipher cipherEncrypt;
 	private Provider securityProvider;
 
-	/**
-	 * New SymmetricEncryption object with default values.
-	 * @throws java.security.GeneralSecurityException
-	 */
-	public SymmetricEncryption() throws GeneralSecurityException {
-		this.securityProvider = new BouncyCastleProvider();
-		Security.addProvider(this.securityProvider);
-	}
+    /**
+     * New SymmetricEncryption object with default values.
+     * @throws java.security.GeneralSecurityException
+     */
+    public SymmetricEncryption() throws GeneralSecurityException {
+        this.securityProvider = new BouncyCastleProvider();
+        Security.addProvider(this.securityProvider);
+    }
 
-	/**
-	 * New SymmetricEncryption object.
-	 * @param keyPath The filename of the key to use
-	 * @param algo A supported algorithm to use (see constant values defined
-	 * in this class which specified supported algorithms)
-	 * @param strength The encryption strength
-	 * @throws java.security.GeneralSecurityException
-	 */
-	public SymmetricEncryption(String keyPath, String algo, int strength) throws GeneralSecurityException {
-		this.securityProvider = new BouncyCastleProvider();
-		this.algorithm = algo;
-		this.strength = strength;
-		this.keyPath = keyPath;
+    /**
+     * New SymmetricEncryption object.
+     * @param encryption the encryption required structure
+     * @throws java.security.GeneralSecurityException
+     */
+    public SymmetricEncryption(EncryptionType encryption) throws GeneralSecurityException {
+        if(encryption == null) {
+            throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+        } else if(encryption.getKeyfile() == null) {
+            throw new RuntimeException("lsc>security>encryption>keyfile node of the LSC configuration cannot be null !");
+        } else if(encryption.getAlgorithm() == null) {
+            throw new RuntimeException("lsc>security>encryption>algorithm node of the LSC configuration cannot be null !");
+        } else if(encryption.getStrength() == null) {
+            throw new RuntimeException("lsc>security>encryption>strength node of the LSC configuration cannot be null !");
+        }
 
-		Security.addProvider(this.securityProvider);
-	}
+        this.securityProvider = new BouncyCastleProvider();
+        this.algorithm = encryption.getAlgorithm();
+        this.strength = encryption.getStrength().intValue();
+        this.keyPath = encryption.getKeyfile();
+
+        Security.addProvider(this.securityProvider);
+    }
 
 	/**
 	 * Encrypt bytes.
@@ -297,10 +305,15 @@ public class SymmetricEncryption {
 		}
 
 		try {
-			SymmetricEncryption se = new SymmetricEncryption();
-			if (se.generateDefaultRandomKeyFile()) {
-				LOGGER.info("Key generated: {}. Do not forget to update lsc>security>encryption>keyfile option in your configuration file !", se.keyPath );
-			}
+            if(LscConfiguration.getSecurity() == null) {
+                throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
+            } else if(LscConfiguration.getSecurity().getEncryption() == null) {
+                throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+            }
+            SymmetricEncryption se = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption());
+            if (se.generateDefaultRandomKeyFile()) {
+                LOGGER.info("Key generated: {}. Do not forget to check the lsc>security>encryption>keyfile node value in your configuration file !", se.keyPath );
+            }
 		} catch (GeneralSecurityException ex) {
 			LOGGER.debug(ex.toString(), ex);
 		}

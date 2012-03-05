@@ -187,6 +187,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdClean; 
 		}
 
+        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());

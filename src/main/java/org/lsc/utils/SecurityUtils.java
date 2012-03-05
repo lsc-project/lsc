@@ -69,11 +69,14 @@ public class SecurityUtils {
 	// Utility class
 	private SecurityUtils() {}
 	
-	private static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
+	public static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
 		if(encryptionInstance == null) {
-			encryptionInstance = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption().getKeyfile(),
-					LscConfiguration.getSecurity().getEncryption().getAlgorithm(), 
-					LscConfiguration.getSecurity().getEncryption().getStrength().intValue());
+            if(LscConfiguration.getSecurity() == null) {
+                throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
+            } else if(LscConfiguration.getSecurity().getEncryption() == null) {
+                throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+            }
+            encryptionInstance = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption());
 		}
 		return encryptionInstance;
 	}

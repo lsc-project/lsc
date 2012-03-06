@@ -53,6 +53,7 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
@@ -104,4 +105,29 @@ public class SecurityUtilsTest {
 		result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
 		assertTrue(result.equals(hashedValueSHA1));
 	}
+
+    @Test
+    public final void testcomputeSambaPasswords() {
+        String password = "lsc-project";
+        String passwordSambaLM = "421C32AAE6A89FEF0DCD0BFE45023337";
+        String passwordSambaNT = "433EFC29BCD88C3888E797704BEF3AE1";
+        //
+        // LM
+        //
+        try {
+            String result = SecurityUtils.computeSambaLMPassword(password);
+            Assert.assertEquals(result, passwordSambaLM);
+        } catch (Exception ex) {
+            assertTrue(false);
+        }
+        //
+        // NT
+        //
+        try {
+            String result = SecurityUtils.computeSambaNTPassword(password);
+            Assert.assertEquals(result, passwordSambaNT);
+        } catch (Exception ex) {
+            assertTrue(false);
+        }
+    }
 }

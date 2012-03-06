@@ -167,9 +167,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param pivotName Name of the entry to be returned, which is the name returned by
+	 * @param id Name of the entry to be returned, which is the name returned by
 	 *            {@link #getListPivots()} (used for display only)
-	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 * @param pivotAttrs Map of attribute names and values, which is the data identifier in the
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
 	 *            entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service

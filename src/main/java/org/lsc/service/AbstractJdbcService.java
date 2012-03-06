@@ -207,7 +207,7 @@ public abstract class AbstractJdbcService implements IService {
 					srcBean.setAttribute(new BasicAttribute(entry.getKey()));
 				}
 			}
-			srcBean.setDistinguishName(id);
+			srcBean.setMainIdentifier(id);
 			return srcBean;
 		} catch (InstantiationException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",

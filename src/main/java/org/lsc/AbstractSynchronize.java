@@ -680,7 +680,7 @@ class SynchronizeTask implements Runnable {
 				for(String datasetName: entry.getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
-				dstBean = task.getDestinationService().getBean(entry.getDistinguishedName(), entryDatasets, false);
+				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, false);
 			}
 
 			// Calculate operation that would be performed

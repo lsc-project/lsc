@@ -69,7 +69,7 @@ public class SecurityUtils {
 	// Utility class
 	private SecurityUtils() {}
 	
-	public static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
+	private static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
 		if(encryptionInstance == null) {
             if(LscConfiguration.getSecurity() == null) {
                 throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");

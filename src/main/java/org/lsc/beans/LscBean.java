@@ -237,9 +237,9 @@ public abstract class LscBean implements IBean, Serializable {
 	/**
 	 * Set an attribute.
 	 * 
-	 * @param attrName
+	 * @param name
 	 *            The attribute name.
-	 * @param attrValues
+	 * @param values
 	 *            A set of values for the attribute.
 	 */
 	public final void setDataset(String name, Set<Object> values) {
@@ -294,7 +294,7 @@ public abstract class LscBean implements IBean, Serializable {
 	/**
 	 * Default main object identifier setter.
 	 * 
-	 * @param dn
+	 * @param id
 	 *            The main identifier to set
 	 */
 	public final void setMainIdentifier(final String id) {

@@ -484,11 +484,7 @@
 		<repository>
 			<id>maven.forgerock.org</id>
 			<name>maven.forgerock.org-snapshot</name>
-			<url>http://maven.forgerock.org/repo/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
+			<url>http://maven.forgerock.org/repo/release</url>
 		</repository>
 		<repository>
 			<id>oracleReleases</id>

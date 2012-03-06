@@ -53,6 +53,7 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
@@ -62,46 +63,71 @@ import org.lsc.utils.security.SymmetricEncryption;
  */
 public class SecurityUtilsTest {
 
-	@Test
-	public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
-		//
-		// First generate a random symmetric key. We could use it then to
-		// do all encryption operations.
-		//
-		String tmpKeyPath = new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath();
-		SymmetricEncryption se = new SymmetricEncryption();
-		assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
+    @Test
+    public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
+        //
+        // First generate a random symmetric key. We could use it then to
+        // do all encryption operations.
+        //
+        String tmpKeyPath = new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath();
+        SymmetricEncryption se = new SymmetricEncryption();
+        assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
 
-		LscConfiguration.getSecurity().getEncryption().setKeyfile(tmpKeyPath);
-		
-		//
-		// Now, the test consist to encrypt a random value. Then, we compare the
-		// decrypted value with the initial one, they should be equal.
-		//
-		String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		Random r = new Random();
-		char[] buf = new char[20];
-		for (int i = 0; i < 20; i++) {
-			buf[i] = chars.charAt(r.nextInt(chars.length()));
-		}
-		String randomValue = new String(buf);
-		String encryptedValue = SecurityUtils.encrypt(randomValue);
-		String decryptedValue = SecurityUtils.decrypt(encryptedValue);
-		assertTrue(randomValue.equals(decryptedValue));
-	}
+        LscConfiguration.getSecurity().getEncryption().setKeyfile(tmpKeyPath);
 
-	@Test
-	public final void testHash() throws NoSuchAlgorithmException {
-		String simpleValue = "lsc-project.org";
-		String hashedValueMD5 = "9xGo7EH8D2X+OOqXw1eIxQ==";
-		String hashedValueSHA1 = "YVTOIPfeXwxFluZBGrS+V5lARgc=";
+        //
+        // Now, the test consist to encrypt a random value. Then, we compare the
+        // decrypted value with the initial one, they should be equal.
+        //
+        String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random r = new Random();
+        char[] buf = new char[20];
+        for (int i = 0; i < 20; i++) {
+            buf[i] = chars.charAt(r.nextInt(chars.length()));
+        }
+        String randomValue = new String(buf);
+        String encryptedValue = SecurityUtils.encrypt(randomValue);
+        String decryptedValue = SecurityUtils.decrypt(encryptedValue);
+        assertTrue(randomValue.equals(decryptedValue));
+    }
 
-		// MD5
-		String result = SecurityUtils.hash(SecurityUtils.HASH_MD5, simpleValue);
-		assertTrue(result.equals(hashedValueMD5));
+    @Test
+    public final void testHash() throws NoSuchAlgorithmException {
+        String simpleValue = "lsc-project.org";
+        String hashedValueMD5 = "9xGo7EH8D2X+OOqXw1eIxQ==";
+        String hashedValueSHA1 = "YVTOIPfeXwxFluZBGrS+V5lARgc=";
 
-		// SHA-1
-		result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
-		assertTrue(result.equals(hashedValueSHA1));
-	}
+        // MD5
+        String result = SecurityUtils.hash(SecurityUtils.HASH_MD5, simpleValue);
+        assertTrue(result.equals(hashedValueMD5));
+
+        // SHA-1
+        result = SecurityUtils.hash(SecurityUtils.HASH_SHA1, simpleValue);
+        assertTrue(result.equals(hashedValueSHA1));
+    }
+
+    @Test
+    public final void testcomputeSambaPasswords() {
+        String password = "lsc-project";
+        String passwordSambaLM = "421C32AAE6A89FEF0DCD0BFE45023337";
+        String passwordSambaNT = "433EFC29BCD88C3888E797704BEF3AE1";
+        //
+        // LM
+        //
+        try {
+            String result = SecurityUtils.computeSambaLMPassword(password);
+            Assert.assertEquals(result, passwordSambaLM);
+        } catch (Exception ex) {
+            assertTrue(false);
+        }
+        //
+        // NT
+        //
+        try {
+            String result = SecurityUtils.computeSambaNTPassword(password);
+            Assert.assertEquals(result, passwordSambaNT);
+        } catch (Exception ex) {
+            assertTrue(false);
+        }
+    }
 }

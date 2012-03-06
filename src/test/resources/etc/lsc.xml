@@ -123,28 +123,22 @@
           <name>default</name>
           <policy>FORCE</policy>
         </dataset>
-<!--         <dataset>
+        <dataset>
           <name>description</name>
           <policy>MERGE</policy>
-          <defaultValues>
-            <string>srcBean.getDatasetFirstValueById("userPassword")</string>
-          </defaultValues>
-        </dataset>
- -->        <dataset>
-          <name>description</name>
-          <policy>FORCE</policy>
           <forceValues>
-<string>
-    var j=0;
-    var proxyAddressValues = new Array();
-    var mailLocalAddressValues = srcBean.getDatasetById ("description").toArray() ;
-    for (var i=0; i &lt; mailLocalAddressValues.length; i++ ) {
-        if ( mailLocalAddressValues[i] != null ) {
-        	proxyAddressValues[j++] = "modified:" + mailLocalAddressValues[i];
-       	}
-    }
-    proxyAddressValues
-</string>
+			<string>
+			    var j=0;
+			    var dstDescriptionValues = new Array();
+			    var srcDescriptionValues = srcBean.getDatasetById("userPassword").toArray() ;
+			    for (var i=0; i &lt; srcDescriptionValues.length; i++ ) {
+			        if ( mailLocalAddressValues[i] != null ) {
+			        	// The sample just copy the value, but you can do what you want there !
+			        	dstDescriptionValues[j++] = srcDescriptionValues[i];
+			       	}
+			    }
+			    dstDescriptionValues
+			</string>
           </forceValues>
         </dataset>
         <dataset>

@@ -198,6 +198,9 @@ public final class Launcher {
 			
 			// if a configuration directory was set on command line, use it to set up Configuration
 			Configuration.setUp(configurationLocation);
+            if(!LscConfiguration.isInitialized()) {
+                return 255;
+            }
 
 			// initialize the synchronization engine
 			sync = new SimpleSynchronize();

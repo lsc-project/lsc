@@ -115,6 +115,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	public SimpleJndiSrcService(final TaskType task) throws LscServiceConfigurationException {
 		super((LdapSourceServiceType)LscConfiguration.getSourceService(task));
 		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getGetCleanFilter();
+        if(filterIdClean == null) {
+            LOGGER.warn("No clean filter has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+        }
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {

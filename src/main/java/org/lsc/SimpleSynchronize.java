@@ -185,7 +185,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
 		try {
-			LSCStructuralLogger.DESTINATION.warn("Starting {} for {}", taskMode.name(), task.getName());
+			LSCStructuralLogger.DESTINATION.info("Starting {} for {}", taskMode.name(), task.getName());
 
 			// Do the work!
 			switch (taskMode) {
@@ -298,6 +298,12 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return cache.values().toArray(new Task[cache.values().size()]);
 	}
 
+    /**
+     * Launch a sequential synchronization based on identifiers got from the source
+     * @param taskName the task name to launch
+     * @param entries the entries to synchronize
+     * @return false if at least one synchronization has failed, true if all of them have succeeded
+     */
 	public final boolean launchById(String taskName, Map<String, LscDatasets> entries) {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();

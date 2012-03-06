@@ -378,16 +378,11 @@
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
 				<xsd:sequence>
-					<xsd:choice>
-						<xsd:sequence>
-							<xsd:element name="requestNameForList" type="xsd:string" />
-						</xsd:sequence>
-						<xsd:sequence>
-							<xsd:element name="requestNameForNextId" type="xsd:string" />
-						</xsd:sequence>
-					</xsd:choice>
-					<xsd:element name="requestNameForObject" type="xsd:string" />
 		 			<xsd:element name="interval" type="xsd:integer" default="5" minOccurs="0"/>
+					<xsd:element name="requestNameForList" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForObject" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForNextId" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="requestNameForClean" type="xsd:string" minOccurs="0"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

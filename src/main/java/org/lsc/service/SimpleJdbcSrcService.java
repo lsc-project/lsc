@@ -71,6 +71,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	private final String requestNameForList;
 	private final String requestNameForNextId;
 	private final String requestNameForObject;
+    private final String requestNameForClean;
 	
 	private int interval;
 
@@ -88,6 +89,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
 		requestNameForNextId = props.getProperty("requestNameForNextId");
+        requestNameForClean = props.getProperty("requestNameForClean");
 		
 		try {
 			// check that we have all parameters, or abort
@@ -120,7 +122,11 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		requestNameForList = serviceConf.getRequestNameForList();
 		requestNameForObject = serviceConf.getRequestNameForObject();
 		requestNameForNextId = serviceConf.getRequestNameForNextId();
-		
+        requestNameForClean = serviceConf.getRequestNameForClean();
+        if(requestNameForClean == null) {
+            LOGGER.warn("No clean request has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+        }
+        
 		interval = (serviceConf.getInterval() != null ? serviceConf.getInterval().intValue() : 5);
 	}
 
@@ -132,13 +138,13 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForList;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
-	 */
-	@Override
-	public String getRequestNameForObject() {
-		return requestNameForObject;
-	}
+    /* (non-Javadoc)
+     * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
+     */
+    @Override
+    public String getRequestNameForObject() {
+        return requestNameForObject;
+    }
 
 	/* (non-Javadoc)
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForId()
@@ -147,6 +153,14 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	public String getRequestNameForNextId() {
 		return requestNameForNextId;
 	}
+
+    /* (non-Javadoc)
+     * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
+     */
+    @Override
+    public String getRequestNameForClean() {
+        return requestNameForClean;
+    }
 
 	static int count = 0;
 

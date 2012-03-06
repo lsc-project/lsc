@@ -122,8 +122,8 @@ public final class BeanComparator {
 		// this must be either a MODIFY or MODRDN operation
 		// clone the source bean to calculate modifications on the DN
 		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
-		if (!"".equals(itmBean.getDistinguishedName()) &&
-				dstBean.getDistinguishedName().compareToIgnoreCase(itmBean.getDistinguishedName()) != 0) {
+		if (!"".equals(itmBean.getMainIdentifier()) &&
+				dstBean.getMainIdentifier().compareToIgnoreCase(itmBean.getMainIdentifier()) != 0) {
 			return LscModificationType.CHANGE_ID;
 		} else {
 			return LscModificationType.UPDATE_OBJECT;
@@ -177,7 +177,7 @@ public final class BeanComparator {
 			case CHANGE_ID:
 				// WARNING: updating the RDN of the entry will cancel other
 				// modifications! Relaunch synchronization to complete update
-				lm.setNewMainIdentifier(itmBean.getDistinguishedName());
+				lm.setNewMainIdentifier(itmBean.getMainIdentifier());
 				break;
 
 			default:
@@ -192,13 +192,13 @@ public final class BeanComparator {
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
 		if (dstBean != null) {
-			return dstBean.getDistinguishedName();
+			return dstBean.getMainIdentifier();
 		}
 
 		// If the itmBean has a DN set, use that (this is where JavaScript
 		// generated DNs come from)
-		if (itmBean != null && itmBean.getDistinguishedName() != null) {
-			return itmBean.getDistinguishedName();
+		if (itmBean != null && itmBean.getMainIdentifier() != null) {
+			return itmBean.getMainIdentifier();
 		}
 
 		// At this stage, we don't have a real DN to use.
@@ -523,7 +523,7 @@ public final class BeanComparator {
 				if (task.getCustomLibraries() != null) {
 					table.put("custom", task.getCustomLibraries());
 				}
-				itmBean.setDistinguishName(ScriptingEvaluator.evalToString(task, dn, table));
+				itmBean.setMainIdentifier(ScriptingEvaluator.evalToString(task, dn, table));
 			}
 		}
 

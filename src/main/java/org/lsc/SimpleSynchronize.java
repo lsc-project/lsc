@@ -311,7 +311,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
 		    new SynchronizeTask(task, counter, this, entry, true).run();
 		}
-		return counter.getCountError() > 0; 
+		return counter.getCountError() == 0; 
 	}
 
 	public final boolean launch(String taskName, IBean bean) {

@@ -207,8 +207,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
 		// the description was copied over since this is an existing object and it description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
-		attributeValues.add("Number two's descriptive text");
-		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+		attributeValues.add("modified: Number two's descriptive text");
+//		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "description", attributeValues);
 
 		// the telephoneNumber was added
@@ -242,7 +242,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// the object has been created
 		assertTrue(dstJndiServices.exists(DN_ADD_DST));
 		// the description was copied over
-		checkAttributeValue(DN_ADD_DST, "description", "Number three's descriptive text");
+		checkAttributeValue(DN_ADD_DST, "description", "modified: Number three's descriptive text");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_ADD_DST, "secretCN0003"));
 
@@ -262,7 +262,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// the description was copied over since this is an existing object and it description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("Number one's descriptive text");
-		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
+        attributeValues.add("modified: Number one's descriptive text");
+//		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
 		checkAttributeValues(DN_MODIFY_DST, "description", attributeValues);
 		// the telephoneNumber was merged with existing values
 		attributeValues = new ArrayList<String>(3);
@@ -343,6 +344,6 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		assertEquals(1, at.size());
 
 		String realValue = (String) at.get();
-		assertTrue(realValue.equals(value));
+		assertEquals(value, realValue);
 	}
 }

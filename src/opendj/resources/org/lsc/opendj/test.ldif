@@ -84,6 +84,7 @@ objectClass: top
 telephoneNumber: 123456
 telephoneNumber: 456789
 seeAlso: cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+description: Number one's descriptive text
 
 dn: cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002

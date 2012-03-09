@@ -130,11 +130,13 @@
 			<string>
 			    var j=0;
 			    var dstDescriptionValues = new Array();
-			    var srcDescriptionValues = srcBean.getDatasetById("userPassword").toArray() ;
+			    var srcDescriptionValues = srcBean.getDatasetById("description").toArray() ;
 			    for (var i=0; i &lt; srcDescriptionValues.length; i++ ) {
-			        if ( mailLocalAddressValues[i] != null ) {
+			        if ( srcDescriptionValues[i] != null ) {
 			        	// The sample just copy the value, but you can do what you want there !
-			        	dstDescriptionValues[j++] = srcDescriptionValues[i];
+			        	// Just keep in mind to force a correct data type because the source values are mapped to a generic Object type
+			        	// which will not be well handled by the Javascript engine !
+			        	dstDescriptionValues[j++] = "modified: " + srcDescriptionValues[i];
 			       	}
 			    }
 			    dstDescriptionValues

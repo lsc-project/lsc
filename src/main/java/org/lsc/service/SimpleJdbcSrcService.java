@@ -61,6 +61,7 @@ import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
+import org.lsc.persistence.DaoConfig;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -86,7 +87,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 */
 	@Deprecated
 	public SimpleJdbcSrcService(Properties props, String beanClassName) throws LscServiceException {
-		super(Configuration.getAsProperties("src.database"));
+		super(DaoConfig.getSqlMapClient(Configuration.getAsProperties("src.database")), beanClassName);
 		requestNameForList = props.getProperty("requestNameForList");
 		requestNameForObject = props.getProperty("requestNameForObject");
 		requestNameForNextId = props.getProperty("requestNameForNextId");

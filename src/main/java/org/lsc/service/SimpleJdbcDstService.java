@@ -46,14 +46,9 @@
 
 package org.lsc.service;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
-import org.lsc.LscModifications;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.DatabaseDestinationServiceType;
 import org.lsc.configuration.TaskType;
@@ -62,16 +57,12 @@ import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
 import org.lsc.persistence.DaoConfig;
 
-import com.ibatis.sqlmap.client.SqlMapClient;
-import com.ibatis.sqlmap.engine.impl.SqlMapClientImpl;
-import com.ibatis.sqlmap.engine.mapping.parameter.ParameterMapping;
-
 /**
  * This class is a Database Service destination service
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJdbcDstService extends AbstractJdbcService implements IWritableService {
+public class SimpleJdbcDstService extends AbstractJdbcDstService {
 
 	private DatabaseDestinationServiceType serviceConf;
 
@@ -85,7 +76,7 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	 */
 	@Deprecated
 	public SimpleJdbcDstService(Properties props, String beanClassName) throws LscServiceException {
-		super(props);
+		super("jdbc-dst-service", DaoConfig.getSqlMapClient(props), beanClassName);
 		throw new LscServiceConfigurationException("Unsupported ! Please convert your configuration to XML.");
 	}
 
@@ -98,7 +89,9 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
 	 * @throws LscServiceInitializationException 
 	 */
 	public SimpleJdbcDstService(final TaskType task) throws LscServiceException {
-		super((DatabaseConnectionType)task.getDatabaseDestinationService().getConnection().getReference(), task.getBean());
+		super(task.getDatabaseDestinationService().getName(), 
+		        DaoConfig.getSqlMapClient((DatabaseConnectionType)task.getDatabaseDestinationService().getConnection().getReference()),
+		        task.getBean());
 		serviceConf = task.getDatabaseDestinationService();
 	}
 
@@ -136,70 +129,18 @@ public class SimpleJdbcDstService extends AbstractJdbcService implements IWritab
     }
 
     @Override
-	public boolean apply(LscModifications lm) throws LscServiceException {
-		Map<String, Object> attributeMap = getAttributesMap(lm.getLscAttributeModifications());
-		try {
-			sqlMapper.startTransaction();
-			switch(lm.getOperation()) {
-			case CHANGE_ID:
-				// Silently return without doing anything
-				break;
-			case CREATE_OBJECT:
-				for(String request: serviceConf.getRequestsNameForInsert().getString()) {
-					sqlMapper.insert(request, attributeMap);
-				}
-				break;
-			case DELETE_OBJECT:
-				for(String request: serviceConf.getRequestsNameForDelete().getString()) {
-					sqlMapper.delete(request, attributeMap);
-				}
-				break;
-			case UPDATE_OBJECT:
-				// Push the destination value
-				attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
-				for(String request: serviceConf.getRequestsNameForUpdate().getString()) {
-					sqlMapper.update(request, attributeMap);
-				}
-			}
-			sqlMapper.commitTransaction();
-		} catch (SQLException e) {
-			LOGGER.error(e.toString(), e);
-			return false;
-		} finally {
-			try {
-				sqlMapper.endTransaction();
-			} catch (SQLException e) {
-				LOGGER.error(e.toString(), e);
-				return false;
-			}
-		}
-		return true;
-	}
+    public List<String> getRequestsNameForInsert() {
+        return serviceConf.getRequestsNameForInsert().getString();
+    }
 
-	/** Fetched attributes name cache */
-	private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
+    @Override
+    public List<String> getRequestsNameForUpdate() {
+        return serviceConf.getRequestsNameForUpdate().getString();
+    }
 
-	@Override
-	public List<String> getWriteDatasetIds() {
-		String serviceName = serviceConf.getName();
-		if(attributesNameCache != null && attributesNameCache.size() > 0) {
-			return attributesNameCache.get(serviceName);
-		}
-		attributesNameCache.put(serviceName, new ArrayList<String>());
-		SqlMapClient sqlMapper = null;
-		try {
-			sqlMapper = DaoConfig.getSqlMapClient((DatabaseConnectionType)serviceConf.getConnection().getReference());
-			if(sqlMapper instanceof SqlMapClientImpl) {
-				for(String request: serviceConf.getRequestsNameForInsert().getString()) {
-					for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
-						attributesNameCache.get(serviceName).add(pm.getPropertyName());
-					}
-				}
-			}
-		} catch (LscServiceConfigurationException e) {
-			LOGGER.error("Error while looking for fetched attributes through JDBC destination service: " + e.toString(), e);
-			return null;
-		}
-		return attributesNameCache.get(serviceName);
-	}
+    @Override
+    public List<String> getRequestsNameForDelete() {
+        return serviceConf.getRequestsNameForDelete().getString();
+    }
+
 }

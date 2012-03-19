@@ -51,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.CommunicationException;
@@ -93,23 +92,29 @@ public abstract class AbstractJdbcService implements IService {
 
     public abstract String getRequestNameForClean();
 
-	@Deprecated
-	public AbstractJdbcService(Properties databaseProps) throws LscServiceConfigurationException {
-		sqlMapper = DaoConfig.getSqlMapClient(databaseProps);
-	}
+    @SuppressWarnings("unchecked")
+	public AbstractJdbcService(SqlMapClient sqlmap, String beanClassname) throws LscServiceConfigurationException {
+		sqlMapper = sqlmap;
 
-	@SuppressWarnings("unchecked")
-	public AbstractJdbcService(DatabaseConnectionType destinationConnection, String beanClassname) throws LscServiceConfigurationException {
-		sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
-		
 		try {
-			this.beanClass = (Class<IBean>) Class.forName(beanClassname);
-		} catch (ClassNotFoundException e) {
-			throw new LscServiceConfigurationException(e);
-		}
+            this.beanClass = (Class<IBean>) Class.forName(beanClassname);
+        } catch (ClassNotFoundException e) {
+            throw new LscServiceConfigurationException(e);
+        }
 	}
 
-	/**
+    @SuppressWarnings("unchecked")
+	public AbstractJdbcService(DatabaseConnectionType destinationConnection, String beanClassname) throws LscServiceConfigurationException {
+	    sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
+
+        try {
+            this.beanClass = (Class<IBean>) Class.forName(beanClassname);
+        } catch (ClassNotFoundException e) {
+            throw new LscServiceConfigurationException(e);
+        }
+	}
+
+    /**
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param pivotName Name of the entry to be returned, which is the name returned by

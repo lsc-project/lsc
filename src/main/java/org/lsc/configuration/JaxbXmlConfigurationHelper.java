@@ -50,7 +50,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -138,7 +141,9 @@ public class JaxbXmlConfigurationHelper {
                 
                 Set<String> xsdFiles = reflections.getResources(Pattern.compile(".*\\.xsd"));
                 Source[] schemasSource = new Source[xsdFiles.size()];
-                for(String schemaFile: xsdFiles) {
+                List<String> xsdFilesList = new ArrayList<String>(xsdFiles);
+                Collections.reverse(xsdFilesList);
+                for(String schemaFile: xsdFilesList) {
                     LOGGER.debug("Importing XML schema file: " + schemaFile);
                     InputStream schemaStream = this.getClass().getClassLoader().getResourceAsStream(schemaFile);
                     schemasSource[i++] = new StreamSource(schemaStream);

@@ -51,7 +51,6 @@ import java.io.Reader;
 import java.util.Properties;
 
 import org.lsc.Configuration;
-import org.lsc.beans.BeanComparator;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ import com.ibatis.sqlmap.client.SqlMapClientBuilder;
  */
 public final class DaoConfig {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfig.class);
 
 	/** The base name of the iBatis configuration file */
 	public static final String IBATIS_SQLMAP_CONFIGURATION_FILENAME = "sql-map-config.xml";

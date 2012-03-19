@@ -540,7 +540,6 @@
 	</pluginRepositories>
 
 	<dependencies>
-		<!-- Logging -->
 		<dependency>
 			<groupId>org.apache.ibatis</groupId>
 			<artifactId>ibatis-sqlmap</artifactId>
@@ -741,22 +740,7 @@
 			<artifactId>groovy-all</artifactId>
 			<version>1.7.0</version>
  		</dependency>
-<!-- 		<dependency>
-	      <groupId>org.apache.directory.server</groupId>
-	      <artifactId>apacheds-all</artifactId>
-	      <version>1.5.7</version>
-	      <exclusions>
-	      	<exclusion>
-	      		<groupId>org.slf4j</groupId>
-	      		<artifactId>slf4j-api</artifactId>
-	      	</exclusion>
-	      	<exclusion>
-	      		<groupId>org.apache.directory.shared</groupId>
-	      		<artifactId>shared-ldap-schema</artifactId>
-	      	</exclusion>
-	      </exclusions>
-	    </dependency>  
- -->	    <dependency>
+	    <dependency>
 	      <groupId>org.apache.directory.server</groupId>
 	      <artifactId>apacheds-server-integ</artifactId>
 	      <version>1.5.7</version>
@@ -770,6 +754,7 @@
 	      		<artifactId>shared-ldap-schema</artifactId>
 	      	</exclusion>
 	      </exclusions>
+	      <scope>test</scope>
 	    </dependency>  
 	    <dependency>
 	      <groupId>org.apache.directory.server</groupId>
@@ -785,6 +770,22 @@
 	      		<artifactId>shared-ldap-schema</artifactId>
 	      	</exclusion>
 	      </exclusions>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.directory.shared</groupId>
+	    	<artifactId>shared-all</artifactId>
+	    	<version>1.0.0-M11</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.directory.client.ldap</groupId>
+	    	<artifactId>ldap-client-api</artifactId>
+	    	<version>0.1</version>
+	    </dependency>
+	    <dependency>
+	    	<groupId>org.apache.directory.shared</groupId>
+	    	<artifactId>shared-ldap</artifactId>
+	    	<version>0.9.19</version>
 	    </dependency>
         <dependency>
 			<groupId>xml-apis</groupId>

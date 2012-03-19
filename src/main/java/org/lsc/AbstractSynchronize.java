@@ -146,7 +146,7 @@ public abstract class AbstractSynchronize {
 	 * @param dstJndiService
 	 *            the jndi destination service
 	 */
-	protected final void clean2Ldap(Task task) {
+	protected final boolean clean2Ldap(Task task) {
 
 		InfoCounter counter = new InfoCounter();
 
@@ -157,13 +157,13 @@ public abstract class AbstractSynchronize {
 		} catch (LscServiceException e) {
 			LOGGER.error("Error getting list of IDs in the destination for task {}", task.getName());
 			LOGGER.debug(e.toString(), e);
-			return;
+			return false;
 		}
 
 		// Make sure we have at least one entry to work on
 		if (ids.isEmpty()) {
 			LOGGER.error("Empty or non existant destination (no IDs found)");
-			return;
+			return false;
 		}
 
 		ISyncOptions syncOptions = task.getSyncOptions();
@@ -258,7 +258,7 @@ public abstract class AbstractSynchronize {
 					// we lost the connection to the source or destination, stop
 					// everything!
 					LOGGER.error("Connection lost! Aborting.");
-					return;
+					return false;
 				} else {
 					LOGGER.error("Unable to delete object {} ({})", id.getKey(), e.toString());
 				}
@@ -272,6 +272,7 @@ public abstract class AbstractSynchronize {
 		} else {
 			LOGGER.info(totalsLogMessage, objects);
 		}
+		return counter.getCountError() == 0;
 	}
 
 	/**
@@ -287,7 +288,7 @@ public abstract class AbstractSynchronize {
 	 * @param objectBean
 	 * @param customLibrary
 	 */
-	protected final void synchronize2Ldap(final Task task) {
+	protected final boolean synchronize2Ldap(final Task task) {
 		/*final String syncName,
 		final IService srcService, final IService dstService,
 		final Object customLibrary*/
@@ -302,13 +303,13 @@ public abstract class AbstractSynchronize {
 		} catch (Exception e) {
 			LOGGER.error("Error getting list of IDs in the source for task {}", task.getName());
 			LOGGER.debug(e.toString(), e);
-			return;
+			return false;
 		}
 
 		// Make sure we have at least one entry to work on
 		if (ids.isEmpty()) {
 			LOGGER.error("Empty or non existant source (no IDs found)");
-			return;
+			return false;
 		}
 
 		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
@@ -335,6 +336,7 @@ public abstract class AbstractSynchronize {
 		} else {
 			LOGGER.info(totalsLogMessage, objects);
 		}
+		return counter.getCountError() == 0;
 	}
 
 	public final synchronized void startAsynchronousSynchronize2Ldap(Task task) {

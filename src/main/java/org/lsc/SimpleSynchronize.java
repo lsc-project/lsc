@@ -184,16 +184,16 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * @throws Exception
 	 */
 	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
+        boolean status = true;
 		try {
 			LSCStructuralLogger.DESTINATION.info("Starting {} for {}", taskMode.name(), task.getName());
-
 			// Do the work!
 			switch (taskMode) {
 				case clean:
-					clean2Ldap(task);
+					status = clean2Ldap(task);
 					break;
 				case sync:
-					synchronize2Ldap(task);
+					status = synchronize2Ldap(task);
 					break;
 				case async:
 					if(task.getSourceService() instanceof IAsynchronousService
@@ -232,7 +232,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 		}
 
-		return true;
+		return status;
 	}
 	
 	/**

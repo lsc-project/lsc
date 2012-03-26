@@ -105,11 +105,10 @@ public abstract class LscBean implements IBean, Serializable {
 	}
 
 	/**
-	 * Get an attribute from its name.
+	 * Get an dataset from its name.
 	 * 
-	 * @param id
-	 *            the name
-	 * @return the LDAP attribute
+	 * @param id the name
+	 * @return the values dataset or null if non existent
 	 */
 	public final Set<Object> getDatasetById(final String id) {
 		// use lower case since attribute names are case-insensitive
@@ -450,6 +449,14 @@ public abstract class LscBean implements IBean, Serializable {
 				Set<Object> valuesAsSet = new HashSet<Object>();
 				valuesAsSet.add(values);
 				tmp.put(name, valuesAsSet);
+            } else if (values instanceof Boolean) {
+                Set<Object> valuesAsSet = new HashSet<Object>();
+                valuesAsSet.add(values.toString());
+                tmp.put(name, valuesAsSet);
+            } else if (values instanceof Integer) {
+                Set<Object> valuesAsSet = new HashSet<Object>();
+                valuesAsSet.add("" + values);
+                tmp.put(name, valuesAsSet);
 			} else {
 				LOGGER.warn("Appending unknown type inside lsc bean as Set: "
 						+ values);

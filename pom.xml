@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
@@ -258,19 +259,26 @@
 				</executions>
 			</plugin>
 
-            <plugin>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections-maven</artifactId>
-                <version>0.9.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>reflections</goal>
-                        </goals>
-                        <phase>process-classes</phase>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections-maven</artifactId>
+				<version>0.9.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>reflections</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<inherited>true</inherited>
+				<extensions>true</extensions>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>
@@ -372,7 +380,7 @@
 						<artifactId>build-helper-maven-plugin</artifactId>
 						<version>1.7</version>
 						<executions>
- 							<execution>
+							<execution>
 								<id>add-source</id>
 								<phase>generate-sources</phase>
 								<goals>
@@ -384,7 +392,7 @@
 									</sources>
 								</configuration>
 							</execution>
- 							<execution>
+							<execution>
 								<id>add-resource</id>
 								<phase>generate-resources</phase>
 								<goals>
@@ -392,7 +400,9 @@
 								</goals>
 								<configuration>
 									<resources>
-										<resource><directory>src/opendj/resources</directory></resource>
+										<resource>
+											<directory>src/opendj/resources</directory>
+										</resource>
 									</resources>
 								</configuration>
 							</execution>
@@ -435,7 +445,7 @@
 				</plugins>
 			</build>
 		</profile>
- 		<profile>
+		<profile>
 			<id>postgresql</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
@@ -466,17 +476,9 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
-<!-- 		<repository>
-			<id>JBoss repository</id>
-			<url>http://repository.jboss.org/maven2/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-		</repository> -->
+		<!-- <repository> <id>JBoss repository</id> <url>http://repository.jboss.org/maven2/</url> 
+			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
+			<updatePolicy>always</updatePolicy> </snapshots> </repository> -->
 		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
@@ -492,9 +494,9 @@
 			<url>http://download.oracle.com/maven</url>
 		</repository>
 		<repository>
-		    <id>reflections-repo</id>
-		    <name>Reflections Maven2 Repository</name>
-		    <url>http://reflections.googlecode.com/svn/repo</url>
+			<id>reflections-repo</id>
+			<name>Reflections Maven2 Repository</name>
+			<url>http://reflections.googlecode.com/svn/repo</url>
 		</repository>
 		<repository>
 			<id>lsc-site</id>
@@ -506,6 +508,12 @@
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
+		</repository>
+		<repository>
+			<!-- Use for Google Data API -->
+			<id>burtsev-net-maven</id>
+			<name>Burtsev.Net Maven Repository</name>
+			<url>http://maven.burtsev.net</url>
 		</repository>
 	</repositories>
 
@@ -533,9 +541,9 @@
 			</releases>
 		</pluginRepository>
 		<pluginRepository>
-		    <id>reflections-repo</id>
-		    <name>Reflections Maven2 Repository</name>
-		    <url>http://reflections.googlecode.com/svn/repo</url>
+			<id>reflections-repo</id>
+			<name>Reflections Maven2 Repository</name>
+			<url>http://reflections.googlecode.com/svn/repo</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -565,11 +573,11 @@
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
 				</exclusion>
-            	<exclusion>
-            		<groupId>xml-apis</groupId>
-            		<artifactId>xml-apis</artifactId>
-            	</exclusion>
-            </exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>xmlrpc</groupId>
@@ -577,12 +585,12 @@
 			<version>3.0</version>
 			<type>jar</type>
 			<optional>false</optional>
-            <exclusions>
-            	<exclusion>
-            		<groupId>xml-apis</groupId>
-            		<artifactId>xml-apis</artifactId>
-            	</exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -699,17 +707,17 @@
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.5</version>
-            <exclusions>
-            	<exclusion>
-            		<groupId>xml-apis</groupId>
-            		<artifactId>xml-apis</artifactId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
@@ -720,77 +728,87 @@
 			<artifactId>xadisk</artifactId>
 			<version>1.1</version>
 		</dependency>
-        <dependency>
-            <groupId>javax.resource</groupId>
-            <artifactId>connector-api</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>javaee</groupId>
-            <artifactId>javaee-api</artifactId>
-            <version>5</version>
-        </dependency>
 		<dependency>
-		  <groupId>org.codehaus.btm</groupId>
-		  <artifactId>btm</artifactId>
-		  <version>2.1.0</version>
+			<groupId>javax.resource</groupId>
+			<artifactId>connector-api</artifactId>
+			<version>1.5</version>
+		</dependency>
+		<dependency>
+			<groupId>javaee</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.btm</groupId>
+			<artifactId>btm</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 			<version>1.7.0</version>
- 		</dependency>
-	    <dependency>
-	      <groupId>org.apache.directory.server</groupId>
-	      <artifactId>apacheds-server-integ</artifactId>
-	      <version>1.5.7</version>
-	      <exclusions>
-	      	<exclusion>
-	      		<groupId>org.slf4j</groupId>
-	      		<artifactId>slf4j-api</artifactId>
-	      	</exclusion>
-	      	<exclusion>
-	      		<groupId>org.apache.directory.shared</groupId>
-	      		<artifactId>shared-ldap-schema</artifactId>
-	      	</exclusion>
-	      </exclusions>
-	      <scope>test</scope>
-	    </dependency>  
-	    <dependency>
-	      <groupId>org.apache.directory.server</groupId>
-	      <artifactId>apacheds-core-integ</artifactId>
-	      <version>1.5.7</version>
-	      <exclusions>
-	      	<exclusion>
-	      		<groupId>org.slf4j</groupId>
-	      		<artifactId>slf4j-api</artifactId>
-	      	</exclusion>
-	      	<exclusion>
-	      		<groupId>org.apache.directory.shared</groupId>
-	      		<artifactId>shared-ldap-schema</artifactId>
-	      	</exclusion>
-	      </exclusions>
-	      <scope>test</scope>
-	    </dependency>
-	    <dependency>
-	    	<groupId>org.apache.directory.shared</groupId>
-	    	<artifactId>shared-all</artifactId>
-	    	<version>1.0.0-M11</version>
-	    </dependency>
-	    <dependency>
-	    	<groupId>org.apache.directory.client.ldap</groupId>
-	    	<artifactId>ldap-client-api</artifactId>
-	    	<version>0.1</version>
-	    </dependency>
-	    <dependency>
-	    	<groupId>org.apache.directory.shared</groupId>
-	    	<artifactId>shared-ldap</artifactId>
-	    	<version>0.9.19</version>
-	    </dependency>
-        <dependency>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-server-integ</artifactId>
+			<version>2.0.0-M6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.directory.shared</groupId>
+					<artifactId>shared-ldap-schema</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-integ</artifactId>
+			<version>2.0.0-M6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.directory.shared</groupId>
+					<artifactId>shared-ldap-schema</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.shared</groupId>
+			<artifactId>shared-all</artifactId>
+			<version>1.0.0-M11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.client.ldap</groupId>
+			<artifactId>ldap-client-api</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.directory.shared</groupId>
+			<artifactId>shared-ldap</artifactId>
+			<version>0.9.19</version>
+		</dependency>
+		<dependency>
 			<groupId>xml-apis</groupId>
 			<artifactId>xml-apis</artifactId>
 			<version>1.4.01</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gdata.gdata-java-client</groupId>
+			<artifactId>gdata-appsforyourdomain-1.0</artifactId>
+			<version>1.46.0</version>
+		</dependency>
+ 		<dependency>
+			<groupId>com.google.gdata.gdata-java-client</groupId>
+			<artifactId>gdata-contacts-3.0</artifactId>
+			<version>1.46.0</version>
 		</dependency>
 	</dependencies>
 

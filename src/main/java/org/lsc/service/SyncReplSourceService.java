@@ -210,6 +210,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			srcBean = this.beanClass.newInstance();
 
 			entryCursor.next();
+			if(! entryCursor.available()) {
+			    return null;
+			}
 			Entry entry =  entryCursor.get();
 			// get dn
 			srcBean.setMainIdentifier(entry.getDn().getName());
@@ -374,6 +377,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		Map<String, LscDatasets> converted = new HashMap<String, LscDatasets>();
         try {
             entryCursor.next();
+            if(!entryCursor.available()) {
+                return converted;
+            }
             for(Entry entry = entryCursor.get(); entryCursor.available(); entryCursor.next()) {
                 converted.put(entry.getDn().getName(), convertEntry(entry));
             }

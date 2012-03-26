@@ -62,6 +62,7 @@ import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
 import org.lsc.jndi.PullableJndiSrcService;
 import org.lsc.jndi.SimpleJndiDstService;
+import org.lsc.service.GoogleAppsService;
 import org.lsc.service.MultipleDstService;
 import org.lsc.service.SimpleJdbcDstService;
 import org.lsc.service.SimpleJdbcSrcService;
@@ -363,6 +364,8 @@ public class LscConfiguration {
 			return t.getDatabaseDestinationService();
 		} else if (t.getJndiExecDstService() != null) {
 			return t.getJndiExecDstService();
+        } else if (t.getGoogleAppsDestinationService() != null) {
+            return t.getGoogleAppsDestinationService();
 		} else if (t.getMultiDestinationService() != null) {
 			return t.getMultiDestinationService();
 		} else if (t.getPluginDestinationService() != null) {
@@ -376,6 +379,8 @@ public class LscConfiguration {
 			return t.getAsyncLdapSourceService();
 		} else if (t.getLdapSourceService() != null) {
 			return t.getLdapSourceService();
+        } else if (t.getGoogleAppsSourceService() != null) {
+            return t.getGoogleAppsSourceService();
 		} else if (t.getDatabaseSourceService() != null) {
 			return t.getDatabaseSourceService();
 		} else if (t.getNisSourceService() != null) {
@@ -399,6 +404,8 @@ public class LscConfiguration {
 			return SimpleJdbcSrcService.class;
 		} else if (service instanceof MultiDestinationServiceType) {
 			return MultipleDstService.class;
+        } else if (service instanceof GoogleAppsServiceType) {
+            return GoogleAppsService.class;
 		} else if (service instanceof PluginDestinationServiceType) {
 			try {
 				return Class.forName(((PluginDestinationServiceType) service).getImplementationClass());

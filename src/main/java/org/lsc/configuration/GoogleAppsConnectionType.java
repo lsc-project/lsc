@@ -14,14 +14,14 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for jndiExecDstServiceType complex type.
+ * <p>Java class for googleAppsConnectionType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="jndiExecDstServiceType">
+ * &lt;complexType name="googleAppsConnectionType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.0.xsd}ldapDestinationServiceType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.0.xsd}connectionType">
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -30,9 +30,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "jndiExecDstServiceType")
-public class JndiExecDstServiceType
-    extends LdapDestinationServiceType
+@XmlType(name = "googleAppsConnectionType")
+public class GoogleAppsConnectionType
+    extends ConnectionType
 {
 
 

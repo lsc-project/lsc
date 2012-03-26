@@ -15,17 +15,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for xaFileDestinationServiceType complex type.
+ * <p>Java class for googleAppsServiceType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="xaFileDestinationServiceType">
+ * &lt;complexType name="googleAppsServiceType">
  *   &lt;complexContent>
  *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.0.xsd}serviceType">
  *       &lt;sequence>
- *         &lt;element name="fileType" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="outputDirectory" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="apiCategory" type="{http://lsc-project.org/XSD/lsc-core-2.0.xsd}googleAppsProvisioningType"/>
+ *         &lt;element name="quotaLimitInMb" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -35,65 +35,64 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "xaFileDestinationServiceType", propOrder = {
-    "fileType",
-    "outputDirectory"
+@XmlType(name = "googleAppsServiceType", propOrder = {
+    "apiCategory",
+    "quotaLimitInMb"
 })
-public class XaFileDestinationServiceType
+public class GoogleAppsServiceType
     extends ServiceType
 {
 
-    @XmlElement(defaultValue = "ldif")
-    protected String fileType;
     @XmlElement(required = true)
-    protected String outputDirectory;
+    protected GoogleAppsProvisioningType apiCategory;
+    protected Integer quotaLimitInMb;
 
     /**
-     * Gets the value of the fileType property.
+     * Gets the value of the apiCategory property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link GoogleAppsProvisioningType }
      *     
      */
-    public String getFileType() {
-        return fileType;
+    public GoogleAppsProvisioningType getApiCategory() {
+        return apiCategory;
     }
 
     /**
-     * Sets the value of the fileType property.
+     * Sets the value of the apiCategory property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link GoogleAppsProvisioningType }
      *     
      */
-    public void setFileType(String value) {
-        this.fileType = value;
+    public void setApiCategory(GoogleAppsProvisioningType value) {
+        this.apiCategory = value;
     }
 
     /**
-     * Gets the value of the outputDirectory property.
+     * Gets the value of the quotaLimitInMb property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link Integer }
      *     
      */
-    public String getOutputDirectory() {
-        return outputDirectory;
+    public Integer getQuotaLimitInMb() {
+        return quotaLimitInMb;
     }
 
     /**
-     * Sets the value of the outputDirectory property.
+     * Sets the value of the quotaLimitInMb property.
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link Integer }
      *     
      */
-    public void setOutputDirectory(String value) {
-        this.outputDirectory = value;
+    public void setQuotaLimitInMb(Integer value) {
+        this.quotaLimitInMb = value;
     }
 
 }

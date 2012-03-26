@@ -14,30 +14,34 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ldapVersionType.
+ * <p>Java class for googleAppsProvisioningType.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ldapVersionType">
+ * &lt;simpleType name="googleAppsProvisioningType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="VERSION2"/>
- *     &lt;enumeration value="VERSION_3"/>
+ *     &lt;enumeration value="UserAccounts"/>
+ *     &lt;enumeration value="Groups"/>
+ *     &lt;enumeration value="OrganizationUnits"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "ldapVersionType")
+@XmlType(name = "googleAppsProvisioningType")
 @XmlEnum
-public enum LdapVersionType {
+public enum GoogleAppsProvisioningType {
 
-    @XmlEnumValue("VERSION2")
-    VERSION_2("VERSION2"),
-    VERSION_3("VERSION_3");
+    @XmlEnumValue("UserAccounts")
+    USER_ACCOUNTS("UserAccounts"),
+    @XmlEnumValue("Groups")
+    GROUPS("Groups"),
+    @XmlEnumValue("OrganizationUnits")
+    ORGANIZATION_UNITS("OrganizationUnits");
     private final String value;
 
-    LdapVersionType(String v) {
+    GoogleAppsProvisioningType(String v) {
         value = v;
     }
 
@@ -45,8 +49,8 @@ public enum LdapVersionType {
         return value;
     }
 
-    public static LdapVersionType fromValue(String v) {
-        for (LdapVersionType c: LdapVersionType.values()) {
+    public static GoogleAppsProvisioningType fromValue(String v) {
+        for (GoogleAppsProvisioningType c: GoogleAppsProvisioningType.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

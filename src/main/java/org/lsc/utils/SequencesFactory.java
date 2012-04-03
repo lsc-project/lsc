@@ -12,7 +12,6 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchResult;
 
-import org.lsc.configuration.LdapConnectionType;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.jndi.JndiServices;
@@ -35,25 +34,25 @@ public class SequencesFactory {
 
 	private JndiServices jndiServices;
 	
-	/**
-	 * The local constructor
-	 */
-	private SequencesFactory(LdapConnectionType connection) {
-		jndiServices = JndiServices.getInstance(connection);
-		sequences = new HashMap<String, Sequence>();
-	}
+    /**
+     * The local constructor
+     */
+    private SequencesFactory(JndiServices jndiServices) {
+        this.jndiServices = jndiServices;
+        sequences = new HashMap<String, Sequence>();
+    }
 
-	/**
-	 * Get the factory instance (if needed create and initialize it)
-	 * @return the instance
-	 */
-	public static SequencesFactory getInstance(LdapConnectionType connection) {
-		if (instance == null) {
-			LOGGER.info("Initializing the sequences factory.");
-			instance = new SequencesFactory(connection);
-		}
-		return instance;
-	}
+    /**
+     * Get the factory instance (if needed create and initialize it)
+     * @return the instance
+     */
+    public static SequencesFactory getInstance(JndiServices services) {
+        if (instance == null) {
+            LOGGER.info("Initializing the sequences factory.");
+            instance = new SequencesFactory(services);
+        }
+        return instance;
+    }
 
 	/**
 	 * Get the next value for this sequence

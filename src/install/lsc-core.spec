@@ -23,7 +23,7 @@
 Summary: LDAP Synchronization Connector
 Name: %{lsc_name}
 Version: %{lsc_version}
-Release: 1%{?dist}
+Release: 0%{?dist}
 License: BSD
 BuildArch: noarch
 
@@ -64,7 +64,6 @@ mkdir -p %{buildroot}/usr/%{_lib}/lsc
 mkdir -p %{buildroot}/etc/lsc
 mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
 mkdir -p %{buildroot}/etc/cron.d
-mkdir -p %{buildroot}/etc/logrotate.d
 mkdir -p %{buildroot}/usr/share/doc/lsc
 mkdir -p %{buildroot}%{lsc_logdir}
 
@@ -80,17 +79,13 @@ cp -a etc/sql-map-config.xml-sample %{buildroot}/etc/lsc/sql-map-config.xml
 cp -a lib/* %{buildroot}/usr/%{_lib}/lsc
 ## sample
 cp -a sample/ %{buildroot}/usr/share/doc/lsc
-## cron && logrotate
+## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
-cp -a etc/logrotate.d/lsc.logrotate %{buildroot}/etc/logrotate.d/lsc
 
 # Reconfigure files
 ## logback
 sed -i 's:${LSC_HOME}/logs/lsc.log:%{lsc_logdir}/lsc.log:' %{buildroot}/etc/lsc/logback.xml
 sed -i 's:/tmp/lsc.ldif:%{lsc_logdir}/lsc.ldif:' %{buildroot}/etc/lsc/logback.xml
-## logrotate
-sed -i 's:#LSC_LOGFILE#:%{lsc_logdir}/lsc.log %{lsc_logdir}/lsc.ldif:' %{buildroot}/etc/logrotate.d/lsc
-sed -i 's:root root:%{lsc_user} %{lsc_group}:' %{buildroot}/etc/logrotate.d/lsc
 ## cron
 sed -i 's: root : %{lsc_user} :' %{buildroot}/etc/cron.d/lsc
 sed -i 's:#LSC_BIN#:/usr/bin/lsc:g' %{buildroot}/etc/cron.d/lsc
@@ -145,7 +140,6 @@ rm -rf %{buildroot}
 %defattr(-, root, root, 0755)
 %config(noreplace) /etc/lsc/
 %config(noreplace) /etc/cron.d/lsc
-%config(noreplace) /etc/logrotate.d/lsc
 /usr/bin/lsc
 /usr/bin/lsc-agent
 /usr/%{_lib}/lsc/

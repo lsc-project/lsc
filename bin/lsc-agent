@@ -47,17 +47,6 @@
 #	- 2: 'java' executable not found on PATH or in JAVA_HOME, aborting
 #====================================================================
 
-
-#====================================================================
-# Changelog
-#====================================================================
-# Version 0.2 (12/2011):
-# - Fixing SLF4J classpath issue and JAVA_OPTS
-# Version 0.1 (07/2011):
-# - copy from lsc
-# Author: Sebastien Bahloul
-#====================================================================
-
 # work out where LSC lives
 LSC_HOME=$(dirname "${BASH_SOURCE}")/..
 if [ ${LSC_HOME:0:1} != "/" ] ; then

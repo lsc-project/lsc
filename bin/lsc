@@ -47,29 +47,6 @@
 #	- 2: 'java' executable not found on PATH or in JAVA_HOME, aborting
 #====================================================================
 
-
-#====================================================================
-# Changelog
-#====================================================================
-# Version 0.5 (09/2011):
-# - Add the JAVA_OPTS environment variable usage
-# Version 0.4 (01/2010):
-# - Include a fatal error message in JAVA_HOME missing
-# - Notice log file location
-# Version 0.3 (01/2010):
-# - Update for LSC 1.2
-# - Guess the base directory for LSC and usual directories
-# - Use JAVA_HOME from the environment or java on PATH, without redefining it
-# Version 0.2 (2008):
-# - Modify exit codes
-# - Add comments
-# Author: Clement OUDOT (LINAGORA)
-#
-# Version 0.1 (2008):
-# - First version
-# Author: Jonathan CLARKE (LINAGORA)
-#====================================================================
-
 # work out where LSC lives
 LSC_HOME=$(dirname "${BASH_SOURCE}")/..
 if [ ${LSC_HOME:0:1} != "/" ] ; then

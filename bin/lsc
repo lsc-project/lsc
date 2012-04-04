@@ -64,6 +64,8 @@ LOG_FILE="$LOG_DIR/lsc.log"
 
 mkdir -p "$LOG_DIR"
 
+PARAMETERS="$*"
+
 #====================================================================
 # Functions
 #====================================================================
@@ -111,6 +113,16 @@ function build_classpath() {
 	export CLASSPATH
 }
 
+function build_parameters() {
+	# Force configuration directory if no -f option
+	echo "$PARAMETERS" | grep '\-f ' > /dev/null 
+	if [ $? != 0 ]; then
+		PARAMETERS="$PARAMETERS -f $CFG_DIR"
+	fi
+
+	export PARAMETERS
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -132,7 +144,8 @@ fi
 log "Starting LSC"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
+build_parameters
+"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $PARAMETERS
 
 status=$?
 

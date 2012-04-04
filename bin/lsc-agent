@@ -57,7 +57,6 @@ fi
 # Configuration
 #====================================================================
 
-CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
 LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/lsc-agent.log"
@@ -118,25 +117,25 @@ function build_classpath() {
 # check if we have java executable
 get_java
 
-# check if LSC is not already running
+# check if LSC Remote Agent is not already running
 if [ $(ps aux | grep -a org.lsc.jmx.LscAgent | grep -av grep | wc -l) -ne 0 ] 
 then
-	# LSC already running
-	fatal "LSC already running - launch aborted"
+	# LSC Remote Agent already running
+	fatal "LSC Remote Agent already running - launch aborted"
 
-	# since LSC already running, don't launch and exit
+	# since LSC Remote Agent already running, don't launch and exit
 	exit 1
 fi
 
-# LSC not already running
+# LSC Remote Agent not already running
 log "Starting LSC Remote Agent"
 
 build_classpath
-"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.Launcher $* 
+"${JAVA_COMMAND}" -cp "$CLASSPATH" $JAVA_OPTS org.lsc.jmx.LscAgent $* 
 
 status=$?
 
-# LSC finished running
+# LSC Remote Agent finished running
 log "LSC Remote Agent finished running"
 
 if [ $status -ne 0 ]

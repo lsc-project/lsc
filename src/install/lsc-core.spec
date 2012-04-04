@@ -34,7 +34,7 @@ Source: %{lsc_name}-core-%{lsc_version}-dist.zip
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Prereq: coreutils
-Requires: jdk
+Requires: jdk >= 1.6
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize

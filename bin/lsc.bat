@@ -30,7 +30,13 @@ set CLASSPATH=.
 set CLASSPATH=!CLASSPATH!
 
 REM if LSC options include the "-a" flag, set the required JMX options
-FOR %%i IN ( %* ) DO IF "%%i"=="-a" (SET JAVA_OPTS=-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=1099 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false)
+FOR %%i IN ( %* ) DO IF "%%i"=="-a" (
+  IF DEFINED LSC_JMXPORT (
+        SET JAVA_OPTS=-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=%LSC_JMXPORT% -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+  ) ELSE (
+    call:log "LSC: to control your asynchronous task(s), consider setting the LSC_JMXPORT environment variable to a positive value to bind the JMX interface to that TCP port."
+  )
+)
 
 "%JAVA_COMMAND%" -cp "%CLASSPATH%" %JAVA_OPTS% org.lsc.Launcher %*
 

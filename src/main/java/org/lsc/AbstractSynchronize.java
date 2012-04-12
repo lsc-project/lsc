@@ -232,6 +232,7 @@ public abstract class AbstractSynchronize {
 						// if "nodelete" was specified in command line options,
 						// or if the condition is false,
 						// log action for debugging purposes and continue
+	                    counter.incrementCountModifiable();
 						if (nodelete) {
 							logShouldAction(lm, task.getName());
 							continue;
@@ -242,7 +243,6 @@ public abstract class AbstractSynchronize {
 
 					// if we got here, we have a modification to apply - let's
 					// do it!
-					counter.incrementCountInitiated();
 					if (task.getDestinationService().apply(lm)) {
 						counter.incrementCountCompleted();
 						logAction(lm, id, task.getName());
@@ -266,7 +266,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
+		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage, objects);
 		} else {
@@ -329,8 +329,8 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
+		String totalsLogMessage = "All entries: {}, to modify entries: {}, successfully modified entries: {}, errors: {}";
+		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage, objects);
 		} else {
@@ -679,7 +679,7 @@ class SynchronizeTask implements Runnable {
 				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
-				for(String datasetName: entry.getAttributesNames()) {
+				for(String datasetName: entry.datasets().getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
 				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, false);
@@ -726,6 +726,7 @@ class SynchronizeTask implements Runnable {
 
 				// apply condition is false, log action for debugging purposes
 				// and forget
+	            counter.incrementCountModifiable();
 				if (!applyCondition || calculateForDebugOnly) {
 					abstractSynchronize.logShouldAction(lm, syncName);
 					return true;
@@ -735,7 +736,6 @@ class SynchronizeTask implements Runnable {
 			}
 
 			// if we got here, we have a modification to apply - let's do it!
-			counter.incrementCountInitiated();
 			if (task.getDestinationService().apply(lm)) {
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
@@ -745,13 +745,6 @@ class SynchronizeTask implements Runnable {
 				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), new Exception("Technical problem while applying modifications to the destination"));
 				return false;
 			}
-		} catch (CommunicationException e) {
-			// we lost the connection to the source or destination, stop
-			// everything!
-			counter.incrementCountError();
-			AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
-			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
-			return false;
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : ( entry != null ? entry.getMainIdentifier() : e.toString())), e);
@@ -795,7 +788,7 @@ class InfoCounter {
 
 	private int countAll = 0;
 	private int countError = 0;
-	private int countInitiated = 0;
+	private int countModifiable = 0;
 	private int countCompleted = 0;
 
 	public synchronized void incrementCountAll() {
@@ -806,8 +799,8 @@ class InfoCounter {
 		countError++;
 	}
 
-	public synchronized void incrementCountInitiated() {
-		countInitiated++;
+	public synchronized void incrementCountModifiable() {
+		countModifiable++;
 	}
 
 	public synchronized void incrementCountCompleted() {
@@ -837,13 +830,12 @@ class InfoCounter {
 	}
 
 	/**
-	 * Return the count of all objects that have been embraced in a data
-	 * modification (successfully or not)
+	 * Return the count of all objects that should be modify
 	 * 
-	 * @return the count of all attempted updates
+	 * @return the count of all updates to do
 	 */
-	public synchronized int getCountInitiated() {
-		return countInitiated;
+	public synchronized int getCountModifiable() {
+		return countModifiable;
 	}
 
 	/**

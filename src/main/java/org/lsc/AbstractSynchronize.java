@@ -234,6 +234,7 @@ public abstract class AbstractSynchronize {
 						// if "nodelete" was specified in command line options,
 						// or if the condition is false,
 						// log action for debugging purposes and continue
+	                    counter.incrementCountModifiable();
 						if (nodelete) {
 							logShouldAction(lm, task.getName());
 							continue;
@@ -244,7 +245,6 @@ public abstract class AbstractSynchronize {
 
 					// if we got here, we have a modification to apply - let's
 					// do it!
-					counter.incrementCountInitiated();
 					if (task.getDestinationService().apply(lm)) {
 						counter.incrementCountCompleted();
 						logAction(lm, id, task.getName());
@@ -267,8 +267,8 @@ public abstract class AbstractSynchronize {
 			}
 		}
 
-		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
+		String totalsLogMessage = "All entries: {}, to modify entries: {}, successfully modified entries: {}, errors: {}";
+		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage, objects);
 		} else {
@@ -331,7 +331,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountInitiated(), counter.getCountCompleted(), counter.getCountError() };
+		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage, objects);
 		} else {
@@ -715,6 +715,7 @@ class SynchronizeTask implements Runnable {
 
 				// apply condition is false, log action for debugging purposes
 				// and forget
+	            counter.incrementCountModifiable();
 				if (!applyCondition || calculateForDebugOnly) {
 					abstractSynchronize.logShouldAction(lm, syncName);
 					return true;
@@ -724,7 +725,6 @@ class SynchronizeTask implements Runnable {
 			}
 
 			// if we got here, we have a modification to apply - let's do it!
-			counter.incrementCountInitiated();
 			if (task.getDestinationService().apply(lm)) {
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
@@ -784,7 +784,7 @@ class InfoCounter {
 
 	private int countAll = 0;
 	private int countError = 0;
-	private int countInitiated = 0;
+	private int countModifiable = 0;
 	private int countCompleted = 0;
 
 	public synchronized void incrementCountAll() {
@@ -795,8 +795,8 @@ class InfoCounter {
 		countError++;
 	}
 
-	public synchronized void incrementCountInitiated() {
-		countInitiated++;
+	public synchronized void incrementCountModifiable() {
+		countModifiable++;
 	}
 
 	public synchronized void incrementCountCompleted() {
@@ -825,14 +825,13 @@ class InfoCounter {
 		return countError;
 	}
 
-	/**
-	 * Return the count of all objects that have been embraced in a data
-	 * modification (successfully or not)
-	 * 
-	 * @return the count of all attempted updates
-	 */
-	public synchronized int getCountInitiated() {
-		return countInitiated;
+    /**
+     * Return the count of all objects that should be modify
+     * 
+     * @return the count of all updates to do
+     */
+	public synchronized int getCountModifiable() {
+		return countModifiable;
 	}
 
 	/**

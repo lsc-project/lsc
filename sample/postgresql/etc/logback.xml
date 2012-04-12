@@ -40,8 +40,8 @@
 	<logger name="communicationLogger" level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<logger name="lsc" level="INFO">
-		<appender-ref ref="LDIF"/>
+	<logger name="lsc" level="DEBUG">
+		<appender-ref ref="CONSOLE"/>
 	</logger>
 	<logger name="org.apache" level="WARN">
 		<appender-ref ref="CONSOLE"/>

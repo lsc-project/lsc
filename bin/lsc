@@ -47,29 +47,6 @@
 #	- 2: 'java' executable not found on PATH or in JAVA_HOME, aborting
 #====================================================================
 
-
-#====================================================================
-# Changelog
-#====================================================================
-# Version 0.5 (09/2011):
-# - Add the JAVA_OPTS environment variable usage
-# Version 0.4 (01/2010):
-# - Include a fatal error message in JAVA_HOME missing
-# - Notice log file location
-# Version 0.3 (01/2010):
-# - Update for LSC 1.2
-# - Guess the base directory for LSC and usual directories
-# - Use JAVA_HOME from the environment or java on PATH, without redefining it
-# Version 0.2 (2008):
-# - Modify exit codes
-# - Add comments
-# Author: Clement OUDOT (LINAGORA)
-#
-# Version 0.1 (2008):
-# - First version
-# Author: Jonathan CLARKE (LINAGORA)
-#====================================================================
-
 # work out where LSC lives
 LSC_HOME=$(dirname "${BASH_SOURCE}")/..
 if [ ${LSC_HOME:0:1} != "/" ] ; then
@@ -86,6 +63,8 @@ LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/lsc.log"
 
 mkdir -p "$LOG_DIR"
+
+PARAMETERS="$*"
 
 #====================================================================
 # Functions
@@ -134,6 +113,16 @@ function build_classpath() {
 	export CLASSPATH
 }
 
+function build_parameters() {
+	# Force configuration directory if no -f option
+	echo "$PARAMETERS" | grep '\-f ' > /dev/null 
+	if [ $? != 0 ]; then
+		PARAMETERS="$PARAMETERS -f $CFG_DIR"
+	fi
+
+	export PARAMETERS
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -155,20 +144,21 @@ fi
 log "Starting LSC"
 
 # JMX
-for param in $*; do
-  if [ "$param" == "-a" ]; then
-    if [ -n "$LSC_JMXPORT" ]; then
-	  export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=$LSC_JMXPORT -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
-    else
-      echo "LSC: to control your asynchronous task(s), consider setting the LSC_JMXPORT "
-	  echo "environment variable to a positive value to bind the JMX interface to that "
-	  echo "TCP port."
+for param in $PARAMETERS; do
+	if [ "$param" == "-a" ]; then
+		if [ -n "$LSC_JMXPORT" ]; then
+			export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=$LSC_JMXPORT -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+		else
+			echo "LSC: to control your asynchronous task(s), consider setting the LSC_JMXPORT "
+			echo "environment variable to a positive value to bind the JMX interface to that "
+			echo "TCP port."
+		fi
 	fi
-  fi
 done
 
 build_classpath
-"${JAVA_COMMAND}" $JAVA_OPTS -cp "$CLASSPATH" org.lsc.Launcher $* 
+build_parameters
+"${JAVA_COMMAND}" $JAVA_OPTS -cp "$CLASSPATH" org.lsc.Launcher $PARAMETERS
 
 status=$?
 

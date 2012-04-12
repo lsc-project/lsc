@@ -197,7 +197,7 @@
 			<xsd:extension base="auditType">
 				<xsd:sequence>
 					<xsd:element name="datasets" type="xsd:string" minOccurs="0"/>
-					<xsd:element name="separator" type="xsd:string" minOccurs="0"/>
+					<xsd:element name="separator" type="xsd:string" minOccurs="0" default=";"/>
 					<xsd:element name="outputHeader" type="xsd:boolean" minOccurs="0" default="true"/>
 					<xsd:element name="taskNames" type="valuesType" minOccurs="0"/>
 				</xsd:sequence>
@@ -281,8 +281,8 @@
     	<xsd:complexContent>
     		<xsd:extension base="syncOptionsType">
 				<xsd:sequence>
-		 			<xsd:element name="defaultDelimiter" type="xsd:string"/>
-		 			<xsd:element name="defaultPolicy" type="policyType"/>
+		 			<xsd:element name="defaultDelimiter" type="xsd:string" default=";"/>
+		 			<xsd:element name="defaultPolicy" type="policyType" default="FORCE"/>
 		 			<xsd:element name="conditions" type="conditionsType" minOccurs="0"/>
 		 			<xsd:element name="dataset" type="datasetType" minOccurs="0" maxOccurs="unbounded"/>
 				</xsd:sequence>
@@ -412,8 +412,8 @@
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
 				<xsd:sequence>
-					<xsd:element name="apiCategory" type="googleAppsProvisioningType" />
-					<xsd:element name="quotaLimitInMb" type="xsd:int" minOccurs="0" />
+					<xsd:element name="apiCategory" type="googleAppsProvisioningType" default="UserAccounts"/>
+					<xsd:element name="quotaLimitInMb" type="xsd:int" minOccurs="0" default="25000"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -431,7 +431,7 @@
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
 				<xsd:sequence>
-					<xsd:element name="map" type="xsd:string"/>
+					<xsd:element name="map" type="xsd:string" default="passwd"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -477,7 +477,7 @@
     <xsd:complexType name="taskType">
 		<xsd:sequence>
  			<xsd:element name="name" type="xsd:ID" />
- 			<xsd:element name="bean" type="xsd:string" />
+ 			<xsd:element name="bean" type="xsd:string" default="org.lsc.beans.SimpleBean"/>
  			<xsd:element name="cleanHook" type="xsd:string" minOccurs="0"/>
  			<xsd:element name="syncHook" type="xsd:string" minOccurs="0"/>
  			<xsd:choice>
@@ -514,15 +514,13 @@
     </xsd:complexType>
     
     <xsd:complexType name="connectionsType">
-		<xsd:sequence>
-			<xsd:choice maxOccurs="unbounded">
-	   			<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
-	   			<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded"/>
-	   			<xsd:element name="nisConnection" type="nisConnectionType" minOccurs="0" maxOccurs="unbounded"/>
-	   			<xsd:element name="googleAppsConnection" type="googleAppsConnectionType" minOccurs="0" maxOccurs="unbounded"/>
-				<xsd:element name="pluginConnection" type="pluginConnectionType" />
-			</xsd:choice>
-		</xsd:sequence>
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+   			<xsd:element name="ldapConnection" type="ldapConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+   			<xsd:element name="databaseConnection" type="databaseConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+   			<xsd:element name="nisConnection" type="nisConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+   			<xsd:element name="googleAppsConnection" type="googleAppsConnectionType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="pluginConnection" type="pluginConnectionType" />
+		</xsd:choice>
 		<xsd:attribute name="id" type="xsd:string" use="optional"/>
 					<!-- Connection id uniqueness
 					<xs:key name="uniqueConnectionIdentifier">
@@ -532,13 +530,11 @@
     </xsd:complexType>
     
     <xsd:complexType name="auditsType">
-		<xsd:sequence>
-			<xsd:choice maxOccurs="unbounded">
-   				<xsd:element name="csvAudit" type="csvAuditType" minOccurs="0" />
-   				<xsd:element name="ldifAudit" type="ldifAuditType" minOccurs="0" />
- 				<xsd:element name="pluginAudit" type="pluginAuditType"/>
-			</xsd:choice>
-		</xsd:sequence>
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="csvAudit" type="csvAuditType" />
+			<xsd:element name="ldifAudit" type="ldifAuditType" />
+			<xsd:element name="pluginAudit" type="pluginAuditType"/>
+		</xsd:choice>
 		<xsd:attribute name="id" type="xsd:string" use="optional"/>
 	</xsd:complexType>
 

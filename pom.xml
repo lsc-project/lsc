@@ -276,9 +276,43 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.3.7</version>
 				<inherited>true</inherited>
 				<extensions>true</extensions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.7.3</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<generateDirectory>src/main/java</generateDirectory>
+					<generatePackage>org.lsc.configuration</generatePackage>
+					<bindingDirectory>src/main/resources/schemas</bindingDirectory>
+					<bindingIncludes><bindingInclude>lsc-core-2.0.xjc</bindingInclude></bindingIncludes>
+					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
+					<schemaIncludes>
+						<schemaInclude>lsc-core-2.0.xsd</schemaInclude>
+					</schemaIncludes>
+					<extension>true</extension>
+					<args><arg>-Xdefault-value</arg></args>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.jvnet.jaxb2_commons</groupId>
+						<artifactId>jaxb2-default-value</artifactId>
+						<version>1.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
 		</plugins>
 
 		<pluginManagement>
@@ -324,6 +358,25 @@
 										</versionRange>
 										<goals>
 											<goal>reflections</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.sun.tools.xjc.maven2
+										</groupId>
+										<artifactId>
+											maven-jaxb-plugin
+										</artifactId>
+										<versionRange>
+											[1.1.1,)
+										</versionRange>
+										<goals>
+											<goal>generate</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

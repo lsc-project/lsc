@@ -3,8 +3,8 @@
   <connections>
     <ldapConnection>
       <name>ldap-src-conn</name>
-      <url>ldap://192.168.183.129:389/dc=lsc-project,dc=org</url>
-      <username>cn=Manager,dc=lsc-project,dc=org</username>
+      <url>ldap://127.0.0.1:33389/dc=lsc-project,dc=org</url>
+      <username>cn=Directory Manager</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>
@@ -41,7 +41,7 @@
     <task>
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <asyncLdapSourceService>
+      <ldapSourceService>
         <name>openldap-source-service</name>
         <connection reference="ldap-src-conn" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
@@ -59,8 +59,8 @@
         </fetchedAttributes>
         <getAllFilter>(&amp;(objectClass=inetorgperson)(mail=*))</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-        <serverType>OpenLDAP</serverType>
-      </asyncLdapSourceService>
+        <getCleanFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getCleanFilter>
+      </ldapSourceService>
       <databaseDestinationService>
         <name>postgresql-src-service</name>
         <connection reference="jdbc-dst-conn" />
@@ -74,6 +74,9 @@
         <mainIdentifier>"mail="+srcBean.getDatasetFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
+        <conditions>
+        	<changeId>false</changeId>
+        </conditions>
       </propertiesBasedSyncOptions>
     </task>
   </tasks>

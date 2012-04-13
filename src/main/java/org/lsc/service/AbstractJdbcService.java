@@ -183,7 +183,6 @@ public abstract class AbstractJdbcService implements IService {
 	
 	/**
 	 * Override default AbstractJdbcSrcService to get a SimpleBean
-	 * TODO 1.3 Move this to AbstractJdbcSrcService and replace return type with a simple Map 
 	 * @throws LscServiceException 
 	 */
 	@SuppressWarnings("unchecked")

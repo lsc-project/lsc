@@ -477,18 +477,23 @@ public class Configuration {
 			location = cleanup(lscConfigurationPath);
 			if(!LscConfiguration.isInitialized()) {
 				File xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
+				File properties = new File(location, Configuration.PROPERTIES_FILENAME);
 				if(xml.exists() && xml.isFile()) {
 					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString()));
-				} else {
+				} else if (properties.exists() && properties.isFile()) {
 					LOGGER.warn("LSC configuration loaded from old properties file format !");
-					PropertiesConfigurationHelper.loadConfigurationFrom(new File(location, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
+					PropertiesConfigurationHelper.loadConfigurationFrom(properties.getAbsolutePath());
+				} else {
+		            message = "Unable to load configuration configuration inside the directory: " + location;
+		            LOGGER.error(message);
+		            return;
 				}
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
 		} catch (LscConfigurationException e) {
 			message = "Unable to load configuration (" + e + ")";
-			LOGGER.error(e.toString(),e);
+			LOGGER.error(message, e);
 			return;
 		}
 

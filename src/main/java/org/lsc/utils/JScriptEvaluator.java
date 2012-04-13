@@ -53,11 +53,15 @@ import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.lsc.Task;
+import org.lsc.beans.IBean;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.AbstractSimpleJndiService;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.UniqueTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,9 +102,10 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	 * @param params
 	 *                the keys are the name used in the
 	 * @return the evaluation result
+	 * @throws LscServiceException 
 	 */
 	public String evalToString(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params) throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 
 		if (result == null) {
@@ -115,9 +120,14 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
 	public List<String> evalToStringList(final Task task, final String expression,
-					final Map<String, Object> params) {
-		Object result = convertJsToJava(instanceEval(task, expression, params));
-
+					final Map<String, Object> params) throws LscServiceException {
+        Object result = null;
+	    try {
+	        result = convertJsToJava(instanceEval(task, expression, params));
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
+	    
 		if(result instanceof String[] || result instanceof Object[] ) {
 			List<String> resultsArray = new ArrayList<String>();
 			for (Object resultValue : (Object[])result) {
@@ -148,8 +158,12 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		}
 	}
 
-	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
-		return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
+	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
+	    try {
+	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
 	}
 
 	/**
@@ -160,9 +174,10 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	 * @param params
 	 *                the keys are the name used in the
 	 * @return the evaluation result
+	 * @throws LscServiceException 
 	 */
 	private Object instanceEval(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params) throws LscServiceException {
 //		Script script = null;
 		Bindings bindings = engine.createBindings();
 
@@ -204,8 +219,16 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		Object ret = null;
 		try {
 			ret = engine.eval(expressionImport, bindings);
+		} catch (ScriptException e) {
+            LOGGER.error("Fail to compute expression: " + expression + " on " + 
+                    (params.containsKey("srcBean") && ((IBean)params.get("srcBean")).getMainIdentifier() != null ? "id=" + ((IBean)params.get("srcBean")).getMainIdentifier() : 
+                        ( params.containsKey("dstBean") && ((IBean)params.get("dstBean")).getMainIdentifier() != null ? "id=" + ((IBean)params.get("dstBean")).getMainIdentifier() :
+                            "unknown id !"))
+                    + "\nReason: " + e.toString());
+            LOGGER.debug(e.toString(), e);
+            throw new LscServiceException (e);
 		} catch (RuntimeException e) {
-			throw e;
+            throw new LscServiceException (e);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);

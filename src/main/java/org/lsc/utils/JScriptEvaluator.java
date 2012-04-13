@@ -45,7 +45,6 @@
  */
 package org.lsc.utils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -252,23 +251,9 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 					retarr[index] = getMethod.invoke(src, index, null);
 				}
 				return retarr;
-			} catch(InvocationTargetException e) {
-				
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch(Exception e) {
+	            LOGGER.error(e.toString());
+	            LOGGER.debug(e.toString(), e);
 			}
 		} else if (src == UniqueTag.NOT_FOUND
 				|| src == UniqueTag.NULL_VALUE) {

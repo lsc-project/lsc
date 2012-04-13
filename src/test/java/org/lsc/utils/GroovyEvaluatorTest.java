@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.lsc.Task;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
-import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.jndi.SimpleJndiSrcService;
 
@@ -32,7 +32,7 @@ public class GroovyEvaluatorTest {
 	}
 	
 	@Test
-	public void test1() throws LscServiceConfigurationException {
+	public void test1() throws LscServiceException {
 
 		new NonStrictExpectations() {
 			{

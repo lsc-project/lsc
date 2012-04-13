@@ -122,13 +122,11 @@ public class SymmetricEncryption {
             throw new RuntimeException("lsc>security>encryption>keyfile node of the LSC configuration cannot be null !");
         } else if(encryption.getAlgorithm() == null) {
             throw new RuntimeException("lsc>security>encryption>algorithm node of the LSC configuration cannot be null !");
-        } else if(encryption.getStrength() == null) {
-            throw new RuntimeException("lsc>security>encryption>strength node of the LSC configuration cannot be null !");
         }
 
         this.securityProvider = new BouncyCastleProvider();
         this.algorithm = encryption.getAlgorithm();
-        this.strength = encryption.getStrength().intValue();
+        this.strength = encryption.getStrength();
         this.keyPath = encryption.getKeyfile();
 
         Security.addProvider(this.securityProvider);
@@ -232,7 +230,7 @@ public class SymmetricEncryption {
 	 * @return int
 	 */
 	public static int getStrength() {
-		return LscConfiguration.getSecurity().getEncryption().getStrength().intValue();
+		return LscConfiguration.getSecurity().getEncryption().getStrength();
 	}
 
 	/**

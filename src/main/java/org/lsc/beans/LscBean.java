@@ -150,7 +150,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 */
 	public final String getDatasetFirstValueById(final String id)
 			throws NamingException {
-		List<String> allValues = getAttributeValuesById(id);
+		List<String> allValues = getDatasetValuesById(id);
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
 
@@ -234,12 +234,10 @@ public abstract class LscBean implements IBean, Serializable {
 	}
 
 	/**
-	 * Set an attribute.
+	 * Set a dataset.
 	 * 
-	 * @param name
-	 *            The attribute name.
-	 * @param values
-	 *            A set of values for the attribute.
+	 * @param name The dataset name.
+	 * @param values A set of values for this dataset.
 	 */
 	public final void setDataset(String name, Set<Object> values) {
 		// use lower case since attribute names are case-insensitive

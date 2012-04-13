@@ -7,13 +7,6 @@ SUSPENDS THEM ! (See at below how to delete them if you need it)
 This LSC destination service enables the provisioning of Google Apps users 
 account. 
 
-It supports :
-- through LDAP Persistent Search Control : Netscape Directory Server, Sun 
-   Directory Server (native and Java edition), Oracle Directory 
-   server, OpenDS and OpenDJ
-- through LDAP Sync Control: OpenLDAP and Apache DS (to be fully checked)
-- through Microsoft proprietary control (1.2.840.113556.1.4.528): Active Directory
-
 It has not been tested (and is not currently supported) for:
 - multi domains
 - OAuth and Captcha authentication
@@ -34,7 +27,7 @@ Just replace:
 - the URL with the domain name to provision
 - the username with the email address that has administrative privileges on 
    the previously specified domain
-- the password corresponding  to this email address
+- the password corresponding to this email address
 
 Then, setup the corresponding information regarding the destination service:
 

@@ -64,6 +64,7 @@ import org.lsc.configuration.PolicyType;
 import org.lsc.configuration.PropertiesBasedSyncOptionsType;
 import org.lsc.configuration.TaskType;
 import org.lsc.configuration.ValuesType;
+import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 
 public class PropertiesBasedSyncOptionsTest {
@@ -133,7 +134,7 @@ public class PropertiesBasedSyncOptionsTest {
 	}
 
 	@Test
-	public final void testJS() {
+	public final void testJS() throws LscServiceException {
 		DatasetType jsAttr = new DatasetType();
 		ValuesType jsAttrValues = new ValuesType();
 		jsAttrValues.getString().addAll(Arrays.asList(new String[] {"\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\""}));

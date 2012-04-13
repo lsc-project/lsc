@@ -59,13 +59,10 @@ public class ConfigurationLoaderTest {
 			new ConfigurationLoaderTest().testDumpSimpleConfiguration();
 			new ConfigurationLoaderTest().testLoadSimpleConfiguration();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (LscConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

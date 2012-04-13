@@ -256,7 +256,7 @@ public class LscConfiguration {
 	}
 	
 	public static void saving() {
-		getInstance().getLsc().setRevision(getInstance().getLsc().getRevision().add(new BigInteger("1")));
+		getInstance().getLsc().setRevision(getInstance().getLsc().getRevision()+1);
 	}
 	
 	public static void saved() {

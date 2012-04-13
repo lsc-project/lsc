@@ -186,7 +186,7 @@
 		<xsd:complexContent>
 			<xsd:extension base="auditType">
 				<xsd:sequence>
-					<xsd:element name="logOnlyLdif" type="xsd:boolean" default="false" minOccurs="0"/>
+					<xsd:element name="logOnlyLdif" type="xsd:boolean" default="true" minOccurs="0"/>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

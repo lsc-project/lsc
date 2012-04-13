@@ -73,9 +73,13 @@ import org.apache.directory.shared.ldap.model.entry.Entry;
 import org.apache.directory.shared.ldap.model.entry.Value;
 import org.apache.directory.shared.ldap.model.exception.LdapException;
 import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.model.message.LdapResult;
+import org.apache.directory.shared.ldap.model.message.MessageTypeEnum;
 import org.apache.directory.shared.ldap.model.message.Response;
+import org.apache.directory.shared.ldap.model.message.ResultCodeEnum;
 import org.apache.directory.shared.ldap.model.message.SearchRequest;
 import org.apache.directory.shared.ldap.model.message.SearchRequestImpl;
+import org.apache.directory.shared.ldap.model.message.SearchResultDone;
 import org.apache.directory.shared.ldap.model.message.SearchScope;
 import org.apache.directory.shared.ldap.model.message.controls.AbstractControl;
 import org.apache.directory.shared.ldap.model.message.controls.PersistentSearchImpl;
@@ -88,6 +92,7 @@ import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapDerefAliasesType;
 import org.lsc.configuration.LdapServerType;
 import org.lsc.configuration.TaskType;
+import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
@@ -262,13 +267,18 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		} catch (TimeoutException e) {
 			LOGGER.warn("Timeout during search !");
 		}
-		if(searchResponse != null && searchResponse instanceof SearchResultEntry) {
+		if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_ENTRY) {
 			SearchResultEntry sre = ((SearchResultEntry) searchResponse);
 			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
-		} else {
-			return null;
+		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
+		    LdapResult result = ((SearchResultDone)searchResponse).getLdapResult();
+		    if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
+		        throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
+		    }
+		    sf = null;
 		}
+        return null;
 	}
 
     private org.apache.directory.shared.ldap.model.message.AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
@@ -299,7 +309,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		case NETSCAPE_DS:
 		case NOVELL_E_DIRECTORY:
 		    PersistentSearchImpl searchControl = new PersistentSearchImpl();
+		    searchControl.setCritical(true);
 			searchControl.setChangesOnly(true);
+			searchControl.setReturnECs(false);
 			searchControl.setChangeTypes(ChangeType.ADD_VALUE + ChangeType.DELETE_VALUE + ChangeType.MODDN_VALUE + ChangeType.MODIFY_VALUE);
 			return searchControl;
 		case ACTIVE_DIRECTORY:

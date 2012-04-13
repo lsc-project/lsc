@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
@@ -66,6 +65,7 @@ import org.lsc.LscModifications;
 import org.lsc.Task;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.PolicyType;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.ScriptingEvaluator;
@@ -99,10 +99,10 @@ public final class BeanComparator {
 	 * @param srcBean Bean from source
 	 * @param dstBean JNDI bean
 	 * @return JndiModificationType the modification type that would happen
-	 * @throws CloneNotSupportedException
+	 * @throws LscServiceException
 	 */
 	public static LscModificationType calculateModificationType(Task task,
-					IBean srcBean, IBean dstBean) throws CloneNotSupportedException {
+					IBean srcBean, IBean dstBean) throws LscServiceException {
 		// no beans, nothing to do
 		if (srcBean == null && dstBean == null) {
 			return null;
@@ -147,7 +147,7 @@ public final class BeanComparator {
 	 */
 	public static LscModifications calculateModifications(
 					Task task, IBean srcBean, IBean dstBean, boolean condition) 
-					throws NamingException, CloneNotSupportedException {
+					throws LscServiceException {
 
 		LscModifications lm = null;
 
@@ -233,7 +233,7 @@ public final class BeanComparator {
 	private static LscModifications getUpdatedObject(
 					Task task, LscModifications modOperation,
 					IBean srcBean, IBean itmBean, IBean dstBean)
-					throws NamingException, CloneNotSupportedException {
+					throws LscServiceException {
 
 		String id = modOperation.getMainIdentifier();
 		String logPrefix = "In object \"" + id + "\": ";
@@ -441,7 +441,7 @@ public final class BeanComparator {
 		// If no explicit list of attribute types to write is specified,
 		// we build a list from all source attributes, all force and default values
 		if (res.size() == 0) {
-			Set<String> itmBeanAttrsList = srcBean.getAttributesNames();
+			List<String> itmBeanAttrsList = srcBean.datasets().getAttributesNames();
 			Set<String> forceAttrsList = task.getSyncOptions().getForceValuedAttributeNames();
 			Set<String> defaultAttrsList = task.getSyncOptions().getDefaultValuedAttributeNames();
 			Set<String> createAttrsList = task.getSyncOptions().getCreateAttributeNames();
@@ -503,16 +503,20 @@ public final class BeanComparator {
 	 * @param srcBean Original bean from source
 	 * @param dstBean Destination bean
 	 * @return New bean cloned from srcBean
-	 * @throws CloneNotSupportedException
+	 * @throws LscServiceException
 	 */
-	private static IBean cloneSrcBean(Task task, IBean srcBean, IBean dstBean) throws CloneNotSupportedException {
+	private static IBean cloneSrcBean(Task task, IBean srcBean, IBean dstBean) throws LscServiceException {
 		//
 		// We clone the source object, because syncoptions should not be used
 		// on modified values of the source object :)
 		//
 		IBean itmBean = null;
 		if (srcBean != null) {
-			itmBean = srcBean.clone();
+		    try {
+	            itmBean = srcBean.clone();
+		    } catch(CloneNotSupportedException e) {
+		        throw new LscServiceException(e);
+		    }
 
 			// apply any new DN from properties to this intermediary bean
 			String dn = task.getSyncOptions().getDn();
@@ -579,7 +583,8 @@ public final class BeanComparator {
 	 *         destination, or null if this attribute should be ignored.
 	 */
 	protected static Set<Object> getValuesToSet(Task task, String attrName,
-					Set<Object> srcAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType) {
+					Set<Object> srcAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType)
+					throws LscServiceException {
 		// Result
 		Set<Object> attrValues = new HashSet<Object>();
 

@@ -154,11 +154,13 @@ public class LscConfiguration {
 	}
 
 	public static AuditType getAudit(String name) {
-		for(AuditType audit: getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit()) {
-			if(audit.getName().equalsIgnoreCase(name)) {
-				return audit;
-			}
-		}
+	    if(getInstance().getLsc().getAudits() != null) {
+	        for(AuditType audit: getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit()) {
+	            if(audit.getName().equalsIgnoreCase(name)) {
+	                return audit;
+	            }
+	        }
+	    }
 		return null;
 	}
 
@@ -255,7 +257,7 @@ public class LscConfiguration {
 	}
 	
 	public static void saving() {
-		getInstance().getLsc().setRevision(getInstance().getLsc().getRevision().add(new BigInteger("1")));
+		getInstance().getLsc().setRevision(getInstance().getLsc().getRevision() + 1);
 	}
 	
 	public static void saved() {

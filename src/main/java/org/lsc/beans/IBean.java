@@ -145,6 +145,14 @@ public interface IBean extends Cloneable, Serializable {
 	 */
 	void setAttribute(Attribute attr);
 
+    /**
+     * Set an dataset.
+     * 
+     * @param name The dataset name.
+     * @param values A set of values for this dataset.
+     */
+    public void setDataset(String name, Set<Object> values);
+    
 	/**
 	 * Set an attribute.
 	 *

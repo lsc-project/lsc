@@ -441,7 +441,7 @@ public final class BeanComparator {
 		// If no explicit list of attribute types to write is specified,
 		// we build a list from all source attributes, all force and default values
 		if (res.size() == 0) {
-			Set<String> itmBeanAttrsList = srcBean.getAttributesNames();
+			List<String> itmBeanAttrsList = srcBean.datasets().getAttributesNames();
 			Set<String> forceAttrsList = task.getSyncOptions().getForceValuedAttributeNames();
 			Set<String> defaultAttrsList = task.getSyncOptions().getDefaultValuedAttributeNames();
 			Set<String> createAttrsList = task.getSyncOptions().getCreateAttributeNames();

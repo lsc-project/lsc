@@ -47,6 +47,7 @@ package org.lsc.service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.CommunicationException;
-import javax.naming.directory.BasicAttribute;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
@@ -201,9 +201,9 @@ public abstract class AbstractJdbcService implements IService {
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
 				if(entry.getValue() != null) {
-					srcBean.setAttribute(new BasicAttribute(entry.getKey(), entry.getValue()));
+                    srcBean.datasets().put(entry.getKey(), entry.getValue());
 				} else {
-					srcBean.setAttribute(new BasicAttribute(entry.getKey()));
+                    srcBean.datasets().put(entry.getKey(), new HashSet<String>());
 				}
 			}
 			srcBean.setMainIdentifier(id);

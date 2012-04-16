@@ -235,12 +235,10 @@ public abstract class LscBean implements IBean, Serializable {
 	}
 
 	/**
-	 * Set an attribute.
+	 * Set an dataset.
 	 * 
-	 * @param attrName
-	 *            The attribute name.
-	 * @param attrValues
-	 *            A set of values for the attribute.
+	 * @param name The dataset name.
+	 * @param values A set of values for this dataset.
 	 */
 	public final void setDataset(String name, Set<Object> values) {
 		// use lower case since attribute names are case-insensitive

@@ -65,6 +65,7 @@ import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapServiceType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,7 +199,7 @@ public abstract class AbstractSimpleJndiService {
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {
 			Attribute attr = (Attribute) ne.next();
-			beanToFill.setAttribute(attr);
+			beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
 		}
 		return beanToFill;
 	}

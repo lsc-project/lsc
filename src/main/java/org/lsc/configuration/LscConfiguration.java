@@ -45,7 +45,6 @@
  */
 package org.lsc.configuration;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -329,16 +328,15 @@ public class LscConfiguration {
 		return lscObject;
 	}
 
-	public static SyncOptionsType getSyncOptions(TaskType task) throws LscConfigurationException {
+	public static SyncOptionsType getSyncOptions(TaskType task) {
 		if(task.getPropertiesBasedSyncOptions() != null) {
 			return task.getPropertiesBasedSyncOptions();
 		} else if(task.getForceSyncOptions() != null) {
 			return task.getForceSyncOptions();
 		} else if(task.getPluginSyncOptions() != null){
 			return task.getPluginSyncOptions();
-		} else {
-			throw new LscConfigurationException("Non existent sync options settings for task '" + task.getName() + "' !");
 		}
+		return null;
 	}
 
 	public static DatasetType getDataset(PropertiesBasedSyncOptionsType conf,

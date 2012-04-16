@@ -196,4 +196,13 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		}
 		return result;
 	}
+	
+	public String getDelimiter(String name) {
+        DatasetType dataset = LscConfiguration.getDataset(conf, name);
+        if(dataset != null && dataset.getDelimiter() != null) {
+            return dataset.getDelimiter();
+        } else {
+            return conf.getDefaultDelimiter();
+        }
+	}
 }

@@ -61,19 +61,6 @@ public interface ISyncOptions {
 	/** default condition if none is given */
 	public static final String DEFAULT_CONDITION = "true";
 	
-//	/** The strategy to apply to the attribute updates. */
-//	public enum STATUS_TYPE {
-//
-//		/** Keep the destination value. */
-//		KEEP,
-//		/** Force the source value. */
-//		FORCE,
-//		/** Merge source and destination values. */
-//		MERGE,
-//		/** Unknown. */
-//		UNKNOWN,
-//	}
-
 	/**
 	 * Initialize the synchronization options policy.
 	 * @param task the task configuration object on which applying syncopts
@@ -171,4 +158,6 @@ public interface ISyncOptions {
 	 * @return the new object dn pattern
 	 */
 	String getDn();
+	
+	String getDelimiter(String attributeName);
 }

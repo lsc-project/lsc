@@ -135,4 +135,9 @@ public class ForceSyncOptions implements ISyncOptions {
 	public List<String> getForceValues(String id, String attributeName) {
 		return null;
 	}
+
+    @Override
+    public String getDelimiter(String attributeName) {
+        return null;
+    }
 }

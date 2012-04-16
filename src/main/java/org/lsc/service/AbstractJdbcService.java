@@ -47,7 +47,6 @@ package org.lsc.service;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.naming.CommunicationException;
+import javax.naming.NamingException;
+import javax.naming.directory.BasicAttribute;
 
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +66,7 @@ import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.persistence.DaoConfig;
+import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,9 +208,9 @@ public abstract class AbstractJdbcService implements IService {
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
 			for(Entry<String, Object> entry: record.entrySet()) {
 				if(entry.getValue() != null) {
-					srcBean.datasets().put(entry.getKey(), entry.getValue());
+					srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
 				} else {
-					srcBean.datasets().put(entry.getKey(), new HashSet<String>());
+                    srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
 				}
 			}
 			srcBean.setMainIdentifier(id);
@@ -227,7 +229,10 @@ public abstract class AbstractJdbcService implements IService {
 			// TODO This SQLException may mean we lost the connection to the DB
 			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
 			throw new LscServiceException(new CommunicationException(e.getMessage()));
-		}
+		} catch (NamingException e) {
+            LOGGER.error("Unable to get handle cast: " + e.toString());
+            LOGGER.debug(e.toString(), e);
+        }
 		return null;
 	}
 

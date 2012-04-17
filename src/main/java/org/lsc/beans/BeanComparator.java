@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -632,6 +633,26 @@ public final class BeanComparator {
 			return null;
 		}
 
-		return attrValues;
+        return splitValues(task, attrName, attrValues);
 	}
+
+    private static Set<Object> splitValues(Task task, String attrName, Set<Object> attrValues) {
+        Set<Object> ret = new HashSet<Object>();
+        for(Object value : attrValues) {
+            if(value instanceof String) {
+                String delimiter = task.getSyncOptions().getDelimiter(attrName);
+                if(delimiter != null) {
+                    StringTokenizer sTok = new StringTokenizer((String) value, delimiter);
+                    while( sTok.hasMoreTokens() ) {
+                        ret.add(sTok.nextToken());
+                    }
+                } else {
+                    ret.add(value);
+                }
+            } else {
+                ret.add(value);
+            }
+        }
+        return ret;
+    }
 }

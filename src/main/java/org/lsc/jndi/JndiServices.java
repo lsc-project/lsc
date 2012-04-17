@@ -76,6 +76,7 @@ import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.PagedResultsControl;
 import javax.naming.ldap.PagedResultsResponseControl;
+import javax.naming.ldap.SortControl;
 import javax.naming.ldap.StartTlsRequest;
 import javax.naming.ldap.StartTlsResponse;
 import javax.security.auth.callback.Callback;
@@ -138,8 +139,9 @@ public final class JndiServices {
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
 
-	//	/** Attribute name to sort on. */
-	//	private String sortedBy;
+	/** Attribute name to sort on. */
+	private String sortedBy;
+	
 	/**
 	 * Initiate the object and the connection according to the properties.
 	 *
@@ -213,6 +215,8 @@ public final class JndiServices {
 			pageSize = -1;
 		}
 
+		sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
+		
 		String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
 		if (recursiveDeleteStr != null) {
 			recursiveDelete = Boolean.parseBoolean(recursiveDeleteStr);
@@ -945,6 +949,10 @@ public final class JndiServices {
 
 			if (requestPagedResults) {
 				extControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
+			}
+			
+			if(sortedBy != null) {
+			    extControls.add(new SortControl(sortedBy, Control.CRITICAL));
 			}
 
 			if (extControls.size() > 0) {

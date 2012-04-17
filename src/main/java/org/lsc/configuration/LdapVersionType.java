@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;simpleType name="ldapVersionType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="VERSION2"/>
+ *     &lt;enumeration value="VERSION_2"/>
  *     &lt;enumeration value="VERSION_3"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
@@ -32,8 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum LdapVersionType {
 
-    @XmlEnumValue("VERSION2")
-    VERSION_2("VERSION2"),
+    @XmlEnumValue("VERSION_2")
+    VERSION_2("VERSION_2"),
     VERSION_3("VERSION_3");
     private final String value;
 

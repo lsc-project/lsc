@@ -133,6 +133,8 @@
 						minOccurs="0" />
 					<xsd:element name="binaryAttributes" type="valuesType"
 						minOccurs="0" />
+					<xsd:element name="recursiveDelete" type="xsd:boolean"
+						default="false" minOccurs="0" />
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

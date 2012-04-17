@@ -388,6 +388,9 @@ public final class JndiServices {
 			props.setProperty("java.naming.ldap.sortedBy", connection.getSortedBy());
 		}
 		props.setProperty("java.naming.ldap.version", (connection.getVersion() == LdapVersionType.VERSION_2 ? "2" : "3" ));
+        if(connection.isRecursiveDelete() != null) {
+            props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
+        }
 		return props;
 	}
 	

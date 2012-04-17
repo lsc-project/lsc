@@ -337,8 +337,6 @@
 						minOccurs="0" />
 					<xsd:element name="getAllFilter" type="xsd:string" />
 					<xsd:element name="getOneFilter" type="xsd:string" />
-					<xsd:element name="getCleanFilter" type="xsd:string"
-						minOccurs="0" />
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -348,6 +346,8 @@
 		<xsd:complexContent>
 			<xsd:extension base="ldapServiceType">
 				<xsd:sequence>
+					<xsd:element name="cleanFilter" type="xsd:string"
+						minOccurs="0" />
 					<xsd:element name="filterAsync" type="xsd:string"
 						minOccurs="0" />
 					<xsd:element name="dateFormat" type="xsd:string"

@@ -45,7 +45,6 @@
  */
 package org.lsc.configuration;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

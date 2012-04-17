@@ -114,7 +114,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	@SuppressWarnings("unchecked")
 	public SimpleJndiSrcService(final TaskType task) throws LscServiceConfigurationException {
 		super((LdapSourceServiceType)LscConfiguration.getSourceService(task));
-		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getGetCleanFilter();
+		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getCleanFilter();
         if(filterIdClean == null) {
             LOGGER.warn("No clean filter has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
         }

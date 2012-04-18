@@ -45,19 +45,6 @@
 #   Jonathan Clarke <jon@lsc-project.org>
 #   Remy-Christophe Schermesser <rcs@lsc-project.org>
 #
-# ---------------------------------------------------------------------------------
-#
-# Version 0.2 (2010):
-# - Adapted the script as a demo of LSC (lsc sample)
-# - Removed all server start/stop operations, to just use a file database
-# - Update population: add SHUTDOWN after table creation and don't delete CSV
-#   file to allow re-opening of the DB.
-# Author: Jonathan Clarke
-#
-# Version 0.1 (2009):
-# - First version
-# Author: Thomas CHEMINEAU
-#
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ---------------------------------------------------------------------------------
@@ -281,9 +268,9 @@ run() {
 	export CLASSPATH
 	export CONFIGPATH
 
-	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all"
+	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all --clean all"
 	echo "Running $command"
-	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --synchronize all
+	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --synchronize all --clean all
 }
 
 # ---------------------------------------------------------------------------------

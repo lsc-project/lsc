@@ -33,6 +33,7 @@
         <connection reference="src-jdbc"/>
         <requestNameForList>getInetOrgPersonList</requestNameForList>
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
+	<requestNameForClean>getInetOrgPersonClean</requestNameForClean>
       </databaseSourceService>
       <ldapDestinationService>
         <name>MySyncTask-dst</name>

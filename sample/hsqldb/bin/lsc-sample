@@ -89,7 +89,7 @@ if [ $? -eq 0 ]; then
 	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
 	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
 	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
-	HSQLDB_DIR=$(cygpath -u "c:\tmp\lsc\hsqldb")
+	HSQLDB_DIR=$(cygpath -u "$HSQLDB_DIR")
 fi
 
 # ---------------------------------------------------------------------------------

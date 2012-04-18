@@ -111,6 +111,8 @@
         <requestNameForNextId>mandatory but not used yet</requestNameForNextId> -->
 <!--	./requestNameForObject mandatory node providing the SQL request name to get the full object according to the datasets identifying it uniquely -->
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
+<!--	./requestNameForClean optional node providing the SQL request name to check that the object still exissts. If not it will be deleted -->
+        <requestNameForClean>checkPersonForClean</requestNameForClean>
       </databaseSourceService>
 <!--  ./destinationService mandatory node containing definition of the source service settings  
 			@class define the implementation, possible builtin types are :

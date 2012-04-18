@@ -19,6 +19,13 @@
 		WHERE pers."MAIL" LIKE #mail#
 	</select>
 
+	<select id="checkPersonForClean" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		Select
+			pers."ID" AS ID
+		FROM csvdata pers
+		WHERE pers."MAIL" LIKE #mail#
+	</select>
+
 	<select id="getInetOrgPersonList" resultClass="java.util.HashMap">
 		SELECT pers."MAIL" AS mail
 		FROM csvdata pers

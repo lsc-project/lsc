@@ -59,7 +59,7 @@
         </fetchedAttributes>
         <getAllFilter>(&amp;(objectClass=inetorgperson)(mail=*))</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-        <getCleanFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getCleanFilter>
+        <cleanFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</cleanFilter>
       </ldapSourceService>
       <databaseDestinationService>
         <name>postgresql-src-service</name>

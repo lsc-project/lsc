@@ -207,7 +207,7 @@ public class LscAgent implements NotificationListener {
 		options.addOption("p", "port", true, "Specify the port to connect to");
 		options.addOption("i", "identifier", true, "Specify the identifier to synchronize");
 		options.addOption("t", "attributes", true, "Specify the attributes pivot to synchronize (comma separated, identifier parameter required)");
-		options.addOption("s", "status", false, "Get a task status");
+		options.addOption("s", "status", true, "Get a task status");
 
 		CommandLineParser parser = new GnuParser();
 

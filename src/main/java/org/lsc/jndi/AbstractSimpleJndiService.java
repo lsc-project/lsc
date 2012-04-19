@@ -167,6 +167,10 @@ public abstract class AbstractSimpleJndiService {
 		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
 			attrsId.add(pivotAttr);
 		}
+		attrs = new ArrayList<String>(ldapService.getFetchedAttributes().getString().size());
+		for (String attr: ldapService.getFetchedAttributes().getString()) {
+			attrs.add(attr);
+		}
 		jndiServices = JndiServices.getInstance((LdapConnectionType)ldapService.getConnection().getReference());
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
 			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");

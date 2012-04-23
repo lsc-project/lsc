@@ -267,6 +267,10 @@ case "$1" in
     ACTIONS="$ACTIONS stopserver"
     shift
     ;;
+  "--status")
+    ACTIONS="$ACTIONS status"
+    shift
+    ;;
   "--help"|*)
     echo ""
     echo " $0 [<option>]"
@@ -325,6 +329,15 @@ for action in $ACTIONS; do
         hsqldb_cleanData
       fi
       ;;
+    "status")
+      if [ `hsqldb_checkInstance` -eq 0 ]; then
+        pid=`cat $HSQLDB_PIDFILE`
+	echo "HSQLDB Server is running (PID $pid)"
+        exit 0
+      else
+	echo "HSQLDB Server is not running"
+        exit 1
+      fi
 
   esac
 done

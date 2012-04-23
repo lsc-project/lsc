@@ -132,7 +132,12 @@ data_import()
       let nblines--
       tail -n $nblines $1 > $HSQLDB_DIR/`basename $1`
       sep=`hsqldb_checkCsvSeparator $2`
-      hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep\";" > /dev/null 2>&1
+      encoding=`file $1  2> /dev/null | cut -d' ' -f2`
+      if [ "x$encoding" == "xUTF-8" ] ; then
+        hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep;encoding=UTF-8\";" > /dev/null 2>&1
+      else
+        hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep\";" > /dev/null 2>&1
+      fi
       if [ $? -eq 0 ]; then
         log "File $1 imported into $HSQLDB_TABLE ($nblines rows)"
 	echo "$nblines lines imported into table $HSQLDB_TABLE"

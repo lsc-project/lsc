@@ -61,7 +61,7 @@ fi
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
 LOG_DIR="/tmp"
-LOG_FILE="$LOG_DIR/lsc.log"
+LOG_FILE="$LOG_DIR/hsqldb.log"
 VAR_DIR="$LSC_HOME/var"
 
 # HSQLDB jar file
@@ -82,13 +82,26 @@ CSV_SEPARATOR=";"
 # ---------------------------------------------------------------------------------
 # FUNCTIONS
 # ---------------------------------------------------------------------------------
+function log() {
+  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [hsqldb] $1" >> "$LOG_FILE"
+}
+
+function fatal() {
+  log $1
+  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [hsqldb] $1" 1>&2
+}
 
 #
 # Drop all data from the HSQLDB instance.
 #
 data_drop()
 {
-  hsqldb_sqlQuery "DROP TABLE $HSQLDB_TABLE" 2> /dev/null
+  hsqldb_sqlQuery "DROP TABLE $HSQLDB_TABLE;" 2> /dev/null
+  if [ $? -eq 0 ]; then
+    log "Table $HSQLDB_TABLE deleted"
+  else
+    fatal "Unable to delete table $HSQLDB_TABLE"
+  fi
 }
 
 #
@@ -112,19 +125,25 @@ data_import()
   done
   IFS=$IOFS
   if [ -n "$HSQLDB_TABLEDEF" ]; then
-    hsqldb_sqlQuery "CREATE TEXT TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF)"
+    hsqldb_sqlQuery "CREATE TEXT TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF);"
     if [ $? -eq 0 ]; then
+      log "Table $HSQLDB_TABLE created"
       nblines=`cat $1 | wc -l`
       let nblines--
       tail -n $nblines $1 > $HSQLDB_DIR/`basename $1`
       sep=`hsqldb_checkCsvSeparator $2`
-      hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep\"" > /dev/null 2>&1
-      echo $?
+      hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep\";" > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        log "File $1 imported into $HSQLDB_TABLE ($nblines rows)"
+	echo "$nblines lines imported into table $HSQLDB_TABLE"
+      else
+        fatal "Unable to import $1 into table $HSQLDB_TABLE"
+      fi
       rm -f $HSQLDB_DIR/`basename $1` > /dev/null 2>&1
       return
     fi
   fi
-  echo 1
+  exit 1
 }
 
 #
@@ -132,7 +151,7 @@ data_import()
 #
 data_show()
 {
-  hsqldb_sqlQuery "SELECT * FROM $HSQLDB_TABLE" 2> /dev/null
+  hsqldb_sqlQuery "SELECT * FROM $HSQLDB_TABLE;" 2> /dev/null
 }
 
 #
@@ -311,7 +330,7 @@ for action in $ACTIONS; do
         echo " Error - server is not running"
         exit 1
       fi
-      exit `data_import "$CSV_FILE" "$CSV_SEPARATOR"`
+      data_import "$CSV_FILE" "$CSV_SEPARATOR"
       ;;
     "showdata")
       if [ `hsqldb_checkInstance` -eq 1 ]; then

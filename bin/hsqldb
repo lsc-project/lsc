@@ -269,6 +269,11 @@ ACTIONS=""
 
 case "$1" in
   "--drop")
+    shift
+    if [ "$1" != "" ]; then
+      HSQLDB_TABLE="$1"
+      shift
+    fi
     ACTIONS="$ACTIONS dropdata"
     shift
     ;;
@@ -277,12 +282,21 @@ case "$1" in
     CSV_FILE="$1"
     shift
     if [ "$1" != "" ]; then
+      HSQLDB_TABLE="$1"
+      shift
+    fi
+    if [ "$1" != "" ]; then
       CSV_SEPARATOR="$1"
       shift
     fi
     ACTIONS="$ACTIONS importdata"
     ;;
   "--show")
+    shift
+    if [ "$1" != "" ]; then
+      HSQLDB_TABLE="$1"
+      shift
+    fi
     ACTIONS="$ACTIONS showdata"
     shift
     ;;
@@ -303,9 +317,9 @@ case "$1" in
     echo " $0 [<option>]"
     echo ""
     echo " One option from available options is:"
-    echo "   --import <file> [<separator>]    Import data from CSV file"
-    echo "   --drop    Drop data"
-    echo "   --show    Show data from database"
+    echo "   --import <file> [<table>] [<separator>]    Import data from CSV file"
+    echo "   --drop [<table>]   Drop data"
+    echo "   --show [<table>]   Show data from database"
     echo "   --start   Start the server"
     echo "   --stop    Stop the server"
     echo "   --status  Display server status"

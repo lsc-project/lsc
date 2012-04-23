@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -45,26 +45,34 @@
 #   Jonathan Clarke <jon@lsc-project.org>
 #   Remy-Christophe Schermesser <rcs@lsc-project.org>
 #
-# ---------------------------------------------------------------------------------
-#
-# Version 0.1 (2009):
-# - First version
-# Author: Thomas CHEMINEAU
-#
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# work out where LSC lives
+LSC_HOME=$(dirname "${BASH_SOURCE}")/..
+if [ ${LSC_HOME:0:1} != "/" ] ; then
+        LSC_HOME="${PWD}/${LSC_HOME}"
+fi
 
 # ---------------------------------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------------------------------
 
-# LSC home directory
-LSC_HOME=/usr/local/lsc
+# LSC directories
+CFG_DIR="$LSC_HOME/etc"
+LIB_DIR="$LSC_HOME/lib"
+LOG_DIR="/tmp"
+LOG_FILE="$LOG_DIR/lsc.log"
+VAR_DIR="$LSC_HOME/var"
+
 # HSQLDB jar file
-HSQLDB_LIB=$LSC_HOME/lib/hsqldb*.jar
+HSQLDB_LIB=$LIB_DIR/hsqldb*.jar
+
 # Temporary directory so that HSQLDB server could store files
-HSQLDB_DIR=$LSC_HOME/var/hsqldb
+HSQLDB_DIR=$VAR_DIR/hsqldb
+
 # HSQLDB server PID file
-HSQLDB_PIDFILE=$LSC_HOME/var/hsqldb.pid
+HSQLDB_PIDFILE=$VAR_DIR/hsqldb.pid
+
 # Default CSV separator
 CSV_SEPARATOR=";"
 
@@ -200,7 +208,7 @@ hsqldb_sqlQuery()
 hsqldb_startServer()
 {
   mkdir -p $HSQLDB_DIR
-  java -cp $LSC_HOME/lib/hsqldb*.jar org.hsqldb.Server \
+  java -cp $HSQLDB_LIB org.hsqldb.Server \
     -database.0 file:$HSQLDB_DIR/mydb -dbname.0 lscdb > /dev/null 2>&1 &
   echo $! > $HSQLDB_PIDFILE
   sleep 2

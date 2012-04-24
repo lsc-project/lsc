@@ -192,8 +192,13 @@ public final class Launcher {
 				}
 				// if a configuration directory was set on command line, use it to set up Configuration
 				Configuration.setUp(configurationLocation, true);
-				LOGGER.info("Configuration and environment successfully checked !");
-				return 0;
+				if(LscConfiguration.isInitialized()) {
+	                LOGGER.info("Configuration and environment successfully checked !");
+	                return 0;
+				} else {
+				    LOGGER.info("Configuration validation failed !");
+				    return 255;
+				}
 			}
 			
 			// if a configuration directory was set on command line, use it to set up Configuration

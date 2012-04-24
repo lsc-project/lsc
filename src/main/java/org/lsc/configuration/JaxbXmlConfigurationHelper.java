@@ -49,7 +49,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -63,6 +70,11 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.lsc.exception.LscConfigurationException;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -108,51 +120,59 @@ public class JaxbXmlConfigurationHelper {
 //		return packageName;
 //	}
 
-	/**
-	 * Load an XML file to the object
-	 * 
-	 * @param filename
-	 *            filename to read from
-	 * @return the completed configuration object
-	 * @throws FileNotFoundException
-	 *             thrown if the file can not be accessed (either because of a
-	 *             misconfiguration or due to a rights issue)
-	 * @throws LscConfigurationException 
-	 */
-	public Lsc getConfiguration(String filename)
-			throws LscConfigurationException {
-		LOGGER.debug("Loading XML configuration from: " + filename);
-	    try {
-	    	Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
-	    	SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-	    	Schema lscSchema = null;
-			try {
-				int i = 0;
-				InputStream lscCoreSchema = this.getClass().getClassLoader().getResourceAsStream("schemas/lsc-core-2.0.xsd");
-				if(lscCoreSchema != null) {
-					@SuppressWarnings("unchecked")
-					Collection<File> schemas = FileUtils.listFiles(new File(this.getClass().getClassLoader().getResource(".").getFile()), new String[] {"xsd"}, true);
-					Source[] schemasSource = new Source[schemas.size() + 1];
-					schemasSource[i++] = new StreamSource(lscCoreSchema);
-					for(File schemaFile: schemas) {
-						schemasSource[i++] = new StreamSource(schemaFile);
-					}
-					lscSchema = schemaFactory.newSchema(schemasSource);
-			    	unmarshaller.setSchema( lscSchema );
-				} else {
-					LOGGER.warn("LSC XML schema not found, no validation of the configuration file will be done !");
-				}
-			} catch (VerifyError e) {
-				throw new LscConfigurationException(e.toString(), e);
-			} catch (SAXException e) {
-				throw new LscConfigurationException(e);
-			}
-	    	
-			return (Lsc)unmarshaller.unmarshal( new File(filename) );
-		} catch (JAXBException e) {
-			throw new LscConfigurationException(e);
-		}
-	}
+    /**
+     * Load an XML file to the object
+     * 
+     * @param filename
+     *            filename to read from
+     * @return the completed configuration object
+     * @throws FileNotFoundException
+     *             thrown if the file can not be accessed (either because of a
+     *             misconfiguration or due to a rights issue)
+     * @throws LscConfigurationException 
+     */
+    public Lsc getConfiguration(String filename)
+            throws LscConfigurationException {
+        LOGGER.debug("Loading XML configuration from: " + filename);
+        try {
+            Unmarshaller unmarshaller = jaxbc.createUnmarshaller();
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema lscSchema = null;
+            try {
+                int i = 0;
+                Set<URL> urls = new HashSet<URL>();
+                urls.addAll(ClasspathHelper.forPackage("org.lsc"));
+                if(System.getProperty("LSC.PLUGINS.PACKAGEPATH") != null) {
+                    String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(System.getProperty("path.separator"));
+                    for(String pathElement: pathElements) {
+                        urls.addAll(ClasspathHelper.forPackage(pathElement));
+                    }
+                }
+                Reflections reflections = new Reflections(new ConfigurationBuilder()
+                    .addUrls(urls).setScanners(new ResourcesScanner(), new SubTypesScanner()));
+                
+                Set<String> xsdFiles = reflections.getResources(Pattern.compile(".*\\.xsd"));
+                Source[] schemasSource = new Source[xsdFiles.size()];
+                List<String> xsdFilesList = new ArrayList<String>(xsdFiles);
+                Collections.reverse(xsdFilesList);
+                for(String schemaFile: xsdFilesList) {
+                    LOGGER.debug("Importing XML schema file: " + schemaFile);
+                    InputStream schemaStream = this.getClass().getClassLoader().getResourceAsStream(schemaFile);
+                    schemasSource[i++] = new StreamSource(schemaStream);
+                }
+                lscSchema = schemaFactory.newSchema(schemasSource);
+                unmarshaller.setSchema( lscSchema );
+            } catch (VerifyError e) {
+                throw new LscConfigurationException(e.toString(), e);
+            } catch (SAXException e) {
+                throw new LscConfigurationException(e);
+            }
+            
+            return (Lsc)unmarshaller.unmarshal( new File(filename) );
+        } catch (JAXBException e) {
+            throw new LscConfigurationException(e);
+        }
+    }
 
 	/**
 	 * Dump the object to an XML file (by overriding if necessary)

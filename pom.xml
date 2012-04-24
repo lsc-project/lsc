@@ -156,6 +156,20 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections-maven</artifactId>
+				<version>0.9.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>reflections</goal>
+						</goals>
+						<phase>process-classes</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -319,6 +333,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.reflections
+										</groupId>
+										<artifactId>
+											reflections-maven
+										</artifactId>
+										<versionRange>
+											[0.9.5,)
+										</versionRange>
+										<goals>
+											<goal>reflections</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -504,6 +537,11 @@
 			<layout>default</layout>
 		</repository>
 		<repository>
+			<id>reflections-repo</id>
+			<name>Reflections Maven2 Repository</name>
+			<url>http://reflections.googlecode.com/svn/repo</url>
+		</repository>
+		<repository>
 			<id>lsc-site</id>
 			<url>http://lsc-project.org/maven</url>
 			<releases>
@@ -538,6 +576,11 @@
 			<releases>
 				<enabled>true</enabled>
 			</releases>
+		</pluginRepository>
+		<pluginRepository>
+			<id>reflections-repo</id>
+			<name>Reflections Maven2 Repository</name>
+			<url>http://reflections.googlecode.com/svn/repo</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -693,9 +736,15 @@
 			<optional>false</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.clapper</groupId>
-			<artifactId>ocutil</artifactId>
-			<version>2.5.2</version>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>

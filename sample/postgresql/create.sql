@@ -6,8 +6,6 @@ CREATE DATABASE lsc
   WITH OWNER = lsc
        ENCODING = 'UTF8'
        TABLESPACE = pg_default
-       LC_COLLATE = 'French, France'
-       LC_CTYPE = 'French, France'
        CONNECTION LIMIT = -1;
 
 \c lsc

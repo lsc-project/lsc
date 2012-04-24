@@ -665,10 +665,10 @@ class SynchronizeTask implements Runnable {
 
 			// Search destination for matching object
 			if(id != null) {
-				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), false);
+				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
-				for(String datasetName: entry.getAttributesNames()) {
+				for(String datasetName: entry.datasets().getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
 				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, false);

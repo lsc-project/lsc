@@ -201,12 +201,13 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 
 		try {
-//			SearchRequest searchRequest = new SearchRequest( id, SearchScope.BASE, searchString );
 			String[] attrs = null;
 			if(getAttrs() != null) {
 				attrs = getAttrs().toArray(new String[getAttrs().size()]);
 			}
-			SearchCursor searchResponses = (SearchCursor) connection.search(id, searchString, SearchScope.OBJECT, attrs);
+			// When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
+			String searchBaseDn = (fromSameService ? id : baseDn);
+			SearchCursor searchResponses = (SearchCursor) connection.search(searchBaseDn, searchString, SearchScope.OBJECT, attrs);
 
 			srcBean = this.beanClass.newInstance();
 

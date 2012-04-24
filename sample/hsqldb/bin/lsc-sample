@@ -71,7 +71,7 @@ if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
 fi
 
 # HSQLDB jar file
-HSQLDB_LIB=$SAMPLE_HOME/../lib/hsqldb-1.8.0.10.jar
+HSQLDB_LIB=$SAMPLE_HOME/../../lib/hsqldb-1.8.0.10.jar
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
 # HSQLDB configuration file

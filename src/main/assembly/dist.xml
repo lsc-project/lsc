@@ -1,9 +1,5 @@
 <!--	Build the distribution archive for LSC	-->
 
-<!--	TODO:
-			- Add cron and logrotate files
--->
-
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
@@ -40,42 +36,19 @@
 		</fileSet>
 
 		<!-- Include the sample directory and all required files -->
-		<fileSet> <directory>sample</directory> </fileSet>
-		<!-- copy the tests JAR from lsc-core to use to launch OpenDS -->
 		<fileSet>
-			<directory>target</directory>
-			<includes> <include>lsc-core-1.2-SNAPSHOT-tests.jar</include> </includes>
-			<outputDirectory>sample/lib</outputDirectory>
+			<directory>sample/hsqldb/etc</directory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
-		<fileSet>
-			<directory>src/install</directory>
-			<includes> <include>lsc.cron</include> </includes>
-			<outputDirectory>etc/cron.d</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>
-		<fileSet>
-			<directory>src/install</directory>
-			<includes> <include>lsc.logrotate</include> </includes>
-			<outputDirectory>etc/logrotate.d</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>
-		<fileSet>
-			<directory>src/install</directory>
-			<includes> <include>check_lsc.sh</include> </includes>
-			<outputDirectory>bin</outputDirectory>
-			<fileMode>0755</fileMode>
-			<directoryMode>0755</directoryMode>
-		</fileSet>
+
 		<fileSet>
 			<directory>src/test/resources/etc/config</directory>
 			<outputDirectory>sample/hsqldb/etc/config</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+
 		<fileSet>
 			<directory>src/test/resources</directory>
 			<includes>
@@ -86,6 +59,81 @@
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
+		
+		<fileSet>
+			<includes>
+				<include>sample/hsqldb/README</include>
+				<include>sample/hsqldb/sample.csv</include>
+			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>sample/hsqldb/bin</directory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>sample/multi</directory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>sample/nis</directory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+
+		<fileSet>
+			<directory>sample/postgresql</directory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>sample/syncrepl</directory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>sample/hsqldb/bin</directory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<!-- Cron job -->
+		<fileSet>
+			<directory>src/install</directory>
+			<includes> <include>lsc.cron</include> </includes>
+			<outputDirectory>etc/cron.d</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<!-- Logrotate -->
+		<fileSet>
+			<directory>src/install</directory>
+			<includes> <include>lsc.logrotate</include> </includes>
+			<outputDirectory>etc/logrotate.d</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<!-- Nagios script -->
+		<fileSet>
+			<directory>src/install</directory>
+			<includes> <include>check_lsc.sh</include> </includes>
+			<outputDirectory>bin</outputDirectory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<!-- Man pages -->
 		<fileSet>
 			<directory>doc/man</directory>
 			<includes>
@@ -112,7 +160,6 @@
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>org.forgerock.opendj:opendj-server</exclude>
-				<exclude>hsqldb:hsqldb</exclude>
 				<exclude>org.postgresql:postgresql</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
@@ -122,7 +169,6 @@
 			<outputDirectory>sample/lib</outputDirectory>
 			<includes>
 				<include>org.forgerock.opendj:opendj-server</include>
-				<include>hsqldb:hsqldb</include>
 				<include>org.postgresql:postgresql</include>
 				<!-- see also the tests jar included in a fileSet above -->
 			</includes>

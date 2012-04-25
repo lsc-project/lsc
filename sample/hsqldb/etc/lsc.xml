@@ -33,7 +33,7 @@
         <connection reference="src-jdbc"/>
         <requestNameForList>getInetOrgPersonList</requestNameForList>
         <requestNameForObject>getInetOrgPerson</requestNameForObject>
-        <requestNameForClean>getInetOrgPersonByMail</requestNameForClean>
+	<requestNameForClean>getInetOrgPersonClean</requestNameForClean>
       </databaseSourceService>
       <ldapDestinationService>
         <name>MySyncTask-dst</name>
@@ -49,6 +49,7 @@
           <string>userPassword</string>
           <string>objectClass</string>
           <string>mail</string>
+          <string>uid</string>
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetOrgPerson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetOrgPerson)(mail={mail}))</getOneFilter>
@@ -57,9 +58,6 @@
         <mainIdentifier>"mail=" + srcBean.getDatasetFirstValueById("mail") + ",ou=Sample,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
-        <conditions>
-        	<create>true</create>
-        </conditions>
         <dataset>
           <name>objectClass</name>
           <policy>FORCE</policy>
@@ -85,10 +83,4 @@
       </propertiesBasedSyncOptions>
     </task>
   </tasks>
-  <security>
-    <encryption>
-      <algorithm>AES</algorithm>
-      <strength>128</strength>
-    </encryption>
-  </security>
 </lsc>

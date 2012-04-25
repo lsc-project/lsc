@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <configuration>
 
 	<!-- standard output to console -->
@@ -40,7 +39,7 @@
 	<logger name="communicationLogger" level="WARN">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<logger name="lsc" level="DEBUG">
+	<logger name="lsc" level="DEBUG" additivity="false">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 	<logger name="org.apache" level="WARN">
@@ -53,4 +52,3 @@
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </configuration>
-

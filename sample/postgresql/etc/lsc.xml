@@ -22,21 +22,6 @@
       <driver>org.postgresql.Driver</driver>
     </databaseConnection>
   </connections>
-  <audits>
-	<csvAudit>
-		<name>csv</name>
-		<append>true</append>
-		<operations>create, delete</operations>
-		<file>/tmp/audit.csv</file>
-		<datasets>cn, dn</datasets>
-		<separator>;</separator>
-	</csvAudit>
-	<ldifAudit>
-		<name>ldif</name>
-		<append>false</append>
-		<file>/tmp/audit.ldif</file>
-	</ldifAudit>
-  </audits>
   <tasks>
     <task>
       <name>People</name>
@@ -44,7 +29,7 @@
       <ldapSourceService>
         <name>openldap-source-service</name>
         <connection reference="ldap-src-conn" />
-        <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
+        <baseDn>ou=Sample,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>mail</string>
         </pivotAttributes>

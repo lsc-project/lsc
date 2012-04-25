@@ -16,8 +16,8 @@ Please open a psql command line with database administrator rights on the
 embedded postgres database and drop any existing database and role lsc, BUT
 TAKE CARE THAT YOU HAVE ALREADY BACKUPED ANY EXISTING DATA :
 
-postgres=# DROP DATABASE IF EXISTS lsc
-postgres=# DROP ROLE IF EXISTS lsc
+postgres=# DROP DATABASE IF EXISTS lsc;
+postgres=# DROP ROLE IF EXISTS lsc;
 
 Go in the right directory and launch the creation script :
 
@@ -44,9 +44,11 @@ address, TCP port, username and password :
 This sample requires that you start the embedded OpenDJ LDAP server:
 $ sample/hsqldb/bin/lsc-sample --start-ldap-server
 
-Then, launch the LSC in a command line 
-$ bin/lsc -f sample/postgresql/etc -s all
+In a new console, populate the LDAP server by using the HSQLDB sample:
+$ sample/hsqldb/bin/lsc-sample --import sample/hsqldb/sample.csv
+$ sample/hsqldb/bin/lsc-sample --run
 
-And now you should get a OpenDJ and a PostgreSQL synchronized :
-you should see a add operation which will add an entry inside your lsc database
-and inetorgperson table.
+Then, launch the LSC in a command line to start LDAP to postgresql synchronization: 
+$ bin/lsc -f sample/postgresql/etc -s all -c all
+
+And now you should get a OpenDJ and a PostgreSQL synchronized: you should see add operations which will add entries inside your lsc database and inetorgperson table.

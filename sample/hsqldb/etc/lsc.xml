@@ -49,6 +49,7 @@
           <string>userPassword</string>
           <string>objectClass</string>
           <string>mail</string>
+          <string>uid</string>
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetOrgPerson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetOrgPerson)(mail={mail}))</getOneFilter>
@@ -82,10 +83,4 @@
       </propertiesBasedSyncOptions>
     </task>
   </tasks>
-  <security>
-    <encryption>
-      <algorithm>AES</algorithm>
-      <strength>128</strength>
-    </encryption>
-  </security>
 </lsc>

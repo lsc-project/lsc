@@ -393,13 +393,22 @@
 
 	<profiles>
 		<profile>
+			<id>jdk17</id>
+			<activation>
+				<jdk>1.7</jdk>
+			</activation>
+			<properties>
+				<bc-jdk-version>jdk16</bc-jdk-version>
+			</properties>
+		</profile>
+		<profile>
 			<id>jdk16</id>
 			<activation>
 				<jdk>1.6</jdk>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<jdk-version>jdk16</jdk-version>
+				<bc-jdk-version>jdk16</bc-jdk-version>
 			</properties>
 		</profile>
 		<profile>
@@ -408,7 +417,7 @@
 				<jdk>1.5</jdk>
 			</activation>
 			<properties>
-				<jdk-version>jdk15</jdk-version>
+				<bc-jdk-version>jdk15</bc-jdk-version>
 			</properties>
 		</profile>
 		<profile>
@@ -708,7 +717,7 @@
 		</dependency>
 		<dependency>
 			<groupId>bouncycastle</groupId>
-			<artifactId>bcprov-${jdk-version}</artifactId>
+			<artifactId>bcprov-${bc-jdk-version}</artifactId>
 			<version>140</version>
 			<type>jar</type>
 			<optional>false</optional>

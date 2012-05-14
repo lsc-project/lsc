@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -923,7 +924,7 @@ public final class JndiServices {
 		String searchBase = base == null ? "" : rewriteBase(base);
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
 
-		Map<String, LscDatasets> res = new HashMap<String, LscDatasets>();
+		Map<String, LscDatasets> res = new LinkedHashMap<String, LscDatasets>();
 
 		if (attrsNames == null || attrsNames.size() == 0) {
 			LOGGER.error("No attribute names to read! Check configuration.");

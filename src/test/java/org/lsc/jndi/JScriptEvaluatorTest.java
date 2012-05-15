@@ -47,7 +47,6 @@ package org.lsc.jndi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -146,6 +145,10 @@ public class JScriptEvaluatorTest {
 		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetFirstValueById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
+
+        res = ScriptingEvaluator.evalToStringList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr", table);
+        assertNotNull(res);
+        assertEquals(2, res.size());
 
 	}
 

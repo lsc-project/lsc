@@ -207,7 +207,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			}
 			// When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
 			String searchBaseDn = (fromSameService ? id : baseDn);
-			SearchCursor searchResponses = (SearchCursor) connection.search(searchBaseDn, searchString, SearchScope.OBJECT, attrs);
+			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
+			SearchCursor searchResponses = (SearchCursor) connection.search(searchBaseDn, searchString, searchScope, attrs);
 
 			srcBean = this.beanClass.newInstance();
 
@@ -346,15 +347,21 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 * Convert a search result entries list to a LSC ready to use map
 	 * @param cursor Unbounded ID LDAP SDK objects 
 	 * @return LSC compatible map
+	 * @throws LscServiceException 
 	 */
 	private Map<String, LscDatasets> convertSearchEntries(
-			Cursor<SearchResponse> cursor) {
+			Cursor<SearchResponse> cursor) throws LscServiceException {
 		Map<String, LscDatasets> converted = new HashMap<String, LscDatasets>();
-		for(SearchResponse sr : cursor) {
-			if(sr instanceof SearchResultEntry) {
-				SearchResultEntry sre = (SearchResultEntry) sr;
-				converted.put(sre.getObjectName().toString(), convertSearchEntry(sre));
+		try {
+			while (cursor.next()) {
+				SearchResponse sr = cursor.get();
+				if(sr instanceof SearchResultEntry) {
+					SearchResultEntry sre = (SearchResultEntry) sr;
+					converted.put(sre.getObjectName().toString(), convertSearchEntry(sre));
+				}
 			}
+		} catch (Exception e) {
+			throw new LscServiceException("Error while performing search. Results may be incomplete." + e, e);
 		}
 		return converted;
 	}

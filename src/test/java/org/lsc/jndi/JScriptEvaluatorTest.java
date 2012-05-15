@@ -148,6 +148,10 @@ public class JScriptEvaluatorTest {
 		assertNotNull(res);
 		assertEquals(0, res.size());
 
+        res = ScriptingEvaluator.evalToStringList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr", table);
+        assertNotNull(res);
+        assertEquals(2, res.size());
+
 	}
 
 	@Test

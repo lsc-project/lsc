@@ -208,10 +208,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		    EntryCursor entryCursor = null;
             // When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
             String searchBaseDn = (fromSameService ? id : baseDn);
+            SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
 			if(getAttrs() != null) {
-				entryCursor = connection.search(searchBaseDn, searchString, SearchScope.OBJECT, getAttrs().toArray(new String[getAttrs().size()]));
+				entryCursor = connection.search(searchBaseDn, searchString, searchScope, getAttrs().toArray(new String[getAttrs().size()]));
 			} else {
-			    entryCursor = connection.search(searchBaseDn, searchString, SearchScope.OBJECT);
+			    entryCursor = connection.search(searchBaseDn, searchString, searchScope);
 			}
 
 			srcBean = this.beanClass.newInstance();
@@ -389,18 +390,15 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	private Map<String, LscDatasets> convertSearchEntries(
 			EntryCursor entryCursor) throws LscServiceException {
 		Map<String, LscDatasets> converted = new HashMap<String, LscDatasets>();
-        try {
-            entryCursor.next();
-            if(!entryCursor.available()) {
-                return converted;
-            }
-            for(Entry entry = entryCursor.get(); entryCursor.available(); entryCursor.next()) {
-                converted.put(entry.getDn().getName(), convertEntry(entry));
-            }
-            entryCursor.getSearchResultDone();
-        } catch (Exception e) {
-            throw new LscServiceException(e);
-        }
+		try {
+			while (entryCursor.next()) {
+				Entry entry = entryCursor.get();
+				converted.put(entry.getDn().getName(), convertEntry(entry));
+			}
+			entryCursor.getSearchResultDone();
+		} catch (Exception e) {
+			throw new LscServiceException("Error while performing search. Results may be incomplete." + e, e);
+		}
 		return converted;
 	}
 

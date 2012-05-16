@@ -154,15 +154,16 @@ public class LscAgent implements NotificationListener {
 				lscServer.shutdownAsyncTask(taskName);
 				break;
 			case STATUS:
+				boolean status = lscServer.isAsyncTaskRunning(taskName);
 				if(ArrayUtils.contains(lscServer.getAsyncTasksName(), taskName)) {
-					LOGGER.info("Asynchronous task " + taskName + " is " + ( lscServer.isAsyncTaskRunning(taskName) ? "running" : "stopped"));
+					LOGGER.info("Asynchronous task " + taskName + " is " + ( status ? "running" : "stopped"));
 				} else 	if(ArrayUtils.contains(lscServer.getSyncTasksName(), taskName)) {
-					LOGGER.info("Synchronous task " + taskName + " is " + ( lscServer.isAsyncTaskRunning(taskName) ? "running" : "stopped"));
+					LOGGER.info("Synchronous task " + taskName + " is " + ( status ? "running" : "stopped"));	
 				} else {
 					LOGGER.error("Unknown or synchronous task name: " + taskName);
 					return 3;
 				}
-				break;
+				return (status ? 0 : 1);
 			case TASKS_LIST:
 				LOGGER.info("Available asynchronous tasks are: ");
 				for(String taskName: lscServer.getAsyncTasksName()) {

@@ -1,98 +1,98 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1" revision="0">
-  <connections id="2">
-    <ldapConnection id="4">
-      <id>ldap-dst-conn</id>
-      <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
-      <password>secret</password>
-      <authentication>SIMPLE</authentication>
-      <referral>IGNORE</referral>
-      <derefAliases>NEVER</derefAliases>
-      <version>VERSION_3</version>
-      <pageSize>-1</pageSize>
-      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
-      <tlsActivated>false</tlsActivated>
-    </ldapConnection>
-    <nisConnection id="3">
-      <id>nis-src-conn</id>
-      <url>nis://192.168.18.128/lsc-project.org</url>
-    </nisConnection>
-  </connections>
-  <audits>
-	<csvAudit>
-		<name>csv</name>
-		<append>true</append>
-		<operations>create, delete</operations>
-		<datasets>cn, dn</datasets>
-		<separator>;</separator>
-	</csvAudit>
-	<ldifAudit>
-		<name>ldif</name>
-		<append>false</append>
-	</ldifAudit>
-  </audits>
-  <tasks>
-    <task>
-      <name>passwd</name>
-      <bean>org.lsc.beans.SimpleBean</bean>
-      <nisSourceService>
-        <name>nis-source-service</name>
-        <connection reference="3" />
-	    <map>passwd.byname</map>
-      </nisSourceService>
-      <ldapDestinationService>
-        <name>opends-dst-service</name>
-        <connection reference="4" />
-        <baseDn>ou=People</baseDn>
-        <pivotAttributes id="9">
-          <string>mail</string>
-        </pivotAttributes>
-        <fetchedAttributes id="10">
-          <string>description</string>
-          <string>cn</string>
-          <string>sn</string>
-          <string>userPassword</string>
-          <string>objectClass</string>
-          <string>uid</string>
-          <string>mail</string>
-        </fetchedAttributes>
-        <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-        <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </ldapDestinationService>
-      <propertiesBasedSyncOptions>
-        <mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("uid") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
-        <defaultDelimiter>;</defaultDelimiter>
-        <defaultPolicy>FORCE</defaultPolicy>
-        <dataset id="23">
-          <name>mail</name>
-          <policy>FORCE</policy>
-          <forceValues id="25">
-            <string>srcBean.getAttributeFirstValueById("uid")</string>
-          </forceValues>
-        </dataset>
-        <dataset id="23">
-          <name>userPassword</name>
-          <policy>FORCE</policy>
-          <forceValues id="25">
-            <string>srcBean.getAttributeFirstValueById("userPassword")</string>
-          </forceValues>
-        </dataset>
-        <dataset id="23">
-          <name>objectClass</name>
-          <policy>KEEP</policy>
-          <createValues id="25">
-            <string>"inetOrgPerson"</string>
-          </createValues>
-        </dataset>
-        <dataset id="23">
-          <name>sn</name>
-          <policy>FORCE</policy>
-          <forceValues id="25">
-            <string>srcBean.getAttributeFirstValueById("gecos")</string>
-          </forceValues>
-        </dataset>
-      </propertiesBasedSyncOptions>
-    </task>
-  </tasks>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" 
+	xmlns:nis="http://lsc-project.org/XSD/lsc-nis-plugin-1.0"
+	revision="0">
+	<connections>
+		<ldapConnection>
+			<name>ldap-dst-conn</name>
+			<url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
+			<username>cn=Directory Manager</username>
+			<password>secret</password>
+			<authentication>SIMPLE</authentication>
+			<referral>IGNORE</referral>
+			<derefAliases>NEVER</derefAliases>
+			<version>VERSION_3</version>
+			<pageSize>-1</pageSize>
+			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+			<tlsActivated>false</tlsActivated>
+		</ldapConnection>
+		<pluginConnection implementationClass="org.lsc.plugins.connectors.nis.generated.NisSourceServiceType">
+			<name>nis-src-conn</name>
+			<url>nis://192.168.18.128/lsc-project.org</url>
+			<username>unused</username>
+			<password>unused</password>
+		</pluginConnection>
+	</connections>
+	<tasks>
+		<task>
+			<name>passwd</name>
+			<bean>org.lsc.beans.SimpleBean</bean>
+			<pluginSourceService implementationClass="org.lsc.plugins.connectors.nis.NisSrcService">
+				<name>nis-source-service</name>
+				<connection reference="nis-src-conn" />
+				<nis:nisSourceServiceSettings>
+					<name>nis-src-service</name>
+					<connection reference="nis-src-conn" />
+					<nis:map>passwd.byname</nis:map>
+				</nis:nisSourceServiceSettings>
+			</pluginSourceService>
+			<ldapDestinationService>
+				<name>opends-dst-service</name>
+				<connection reference="ldap-dst-conn" />
+				<baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
+				<pivotAttributes>
+					<string>mail</string>
+				</pivotAttributes>
+				<fetchedAttributes>
+					<string>description</string>
+					<string>cn</string>
+					<string>sn</string>
+					<string>userPassword</string>
+					<string>objectClass</string>
+					<string>uid</string>
+					<string>mail</string>
+				</fetchedAttributes>
+				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
+				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))
+				</getOneFilter>
+			</ldapDestinationService>
+			<propertiesBasedSyncOptions>
+				<mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("uid")
+					+ ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+				<defaultDelimiter>;</defaultDelimiter>
+				<defaultPolicy>FORCE</defaultPolicy>
+				<dataset>
+					<name>mail</name>
+					<policy>FORCE</policy>
+					<forceValues>
+						<string>srcBean.getAttributeFirstValueById("uid")</string>
+					</forceValues>
+				</dataset>
+				<dataset>
+					<name>userPassword</name>
+					<policy>FORCE</policy>
+					<forceValues>
+						<string>srcBean.getAttributeFirstValueById("userPassword")
+						</string>
+					</forceValues>
+				</dataset>
+				<dataset>
+					<name>objectClass</name>
+					<policy>KEEP</policy>
+					<createValues>
+						<string>"inetOrgPerson"</string>
+					</createValues>
+				</dataset>
+				<dataset>
+					<name>sn</name>
+					<policy>FORCE</policy>
+					<forceValues>
+						<string>srcBean.getAttributeFirstValueById("gecos")</string>
+					</forceValues>
+				</dataset>
+			</propertiesBasedSyncOptions>
+		</task>
+	</tasks>
+	<audits></audits>
+	<security></security>
 </lsc>

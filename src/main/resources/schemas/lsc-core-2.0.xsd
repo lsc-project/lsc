@@ -42,6 +42,11 @@
  *         Sebastien Bahloul <seb@lsc-project.org>
  ****************************************************************************
  -->
+ <!-- 
+ 	Changelog:
+ 	- 02/05/2012: nisConnectionType and nisServiceType have been moved to dedicated XSD file inside the corresponding plugin
+ 		No new version is released because it has never been implemented before and won't break any existing and functional configuration
+  -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd"
 	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.0.xsd"
@@ -59,13 +64,6 @@
 			<xsd:element name="password" type="xsd:string" />
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:string" use="optional" />
-	</xsd:complexType>
-
-	<xsd:complexType name="nisConnectionType">
-		<xsd:complexContent>
-			<xsd:extension base="connectionType">
-			</xsd:extension>
-		</xsd:complexContent>
 	</xsd:complexType>
 
 	<xsd:simpleType name="ldapAuthenticationType">
@@ -468,16 +466,6 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
-	<xsd:complexType name="nisSourceServiceType">
-		<xsd:complexContent>
-			<xsd:extension base="serviceType">
-				<xsd:sequence>
-					<xsd:element name="map" type="xsd:string" default="passwd" />
-				</xsd:sequence>
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<xsd:complexType name="pluginDestinationServiceType">
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
@@ -530,7 +518,6 @@
 				<xsd:element name="googleAppsSourceService" type="googleAppsServiceType" />
 				<xsd:element name="ldapSourceService" type="ldapSourceServiceType" />
 				<xsd:element name="asyncLdapSourceService" type="asyncLdapSourceServiceType" />
-				<xsd:element name="nisSourceService" type="nisSourceServiceType" />
 				<xsd:element name="pluginSourceService" type="pluginSourceServiceType" />
 			</xsd:choice>
 			<xsd:choice>
@@ -563,7 +550,6 @@
 		<xsd:choice minOccurs="0" maxOccurs="unbounded">
 			<xsd:element name="ldapConnection" type="ldapConnectionType" />
 			<xsd:element name="databaseConnection" type="databaseConnectionType" />
-			<xsd:element name="nisConnection" type="nisConnectionType" />
 			<xsd:element name="googleAppsConnection" type="googleAppsConnectionType" />
 			<xsd:element name="pluginConnection" type="pluginConnectionType" />
 		</xsd:choice>

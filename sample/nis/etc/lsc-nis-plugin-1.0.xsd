@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  
+     Copyright (c) 2012 Dictao. All rights reserved. Confidential and proprietary.
+  -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+ 	xmlns="http://lsc-project.org/XSD/lsc-nis-plugin-1.0" 
+	targetNamespace="http://lsc-project.org/XSD/lsc-nis-plugin-1.0"
+	elementFormDefault="qualified"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	xmlns:lsc="http://lsc-project.org/XSD/lsc-core-2.0.xsd"
+	jaxb:version="2.0">
+    
+    <xsd:import namespace="http://lsc-project.org/XSD/lsc-core-2.0.xsd"/>
+    
+	<xsd:complexType name="nisConnectionType">
+		<xsd:complexContent>
+			<xsd:extension base="lsc:connectionType">
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="nisSourceServiceType">
+		<xsd:complexContent>
+			<xsd:extension base="lsc:serviceType">
+				<xsd:sequence>
+					<xsd:element name="map" type="xsd:string" default="passwd" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+</xsd:schema>

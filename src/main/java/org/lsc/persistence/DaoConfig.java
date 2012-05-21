@@ -112,10 +112,7 @@ public final class DaoConfig {
 					LOGGER.debug("Reading {} from {}", IBATIS_SQLMAP_CONFIGURATION_FILENAME, pathToFile);
 					reader = Resources.getUrlAsReader(pathToFile);
 				} else {
-//					// read the file from the classpath (it's in a JAR file)
-					LOGGER.info("File {} not found in {}. Trying in embedded archives", IBATIS_SQLMAP_CONFIGURATION_FILENAME, configFile.getAbsoluteFile());
-					reader = Resources.getResourceAsReader(IBATIS_SQLMAP_CONFIGURATION_FILE);
-//					throw new LscServiceConfigurationException("Unable to find iBatis SQL map file in " + Configuration.getConfigurationDirectory());
+					throw new LscServiceConfigurationException("Unable to find iBatis SQL map file in " + Configuration.getConfigurationDirectory());
 				}
 
 				// add the configuration directory to properties so that sql-map-config can use relative paths

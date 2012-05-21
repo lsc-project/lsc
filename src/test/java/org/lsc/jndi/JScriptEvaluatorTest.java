@@ -67,7 +67,7 @@ import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
-import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 import org.mozilla.javascript.EcmaError;
 
@@ -87,14 +87,14 @@ public class JScriptEvaluatorTest {
 	}
 	
 	@Test
-	public void testOk() {
+	public void testOk() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 		assertEquals("b", ScriptingEvaluator.evalToString(task, "srcAttr.get()", table));
 	}
 
 	@Test //(expected=EcmaError.class)
-	public void testNk() throws EcmaError {
+	public void testNk() throws EcmaError, LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
@@ -103,7 +103,7 @@ public class JScriptEvaluatorTest {
 	}
 
 	@Test
-	public void testOk2() {
+	public void testOk2() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("sn", new BasicAttribute("sn", "Doe"));
 		table.put("givenName", new BasicAttribute("givenName", "John"));
@@ -111,7 +111,7 @@ public class JScriptEvaluatorTest {
 	}
 
 	@Test
-	public void testList() {
+	public void testList() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		Attribute sn = new BasicAttribute("sn", "Doe");
 		Attribute givenName = new BasicAttribute("givenName", "John");
@@ -155,7 +155,7 @@ public class JScriptEvaluatorTest {
 	}
 
 	@Test
-	public void testOkLdap() throws LscServiceConfigurationException {
+	public void testOkLdap() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 
 		final TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");

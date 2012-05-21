@@ -67,6 +67,7 @@ import org.lsc.LscModifications;
 import org.lsc.Task;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.PolicyType;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.jndi.JndiModifications;
 import org.lsc.utils.ScriptingEvaluator;
@@ -101,9 +102,10 @@ public final class BeanComparator {
 	 * @param dstBean JNDI bean
 	 * @return JndiModificationType the modification type that would happen
 	 * @throws CloneNotSupportedException
+	 * @throws LscServiceException 
 	 */
 	public static LscModificationType calculateModificationType(Task task,
-					IBean srcBean, IBean dstBean) throws CloneNotSupportedException {
+					IBean srcBean, IBean dstBean) throws CloneNotSupportedException, LscServiceException {
 		// no beans, nothing to do
 		if (srcBean == null && dstBean == null) {
 			return null;
@@ -145,10 +147,11 @@ public final class BeanComparator {
 	 *             an exception may be thrown if an LDAP data access error is
 	 *             encountered
 	 * @throws CloneNotSupportedException 
+	 * @throws LscServiceException 
 	 */
 	public static LscModifications calculateModifications(
 					Task task, IBean srcBean, IBean dstBean, boolean condition) 
-					throws NamingException, CloneNotSupportedException {
+					throws NamingException, CloneNotSupportedException, LscServiceException {
 
 		LscModifications lm = null;
 
@@ -230,11 +233,12 @@ public final class BeanComparator {
 	 * @return {@link JndiModifications} List of modifications to apply to the destination
 	 * @throws NamingException
 	 * @throws CloneNotSupportedException
+	 * @throws LscServiceException 
 	 */
 	private static LscModifications getUpdatedObject(
 					Task task, LscModifications modOperation,
 					IBean srcBean, IBean itmBean, IBean dstBean)
-					throws NamingException, CloneNotSupportedException {
+					throws NamingException, CloneNotSupportedException, LscServiceException {
 
 		String id = modOperation.getMainIdentifier();
 		String logPrefix = "In object \"" + id + "\": ";
@@ -505,8 +509,9 @@ public final class BeanComparator {
 	 * @param dstBean Destination bean
 	 * @return New bean cloned from srcBean
 	 * @throws CloneNotSupportedException
+	 * @throws LscServiceException 
 	 */
-	private static IBean cloneSrcBean(Task task, IBean srcBean, IBean dstBean) throws CloneNotSupportedException {
+	private static IBean cloneSrcBean(Task task, IBean srcBean, IBean dstBean) throws CloneNotSupportedException, LscServiceException {
 		//
 		// We clone the source object, because syncoptions should not be used
 		// on modified values of the source object :)
@@ -578,9 +583,10 @@ public final class BeanComparator {
 	 *            create values to be used instead of default values)
 	 * @return List<Object> The list of values that should be set in the
 	 *         destination, or null if this attribute should be ignored.
+	 * @throws LscServiceException 
 	 */
 	protected static Set<Object> getValuesToSet(Task task, String attrName,
-					Set<Object> srcAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType) {
+					Set<Object> srcAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType) throws LscServiceException {
 		// Result
 		Set<Object> attrValues = new HashSet<Object>();
 

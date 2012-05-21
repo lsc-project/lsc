@@ -9,6 +9,7 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.commons.collections.map.LRUMap;
 import org.lsc.Task;
+import org.lsc.exception.LscServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +26,6 @@ public class ScriptingEvaluator {
 	private static Map<String, Class<? extends ScriptableEvaluator>> implementetionsCache;
 
 	private Map<String, ScriptableEvaluator> instancesCache;
-
-	// // Logger
-	// private static final Logger LOGGER = LoggerFactory
-	// .getLogger(ScriptingEvaluator.class);
 
 	private ScriptableEvaluator defaultImplementation;
 
@@ -96,23 +93,24 @@ public class ScriptingEvaluator {
 	 * @param params
 	 *            the keys are the name used in the
 	 * @return the evaluation result
+	 * @throws LscServiceException 
 	 */
 	public static String evalToString(final Task task, final String expression,
-			final Map<String, Object> params) {
+			final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
 		return se.evalToString(task, expression, params);
 	}
 
 	public static List<String> evalToStringList(final Task task,
-			final String expression, final Map<String, Object> params) {
+			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
 		return se.evalToStringList(task, expression, params);
 	}
 
 	public static Boolean evalToBoolean(final Task task,
-			final String expression, final Map<String, Object> params) {
+			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
 		return se.evalToBoolean(task, expression, params);

@@ -71,6 +71,7 @@ import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.PolicyType;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.utils.SetUtils;
 
@@ -86,9 +87,10 @@ public class BeanComparatorTest {
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
 	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * @throws LscServiceException 
 	 */
 	@Test
-	public void testCalculateModificationType() throws CloneNotSupportedException {
+	public void testCalculateModificationType() throws CloneNotSupportedException, LscServiceException {
 		new NonStrictExpectations() {
 			@Injectable @NonStrict ISyncOptions syncOptions;
 			{
@@ -141,9 +143,10 @@ public class BeanComparatorTest {
 	 * With an invalid syntax error.
 	 * @throws NamingException As thrown when reading JNDI Attribute values.
 	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * @throws LscServiceException 
 	 */
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException {
+	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException, LscServiceException {
 
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
@@ -175,7 +178,7 @@ public class BeanComparatorTest {
 	}
 
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException, CloneNotSupportedException {
+	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException, CloneNotSupportedException, LscServiceException {
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 
 			{
@@ -211,9 +214,10 @@ public class BeanComparatorTest {
 
 	/**
 	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
+	 * @throws LscServiceException 
 	 */
 	@Test
-	public void testGetValuesToSet() {
+	public void testGetValuesToSet() throws LscServiceException {
 
 		new NonStrictExpectations() {
 			@NonStrict ISyncOptions syncOptions; 

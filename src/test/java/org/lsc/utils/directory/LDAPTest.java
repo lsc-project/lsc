@@ -56,6 +56,7 @@ import mockit.Mocked;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.junit.Test;
 import org.lsc.Task;
+import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 ;
 ;
@@ -70,7 +71,7 @@ public class LDAPTest {
 	@Mocked Task task;
 	
 	@Test
-	public final void testCanBind() throws NamingException, LdapURLEncodingException {
+	public final void testCanBind() throws NamingException, LdapURLEncodingException, LscServiceException {
 		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "secret"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager", "public"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=nobody", "secret"));

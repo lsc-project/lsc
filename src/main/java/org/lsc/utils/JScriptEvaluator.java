@@ -54,9 +54,11 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
 import org.lsc.Task;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.AbstractSimpleJndiService;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.UniqueTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,173 +70,162 @@ import org.slf4j.LoggerFactory;
  */
 public final class JScriptEvaluator implements ScriptableEvaluator {
 
-	// Logger
-	private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
+    // Logger
+    private static final Logger LOGGER = LoggerFactory.getLogger(JScriptEvaluator.class);
 
-//	/** The precompiled Javascript cache. */
-//	private Map<String, Script> cache;
+    // /** The precompiled Javascript cache. */
+    // private Map<String, Script> cache;
 
-	private ScriptEngine engine;
-	
-	/** The local Rhino context. */
-//	private ScriptContext cx;
+    private ScriptEngine        engine;
 
-	/**
-	 * Default public constructor.
-	 */
-	public JScriptEvaluator(ScriptEngine se) {
-//		cache = new HashMap<String, Script>();
-		this.engine = se;
-//		cx = se.getContext();//new ContextFactory().enterContext();
-	}
+    /** The local Rhino context. */
+    // private ScriptContext cx;
 
-	/**
-	 * Evaluate your Ecma script expression (manage pre-compiled expressions
-	 * cache).
-	 *
-	 * @param expression
-	 *                the expression to eval
-	 * @param params
-	 *                the keys are the name used in the
-	 * @return the evaluation result
-	 */
-	public String evalToString(final Task task, final String expression,
-					final Map<String, Object> params) {
-		Object result = instanceEval(task, expression, params);
+    /**
+     * Default public constructor.
+     */
+    public JScriptEvaluator(ScriptEngine se) {
+        // cache = new HashMap<String, Script>();
+        this.engine = se;
+        // cx = se.getContext();//new ContextFactory().enterContext();
+    }
 
-		if (result == null) {
-			return null;
-		} else if (result instanceof String) {
-			return (String)result;
-		} else {
-			return result.toString();
-		}
+    /** {@inheritDoc} */
+    public String evalToString(final Task task, final String expression, final Map<String, Object> params) {
+        Object result = instanceEval(task, expression, params);
 
-//		return (String) Context.jsToJava(result, String.class);
-	}
+        if (result == null) {
+            return null;
+        } else if (result instanceof String) {
+            return (String) result;
+        } else {
+            return result.toString();
+        }
 
-	public List<String> evalToStringList(final Task task, final String expression,
-					final Map<String, Object> params) {
-		Object result = convertJsToJava(instanceEval(task, expression, params));
+        // return (String) Context.jsToJava(result, String.class);
+    }
 
-		if(result instanceof String[] || result instanceof Object[] ) {
-			List<String> resultsArray = new ArrayList<String>();
-			for (Object resultValue : (Object[])result) {
-				resultsArray.add(resultValue.toString());
-			}
-			return resultsArray;
-		} else if (result instanceof String) {
-			List<String> resultsArray = new ArrayList<String>();
-			String resultAsString = (String)result;
-			if (resultAsString != null && resultAsString.length() > 0) {
-				resultsArray.add(resultAsString);
-			}
-			return resultsArray;
-		} else if (result instanceof List) {
-			List<String> resultsArray = new ArrayList<String>();
-			for (Object resultValue : (List<?>)result) {
-				resultsArray.add(resultValue.toString());
-			}
-			return resultsArray;
-		} else if(result == null){
-			return null;
-		} else {
-			List<String> resultsArray = new ArrayList<String>();
-			if (result != null) {
-				resultsArray.add(result.toString());
-			}
-			return resultsArray;
-		}
-	}
+    /** {@inheritDoc} */
+    public List<String> evalToStringList(final Task task, final String expression, final Map<String, Object> params)
+            throws LscServiceException {
+        Object result = null;
+        try {
+            result = convertJsToJava(instanceEval(task, expression, params));
+        } catch (EvaluatorException e) {
+            throw new LscServiceException(e);
+        }
 
-	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
-		return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
-	}
+        if (result instanceof String[] || result instanceof Object[]) {
+            List<String> resultsArray = new ArrayList<String>();
+            for (Object resultValue : (Object[]) result) {
+                resultsArray.add(resultValue.toString());
+            }
+            return resultsArray;
+        } else if (result instanceof String) {
+            List<String> resultsArray = new ArrayList<String>();
+            String resultAsString = (String) result;
+            if (resultAsString != null && resultAsString.length() > 0) {
+                resultsArray.add(resultAsString);
+            }
+            return resultsArray;
+        } else if (result instanceof List) {
+            List<String> resultsArray = new ArrayList<String>();
+            for (Object resultValue : (List<?>) result) {
+                resultsArray.add(resultValue.toString());
+            }
+            return resultsArray;
+        } else if (result == null) {
+            return null;
+        } else {
+            List<String> resultsArray = new ArrayList<String>();
+            if (result != null) {
+                resultsArray.add(result.toString());
+            }
+            return resultsArray;
+        }
+    }
 
-	/**
-	 * Local instance evaluation.
-	 *
-	 * @param expression
-	 *                the expression to eval
-	 * @param params
-	 *                the keys are the name used in the
-	 * @return the evaluation result
-	 */
-	private Object instanceEval(final Task task, final String expression,
-					final Map<String, Object> params) {
-//		Script script = null;
-		Bindings bindings = engine.createBindings();
+    /** {@inheritDoc} */
+    public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
+        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
+    }
 
+    /**
+     * Local instance evaluation.
+     * 
+     * @param expression the expression to eval
+     * @param params the keys are the name used in the
+     * @return the evaluation result
+     */
+    private Object instanceEval(final Task task, final String expression, final Map<String, Object> params) {
+        // Script script = null;
+        Bindings bindings = engine.createBindings();
 
-		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
-		String expressionImport =
-						"importPackage(org.lsc.utils.directory);\n" +
-						"importPackage(org.lsc.utils);\n" + expression;
+        /* Allow to have shorter names for function in the package org.lsc.utils.directory */
+        String expressionImport = "importPackage(org.lsc.utils.directory);\n" + "importPackage(org.lsc.utils);\n" + expression;
 
-//		if (cache.containsKey(expressionImport)) {
-//			script = cache.get(expressionImport);
-//		} else {
-//			script = cx.compileString(expressionImport, "<cmd>", 1, null);
-//			cache.put(expressionImport, script);
-//		}
+        // if (cache.containsKey(expressionImport)) {
+        // script = cache.get(expressionImport);
+        // } else {
+        // script = cx.compileString(expressionImport, "<cmd>", 1, null);
+        // cache.put(expressionImport, script);
+        // }
 
-		// add LDAP interface for destination if necessary
-		if (expression.contains("ldap.") && !bindings.containsKey("ldap")
-				&& 	task.getDestinationService() instanceof AbstractSimpleJndiService) {
-			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-			dstSjs.setJndiServices(((AbstractSimpleJndiService)task.getDestinationService()).getJndiServices());
-			bindings.put("ldap", dstSjs);
-		}
+        // add LDAP interface for destination if necessary
+        if (expression.contains("ldap.") && !bindings.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
+            ScriptableJndiServices dstSjs = new ScriptableJndiServices();
+            dstSjs.setJndiServices(((AbstractSimpleJndiService) task.getDestinationService()).getJndiServices());
+            bindings.put("ldap", dstSjs);
+        }
 
-		// add LDAP interface for source if necessary
-		if (expression.contains("srcLdap.") && !bindings.containsKey("srcLdap")
-				&& task.getSourceService() instanceof AbstractSimpleJndiService) {
-			ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-			srcSjs.setJndiServices(((AbstractSimpleJndiService)task.getSourceService()).getJndiServices());
-			bindings.put("srcLdap", srcSjs);
-		}
+        // add LDAP interface for source if necessary
+        if (expression.contains("srcLdap.") && !bindings.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
+            ScriptableJndiServices srcSjs = new ScriptableJndiServices();
+            srcSjs.setJndiServices(((AbstractSimpleJndiService) task.getSourceService()).getJndiServices());
+            bindings.put("srcLdap", srcSjs);
+        }
 
-		if(params != null) {
-			for(String paramName: params.keySet()) {
-				bindings.put(paramName, params.get(paramName));
-			}
-		}
-		
-		Object ret = null;
-		try {
-			ret = engine.eval(expressionImport, bindings);
-		} catch (RuntimeException e) {
-			throw e;
-		} catch (Exception e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-			return null;
-		}
+        if (params != null) {
+            for (String paramName : params.keySet()) {
+                bindings.put(paramName, params.get(paramName));
+            }
+        }
 
-		return ret;
-	}
-	
-	private static Object convertJsToJava(Object src) {
-		if (src == null) {
-			return null;
-		} else if(src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
-			return Context.jsToJava(src, Object.class);
-		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
-			try {
-				Method getMethod = src.getClass().getMethod("get", Integer.class, Class.forName("sun.org.mozilla.rhino.ScriptableObject"));
-				Object[] retarr = new Object[(Integer) src.getClass().getMethod("getLength").invoke(src)];
-				for (int index = 0; index < retarr.length; index++) {
-					retarr[index] = getMethod.invoke(src, index, null);
-				}
-				return retarr;
-			} catch(Exception e) {
-	            LOGGER.error(e.toString());
-	            LOGGER.debug(e.toString(), e);
-			}
-		} else if (src == UniqueTag.NOT_FOUND
-				|| src == UniqueTag.NULL_VALUE) {
-			return null;
-		}
-		return src;
-	}
+        Object ret = null;
+        try {
+            ret = engine.eval(expressionImport, bindings);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            LOGGER.debug(e.toString(), e);
+            return null;
+        }
+
+        return ret;
+    }
+
+    private static Object convertJsToJava(Object src) {
+        if (src == null) {
+            return null;
+        } else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
+            return Context.jsToJava(src, Object.class);
+        } else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
+            try {
+                Method getMethod = src.getClass().getMethod("get", int.class, Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
+                Object length = src.getClass().getMethod("getLength").invoke(src);
+                Object[] retarr = new Object[Integer.parseInt(length.toString())];
+                for (int index = 0; index < retarr.length; index++) {
+                    retarr[index] = getMethod.invoke(src, index, null);
+                }
+                return retarr;
+            } catch (Exception e) {
+                LOGGER.error(e.toString());
+                LOGGER.debug(e.toString(), e);
+            }
+        } else if (src == UniqueTag.NOT_FOUND || src == UniqueTag.NULL_VALUE) {
+            return null;
+        }
+        return src;
+    }
 }

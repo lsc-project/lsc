@@ -64,6 +64,8 @@ mkdir -p %{buildroot}/usr/%{_lib}/lsc
 mkdir -p %{buildroot}/etc/lsc
 mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
 mkdir -p %{buildroot}/etc/cron.d
+mkdir -p %{buildroot}/etc/init.d
+mkdir -p %{buildroot}/etc/default
 mkdir -p %{buildroot}/usr/share/doc/lsc
 mkdir -p %{buildroot}%{lsc_logdir}
 
@@ -82,6 +84,9 @@ cp -a lib/* %{buildroot}/usr/%{_lib}/lsc
 cp -a sample/ %{buildroot}/usr/share/doc/lsc
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
+## init
+cp -a etc/init.d/lsc %{buildroot}/etc/init.d/lsc
+cp -a etc/default/lsc %{buildroot}/etc/default/lsc
 
 # Reconfigure files
 ## logback
@@ -96,6 +101,12 @@ sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/
 sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/%{_lib}/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
 sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
 sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}/usr/bin/hsqldb
+## init
+sed -i 's:^LSC_BIN.*:LSC_BIN="/usr/bin/lsc":' %{buildroot}/etc/default/lsc
+sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' %{buildroot}/etc/default/lsc
+sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}/etc/default/lsc
+sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}/etc/default/lsc
+sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}/etc/default/lsc
 
 %post
 #=================================================
@@ -105,6 +116,9 @@ sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}/usr/bin/hsqldb
 # Do this at first install
 if [ $1 -eq 1 ]
 then
+        # Set lsc as service
+        /sbin/chkconfig --add lsc
+
         # Create user and group
         /usr/sbin/groupadd %{lsc_group}
         /usr/sbin/useradd %{lsc_user} -g %{lsc_group}
@@ -142,9 +156,11 @@ rm -rf %{buildroot}
 %defattr(-, root, root, 0755)
 %config(noreplace) /etc/lsc/
 %config(noreplace) /etc/cron.d/lsc
+%config(noreplace) /etc/default/lsc
 /usr/bin/lsc
 /usr/bin/lsc-agent
 /usr/bin/hsqldb
+/etc/init.d/lsc
 /usr/%{_lib}/lsc/
 /usr/share/doc/lsc
 %{lsc_logdir}

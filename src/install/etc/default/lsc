@@ -9,6 +9,7 @@ LSC_CFG_DIR="/usr/local/lsc/etc"
 LSC_USER=""
 LSC_GROUP=""
 LSC_PID_FILE="/var/run/lsc.pid"
+LSC_TASKS="all"
 
 # JMX
 LSC_JMXPORT="1099"

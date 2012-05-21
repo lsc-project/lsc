@@ -63,6 +63,7 @@ LSC_CFG_DIR="/etc/lsc"
 LSC_USER="lsc"
 LSC_GROUP="lsc"
 LSC_PID_FILE="/var/run/lsc.pid"
+LSC_TASKS="all"
 
 # JMX
 LSC_JMXPORT=1099
@@ -163,7 +164,7 @@ start_lsc() {
 	fi
 
 	# LSC parameters
-	LSC_PARAMS="-a all -f $LSC_CFG_DIR"
+	LSC_PARAMS="-a $LSC_TASKS -f $LSC_CFG_DIR"
 
 	if [ -z "$SU" ]
 	then

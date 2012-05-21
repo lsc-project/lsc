@@ -203,7 +203,7 @@ public abstract class AbstractSimpleJndiService {
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {
             Attribute attr = (Attribute) ne.next();
-            beanToFill.datasets().put(attr.getID(), SetUtils.attributeToSet(attr));
+            beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
 		}
 		return beanToFill;
 	}

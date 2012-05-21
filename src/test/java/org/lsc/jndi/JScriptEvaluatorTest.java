@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
 import mockit.Mocked;
@@ -69,6 +68,8 @@ import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 import org.mozilla.javascript.EcmaError;
+
+import com.google.common.collect.Sets;
 
 /**
  * Test different use cases of this JScript evaluator
@@ -111,19 +112,13 @@ public class JScriptEvaluatorTest {
 	@Test
 	public void testList() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
-		Attribute sn = new BasicAttribute("sn", "Doe");
-		Attribute givenName = new BasicAttribute("givenName", "John");
-		Attribute cn = new BasicAttribute("cn");
-		cn.add("John Doe");
-		cn.add("DOE John");
 		IBean bean = (IBean) new SimpleBean();
-		bean.setAttribute(sn);
-		bean.setAttribute(givenName);
-		bean.setAttribute(cn);
+		bean.setDataset("sn", Sets.newHashSet((Object)"Doe"));
+        bean.setDataset("givenName", Sets.newHashSet((Object)"John"));
+        bean.setDataset("cn", Sets.newHashSet((Object)"John Doe", (Object)"DOE John"));
 
 		table.put("srcBean", bean);
 
-//		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getAttributeById('givenName').get() + ' ' + srcBean.getAttributeById('sn').get()", table));
 		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetFirstValueById('givenName') + ' ' + srcBean.getDatasetFirstValueById('sn')", table));
 
 		List<String> res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetById('givenName') + ' ' + srcBean.getDatasetById('sn')", table);

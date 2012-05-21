@@ -66,13 +66,6 @@
 		<xsd:attribute name="id" type="xsd:string" use="optional" />
 	</xsd:complexType>
 
-	<xsd:complexType name="nisConnectionType">
-		<xsd:complexContent>
-			<xsd:extension base="connectionType">
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<xsd:simpleType name="ldapAuthenticationType">
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="NONE" />
@@ -448,16 +441,6 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
-	<xsd:complexType name="nisSourceServiceType">
-		<xsd:complexContent>
-			<xsd:extension base="serviceType">
-				<xsd:sequence>
-					<xsd:element name="map" type="xsd:string" default="passwd" />
-				</xsd:sequence>
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<xsd:complexType name="pluginDestinationServiceType">
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
@@ -509,7 +492,6 @@
 				<xsd:element name="databaseSourceService" type="databaseSourceServiceType" />
 				<xsd:element name="ldapSourceService" type="ldapSourceServiceType" />
 				<xsd:element name="asyncLdapSourceService" type="asyncLdapSourceServiceType" />
-				<xsd:element name="nisSourceService" type="nisSourceServiceType" />
 				<xsd:element name="pluginSourceService" type="pluginSourceServiceType" />
 			</xsd:choice>
 			<xsd:choice>
@@ -546,7 +528,6 @@
 		<xsd:choice minOccurs="0" maxOccurs="unbounded">
 			<xsd:element name="ldapConnection" type="ldapConnectionType" />
 			<xsd:element name="databaseConnection" type="databaseConnectionType" />
-			<xsd:element name="nisConnection" type="nisConnectionType" />
 			<xsd:element name="pluginConnection" type="pluginConnectionType" />
 		</xsd:choice>
 		<xsd:attribute name="id" type="xsd:string" use="optional" />

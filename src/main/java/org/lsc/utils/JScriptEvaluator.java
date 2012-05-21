@@ -92,17 +92,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //		cx = se.getContext();//new ContextFactory().enterContext();
 	}
 
-	/**
-	 * Evaluate your Ecma script expression (manage pre-compiled expressions
-	 * cache).
-	 *
-	 * @param expression
-	 *                the expression to eval
-	 * @param params
-	 *                the keys are the name used in the
-	 * @return the evaluation result
-	 * @throws LscServiceException 
-	 */
+    /** {@inheritDoc} */
 	public String evalToString(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
@@ -118,6 +108,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //		return (String) Context.jsToJava(result, String.class);
 	}
 
+    /** {@inheritDoc} */
 	public List<String> evalToStringList(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
         Object result = null;
@@ -157,6 +148,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		}
 	}
 
+    /** {@inheritDoc} */
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
 	    try {
 	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);

@@ -154,17 +154,19 @@ public class LscConfiguration {
 	}
 
 	public static AuditType getAudit(String name) {
-		for(AuditType audit: getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit()) {
-			if(audit.getName().equalsIgnoreCase(name)) {
-				return audit;
-			}
-		}
+        if(getInstance().getLsc().getAudits() != null) {
+    		for(AuditType audit: getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit()) {
+    			if(audit.getName().equalsIgnoreCase(name)) {
+    				return audit;
+    			}
+    		}
+        }
 		return null;
 	}
 
 	public static Collection<ConnectionType> getConnections() {
 		List<ConnectionType> connectionsList = new ArrayList<ConnectionType>();
-		connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection());
+		connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection());
 		return Collections.unmodifiableCollection(connectionsList);
 	}
 
@@ -202,12 +204,12 @@ public class LscConfiguration {
 	
 	public static void addConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(connection);
 	}
 
 	public static void removeConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().remove(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().remove(connection);
 	}
 
 	public static void addAudit(AuditType audit) {
@@ -285,10 +287,10 @@ public class LscConfiguration {
 	}
 	
 	public void setConnections(List<ConnectionType> conns) {
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().clear();
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().clear();
 		for(ConnectionType conn : conns) {
 			logModification(conn);
-			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(conn);
+			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(conn);
 		}
 	}
 	
@@ -381,8 +383,6 @@ public class LscConfiguration {
             return t.getGoogleAppsSourceService();
 		} else if (t.getDatabaseSourceService() != null) {
 			return t.getDatabaseSourceService();
-		} else if (t.getNisSourceService() != null) {
-			return t.getNisSourceService();
 		} else if (t.getPluginSourceService() != null) {
 			return t.getPluginSourceService();
 		}

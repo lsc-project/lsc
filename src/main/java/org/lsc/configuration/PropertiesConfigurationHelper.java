@@ -122,7 +122,7 @@ public class PropertiesConfigurationHelper {
             	ldapConn.setAuthentication(LdapAuthenticationType.NONE);
             }
             ldapConn.setUrl(org.lsc.Configuration.getString("src.java.naming.provider.url"));
-            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(ldapConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(ldapConn);
         }
 
         if(org.lsc.Configuration.getString("src.database.url") != null)  {
@@ -132,7 +132,7 @@ public class PropertiesConfigurationHelper {
             jdbcConn.setPassword(org.lsc.Configuration.getString("src.database.password"));
             jdbcConn.setUrl(org.lsc.Configuration.getString("src.database.url"));
             jdbcConn.setDriver(org.lsc.Configuration.getString("src.database.driver"));
-            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(jdbcConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(jdbcConn);
         }
 
         if(org.lsc.Configuration.getString("dst.java.naming.provider.url") != null) {
@@ -146,7 +146,7 @@ public class PropertiesConfigurationHelper {
 	        	dstConn.setAuthentication(LdapAuthenticationType.NONE);
 	        }
 	        dstConn.setUrl(org.lsc.Configuration.getString("dst.java.naming.provider.url"));
-            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(dstConn);
+            lscInstance.getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(dstConn);
         }
         
         lscInstance.setTasks(new TasksType());

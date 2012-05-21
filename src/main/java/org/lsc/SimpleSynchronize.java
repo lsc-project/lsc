@@ -129,6 +129,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		} else if(getTasks().length == 0) {
 			init();
 		}
+		if(!asyncTasks.isEmpty()) {
+            LscServerImpl.startJmx(this);
+		}
 		
 		for (Task task: cache.values()) {
 
@@ -198,7 +201,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				case async:
 					if(task.getSourceService() instanceof IAsynchronousService
 					        || task.getDestinationService() instanceof IAsynchronousService) {
-						LscServerImpl.startJmx(this);
 						startAsynchronousSynchronize2Ldap(task);
 					} else {
 						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + task.getSourceService().getClass().getName() + ")");

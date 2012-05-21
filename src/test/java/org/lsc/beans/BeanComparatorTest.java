@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.naming.NamingException;
-import javax.naming.directory.BasicAttribute;
 
 import mockit.Injectable;
 import mockit.Mocked;
@@ -74,6 +73,8 @@ import org.lsc.configuration.PolicyType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.utils.SetUtils;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
@@ -165,8 +166,8 @@ public class BeanComparatorTest {
 		// test add
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-		srcBean.setAttribute(new BasicAttribute("sn", ""));
-		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
+		srcBean.setDataset("sn", Sets.newHashSet((Object)""));
+        srcBean.setDataset("cn", Sets.newHashSet((Object)"real cn"));
 		destBean = null;
 
 		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
@@ -196,12 +197,12 @@ public class BeanComparatorTest {
 		// test mod
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-		srcBean.setAttribute(new BasicAttribute("sn", ""));
-		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
+        srcBean.setDataset("sn", Sets.newHashSet((Object)""));
+        srcBean.setDataset("cn", Sets.newHashSet((Object)"real cn"));
 
 		destBean = new SimpleBean();
 		destBean.setMainIdentifier("something");
-		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
+        srcBean.setDataset("cn", Sets.newHashSet((Object)"old cn"));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
 

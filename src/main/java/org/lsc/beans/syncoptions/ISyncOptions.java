@@ -158,6 +158,11 @@ public interface ISyncOptions {
 	 * @return the new object dn pattern
 	 */
 	String getDn();
-	
-	String getDelimiter(String attributeName);
+
+	/**
+	 * Return the delimiter name for the corresponding dataset
+	 * @param name dataset name
+     * @return the delimiter for this dataset or the default delimiter
+	 */
+	String getDelimiter(String name);
 }

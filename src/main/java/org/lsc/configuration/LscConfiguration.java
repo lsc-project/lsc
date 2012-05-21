@@ -74,8 +74,8 @@ import org.slf4j.LoggerFactory;
  * 
  * It references mainly :
  * &lt;ul&gt;
- * &lt;li&gt;the datasource connections which includes directories, database, nis, ... source and destination connectors connections&lt;/li&gt;
- * &lt;li&gt;the datasource connections which includes directories, database, nis, ... source and destination connectors connections&lt;/li&gt;
+ * &lt;li&gt;the datasource connections which includes directories, database, ... source and destination connectors connections&lt;/li&gt;
+ * &lt;li&gt;the datasource connections which includes directories, database, ... source and destination connectors connections&lt;/li&gt;
  * &lt;/ul&gt;
  * 
  * Severeals methods can be used to set and get the instance from / to an modelized configuration (properties, xml, json, ...). Modifications 
@@ -165,7 +165,7 @@ public class LscConfiguration {
 
 	public static Collection<ConnectionType> getConnections() {
 		List<ConnectionType> connectionsList = new ArrayList<ConnectionType>();
-		connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection());
+		connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection());
 		return Collections.unmodifiableCollection(connectionsList);
 	}
 
@@ -203,12 +203,12 @@ public class LscConfiguration {
 	
 	public static void addConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().add(connection);
 	}
 
 	public static void removeConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().remove(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().remove(connection);
 	}
 
 	public static void addAudit(AuditType audit) {
@@ -286,10 +286,10 @@ public class LscConfiguration {
 	}
 	
 	public void setConnections(List<ConnectionType> conns) {
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().clear();
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().clear();
 		for(ConnectionType conn : conns) {
 			logModification(conn);
-			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrNisConnection().add(conn);
+			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().add(conn);
 		}
 	}
 	
@@ -379,8 +379,6 @@ public class LscConfiguration {
 			return t.getLdapSourceService();
 		} else if (t.getDatabaseSourceService() != null) {
 			return t.getDatabaseSourceService();
-		} else if (t.getNisSourceService() != null) {
-			return t.getNisSourceService();
 		} else if (t.getPluginSourceService() != null) {
 			return t.getPluginSourceService();
 		}

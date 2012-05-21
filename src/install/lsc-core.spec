@@ -71,6 +71,7 @@ mkdir -p %{buildroot}%{lsc_logdir}
 ## bin
 cp -a bin/lsc %{buildroot}/usr/bin
 cp -a bin/lsc-agent %{buildroot}/usr/bin
+cp -a bin/hsqldb %{buildroot}/usr/bin
 ## config
 cp -a etc/logback.xml %{buildroot}/etc/lsc
 cp -a etc/lsc.xml-sample %{buildroot}/etc/lsc/lsc.xml
@@ -91,9 +92,10 @@ sed -i 's: root : %{lsc_user} :' %{buildroot}/etc/cron.d/lsc
 sed -i 's:#LSC_BIN#:/usr/bin/lsc:g' %{buildroot}/etc/cron.d/lsc
 sed -i 's:^30:#30:' %{buildroot}/etc/cron.d/lsc
 ## bin
-sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent
-sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/%{_lib}/lsc":' %{buildroot}/usr/bin/lsc  %{buildroot}/usr/bin/lsc-agent
-sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}/usr/bin/lsc  %{buildroot}/usr/bin/lsc-agent
+sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
+sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/%{_lib}/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
+sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
+sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}/usr/bin/hsqldb
 
 %post
 #=================================================
@@ -142,6 +144,7 @@ rm -rf %{buildroot}
 %config(noreplace) /etc/cron.d/lsc
 /usr/bin/lsc
 /usr/bin/lsc-agent
+/usr/bin/hsqldb
 /usr/%{_lib}/lsc/
 /usr/share/doc/lsc
 %{lsc_logdir}

@@ -49,6 +49,7 @@
           <string>userPassword</string>
           <string>objectClass</string>
           <string>mail</string>
+          <string>carLicense</string>
           <string>uid</string>
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetOrgPerson)</getAllFilter>
@@ -56,7 +57,7 @@
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
         <mainIdentifier>"mail=" + srcBean.getDatasetFirstValueById("mail") + ",ou=Sample,dc=lsc-project,dc=org"</mainIdentifier>
-        <defaultDelimiter>;</defaultDelimiter>
+        <defaultDelimiter>|</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
         <dataset>
           <name>objectClass</name>
@@ -75,10 +76,6 @@
           <createValues>
             <string>"changethis"</string>
           </createValues>
-        </dataset>
-        <dataset>
-          <name>default</name>
-          <policy>FORCE</policy>
         </dataset>
       </propertiesBasedSyncOptions>
     </task>

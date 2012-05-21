@@ -14,7 +14,8 @@
 			pers."MAIL",
 			pers."GIVENNAME",
 			pers."ADDRESS",
-			pers."TELEPHONENUMBER"
+			pers."TELEPHONENUMBER",
+			pers."CARLICENSE"
 		FROM csvdata pers
 		WHERE pers."MAIL" LIKE #mail#
 	</select>

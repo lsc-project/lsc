@@ -18,7 +18,7 @@
 		<pluginConnection
 			implementationClass="org.lsc.plugins.connectors.nis.generated.NisConnectionType">
 			<name>nis-src-conn</name>
-			<url>nis://192.168.18.128/lsc-project.org</url>
+			<url>nis://192.168.183.129/lsc-project.org</url>
 			<username>unused</username>
 			<password>unused</password>
 		</pluginConnection>
@@ -41,7 +41,7 @@
 				<connection reference="ldap-dst-conn" />
 				<baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes>
-					<string>mail</string>
+					<string>uid</string>
 				</pivotAttributes>
 				<fetchedAttributes>
 					<string>description</string>
@@ -53,11 +53,10 @@
 					<string>mail</string>
 				</fetchedAttributes>
 				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))
-				</getOneFilter>
+				<getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid}))</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
-				<mainIdentifier>"mail=" + srcBean.getAttributeFirstValueById("uid")
+				<mainIdentifier>"uid=" + srcBean.getAttributeFirstValueById("uid")
 					+ ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
 				<defaultDelimiter>;</defaultDelimiter>
 				<defaultPolicy>FORCE</defaultPolicy>
@@ -65,23 +64,22 @@
 					<name>mail</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getAttributeFirstValueById("uid")</string>
+						<string>srcBean.getAttributeFirstValueById("uid") + "@lsc-project.org"</string>
 					</forceValues>
 				</dataset>
 				<dataset>
 					<name>userPassword</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getAttributeFirstValueById("userPassword")
-						</string>
+						<string>srcBean.getAttributeFirstValueById("userPassword")</string>
 					</forceValues>
 				</dataset>
 				<dataset>
 					<name>objectClass</name>
-					<policy>KEEP</policy>
-					<createValues>
+					<policy>FORCE</policy>
+					<forceValues>
 						<string>"inetOrgPerson"</string>
-					</createValues>
+					</forceValues>
 				</dataset>
 				<dataset>
 					<name>sn</name>
@@ -93,6 +91,4 @@
 			</propertiesBasedSyncOptions>
 		</task>
 	</tasks>
-	<audits></audits>
-	<security></security>
 </lsc>

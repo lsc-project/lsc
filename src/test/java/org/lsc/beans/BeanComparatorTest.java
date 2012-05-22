@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.naming.NamingException;
-import javax.naming.directory.BasicAttribute;
 
 import mockit.Injectable;
 import mockit.Mocked;
@@ -165,8 +164,8 @@ public class BeanComparatorTest {
 		// test add
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-		srcBean.setAttribute(new BasicAttribute("sn", ""));
-		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
+		srcBean.setDataset("sn", new HashSet<Object>());
+        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList("real cn")));
 		destBean = null;
 
 		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
@@ -196,12 +195,12 @@ public class BeanComparatorTest {
 		// test mod
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-		srcBean.setAttribute(new BasicAttribute("sn", ""));
-		srcBean.setAttribute(new BasicAttribute("cn", "real cn"));
+        srcBean.setDataset("sn", new HashSet<Object>());
+        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList("real cn")));
 
 		destBean = new SimpleBean();
 		destBean.setMainIdentifier("something");
-		destBean.setAttribute(new BasicAttribute("cn", "old cn"));
+		destBean.setDataset("cn", new HashSet<Object>(Arrays.asList("old cn")));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
 

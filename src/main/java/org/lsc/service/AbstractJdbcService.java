@@ -234,7 +234,7 @@ public abstract class AbstractJdbcService implements IService {
 
 	public static Map<String, Object> fillAttributesMap(
 			Map<String, Object> datasets, IBean destinationBean) {
-		for(String attributeName : destinationBean.getAttributesNames()) {
+		for(String attributeName : destinationBean.datasets().getAttributesNames()) {
 			if(!datasets.containsKey(attributeName)) {
 				if(destinationBean.getDatasetById(attributeName) != null && destinationBean.getDatasetById(attributeName).size() > 0) {
 					datasets.put(attributeName, destinationBean.getDatasetById(attributeName).iterator().next().toString());

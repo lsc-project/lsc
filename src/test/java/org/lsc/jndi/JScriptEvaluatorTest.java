@@ -50,11 +50,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
 import mockit.Mocked;
@@ -113,15 +114,10 @@ public class JScriptEvaluatorTest {
 	@Test
 	public void testList() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
-		Attribute sn = new BasicAttribute("sn", "Doe");
-		Attribute givenName = new BasicAttribute("givenName", "John");
-		Attribute cn = new BasicAttribute("cn");
-		cn.add("John Doe");
-		cn.add("DOE John");
 		IBean bean = (IBean) new SimpleBean();
-		bean.setAttribute(sn);
-		bean.setAttribute(givenName);
-		bean.setAttribute(cn);
+		bean.setDataset("sn", new HashSet<Object>(Arrays.asList("Doe")));
+        bean.setDataset("givenName", new HashSet<Object>(Arrays.asList("John")));
+        bean.setDataset("cn", new HashSet<Object>(Arrays.asList("John Doe", "DOE John")));
 
 		table.put("srcBean", bean);
 

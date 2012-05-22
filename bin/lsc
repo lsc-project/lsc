@@ -123,6 +123,17 @@ function build_parameters() {
 	export PARAMETERS
 }
 
+# Function to know if the command will run a task
+function is_run_command() {
+	echo "$PARAMETERS" | grep '\-c \|\-s \|\-a ' > /dev/null 
+	if [ $? -eq 0 ]
+	then
+		return 1
+	else
+		return 0
+	fi
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -130,18 +141,27 @@ function build_parameters() {
 # check if we have java executable
 get_java
 
+# Do we reaaly run a task?
+is_run_command
+run_status=$?
+
 # LSC start message
-log "Starting LSC"
+if [ $run_status -eq 1 ]
+then
+	log "Starting LSC"
+fi
 
 # JMX
 for param in $PARAMETERS; do
 	if [ "$param" == "-a" ]; then
 		if [ -n "$LSC_JMXPORT" ]; then
 			export JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=$LSC_JMXPORT -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+			log "Using JMX port $LSC_JMXPORT"
 		else
 			echo "LSC: to control your asynchronous task(s), consider setting the LSC_JMXPORT "
 			echo "environment variable to a positive value to bind the JMX interface to that "
 			echo "TCP port."
+			log "JMX not activated"
 		fi
 	fi
 done
@@ -153,15 +173,12 @@ build_parameters
 status=$?
 
 # LSC stop message
-log "LSC finished running"
-
-if [ $status -ne 0 ]
+if [ $run_status -eq 1 ]
 then
-	echo "Last log file line: `tail -2 "$LOG_FILE" | head -1`" 1>&2
-	exit $status
+	log "LSC finished running"
 fi
 
 #====================================================================
 # Exit
 #====================================================================
-exit 0
+exit $status

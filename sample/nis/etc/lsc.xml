@@ -18,7 +18,7 @@
 		<pluginConnection
 			implementationClass="org.lsc.plugins.connectors.nis.generated.NisConnectionType">
 			<name>nis-src-conn</name>
-			<url>nis://192.168.183.129/lsc-project.org</url>
+			<url>nis://NIS-SERVER-ADDRESS/lsc-project.org</url>
 			<username>unused</username>
 			<password>unused</password>
 		</pluginConnection>
@@ -39,7 +39,7 @@
 			<ldapDestinationService>
 				<name>opends-dst-service</name>
 				<connection reference="ldap-dst-conn" />
-				<baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
+				<baseDn>ou=sample,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes>
 					<string>uid</string>
 				</pivotAttributes>
@@ -56,22 +56,22 @@
 				<getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid}))</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
-				<mainIdentifier>"uid=" + srcBean.getAttributeFirstValueById("uid")
-					+ ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+				<mainIdentifier>"uid=" + srcBean.getDatasetFirstValueById("uid")
+					+ ",ou=sample,dc=lsc-project,dc=org"</mainIdentifier>
 				<defaultDelimiter>;</defaultDelimiter>
 				<defaultPolicy>FORCE</defaultPolicy>
 				<dataset>
 					<name>mail</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getAttributeFirstValueById("uid") + "@lsc-project.org"</string>
+						<string>srcBean.getDatasetFirstValueById("uid") + "@lsc-project.org"</string>
 					</forceValues>
 				</dataset>
 				<dataset>
 					<name>userPassword</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getAttributeFirstValueById("userPassword")</string>
+						<string>srcBean.getDatasetFirstValueById("userPassword")</string>
 					</forceValues>
 				</dataset>
 				<dataset>
@@ -85,7 +85,7 @@
 					<name>sn</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getAttributeFirstValueById("gecos")</string>
+						<string>srcBean.getDatasetFirstValueById("gecos")</string>
 					</forceValues>
 				</dataset>
 			</propertiesBasedSyncOptions>

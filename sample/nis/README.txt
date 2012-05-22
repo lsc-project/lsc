@@ -52,7 +52,7 @@ address and the managed NIS domain in the following line :
 Note that this synchronization will lookup accounts through the 
 passwd.byname map :
 
-	    <map>passwd.byname</map>
+	    <nis:map>passwd.byname</nis:map>
 
 This means that if you want to synchronize groups, you will need to change the
 map you plan to use.
@@ -61,8 +61,8 @@ This sample requires that you start the embedded OpenDJ LDAP server:
 $ sample/hsqldb/bin/lsc-sample --start-ldap-server
 
 Then, launch the LSC in a command line 
+$ export JAVA_OPTS=-DLSC.PLUGINS.PACKAGEPATH=org.lsc.plugins.connectors.nis.generated
 $ bin/lsc -f sample/nis/etc -s passwd
 
-And now you should get a NIS server and a directory synchronized :
-you should see a renaming operation which will change the RDN of the uid=00000001
-entry to mail=test@lsc-project.org
+And now you should see NIS entries created in the LDAP Directory.
+

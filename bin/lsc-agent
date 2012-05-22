@@ -117,17 +117,7 @@ function build_classpath() {
 # check if we have java executable
 get_java
 
-# check if LSC Remote Agent is not already running
-if [ $(ps aux | grep -a org.lsc.jmx.LscAgent | grep -av grep | wc -l) -ne 0 ] 
-then
-	# LSC Remote Agent already running
-	fatal "LSC Remote Agent already running - launch aborted"
-
-	# since LSC Remote Agent already running, don't launch and exit
-	exit 1
-fi
-
-# LSC Remote Agent not already running
+# LSC Remote Agent start message
 log "Starting LSC Remote Agent"
 
 build_classpath
@@ -135,16 +125,10 @@ build_classpath
 
 status=$?
 
-# LSC Remote Agent finished running
+# LSC Remote Agent stop message
 log "LSC Remote Agent finished running"
-
-if [ $status -ne 0 ]
-then
-	echo "Last log file line: `tail -2 "$LOG_FILE" | head -1`" 1>&2
-	exit $status
-fi
 
 #====================================================================
 # Exit
 #====================================================================
-exit 0
+exit $status

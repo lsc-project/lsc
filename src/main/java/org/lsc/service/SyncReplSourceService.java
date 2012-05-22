@@ -45,6 +45,7 @@
  */
 package org.lsc.service;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,7 +99,7 @@ import org.slf4j.LoggerFactory;
  * to a compatible directory to get updates on the fly.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SyncReplSourceService extends SimpleJndiSrcService implements IAsynchronousService {
+public class SyncReplSourceService extends SimpleJndiSrcService implements IAsynchronousService, Closeable {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(SyncReplSourceService.class);
 
@@ -149,6 +150,12 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (IOException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
+		}
+	}
+	
+	public void close() throws IOException {
+		if (! connection.close()) {
+			throw new IOException("Can't close service");
 		}
 	}
 	

@@ -45,6 +45,8 @@
  */
 package org.lsc;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -102,6 +104,18 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 	}
 	
+	private void close() {
+		for (Task task: cache.values()) {
+			if (task.getSourceService() instanceof Closeable) {
+				try {
+					((Closeable)task.getSourceService()).close();
+				} catch (IOException e) {
+					LOGGER.error("Error while closing service.");
+				}
+			}
+		}
+	}
+
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
@@ -117,6 +131,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 					final List<String> cleanTasks) throws Exception {
 		Boolean foundATask = false;
+		boolean canClose = true;
 
 		// Get the list of defined tasks from LSC properties
 		// Iterate on each task
@@ -164,7 +179,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				if(!launchTask(task, Task.Mode.async)) {
 					return false;
 				}
+				
+				canClose = false;
 			}
+		}
+		
+		if (canClose) {
+			close();
 		}
 
 		if (!foundATask) {

@@ -291,7 +291,7 @@ public final class BeanComparator {
 //			Set<Object> dstAttrValues = SetUtils.attributeToSet(dstAttr);
 
 			// Get list of values that the attribute should be set to in the destination
-			Set<Object> toSetAttrValues = getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, modType);
+			Set<Object> toSetAttrValues = getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, modType);
 
 			// Convention: if values to set is returned null, ignore this attribute
 			if (toSetAttrValues == null) {
@@ -585,11 +585,18 @@ public final class BeanComparator {
 	 *         destination, or null if this attribute should be ignored.
 	 */
 	protected static Set<Object> getValuesToSet(Task task, String attrName,
-					Set<Object> srcAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType)
+					Set<Object> srcAttrValues, Set<Object> dstAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType)
 					throws LscServiceException {
 		// Result
 		Set<Object> attrValues = new HashSet<Object>();
 
+		PolicyType attrPolicy = task.getSyncOptions().getStatus(null, attrName);
+		
+		// Ignore the attribute if the policy is to keep values and that the destination already contains at least a single value
+		if(attrPolicy == PolicyType.KEEP && dstAttrValues.size() > 0) {
+		   return null; 
+		}
+		
 		// If we have force values, they take precedence over anything else, just use them
 		List<String> forceValueDefs = task.getSyncOptions().getForceValues(null, attrName);
 		if (forceValueDefs != null) {
@@ -612,7 +619,7 @@ public final class BeanComparator {
 		// Add default or create values if:
 		// a) there are no values yet, or
 		// b) attribute is in Merge status
-		if (attrValues.size() == 0 || task.getSyncOptions().getStatus(null, attrName) == PolicyType.MERGE) {
+		if (attrValues.size() == 0 || attrPolicy == PolicyType.MERGE) {
 			List<String> newValuesDefs;
 			if (modType == LscModificationType.CREATE_OBJECT) {
 				newValuesDefs = task.getSyncOptions().getCreateValues(null, attrName);

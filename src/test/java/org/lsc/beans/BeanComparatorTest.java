@@ -74,8 +74,6 @@ import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
 import org.lsc.utils.SetUtils;
 
-import com.google.common.collect.Sets;
-
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
@@ -166,8 +164,8 @@ public class BeanComparatorTest {
 		// test add
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-		srcBean.setDataset("sn", Sets.newHashSet((Object)""));
-        srcBean.setDataset("cn", Sets.newHashSet((Object)"real cn"));
+		srcBean.setDataset("sn", new HashSet<Object>());
+        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"real cn"})));
 		destBean = null;
 
 		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
@@ -197,12 +195,12 @@ public class BeanComparatorTest {
 		// test mod
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-        srcBean.setDataset("sn", Sets.newHashSet((Object)""));
-        srcBean.setDataset("cn", Sets.newHashSet((Object)"real cn"));
+        srcBean.setDataset("sn", new HashSet<Object>());
+        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"real cn"})));
 
 		destBean = new SimpleBean();
 		destBean.setMainIdentifier("something");
-        srcBean.setDataset("cn", Sets.newHashSet((Object)"old cn"));
+		destBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"old cn"})));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
 
@@ -237,6 +235,7 @@ public class BeanComparatorTest {
 		String attrName = "cn";
 
 		Set<Object> srcAttrValues = null;
+        Set<Object> dstAttrValues = null;
 		Map<String, Object> javaScriptObjects = null;
 
 //		Map<String, STATUS_TYPE> statusMap = null;
@@ -255,9 +254,10 @@ public class BeanComparatorTest {
 		// First test: no default values, no force values, no source values (empty list)
 		// Should return an empty List
 		srcAttrValues = new HashSet<Object>();
+        dstAttrValues = new HashSet<Object>();
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
@@ -268,7 +268,7 @@ public class BeanComparatorTest {
 		srcAttrValues = null;
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
@@ -293,7 +293,7 @@ public class BeanComparatorTest {
 			}
 		};
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(srcAttrValues.size(), res.size());
@@ -316,7 +316,7 @@ public class BeanComparatorTest {
 		};
 
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -342,7 +342,7 @@ public class BeanComparatorTest {
 			}
 		};
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -368,7 +368,7 @@ public class BeanComparatorTest {
 			}
 		};
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
@@ -396,7 +396,7 @@ public class BeanComparatorTest {
 			}
 		};
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size() + srcAttrValues.size(), res.size());
@@ -430,7 +430,7 @@ public class BeanComparatorTest {
 		};
 
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsCreateValues.size() + srcAttrValues.size(), res.size());
@@ -462,9 +462,34 @@ public class BeanComparatorTest {
 			}
 		};
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
 
 		assertNull(res);
+
+		// Check that neither create nor default values are checked if the destination already contains at least one value with a KEEP policy
+		
+
+	    final List<String> jsThrowException = new ArrayList<String>();
+	    jsThrowException.add("throw 'We should not reach this point !'");
+
+		new NonStrictExpectations() {
+            @NonStrict ISyncOptions syncOptions; 
+            {
+                task.getDestinationService(); result = dstService;
+                dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn", "sn"});
+                syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
+                syncOptions.getForceValues(anyString, anyString); result = null;
+                syncOptions.getDefaultValues(anyString, anyString); result = jsThrowException;
+                syncOptions.getCreateValues(anyString, anyString); result = jsThrowException;
+                task.getSyncOptions(); result = syncOptions;
+            }
+        };
+
+        dstAttrValues.add("At least a single CN value");
+
+        res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+
+        assertNull(res);
 	}
 
 }

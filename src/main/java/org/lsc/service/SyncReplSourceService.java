@@ -63,11 +63,12 @@ import org.apache.directory.ldap.client.api.LdapAsyncConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapConnectionFactory;
 import org.apache.directory.ldap.client.api.future.SearchFuture;
-import org.apache.directory.ldap.client.api.message.SearchResultEntry;
+import org.apache.directory.shared.ldap.codec.decorators.SearchResultEntryDecorator;
+import org.apache.directory.shared.ldap.codec.osgi.DefaultLdapCodecService;
 import org.apache.directory.shared.ldap.codec.search.controls.ChangeType;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.apache.directory.shared.ldap.entry.EntryAttribute;
-import org.apache.directory.shared.ldap.extras.controls.SyncRequestValueImpl;
+import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncRequestValueDecorator;
 import org.apache.directory.shared.ldap.model.cursor.EntryCursor;
 import org.apache.directory.shared.ldap.model.entry.Attribute;
 import org.apache.directory.shared.ldap.model.entry.Entry;
@@ -278,7 +279,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			LOGGER.warn("Timeout during search !");
 		}
 		if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_ENTRY) {
-			SearchResultEntry sre = ((SearchResultEntry) searchResponse);
+			SearchResultEntryDecorator sre = ((SearchResultEntryDecorator) searchResponse);
 			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
 		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
@@ -309,9 +310,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		switch(serverType) {
 		case OPEN_LDAP:
 		case APACHE_DS:
-		    SyncRequestValueImpl syncControl = new SyncRequestValueImpl();
-			syncControl.setMode(org.apache.directory.shared.ldap.extras.controls.SynchronizationModeEnum.REFRESH_AND_PERSIST);
-			return syncControl;
+		    DefaultLdapCodecService codec = new DefaultLdapCodecService();
+		    SyncRequestValueDecorator syncControl = new SyncRequestValueDecorator(codec);
+		    syncControl.setMode(org.apache.directory.shared.ldap.extras.controls.SynchronizationModeEnum.REFRESH_AND_PERSIST);
+		    return syncControl;
 		case OPEN_DS:
 		case OPEN_DJ:
 		case ORACLE_DS:

@@ -262,6 +262,7 @@ public class LscConfiguration {
 	
 	public static void saved() {
 		finalizeInitialization();
+		getInstance().modified = false;
 	}
 	
 	public static void logModification(Object o) {
@@ -279,6 +280,9 @@ public class LscConfiguration {
 		instance.audits = original.audits;
 		instance.connections = original.connections;
 		instance.tasks = original.tasks;
+		instance.security = original.security;
+		instance.audits = original.audits;
+		instance.revision = original.revision;
 		instance.modified = false;
 	}
 
@@ -517,5 +521,17 @@ public class LscConfiguration {
 		instance = null;
 		original = null;
 	}
+
+    public static void setSyncOptions(TaskType task, SyncOptionsType syncOptions) throws LscConfigurationException {
+        if(syncOptions instanceof ForceSyncOptionsType) {
+            task.setForceSyncOptions((ForceSyncOptionsType) syncOptions);
+        } else if(syncOptions instanceof PropertiesBasedSyncOptionsType) {
+            task.setPropertiesBasedSyncOptions((PropertiesBasedSyncOptionsType) syncOptions);
+        } else if(syncOptions instanceof PluginSyncOptionsType) {
+            task.setPluginSyncOptions((PluginSyncOptionsType) syncOptions);
+        } else {
+            throw new LscConfigurationException("Unknown or null syncoptions type: " + syncOptions.getClass().getName()); 
+        }
+    }
 }
 	

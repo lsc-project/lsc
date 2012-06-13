@@ -159,8 +159,8 @@ public abstract class AbstractSimpleJndiService {
 	 */
 	public AbstractSimpleJndiService(final LdapServiceType ldapService) throws LscServiceConfigurationException {
 		baseDn = ldapService.getBaseDn();
-		filterIdSync = ldapService.getGetOneFilter().trim();
-		filterAll = ldapService.getGetAllFilter().trim();
+		filterIdSync = (ldapService.getOneFilter() != null ? ldapService.getOneFilter().trim() : ldapService.getGetOneFilter().trim());
+		filterAll = (ldapService.getAllFilter() != null ? ldapService.getAllFilter().trim() : ldapService.getGetAllFilter().trim());
 		_filteredSc = new SearchControls();
 		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(new String[ldapService.getFetchedAttributes().getString().size()] ));
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 

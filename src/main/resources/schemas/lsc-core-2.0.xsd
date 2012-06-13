@@ -331,8 +331,14 @@
 						minOccurs="0" />
 					<xsd:element name="fetchedAttributes" type="valuesType"
 						minOccurs="0" />
-					<xsd:element name="getAllFilter" type="xsd:string" />
-					<xsd:element name="getOneFilter" type="xsd:string" />
+					<xsd:choice>
+						<xsd:element name="getAllFilter" type="xsd:string" />
+						<xsd:element name="allFilter" type="xsd:string" />
+					</xsd:choice>
+					<xsd:choice>
+						<xsd:element name="getOneFilter" type="xsd:string" />
+						<xsd:element name="oneFilter" type="xsd:string" />
+					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

@@ -51,7 +51,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -60,26 +59,32 @@ import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
 
-import org.apache.directory.ldap.client.api.LdapConnection;
+import org.apache.directory.ldap.client.api.LdapAsyncConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
-import org.apache.directory.ldap.client.api.SearchCursor;
-import org.apache.directory.ldap.client.api.exception.LdapException;
+import org.apache.directory.ldap.client.api.LdapConnectionFactory;
 import org.apache.directory.ldap.client.api.future.SearchFuture;
-import org.apache.directory.ldap.client.api.message.SearchRequest;
-import org.apache.directory.ldap.client.api.message.SearchResponse;
 import org.apache.directory.ldap.client.api.message.SearchResultEntry;
-import org.apache.directory.shared.ldap.codec.controls.ControlImpl;
-import org.apache.directory.shared.ldap.codec.controls.replication.syncRequestValue.SyncRequestValueControl;
 import org.apache.directory.shared.ldap.codec.search.controls.ChangeType;
-import org.apache.directory.shared.ldap.codec.search.controls.persistentSearch.PersistentSearchControl;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
-import org.apache.directory.shared.ldap.cursor.Cursor;
 import org.apache.directory.shared.ldap.entry.EntryAttribute;
-import org.apache.directory.shared.ldap.entry.Value;
-import org.apache.directory.shared.ldap.filter.SearchScope;
-import org.apache.directory.shared.ldap.message.AliasDerefMode;
-import org.apache.directory.shared.ldap.message.control.Control;
-import org.apache.directory.shared.ldap.message.control.replication.SynchronizationModeEnum;
+import org.apache.directory.shared.ldap.extras.controls.SyncRequestValueImpl;
+import org.apache.directory.shared.ldap.model.cursor.EntryCursor;
+import org.apache.directory.shared.ldap.model.entry.Attribute;
+import org.apache.directory.shared.ldap.model.entry.Entry;
+import org.apache.directory.shared.ldap.model.entry.Value;
+import org.apache.directory.shared.ldap.model.exception.LdapException;
+import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.model.message.LdapResult;
+import org.apache.directory.shared.ldap.model.message.MessageTypeEnum;
+import org.apache.directory.shared.ldap.model.message.Response;
+import org.apache.directory.shared.ldap.model.message.ResultCodeEnum;
+import org.apache.directory.shared.ldap.model.message.SearchRequest;
+import org.apache.directory.shared.ldap.model.message.SearchRequestImpl;
+import org.apache.directory.shared.ldap.model.message.SearchResultDone;
+import org.apache.directory.shared.ldap.model.message.SearchScope;
+import org.apache.directory.shared.ldap.model.message.controls.AbstractControl;
+import org.apache.directory.shared.ldap.model.message.controls.PersistentSearchImpl;
+import org.apache.directory.shared.ldap.model.name.Dn;
 import org.apache.directory.shared.ldap.util.LdapURL;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -88,6 +93,7 @@ import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapDerefAliasesType;
 import org.lsc.configuration.LdapServerType;
 import org.lsc.configuration.TaskType;
+import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
@@ -103,7 +109,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(SyncReplSourceService.class);
 
-	private LdapConnection connection;
+	private LdapAsyncConnection connection;
 	
 	private LdapConnectionType ldapConn;
 	
@@ -126,18 +132,16 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		connection = getConnection(ldapConn);
 	}
 
-	public static LdapConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
-		LdapConnectionConfig lcc = new LdapConnectionConfig();
+	public static LdapAsyncConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
 		LdapURL url;
 		try {
-			url = new LdapURL(ldapConn.getUrl());
-			lcc.setLdapHost(url.getHost());
-			lcc.setLdapPort((url.getPort() != -1 ? url.getPort() : 389));
+            url = new LdapURL(ldapConn.getUrl());
+            LdapAsyncConnection conn = LdapConnectionFactory.getNetworkConnection(url.getHost(), (url.getPort() != -1 ? url.getPort() : 389));
+            LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setSslProtocol(url.getScheme());
 			lcc.setUseSsl("ldaps".equalsIgnoreCase(url.getScheme()));
 			lcc.setName(lcc.getName());
 //			lco.setFollowReferrals(ldapConn.getReferralHandling() == ReferralHandling.THROUGH);
-			LdapConnection conn = new LdapConnection(lcc);
 			if(conn.connect()) {
 				conn.bind(ldapConn.getUsername(), ldapConn.getPassword());
 				return conn;
@@ -146,11 +150,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			}
 		} catch (LdapURLEncodingException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (LdapException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (IOException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
-		}
+		} catch (LdapException e) {
+            throw new LscServiceConfigurationException(e.toString(), e);
+        }
 	}
 	
 	public void close() throws IOException {
@@ -167,16 +171,16 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		} catch (RuntimeException e) {
 			throw new LscServiceException(e.toString(), e);
 		} catch (LdapException e) {
-			throw new LscServiceException(e.toString(), e);
-		}
+            throw new LscServiceException(e.toString(), e);
+        }
 	}
 
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param pivotName Name of the entry to be returned, which is the name returned by
+	 * @param id Name of the entry to be returned, which is the name returned by
 	 *            {@link #getListPivots()} (used for display only)
-	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
+	 * @param pivotAttrs Map of attribute names and values, which is the data identifier in the
 	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
 	 *            entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
@@ -208,32 +212,34 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 
 		try {
-			String[] attrs = null;
+		    EntryCursor entryCursor = null;
+            // When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
+            String searchBaseDn = (fromSameService ? id : baseDn);
+            SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
 			if(getAttrs() != null) {
-				attrs = getAttrs().toArray(new String[getAttrs().size()]);
+				entryCursor = connection.search(searchBaseDn, searchString, searchScope, getAttrs().toArray(new String[getAttrs().size()]));
+			} else {
+			    entryCursor = connection.search(searchBaseDn, searchString, searchScope);
 			}
-			// When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
-			String searchBaseDn = (fromSameService ? id : baseDn);
-			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
-			SearchCursor searchResponses = (SearchCursor) connection.search(searchBaseDn, searchString, searchScope, attrs);
 
 			srcBean = this.beanClass.newInstance();
 
-			if(searchResponses.next() && searchResponses.get() instanceof SearchResultEntry) {
-				SearchResultEntry sre = (SearchResultEntry) searchResponses.get();
-				// get dn
-				srcBean.setMainIdentifier(sre.getObjectName().toString());
-				srcBean.setDatasets(convertSearchEntry(sre));
-				return srcBean;
+			entryCursor.next();
+			if(! entryCursor.available()) {
+			    return null;
 			}
+			Entry entry =  entryCursor.get();
+			// get dn
+			srcBean.setMainIdentifier(entry.getDn().getName());
+			srcBean.setDatasets(convertEntry(entry));
+			entryCursor.getSearchResultDone();
+			entryCursor.close();
+			return srcBean;
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
-			LOGGER.debug(e.toString(), e);
-		} catch (LdapException e) {
-			LOGGER.error("LDAP error while reading entry " + id + " (" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		} catch (Exception e) {
 			LOGGER.error("LDAP error while reading entry " + id + " (" + e + ")");
@@ -243,23 +249,25 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	}
 
 	@Override
-	public Entry<String, LscDatasets> getNextId() throws LscServiceException {
+	public java.util.Map.Entry<String, LscDatasets> getNextId() throws LscServiceException {
 		Map<String, LscDatasets> temporaryMap = new HashMap<String, LscDatasets>(1);
 		if(sf == null || sf.isCancelled()) {
 			try {
-				SearchRequest searchRequest = new SearchRequest();
-				searchRequest.add(getSearchContinuationControl(srsc.getServerType()));
-				searchRequest.setBaseDn(getBaseDn());
+				SearchRequest searchRequest = new SearchRequestImpl();
+				searchRequest.addControl(getSearchContinuationControl(srsc.getServerType()));
+				searchRequest.setBase(new Dn(getBaseDn()));
 				searchRequest.setFilter(getFilterAll());
 				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
-				searchRequest.setScope(SearchScope.SUBTREE);
+				searchRequest.setScope(org.apache.directory.shared.ldap.model.message.SearchScope.SUBTREE);
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
 				sf = getConnection(ldapConn).searchAsync(searchRequest);
-			} catch (LdapException e) {
-				throw new LscServiceException(e.toString(), e);
-			}
+			} catch (LdapInvalidDnException e) {
+                throw new LscServiceException(e.toString(), e);
+            } catch (LdapException e) {
+                throw new LscServiceException(e.toString(), e);
+            }
 		}
-		SearchResponse searchResponse = null;
+		Response searchResponse = null;
 		try {
 			searchResponse = sf.get(1, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
@@ -269,35 +277,40 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		} catch (TimeoutException e) {
 			LOGGER.warn("Timeout during search !");
 		}
-		if(searchResponse != null && searchResponse instanceof SearchResultEntry) {
+		if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_ENTRY) {
 			SearchResultEntry sre = ((SearchResultEntry) searchResponse);
-			temporaryMap.put(sre.getObjectName().toString(), convertSearchEntry(sre, true));
+			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
-		} else {
-			return null;
+		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
+		    LdapResult result = ((SearchResultDone)searchResponse).getLdapResult();
+		    if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
+		        throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
+		    }
+		    sf = null;
 		}
+        return null;
 	}
 
-	private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
+    private org.apache.directory.shared.ldap.model.message.AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
 		switch(aliasesHandling) {
 		case ALWAYS:
-			return AliasDerefMode.DEREF_ALWAYS;
+			return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_ALWAYS;
 		case FIND:
-			return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_FINDING_BASE_OBJ;
 		case SEARCH:
-			return AliasDerefMode.DEREF_IN_SEARCHING;
+            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_IN_SEARCHING;
 		case NEVER:
 		default:
-			return AliasDerefMode.NEVER_DEREF_ALIASES;
+            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.NEVER_DEREF_ALIASES;
 		}
 	}
 
-	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
+	public static org.apache.directory.shared.ldap.model.message.Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
 		switch(serverType) {
 		case OPEN_LDAP:
 		case APACHE_DS:
-			SyncRequestValueControl syncControl = new SyncRequestValueControl();
-			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
+		    SyncRequestValueImpl syncControl = new SyncRequestValueImpl();
+			syncControl.setMode(org.apache.directory.shared.ldap.extras.controls.SynchronizationModeEnum.REFRESH_AND_PERSIST);
 			return syncControl;
 		case OPEN_DS:
 		case OPEN_DJ:
@@ -305,14 +318,14 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		case SUN_DS:
 		case NETSCAPE_DS:
 		case NOVELL_E_DIRECTORY:
-			PersistentSearchControl searchControl = new PersistentSearchControl();
+		    PersistentSearchImpl searchControl = new PersistentSearchImpl();
+		    searchControl.setCritical(true);
 			searchControl.setChangesOnly(true);
+			searchControl.setReturnECs(false);
 			searchControl.setChangeTypes(ChangeType.ADD_VALUE + ChangeType.DELETE_VALUE + ChangeType.MODDN_VALUE + ChangeType.MODIFY_VALUE);
 			return searchControl;
 		case ACTIVE_DIRECTORY:
-			Control notificationControl = new ControlImpl("1.2.840.113556.1.4.528");
-			notificationControl.setCritical(true);
-			return notificationControl;
+			return new AbstractControl("1.2.840.113556.1.4.528", true) {};
 		default:
 			throw new LscServiceConfigurationException("Unknown or unsupported server type !");
 		}
@@ -323,17 +336,42 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 * @param entry
 	 * @return
 	 */
-	private LscDatasets convertSearchEntry(SearchResultEntry entry) {
-		return convertSearchEntry(entry, false);
+	private LscDatasets convertEntry(Entry entry) {
+		return convertEntry(entry, false);
 	}
-	private LscDatasets convertSearchEntry(SearchResultEntry entry, boolean onlyFirstValue) {
+	
+    private LscDatasets convertEntry(org.apache.directory.shared.ldap.entry.Entry entry, boolean onlyFirstValue) {
+        if(entry == null) return null;
+        LscDatasets converted = new LscDatasets();
+        Iterator<EntryAttribute> entryAttributes = entry.iterator();
+        while(entryAttributes.hasNext()) {
+            EntryAttribute attr = entryAttributes.next();
+            if(attr != null && attr.size() > 0)  {
+                Iterator<org.apache.directory.shared.ldap.entry.Value<?>> values = attr.iterator();
+                if(!onlyFirstValue) {
+                    Set<Object> datasetsValues = new HashSet<Object>();
+                    while(values.hasNext()) {
+                        org.apache.directory.shared.ldap.entry.Value<?> value = values.next();
+                        datasetsValues.add(value.getString());
+                    }
+                    converted.getDatasets().put(attr.getId(), datasetsValues);
+                } else {
+                    org.apache.directory.shared.ldap.entry.Value<?> value = values.next();
+                    converted.getDatasets().put(attr.getId(), value.getString());
+                }
+            }
+        }
+        return converted;
+    }
+
+	private LscDatasets convertEntry(Entry entry, boolean onlyFirstValue) {
 		if(entry == null) return null;
 		LscDatasets converted = new LscDatasets();
-		Iterator<EntryAttribute> entryAttributes = entry.getEntry().iterator();
+		Iterator<Attribute> entryAttributes = entry.iterator();
 		while(entryAttributes.hasNext()) {
-			EntryAttribute attr = entryAttributes.next();
-			if(attr.getAll() != null)  {
-				Iterator<Value<?>> values = attr.getAll();
+			Attribute attr = entryAttributes.next();
+			if(attr != null && attr.size() > 0)  {
+				Iterator<Value<?>> values = attr.iterator();
 				if(!onlyFirstValue) {
 					Set<Object> datasetsValues = new HashSet<Object>();
 					while(values.hasNext()) {
@@ -352,21 +390,19 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 
 	/**
 	 * Convert a search result entries list to a LSC ready to use map
-	 * @param cursor Unbounded ID LDAP SDK objects 
+	 * @param entryCursor Unbounded ID LDAP SDK objects 
 	 * @return LSC compatible map
 	 * @throws LscServiceException 
 	 */
 	private Map<String, LscDatasets> convertSearchEntries(
-			Cursor<SearchResponse> cursor) throws LscServiceException {
+			EntryCursor entryCursor) throws LscServiceException {
 		Map<String, LscDatasets> converted = new HashMap<String, LscDatasets>();
 		try {
-			while (cursor.next()) {
-				SearchResponse sr = cursor.get();
-				if(sr instanceof SearchResultEntry) {
-					SearchResultEntry sre = (SearchResultEntry) sr;
-					converted.put(sre.getObjectName().toString(), convertSearchEntry(sre));
-				}
+			while (entryCursor.next()) {
+				Entry entry = entryCursor.get();
+				converted.put(entry.getDn().getName(), convertEntry(entry));
 			}
+			entryCursor.getSearchResultDone();
 		} catch (Exception e) {
 			throw new LscServiceException("Error while performing search. Results may be incomplete." + e, e);
 		}

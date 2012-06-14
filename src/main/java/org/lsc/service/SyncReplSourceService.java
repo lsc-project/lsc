@@ -68,6 +68,8 @@ import org.apache.directory.shared.ldap.codec.osgi.DefaultLdapCodecService;
 import org.apache.directory.shared.ldap.codec.search.controls.ChangeType;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.apache.directory.shared.ldap.entry.EntryAttribute;
+import org.apache.directory.shared.ldap.extras.controls.SyncStateTypeEnum;
+import org.apache.directory.shared.ldap.extras.controls.SyncStateValue;
 import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncRequestValueDecorator;
 import org.apache.directory.shared.ldap.model.cursor.EntryCursor;
 import org.apache.directory.shared.ldap.model.entry.Attribute;
@@ -278,7 +280,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		} catch (TimeoutException e) {
 			LOGGER.warn("Timeout during search !");
 		}
-		if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_ENTRY) {
+		if(checkSearchResponse(searchResponse)) {
 			SearchResultEntryDecorator sre = ((SearchResultEntryDecorator) searchResponse);
 			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
@@ -290,6 +292,19 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		    sf = null;
 		}
         return null;
+	}
+
+	private boolean checkSearchResponse(Response searchResponse) {
+		if (searchResponse == null || searchResponse.getType() != MessageTypeEnum.SEARCH_RESULT_ENTRY) {
+			return false;
+		}
+		
+        SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
+		if (syncStateCtrl != null && syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE) {
+			return false;
+		}
+		
+		return true;
 	}
 
     private org.apache.directory.shared.ldap.model.message.AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {

@@ -689,7 +689,7 @@ class SynchronizeTask implements Runnable {
 			 */
 			if (entry == null) {
 				counter.incrementCountError();
-				AbstractSynchronize.LOGGER.error("Unable to get object for id={}", id.getKey());
+				AbstractSynchronize.LOGGER.error("Synchronization aborted because no source object has been found !");
 				return false;
 			}
 

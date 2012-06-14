@@ -55,6 +55,7 @@ import javax.naming.CommunicationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.directory.shared.ldap.codec.standalone.StandaloneLdapApiService;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ISyncOptions;

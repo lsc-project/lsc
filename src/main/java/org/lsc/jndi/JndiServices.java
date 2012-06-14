@@ -89,8 +89,12 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.directory.shared.ldap.codec.api.ControlFactory;
+import org.apache.directory.shared.ldap.codec.api.LdapApiService;
+import org.apache.directory.shared.ldap.codec.api.LdapApiServiceFactory;
 import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
 import org.apache.directory.shared.ldap.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
 import org.apache.directory.shared.ldap.name.DN;
 import org.apache.directory.shared.ldap.name.RDN;
 import org.apache.directory.shared.ldap.util.LdapURL;
@@ -224,6 +228,11 @@ public final class JndiServices {
 		} else {
 			recursiveDelete = false;
 		}
+		
+		/* Load SyncRepl response control */
+		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
+		ControlFactory<?, ?> factory = new SyncStateValueFactory( ldapApiService );
+		ldapApiService.registerControl( factory );
 	}
 
 	private void logConnectingTo(Properties connProps) {

@@ -127,7 +127,10 @@
 		<!-- Nagios script -->
 		<fileSet>
 			<directory>src/install</directory>
-			<includes> <include>check_lsc.sh</include> </includes>
+			<includes>
+				<include>check_lsc.sh</include>
+				<include>check_lsc_remote.pl</include>
+			</includes>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>

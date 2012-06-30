@@ -831,11 +831,6 @@
 			<version>1.0.0-M11</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.directory.client.ldap</groupId>
-			<artifactId>ldap-client-api</artifactId>
-			<version>0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.directory.shared</groupId>
 			<artifactId>shared-ldap</artifactId>
 			<version>0.9.19</version>

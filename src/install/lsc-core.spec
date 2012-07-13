@@ -12,7 +12,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	2.0rc2
+%define lsc_version	2.0
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -65,7 +65,7 @@ mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
 mkdir -p %{buildroot}/etc/cron.d
 mkdir -p %{buildroot}/etc/init.d
 mkdir -p %{buildroot}/etc/default
-mkdir -p %{buildroot}/usr/share/doc/lsc
+mkdir -p %{buildroot}/usr/share/doc/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
 
 # Copy files
@@ -128,7 +128,8 @@ fi
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 
 # Add symlink for sample to work
-ln -sf /usr/%{_lib}/lsc /usr/share/doc/lsc/%{_lib}
+ln -sf /usr/%{_lib}/lsc/ /usr/share/doc/lsc/%{_lib}
+ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
 
 %postun
 #=================================================

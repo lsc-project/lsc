@@ -14,3 +14,5 @@ LSC_TASKS="all"
 # JMX
 LSC_JMXPORT="1099"
 
+# JAVA
+#JAVA_HOME=/usr/java/jdk/jre

@@ -68,6 +68,9 @@ LSC_TASKS="all"
 # JMX
 LSC_JMXPORT=1099
 
+# JAVA
+JAVA_HOME=""
+
 # Script specific
 PROG_NAME=`basename $0 | sed 's/^[KS][0-9][0-9]//'` # For nice messages
 OS=`uname -s`   # To adapt message printing
@@ -111,7 +114,7 @@ fi
 #====================================================================
 if [ "$LSC_USER" -a $MYUID -eq 0 ]
 then
-	SU="su -s /bin/bash - $LSC_USER -c "
+	SU="su -s /bin/bash $LSC_USER -c "
 fi
 
 #====================================================================
@@ -137,6 +140,11 @@ do
 		exit 1
 	fi
 done
+
+# Export JAVA_HOME
+if [ "z" != "z${JAVA_HOME}" ]; then
+	export JAVA_HOME=$JAVA_HOME       
+fi
 
 #====================================================================
 # Functions

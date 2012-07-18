@@ -206,7 +206,7 @@ function get_java() {
     fi  
 
     # Try java command on PATH as an alternative
-    JAVA_COMMAND="$(which java)"
+    JAVA_COMMAND="$(which java 2>/dev/null)"
     if [ -e "$JAVA_COMMAND" ]; then return; fi
 
     # Nothing seems approprite, warn and exit

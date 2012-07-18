@@ -45,19 +45,6 @@
 #   Jonathan Clarke <jon@lsc-project.org>
 #   Remy-Christophe Schermesser <rcs@lsc-project.org>
 #
-# ---------------------------------------------------------------------------------
-#
-# Version 0.2 (2010):
-# - Adapted the script as a demo of LSC (lsc sample)
-# - Removed all server start/stop operations, to just use a file database
-# - Update population: add SHUTDOWN after table creation and don't delete CSV
-#   file to allow re-opening of the DB.
-# Author: Jonathan Clarke
-#
-# Version 0.1 (2009):
-# - First version
-# Author: Thomas CHEMINEAU
-#
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ---------------------------------------------------------------------------------
@@ -71,7 +58,7 @@ if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
 fi
 
 # HSQLDB jar file
-HSQLDB_LIB=$SAMPLE_HOME/../../lib/hsqldb-1.8.0.10.jar
+HSQLDB_LIB=$SAMPLE_HOME/../../lib/hsqldb*.jar
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
 # HSQLDB configuration file
@@ -84,8 +71,8 @@ CSV_SEPARATOR=";"
 # Configuration for sample
 SAMPLE_CONFIG_DIR="$SAMPLE_HOME/etc"
 # is this Cygwin? if so, convert path to Windows format for the JVM
-CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
-if [ $? -eq 0 ]; then
+CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+if [ -e "$CYGPATH_COMMAND" ]; then
 	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
 	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
 	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
@@ -220,7 +207,7 @@ function get_java() {
 
     # Try java command on PATH as an alternative
     JAVA_COMMAND="$(which java)"
-    if [ $? -eq 0 ]; then return; fi
+    if [ -e "$JAVA_COMMAND" ]; then return; fi
 
     # Nothing seems approprite, warn and exit
     log "No java executable found on PATH or in JAVA_HOME! Aborting."
@@ -246,8 +233,8 @@ run_java_command()
 	done
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath)"
-	if [ $? -eq 0 ]; then
+	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+	if [ -e "$CYGPATH_COMMAND" ]; then
 		LDAPCP=$(cygpath -p -w "$LDAPCP")
 	fi
 
@@ -272,8 +259,8 @@ run() {
 	CONFIGPATH=$SAMPLE_HOME/etc;
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath)"
-	if [ $? -eq 0 ]; then
+	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+	if [ -e "$CYGPATH_COMMAND" ]; then
 		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
 		CONFIGPATH=$(cygpath -w "$CONFIGPATH")
 	fi
@@ -281,9 +268,9 @@ run() {
 	export CLASSPATH
 	export CONFIGPATH
 
-	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all"
+	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all --clean all"
 	echo "Running $command"
-	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --synchronize all
+	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --synchronize all --clean all
 }
 
 # ---------------------------------------------------------------------------------

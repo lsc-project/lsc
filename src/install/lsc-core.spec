@@ -139,6 +139,10 @@ ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
 # Don't do this if newer version is installed
 if [ $1 -eq 0 ]
 then
+	# Remove sample symlinks
+	rm -rf /usr/share/doc/lsc/%{_lib}
+	rm -rf /usr/share/doc/lsc/bin/
+
         # Delete user and group
         /usr/sbin/userdel -r %{lsc_user}
 fi

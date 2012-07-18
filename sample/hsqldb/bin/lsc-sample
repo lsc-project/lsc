@@ -71,8 +71,8 @@ CSV_SEPARATOR=";"
 # Configuration for sample
 SAMPLE_CONFIG_DIR="$SAMPLE_HOME/etc"
 # is this Cygwin? if so, convert path to Windows format for the JVM
-CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
-if [ $? -eq 0 ]; then
+CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+if [ -e "$CYGPATH_COMMAND" ]; then
 	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
 	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
 	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
@@ -207,7 +207,7 @@ function get_java() {
 
     # Try java command on PATH as an alternative
     JAVA_COMMAND="$(which java)"
-    if [ $? -eq 0 ]; then return; fi
+    if [ -e "$JAVA_COMMAND" ]; then return; fi
 
     # Nothing seems approprite, warn and exit
     log "No java executable found on PATH or in JAVA_HOME! Aborting."
@@ -233,8 +233,8 @@ run_java_command()
 	done
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath)"
-	if [ $? -eq 0 ]; then
+	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+	if [ -e "$CYGPATH_COMMAND" ]; then
 		LDAPCP=$(cygpath -p -w "$LDAPCP")
 	fi
 
@@ -259,8 +259,8 @@ run() {
 	CONFIGPATH=$SAMPLE_HOME/etc;
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath)"
-	if [ $? -eq 0 ]; then
+	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+	if [ -e "$CYGPATH_COMMAND" ]; then
 		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
 		CONFIGPATH=$(cygpath -w "$CONFIGPATH")
 	fi

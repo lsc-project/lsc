@@ -85,7 +85,7 @@ function get_java() {
 
 	# Try java command on PATH as an alternative
 	JAVA_COMMAND="$(which java)"
-	if [ $? -eq 0 ]; then return; fi
+	if [ -e "$JAVA_COMMAND" ]; then return; fi
 
 	# Nothing seems approprite, warn and exit
 	fatal "No java executable found on PATH or in JAVA_HOME! Aborting."
@@ -103,7 +103,7 @@ function build_classpath() {
 
 	# is this Cygwin? if so, convert path to Windows format for the JVM
 	CYGPATH_COMMAND="$(which cygpath > /dev/null 2>&1)"
-	if [ $? -eq 0 ]; then
+	if [ -e "$CYGPATH_COMMAND" ]; then
 		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
 	fi
 

@@ -2,7 +2,7 @@
 
 <configuration>
 
-	<!-- standard output to console -->
+	<!-- Standard output to console -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout class="org.lsc.utils.output.LdifLayout">
@@ -11,11 +11,10 @@
 		</encoder>
 	</appender>
 
-	<!-- log all application messages to the file /tmp/lsc.log -->
+	<!-- Log all application messages -->
 	<!-- this file is rotated every 10000KB, compressed and 7 files are kept for history -->
 	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<Append>true</Append>
-		<File>${LSC_HOME}/logs/lsc.log</File>
+		<file>/tmp/lsc/log/lsc.log</file>
 
 		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
@@ -36,15 +35,30 @@
 		</triggeringPolicy>
 	</appender>
 
-	<!-- special logger to have a LDIF file of all modifications applied -->
+
+	<!-- Log for status (to use with check_lsc_status_file.pl -->
+	<!-- this file is erased at each execution -->
+	<appender name="LSC_STATUS" class="ch.qos.logback.core.FileAppender">
+		<append>false</append>
+		<file>/tmp/lsc/log/lsc.status</file>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
+		</layout>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+	<!-- Special logger to have a LDIF file of all modifications applied -->
 	<!-- this file is rotated every 10000KB, compressed and 7 files are kept for history -->
 	<appender name="LDIF" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
-		<Append>true</Append>
-		<File>/tmp/lsc.ldif</File>
+		<file>/tmp/lsc/log/lsc.ldif</file>
 
 		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%m%n</Pattern>
+			<onlyLdif>true</onlyLdif>
 		</layout>
 
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -62,23 +76,27 @@
 		</triggeringPolicy>
 	</appender>
 
-	<!-- link log sources and log appenders -->
-	<logger name="communicationLogger" level="WARN">
-		<appender-ref ref="CONSOLE"/>
-	</logger>
+	<!-- Main LSC messages -->
 	<logger name="org.lsc" level="INFO">
 		<appender-ref ref="LSC"/>
+		<appender-ref ref="LSC_STATUS"/>
 	</logger>
+	<!-- Messages for LDIF output -->
 	<logger name="lsc" level="INFO">
 		<appender-ref ref="LDIF"/>
 	</logger>
-	<logger name="org.apache" level="WARN">
+	<!-- Other messages -->
+	<logger name="communicationLogger">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<logger name="poolLogger" level="ERROR">
+	<logger name="org.apache">
 		<appender-ref ref="CONSOLE"/>
 	</logger>
-	<root level="WARN">
+	<logger name="poolLogger">
+		<appender-ref ref="CONSOLE"/>
+	</logger>
+	<!-- Root logger -->
+	<root level="INFO">
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </configuration>

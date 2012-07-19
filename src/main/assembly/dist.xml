@@ -180,7 +180,7 @@
 			<excludes>
 				<exclude>junit:junit</exclude>
 				<exclude>org.forgerock.opendj:opendj-server</exclude>
-				<exclude>org.postgresql:postgresql</exclude>
+				<exclude>postgresql:postgresql</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
@@ -189,9 +189,11 @@
 			<outputDirectory>sample/lib</outputDirectory>
 			<includes>
 				<include>org.forgerock.opendj:opendj-server</include>
-				<include>org.postgresql:postgresql</include>
+				<include>postgresql:postgresql</include>
 				<!-- see also the tests jar included in a fileSet above -->
 			</includes>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
 		</dependencySet>
 	</dependencySets>
 </assembly>

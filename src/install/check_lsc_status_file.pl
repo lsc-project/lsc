@@ -155,6 +155,12 @@ if ( -z $logfile ) {
     exit $ERRORS{UNKNOWN};
 }
 
+# Open logfile
+unless ( open( LOG, "$logfile" ) ) {
+    printf "UNKNOWN: unable to parse LSC log file.\n";
+    exit $ERRORS{UNKNOWN};
+}
+
 # Check file age
 my $fileage = -M $logfile;
 $fileage = int( $fileage * 3600 );
@@ -162,12 +168,6 @@ $fileage = int( $fileage * 3600 );
 if ( defined $delay and $delay < $fileage ) {
     printf "CRITICAL: LSC log file too old ($fileage seconds).\n";
     exit $ERRORS{CRITICAL};
-}
-
-# Open logfile
-unless ( open( LOG, "$logfile" ) ) {
-    printf "UNKNOWN: unable to parse LSC log file.\n";
-    exit $ERRORS{UNKNOWN};
 }
 
 # Get all messages

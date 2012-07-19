@@ -119,7 +119,8 @@ public final class Launcher {
 		options.addOption("f", "config", true, "Specify configuration directory");
 		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: 5)");
 		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
-		options.addOption("x", "convert", false, "Convert lsc.properties to lsc.xml (-f is mandatory while converting)");
+		// Temporary disabled for 2.0 release, see #485
+//		options.addOption("x", "convert", false, "Convert lsc.properties to lsc.xml (-f is mandatory while converting)");
 		options.addOption("h", "help", false, "Get this text");
 	}
 	

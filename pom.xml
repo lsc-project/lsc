@@ -491,9 +491,9 @@
 			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.postgresql</groupId>
+					<groupId>postgresql</groupId>
 					<artifactId>postgresql</artifactId>
-					<version>8.4-702</version>
+					<version>8.4-702.jdbc4</version>
 					<scope>provided</scope>
 				</dependency>
 			</dependencies>

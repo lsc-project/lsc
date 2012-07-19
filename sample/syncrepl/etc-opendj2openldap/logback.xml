@@ -2,59 +2,16 @@
 
 <configuration>
 
-	<!-- standard output to console -->
+	<!-- Standard output to console -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-			<layout class="org.lsc.utils.output.LdifLayout">
-				<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
-			</layout>
-		</encoder>
-	</appender>
-
-	<!-- log all application messages to the file /tmp/lsc.log -->
-	<!-- this file is rotated every 10000KB, compressed and 7 files are kept for history -->
-	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<Append>true</Append>
-		<File>${LSC_HOME}/logs/lsc.log</File>
-
 		<layout class="org.lsc.utils.output.LdifLayout">
 			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
 		</layout>
-
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
-
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<FileNamePattern>lsc.log.%i.gz</FileNamePattern>
-			<MinIndex>1</MinIndex>
-			<MaxIndex>7</MaxIndex>
-		</rollingPolicy>
-
-		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>10000KB</MaxFileSize>
-		</triggeringPolicy>
 	</appender>
 
-	<!-- link log sources and log appenders -->
-	<logger name="communicationLogger" level="WARN">
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-	<logger name="org.lsc" level="DEBUG">
-		<appender-ref ref="LSC"/>
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-	<logger name="lsc" level="DEBUG" additivity="false">
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-	<logger name="org.apache" level="WARN">
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-	<logger name="poolLogger" level="ERROR">
-		<appender-ref ref="CONSOLE"/>
-	</logger>
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="CONSOLE"/>
 	</root>
+
 </configuration>
 

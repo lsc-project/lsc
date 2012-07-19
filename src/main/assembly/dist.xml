@@ -128,8 +128,8 @@
 		<fileSet>
 			<directory>src/install</directory>
 			<includes>
-				<include>check_lsc.sh</include>
 				<include>check_lsc_remote.pl</include>
+				<include>check_lsc_status_file.pl</include>
 			</includes>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>

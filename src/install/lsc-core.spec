@@ -89,8 +89,7 @@ cp -a etc/default/lsc %{buildroot}/etc/default/lsc
 
 # Reconfigure files
 ## logback
-sed -i 's:${LSC_HOME}/logs/lsc.log:%{lsc_logdir}/lsc.log:' %{buildroot}/etc/lsc/logback.xml
-sed -i 's:/tmp/lsc.ldif:%{lsc_logdir}/lsc.ldif:' %{buildroot}/etc/lsc/logback.xml
+sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' %{buildroot}/etc/lsc/logback.xml
 ## cron
 sed -i 's: root : %{lsc_user} :' %{buildroot}/etc/cron.d/lsc
 sed -i 's:#LSC_BIN#:/usr/bin/lsc:g' %{buildroot}/etc/cron.d/lsc

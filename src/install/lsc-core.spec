@@ -67,6 +67,7 @@ mkdir -p %{buildroot}/etc/init.d
 mkdir -p %{buildroot}/etc/default
 mkdir -p %{buildroot}/usr/share/doc/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
+mkdir -p %{buildroot}/var/lib/lsc/nagios
 
 # Copy files
 ## bin
@@ -86,6 +87,8 @@ cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
 ## init
 cp -a etc/init.d/lsc %{buildroot}/etc/init.d/lsc
 cp -a etc/default/lsc %{buildroot}/etc/default/lsc
+## nagios
+cp -a bin/check_lsc* %{buildroot}/var/lib/lsc/nagios
 
 # Reconfigure files
 ## logback
@@ -167,6 +170,7 @@ rm -rf %{buildroot}
 /usr/%{_lib}/lsc/
 /usr/share/doc/lsc
 %{lsc_logdir}
+/var/lib/lsc/nagios
 
 #=================================================
 # Changelog

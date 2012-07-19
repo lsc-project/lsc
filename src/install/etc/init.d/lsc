@@ -224,6 +224,8 @@ start_lsc() {
 		exit 1
 	fi
 
+	sleep 2
+
 	# Is LSC launched?
 	PID=`cat $LSC_PID_FILE`
 	if [ ! -e /proc/$PID ]
@@ -258,7 +260,7 @@ stop_lsc() {
 
 			kill $PID
 
-			sleep 1
+			sleep 2
 
 			if [ -e /proc/$PID ]
 			then

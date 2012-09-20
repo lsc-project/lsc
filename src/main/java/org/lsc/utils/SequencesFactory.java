@@ -168,6 +168,7 @@ public class SequencesFactory {
 }
 
 class Sequence {
+	public static final int INCREMENT_MAX_RETRY = 5;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
 
@@ -236,14 +237,32 @@ class Sequence {
 	 * @return Next value to set, or -1 if an error occurred
 	 */
 	public synchronized int getNextValue() {
+		for (int i=0; i<INCREMENT_MAX_RETRY; i++) {
+			int newValue = incrementValue();
+			if (newValue != -1) {
+				return newValue;
+			} else {
+				LOGGER.warn("Failed to update the directory for the value of the sequence {}/{}, retrying: "+(i+1)+"/"+INCREMENT_MAX_RETRY, getDn(), getAttributeName());
+			}
+		}
+		LOGGER.error("Maximum retry ("+INCREMENT_MAX_RETRY+") reached to increment sequence {}/{}", getDn(), getAttributeName());
+		return -1;
+	}
+	
+	private synchronized int incrementValue() {
 		int newValue = 0;
 		try {
 			if (!readValue()) {
 				return -1;
 			}
 			
-			newValue = getCurrentValue() + 1;
+			int value = getCurrentValue();
+			newValue = value + 1;
 			
+			Attribute valueAttribute = new BasicAttribute(getAttributeName());
+			valueAttribute.clear();
+			valueAttribute.add("" + value);
+
 			Attribute newValueAttribute = new BasicAttribute(getAttributeName());
 			newValueAttribute.clear();
 			newValueAttribute.add("" + newValue);
@@ -252,12 +271,14 @@ class Sequence {
 			JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
 			jm.setDistinguishName(getDn());
 			List<ModificationItem> mi = new ArrayList<ModificationItem>();
-			mi.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, newValueAttribute));
+			mi.add(new ModificationItem(DirContext.REMOVE_ATTRIBUTE, valueAttribute));
+			mi.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, newValueAttribute));
 			jm.setModificationItems(mi);
 
-			jndiServices.apply(jm);
+			if (!jndiServices.apply(jm)) {
+				return -1;
+			}
 		} catch (NamingException e) {
-			LOGGER.error("Failed to update the directory for the value of the sequence {}/{}", getDn(), getAttributeName());
 			return -1;
 		}
 

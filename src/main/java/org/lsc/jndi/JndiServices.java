@@ -49,7 +49,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -92,12 +91,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.directory.shared.ldap.codec.api.ControlFactory;
 import org.apache.directory.shared.ldap.codec.api.LdapApiService;
 import org.apache.directory.shared.ldap.codec.api.LdapApiServiceFactory;
-import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
-import org.apache.directory.shared.ldap.exception.LdapInvalidDnException;
 import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
-import org.apache.directory.shared.ldap.name.DN;
-import org.apache.directory.shared.ldap.name.RDN;
-import org.apache.directory.shared.ldap.util.LdapURL;
+import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.model.name.Dn;
+import org.apache.directory.shared.ldap.model.name.Rdn;
+import org.apache.directory.shared.ldap.model.url.LdapUrl;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.configuration.LdapAuthenticationType;
@@ -131,7 +130,7 @@ public final class JndiServices {
 	private StartTlsResponse tlsResponse;
 
 	/** The context base dn. */
-	private org.apache.directory.shared.ldap.name.DN contextDn;
+	private Dn contextDn;
 
 	/** The instances cache. */
 	private static Map<Properties, JndiServices> cache = new HashMap<Properties, JndiServices>();
@@ -139,7 +138,7 @@ public final class JndiServices {
 	/** Number of results per page (through PagedResults extended control). */
 	private int pageSize;
 
-	private LdapURL namingContext;
+	private LdapUrl namingContext;
 
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
@@ -203,7 +202,7 @@ public final class JndiServices {
 
 		/* get LDAP naming context */
 		try {
-			namingContext = new LdapURL((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
+			namingContext = new LdapUrl((String) ctx.getEnvironment().get(Context.PROVIDER_URL));
 		} catch (LdapURLEncodingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
@@ -360,7 +359,7 @@ public final class JndiServices {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, "none");
 		}
 		try {
-            LdapURL connectionUrl = new LdapURL(connection.getUrl());
+            LdapUrl connectionUrl = new LdapUrl(connection.getUrl());
             if(connectionUrl.getHost() == null) {
                 if(LOGGER.isDebugEnabled()) LOGGER.debug("Hostname is empty in LDAP URL, will try to lookup through the naming context ...");
                 String domainExt = convertToDomainExtension(connectionUrl.getDn());
@@ -421,18 +420,17 @@ public final class JndiServices {
         return hostname + ":389";
     }
 
-    private static String convertToDomainExtension(DN dn) {
+    private static String convertToDomainExtension(Dn dn) {
         String fqdn = "";
-        Enumeration<RDN> rdns = dn.getAllRdn();
-        while(rdns.hasMoreElements()) {
-            RDN rdn = rdns.nextElement();
-            if(!rdn.getAtav().getUpType().equalsIgnoreCase("dc")) {
+        List<Rdn> rdns = dn.getRdns();
+        for (Rdn rdn: rdns) {
+            if(!rdn.getAva().getType().equalsIgnoreCase("dc")) {
                 return null;
             }
             if(fqdn.length() > 0) {
-                fqdn = rdn.getNormValue() + "." + fqdn;
+                fqdn = rdn.getNormValue().getString() + "." + fqdn;
             } else {
-                fqdn = rdn.getNormValue();
+                fqdn = rdn.getNormValue().getString();
             }
         }
         return fqdn;
@@ -612,8 +610,8 @@ public final class JndiServices {
 
     public String rewriteBase(final String base) {
         try {
-            DN baseDn = new DN(base);
-            if (!baseDn.isChildOf(contextDn)) {
+            Dn baseDn = new Dn(base);
+            if (!baseDn.isDescendantOf(contextDn)) {
                 return base;
             }
             
@@ -621,7 +619,7 @@ public final class JndiServices {
                 return "";
             }
             
-            DN relativeDn = baseDn.getSuffix(contextDn.getRdns().size());
+            Dn relativeDn = baseDn.getDescendantOf(contextDn);
             return relativeDn.toString();
         } catch (LdapInvalidDnException e) {
             throw new RuntimeException(e);

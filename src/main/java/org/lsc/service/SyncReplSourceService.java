@@ -65,9 +65,6 @@ import org.apache.directory.ldap.client.api.LdapConnectionFactory;
 import org.apache.directory.ldap.client.api.future.SearchFuture;
 import org.apache.directory.shared.ldap.codec.decorators.SearchResultEntryDecorator;
 import org.apache.directory.shared.ldap.codec.osgi.DefaultLdapCodecService;
-import org.apache.directory.shared.ldap.codec.search.controls.ChangeType;
-import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
-import org.apache.directory.shared.ldap.entry.EntryAttribute;
 import org.apache.directory.shared.ldap.extras.controls.SyncStateTypeEnum;
 import org.apache.directory.shared.ldap.extras.controls.SyncStateValue;
 import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncRequestValueDecorator;
@@ -77,6 +74,7 @@ import org.apache.directory.shared.ldap.model.entry.Entry;
 import org.apache.directory.shared.ldap.model.entry.Value;
 import org.apache.directory.shared.ldap.model.exception.LdapException;
 import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.shared.ldap.model.message.LdapResult;
 import org.apache.directory.shared.ldap.model.message.MessageTypeEnum;
 import org.apache.directory.shared.ldap.model.message.Response;
@@ -86,9 +84,10 @@ import org.apache.directory.shared.ldap.model.message.SearchRequestImpl;
 import org.apache.directory.shared.ldap.model.message.SearchResultDone;
 import org.apache.directory.shared.ldap.model.message.SearchScope;
 import org.apache.directory.shared.ldap.model.message.controls.AbstractControl;
+import org.apache.directory.shared.ldap.model.message.controls.PersistentSearch;
 import org.apache.directory.shared.ldap.model.message.controls.PersistentSearchImpl;
 import org.apache.directory.shared.ldap.model.name.Dn;
-import org.apache.directory.shared.ldap.util.LdapURL;
+import org.apache.directory.shared.ldap.model.url.LdapUrl;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.AsyncLdapSourceServiceType;
@@ -136,9 +135,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	}
 
 	public static LdapAsyncConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
-		LdapURL url;
+		LdapUrl url;
 		try {
-            url = new LdapURL(ldapConn.getUrl());
+            url = new LdapUrl(ldapConn.getUrl());
             LdapAsyncConnection conn = LdapConnectionFactory.getNetworkConnection(url.getHost(), (url.getPort() != -1 ? url.getPort() : 389));
             LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setSslProtocol(url.getScheme());
@@ -339,7 +338,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		    searchControl.setCritical(true);
 			searchControl.setChangesOnly(true);
 			searchControl.setReturnECs(false);
-			searchControl.setChangeTypes(ChangeType.ADD_VALUE + ChangeType.DELETE_VALUE + ChangeType.MODDN_VALUE + ChangeType.MODIFY_VALUE);
+			searchControl.setChangeTypes(PersistentSearch.CHANGE_TYPES_MAX);
 			return searchControl;
 		case ACTIVE_DIRECTORY:
 			return new AbstractControl("1.2.840.113556.1.4.528", true) {};
@@ -357,30 +356,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		return convertEntry(entry, false);
 	}
 	
-    private LscDatasets convertEntry(org.apache.directory.shared.ldap.entry.Entry entry, boolean onlyFirstValue) {
-        if(entry == null) return null;
-        LscDatasets converted = new LscDatasets();
-        Iterator<EntryAttribute> entryAttributes = entry.iterator();
-        while(entryAttributes.hasNext()) {
-            EntryAttribute attr = entryAttributes.next();
-            if(attr != null && attr.size() > 0)  {
-                Iterator<org.apache.directory.shared.ldap.entry.Value<?>> values = attr.iterator();
-                if(!onlyFirstValue) {
-                    Set<Object> datasetsValues = new HashSet<Object>();
-                    while(values.hasNext()) {
-                        org.apache.directory.shared.ldap.entry.Value<?> value = values.next();
-                        datasetsValues.add(value.getString());
-                    }
-                    converted.getDatasets().put(attr.getId(), datasetsValues);
-                } else {
-                    org.apache.directory.shared.ldap.entry.Value<?> value = values.next();
-                    converted.getDatasets().put(attr.getId(), value.getString());
-                }
-            }
-        }
-        return converted;
-    }
-
 	private LscDatasets convertEntry(Entry entry, boolean onlyFirstValue) {
 		if(entry == null) return null;
 		LscDatasets converted = new LscDatasets();

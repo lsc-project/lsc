@@ -59,8 +59,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 
-import org.apache.directory.shared.ldap.codec.util.LdapURLEncodingException;
-import org.apache.directory.shared.ldap.util.LdapURL;
+import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.model.url.LdapUrl;
 import org.lsc.jndi.JndiServices;
 
 /**
@@ -233,7 +233,7 @@ public class LDAP {
 		// interpret the search URL to feed to JndiServices
 		// this is done first to thrown MalformedURLException ASAP, not after
 		// connecting...
-		LdapURL urlInstance = new LdapURL(url);
+		LdapUrl urlInstance = new LdapUrl(url);
 
 		// get JndiServices for this bindDn and bindPassword
 		JndiServices bindJndiServices;

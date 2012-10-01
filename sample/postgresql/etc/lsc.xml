@@ -56,7 +56,7 @@
        	<requestsNameForDelete><string>deleteInetOrgPerson</string></requestsNameForDelete>
       </databaseDestinationService>
       <propertiesBasedSyncOptions>
-        <mainIdentifier>"mail="+srcBean.getDatasetFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"mail="+srcBean.getDatasetFirstValueById("mail") + ",ou=Sample,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
         <conditions>

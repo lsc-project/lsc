@@ -45,7 +45,10 @@
  */
 package org.lsc;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -55,6 +58,7 @@ import javax.naming.CommunicationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ISyncOptions;
@@ -236,6 +240,12 @@ public abstract class AbstractSynchronize {
 					if (doDelete || nodelete) {
 						lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
 						lm.setMainIdentifer(id.getKey());
+						
+						List<LscDatasetModification> attrsMod = new ArrayList<LscDatasetModification>();
+						for (Entry<String,Object> attr : id.getValue().getDatasets().entrySet()) {
+							attrsMod.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, attr.getKey(), Collections.singletonList(attr.getValue())));
+						}
+						lm.setLscAttributeModifications(attrsMod);
 
 						// if "nodelete" was specified in command line options,
 						// or if the condition is false,

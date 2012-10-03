@@ -388,7 +388,7 @@ public final class JndiServices {
 			props.setProperty("java.naming.ldap.derefAliases", getDerefJndiValue(LdapDerefAliasesType.NEVER));
 		}
 		if(connection.getBinaryAttributes() != null) {
-			props.setProperty("java.naming.ldap.binaryAttributes", StringUtils.join(connection.getBinaryAttributes().getString(), ", "));
+			props.setProperty("java.naming.ldap.attributes.binary", StringUtils.join(connection.getBinaryAttributes().getString(), " "));
 		}
 		if(connection.getPageSize() != null) {
 			props.setProperty("java.naming.ldap.pageSize", "" + connection.getPageSize());

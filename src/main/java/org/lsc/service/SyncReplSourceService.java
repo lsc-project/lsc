@@ -63,10 +63,12 @@ import org.apache.directory.ldap.client.api.LdapAsyncConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapConnectionFactory;
 import org.apache.directory.ldap.client.api.future.SearchFuture;
+import org.apache.directory.shared.ldap.codec.api.DefaultConfigurableBinaryAttributeDetector;
 import org.apache.directory.shared.ldap.codec.decorators.SearchResultEntryDecorator;
 import org.apache.directory.shared.ldap.codec.osgi.DefaultLdapCodecService;
 import org.apache.directory.shared.ldap.extras.controls.SyncStateTypeEnum;
 import org.apache.directory.shared.ldap.extras.controls.SyncStateValue;
+import org.apache.directory.shared.ldap.extras.controls.SynchronizationModeEnum;
 import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncRequestValueDecorator;
 import org.apache.directory.shared.ldap.model.cursor.EntryCursor;
 import org.apache.directory.shared.ldap.model.entry.Attribute;
@@ -75,6 +77,8 @@ import org.apache.directory.shared.ldap.model.entry.Value;
 import org.apache.directory.shared.ldap.model.exception.LdapException;
 import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.shared.ldap.model.message.AliasDerefMode;
+import org.apache.directory.shared.ldap.model.message.Control;
 import org.apache.directory.shared.ldap.model.message.LdapResult;
 import org.apache.directory.shared.ldap.model.message.MessageTypeEnum;
 import org.apache.directory.shared.ldap.model.message.Response;
@@ -143,6 +147,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			lcc.setSslProtocol(url.getScheme());
 			lcc.setUseSsl("ldaps".equalsIgnoreCase(url.getScheme()));
 			lcc.setName(lcc.getName());
+			DefaultConfigurableBinaryAttributeDetector bad = new DefaultConfigurableBinaryAttributeDetector();
+			bad.addBinaryAttribute(ldapConn.getBinaryAttributes().getString().toArray(new String[0]));
+			lcc.setBinaryAttributeDetector(bad);
 //			lco.setFollowReferrals(ldapConn.getReferralHandling() == ReferralHandling.THROUGH);
 			if(conn.connect()) {
 				conn.bind(ldapConn.getUsername(), ldapConn.getPassword());
@@ -260,7 +267,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				searchRequest.setBase(new Dn(getBaseDn()));
 				searchRequest.setFilter(getFilterAll());
 				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
-				searchRequest.setScope(org.apache.directory.shared.ldap.model.message.SearchScope.SUBTREE);
+				searchRequest.setScope(SearchScope.SUBTREE);
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
 				sf = getConnection(ldapConn).searchAsync(searchRequest);
 			} catch (LdapInvalidDnException e) {
@@ -306,27 +313,27 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		return true;
 	}
 
-    private org.apache.directory.shared.ldap.model.message.AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
+    private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
 		switch(aliasesHandling) {
 		case ALWAYS:
-			return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_ALWAYS;
+			return AliasDerefMode.DEREF_ALWAYS;
 		case FIND:
-            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+            return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
 		case SEARCH:
-            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.DEREF_IN_SEARCHING;
+            return AliasDerefMode.DEREF_IN_SEARCHING;
 		case NEVER:
 		default:
-            return org.apache.directory.shared.ldap.model.message.AliasDerefMode.NEVER_DEREF_ALIASES;
+            return AliasDerefMode.NEVER_DEREF_ALIASES;
 		}
 	}
 
-	public static org.apache.directory.shared.ldap.model.message.Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
+	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
 		switch(serverType) {
 		case OPEN_LDAP:
 		case APACHE_DS:
 		    DefaultLdapCodecService codec = new DefaultLdapCodecService();
 		    SyncRequestValueDecorator syncControl = new SyncRequestValueDecorator(codec);
-		    syncControl.setMode(org.apache.directory.shared.ldap.extras.controls.SynchronizationModeEnum.REFRESH_AND_PERSIST);
+		    syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
 		    return syncControl;
 		case OPEN_DS:
 		case OPEN_DJ:

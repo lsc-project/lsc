@@ -47,6 +47,9 @@ package org.lsc.service;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +61,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.directory.ldap.client.api.LdapAsyncConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
@@ -142,11 +146,20 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		LdapUrl url;
 		try {
             url = new LdapUrl(ldapConn.getUrl());
-            LdapAsyncConnection conn = LdapConnectionFactory.getNetworkConnection(url.getHost(), (url.getPort() != -1 ? url.getPort() : 389));
+            boolean isLdaps = "ldaps://".equalsIgnoreCase(url.getScheme());
+            int port = url.getPort();
+            if (port == -1) {
+            	port = isLdaps ? 636 : 389;
+            }
+            LdapAsyncConnection conn = LdapConnectionFactory.getNetworkConnection(url.getHost(), port);
             LdapConnectionConfig lcc = conn.getConfig();
-			lcc.setSslProtocol(url.getScheme());
-			lcc.setUseSsl("ldaps".equalsIgnoreCase(url.getScheme()));
-			lcc.setName(lcc.getName());
+			lcc.setUseSsl(isLdaps);
+			
+			/* Use default SUN TrustManager. See https://issues.apache.org/jira/browse/DIRAPI-91 */
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			tmf.init((KeyStore)null);
+			lcc.setTrustManagers(tmf.getTrustManagers());
+			
 			if(ldapConn.getBinaryAttributes() != null) {
 				DefaultConfigurableBinaryAttributeDetector bad = new DefaultConfigurableBinaryAttributeDetector();
 				bad.addBinaryAttribute(ldapConn.getBinaryAttributes().getString().toArray(new String[0]));
@@ -165,7 +178,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (LdapException e) {
             throw new LscServiceConfigurationException(e.toString(), e);
-        }
+        } catch (NoSuchAlgorithmException e) {
+            throw new LscServiceConfigurationException(e.toString(), e);
+		} catch (KeyStoreException e) {
+            throw new LscServiceConfigurationException(e.toString(), e);
+		}
 	}
 	
 	public void close() throws IOException {

@@ -217,7 +217,11 @@ public class LdifLayout extends PatternLayout {
 			// SAFE-STRING per RFC2849
 			sValue = getStringValue(value);
 			if(isLdifSafeString(sValue)) {
-				sb.append(": ").append(value);
+				if (value instanceof byte[]) {
+					sb.append(": ").append(sValue);
+				} else {
+					sb.append(": ").append(value);
+				}
 			} else {
 				if (value instanceof byte[]) {
 					sb.append(":: ").append(toBase64((byte[])value));

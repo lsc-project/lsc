@@ -219,7 +219,11 @@ public class LdifLayout extends PatternLayout {
 			if(isLdifSafeString(sValue)) {
 				sb.append(": ").append(value);
 			} else {
-				sb.append(":: ").append(toBase64(sValue));
+				if (value instanceof byte[]) {
+					sb.append(":: ").append(toBase64((byte[])value));
+				} else {
+					sb.append(":: ").append(toBase64(sValue));
+				}
 			}
 			
 			// new line
@@ -238,6 +242,10 @@ public class LdifLayout extends PatternLayout {
 
 	public static String toBase64(String value) {
 		return new String(new Base64().encode(value.getBytes(Charset.forName("utf-8"))));
+	}
+	
+	public static String toBase64(byte[] value) {
+		return new String(new Base64().encode(value));
 	}
 
 	/**

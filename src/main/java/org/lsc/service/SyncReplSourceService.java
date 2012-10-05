@@ -394,12 +394,16 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 					Set<Object> datasetsValues = new HashSet<Object>();
 					while(values.hasNext()) {
 						Value<?> value = values.next();
-						datasetsValues.add(value.getString());
+						if (value.isHumanReadable()) {
+							datasetsValues.add(value.getString());
+						} else {
+							datasetsValues.add(value.getBytes());
+						}
 					}
 					converted.getDatasets().put(attr.getId(), datasetsValues);
 				} else {
 					Value<?> value = values.next();
-					converted.getDatasets().put(attr.getId(), value.getString());
+					converted.getDatasets().put(attr.getId(), value.isHumanReadable() ? value.getString() : value.getBytes());
 				}
 			}
 		}

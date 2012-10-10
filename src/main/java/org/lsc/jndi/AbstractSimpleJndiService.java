@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingEnumeration;
@@ -240,17 +241,17 @@ public abstract class AbstractSimpleJndiService {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource, String searchString) throws NamingException {
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
+        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());
-				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(valueId));
 			}
 		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(id);
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		} else {
 			// this is kept for backwards compatibility but will be removed
-			searchString = filterIdSync.replaceAll("\\{0\\}", id);
+			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
 		}
 
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);

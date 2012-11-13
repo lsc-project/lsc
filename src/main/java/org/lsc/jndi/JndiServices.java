@@ -146,6 +146,9 @@ public final class JndiServices {
 	/** Attribute name to sort on. */
 	private String sortedBy;
 	
+	/** Remember connection properties to reconnect */
+	private Properties connProps;
+	
 	/**
 	 * Initiate the object and the connection according to the properties.
 	 *
@@ -155,7 +158,12 @@ public final class JndiServices {
 	 * @throws IOException thrown if an error occurs negotiating StartTLS operation
 	 */
 	private JndiServices(final Properties connProps) throws NamingException, IOException {
+		this.connProps = connProps;
+		initConnection();
+	}
 
+	private void initConnection()
+			throws NamingException, IOException {
 		// log new connection with it's details
 		logConnectingTo(connProps);
 
@@ -304,21 +312,10 @@ public final class JndiServices {
         if(forceNewConnection) {
             return new JndiServices(props);
         } else {
-            JndiServices instance = cache.get(props);
-            if (instance == null) {
-                instance = new JndiServices(props);
-            } else {
-                try {
-                    instance.getContext().lookup("");
-                } catch (Exception e) {
-                    LOGGER.warn("Connection is closed. Create a new JndiServices. " + e.getMessage());
-                    LOGGER.debug("Error checking connection: ", e);
-                    instance = new JndiServices(props);
-                }
-            }
-            cache.put(props, instance);
-            return instance;
-        
+        	if (!cache.containsKey(props)) {
+        		cache.put(props, new JndiServices(props));
+        	}
+        	return cache.get(props);
         }
 	}
 
@@ -514,6 +511,25 @@ public final class JndiServices {
 	 */
 	public SearchResult getEntry(final String base, final String filter,
 					final SearchControls sc, final int scope) throws NamingException {
+		try {
+			return doGetEntry(base, filter, sc, scope);
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			return doGetEntry(base, filter, sc, scope);
+		}
+	}
+
+	private SearchResult doGetEntry(final String base, final String filter,
+			final SearchControls sc, final int scope) throws NamingException {
 		//sanity checks
 		String searchBase = base == null ? "" : base;
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
@@ -628,6 +644,25 @@ public final class JndiServices {
 
 	public SearchResult readEntry(final String base, final String filter,
 					final boolean allowError, final SearchControls sc) throws NamingException {
+		try {
+			return doReadEntry(base, filter, allowError, sc);
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			return doReadEntry(base, filter, allowError, sc);
+		}
+	}
+	
+	private SearchResult doReadEntry(final String base, final String filter,
+			final boolean allowError, final SearchControls sc) throws NamingException {
 		NamingEnumeration<SearchResult> ne = null;
 		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 		try {
@@ -670,6 +705,25 @@ public final class JndiServices {
 	 */
 	public List<String> getDnList(final String base, final String filter,
 					final int scope) throws NamingException {
+		try {
+			return doGetDnList(base, filter, scope);
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			return doGetDnList(base, filter, scope);
+		}
+	}
+	
+	private List<String> doGetDnList(final String base, final String filter,
+			final int scope) throws NamingException {
 		NamingEnumeration<SearchResult> ne = null;
 		List<String> iist = new ArrayList<String>();
 		try {
@@ -705,6 +759,29 @@ public final class JndiServices {
 	 * @throws CommunicationException If the connection to the directory is lost
 	 */
 	public boolean apply(final JndiModifications jm) throws CommunicationException {
+		try {
+			return doApply(jm);
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			} catch (NamingException nex) {
+				LOGGER.error("Naming error: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			return doApply(jm);
+		}
+	}
+
+	private boolean doApply(final JndiModifications jm) throws CommunicationException {
 		if (jm == null) {
 			return true;
 		}
@@ -793,6 +870,26 @@ public final class JndiServices {
 	 * @throws NamingException thrown if an error is encountered
 	 */
 	private void deleteChildrenRecursively(String distinguishName) throws NamingException {
+		try {
+			doDeleteChildrenRecursively(distinguishName);
+			return;
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			doDeleteChildrenRecursively(distinguishName);
+			return;
+		}
+	}
+
+	private void doDeleteChildrenRecursively(String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
 		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
@@ -926,6 +1023,26 @@ public final class JndiServices {
 	public Map<String, LscDatasets> getAttrsList(final String base,
 					final String filter, final int scope, final List<String> attrsNames)
 					throws NamingException {
+		try {
+			return doGetAttrsList(base, filter, scope, attrsNames);
+		} catch (CommunicationException cex) {
+			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
+			LOGGER.debug(cex.getMessage(), cex);
+			try {
+				initConnection();
+			} catch (IOException ioex) {
+				LOGGER.error("I/O error: " + ioex.getMessage());
+				LOGGER.debug(ioex.getMessage(), ioex);
+				// throw the initial communication exception
+				throw cex;
+			}
+			return doGetAttrsList(base, filter, scope, attrsNames);
+		}
+	}
+
+	public Map<String, LscDatasets> doGetAttrsList(final String base,
+			final String filter, final int scope, final List<String> attrsNames)
+			throws NamingException {
 
 		// sanity checks
 		String searchBase = base == null ? "" : rewriteBase(base);

@@ -15,7 +15,7 @@
 #==========================================================================
 # Version
 #==========================================================================
-my $VERSION = '0.1';
+my $VERSION = '2.0.2';
 
 #==========================================================================
 # Modules
@@ -163,7 +163,7 @@ unless ( open( LOG, "$logfile" ) ) {
 
 # Check file age
 my $fileage = -M $logfile;
-$fileage = int( $fileage * 3600 );
+$fileage = int( $fileage * 3600 * 24 );
 
 if ( defined $delay and $delay < $fileage ) {
     printf "CRITICAL: LSC log file too old ($fileage seconds).\n";

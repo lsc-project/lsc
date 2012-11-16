@@ -61,6 +61,7 @@ import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.ServiceUnavailableException;
 import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
@@ -513,18 +514,22 @@ public final class JndiServices {
 					final SearchControls sc, final int scope) throws NamingException {
 		try {
 			return doGetEntry(base, filter, sc, scope);
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
+		} catch (NamingException nex) {
+			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				try {
+					initConnection();
+				} catch (IOException ioex) {
+					LOGGER.error("I/O error: " + ioex.getMessage());
+					LOGGER.debug(ioex.getMessage(), ioex);
+					// throw the initial communication exception
+					throw nex;
+				}
+				return doGetEntry(base, filter, sc, scope);
+			} else {
+				throw nex;
 			}
-			return doGetEntry(base, filter, sc, scope);
 		}
 	}
 
@@ -646,18 +651,22 @@ public final class JndiServices {
 					final boolean allowError, final SearchControls sc) throws NamingException {
 		try {
 			return doReadEntry(base, filter, allowError, sc);
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
+		} catch (NamingException nex) {
+			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				try {
+					initConnection();
+				} catch (IOException ioex) {
+					LOGGER.error("I/O error: " + ioex.getMessage());
+					LOGGER.debug(ioex.getMessage(), ioex);
+					// throw the initial communication exception
+					throw nex;
+				}
+				return doReadEntry(base, filter, allowError, sc);
+			} else {
+				throw nex;
 			}
-			return doReadEntry(base, filter, allowError, sc);
 		}
 	}
 	
@@ -707,18 +716,22 @@ public final class JndiServices {
 					final int scope) throws NamingException {
 		try {
 			return doGetDnList(base, filter, scope);
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
+		} catch (NamingException nex) {
+			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				try {
+					initConnection();
+				} catch (IOException ioex) {
+					LOGGER.error("I/O error: " + ioex.getMessage());
+					LOGGER.debug(ioex.getMessage(), ioex);
+					// throw the initial communication exception
+					throw nex;
+				}
+				return doGetDnList(base, filter, scope);
+			} else {
+				throw nex;
 			}
-			return doGetDnList(base, filter, scope);
 		}
 	}
 	
@@ -859,6 +872,12 @@ public final class JndiServices {
 				// we lost the connection to the source or destination, stop everything!
 				throw (CommunicationException) ne;
 			}
+			if (ne instanceof ServiceUnavailableException) {
+				// we lost the connection to the source or destination, stop everything!
+				CommunicationException ce = new CommunicationException(ne.getExplanation());
+				ce.setRootCause(ne);
+				throw ce;
+			}
 			
 			return false;
 		}
@@ -873,19 +892,23 @@ public final class JndiServices {
 		try {
 			doDeleteChildrenRecursively(distinguishName);
 			return;
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
+		} catch (NamingException nex) {
+			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				try {
+					initConnection();
+				} catch (IOException ioex) {
+					LOGGER.error("I/O error: " + ioex.getMessage());
+					LOGGER.debug(ioex.getMessage(), ioex);
+					// throw the initial communication exception
+					throw nex;
+				}
+				doDeleteChildrenRecursively(distinguishName);
+				return;
+			} else {
+				throw nex;
 			}
-			doDeleteChildrenRecursively(distinguishName);
-			return;
 		}
 	}
 
@@ -1025,18 +1048,22 @@ public final class JndiServices {
 					throws NamingException {
 		try {
 			return doGetAttrsList(base, filter, scope, attrsNames);
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
+		} catch (NamingException nex) {
+			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.debug(nex.getMessage(), nex);
+				try {
+					initConnection();
+				} catch (IOException ioex) {
+					LOGGER.error("I/O error: " + ioex.getMessage());
+					LOGGER.debug(ioex.getMessage(), ioex);
+					// throw the initial communication exception
+					throw nex;
+				}
+				return doGetAttrsList(base, filter, scope, attrsNames);
+			} else {
+				throw nex;
 			}
-			return doGetAttrsList(base, filter, scope, attrsNames);
 		}
 	}
 
@@ -1131,6 +1158,9 @@ public final class JndiServices {
 			}
         } catch (CommunicationException e) {
             // Avoid handling the communication exception as a generic one
+            throw e;
+        } catch (ServiceUnavailableException e) {
+            // Avoid handling the service unavailable exception as a generic one
             throw e;
 		} catch (NamingException e) {
 			// clear requestControls for future use of the JNDI context

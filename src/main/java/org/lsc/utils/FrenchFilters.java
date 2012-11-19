@@ -66,7 +66,7 @@ public final class FrenchFilters {
 
 	/** Array of accents and cedillas */
 	private static final String[] REGEXP_ACCENTS_CEDILLAS = {
-		"À", "á", "Á",
+		"À", "à", "á", "Á",
 		"&agrave;", "&agrave;",
 		"â", "Â",
 		"ä", "Ä",
@@ -96,7 +96,7 @@ public final class FrenchFilters {
 	 * Replacement chars for the array REGEXP_ACCENTS_CEDILLES
 	 */
 	private static final String[] REGEXP_STRING_ACCENTS_CEDILLAS = {
-		"A", "a", "A",
+		"A", "a", "a", "A",
 		"a", "A",
 		"a", "A",
 		"a", "A",

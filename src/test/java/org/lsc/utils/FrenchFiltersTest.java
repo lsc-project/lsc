@@ -17,8 +17,8 @@ public class FrenchFiltersTest {
 
 	@Test
 	public void testRemoveBadChars() {
-		String test = "Ç'ést lä lùttè fînâlÉ";
-		assertEquals("C'est la lutte finalE", FrenchFilters.removeBadChars(test));	
+		String test = "Ç'ést lä lùttè fînâÀàlÉ";
+		assertEquals("C'est la lutte finaAalE", FrenchFilters.removeBadChars(test));	
 	}
 
 	@Test

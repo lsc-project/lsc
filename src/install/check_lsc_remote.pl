@@ -16,7 +16,7 @@
 #==========================================================================
 # Version
 #==========================================================================
-my $VERSION = '0.1';
+my $VERSION = '2.0.2';
 
 #==========================================================================
 # Modules
@@ -206,7 +206,7 @@ my ( $all, $modify, $modified, $errors ) =
 my $perfparse = " ";
 if ($perf_data) {
     $perfparse =
-"|'all'=$all,'modify'=$modify,'modified'=$modified,'errors'=$errors;$warning;$critical";
+"|'all'=$all 'modify'=$modify 'modified'=$modified 'errors'=$errors;$warning;$critical";
 }
 
 # Test the errors and exit

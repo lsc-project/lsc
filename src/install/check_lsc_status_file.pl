@@ -200,7 +200,7 @@ my ( $all, $modify, $modified, $errors ) =
 my $perfparse = " ";
 if ($perf_data) {
     $perfparse =
-"|'all'=$all,'modify'=$modify,'modified'=$modified,'errors'=$errors;$warning;$critical";
+"|'all'=$all 'modify'=$modify 'modified'=$modified 'errors'=$errors;$warning;$critical";
 }
 
 # Test the errors and exit

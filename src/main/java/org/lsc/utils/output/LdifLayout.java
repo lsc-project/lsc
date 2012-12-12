@@ -47,6 +47,7 @@ package org.lsc.utils.output;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -116,6 +117,9 @@ public class LdifLayout extends PatternLayout {
 	
 	public static String format(LscModifications lm) {
 		StringBuilder msgBuffer = new StringBuilder();
+		
+		printHeader(msgBuffer);
+		
 		String dn = "";
 		if (lm.getMainIdentifier() != null && lm.getMainIdentifier().length() > 0) {
 			dn = lm.getMainIdentifier();
@@ -165,6 +169,10 @@ public class LdifLayout extends PatternLayout {
 		}
 		msgBuffer.append("\n");
 		return msgBuffer.toString();
+	}
+
+	private static void printHeader(StringBuilder msgBuffer) {
+		msgBuffer.append("# ").append(new Date()).append("\n");
 	}
 
 	/**

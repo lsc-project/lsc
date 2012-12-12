@@ -576,7 +576,7 @@
 			<!-- Use for Google Data API -->
 			<id>burtsev-net-maven</id>
 			<name>Burtsev.Net Maven Repository</name>
-			<url>http://maven.burtsev.net</url>
+			<url>https://raw.github.com/eburtsev/gdata-maven/master</url>
 		</repository>
 	</repositories>
 

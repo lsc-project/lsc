@@ -52,6 +52,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
@@ -74,12 +78,23 @@ public class LdifLayoutTest {
 	private LoggerContext lc = new LoggerContext();
 	private Logger LOGGER = lc.getLogger(LdifLayout.class);
 
+	@Mocked java.util.Date date; 
+
 	private ILoggingEvent makeLoggingEvent(String message, Object object) {
 		return new LoggingEvent("org.lsc",
 						LOGGER, Level.INFO, message,
 						new Exception(), new Object[]{object});
 	}
 
+	@Before
+	public final void init() {
+		new NonStrictExpectations() {
+			{
+				date.toString(); result = "Wed Dec 12 16:25:01 CET 2012";
+			}
+		};
+	}
+	
 	/**
 	 * Launch a add entry layout test.
 	 * 
@@ -103,11 +118,11 @@ public class LdifLayoutTest {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		assertEquals("dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
+		assertEquals("# Wed Dec 12 16:25:01 CET 2012\ndn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 
 		jm.setMainIdentifer("dc=lsc-project,dc=org");
-		assertEquals("dn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
+		assertEquals("# Wed Dec 12 16:25:01 CET 2012\ndn: dc=lsc-project,dc=org\nchangetype: add\ncn: name\nsn:: PG5vbiBzYWZlIHN0cmluZz4=\ngivenName:: U8OpYmFzdGllbg==\ndescription: \n\n",
 						layout.doLayout(loggingEvent));
 	}
 
@@ -135,7 +150,9 @@ public class LdifLayoutTest {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		assertEquals("dn: dc=lsc-project,dc=org\n" +
+		
+		assertEquals("# Wed Dec 12 16:25:01 CET 2012\n" + 
+						"dn: dc=lsc-project,dc=org\n" +
 						"changetype: modify\n" +
 						"replace: cn\n" +
 						"cn: new_name\n" +
@@ -168,7 +185,7 @@ public class LdifLayoutTest {
 		layout.setPattern("%m%n");
 		layout.start();
 
-		assertEquals("dn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n",
+		assertEquals("# Wed Dec 12 16:25:01 CET 2012\ndn: uid=a,dc=lsc-project,dc=org\nchangetype: delete\n\n",
 						layout.doLayout(loggingEvent));
 	}
 

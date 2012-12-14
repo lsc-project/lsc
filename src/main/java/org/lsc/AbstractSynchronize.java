@@ -771,7 +771,7 @@ class SynchronizeTask implements Runnable {
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, id.getValue(), new Exception("Technical problem while applying modifications to the destination"));
+				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), new Exception("Technical problem while applying modifications to the destination"));
 				return false;
 			}
 		} catch (CommunicationException e) {

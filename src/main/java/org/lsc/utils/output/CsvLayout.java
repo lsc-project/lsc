@@ -196,7 +196,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 			/* We only add valid options */
 			StringTokenizer st = new StringTokenizer(taskNames, CsvLayout.OPTIONS_SEPARATOR);
 			String token = null;
-			for (int i = 0; st.hasMoreTokens(); i++) {
+			for (; st.hasMoreTokens();) {
 				token = st.nextToken().toLowerCase();
 				taskNamesList.add(token);
 			}
@@ -256,7 +256,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		this.outputHeader = outputHeader;
 	}
 	
-	public Set<LscModificationType> getLogOperations() {
+	/* package */ Set<LscModificationType> getLogOperations() {
 		return operations;
 	}
 }

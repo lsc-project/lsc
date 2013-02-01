@@ -128,8 +128,8 @@ if [ ! -d "$piddir" ]; then
 fi
 
 touch $LSC_PID_FILE
-[ -z "$LSC_USER" ] || chown -R "$LSC_USER" "$piddir"
-[ -z "$LSC_GROUP" ] || chgrp -R "$LSC_GROUP" "$piddir"
+[ -z "$LSC_USER" ] || chown -R "$LSC_USER" "$LSC_PID_FILE"
+[ -z "$LSC_GROUP" ] || chgrp -R "$LSC_GROUP" "$LSC_PID_FILE"
 
 # Rights to execute binaries
 for i in "$LSC_BIN" "$NOHUP"

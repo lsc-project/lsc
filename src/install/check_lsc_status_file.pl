@@ -189,7 +189,7 @@ unless ( $last =~ /All entries:/ ) {
 # Get statistics
 my ( $all, $modify, $modified, $errors ) =
   ( $last =~
-/All entries: (\d+), to modify entries: (\d+), successfully modified entries: (\d+), errors: (\d+)/mi
+/All entries: (\d+), to modify entries: (\d+), (?:successfully )?modified entries: (\d+), errors: (\d+)/mi
   );
 
 #==========================================================================

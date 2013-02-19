@@ -176,7 +176,7 @@ my @messages = <LOG>;
 # The last message should be a status message
 my $last = pop @messages;
 
-if ( $last =~ /ERROR - (.*)$/ ) {
+if ( $last =~ /ERROR - (.*)$/ and $last !~ /All entries:/ ) {
     printf "CRITICAL: LSC error $1.\n";
     exit $ERRORS{CRITICAL};
 }

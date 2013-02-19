@@ -313,7 +313,7 @@ case "$1" in
 	shift
 	;;
   "--clean")
-	ACTIONS="$ACTIONS cleandata"
+	ACTIONS="$ACTIONS cleandata cleanldapdata"
 	shift
 	;;
   "--help"|*)
@@ -351,17 +351,18 @@ for action in $ACTIONS; do
     "showdata")
       data_show
       ;;
-	"startldap")
-	  start_ldap
-	  ;;
-	"stopldap")
-	  stop_ldap
-	  ;;
+    "startldap")
+      start_ldap
+      ;;
+    "stopldap")
+      stop_ldap
+      ;;
     "cleandata")
       hsqldb_cleanData
-	  rm -rf /tmp/opendj-test
       ;;
-
+    "cleanldapdata")
+      rm -rf /tmp/opendj-test
+      ;;
   esac
 done
 

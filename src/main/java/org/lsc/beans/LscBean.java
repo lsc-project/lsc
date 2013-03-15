@@ -275,18 +275,15 @@ public abstract class LscBean implements IBean, Serializable {
 	}
 
 	/**
-	 * Distinguish name getter that makes sure to return the FULL DN (including
-	 * suffix).
-	 * 
+	 * Distinguish name getter that makes sure to return the FULL DN
+	 * The mainIdentifier is always including the suffix, so this method
+	 * is the same as getDistinguishedName()
+	 *
 	 * @return the distinguishedName
 	 */
+	@Deprecated
 	public final String getFullDistinguishedName() {
-		String dn = getMainIdentifier();
-		if (!dn.endsWith("," + Configuration.DN_REAL_ROOT)) {
-			return dn + "," + Configuration.DN_REAL_ROOT;
-		} else {
-			return dn;
-		}
+                return getMainIdentifier();
 	}
 
 	/**

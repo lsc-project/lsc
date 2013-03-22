@@ -10,6 +10,7 @@ LSC_USER=""
 LSC_GROUP=""
 LSC_PID_FILE="/var/run/lsc.pid"
 LSC_TASKS="all"
+LSC_PARAMS=""
 
 # JMX
 LSC_JMXPORT="1099"

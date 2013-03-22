@@ -92,6 +92,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.directory.shared.ldap.codec.api.ControlFactory;
 import org.apache.directory.shared.ldap.codec.api.LdapApiService;
 import org.apache.directory.shared.ldap.codec.api.LdapApiServiceFactory;
+import org.apache.directory.shared.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
 import org.apache.directory.shared.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
 import org.apache.directory.shared.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
@@ -241,6 +242,9 @@ public final class JndiServices {
 		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
 		ControlFactory<?, ?> factory = new SyncStateValueFactory( ldapApiService );
 		ldapApiService.registerControl( factory );
+		/* Load Persistent Search response control */
+		factory = new PersistentSearchFactory(ldapApiService);
+		ldapApiService.registerControl(factory);
 	}
 
 	private void logConnectingTo(Properties connProps) {

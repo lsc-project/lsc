@@ -59,6 +59,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.naming.NamingException;
 import javax.net.ssl.TrustManagerFactory;
@@ -245,7 +247,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             String searchBaseDn = (fromSameService ? id : baseDn);
             SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
 			if(getAttrs() != null) {
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope, getAttrs().toArray(new String[getAttrs().size()]));
+				List<String> attrList = new ArrayList<String>(getAttrs());
+				attrList.addAll(pivotAttrs.getAttributesNames());
+				entryCursor = connection.search(searchBaseDn, searchString, searchScope, attrList.toArray(new String[attrList.size()]));
 			} else {
 			    entryCursor = connection.search(searchBaseDn, searchString, searchScope);
 			}

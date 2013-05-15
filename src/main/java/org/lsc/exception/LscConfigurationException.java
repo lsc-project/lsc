@@ -62,7 +62,7 @@ public class LscConfigurationException extends LscException {
 		super(message, origin);
 	}
 	
-	public LscConfigurationException(Exception e) {
-		super(e);
+	public LscConfigurationException(Throwable e) {
+		super("Configuration exception: ", e);
 	}
 }

@@ -1,5 +1,5 @@
 This README file is describing how to setup a sample PostgreSQL server and to 
-setup the synchronization from an OpenDJ instance.
+setup the synchronization from and to an OpenDJ instance.
 
 REQUIREMENTS
 ------------
@@ -49,6 +49,9 @@ $ sample/hsqldb/bin/lsc-sample --import sample/hsqldb/sample.csv
 $ sample/hsqldb/bin/lsc-sample --run
 
 Then, launch the LSC in a command line to start LDAP to postgresql synchronization: 
-$ bin/lsc -f sample/postgresql/etc -s all -c all
+$ bin/lsc -f sample/postgresql/etc-opendj2postgresql -s all -c all
+
+Or launch the LSC in a command line to start an asynchronous postgresql to LDAP task: 
+$ bin/lsc -f sample/postgresql/etc-postgresql2opendj -a all
 
 And now you should get a OpenDJ and a PostgreSQL synchronized: you should see add operations which will add entries inside your lsc database and inetorgperson table.

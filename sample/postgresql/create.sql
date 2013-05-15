@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS lsc;
+
+DROP ROLE IF EXISTS lsc;
+
 CREATE ROLE lsc LOGIN
   ENCRYPTED PASSWORD 'md5809ead1da2f082b19e643d95a616110f'
   NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE;
@@ -32,4 +36,7 @@ CREATE TABLE public.inetorgperson
   CONSTRAINT inetorgperson_pkey1 PRIMARY KEY (id)
 );
 
+INSERT INTO public.inetorgperson VALUES ( 'jdoe-test', 'Doe', 'John', 'Doe, John', 'jdoe@foobar.com', 'The White House, Washington DC, United States', '(1) 123 45678', 1);
+
 GRANT ALL ON TABLE public.inetorgperson TO lsc;
+

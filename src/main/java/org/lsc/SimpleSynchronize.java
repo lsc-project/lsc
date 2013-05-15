@@ -276,9 +276,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			if (hookClass.length() > 0 && hookMethod.length() > 0) {
 				try {
 					Method hook = Class.forName(hookClass).getMethod(
-							hookMethod, new Class[] {});
+							hookMethod, new Class<?>[] {});
 
-					hook.invoke(null, new Object[] {});
+					hook.invoke(null, new Object[0]);
 				} catch (ClassNotFoundException e) {
 					LOGGER.error("Invalid Hook Class specified " + hookClass
 							+ " for task " + taskName);

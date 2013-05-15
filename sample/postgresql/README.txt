@@ -54,4 +54,7 @@ $ bin/lsc -f sample/postgresql/etc-opendj2postgresql -s all -c all
 Or launch the LSC in a command line to start an asynchronous postgresql to LDAP task: 
 $ bin/lsc -f sample/postgresql/etc-postgresql2opendj -a all
 
+When the asynchronous task has synchronized the default jdoe account, add the jsmith by launching the insert.sql script :
+postgres=# \i insert.sql
+
 And now you should get a OpenDJ and a PostgreSQL synchronized: you should see add operations which will add entries inside your lsc database and inetorgperson table.

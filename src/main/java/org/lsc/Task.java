@@ -45,6 +45,7 @@
 package org.lsc;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
@@ -118,6 +119,8 @@ public class Task {
 	
 			initializeSyncOptions(t);
 		// Manage exceptions
+        } catch (InvocationTargetException e) {
+            throw new LscConfigurationException(e.getCause());
 		} catch (LscConfigurationException e) {
 			throw e;
 		} catch (Exception e) {

@@ -58,7 +58,7 @@ if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
 fi
 
 # HSQLDB jar file
-HSQLDB_LIB=$SAMPLE_HOME/../../lib/hsqldb*.jar
+HSQLDB_LIB=`ls $SAMPLE_HOME/../../lib/hsqldb*.jar`
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
 # HSQLDB configuration file
@@ -77,6 +77,7 @@ if [ -e "$CYGPATH_COMMAND" ]; then
 	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
 	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
 	HSQLDB_DIR=$(cygpath -u "$HSQLDB_DIR")
+	CYGWIN_BASE=$(cygpath -w / | sed -e "s#:\\\\#:/#g")
 fi
 
 # ---------------------------------------------------------------------------------
@@ -111,12 +112,14 @@ data_import()
     fi
   done
   IFS=$IOFS
+	mkdir -p $HSQLDB_DIR
   if [ -n "$HSQLDB_TABLEDEF" ]; then
     hsqldb_sqlQuery "CREATE TEXT TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF); SHUTDOWN;"
     if [ $? -eq 0 ]; then
 	  echo "Table $HSQLDB_TABLE created"
       nblines=`cat $1 | wc -l`
       let nblines--
+			
       tail -n $nblines $1 > $HSQLDB_DIR/`basename $1`
       sep=`hsqldb_checkCsvSeparator $2`
 		encoding=`file $1  2> /dev/null | cut -d' ' -f2`
@@ -178,7 +181,7 @@ hsqldb_cleanData()
   if [ $? -eq 0 ]; then
     rm -f *
     cd ..
-    rmdir `basename $HSQLDB_DIR`
+    rmdir `basename "$HSQLDB_DIR"`
   fi
   cd $oldpwd
 }
@@ -194,7 +197,15 @@ hsqldb_sqlQuery()
 	# check if we have java executable
 	get_java
 
-	"${JAVA_COMMAND}" -jar $HSQLDB_LIB --rcFile $HSQLDB_RC --sql "$1" lscdb
+	# is this Cygwin? if so, convert path to Windows format for the JVM
+	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
+	if [ -e "$CYGPATH_COMMAND" ]; then
+		[ ! -f "$HSQLDB_RC.bak" ] && cp "$HSQLDB_RC" "$HSQLDB_RC.bak"
+		cat "$HSQLDB_RC"  | sed -e "s#:/tmp/#:$CYGWIN_BASE/tmp/#g" > "$HSQLDB_RC.new"
+		mv "$HSQLDB_RC.new" "$HSQLDB_RC"
+	fi
+	
+	"${JAVA_COMMAND}" -jar "$HSQLDB_LIB" --rcFile "$HSQLDB_RC" --sql "$1" lscdb
 }
 
 # Determine where the java exectuable is
@@ -263,6 +274,10 @@ run() {
 	if [ -e "$CYGPATH_COMMAND" ]; then
 		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
 		CONFIGPATH=$(cygpath -w "$CONFIGPATH")
+		
+		[ ! -f "$CONFIGPATH/lsc.xml.bak" ] && cp "$CONFIGPATH/lsc.xml" "$CONFIGPATH/lsc.xml.bak"
+		cat "$CONFIGPATH/lsc.xml"  | sed -e "s#jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc#jdbc:hsqldb:file:$CYGWIN_BASE/tmp/lsc/hsqldb/lsc#g" > "$CONFIGPATH/lsc.xml.new"
+		mv "$CONFIGPATH/lsc.xml.new" "$CONFIGPATH/lsc.xml"
 	fi
 
 	export CLASSPATH
@@ -306,7 +321,7 @@ case "$1" in
 	;;
   "--stop-ldap-server")
     ACTIONS="$ACTIONS stopldap"
-	shift
+!	shift
 	;;
   "--run")
 	run

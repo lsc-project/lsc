@@ -50,6 +50,8 @@ objectClass: top
 dn: cn=CN0001,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0001
 sn: SN0001
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 userPassword: secret0001
@@ -58,6 +60,8 @@ description: Number one's descriptive text
 dn: cn=CN0002,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 userPassword: secret0002
@@ -67,6 +71,8 @@ telephoneNumber: 987987
 dn: cn=CN0003,ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0003
 sn: SN0003
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 description: Number three's descriptive text
@@ -79,6 +85,8 @@ objectClass: top
 dn: cn=CN0001,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0001
 sn: SN0001
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 telephoneNumber: 123456
@@ -89,12 +97,16 @@ description: Number one's descriptive text
 dn: cn=CommonName0002,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
 dn: cn=CN0004,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0004
 sn: SN0004
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
@@ -113,6 +125,8 @@ objectClass: top
 dn: cn=CN0001,ou=ldap2executable2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0001
 sn: SN0001
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 userPassword: secret0001
@@ -121,6 +135,8 @@ description: Number one's descriptive text
 dn: cn=CN0002,ou=ldap2executable2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 userPassword: secret0002
@@ -130,6 +146,8 @@ telephoneNumber: 987987
 dn: cn=CN0003,ou=ldap2executable2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0003
 sn: SN0003
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 description: Number three's descriptive text
@@ -144,6 +162,8 @@ objectClass: top
 dn: cn=CN0001,ou=ldap2executable2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0001
 sn: SN0001
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 telephoneNumber: 123456
@@ -153,12 +173,16 @@ seeAlso: cn=CN0001,ou=ldap2executable2TestTaskSrc,ou=Test Data,dc=lsc-project,dc
 dn: cn=CommonName0002,ou=ldap2executable2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
 dn: cn=CN0004,ou=ldap2executable2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0004
 sn: SN0004
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
@@ -172,6 +196,8 @@ objectClass: top
 dn: cn=CN0002,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 userPassword: secret0002
@@ -181,6 +207,8 @@ telephoneNumber: 987987
 dn: cn=CN0003,ou=ldap2ldapJmxTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
 cn: CN0003
 sn: SN0003
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 description: Number three's descriptive text
@@ -193,6 +221,8 @@ objectClass: top
 dn: cn=CommonName0002,ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
 cn: CommonName0002
 sn: SN0002
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 

@@ -272,9 +272,11 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		attributeValues.add("789987");
 		checkAttributeValues(DN_MODIFY_DST, "telephoneNumber", attributeValues);
 		// the objectClass wasn't changed
-		attributeValues = new ArrayList<String>(2);
+		attributeValues = new ArrayList<String>(4);
 		attributeValues.add("top");
 		attributeValues.add("person");
+        attributeValues.add("organizationalPerson");
+        attributeValues.add("inetOrgPerson");
 		checkAttributeValues(DN_MODIFY_DST, "objectClass", attributeValues);
 		// the givenName was deleted
 		attributeValues = new ArrayList<String>();

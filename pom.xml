@@ -294,6 +294,7 @@
 				</executions>
 				<configuration>
 					<episode>true</episode>
+					<episodeFile>${basedir}/lsc.episode</episodeFile>
 					<generateDirectory>src/main/java</generateDirectory>
 					<generatePackage>org.lsc.configuration</generatePackage>
 					<bindingDirectory>src/main/resources/schemas</bindingDirectory>

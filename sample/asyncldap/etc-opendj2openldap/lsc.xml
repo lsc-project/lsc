@@ -2,7 +2,7 @@
 <lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="1">
   <connections id="2">
     <ldapConnection>
-      <name>ldap-src-conn</name>
+      <name>ldap-dst-conn</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
       <username>cn=Directory Manager</username>
       <password>secret</password>
@@ -15,7 +15,7 @@
       <tlsActivated>false</tlsActivated>
     </ldapConnection>
     <ldapConnection>
-      <name>ldap-dst-conn</name>
+      <name>ldap-src-conn</name>
       <url>ldap://192.168.183.129/dc=lsc-project,dc=org</url>
       <username>cn=Manager,dc=lsc-project,dc=org</username>
       <password>secret</password>

@@ -150,6 +150,7 @@ public class JaxbXmlConfigurationHelper {
                 }
                 lscSchema = schemaFactory.newSchema(schemasSource);
                 unmarshaller.setSchema( lscSchema );
+                
             } catch (VerifyError e) {
                 throw new LscConfigurationException(e.toString(), e);
             } catch (SAXException e) {

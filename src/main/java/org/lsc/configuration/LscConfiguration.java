@@ -166,7 +166,9 @@ public class LscConfiguration {
 
 	public static Collection<ConnectionType> getConnections() {
 		List<ConnectionType> connectionsList = new ArrayList<ConnectionType>();
-		connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection());
+		if(getInstance().getLsc().getConnections() != null) {
+	        connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection());
+		}
 		return Collections.unmodifiableCollection(connectionsList);
 	}
 
@@ -222,10 +224,10 @@ public class LscConfiguration {
 		getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit().remove(audit);
 	}
 
-	public static void reinitialize() {
-		getInstance().lscObject = new Lsc();
-	}
-	
+//	public static void reinitialize() {
+//		getInstance().lscObject = new Lsc();
+//	}
+//	
 	public static void finalizeInitialization() {
 		original = instance.clone();
 		getInstance().underInitialization = false;
@@ -299,7 +301,7 @@ public class LscConfiguration {
 	}
 	
 	public int getRevision() {
-		return getLsc().getRevision().intValue(); 
+		return (getLsc().getRevision() != null ? getLsc().getRevision().intValue() : -1); 
 	}
 	
 	public static SecurityType getSecurity() {
@@ -392,6 +394,40 @@ public class LscConfiguration {
 		}
 		return null;
 	}
+
+    public static void setSourceService(TaskType t, ServiceType s) throws LscConfigurationException {
+        if(s instanceof DatabaseSourceServiceType) {
+            t.setDatabaseSourceService((DatabaseSourceServiceType) s);
+        } else if (s instanceof LdapSourceServiceType) {
+            t.setLdapSourceService((LdapSourceServiceType) s);
+        } else if (s instanceof GoogleAppsServiceType) {
+            t.setGoogleAppsSourceService((GoogleAppsServiceType) s);
+        } else if (s instanceof PluginSourceServiceType) {
+            t.setPluginSourceService((PluginSourceServiceType) s);
+        } else  {
+            throw new LscConfigurationException("Unable to map source service type to a known type: " + s.getClass().getName());
+        }
+    }
+
+    public static void setDestinationService(TaskType t, ServiceType s) throws LscConfigurationException {
+        if(s instanceof DatabaseDestinationServiceType) {
+            t.setDatabaseDestinationService((DatabaseDestinationServiceType) s);
+        } else if (s instanceof XaFileDestinationServiceType) {
+            t.setXaFileDestinationService((XaFileDestinationServiceType) s);
+        } else if (s instanceof MultiDestinationServiceType) {
+            t.setMultiDestinationService((MultiDestinationServiceType) s);
+        } else if (s instanceof JndiExecDstServiceType) {
+            t.setJndiExecDstService((JndiExecDstServiceType) s);
+        } else if (s instanceof LdapDestinationServiceType) {
+            t.setLdapDestinationService((LdapDestinationServiceType) s);
+        } else if (s instanceof GoogleAppsServiceType) {
+            t.setGoogleAppsDestinationService((GoogleAppsServiceType) s);
+        } else if (s instanceof PluginDestinationServiceType) {
+            t.setPluginDestinationService((PluginDestinationServiceType) s);
+        } else  {
+            throw new LscConfigurationException("Unable to map destination service type to a known type: " + s.getClass().getName());
+        }
+    }
 
 	public static Class<?> getServiceImplementation(ServiceType service) {
 		if(service instanceof LdapDestinationServiceType) {

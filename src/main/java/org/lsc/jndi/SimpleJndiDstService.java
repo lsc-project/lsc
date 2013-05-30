@@ -58,6 +58,7 @@ import javax.naming.directory.SearchResult;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.LdapServiceType;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
@@ -83,7 +84,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiDstService.class);
 	
-	private TaskType task;
+    private List<String> writableDatasetIds;
 	
 	/**
 	 * Constructor adapted to the context properties and the bean class name to instantiate.
@@ -95,7 +96,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	@SuppressWarnings({ "unchecked" })
 	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
 		super(task.getLdapDestinationService());
-		this.task = task;
+        writableDatasetIds = task.getLdapDestinationService().getFetchedAttributes().getString();
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
@@ -103,6 +104,18 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 			throw new LscServiceConfigurationException(e);
 		}
 	}
+
+    /**
+     * @param ldapService 
+     * @param writableDatasetIds
+     * @param beanClass
+     * @throws LscServiceException 
+     */
+    public SimpleJndiDstService(final LdapServiceType ldapService, List<String> writableDatasetIds, Class<IBean> beanClass) throws LscServiceConfigurationException {
+        super(ldapService);
+        this.writableDatasetIds = writableDatasetIds; 
+        this.beanClass = beanClass;
+    }
 
 	/**
 	 * The simple object getter according to its identifier.
@@ -203,6 +216,6 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	}
 	
 	public List<String> getWriteDatasetIds() {
-		return task.getLdapDestinationService().getFetchedAttributes().getString();
+		return writableDatasetIds;
 	}
 }

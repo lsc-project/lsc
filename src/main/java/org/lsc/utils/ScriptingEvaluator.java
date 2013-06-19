@@ -59,8 +59,15 @@ public class ScriptingEvaluator {
 				LOGGER.debug("Unsupported scripting engine: " + sef.getEngineName());
 			}
 		}
-		defaultImplementation = new JScriptEvaluator(
-				mgr.getEngineByExtension("js"));
+        // Add the rhino engine without debugging capabilities
+		instancesCache.put("rjs",
+                new RhinoJScriptEvaluator(false));
+        // Add the rhino engine with debugging capabilities
+        instancesCache.put("rdjs",
+                new RhinoJScriptEvaluator(true));
+
+        // Default to Javascript
+		defaultImplementation = instancesCache.get("js");
 	}
 
 	public static ScriptingEvaluator getInstance() {
@@ -81,13 +88,27 @@ public class ScriptingEvaluator {
 
 	private ScriptableEvaluator identifyScriptingEngine(String expression) {
 		String[] parts = expression.split(":");
-		if (parts != null && parts.length > 0
+		if (parts != null && parts.length > 0 && parts[0].length() < 10
 				&& instancesCache.containsKey(parts[0])) {
 			return instancesCache.get(parts[0]);
 		}
 		return defaultImplementation;
 	}
 
+	/**
+	 * Remove scripting engine prefix if required
+	 * @param expression the expression
+	 * @return the expression without the "prefix:" prefix
+	 */
+	private String removePrefix(String expression) {
+        String[] parts = expression.split(":");
+        if (parts != null && parts.length > 0 && parts[0].length() < 10
+                && instancesCache.containsKey(parts[0])) {
+            return expression.substring(expression.indexOf(":") + 1);
+        }
+        return expression;
+	}
+	
 	/**
 	 * Evaluate your Ecma script expression (manage pre-compiled expressions
 	 * cache).
@@ -103,21 +124,21 @@ public class ScriptingEvaluator {
 			final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
-		return se.evalToString(task, expression, params);
+		return se.evalToString(task, getInstance().removePrefix(expression), params);
 	}
 
 	public static List<String> evalToStringList(final Task task,
 			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
-		return se.evalToStringList(task, expression, params);
+		return se.evalToStringList(task, getInstance().removePrefix(expression), params);
 	}
 
 	public static Boolean evalToBoolean(final Task task,
 			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
-		return se.evalToBoolean(task, expression, params);
+		return se.evalToBoolean(task, getInstance().removePrefix(expression), params);
 	}
 
 }

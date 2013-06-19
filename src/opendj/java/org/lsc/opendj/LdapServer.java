@@ -160,9 +160,8 @@ public class LdapServer {
 			}
 			LOGGER.debug(e.toString(), e);
 		} catch (LscException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+            LOGGER.warn("Error while loading configuration: " + e.toString());
+		}
 	}
 	
 	/**

@@ -15,7 +15,7 @@
 #==========================================================================
 # Version
 #==========================================================================
-my $VERSION = '2.0.2';
+my $VERSION = '2.0.3';
 
 #==========================================================================
 # Modules
@@ -43,22 +43,25 @@ my $critical;
 my $perf_data;
 my $logfile;
 my $delay;
+my $ignoreEmptySourceError;
 
 GetOptions(
-    'h'          => \$help,
-    'help'       => \$help,
-    'v+'         => \$verbose,
-    'verbose+'   => \$verbose,
-    'w:f'        => \$warning,
-    'warning:f'  => \$warning,
-    'c:f'        => \$critical,
-    'critical:f' => \$critical,
-    'f'          => \$perf_data,
-    'perf_data'  => \$perf_data,
-    'l:s'        => \$logfile,
-    'logfile:s'  => \$logfile,
-    'd:f'        => \$delay,
-    'delay:f'    => \$delay,
+    'h'                      => \$help,
+    'help'                   => \$help,
+    'v+'                     => \$verbose,
+    'verbose+'               => \$verbose,
+    'w:f'                    => \$warning,
+    'warning:f'              => \$warning,
+    'c:f'                    => \$critical,
+    'critical:f'             => \$critical,
+    'f'                      => \$perf_data,
+    'perf_data'              => \$perf_data,
+    'l:s'                    => \$logfile,
+    'logfile:s'              => \$logfile,
+    'd:f'                    => \$delay,
+    'delay:f'                => \$delay,
+    'i'                      => \$ignoreEmptySourceError,
+    'ignoreEmptySourceError' => \$ignoreEmptySourceError,
 
 );
 
@@ -97,6 +100,8 @@ if ($help) {
     print "-d, --delay\n";
     print
 "\tDelay in seconds of LSC execution after which a critical error is returned.\n";
+    print "-i, --ignoreEmptySourceError\n";
+    print "Ignore 'Empty or non existant source' error\n";
 
     print "\n";
 
@@ -175,6 +180,14 @@ my @messages = <LOG>;
 
 # The last message should be a status message
 my $last = pop @messages;
+
+if (    $ignoreEmptySourceError
+    and $last =~ /ERROR - (.*)$/
+    and $last =~ /Empty or non existant source/i )
+{
+    printf "OK - no data to synchronize\n";
+    exit $ERRORS{'OK'};
+}
 
 if ( $last =~ /ERROR - (.*)$/ and $last !~ /All entries:/ ) {
     printf "CRITICAL: LSC error $1.\n";

@@ -213,7 +213,9 @@ public class ScriptableJndiServices extends ScriptableObject {
 
 	@SuppressWarnings({"unchecked"})
 	protected List<String> _attr(final String base, final String attrName) throws NamingException {
-		SearchResult sr = jndiServices.readEntry(base, "objectClass=*", false);
+	    SearchControls sc = new SearchControls();
+	    sc.setReturningAttributes(new String[] {attrName});
+		SearchResult sr = jndiServices.readEntry(base, "objectClass=*", false, sc);
 
 		if ((sr != null) && (sr.getAttributes() != null) && (sr.getAttributes().get(attrName) != null)) {
 			return (List<String>) Collections.list(sr.getAttributes().get(attrName).getAll());

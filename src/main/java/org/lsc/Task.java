@@ -89,8 +89,11 @@ public class Task {
 	
 	private String syncHook;
 	
+	private TaskType taskType;
+	
 	public Task(TaskType t) throws LscConfigurationException {
 		this.name = t.getName();
+		this.taskType = t;
 		try {
 			cleanHook = t.getCleanHook();
 			syncHook = t.getSyncHook();
@@ -174,5 +177,9 @@ public class Task {
 
 	public Object[] getCustomLibraries() {
 		return customLibraries;
+	}
+
+	public TaskType getTaskType() {
+		return taskType;
 	}
 }

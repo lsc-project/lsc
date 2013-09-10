@@ -158,7 +158,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					return false;
 				} else {
 					if(task.getSyncHook() != null && task.getSyncHook() != "") {
-						runPostHook(task.getName(), task.getSyncHook());
+						runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
 					}
 				}
 			}
@@ -169,7 +169,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					return false;
 				} else {
 					if(task.getCleanHook() != null && task.getCleanHook() != "") {
-						runPostHook(task.getName(), task.getCleanHook());
+						runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
 					}
 				}
 			}
@@ -263,8 +263,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke
+	 * @param taskType the TaskType used to initialize the task 
 	 */
-	private void runPostHook(String taskName, String servicePostHook) {
+	private void runPostHook(String taskName, String servicePostHook, TaskType taskType) {
 		if (servicePostHook != null && servicePostHook.length() > 0) {
 			LOGGER.debug("Service Post Hook found: " + servicePostHook);
 			String hookClass = servicePostHook.substring(0, servicePostHook.lastIndexOf('.'));
@@ -275,10 +276,18 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 			if (hookClass.length() > 0 && hookMethod.length() > 0) {
 				try {
-					Method hook = Class.forName(hookClass).getMethod(
-							hookMethod, new Class<?>[] {});
-
-					hook.invoke(null, new Object[0]);
+					Class<?> clazz = Class.forName(hookClass);
+					try {
+						// Try with a TaskType parameter
+						Method hook = clazz.getMethod(
+								hookMethod, new Class<?>[] {TaskType.class});
+						hook.invoke(null, taskType);
+					} catch (NoSuchMethodException e) {
+						// Try without parameter
+						Method hook = clazz.getMethod(
+								hookMethod, new Class<?>[] {});
+						hook.invoke(null, new Object[0]);
+					}
 				} catch (ClassNotFoundException e) {
 					LOGGER.error("Invalid Hook Class specified " + hookClass
 							+ " for task " + taskName);

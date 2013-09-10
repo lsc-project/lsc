@@ -158,7 +158,7 @@
 			<plugin>
 				<groupId>org.reflections</groupId>
 				<artifactId>reflections-maven</artifactId>
-				<version>0.9.5</version>
+				<version>0.9.9-RC1</version>
 				<executions>
 					<execution>
 						<goals>
@@ -352,7 +352,7 @@
 											reflections-maven
 										</artifactId>
 										<versionRange>
-											[0.9.5,)
+											[0.9.9-RC1,)
 										</versionRange>
 										<goals>
 											<goal>reflections</goal>
@@ -755,7 +755,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.5</version>
+			<version>0.9.9-RC1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>

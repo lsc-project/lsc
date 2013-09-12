@@ -48,6 +48,8 @@ package org.lsc.persistence;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.lsc.Configuration;
@@ -84,8 +86,9 @@ public final class DaoConfig {
 	/**
 	 * SqlMapClient instances are thread safe, so you only need one. In this
 	 * case, we'll use a static singleton. So sue me. ;-)
+	 * Fix: use a map instead, allowing to have multiple mappers at the same time
 	 */
-	private static SqlMapClient sqlMapper;
+	private static Map<String, SqlMapClient> sqlMappers = new HashMap<String, SqlMapClient>();
 
 	/** Tool class. */
 	private DaoConfig() {
@@ -99,6 +102,16 @@ public final class DaoConfig {
 	 * @throws LscServiceConfigurationException 
 	 */
 	public static SqlMapClient getSqlMapClient(Properties databaseProps) throws LscServiceConfigurationException {
+		String mapperKey = new StringBuffer()
+				.append(databaseProps.get("username"))
+				.append("|")
+				.append(databaseProps.get("password"))
+				.append("|")
+				.append(databaseProps.get("url"))
+				.append("|")
+				.append(databaseProps.get("driver"))
+				.toString();
+		SqlMapClient sqlMapper = sqlMappers.get(mapperKey);
 		if(sqlMapper == null) {
 			try {
 				Reader reader = null;
@@ -132,6 +145,7 @@ public final class DaoConfig {
 			} catch (IOException e) {
 				throw new LscServiceConfigurationException("Something bad happened while building the SqlMapClient instance." + e, e);
 			}
+			sqlMappers.put(mapperKey, sqlMapper);
 		}
 		return sqlMapper;
 	}

@@ -15,7 +15,7 @@
 #==========================================================================
 # Version
 #==========================================================================
-my $VERSION = '2.0.3';
+my $VERSION = '2.0.4';
 
 #==========================================================================
 # Modules
@@ -173,6 +173,11 @@ $fileage = int( $fileage * 3600 * 24 );
 if ( defined $delay and $delay < $fileage ) {
     printf "CRITICAL: LSC log file too old ($fileage seconds).\n";
     exit $ERRORS{CRITICAL};
+}
+
+if ( $fileage < 5 ) {
+    printf "UNKNOWN: log file is still being written, cannot get status.\n";
+    exit $ERRORS{UNKNOWN};
 }
 
 # Get all messages

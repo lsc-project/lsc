@@ -69,7 +69,7 @@ public class SecurityUtilsTest {
         // First generate a random symmetric key. We could use it then to
         // do all encryption operations.
         //
-        String tmpKeyPath = new File(this.getClass().getClassLoader().getResource(".").getFile(), "lsc-key.tmp").getAbsolutePath();
+        String tmpKeyPath = new File(this.getClass().getClassLoader().getResource("").getFile(), "lsc-key.tmp").getAbsolutePath();
         SymmetricEncryption se = new SymmetricEncryption();
         assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
 

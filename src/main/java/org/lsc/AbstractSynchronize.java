@@ -620,6 +620,15 @@ class AsynchronousRunner implements Runnable {
             counter.incrementCountError();
             abstractSynchronize.logActionError(null, nextId, e);
         }
+        
+		try {
+			threadPool.shutdown();
+			threadPool.awaitTermination(abstractSynchronize.getTimeLimit(), TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
+			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+		}
+
     }
 }
 

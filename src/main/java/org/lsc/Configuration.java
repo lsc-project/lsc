@@ -433,7 +433,7 @@ public class Configuration {
 			return;
 		}
 		try {
-			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory()) {
+			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && new File(System.getProperty("LSC_HOME"), "etc/lsc.xml").exists()) {
 				Configuration.setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
 			} else {
 				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings

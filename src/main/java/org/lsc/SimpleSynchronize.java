@@ -132,6 +132,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					final List<String> cleanTasks) throws Exception {
 		Boolean foundATask = false;
 		boolean canClose = true;
+		boolean launchResult = true;
 
 		// Get the list of defined tasks from LSC properties
 		// Iterate on each task
@@ -155,7 +156,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				foundATask = true;
 
 				if (!launchTask(task, Task.Mode.sync)) {
-					return false;
+					launchResult = false;
+					break;
 				} else {
 					if(task.getSyncHook() != null && task.getSyncHook() != "") {
 						runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
@@ -166,7 +168,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				foundATask = true;
 
 				if (!launchTask(task, Task.Mode.clean)) {
-					return false;
+					launchResult = false;
+					break;
 				} else {
 					if(task.getCleanHook() != null && task.getCleanHook() != "") {
 						runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
@@ -175,12 +178,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
 				foundATask = true;
-
-				if(!launchTask(task, Task.Mode.async)) {
-					return false;
-				}
 				
 				canClose = false;
+
+				if(!launchTask(task, Task.Mode.async)) {
+					launchResult = false;
+					break;
+				}
 			}
 		}
 		
@@ -193,7 +197,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			return false;
 		}
 
-		return true;
+		return launchResult;
 	}
 
 	/**

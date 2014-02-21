@@ -283,7 +283,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.7.3</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -302,6 +302,7 @@
 					</schemaIncludes>
 					<extension>true</extension>
 					<args><arg>-Xdefault-value</arg></args>
+					<cleanPackageDirectories>false</cleanPackageDirectories>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -356,6 +357,25 @@
 										</versionRange>
 										<goals>
 											<goal>reflections</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.jvnet.jaxb2.maven2
+										</groupId>
+										<artifactId>
+											maven-jaxb2-plugin
+										</artifactId>
+										<versionRange>
+											[0.7.3,)
+										</versionRange>
+										<goals>
+											<goal>generate</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

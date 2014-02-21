@@ -94,18 +94,18 @@ public class LscDatasets implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object> getListValueAttribute(String attribute) {
-		return (List<Object>) values.get(attribute);
+	public Set<Object> getListValueAttribute(String attribute) {
+		return (Set<Object>) values.get(attribute);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> getListStringValueAttribute(String attribute) {
-		return (List<String>) values.get(attribute);
+	public Set<String> getListStringValueAttribute(String attribute) {
+		return (Set<String>) values.get(attribute);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Integer> getListIntegerValueAttribute(String attribute) {
-		return (List<Integer>) values.get(attribute);
+	public Set<Integer> getListIntegerValueAttribute(String attribute) {
+		return (Set<Integer>) values.get(attribute);
 	}
 
 	public List<String> getAttributesNames() {

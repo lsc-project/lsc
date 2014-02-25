@@ -244,7 +244,7 @@ public abstract class AbstractSimpleJndiService {
         searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
-				String valueId = pivotAttrs.getStringValueAttribute(attributeName.toLowerCase());
+				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
 				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(valueId));
 			}
 		} else if (attrsId.size() == 1) {

@@ -51,6 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.directory.shared.ldap.model.entry.BinaryValue;
+import org.apache.directory.shared.ldap.model.filter.EqualityNode;
+import org.apache.directory.shared.ldap.model.filter.SimpleNode;
 import org.lsc.utils.CaseIgnoreStringHashMap;
 
 /**
@@ -81,8 +84,21 @@ public class LscDatasets implements Serializable {
 			return ((Set)value).iterator().next().toString();
 		} else if(value instanceof List){
 			return ((List)value).get(0).toString();
+		} else if(value instanceof byte[]) {
+			return new String((byte[])value);
 		}
 		return value != null ? value.toString() : null;
+	}
+	
+	public String getValueForFilter(String attribute) {
+		Object value = values.get(attribute);
+		if(value instanceof byte[]) {
+			BinaryValue binValue = new BinaryValue((byte[])value);
+			SimpleNode<byte[]> filter = new EqualityNode<byte[]>(attribute, binValue);
+			return filter.getEscapedValue().toString();
+		} else {
+			return getStringValueAttribute(attribute);
+		}
 	}
 
 	public Integer getIntegerValueAttribute(String attribute) {

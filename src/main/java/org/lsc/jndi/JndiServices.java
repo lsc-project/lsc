@@ -1123,9 +1123,9 @@ public final class JndiServices {
 				NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
 
 				if (results != null) {
-					Map<String, String> attrsValues = null;
+					Map<String, Object> attrsValues = null;
 					while (results.hasMoreElements()) {
-						attrsValues = new HashMap<String, String>();
+						attrsValues = new HashMap<String, Object>();
 
 						SearchResult ldapResult = (SearchResult) results.next();
 
@@ -1133,7 +1133,7 @@ public final class JndiServices {
 						for (String attributeName : attrsNames) {
 							Attribute attr = ldapResult.getAttributes().get(attributeName);
 							if (attr != null && attr.get() != null) {
-								attrsValues.put(attributeName, (String) attr.get());
+								attrsValues.put(attributeName, attr.get());
 							}
 						}
 

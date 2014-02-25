@@ -53,7 +53,7 @@ import javax.naming.NamingException;
 
 import mockit.Mocked;
 
-import org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.junit.Test;
 import org.lsc.Task;
 import org.lsc.exception.LscServiceException;

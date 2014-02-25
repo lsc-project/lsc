@@ -44,10 +44,10 @@ package org.lsc.jndi;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -99,6 +99,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		interval = Integer.parseInt(props.getProperty("interval", "5"));
 		try {
 			dateFormater = new SimpleDateFormat(dateFormat);
+			dateFormater.setTimeZone(TimeZone.getTimeZone("GMT"));
 		} catch(IllegalArgumentException e) {
 			throw new LscServiceConfigurationException(e);
 		}
@@ -115,6 +116,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		interval = (asyncService.getInterval() != null ? asyncService.getInterval().intValue() : 5);
 		try {
 			dateFormater = new SimpleDateFormat(dateFormat);
+			dateFormater.setTimeZone(TimeZone.getTimeZone("GMT"));
 		} catch(IllegalArgumentException e) {
 			throw new LscServiceConfigurationException(e);
 		}
@@ -133,23 +135,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 			lastSuccessfulSync = new Date();
 			listPivots = this.getListPivots().entrySet();
 		} else {
-			// The directory stores dates in GMT timezone. It is necessary to handle
-			// the difference to get
-			GregorianCalendar gc = new GregorianCalendar();
-			gc.setTime(lastSuccessfulSync);
-
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// VADE RETRO : Directory may store dates in GMT or local timezone
-			// Therefore, filters must be adapted to fit this feature.
-			// Must find a way to implement this correctly !
-			// Maybe through a JavaScript expression ? 
-			gc.add(GregorianCalendar.HOUR, -1);
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-			gc.add(GregorianCalendar.SECOND, -interval);
-			// Avoid to resynchronize already synchronized entry
-			//gc.add(GregorianCalendar.SECOND, 1);
-			String date = dateFormater.format(gc.getTime());
+			String date = dateFormater.format(lastSuccessfulSync);
 
 			// Reset the last successful synchronization date
 			// Must be done now to avoid loosing entries modification while synchronizing

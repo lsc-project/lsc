@@ -80,9 +80,9 @@ public class LscDatasets implements Serializable {
 	@SuppressWarnings("rawtypes")
 	public String getStringValueAttribute(String attribute) {
 		Object value = values.get(attribute);
-		if(value instanceof Set) {
+		if(value instanceof Set && ((Set)value).size() > 0) {
 			return ((Set)value).iterator().next().toString();
-		} else if(value instanceof List){
+		} else if(value instanceof List && ((List)value).size() > 0){
 			return ((List)value).get(0).toString();
 		} else if(value instanceof byte[]) {
 			return new String((byte[])value);

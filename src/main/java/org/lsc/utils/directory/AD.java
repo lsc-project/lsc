@@ -148,9 +148,9 @@ public class AD {
 	 * @param aDTime An AD timestamp as a long
 	 * @return Timestamp in seconds since the Unix epoch (1 January 1970 00:00:00 UT)
 	 */
-	public static int aDTimeToUnixTimestamp(long aDTime) {
+	public static long aDTimeToUnixTimestamp(long aDTime) {
 		// Subtract Unix epoch in AD time, and divide by 10^7 to switch from 100 ns intervals to seconds
-		return (int) ( (aDTime - UNIX_EPOCH_IN_AD_TIME) / (long) Math.pow(10, 7) );
+		return (long) ( (aDTime - UNIX_EPOCH_IN_AD_TIME) / (long) Math.pow(10, 7) );
 	}
 	
 	/**
@@ -161,7 +161,7 @@ public class AD {
 	 * @return Timestamp in seconds since the Unix epoch (1 January 1970 00:00:00 UT)
 	 * @see #aDTimeToUnixTimestamp(long)
 	 */
-	public static int aDTimeToUnixTimestamp(String aDTimeString) {
+	public static long aDTimeToUnixTimestamp(String aDTimeString) {
 		Long ts = Long.parseLong(aDTimeString);
 		return aDTimeToUnixTimestamp(ts);
 	}
@@ -180,21 +180,21 @@ public class AD {
 	 * @param unixTimestamp A Unix timestamp as an int
 	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
 	 */
-	public static long unixTimestampToADTime(int unixTimestamp) {
+	public static long unixTimestampToADTime(long unixTimestamp) {
 		// Multiply by 10^7 to switch from seconds to 100 ns intervals and add Unix epoch in AD time
 		return ( unixTimestamp * (long) Math.pow(10, 7) ) + UNIX_EPOCH_IN_AD_TIME;
 	}
 	
 	/**
 	 * <p>Helper method to automatically parse a Unix timestamp from a String before
-	 * calling {@link #unixTimestampToADTime(int)}.</p>
+	 * calling {@link #unixTimestampToADTime(long)}.</p>
 	 * 
-	 * @param unixTimestampString A Unix timestamp as an int
+	 * @param unixTimestampString A Unix timestamp as an long
 	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
 	 * @see #unixTimestampToADTime(int)
 	 */
 	public static long unixTimestampToADTime(String unixTimestampString) {
-		return unixTimestampToADTime(Integer.parseInt(unixTimestampString));
+		return unixTimestampToADTime(Long.parseLong(unixTimestampString));
 	}
 	
 	

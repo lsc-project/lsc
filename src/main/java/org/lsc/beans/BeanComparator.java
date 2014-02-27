@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -257,6 +258,7 @@ public final class BeanComparator {
 		if (task.getCustomLibraries() != null) {
 			javaScriptObjects.put("custom", task.getCustomLibraries());
 		}
+		javaScriptObjects.putAll(task.getScriptingVars());
 
 		// We're going to iterate over the list of attributes we may write
 		Set<String> writeAttributes = getWriteAttributes(task, itmBean);

@@ -46,6 +46,8 @@ package org.lsc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.ISyncOptions;
@@ -84,6 +86,8 @@ public class Task {
 	private ISyncOptions syncOptions;
 	
 	private Object[] customLibraries;
+
+	private Map<String, Object> scriptingVars = new HashMap<String, Object>();
 
 	private String cleanHook;
 	
@@ -177,6 +181,14 @@ public class Task {
 
 	public Object[] getCustomLibraries() {
 		return customLibraries;
+	}
+
+	public Map<String, Object> getScriptingVars() {
+		return scriptingVars;
+	}
+	
+	public void addScriptingVar(String identifier, Object value) {
+		scriptingVars.put(identifier, value);
 	}
 
 	public TaskType getTaskType() {

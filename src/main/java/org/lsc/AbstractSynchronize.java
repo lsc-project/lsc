@@ -201,24 +201,20 @@ public abstract class AbstractSynchronize {
 					} else if (conditionString.matches("false")) {
 						doDelete = false;
 					} else {
-						// If condition is based on dstBean, retrieve the full
-						// object from destination
-						if (conditionString.contains("dstBean")) {
-
-							IBean dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
-							// Log an error if the bean could not be retrieved!
-							// This shouldn't happen.
-							if (dstBean == null) {
-								LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
-								counter.incrementCountError();
-								continue;
-							}
-
-							// Put the bean in a map to pass to JavaScript
-							// evaluator
-							conditionObjects = new HashMap<String, Object>();
-							conditionObjects.put("dstBean", dstBean);
+						IBean dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
+						// Log an error if the bean could not be retrieved!
+						// This shouldn't happen.
+						if (dstBean == null) {
+							LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
+							counter.incrementCountError();
+							continue;
 						}
+
+						// Put the bean in a map to pass to JavaScript
+						// evaluator
+						conditionObjects = new HashMap<String, Object>();
+						conditionObjects.put("dstBean", dstBean);
+						conditionObjects.putAll(task.getScriptingVars());
 
 						// Evaluate if we have to do something
 						doDelete = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
@@ -720,6 +716,7 @@ class SynchronizeTask implements Runnable {
 				conditionObjects = new HashMap<String, Object>();
 				conditionObjects.put("dstBean", dstBean);
 				conditionObjects.put("srcBean", entry);
+				conditionObjects.putAll(task.getScriptingVars());
 
 				// Evaluate if we have to do something
 				applyCondition = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);

@@ -213,6 +213,9 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
         boolean status = true;
+        
+        addScriptingContext(task);
+        
 		try {
 			LSCStructuralLogger.DESTINATION.info("Starting {} for {}", taskMode.name(), task.getName());
 			// Do the work!
@@ -262,6 +265,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		return status;
 	}
 	
+	private void addScriptingContext(Task task) {
+		task.addScriptingVar("nocreate", nocreate);
+		task.addScriptingVar("noupdate", noupdate);
+		task.addScriptingVar("nodelete", nodelete);
+		task.addScriptingVar("nomodrdn", nomodrdn);
+	}
+
 	/**
 	 * Invoke the hook method whether it's a postsync or postclean
 	 * 

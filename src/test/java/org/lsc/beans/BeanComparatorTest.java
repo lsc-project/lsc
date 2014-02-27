@@ -159,7 +159,6 @@ public class BeanComparatorTest {
 		};
 
 		IBean srcBean, destBean;
-		boolean condition = true;
 
 		// test add
 		srcBean = new SimpleBean();
@@ -168,7 +167,7 @@ public class BeanComparatorTest {
         srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"real cn"})));
 		destBean = null;
 
-		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
+		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean);
 
 		assertEquals("something", lm.getMainIdentifier());
 		assertEquals(1, lm.getLscAttributeModifications().size());
@@ -190,7 +189,6 @@ public class BeanComparatorTest {
 		};
 
 		IBean srcBean, destBean;
-		boolean condition = true;
 
 		// test mod
 		srcBean = new SimpleBean();
@@ -202,7 +200,7 @@ public class BeanComparatorTest {
 		destBean.setMainIdentifier("something");
 		destBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"old cn"})));
 
-		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean, condition);
+		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean);
 
 		assertEquals("something", lam.getMainIdentifier());
 		assertEquals(1, lam.getLscAttributeModifications().size());

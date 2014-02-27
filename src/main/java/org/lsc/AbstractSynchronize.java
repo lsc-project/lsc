@@ -220,12 +220,7 @@ public abstract class AbstractSynchronize {
 						doDelete = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
 					}
 
-					// Only create delete modification object if (or):
-					// 1) the condition is true (obviously)
-					// 2) the condition is false and we would delete an object
-					// and "nodelete" was specified in command line options
-					// Case 2 is for debugging purposes.
-					if (doDelete || nodelete) {
+					if (doDelete) {
 						lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
 						lm.setMainIdentifer(id.getKey());
 
@@ -235,14 +230,7 @@ public abstract class AbstractSynchronize {
 						}
 						lm.setLscAttributeModifications(attrsMod);
 
-						// if "nodelete" was specified in command line options,
-						// or if the condition is false,
-						// log action for debugging purposes and continue
 	                    counter.incrementCountModifiable();
-						if (nodelete) {
-							logShouldAction(lm, task.getName());
-							continue;
-						}
 					} else {
 						continue;
 					}
@@ -722,31 +710,15 @@ class SynchronizeTask implements Runnable {
 				applyCondition = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
 			}
 
-			// Only evaluate modifications if (or):
-			// 1) the condition is true (obviously)
-			// 2) the condition is false and
-			// a) we would create an object and "nocreate" was specified in
-			// command line options
-			// b) we would update an object and "noupdate" was specified in
-			// command line options
-			// Case 2 is for debugging purposes.
-			Boolean calculateForDebugOnly = (modificationType == LscModificationType.CREATE_OBJECT && abstractSynchronize.nocreate) || (modificationType == LscModificationType.UPDATE_OBJECT && abstractSynchronize.noupdate) || (modificationType == LscModificationType.CHANGE_ID && (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate));
-
-			if (applyCondition || calculateForDebugOnly) {
-				lm = BeanComparator.calculateModifications(task, entry, dstBean, (applyCondition && !calculateForDebugOnly));
+			if (applyCondition) {
+				lm = BeanComparator.calculateModifications(task, entry, dstBean);
 
 				// if there's nothing to do, skip to the next object
 				if (lm == null) {
 					return true;
 				}
 
-				// apply condition is false, log action for debugging purposes
-				// and forget
 	            counter.incrementCountModifiable();
-				if (!applyCondition || calculateForDebugOnly) {
-					abstractSynchronize.logShouldAction(lm, syncName);
-					return true;
-				}
 			} else {
 				return true;
 			}

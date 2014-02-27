@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -141,7 +140,6 @@ public final class BeanComparator {
 	 * @param task the corresponding task parameter
 	 * @param srcBean the source bean
 	 * @param dstBean the destination bean
-	 * @param condition
 	 * @return modifications to apply to the directory
 	 * @throws NamingException
 	 *             an exception may be thrown if an LDAP data access error is
@@ -149,7 +147,7 @@ public final class BeanComparator {
 	 * @throws CloneNotSupportedException 
 	 */
 	public static LscModifications calculateModifications(
-					Task task, IBean srcBean, IBean dstBean, boolean condition) 
+					Task task, IBean srcBean, IBean dstBean) 
 					throws LscServiceException {
 
 		LscModifications lm = null;
@@ -169,7 +167,7 @@ public final class BeanComparator {
 		lm = new LscModifications(modificationType, task.getName());
 		lm.setSourceBean(srcBean);
 		lm.setDestinationBean(dstBean);
-		lm.setMainIdentifer(getDstDN(itmBean, dstBean, condition));
+		lm.setMainIdentifer(getDstDN(itmBean, dstBean));
 
 		switch (modificationType) {
 			case CREATE_OBJECT:
@@ -190,8 +188,7 @@ public final class BeanComparator {
 		return lm;
 	}
 
-	private static String getDstDN(IBean itmBean, IBean dstBean,
-					boolean condition) {
+	private static String getDstDN(IBean itmBean, IBean dstBean) {
 		// If we already know which object we're aiming for in the destination,
 		// we have the DN
 		if (dstBean != null) {
@@ -202,16 +199,6 @@ public final class BeanComparator {
 		// generated DNs come from)
 		if (itmBean != null && itmBean.getMainIdentifier() != null) {
 			return itmBean.getMainIdentifier();
-		}
-
-		// At this stage, we don't have a real DN to use.
-
-		// If we're not really going to create the entry, silently return a
-		// pseudo value
-		if (false == condition) {
-			// condition is false, we're not really going to create the entry
-			// set a pseudo DN to use for display purposes
-			return "No DN set! Read it from the source or set " + Configuration.LSC_TASKS_PREFIX + ".NAME.dn";
 		}
 
 		throw new RuntimeException("No DN set! Read it from the source or set " + Configuration.LSC_TASKS_PREFIX + ".NAME.dn");

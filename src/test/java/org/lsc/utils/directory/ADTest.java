@@ -66,6 +66,9 @@ public class ADTest {
 	private static final long refTimeADLong = 128673223540000000L;
 	private static final String refTimeUnixString = "1222848754";
 	private static final int refTimeUnixInt= 1222848754;
+	// representation of a date where Unix time need a long: Tue, 19 Jan 2038 03:14:10 GMT
+	private static final long otherTimeADLong = 137919572500000000L;
+	private static final long otherTimeUnixLong= 2147483650L;
 
 	@Before
 	public void setUp() {
@@ -164,6 +167,14 @@ public class ADTest {
 	@Test
 	public final void testUnixTimestampToADTimeWithInt() {
 		assertEquals(refTimeADLong, AD.unixTimestampToADTime(refTimeUnixInt));
+	}
+	
+	/**
+	 * Test for the {@link AD#unixTimestampToADTime(long)} method.
+	 */
+	@Test
+	public final void testUnixTimestampToADTimeWithLong() {
+		assertEquals(otherTimeADLong, AD.unixTimestampToADTime(otherTimeUnixLong));
 	}
 	
 }

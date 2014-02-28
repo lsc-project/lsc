@@ -636,16 +636,17 @@ public final class JndiServices {
 
 	public String rewriteBase(final String base) {
 		try {
-			Dn baseDn = new Dn(base);
-			if (!baseDn.isDescendantOf(contextDn)) {
+			Dn lowerCasedContextDn = (contextDn == null) ? null : new Dn(contextDn.toString().toLowerCase()); 
+			Dn baseDn = new Dn(base.toLowerCase());
+			if (!baseDn.isDescendantOf(lowerCasedContextDn)) {
 				return base;
 			}
 			
-			if (baseDn.equals(contextDn)) {
+			if (baseDn.equals(lowerCasedContextDn)) {
 				return "";
 			}
 			
-			Dn relativeDn = baseDn.getDescendantOf(contextDn);
+			Dn relativeDn = baseDn.getDescendantOf(lowerCasedContextDn);
 			return relativeDn.toString();
 		} catch (LdapInvalidDnException e) {
 			throw new RuntimeException(e);

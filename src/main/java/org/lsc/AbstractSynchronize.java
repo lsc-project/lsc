@@ -231,6 +231,13 @@ public abstract class AbstractSynchronize {
 						lm.setLscAttributeModifications(attrsMod);
 
 	                    counter.incrementCountModifiable();
+	                    
+						// if "nodelete" was specified in command line options,
+						// log action for debugging purposes and continue
+	                    if (nodelete) {
+							logShouldAction(lm, task.getName());
+	                    	continue;
+	                    }
 					} else {
 						continue;
 					}
@@ -719,6 +726,15 @@ class SynchronizeTask implements Runnable {
 				}
 
 	            counter.incrementCountModifiable();
+
+	            // no modification: log action for debugging purposes and forget
+				if ((modificationType == LscModificationType.CREATE_OBJECT && abstractSynchronize.nocreate)
+						|| (modificationType == LscModificationType.UPDATE_OBJECT && abstractSynchronize.noupdate)
+						|| (modificationType == LscModificationType.CHANGE_ID && (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate))) {
+					abstractSynchronize.logShouldAction(lm, syncName);
+					return true;
+				}
+
 			} else {
 				return true;
 			}

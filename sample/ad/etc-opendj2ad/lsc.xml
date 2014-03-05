@@ -28,21 +28,6 @@
 			<tlsActivated>false</tlsActivated>
 		</ldapConnection>
 	</connections>
-	<audits>
-		<csvAudit>
-			<name>csv</name>
-			<append>true</append>
-			<operations>create, delete</operations>
-			<file>/tmp/audit.csv</file>
-			<datasets>cn, dn</datasets>
-			<separator>;</separator>
-		</csvAudit>
-		<ldifAudit>
-			<name>ldif</name>
-			<append>false</append>
-			<file>/tmp/audit.ldif</file>
-		</ldifAudit>
-	</audits>
 	<tasks>
 		<task>
 			<name>People</name>
@@ -65,7 +50,7 @@
 				</fetchedAttributes>
 				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
 				<getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid}))</getOneFilter>
-				<getCleanFilter>(&amp;(objectClass=inetorgperson)(sn=bahloul)(uid={samAccountName}))</getCleanFilter>
+				<cleanFilter>(&amp;(objectClass=inetorgperson)(sn=bahloul)(uid={samAccountName}))</cleanFilter>
 			</ldapSourceService>
 			<ldapDestinationService>
 				<name>ad-dst-service</name>

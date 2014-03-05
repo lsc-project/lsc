@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" id="1"
-	revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="0">
 	<connections>
 		<ldapConnection>
 			<name>ldap-src-conn</name>
@@ -29,21 +28,6 @@
 			<tlsActivated>false</tlsActivated>
 		</ldapConnection>
 	</connections>
-	<audits>
-		<csvAudit>
-			<name>csv</name>
-			<append>true</append>
-			<operations>create, delete</operations>
-			<file>/tmp/audit.csv</file>
-			<datasets>cn, dn</datasets>
-			<separator>;</separator>
-		</csvAudit>
-		<ldifAudit>
-			<name>ldif</name>
-			<append>false</append>
-			<file>/tmp/audit.ldif</file>
-		</ldifAudit>
-	</audits>
 	<tasks>
 		<task>
 			<name>People</name>
@@ -65,7 +49,7 @@
 				</fetchedAttributes>
 				<getAllFilter>(objectClass=user)</getAllFilter>
 				<getOneFilter>(&amp;(objectClass=user)(samAccountName={samAccountName}))</getOneFilter>
-				<getCleanFilter>(&amp;(objectClass=user)(samAccountName={uid}))</getCleanFilter>
+				<cleanFilter>(&amp;(objectClass=user)(samAccountName={uid}))</cleanFilter>
 			</ldapSourceService>
 			<ldapDestinationService>
 				<name>opends-dst-service</name>

@@ -22,24 +22,17 @@
     	<password>XXXXXXXXX</password>
     </googleAppsConnection>
   </connections>
-  <audits>
-	<ldifAudit>
-		<name>ldif</name>
-		<append>false</append>
-		<file>/tmp/audit.ldif</file>
-	</ldifAudit>
-  </audits>
   <tasks>
     <task>
       <name>Accounts</name>
       <bean>org.lsc.beans.SimpleBean</bean>
       <googleAppsSourceService>
-        <name>googleapps-dst-service</name>
+        <name>googleapps-src-service</name>
         <connection reference="googleapps-src-conn" />
         <apiCategory>UserAccounts</apiCategory>
       </googleAppsSourceService>
       <ldapDestinationService>
-        <name>opends-source-service</name>
+        <name>opends-dst-service</name>
         <connection reference="opends-dst-conn" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
@@ -55,7 +48,7 @@
           <string>objectClass</string>
         </fetchedAttributes>
         <getAllFilter>(&amp;(objectClass=inetorgperson)(uid=*)(sn=*)(givenName=*))</getAllFilter>
-        <getOneFilter>(&amp;(objectClass=inetorgperson)(uid={id})(sn=*)(givenName=*))</getOneFilter>
+        <getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid})(sn=*)(givenName=*))</getOneFilter>
       </ldapDestinationService>
       <propertiesBasedSyncOptions>
         <mainIdentifier>"uid=" + srcBean.getDatasetFirstValueById("uid") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>

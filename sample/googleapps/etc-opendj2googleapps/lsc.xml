@@ -22,13 +22,6 @@
     	<password>XXXXXXXXX</password>
     </googleAppsConnection>
   </connections>
-  <audits>
-	<ldifAudit>
-		<name>ldif</name>
-		<append>false</append>
-		<file>/tmp/audit.ldif</file>
-	</ldifAudit>
-  </audits>
   <tasks>
     <task>
       <name>Accounts</name>
@@ -49,7 +42,7 @@
         </fetchedAttributes>
         <getAllFilter>(&amp;(objectClass=inetorgperson)(uid=*)(sn=*)(givenName=*)(mail=*))</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid})(sn=*)(givenName=*)(mail=*))</getOneFilter>
-        <getCleanFilter>(&amp;(objectClass=inetorgperson)(uid={login}))</getCleanFilter>
+        <cleanFilter>(&amp;(objectClass=inetorgperson)(uid={uid}))</cleanFilter>
         <!-- <serverType>OpenDS</serverType> -->
       </ldapSourceService>
       <googleAppsDestinationService>

@@ -12,7 +12,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	2.0.3
+%define lsc_version	2.0.4
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -176,6 +176,8 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Thu Mar 06 2014 - Clement Oudot <clem@lsc-project.org> - 2.0.4-0
+- Upgrade to LSC 2.0.4
 * Fri Sep 13 2013 - Clement Oudot <clem@lsc-project.org> - 2.0.3-0
 - Upgrade to LSC 2.0.3
 * Fri Mar 22 2013 - Clement Oudot <clem@lsc-project.org> - 2.0.2-0

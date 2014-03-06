@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.03.06 à 10:51:01 AM CET 
+// Généré le : 2014.03.06 à 05:49:07 PM CET 
 //
 
 
@@ -47,7 +47,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *           &lt;element name="databaseDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseDestinationServiceType"/>
  *           &lt;element name="googleAppsDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}googleAppsServiceType"/>
  *           &lt;element name="ldapDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapDestinationServiceType"/>
- *           &lt;element name="jndiExecDstService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}jndiExecDstServiceType"/>
  *           &lt;element name="multiDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}multiDestinationServiceType"/>
  *           &lt;element name="xaFileDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}xaFileDestinationServiceType"/>
  *           &lt;element name="pluginDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginDestinationServiceType"/>
@@ -90,7 +89,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "databaseDestinationService",
     "googleAppsDestinationService",
     "ldapDestinationService",
-    "jndiExecDstService",
     "multiDestinationService",
     "xaFileDestinationService",
     "pluginDestinationService",
@@ -119,7 +117,6 @@ public class TaskType {
     protected DatabaseDestinationServiceType databaseDestinationService;
     protected GoogleAppsServiceType googleAppsDestinationService;
     protected LdapDestinationServiceType ldapDestinationService;
-    protected JndiExecDstServiceType jndiExecDstService;
     protected MultiDestinationServiceType multiDestinationService;
     protected XaFileDestinationServiceType xaFileDestinationService;
     protected PluginDestinationServiceType pluginDestinationService;
@@ -417,30 +414,6 @@ public class TaskType {
      */
     public void setLdapDestinationService(LdapDestinationServiceType value) {
         this.ldapDestinationService = value;
-    }
-
-    /**
-     * Obtient la valeur de la propriété jndiExecDstService.
-     * 
-     * @return
-     *     possible object is
-     *     {@link JndiExecDstServiceType }
-     *     
-     */
-    public JndiExecDstServiceType getJndiExecDstService() {
-        return jndiExecDstService;
-    }
-
-    /**
-     * Définit la valeur de la propriété jndiExecDstService.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link JndiExecDstServiceType }
-     *     
-     */
-    public void setJndiExecDstService(JndiExecDstServiceType value) {
-        this.jndiExecDstService = value;
     }
 
     /**

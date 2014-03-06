@@ -368,8 +368,6 @@ public class LscConfiguration {
 			return t.getLdapDestinationService();
 		} else if (t.getDatabaseDestinationService() != null) {
 			return t.getDatabaseDestinationService();
-		} else if (t.getJndiExecDstService() != null) {
-			return t.getJndiExecDstService();
         } else if (t.getGoogleAppsDestinationService() != null) {
             return t.getGoogleAppsDestinationService();
 		} else if (t.getMultiDestinationService() != null) {
@@ -416,8 +414,6 @@ public class LscConfiguration {
             t.setXaFileDestinationService((XaFileDestinationServiceType) s);
         } else if (s instanceof MultiDestinationServiceType) {
             t.setMultiDestinationService((MultiDestinationServiceType) s);
-        } else if (s instanceof JndiExecDstServiceType) {
-            t.setJndiExecDstService((JndiExecDstServiceType) s);
         } else if (s instanceof LdapDestinationServiceType) {
             t.setLdapDestinationService((LdapDestinationServiceType) s);
         } else if (s instanceof GoogleAppsServiceType) {

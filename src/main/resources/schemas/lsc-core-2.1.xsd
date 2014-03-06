@@ -464,14 +464,6 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
-	<xsd:complexType name="jndiExecDstServiceType">
-		<xsd:complexContent>
-			<xsd:extension base="ldapDestinationServiceType">
-				<!-- should include there a data structure to set variables -->
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<xsd:complexType name="pluginDestinationServiceType">
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
@@ -530,7 +522,6 @@
 				<xsd:element name="databaseDestinationService" type="databaseDestinationServiceType" />
 				<xsd:element name="googleAppsDestinationService" type="googleAppsServiceType" />
 				<xsd:element name="ldapDestinationService" type="ldapDestinationServiceType" />
-				<xsd:element name="jndiExecDstService" type="jndiExecDstServiceType" />
 				<xsd:element name="multiDestinationService" type="multiDestinationServiceType" />
 				<xsd:element name="xaFileDestinationService" type="xaFileDestinationServiceType" />
 				<xsd:element name="pluginDestinationService" type="pluginDestinationServiceType" />

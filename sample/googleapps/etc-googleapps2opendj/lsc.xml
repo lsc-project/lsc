@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd" revision="1">
   <connections id="2">
     <ldapConnection>
       <name>opends-dst-conn</name>

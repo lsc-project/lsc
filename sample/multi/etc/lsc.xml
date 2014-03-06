@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-1.0.xsd" id="1" revision="0">
-  <connections id="2">
-    <connection class="ldapConnection" id="3">
-      <id>ldap-src-conn</id>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd" revision="0">
+  <connections>
+    <ldapConnection>
+      <name>ldap</name>
       <url>ldap://127.0.0.1:33389/dc=lsc-project,dc=org</url>
       <username>cn=Directory Manager</username>
       <password>secret</password>
@@ -13,50 +13,22 @@
       <pageSize>-1</pageSize>
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
-    </connection>
-    <connection class="databaseConnection" id="4">
-      <id>ldap-dst-conn</id>
+    </ldapConnection>
+    <databaseConnection>
+      <name>postgresql</name>
       <url>jdbc:postgresql://127.0.0.1:5432/lsc</url>
       <username>lsc</username>
       <password>lsc</password>
       <driver>org.postgresql.Driver</driver>
-    </connection>
+    </databaseConnection>
   </connections>
-  <audits>
-	<audit class="csvAudit">
-		<name>csv</name>
-		<operations>create, delete</operations>
-		<datasets>cn, dn</datasets>
-		<separator>;</separator>
-		<append>true</append>
-	</audit>
-	<audit class="ldifAudit">
-		<name>ldif</name>
-		<append>false</append>
-	</audit>
-  </audits>
   <tasks>
     <task>
       <name>People</name>
       <bean>org.lsc.beans.SimpleBean</bean>
-      <destinationService class="multiDestinationService">
-		<xaService class="xaDatabaseDestinationService">
-	        <name>postgresql-destination-service</name>
-        	<connection reference="4" />
-        	<requestsNameForInsert>insertInetOrgPerson</requestsNameForInsert>
-        	<requestsNameForUpdate>updateInetOrgPerson</requestsNameForUpdate>
-        	<requestsNameForDelete>deleteInetOrgPerson</requestsNameForDelete>
-        	<requestNameForObject>getInetOrgPerson</requestNameForObject>
-        	<requestNameForList>getInetOrgPersonList</requestNameForList>
-		</xaService>
-		<xaService class="xaFileDestinationService">
-	        <name>file-destination-service</name>
-        	<outputDirectory>c:/temp</outputDirectory>
-		</xaService>
-      </destinationService>
-      <sourceService class="ldapSourceService">
+      <ldapSourceService>
         <name>openldap-source-service</name>
-        <connection reference="3" />
+        <connection reference="ldap" />
         <baseDn>ou=People,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>mail</string>
@@ -72,12 +44,30 @@
         </fetchedAttributes>
         <getAllFilter>(objectClass=inetorgperson)</getAllFilter>
         <getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-      </sourceService>
-      <syncOptions class="propertiesBasedSyncOptions">
+        <cleanFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</cleanFilter>
+      </ldapSourceService>
+      <multiDestinationService>
+	<name>multi-destination-service</name>
+        <connection reference="postgresql" />
+	<xaServices reference="databaseDestinationService">
+	        <name>postgresql-destination-service</name>
+        	<connection reference="postgresql" />
+        	<requestsNameForInsert>insertInetOrgPerson</requestsNameForInsert>
+        	<requestsNameForUpdate>updateInetOrgPerson</requestsNameForUpdate>
+        	<requestsNameForDelete>deleteInetOrgPerson</requestsNameForDelete>
+        	<requestNameForObject>getInetOrgPerson</requestNameForObject>
+        	<requestNameForList>getInetOrgPersonList</requestNameForList>
+	</xaServices>
+	<xaServices reference="xaFileDestinationService">
+	        <name>file-destination-service</name>
+        	<outputDirectory>c:/temp</outputDirectory>
+	</xaServices>
+      </multiDestinationService>
+      <propertiesBasedSyncOptions>
         <mainIdentifier>"mail="+srcBean.getAttributeFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
         <defaultDelimiter>;</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
-      </syncOptions>
+      </propertiesBasedSyncOptions>
     </task>
   </tasks>
 </lsc>

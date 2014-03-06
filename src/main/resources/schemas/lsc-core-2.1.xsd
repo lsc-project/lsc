@@ -48,11 +48,11 @@
  		No new version is released because it has never been implemented before and won't break any existing and functional configuration
   -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns="http://lsc-project.org/XSD/lsc-core-2.0.xsd"
-	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.0.xsd"
+	xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
+	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
 	elementFormDefault="qualified"
 	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-	jaxb:version="2.0">
+	jaxb:version="2.1">
 
 	<!-- <xsd:annotation> <xsd:documentation> This schema specifies the configuration 
 		options for LSC synchronizations tasks. </xsd:documentation> </xsd:annotation> -->

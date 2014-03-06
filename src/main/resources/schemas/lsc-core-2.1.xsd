@@ -52,7 +52,7 @@
 	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
 	elementFormDefault="qualified"
 	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-	jaxb:version="2.1">
+	jaxb:version="2.0">
 
 	<!-- <xsd:annotation> <xsd:documentation> This schema specifies the configuration 
 		options for LSC synchronizations tasks. </xsd:documentation> </xsd:annotation> -->

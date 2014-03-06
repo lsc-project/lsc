@@ -44,7 +44,7 @@
  -->
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	version="2.1">
+	version="2.0">
 
 	<jaxb:bindings schemaLocation="lsc-core-2.1.xsd">
 		<jaxb:schemaBindings>

@@ -41,6 +41,9 @@ public class ConfigurationLoaderTest {
 
 	@Test
 	public void testDumpSimpleConfiguration() throws ConfigurationException, IOException, LscConfigurationException {
+		Lsc c = getFile(this.getClass().getClassLoader().getResource("test.xml").getPath());
+		LscConfiguration.loadFromInstance(c);
+
 		CsvAuditType csvAudit = new CsvAuditType();
 		csvAudit.setId("csvAudit-1");
 		csvAudit.setAppend(false);

@@ -5,7 +5,7 @@
 Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-Généré le : 2014.03.06 à 05:49:07 PM CET 
+Généré le : 2014.03.14 à 03:31:31 PM CET 
 
   -->
   <bindings scd="x-schema::tns" xmlns:tns="http://lsc-project.org/XSD/lsc-core-2.1.xsd">
@@ -57,11 +57,11 @@ Généré le : 2014.03.06 à 05:49:07 PM CET
     <bindings scd="~tns:ldapDestinationServiceType">
       <class ref="org.lsc.configuration.LdapDestinationServiceType"/>
     </bindings>
-    <bindings scd="~tns:ldapSourceServiceType">
-      <class ref="org.lsc.configuration.LdapSourceServiceType"/>
-    </bindings>
     <bindings scd="~tns:databaseConnectionType">
       <class ref="org.lsc.configuration.DatabaseConnectionType"/>
+    </bindings>
+    <bindings scd="~tns:ldapSourceServiceType">
+      <class ref="org.lsc.configuration.LdapSourceServiceType"/>
     </bindings>
     <bindings scd="~tns:googleAppsServiceType">
       <class ref="org.lsc.configuration.GoogleAppsServiceType"/>

@@ -79,7 +79,6 @@ import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.api.ldap.model.message.AliasDerefMode;
 import org.apache.directory.api.ldap.model.message.Control;
 import org.apache.directory.api.ldap.model.message.LdapResult;
@@ -175,8 +174,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			} else {
 				return null;
 			}
-		} catch (LdapURLEncodingException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
+//		} catch (org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException e) {
+//			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (LdapException e) {
             throw new LscServiceConfigurationException(e.toString(), e);
         } catch (NoSuchAlgorithmException e) {
@@ -187,9 +186,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	}
 	
 	public void close() throws IOException {
-		if (! connection.close()) {
-			throw new IOException("Can't close service");
-		}
+		connection.close();
 	}
 	
 	@Override
@@ -400,7 +397,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 						if (value.isHumanReadable()) {
 							datasetsValues.add(value.getString());
 						} else {
-							datasetsValues.add(value.getBytes());
+							datasetsValues.add(new String(value.getBytes()));
 						}
 					}
 					converted.getDatasets().put(attr.getId(), datasetsValues);

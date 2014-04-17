@@ -62,7 +62,6 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.Rdn;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;

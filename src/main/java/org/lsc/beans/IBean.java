@@ -130,7 +130,7 @@ public interface IBean extends Cloneable, Serializable {
 	 *            The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException
-	 * @deprecated
+	 * @deprecated See getDatasetById(String id)
 	 */
 	public List<String> getAttributeValuesById(final String id)
 					throws NamingException;

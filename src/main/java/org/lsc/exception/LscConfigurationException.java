@@ -63,6 +63,6 @@ public class LscConfigurationException extends LscException {
 	}
 	
 	public LscConfigurationException(Throwable e) {
-		super("Configuration exception: ", e);
+		super("Configuration exception: " + e.getLocalizedMessage(), e);
 	}
 }

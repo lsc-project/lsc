@@ -352,6 +352,11 @@ public abstract class AbstractSynchronize {
 		Thread asyncThread = asynchronousThreads.get(syncName);
         long startTime = System.currentTimeMillis();
         
+        if(asyncThread == null) {
+            LOGGER.info("Trying to stop a non running asynchronous task: " + syncName);
+            return;
+        }
+        
         while(asyncThread.isAlive()) {
         	try {
     			asyncThread.join(1000);

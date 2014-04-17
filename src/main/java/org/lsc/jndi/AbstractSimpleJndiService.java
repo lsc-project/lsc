@@ -48,6 +48,7 @@ package org.lsc.jndi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -62,6 +63,7 @@ import javax.naming.directory.SearchResult;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapServiceType;
 import org.lsc.exception.LscConfigurationException;
@@ -309,5 +311,15 @@ public abstract class AbstractSimpleJndiService {
 	 */
 	public final String getFilterId() {
 		return filterIdSync;
+	}
+
+
+	/**
+	 * @see org.lsc.service.IService.getSupportedConnectionType()
+	 */
+	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+	    Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+	    list.add(LdapConnectionType.class);
+	    return list;
 	}
 }

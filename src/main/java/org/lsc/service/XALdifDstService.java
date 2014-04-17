@@ -47,6 +47,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,7 @@ import javax.transaction.xa.XAResource;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceException;
@@ -257,4 +260,13 @@ public class XALdifDstService implements
 	public List<String> getWriteDatasetIds() {
 		throw new UnsupportedOperationException("TODO");
 	}
+
+
+    /**
+     * @see org.lsc.service.IService.getSupportedConnectionType()
+     */
+    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+        return list;
+    }
 }

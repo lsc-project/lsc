@@ -51,6 +51,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +62,7 @@ import javax.naming.NamingException;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.GoogleAppsConnectionType;
 import org.lsc.configuration.GoogleAppsServiceType;
 import org.lsc.configuration.TaskType;
@@ -843,5 +845,14 @@ public class GoogleAppsService implements IWritableService {
 
         URL deleteUrl = new URL(domainUrlBase + "nickname/" + SERVICE_VERSION + "/" + nickname);
         nicknameService.delete(deleteUrl);
+    }
+
+    /**
+     * @see org.lsc.service.IService.getSupportedConnectionType()
+     */
+    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+        list.add(GoogleAppsConnectionType.class);
+        return list;
     }
 }

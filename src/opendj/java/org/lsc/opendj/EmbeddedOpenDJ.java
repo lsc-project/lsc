@@ -444,6 +444,7 @@ public final class EmbeddedOpenDJ {
             sb.append(line).append("\n");
         }
         addEntries(sb.toString());
+        br.close();
     }
     
     /**

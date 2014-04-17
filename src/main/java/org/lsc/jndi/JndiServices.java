@@ -107,6 +107,7 @@ import org.lsc.configuration.LdapDerefAliasesType;
 import org.lsc.configuration.LdapReferralType;
 import org.lsc.configuration.LdapVersionType;
 import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1072,6 +1073,41 @@ public final class JndiServices {
 			}
 		}
 	}
+
+    /**
+     * Retrieve a specific attribute from an object
+     * 
+     * @param objectDn
+     * @param attribute
+     * @return
+     * @throws LscServiceException
+     */
+    public List<String> getAttributeValues(String objectDn, String attribute) throws LscServiceException {
+        List<String> values = null;
+        try {
+            // Setup search
+            SearchControls sc = new SearchControls();
+            sc.setDerefLinkFlag(false);
+            sc.setReturningAttributes(new String[] { attribute });
+            sc.setSearchScope(SearchControls.OBJECT_SCOPE);
+            sc.setReturningObjFlag(true);
+
+            // Retrieve attribute values
+            SearchResult res = getEntry(objectDn, "objectClass=*", sc, SearchControls.OBJECT_SCOPE);
+            Attribute attr = res.getAttributes().get(attribute);
+            if (attr != null) {
+                values = new ArrayList<String>();
+                NamingEnumeration<?> enu = attr.getAll();
+                while (enu.hasMoreElements()) {
+                    Object val = enu.next();
+                    values.add(val.toString());
+                }
+            }
+        } catch (NamingException e) {
+            throw new LscServiceException(e);
+        }
+        return values;
+    }
 
 	public Map<String, LscDatasets> doGetAttrsList(final String base,
 			final String filter, final int scope, final List<String> attrsNames)

@@ -136,6 +136,23 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
+		<!-- Init script -->
+		<fileSet>
+			<directory>src/install/etc/init.d</directory>
+			<includes> <include>lsc</include> </includes>
+			<outputDirectory>etc/init.d</outputDirectory>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<fileSet>
+			<directory>src/install/etc/default</directory>
+			<includes> <include>lsc</include> </includes>
+			<outputDirectory>etc/default</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
 		<!-- Man pages -->
 		<fileSet>
 			<directory>doc/man</directory>

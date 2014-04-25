@@ -1,0 +1,19 @@
+#====================================================================
+# Configuration for LSC init script
+# (http://www.lsc-project.org).
+#====================================================================
+
+# LSC installation
+LSC_BIN="/usr/local/lsc/bin/lsc"
+LSC_CFG_DIR="/usr/local/lsc/etc"
+LSC_USER=""
+LSC_GROUP=""
+LSC_PID_FILE="/var/run/lsc.pid"
+LSC_TASKS="all"
+LSC_PARAMS=""
+
+# JMX
+LSC_JMXPORT="1099"
+
+# JAVA
+#JAVA_HOME=/usr/java/jdk/jre

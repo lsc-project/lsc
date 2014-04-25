@@ -1,0 +1,25 @@
+Build distribution
+==================
+
+$ mvn -Popendj clean package
+
+tar.gz and .zip files available in target/ directory
+
+RPM
+===
+
+Copy lsc-VERSION.zip in SOURCES/ and lsc-core.spec in SPECS/ and run:
+
+$ rpmbuild -ba SPECS/lsc-core.spec
+
+DEBIAN
+======
+
+Copy debian/ directory in dist directory:
+
+$ cp -a src/install/debian/ target/lsc-core-VERSION-dist/lsc-VERSION/
+
+Build package:
+$ cd target/lsc-core-VERSION-dist/lsc-VERSION/
+$ dpkg-buildpackage
+

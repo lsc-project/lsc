@@ -77,7 +77,11 @@ cp -a bin/hsqldb %{buildroot}/usr/bin
 ## config
 cp -a etc/logback.xml %{buildroot}/etc/lsc
 cp -a etc/lsc.xml-sample %{buildroot}/etc/lsc/lsc.xml
+cp -a etc/lsc.xml-sample %{buildroot}/usr/share/doc/lsc/
 cp -a etc/sql-map-config.xml-sample %{buildroot}/etc/lsc/sql-map-config.xml
+cp -a etc/sql-map-config.xml-sample %{buildroot}/usr/share/doc/lsc/
+cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}/etc/lsc/sql-map-config.d/InetOrgPerson.xml
+cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}/usr/share/doc/lsc/
 ## lib
 cp -a lib/* %{buildroot}/usr/%{_lib}/lsc
 ## sample

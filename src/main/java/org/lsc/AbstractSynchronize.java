@@ -127,9 +127,14 @@ public abstract class AbstractSynchronize {
 	private int timeLimit;
 
 	/**
-	 * Map used to keep trace of all runing threads
+	 * Map used to keep trace of all running threads
 	 */
 	private Map<String, Thread> asynchronousThreads;
+	
+	/**
+	 * Map used to get SyncrhonizeTaks from task name
+	 */
+	private Map<String, AsynchronousRunner> mapSTasks;
 
 	/**
 	 * Default constructor.
@@ -137,6 +142,7 @@ public abstract class AbstractSynchronize {
 	protected AbstractSynchronize() {
 		timeLimit = 3600;
 		asynchronousThreads = new HashMap<String, Thread>();
+		mapSTasks = new HashMap<String, AsynchronousRunner>();
 	}
 
 	/**
@@ -266,13 +272,7 @@ public abstract class AbstractSynchronize {
 			}
 		}
 
-		String totalsLogMessage = "All entries: {}, to modify entries: {}, modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
-		if (counter.getCountError() > 0) {
-			LOGGER.error(totalsLogMessage, objects);
-		} else {
-			LOGGER.info(totalsLogMessage, objects);
-		}
+		logStatus(counter);
 		return counter.getCountError() == 0;
 	}
 
@@ -330,21 +330,19 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		String totalsLogMessage = "All entries: {}, to modify entries: {}, successfully modified entries: {}, errors: {}";
-		Object[] objects = new Object[] { counter.getCountAll(), counter.getCountModifiable(), counter.getCountCompleted(), counter.getCountError() };
-		if (counter.getCountError() > 0) {
-			LOGGER.error(totalsLogMessage, objects);
-		} else {
-			LOGGER.info(totalsLogMessage, objects);
-		}
+		logStatus(counter);
 		return counter.getCountError() == 0;
 	}
 
 	public final synchronized void startAsynchronousSynchronize2Ldap(Task task) {
 
-		Thread thread = new Thread(new AsynchronousRunner(task, this));
-		thread.setName(task.getName());
-		asynchronousThreads.put(task.getName(), thread);
+		AsynchronousRunner asyncRunner = new AsynchronousRunner(task, this);
+		String taskName = task.getName();
+		
+		Thread thread = new Thread(asyncRunner);
+		thread.setName(taskName);
+		asynchronousThreads.put(taskName, thread);
+		mapSTasks.put(taskName, asyncRunner);
 		thread.start();
 	}
 
@@ -375,19 +373,33 @@ public abstract class AbstractSynchronize {
         }
         if(!asyncThread.isAlive()) {
     		asynchronousThreads.remove(syncName);
+    		mapSTasks.remove(syncName);
         }
 	}
 
 	public final boolean isAsynchronousTaskRunning(final String syncName) {
-		if(asynchronousThreads.get(syncName) != null) {
-			if(asynchronousThreads.get(syncName).isAlive()) {
+		Thread asyncThread = asynchronousThreads.get(syncName);
+		if(asyncThread != null) {
+			if(asyncThread.isAlive()) {
 				return true;
 			} else {
 				asynchronousThreads.remove(syncName);
+				mapSTasks.remove(syncName);
 				return false;
 			}
 		} else {
 			return false;
+		}
+	}
+	
+	public final String getTaskFullStatus(final String syncName) {
+		Thread asyncThread = asynchronousThreads.get(syncName);
+		if(asyncThread != null && asyncThread.isAlive()) {
+			AsynchronousRunner asyncRunner = mapSTasks.get(syncName);
+			InfoCounter counter = asyncRunner.getCounter();
+			return getLogStatus(counter);
+		} else {
+			return null;
 		}
 	}
 	
@@ -485,6 +497,24 @@ public abstract class AbstractSynchronize {
 		// TODO Fix LdifLogger to avoid this
 		LSCStructuralLogger.DESTINATION.debug("", lm);
 	}
+	
+	protected void logStatus(InfoCounter counter) {
+		String totalsLogMessage = getLogStatus(counter);
+		if (counter.getCountError() > 0) {
+			LOGGER.error(totalsLogMessage);
+		} else {
+			LOGGER.info(totalsLogMessage);
+		}
+	}
+	
+	protected String getLogStatus(InfoCounter counter) {
+		String totalsLogMessage =
+				"All entries: "+ counter.getCountAll() +
+				", to modify entries: "+ counter.getCountModifiable() +
+				", successfully modified entries: "+counter.getCountCompleted()+
+				", errors: "+counter.getCountError();
+		return totalsLogMessage;
+	}
 
 	/**
 	 * Parse the command line arguments according the selected filter.
@@ -570,6 +600,7 @@ class AsynchronousRunner implements Runnable {
 
     private AbstractSynchronize abstractSynchronize;
     private Task task;
+    private InfoCounter counter;
     
     public AsynchronousRunner(Task task, AbstractSynchronize abstractSynchronize) {
         this.task = task;
@@ -577,7 +608,7 @@ class AsynchronousRunner implements Runnable {
     }
 
     public void run() {
-        InfoCounter counter = new InfoCounter();
+        counter = new InfoCounter();
 
         SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(abstractSynchronize.getThreads());
 
@@ -603,6 +634,7 @@ class AsynchronousRunner implements Runnable {
                 nextId = aService.getNextId();
                 if (nextId != null) {
                     threadPool.runTask(new SynchronizeTask(task, counter, abstractSynchronize, nextId, fromSource));
+                    counter.incrementCountAll();
                 } else {
                     try {
                         Thread.sleep(aService.getInterval());
@@ -625,6 +657,10 @@ class AsynchronousRunner implements Runnable {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
+    }
+    
+    public InfoCounter getCounter() {
+    	return counter;
     }
 }
 

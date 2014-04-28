@@ -139,4 +139,9 @@ public interface LscServer {
 	 */
 	public void launchCleanTask(String taskName) throws Exception;
 	
+	/**
+	 * Get status line of a task
+	 */
+	public String getTaskStatus(String taskName);
+	
 }

@@ -210,4 +210,8 @@ public class LscServerImpl implements LscServer, Runnable {
 	public boolean launchSyncTask(String taskName, SimpleBean bean) {
 		return synchronize.launch(taskName, bean);
 	}
+
+	public String getTaskStatus(String taskName) {
+		return synchronize.getTaskFullStatus(taskName);
+	}
 }

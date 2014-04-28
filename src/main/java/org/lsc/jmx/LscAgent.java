@@ -163,7 +163,15 @@ public class LscAgent implements NotificationListener {
 					LOGGER.error("Unknown or synchronous task name: " + taskName);
 					return 3;
 				}
-				return (status ? 0 : 1);
+				
+				// Display full taks status
+				if (status) {
+					String fullStatus = lscServer.getTaskStatus(taskName);
+					LOGGER.info(fullStatus);
+					return 0;
+				}
+				
+				return 1;
 			case TASKS_LIST:
 				LOGGER.info("Available asynchronous tasks are: ");
 				for(String taskName: lscServer.getAsyncTasksName()) {

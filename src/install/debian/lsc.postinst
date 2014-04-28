@@ -2,6 +2,7 @@
 
 lsc_logdir=/var/log/lsc
 lsc_user=lsc
+lsc_group=lsc
 
 id ${lsc_user} &>/dev/null || useradd ${lsc_user}
 

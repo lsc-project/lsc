@@ -186,14 +186,10 @@ public class LdifLayout extends PatternLayout {
 	 */
 	private static String listToLdif(final List<LscDatasetModification> modificationItems, final boolean addEntry) {
 		StringBuilder sb = new StringBuilder();
-		boolean first = true;
 
 		for(LscDatasetModification mi: modificationItems) {
 			try {
 				if (!addEntry) {
-					if (!first) {
-						sb.append("-\n");
-					}
 					switch (mi.getOperation()) {
 						case DELETE_VALUES:
 							sb.append("delete: ").append(mi.getAttributeName()).append("\n");
@@ -207,10 +203,12 @@ public class LdifLayout extends PatternLayout {
 					}
 				}
 				printAttributeToStringBuffer(sb, mi.getAttributeName(), mi.getValues());
+				if (!addEntry) {
+					sb.append("-\n");
+				}
 			} catch (NamingException e) {
 				sb.append(mi.getAttributeName()).append(": ").append("!!! Unable to print value !!!\n");
 			}
-			first = false;
 		}
 		return sb.toString();
 	}

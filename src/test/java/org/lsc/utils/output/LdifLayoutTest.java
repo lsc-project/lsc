@@ -165,6 +165,7 @@ public class LdifLayoutTest {
 						"-\n" +
 						"add: description\n" +
 						"description:: TXVsdGktbGluZQpkZXNjcmlwdGlvbg==\n" +
+						"-\n" +
 						"\n",
 						layout.doLayout(loggingEvent));
 	}

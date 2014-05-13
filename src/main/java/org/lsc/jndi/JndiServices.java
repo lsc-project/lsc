@@ -240,7 +240,7 @@ public final class JndiServices {
 		
 		/* Load SyncRepl response control */
 		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
-		ControlFactory<?, ?> factory = new SyncStateValueFactory( ldapApiService );
+		ControlFactory<?> factory = new SyncStateValueFactory( ldapApiService );
 		ldapApiService.registerControl( factory );
 		/* Load Persistent Search response control */
 		factory = new PersistentSearchFactory(ldapApiService);

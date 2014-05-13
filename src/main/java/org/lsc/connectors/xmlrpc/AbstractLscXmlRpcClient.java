@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractLscXmlRpcClient extends AbstractLscXmlRpcObject {
 	
-	private static Logger LOGGER = LoggerFactory.getLogger(AbstractLscXmlRpcClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLscXmlRpcClient.class);
 	
 	private URL url;
 	private String username;

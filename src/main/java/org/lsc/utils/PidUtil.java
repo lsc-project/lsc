@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PidUtil {
     
-    private static Logger LOGGER = LoggerFactory.getLogger(PidUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PidUtil.class);
 
     public static String getPID(final String fallback) {
         // Note: may fail in some JVM implementations

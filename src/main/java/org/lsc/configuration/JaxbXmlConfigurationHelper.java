@@ -89,7 +89,7 @@ public class JaxbXmlConfigurationHelper {
 	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-2.0.xsd"; 
 	private JAXBContext jaxbc;
 
-	private static Logger LOGGER = LoggerFactory.getLogger(JaxbXmlConfigurationHelper.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JaxbXmlConfigurationHelper.class);
 	
 	/**
 	 * Initiate helper by adding XML aliases

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class ScriptingEvaluator {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(ScriptingEvaluator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ScriptingEvaluator.class);
 	
 	/**
 	 * The instances, one per thread to protect non thread safe engines like
@@ -26,10 +26,6 @@ public class ScriptingEvaluator {
 	private static Map<String, Class<? extends ScriptableEvaluator>> implementetionsCache;
 
 	private Map<String, ScriptableEvaluator> instancesCache;
-
-	// // Logger
-	// private static final Logger LOGGER = LoggerFactory
-	// .getLogger(ScriptingEvaluator.class);
 
 	private ScriptableEvaluator defaultImplementation;
 

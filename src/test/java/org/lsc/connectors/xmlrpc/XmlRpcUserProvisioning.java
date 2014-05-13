@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements IWritableService {
 	
-	private static Logger LOGGER = LoggerFactory.getLogger(XmlRpcUserProvisioning.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(XmlRpcUserProvisioning.class);
 
 	private String objectType = "Users"; 
 	private String domain = "lsc-project.org";

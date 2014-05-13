@@ -816,7 +816,7 @@
 		<dependency>
 			<groupId>org.apache.directory.api</groupId>
 			<artifactId>api-all</artifactId>
-			<version>1.0.0-M20</version>
+			<version>1.0.0-M22</version>
 		</dependency>
 		<dependency>
 			<groupId>xml-apis</groupId>

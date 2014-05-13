@@ -607,7 +607,6 @@ class AsynchronousRunner implements Runnable {
 
         SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(abstractSynchronize.getThreads());
 
-        counter.incrementCountAll();
         Entry<String, LscDatasets> nextId = null;
         try {
             IAsynchronousService aService = null;
@@ -629,7 +628,6 @@ class AsynchronousRunner implements Runnable {
                 nextId = aService.getNextId();
                 if (nextId != null) {
                     threadPool.runTask(new SynchronizeTask(task, counter, abstractSynchronize, nextId, fromSource));
-                    counter.incrementCountAll();
                 } else {
                     try {
                         Thread.sleep(aService.getInterval());

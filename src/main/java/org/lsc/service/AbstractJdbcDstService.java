@@ -85,13 +85,11 @@ public abstract class AbstractJdbcDstService extends AbstractJdbcService impleme
                 break;
             case CREATE_OBJECT:
                 for(String request: getRequestsNameForInsert()) {
-              	    LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
                     sqlMapper.insert(request, attributeMap);
                 }
                 break;
             case DELETE_OBJECT:
                 for(String request: getRequestsNameForDelete()) {
-                	  LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
                     sqlMapper.delete(request, attributeMap);
                 }
                 break;
@@ -99,14 +97,12 @@ public abstract class AbstractJdbcDstService extends AbstractJdbcService impleme
                 // Push the destination value
                 attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
                 for(String request: getRequestsNameForUpdate()) {
-              	    LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
                     sqlMapper.update(request, attributeMap);
                 }
             }
             sqlMapper.commitTransaction();
         } catch (SQLException e) {
             LOGGER.error(e.toString(), e);
-            LOGGER.error("Error caused by operation " + lm.getOperation().getDescription() + ", attributes " + attributeMap.toString());
             return false;
         } finally {
             try {

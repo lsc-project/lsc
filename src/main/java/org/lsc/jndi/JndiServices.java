@@ -637,17 +637,17 @@ public final class JndiServices {
 	public String rewriteBase(final String base) {
 		try {
 			Dn lowerCasedContextDn = (contextDn == null) ? null : new Dn(contextDn.toString().toLowerCase()); 
-			Dn baseDn = new Dn(base.toLowerCase());
-			if (!baseDn.isDescendantOf(lowerCasedContextDn)) {
+			Dn lowerCasedBaseDn = new Dn(base.toLowerCase());
+			if (!lowerCasedBaseDn.isDescendantOf(lowerCasedContextDn)) {
 				return base;
 			}
 			
-			if (baseDn.equals(lowerCasedContextDn)) {
+			if (lowerCasedBaseDn.equals(lowerCasedContextDn)) {
 				return "";
 			}
 			
-			Dn relativeDn = baseDn.getDescendantOf(lowerCasedContextDn);
-			return relativeDn.toString();
+			Dn lowerCasedRelativeDn = lowerCasedBaseDn.getDescendantOf(lowerCasedContextDn);
+			return base.substring(0, lowerCasedRelativeDn.toString().length());
 		} catch (LdapInvalidDnException e) {
 			throw new RuntimeException(e);
 		}

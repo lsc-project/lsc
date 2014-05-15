@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +55,7 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
+import org.apache.commons.io.FilenameUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.lsc.Task;
 import org.lsc.jndi.AbstractSimpleJndiService;
@@ -166,6 +169,14 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		
 		Object ret = null;
 		try {
+			if (task.getScriptIncludes() != null) {
+				for (File scriptInclude: task.getScriptIncludes()) {
+					String extension = FilenameUtils.getExtension(scriptInclude.getAbsolutePath());
+					if ("groovy".equals(extension) || "gvy".equals(extension) || "gy".equals(extension) || "gsh".equals(extension)) {
+						engine.eval(new FileReader(scriptInclude), bindings);
+					}
+				}
+			}
 			ret = engine.eval(expressionImport, bindings);
 		} catch (RuntimeException e) {
 			throw e;

@@ -533,6 +533,8 @@
 			</xsd:choice>
 			<xsd:element name="customLibrary" type="valuesType"
 				minOccurs="0" />
+			<xsd:element name="scriptInclude" type="valuesType"
+				minOccurs="0" />
 			<!-- The following element is unsupported at this time -->
 			<xsd:element name="auditLog" minOccurs="0" maxOccurs="unbounded">
 				<xsd:complexType>

@@ -44,9 +44,12 @@
  */
 package org.lsc;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
@@ -86,6 +89,8 @@ public class Task {
 	private ISyncOptions syncOptions;
 	
 	private Object[] customLibraries;
+	
+	private List<File> scriptIncludes;
 
 	private Map<String, Object> scriptingVars = new HashMap<String, Object>();
 
@@ -117,6 +122,19 @@ public class Task {
 				int customLibrariesIndex = 0;
 				for(String custumLibraryClassName: t.getCustomLibrary().getString()) {
 					customLibraries[customLibrariesIndex++] = Class.forName(custumLibraryClassName).newInstance();
+				}
+			}
+			
+			// Load custom scripts
+			if (t.getScriptInclude() != null && t.getScriptInclude().getString() != null) {
+				scriptIncludes = new ArrayList<File>();
+				for (String script: t.getScriptInclude().getString()) {
+					File scriptFile = new File(Configuration.getConfigurationDirectory() + "/" + script);
+					if (scriptFile.exists()) {
+						scriptIncludes.add(scriptFile);
+					} else {
+						LOGGER.warn("File " + scriptFile.getAbsolutePath() + "doesn't exist.");
+					}
 				}
 			}
 	
@@ -181,6 +199,10 @@ public class Task {
 
 	public Object[] getCustomLibraries() {
 		return customLibraries;
+	}
+	
+	public List<File> getScriptIncludes() {
+		return scriptIncludes;
 	}
 
 	public Map<String, Object> getScriptingVars() {

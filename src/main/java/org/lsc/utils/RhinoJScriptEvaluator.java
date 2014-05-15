@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import java.io.File;
+import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FilenameUtils;
 import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.AbstractSimpleJndiService;
@@ -218,12 +221,27 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 
         Object ret = null;
         try {
+        	List<Script> includes = new ArrayList<Script>();
+			if (task.getScriptIncludes() != null) {
+				for (File scriptInclude: task.getScriptIncludes()) {
+					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
+						Script include = cx.compileReader(new FileReader(scriptInclude), scriptInclude.getAbsolutePath(), 1, null);
+						includes.add(include);
+					}
+				}
+			}
             if(debug) {
                 rhinoDebugger.initContext(cx, scope, script);
                 Object jsObj = Context.javaToJS(rhinoDebugger, scope);
                 ScriptableObject.putProperty(scope, "rhinoDebugger", jsObj);
+                for (Script include: includes) {
+                	rhinoDebugger.execInclude(include);
+                }
                 ret = rhinoDebugger.exec();
             } else {
+                for (Script include: includes) {
+                	include.exec(cx, scope);
+                }
                 ret = script.exec(cx, scope);
             }
         } catch (EcmaError e) {

@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.03.14 à 03:31:31 PM CET 
+// Généré le : 2014.05.15 à 05:01:12 PM CEST 
 //
 
 
@@ -57,6 +57,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *           &lt;element name="pluginSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginSyncOptionsType"/>
  *         &lt;/choice>
  *         &lt;element name="customLibrary" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="scriptInclude" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
  *         &lt;element name="auditLog" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
@@ -96,6 +97,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "forceSyncOptions",
     "pluginSyncOptions",
     "customLibrary",
+    "scriptInclude",
     "auditLog"
 })
 public class TaskType {
@@ -124,6 +126,7 @@ public class TaskType {
     protected ForceSyncOptionsType forceSyncOptions;
     protected PluginSyncOptionsType pluginSyncOptions;
     protected ValuesType customLibrary;
+    protected ValuesType scriptInclude;
     protected List<TaskType.AuditLog> auditLog;
     @XmlAttribute(name = "id")
     protected String id;
@@ -582,6 +585,30 @@ public class TaskType {
      */
     public void setCustomLibrary(ValuesType value) {
         this.customLibrary = value;
+    }
+
+    /**
+     * Obtient la valeur de la propriété scriptInclude.
+     * 
+     * @return
+     *     possible object is
+     *     {@link ValuesType }
+     *     
+     */
+    public ValuesType getScriptInclude() {
+        return scriptInclude;
+    }
+
+    /**
+     * Définit la valeur de la propriété scriptInclude.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link ValuesType }
+     *     
+     */
+    public void setScriptInclude(ValuesType value) {
+        this.scriptInclude = value;
     }
 
     /**

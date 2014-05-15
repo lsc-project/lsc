@@ -45,6 +45,8 @@
  */
 package org.lsc.utils;
 
+import java.io.File;
+import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +56,7 @@ import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceException;
@@ -209,6 +212,13 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		
 		Object ret = null;
 		try {
+			if (task.getScriptIncludes() != null) {
+				for (File scriptInclude: task.getScriptIncludes()) {
+					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
+						engine.eval(new FileReader(scriptInclude), bindings);
+					}
+				}
+			}
 			ret = engine.eval(expressionImport, bindings);
 		} catch (ScriptException e) {
             LOGGER.error("Fail to compute expression: " + expression + " on " + 

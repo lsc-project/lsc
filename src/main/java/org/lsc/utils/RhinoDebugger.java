@@ -70,9 +70,6 @@ public class RhinoDebugger implements Runnable {
     public RhinoDebugger(String source, ContextFactory factory) {
 
         dim = new Dim();
-        dim.setBreak();
-        dim.setBreakOnEnter(true);
-        dim.setBreakOnExceptions(true);
         dim.setSourceProvider(new LscSourceProvider(source));
         dim.attachTo(factory);// org.mozilla.javascript.tools.shell.Main.shellContextFactory);
 
@@ -99,11 +96,18 @@ public class RhinoDebugger implements Runnable {
     }
 
     public Object exec() {
-        debugGui.setVisible(true);
+   		debugGui.setVisible(true);
+        dim.setBreak();
+        dim.setBreakOnEnter(true);
+        dim.setBreakOnExceptions(true);
         return script.exec(cx, scope);
     }
+    
+    public void execInclude(Script include) {
+    	include.exec(cx, scope);
+    }
 
-    /**
+	/**
      * Exit action.
      */
     @Override

@@ -59,7 +59,6 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
-import javax.naming.ldap.Rdn;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.lsc.Configuration;
@@ -300,7 +299,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 */
 	public final void setDistinguishName(final String dn) {
 		if (dn != null) {
-			setMainIdentifier((String) Rdn.unescapeValue(dn));
+			setMainIdentifier(dn);
 		}
 	}
 

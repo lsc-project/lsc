@@ -77,6 +77,7 @@ public class ExternalJSFileHelper extends ScriptableObject {
             InputStream fis = new FileInputStream(jsFile);
             byte[] arr = new byte[30000];
             fis.read(arr);
+            fis.close();
             ScriptableObject scope = ctx.initStandardObjects();
             ctx.evaluateString(scope, new String(arr).trim(), jsFile, 1, null);
             Function fct = (Function)scope.get(fctName, scope);

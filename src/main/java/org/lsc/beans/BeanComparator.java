@@ -338,7 +338,6 @@ public final class BeanComparator {
 					}
 
 					break;
-
 			}
 
 			if (mi == null) {

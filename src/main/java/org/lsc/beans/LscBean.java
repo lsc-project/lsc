@@ -392,15 +392,21 @@ public abstract class LscBean implements IBean, Serializable {
 						&& (dn.charAt(dn.length() - 1) == '"')) {
 					dn = dn.substring(1, dn.length() - 1);
 				}
-
-				if ((baseDn != null) && (baseDn.length() > 0)) {
-					if (dn.length() > 0) {
-						ab.setDistinguishName(dn + "," + baseDn);
-					} else {
-						ab.setDistinguishName(baseDn);
-					}
+				
+				if (dn.startsWith("ldap://")) {
+					ab.setDistinguishName(entry.getNameInNamespace());
 				} else {
-					ab.setDistinguishName(dn);
+					// Manually concat baseDn because getNameInNamespace returns
+					// a differently escaped DN, causing LSC to detect a MODRDN
+					if ((baseDn != null) && (baseDn.length() > 0)) {
+						if (dn.length() > 0) {
+							ab.setDistinguishName(dn + "," + baseDn);
+						} else {
+							ab.setDistinguishName(baseDn);
+						}
+					} else {
+						ab.setDistinguishName(dn);
+					}
 				}
 
 				NamingEnumeration<?> ne = entry.getAttributes().getAll();

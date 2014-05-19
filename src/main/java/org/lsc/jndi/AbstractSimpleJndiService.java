@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,7 +80,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public abstract class AbstractSimpleJndiService {
+public abstract class AbstractSimpleJndiService implements Closeable {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);
 	/**
@@ -255,6 +256,14 @@ public abstract class AbstractSimpleJndiService {
 		}
 
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
+	}
+	
+	public void close() throws IOException {
+		try {
+			jndiServices.finalize();
+		} catch (Throwable e) {
+			throw new IOException(e);
+		}
 	}
 
 	/**

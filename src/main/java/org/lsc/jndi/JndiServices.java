@@ -320,7 +320,11 @@ public final class JndiServices {
         	if (!cache.containsKey(props)) {
         		cache.put(props, new JndiServices(props));
         	}
-        	return cache.get(props);
+        	JndiServices instance = cache.get(props);
+        	if (instance.ctx == null) {
+        		instance.initConnection();
+        	}
+			return instance;
         }
 	}
 
@@ -1203,6 +1207,7 @@ public final class JndiServices {
 
 		// Close the connection to the LDAP server
 		ctx.close();
+		ctx = null;
 
 		super.finalize();
 	}

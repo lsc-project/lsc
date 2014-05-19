@@ -91,6 +91,10 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		LscConfiguration.getInstance();
 		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
 		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		reloadJndiConnections();
+	}
+
+	private void reloadJndiConnections() {
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
@@ -105,7 +109,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 	 * @throws LscServiceException 
 	 */
 	@Test
-	public final void testReadUserPasswordFromLdap() throws NamingException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, LscServiceException {
+	public final void testReadUserPasswordFromLdap() throws Exception {
 		Map<String, LscDatasets> ids = new HashMap<String, LscDatasets>(1);
 		Map<String, String> attributeValues = new HashMap<String, String>(1);
 		attributeValues.put("sn", "SN0001");
@@ -120,6 +124,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// so we can't test the full value, just the beginning.
 		// This is sufficient to confirm we can read the attribute as a String.
 		assertTrue(userPassword.startsWith("{SSHA}"));
+		
+		((SimpleJndiSrcService)srcService).close();
 	}
 
 	@Test
@@ -156,18 +162,21 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
+		reloadJndiConnections();
 		checkSyncResultsFirstPass();
 
 		// sync again to confirm convergence
 		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
+		reloadJndiConnections();
 		checkSyncResultsSecondPass();
 
 		// sync a third time to make sure nothing changed
 		launchSyncCleanTask(TASK_NAME, false, true, false);
 
 		// check the results of the synchronization
+		reloadJndiConnections();
 		checkSyncResultsSecondPass();
 	}
 
@@ -233,7 +242,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
 	private final void checkSyncResultsCommon() throws Exception {
 		List<String> attributeValues = null;
-
+		
 		// check MODRDN
 		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
 		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
@@ -293,6 +302,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		launchSyncCleanTask(TASK_NAME, false, false, true);
 
 		// check the results of the clean
+		reloadJndiConnections();
 		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
 	}
 

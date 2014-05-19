@@ -113,6 +113,13 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					LOGGER.error("Error while closing service.");
 				}
 			}
+			if (task.getDestinationService() instanceof Closeable) {
+				try {
+					((Closeable)task.getDestinationService()).close();
+				} catch (IOException e) {
+					LOGGER.error("Error while closing service.");
+				}
+			}
 		}
 	}
 

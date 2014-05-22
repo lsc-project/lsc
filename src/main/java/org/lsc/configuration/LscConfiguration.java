@@ -569,7 +569,8 @@ public class LscConfiguration {
     public static boolean isLdapBinaryAttribute(String attributeName) {
     	for (ConnectionType connection: getConnections()) {
     		if (connection instanceof LdapConnectionType) {
-    			if (((LdapConnectionType)connection).getBinaryAttributes().getString().contains(attributeName)) {
+    			ValuesType binaryAttributes = ((LdapConnectionType)connection).getBinaryAttributes();
+				if (binaryAttributes != null && binaryAttributes.getString().contains(attributeName)) {
     				return true;
     			}
     		}

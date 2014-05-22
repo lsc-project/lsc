@@ -565,5 +565,16 @@ public class LscConfiguration {
             throw new LscConfigurationException("Unknown or null syncoptions type: " + syncOptions.getClass().getName()); 
         }
     }
+    
+    public static boolean isLdapBinaryAttribute(String attributeName) {
+    	for (ConnectionType connection: getConnections()) {
+    		if (connection instanceof LdapConnectionType) {
+    			if (((LdapConnectionType)connection).getBinaryAttributes().getString().contains(attributeName)) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
 }
 	

@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
@@ -148,6 +149,67 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
             return resultsArray;
         }
     }
+
+    /** {@inheritDoc} */
+	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
+					final Map<String, Object> params) throws LscServiceException {
+        Object result = null;
+	    try {
+	        result = convertJsToJava(instanceEval(task, expression, params));
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
+	    
+		if(result instanceof byte[][]) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (byte[] resultValue : (byte[][])result) {
+				resultsArray.add(resultValue);
+			}
+			return resultsArray;
+		} else if (result instanceof byte[]) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			byte[] resultAsByteArray = (byte[])result;
+			if (resultAsByteArray != null && resultAsByteArray.length > 0) {
+				resultsArray.add(resultAsByteArray);
+			}
+			return resultsArray;
+		} else if (result instanceof String) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			String resultAsString = (String)result;
+			if (resultAsString != null && resultAsString.length() > 0) {
+				resultsArray.add(resultAsString.getBytes());
+			}
+			return resultsArray;
+		} else if (result instanceof List) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (Object resultValue : (List<?>)result) {
+				if (resultValue instanceof byte[]) {
+					resultsArray.add((byte[])resultValue);
+				} else {
+					resultsArray.add(resultValue.toString().getBytes());
+				}
+			}
+			return resultsArray;
+		} else if (result instanceof Set) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (Object resultValue : (Set<?>)result) {
+				if (resultValue instanceof byte[]) {
+					resultsArray.add((byte[])resultValue);
+				} else {
+					resultsArray.add(resultValue.toString().getBytes());
+				}
+			}
+			return resultsArray;
+		} else if(result == null){
+			return null;
+		} else {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			if (result != null) {
+				resultsArray.add(result.toString().getBytes());
+			}
+			return resultsArray;
+		}
+	}
 
     /** {@inheritDoc} */
     public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)

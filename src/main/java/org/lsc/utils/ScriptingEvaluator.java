@@ -130,6 +130,13 @@ public class ScriptingEvaluator {
 		return se.evalToStringList(task, getInstance().removePrefix(expression), params);
 	}
 
+	public static List<byte[]> evalToByteArrayList(final Task task,
+			final String expression, final Map<String, Object> params) throws LscServiceException {
+		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
+				expression);
+		return se.evalToByteArrayList(task, getInstance().removePrefix(expression), params);
+	}
+
 	public static Boolean evalToBoolean(final Task task,
 			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(

@@ -31,6 +31,17 @@ public interface ScriptableEvaluator {
             throws LscServiceException;
 
     /**
+     * Evaluate your script expression to a list of byte array
+     * @param task the task concerned by this evaluation
+     * @param expression the expression to evaluate
+     * @param params the keys are the name used in the
+     * @return the evaluation result, null if nothing
+     * @throws LscServiceException thrown when a technical error is encountere
+     */
+    public List<byte[]> evalToByteArrayList(final Task task, final String expression, final Map<String, Object> params)
+            throws LscServiceException;
+
+    /**
      * Evaluate your script expression to a boolean value
      * @param task the task concerned by this evaluation
      * @param expression the expression to evaluate

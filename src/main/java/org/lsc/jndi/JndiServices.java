@@ -1206,8 +1206,10 @@ public final class JndiServices {
 		}
 
 		// Close the connection to the LDAP server
-		ctx.close();
-		ctx = null;
+		if (ctx != null) {
+			ctx.close();
+			ctx = null;
+		}
 
 		super.finalize();
 	}

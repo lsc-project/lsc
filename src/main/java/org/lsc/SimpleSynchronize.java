@@ -49,6 +49,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -164,7 +165,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 				if (!launchTask(task, Task.Mode.sync)) {
 					launchResult = false;
-					break;
 				} else {
 					if(task.getSyncHook() != null && task.getSyncHook() != "") {
 						runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
@@ -176,7 +176,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 				if (!launchTask(task, Task.Mode.clean)) {
 					launchResult = false;
-					break;
 				} else {
 					if(task.getCleanHook() != null && task.getCleanHook() != "") {
 						runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
@@ -190,7 +189,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 				if(!launchTask(task, Task.Mode.async)) {
 					launchResult = false;
-					break;
 				}
 			}
 		}
@@ -244,7 +242,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				default:
 					//Should not happen
 					LOGGER.error("Unknown task mode type {}", taskMode.toString());
-					return false;
+					throw new InvalidParameterException("Unknown task mode type " + taskMode.toString());
 			}
 
 			// Manage exceptions
@@ -264,9 +262,8 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				LOGGER.error("Error while launching task \"{}\". Please check your configuration! ({})", task.getName(), errorDetail);
 				LOGGER.debug(e.toString(), e);
 				return false;
-			} else {
-				throw e;
 			}
+			throw e;
 		}
 
 		return status;

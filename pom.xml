@@ -578,7 +578,7 @@
 			<!-- Use for Google Data API -->
 			<id>burtsev-net-maven</id>
 			<name>Burtsev.Net Maven Repository</name>
-			<url>https://raw.github.com/eburtsev/gdata-maven/master</url>
+			<url>http://maven.burtsev.net</url>
 		</repository>
 	</repositories>
 
@@ -826,12 +826,12 @@
 		<dependency>
 			<groupId>com.google.gdata.gdata-java-client</groupId>
 			<artifactId>gdata-appsforyourdomain-1.0</artifactId>
-			<version>1.46.0</version>
+			<version>1.47.1</version>
 		</dependency>
  		<dependency>
 			<groupId>com.google.gdata.gdata-java-client</groupId>
 			<artifactId>gdata-contacts-3.0</artifactId>
-			<version>1.46.0</version>
+			<version>1.47.1</version>
 		</dependency>
 	</dependencies>
 

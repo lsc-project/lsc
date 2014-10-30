@@ -105,7 +105,7 @@ sub compute_password {
     my $user_passwd = $_[0];
 
     # manipulation on the key : truncate + padding with null character
-    $key = substr( $key, 0, 15 );
+    $key = substr( $key, 0, 16 );
     $key = "$key" . ( "\0" x ( 16 - length $key ) );
 
     # manipulation on the input string : padding with PKCS5-padding

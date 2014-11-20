@@ -157,6 +157,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             LdapAsyncConnection conn = new LdapNetworkConnection(url.getHost(), port);
             LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setUseSsl(isLdaps);
+			lcc.setUseTls(ldapConn.isTlsActivated());
 			
 			/* Use default SUN TrustManager. See https://issues.apache.org/jira/browse/DIRAPI-91 */
 			TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());

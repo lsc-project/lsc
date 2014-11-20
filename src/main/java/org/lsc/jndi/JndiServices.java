@@ -120,6 +120,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class JndiServices {
 
+	protected static final String TLS_CONFIGURATION = "java.naming.tls";
+
 	/** Default LDAP filter. */
 	public static final String DEFAULT_FILTER = "objectClass=*";
 
@@ -170,7 +172,7 @@ public final class JndiServices {
 		logConnectingTo(connProps);
 
 		/* should we negotiate TLS? */
-		if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
+		if (connProps.get(TLS_CONFIGURATION) != null && (Boolean) connProps.get(TLS_CONFIGURATION)) {
 			/* if we're going to do TLS, we mustn't BIND before the STARTTLS operation
 			 * so we remove credentials from the properties to stop JNDI from binding */
 			/* duplicate properties to avoid changing them (they are used as a cache key in getInstance() */
@@ -262,7 +264,7 @@ public final class JndiServices {
 			}
 
 			// using TLS ?
-			if (Boolean.parseBoolean((String) connProps.get("java.naming.tls"))) {
+			if (connProps.get(TLS_CONFIGURATION) != null && (Boolean) connProps.get(TLS_CONFIGURATION)) {
 				sb.append(" with STARTTLS extended operation");
 			}
 
@@ -331,6 +333,7 @@ public final class JndiServices {
 	public static Properties getLdapProperties(LdapConnectionType connection) throws LscConfigurationException {
 		Properties props = new Properties();
 		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY, (connection.getFactory() != null ? connection.getFactory() : "com.sun.jndi.ldap.LdapCtxFactory"));
+		props.put(TLS_CONFIGURATION, connection.isTlsActivated());
 		if(connection.getUsername() != null) {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthentication().value());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());

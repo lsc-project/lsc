@@ -239,9 +239,11 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 
 
 		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
-		String expressionImport =
-						"importPackage(org.lsc.utils.directory);\n" +
-						"importPackage(org.lsc.utils);\n" + expression;
+        String expressionImport =
+                        "var version = java.lang.System.getProperty(\"java.version\");\n" +
+                        "if (version.startsWith(\"1.8.0\")) { load(\"nashorn:mozilla_compat.js\"); }\n" +
+                        "importPackage(org.lsc.utils.directory);\n" +
+                        "importPackage(org.lsc.utils);\n" + expression;
 
 //		if (cache.containsKey(expressionImport)) {
 //			script = cache.get(expressionImport);

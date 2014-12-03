@@ -262,15 +262,15 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
         Script script = cx.compileString(expressionImport, "<cmd>", 1, null);
 
         
-     // add LDAP interface for destination if necessary
-        if (expression.contains("ldap.") && !localParams.containsKey("ldap")) {
+     // add LDAP interface for destination
+        if (!localParams.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
             ScriptableJndiServices dstSjs = new ScriptableJndiServices();
             dstSjs.setJndiServices(((AbstractSimpleJndiService) task.getDestinationService()).getJndiServices());
             localParams.put("ldap", dstSjs);
         }
 
-        // add LDAP interface for source if necessary
-        if (expression.contains("srcLdap.") && !localParams.containsKey("srcLdap")) {
+        // add LDAP interface for source
+        if (!localParams.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
             ScriptableJndiServices srcSjs = new ScriptableJndiServices();
             srcSjs.setJndiServices(((AbstractSimpleJndiService) task.getSourceService()).getJndiServices());
             localParams.put("srcLdap", srcSjs);

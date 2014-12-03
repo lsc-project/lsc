@@ -648,7 +648,7 @@ public final class BeanComparator {
 	}
 
     private static Set<Object> splitValues(Task task, String attrName, Set<Object> attrValues) {
-        Set<Object> ret = new HashSet<Object>();
+        Set<Object> ret = new LinkedHashSet<Object>();
         for(Object value : attrValues) {
             if(value instanceof String) {
                 String delimiter = task.getSyncOptions().getDelimiter(attrName);

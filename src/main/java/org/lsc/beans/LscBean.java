@@ -49,7 +49,7 @@ import java.io.Serializable;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -441,19 +441,19 @@ public abstract class LscBean implements IBean, Serializable {
 			if (values instanceof Set<?>) {
 				tmp.put(name, (Set<Object>) values);
 			} else if (values instanceof List<?>) {
-				Set<Object> valuesAsSet = new HashSet<Object>();
+				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
 				valuesAsSet.addAll((List<?>) values);
 				tmp.put(name, valuesAsSet);
 			} else if (values instanceof String) {
-				Set<Object> valuesAsSet = new HashSet<Object>();
+				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
 				valuesAsSet.add(values);
 				tmp.put(name, valuesAsSet);
             } else if (values instanceof Boolean) {
-                Set<Object> valuesAsSet = new HashSet<Object>();
+                Set<Object> valuesAsSet = new LinkedHashSet<Object>();
                 valuesAsSet.add(values.toString());
                 tmp.put(name, valuesAsSet);
             } else if (values instanceof Integer) {
-                Set<Object> valuesAsSet = new HashSet<Object>();
+                Set<Object> valuesAsSet = new LinkedHashSet<Object>();
                 valuesAsSet.add("" + values);
                 tmp.put(name, valuesAsSet);
 			} else {

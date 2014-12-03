@@ -50,6 +50,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -322,7 +323,7 @@ public final class BeanComparator {
 
 				case REPLACE_VALUES:
 					if (attrStatus == PolicyType.FORCE) {
-						if (!SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues)) {
+						if (isModified(dstBean, dstAttrValues, toSetAttrValues)) {
 							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
 											new Object[]{logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues});
 							mi = new LscDatasetModification(operationType, dstAttr.getID(), toSetAttrValues);
@@ -365,6 +366,15 @@ public final class BeanComparator {
 		}
 
 		return result;
+	}
+
+	private static boolean isModified(IBean dstBean, Set<Object> dstAttrValues,
+			Set<Object> toSetAttrValues) {
+		if (dstBean instanceof OrderedValuesBean) {
+			return !SetUtils.doSetsMatchWithOrder(toSetAttrValues, dstAttrValues);
+		} else {
+			return !SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues);
+		}
 	}
 
 	/**
@@ -577,7 +587,7 @@ public final class BeanComparator {
 					Set<Object> srcAttrValues, Set<Object> dstAttrValues, Map<String, Object> javaScriptObjects, LscModificationType modType)
 					throws LscServiceException {
 		// Result
-		Set<Object> attrValues = new HashSet<Object>();
+		Set<Object> attrValues = new LinkedHashSet<Object>();
 
 		PolicyType attrPolicy = task.getSyncOptions().getStatus(null, attrName);
 		

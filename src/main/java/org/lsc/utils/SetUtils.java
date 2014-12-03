@@ -44,6 +44,8 @@ package org.lsc.utils;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.naming.NamingEnumeration;
@@ -77,7 +79,7 @@ public class SetUtils {
 			return new HashSet<Object>();
 		}
 
-		Set<Object> attrValues = new HashSet<Object>(attr.size());
+		Set<Object> attrValues = new LinkedHashSet<Object>(attr.size());
 		NamingEnumeration<?> ne = attr.getAll();
 		while (ne.hasMore()) {
 			Object value = ne.next();
@@ -201,6 +203,79 @@ public class SetUtils {
 	}
 
 	/**
+	 * Check that two supposed identical sets are stored
+	 * in the same order. This method is type-aware and will intelligently compare
+	 * byte[], String, etc.
+	 * 
+	 * @param first
+	 *            First set of Objects to compare.
+	 * @param second
+	 *            Second set of Objects.
+	 * @return {@link boolean} if the order is the same.
+	 */
+	public static boolean checkOrder(Set<?> first, Set<Object> second) {
+		if (first.size() != second.size()) {
+			return false;
+		}
+
+		Iterator<Object> iterator = second.iterator();
+		for (Object element1: first) {
+			Object element2 = iterator.next(); 
+			
+			ByteBuffer element1Buff = null;
+			
+			// use a byte buffer is element1 is binary
+			if (element1.getClass().isAssignableFrom(byte[].class)) {
+				element1Buff = ByteBuffer.wrap((byte[]) element1);
+			}
+			
+			ByteBuffer element2Buff = null;
+			
+			// use a byte buffer if element2 value is binary
+			if (element2.getClass().isAssignableFrom(byte[].class)) {
+				element2Buff = ByteBuffer.wrap((byte[]) element2);
+				
+				// make sure we have a byte buffer for element1 too
+				if (element1Buff == null) {
+					// if element1 is binary, make this element2 value binary
+					if (element1.getClass().isAssignableFrom(String.class)) {
+						element1Buff = ByteBuffer.wrap(((String) element1).getBytes());
+					} else {
+						return false;
+					}
+				}
+			}
+			
+			// element1Buff is set if either element1 or element2 value are
+			// binary
+			// do a binary comparison
+			if (element1Buff != null) {
+				// make sure we have a byte buffer for element2 value too
+				if (element2Buff == null) {
+					if (element2.getClass().isAssignableFrom(String.class)) {
+						element2Buff = ByteBuffer.wrap(((String) element2).getBytes());
+					} else {
+						return false;
+					}
+				}
+				
+				// binary comparison
+				if (element2Buff.compareTo(element1Buff) != 0) {
+					return false;
+				}
+			} else {
+				// fall back to standard compare (works well for String,
+				// int, boolean, etc)
+				if (!element2.equals(element1)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	/**
 	 * Check to make sure all needles are in the haystack. In other words each
 	 * value from the set needles must be in the set haystack. This method is
 	 * type-aware and will intelligently compare byte[], String, etc.
@@ -243,6 +318,21 @@ public class SetUtils {
 		return true;
 	}
 
+	/**
+	 * Compare two lists of values to see if they contain the same values and in same order.
+	 * This method is type-aware and will intelligently compare byte[], String, etc.
+	 * 
+	 * @param srcAttrValues
+	 * @param dstAttrValues
+	 * @return true if all values of each set are present in the other set and in the same order, false otherwise
+	 */
+	public static boolean doSetsMatchWithOrder(Set<Object> srcAttrValues, Set<Object> dstAttrValues) {
+		if (!doSetsMatch(srcAttrValues, dstAttrValues)) {
+			return false;
+		}
+		return checkOrder(srcAttrValues, dstAttrValues);
+	}
+	
 	public static void addAllIfNotPresent(Set<Object> set, Set<Object> values) {
 		Set<Object> valuesToAdd = findMissingNeedles(set, values);
 		set.addAll(valuesToAdd);

@@ -190,17 +190,15 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //			cache.put(expressionImport, script);
 //		}
 
-		// add LDAP interface for destination if necessary
-		if (expression.contains("ldap.") && !bindings.containsKey("ldap")
-				&& 	task.getDestinationService() instanceof AbstractSimpleJndiService) {
+		// add LDAP interface for destination
+		if (!bindings.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
 			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
 			dstSjs.setJndiServices(((AbstractSimpleJndiService)task.getDestinationService()).getJndiServices());
 			bindings.put("ldap", dstSjs);
 		}
 
-		// add LDAP interface for source if necessary
-		if (expression.contains("srcLdap.") && !bindings.containsKey("srcLdap")
-				&& task.getSourceService() instanceof AbstractSimpleJndiService) {
+		// add LDAP interface for source
+		if (!bindings.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
 			ScriptableJndiServices srcSjs = new ScriptableJndiServices();
 			srcSjs.setJndiServices(((AbstractSimpleJndiService)task.getSourceService()).getJndiServices());
 			bindings.put("srcLdap", srcSjs);

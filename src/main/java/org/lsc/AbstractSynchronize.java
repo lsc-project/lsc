@@ -319,8 +319,26 @@ public abstract class AbstractSynchronize {
 		 * Loop on all entries in the source and add or update them in the
 		 * destination
 		 */
+//		SynchronizeTask syncTask;
+		int threadCount = 0;
+		int threadPoolAwaitTerminationTimeOut = 900;
 		for (Entry<String, LscDatasets> id : ids) {
+//			syncTask = new SynchronizeTask(task, counter, this, id, true);
+//			syncTask.run();
+//			threadPool.runTask(new SynchronizeTask(task, counter, this, id, true));
 			threadPool.runTask(new SynchronizeTask(task, counter, this, id, true));
+			threadCount++;
+			if (threadCount == 10000) {
+				try {
+					threadPool.shutdown();
+					threadPool.awaitTermination(threadPoolAwaitTerminationTimeOut, TimeUnit.SECONDS);
+					threadCount = 0;
+					threadPool = null;
+					threadPool = new SynchronizeThreadPoolExecutor(getThreads());
+				} catch (InterruptedException e) {
+					LOGGER.error("Error while shutting down the threadpool and re initializing it: " + e.toString(), e);
+				}
+			}
 		}
 		try {
 			threadPool.shutdown();

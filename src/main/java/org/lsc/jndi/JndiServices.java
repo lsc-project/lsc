@@ -410,6 +410,9 @@ public final class JndiServices {
         if(connection.isRecursiveDelete() != null) {
             props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
         }
+        if(connection.isTlsActivated() != null) {
+            props.setProperty("java.naming.tls", Boolean.toString(connection.isTlsActivated()));
+        }
 		return props;
 	}
 	
@@ -691,6 +694,9 @@ public final class JndiServices {
 		try {
 			ne = ctx.search(rewriteBase(base), filter, sc);
 		} catch (NamingException nex) {
+            if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+                throw nex;
+            }
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
 				LOGGER.debug(nex.toString(), nex);

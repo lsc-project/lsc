@@ -666,7 +666,7 @@ public final class JndiServices {
 			return doReadEntry(base, filter, allowError, sc);
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.info("Communication error, retrying: " + nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
 				try {
 					initConnection();
@@ -690,6 +690,9 @@ public final class JndiServices {
 		try {
 			ne = ctx.search(rewriteBase(base), filter, sc);
 		} catch (NamingException nex) {
+            if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+                throw nex;
+            }
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
 				LOGGER.debug(nex.toString(), nex);

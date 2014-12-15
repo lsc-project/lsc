@@ -60,6 +60,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.directory.api.ldap.model.filter.FilterEncoder;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -242,17 +243,17 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource, String searchString) throws NamingException {
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(FilterEncoder.encodeFilterValue(id)));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
-				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(valueId));
+				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(FilterEncoder.encodeFilterValue(valueId)));
 			}
 		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(FilterEncoder.encodeFilterValue(id)));
 		} else {
 			// this is kept for backwards compatibility but will be removed
-			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
+			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(FilterEncoder.encodeFilterValue(id)));
 		}
 
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);

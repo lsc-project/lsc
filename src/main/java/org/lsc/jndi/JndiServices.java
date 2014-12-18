@@ -410,9 +410,6 @@ public final class JndiServices {
         if(connection.isRecursiveDelete() != null) {
             props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
         }
-        if(connection.isTlsActivated() != null) {
-            props.setProperty("java.naming.tls", Boolean.toString(connection.isTlsActivated()));
-        }
 		return props;
 	}
 	

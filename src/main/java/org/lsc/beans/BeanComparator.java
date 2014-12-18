@@ -158,7 +158,7 @@ public final class BeanComparator {
 		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
 
 		// get modification type to perform
-		LscModificationType modificationType = calculateModificationType(task, itmBean, dstBean);
+		LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
 
 		// if there's nothing to do, just return
 		if (modificationType == null) {

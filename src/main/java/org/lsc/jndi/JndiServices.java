@@ -667,7 +667,7 @@ public final class JndiServices {
 			return doReadEntry(base, filter, allowError, sc);
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.info("Communication error, retrying: " + nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
 				try {
 					initConnection();

@@ -53,6 +53,7 @@ import java.util.Set;
 
 import org.apache.directory.api.ldap.model.entry.BinaryValue;
 import org.apache.directory.api.ldap.model.filter.EqualityNode;
+import org.apache.directory.api.ldap.model.filter.FilterEncoder;
 import org.apache.directory.api.ldap.model.filter.SimpleNode;
 import org.lsc.utils.CaseIgnoreStringHashMap;
 
@@ -97,7 +98,7 @@ public class LscDatasets implements Serializable {
 			SimpleNode<byte[]> filter = new EqualityNode<byte[]>(attribute, binValue);
 			return filter.getEscapedValue().toString();
 		} else {
-			return getStringValueAttribute(attribute);
+			return FilterEncoder.encodeFilterValue(getStringValueAttribute(attribute));
 		}
 	}
 

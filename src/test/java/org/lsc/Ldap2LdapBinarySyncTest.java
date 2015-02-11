@@ -153,8 +153,6 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "0002"));
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
-		
-		Thread.sleep(100000);
 	}
 	
 	@Test

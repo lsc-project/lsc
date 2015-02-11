@@ -398,7 +398,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 						if (value.isHumanReadable()) {
 							datasetsValues.add(value.getString());
 						} else {
-							datasetsValues.add(new String(value.getBytes()));
+							datasetsValues.add(value.getBytes());
 						}
 					}
 					converted.getDatasets().put(attr.getId(), datasetsValues);

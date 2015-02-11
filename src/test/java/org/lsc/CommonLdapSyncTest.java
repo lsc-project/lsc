@@ -47,6 +47,7 @@ package org.lsc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -55,6 +56,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiServices;
 
 /**
@@ -98,6 +101,11 @@ public class CommonLdapSyncTest {
 	
 	protected JndiServices dstJndiServices;
 	
+	protected void reloadJndiConnections() {
+		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
+	}
+	
 	/**
 	 * Get an object from the destination directory, and check that a given attribute
 	 * has n values exactly that matches the values provided.
@@ -130,5 +138,33 @@ public class CommonLdapSyncTest {
 		for (int i = 0; i < at.size(); i++) {
 			assertTrue(expectedValues.contains((String) at.get(i)));
 		}
+	}
+
+	public void checkAttributeIsEmpty(String dn, String attributeName)
+			throws NamingException {
+		SearchResult sr = dstJndiServices.readEntry(dn, false);
+		assertNull(sr.getAttributes().get(attributeName));
+	}
+
+	/**
+	 * Get an object from the destination directory, and check that a given attribute
+	 * has one value exactly that matches the value provided.
+	 * 
+	 * In these tests we use this function to read from the source too, since
+	 * it is in reality the same directory.
+	 * 
+	 * @param dn The object to read.
+	 * @param attributeName The attribute to check.
+	 * @param value The value expected in the attribute.
+	 * @throws NamingException
+	 */
+	public void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
+		SearchResult sr = dstJndiServices.readEntry(dn, false);
+		Attribute at = sr.getAttributes().get(attributeName);
+		assertNotNull(at);
+		assertEquals(1, at.size());
+
+		String realValue = (String) at.get();
+		assertEquals(value, realValue);
 	}
 }

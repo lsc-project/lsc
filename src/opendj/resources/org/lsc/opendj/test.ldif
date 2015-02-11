@@ -226,3 +226,83 @@ objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
+# LDAP 2 LDAP Binary
+
+dn: ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapBinaryTestTaskSrc
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0001
+description: Number one's descriptive text
+personalSignature:: AAE=
+
+dn: cn=CN0002,ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0002
+description: Number two's descriptive text
+telephoneNumber: 987987
+personalSignature:: AAI=
+
+dn: cn=CN0003,ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0003
+sn: SN0003
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+description: Number three's descriptive text
+userPassword: secret0003
+personalSignature:: AAM=
+
+dn: ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapBinaryTestTaskDst
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+telephoneNumber: 123456
+telephoneNumber: 456789
+seeAlso: cn=CN0001,ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+description: Number one's descriptive text
+userPassword: 0001
+personalSignature:: AAE=
+
+dn: cn=CommonName0002,ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CommonName0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0002
+personalSignature:: AAI=
+
+dn: cn=CN0004,ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0004
+sn: SN0004
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0004
+personalSignature:: AAQ=
+

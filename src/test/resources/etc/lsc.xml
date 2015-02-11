@@ -14,6 +14,7 @@
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
       <saslMutualAuthentication>false</saslMutualAuthentication>
+      <binaryAttributes><string>personalSignature</string></binaryAttributes>
     </ldapConnection>
     <ldapConnection>
       <name>dst-ldap</name>
@@ -28,6 +29,7 @@
       <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
       <tlsActivated>false</tlsActivated>
       <saslMutualAuthentication>false</saslMutualAuthentication>
+      <binaryAttributes><string>personalSignature</string></binaryAttributes>
     </ldapConnection>
     <databaseConnection>
       <name>src-jdbc</name>
@@ -315,6 +317,80 @@
             <string>"organizationalPerson"</string>
             <string>"inetOrgPerson"</string>
           </createValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapBinaryTestTask</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapBinaryTestTask-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>personalSignature</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>userPassword</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>personalSignature</string>
+        </fetchedAttributes>
+        <getAllFilter>(&amp;(personalSignature=*))</getAllFilter>
+        <getOneFilter>(personalSignature={personalSignature})</getOneFilter>
+        <filterAsync>(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))</filterAsync>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapBinaryTestTask-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>personalSignature</string>
+          <string>sn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>objectClass</string>
+          <string>userPassword</string>
+          <string>sn</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>mail</string>
+          <string>personalSignature</string>
+        </fetchedAttributes>
+        <getAllFilter>(personalSignature=*)</getAllFilter>
+        <getOneFilter>(personalSignature={personalSignature})</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+        <dataset>
+          <name>objectClass</name>
+          <policy>KEEP</policy>
+          <createValues>
+            <string>"pilotPerson"</string>
+          </createValues>
+        </dataset>
+        <dataset>
+          <name>userPassword</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>description</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>srcBean.getDatasetValuesById("personalSignature")</string>
+          </forceValues>
         </dataset>
       </propertiesBasedSyncOptions>
     </task>

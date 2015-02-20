@@ -149,7 +149,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 				searchString = filterIdClean; 
 			}
 
-			return this.getBeanFromSR(get(pivotName, pivotAttributes, fromSameService, searchString), srcBean);
+			return this.getBeanFromSR(get(pivotName, pivotAttributes, searchString), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);

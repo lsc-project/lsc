@@ -163,6 +163,14 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
     public String getRequestNameForClean() {
         return requestNameForClean;
     }
+    
+    @Override
+    public String getRequestNameForObjectOrClean(boolean fromSameService) {
+    	if (fromSameService) {
+    		return getRequestNameForObject();
+    	}
+    	return getRequestNameForClean();
+    }
 
 	static int count = 0;
 

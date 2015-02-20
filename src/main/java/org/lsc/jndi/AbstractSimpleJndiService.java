@@ -243,7 +243,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public SearchResult get(String id, LscDatasets pivotAttrs, boolean fromSource, String searchString) throws NamingException {
+	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
         searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {

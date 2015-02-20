@@ -97,6 +97,8 @@ public abstract class AbstractJdbcService implements IService {
 
     public abstract String getRequestNameForClean();
 
+	public abstract String getRequestNameForObjectOrClean(boolean fromSameService); 
+
     @SuppressWarnings("unchecked")
 	public AbstractJdbcService(SqlMapClient sqlmap, String beanClassname) throws LscServiceConfigurationException {
 		sqlMapper = sqlmap;
@@ -197,11 +199,11 @@ public abstract class AbstractJdbcService implements IService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBean getBean(String id, LscDatasets attributes, boolean fromSource) throws LscServiceException {
+	public IBean getBean(String id, LscDatasets attributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			List<?> records = sqlMapper.queryForList((fromSource ? getRequestNameForObject() : getRequestNameForClean()), getAttributesMap(attributes));
+			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService), getAttributesMap(attributes));
 			if(records.size() > 1) {
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
 						"For id=" + id + ", there are " + records.size() + " records !");

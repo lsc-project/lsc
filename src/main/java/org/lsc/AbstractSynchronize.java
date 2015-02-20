@@ -705,7 +705,7 @@ class SynchronizeTask implements Runnable {
 	public void run() {
         counter.incrementCountAll();
 		try {
-            run((fromSource ? task.getSourceService() : task.getDestinationService()).getBean(id.getKey(), id.getValue(), fromSource));
+            run((fromSource ? task.getSourceService() : task.getDestinationService()).getBean(id.getKey(), id.getValue(), true));
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
@@ -739,13 +739,13 @@ class SynchronizeTask implements Runnable {
 
 			// Search destination for matching object
 			if(id != null) {
-				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
+				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), ! fromSource);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
 				for(String datasetName: entry.datasets().getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
-				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, true);
+				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, ! fromSource);
 			}
 
 			// Calculate operation that would be performed

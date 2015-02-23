@@ -13,32 +13,34 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Classe Java pour ldapVersionType.
+ * <p>Classe Java pour pivotOriginType.
  * 
  * <p>Le fragment de schéma suivant indique le contenu attendu figurant dans cette classe.
  * <p>
  * <pre>
- * &lt;simpleType name="ldapVersionType">
+ * &lt;simpleType name="pivotOriginType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="VERSION_2"/>
- *     &lt;enumeration value="VERSION_3"/>
+ *     &lt;enumeration value="SOURCE"/>
+ *     &lt;enumeration value="DESTINATION"/>
+ *     &lt;enumeration value="BOTH"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "ldapVersionType")
+@XmlType(name = "pivotOriginType")
 @XmlEnum
-public enum LdapVersionType {
+public enum PivotOriginType {
 
-    VERSION_2,
-    VERSION_3;
+    SOURCE,
+    DESTINATION,
+    BOTH;
 
     public String value() {
         return name();
     }
 
-    public static LdapVersionType fromValue(String v) {
+    public static PivotOriginType fromValue(String v) {
         return valueOf(v);
     }
 

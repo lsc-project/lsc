@@ -341,6 +341,7 @@
         </fetchedAttributes>
         <getAllFilter>(&amp;(personalSignature=*))</getAllFilter>
         <getOneFilter>(personalSignature={personalSignature})</getOneFilter>
+        <cleanFilter>(personalSignature={personalSignature})</cleanFilter>
         <filterAsync>(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))</filterAsync>
         <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
         <interval>5</interval>
@@ -385,12 +386,195 @@
             <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
         </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapBinary2StringTestTask</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapBinary2StringTestTask-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>personalSignature</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>userPassword</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>personalSignature</string>
+        </fetchedAttributes>
+        <getAllFilter>(&amp;(personalSignature=*))</getAllFilter>
+        <getOneFilter>(personalSignature={personalSignature})</getOneFilter>
+        <filterAsync>(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))</filterAsync>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapBinary2StringTestTask-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>favouriteDrink</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>objectClass</string>
+          <string>userPassword</string>
+          <string>sn</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>mail</string>
+          <string>favouriteDrink</string>
+        </fetchedAttributes>
+        <getAllFilter>(favouriteDrink=*)</getAllFilter>
+        <getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <pivotTransformation>
+        	<transformation fromAttribute="personalSignature" toAttribute="favouriteDrink"><![CDATA[js:
+        		var result = "";
+        		for (var i = 0; i < value.length; i++) {
+        			if (result != "") {
+        				result += "-";
+        			}
+        			result += parseInt(value[i]);
+        		}
+        		result;
+        	]]></transformation>
+        	<transformation fromAttribute="favouriteDrink" toAttribute="personalSignature"><![CDATA[js:
+        		var result = [];
+        		for (var i = 0; i < value.length; i++) {
+        			if (value[i] != '-') {
+        				result.push(parseInt(value[i]));
+        			}
+        		}
+        		var javaResult = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, result.length);
+        		for (var i = 0; i < result.length ; i++) {
+        			javaResult[i] = result[i];
+        		}
+        		javaResult;  
+        	]]></transformation>
+        </pivotTransformation>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
         <dataset>
-          <name>description</name>
+          <name>objectClass</name>
+          <policy>KEEP</policy>
+          <createValues>
+            <string>"pilotPerson"</string>
+          </createValues>
+        </dataset>
+        <dataset>
+          <name>userPassword</name>
           <policy>FORCE</policy>
           <forceValues>
-            <string>srcBean.getDatasetValuesById("personalSignature")</string>
+            <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
           </forceValues>
+        </dataset>
+        <dataset>
+        	<name>favouriteDrink</name>
+        	<forceValues>
+        	  <string><![CDATA[js:
+        	    var value = srcBean.getDatasetById("personalSignature").iterator().next();
+        		var result = "";
+        		for (var i = 0; i < value.length; i++) {
+        			if (result != "") {
+        				result += "-";
+        			}
+        			result += parseInt(value[i]);
+        		}
+        		result;
+        	]]></string>
+        	</forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapSamePivotConversionTestTask</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapSamePivotConversionTestTask-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>favouriteDrink</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>userPassword</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>favouriteDrink</string>
+        </fetchedAttributes>
+        <getAllFilter>(&amp;(favouriteDrink=*))</getAllFilter>
+        <getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+        <filterAsync>(&amp;(favouriteDrink=*)(modifytimestamp&gt;={0}))</filterAsync>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapSamePivotConversionTestTask-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>favouriteDrink</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>cn</string>
+          <string>objectClass</string>
+          <string>userPassword</string>
+          <string>sn</string>
+          <string>telephoneNumber</string>
+          <string>seeAlso</string>
+          <string>mail</string>
+          <string>favouriteDrink</string>
+        </fetchedAttributes>
+        <getAllFilter>(favouriteDrink=*)</getAllFilter>
+        <getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <pivotTransformation>
+        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="SOURCE"><![CDATA[js:
+        		value.replace('-src', '-dst');
+        	]]></transformation>
+        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="DESTINATION"><![CDATA[js:
+        		value.replace('-dst', '-src');
+        	]]></transformation>
+        </pivotTransformation>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+        <dataset>
+          <name>objectClass</name>
+          <policy>KEEP</policy>
+          <createValues>
+            <string>"pilotPerson"</string>
+          </createValues>
+        </dataset>
+        <dataset>
+          <name>userPassword</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"secret" + srcBean.getDatasetFirstValueById("cn")</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+        	<name>favouriteDrink</name>
+        	<forceValues>
+        	  <string><![CDATA[js:
+        	    var value = srcBean.getDatasetFirstValueById("favouriteDrink");
+        	    value.replace('-src', '-dst');
+        	]]></string>
+        	</forceValues>
         </dataset>
       </propertiesBasedSyncOptions>
     </task>

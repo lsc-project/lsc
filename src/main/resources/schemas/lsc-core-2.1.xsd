@@ -255,6 +255,30 @@
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:string" use="optional" />
 	</xsd:complexType>
+	
+	<xsd:complexType name="pivotTransformationType">
+		<xsd:sequence>
+			<xsd:element name="transformation" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="fromAttribute" type="xsd:string" />
+							<xsd:attribute name="toAttribute" type="xsd:string" />
+							<xsd:attribute name="pivotOrigin" type="pivotOriginType" use="optional" default="BOTH" />
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="pivotOriginType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SOURCE" />
+			<xsd:enumeration value="DESTINATION" />
+			<xsd:enumeration value="BOTH" />
+		</xsd:restriction>
+	</xsd:simpleType>
 
 	<xsd:complexType name="forceSyncOptionsType">
 		<xsd:complexContent>
@@ -300,6 +324,7 @@
 		<xsd:complexContent>
 			<xsd:extension base="syncOptionsType">
 				<xsd:sequence>
+					<xsd:element name="pivotTransformation" type="pivotTransformationType" minOccurs="0"/>
 					<xsd:element name="defaultDelimiter" type="xsd:string"
 						default=";" />
 					<xsd:element name="defaultPolicy" type="policyType"

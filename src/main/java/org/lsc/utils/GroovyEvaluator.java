@@ -146,6 +146,19 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		}
 	}
 
+	public byte[] evalToByteArray(final Task task, final String expression,
+					final Map<String, Object> params) {
+		Object result = instanceEval(task, expression, params);
+
+		if(result instanceof byte[]) {
+			return (byte[])result;
+		} else if (result instanceof String) {
+			return ((String)result).getBytes();
+		} else {
+			return result.toString().getBytes();
+		}
+	}
+
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
 		return (Boolean) instanceEval(task, expression, params);
 	}

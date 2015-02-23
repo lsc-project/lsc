@@ -306,3 +306,163 @@ objectClass: top
 userPassword: 0004
 personalSignature:: AAQ=
 
+# LDAP 2 LDAP Binary 2 String
+
+dn: ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapBinary2StringTestTaskSrc
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0001
+description: Number one's descriptive text
+personalSignature:: AAE=
+
+dn: cn=CN0002,ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0002
+description: Number two's descriptive text
+telephoneNumber: 987987
+personalSignature:: AAI=
+
+dn: cn=CN0003,ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0003
+sn: SN0003
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+description: Number three's descriptive text
+userPassword: secret0003
+personalSignature:: AAM=
+
+dn: ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapBinary2StringTestTaskDst
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+telephoneNumber: 123456
+telephoneNumber: 456789
+seeAlso: cn=CN0001,ou=ldap2ldapBinary2StringTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+description: Number one's descriptive text
+userPassword: 0001
+favouriteDrink: 0-1
+
+dn: cn=CommonName0002,ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CommonName0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0002
+favouriteDrink: 0-2
+
+dn: cn=CN0004,ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0004
+sn: SN0004
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0004
+favouriteDrink: 0-4
+
+# LDAP 2 LDAP Same pivot transformation
+
+dn: ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapSamePivotConversionTestTaskSrc
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0001
+description: Number one's descriptive text
+favouriteDrink: 0001-src
+
+dn: cn=CN0002,ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: secret0002
+description: Number two's descriptive text
+telephoneNumber: 987987
+favouriteDrink: 0002-src
+
+dn: cn=CN0003,ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0003
+sn: SN0003
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+description: Number three's descriptive text
+userPassword: secret0003
+favouriteDrink: 0003-src
+
+dn: ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+ou: ldap2ldapSamePivotConversionTestTaskDst
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=CN0001,ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0001
+sn: SN0001
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+telephoneNumber: 123456
+telephoneNumber: 456789
+seeAlso: cn=CN0001,ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+description: Number one's descriptive text
+userPassword: 0001
+favouriteDrink: 0001-dst
+
+dn: cn=CommonName0002,ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CommonName0002
+sn: SN0002
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0002
+favouriteDrink: 0002-dst
+
+dn: cn=CN0004,ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org
+cn: CN0004
+sn: SN0004
+objectClass: pilotPerson
+objectClass: simpleSecurityObject
+objectClass: person
+objectClass: top
+userPassword: 0004
+favouriteDrink: 0004-dst
+

@@ -214,6 +214,25 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
+	public byte[] evalToByteArray(final Task task, final String expression,
+					final Map<String, Object> params) throws LscServiceException {
+        Object result = null;
+	    try {
+	        result = convertJsToJava(instanceEval(task, expression, params));
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
+	    
+		if (result instanceof byte[]) {
+			return (byte[])result;
+		} else if (result instanceof String) {
+			return ((String)result).getBytes();
+		} else {
+			return result.toString().getBytes();
+		}
+	}
+
+    /** {@inheritDoc} */
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
 	    try {
 	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);

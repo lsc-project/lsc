@@ -60,16 +60,11 @@ import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.directory.LDAP;
 
-/**
- * This test covers all the JMX capabilities
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- */
-public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
+public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 
 	public static String SOURCE_DN = "ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
 	public static String DESTINATION_DN = "ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	public static String TASK_NAME = "ldap2ldapBinaryTestTask";
-	public static List<String> TASK_LIST = Arrays.asList(TASK_NAME);
 
 	@Override
 	public String getTaskName() {
@@ -86,6 +81,10 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 		return DESTINATION_DN;
 	}
 	
+	public List<String> getTaskList() {
+		return Arrays.asList(getTaskName());
+	}
+	
 
 	@Before
 	public void setup() throws CommunicationException {
@@ -97,12 +96,10 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 	}
 	
 	@Test
-	public final void testSync() throws Exception {
+	public void testSync() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
 
 		// check MODRDN
-		System.out.println(DN_MODRDN_SRC);
-		
 		assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
 		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
 		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
@@ -121,7 +118,7 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
 
 		// perform the sync
-		new SimpleSynchronize().launch(new ArrayList<String>(), TASK_LIST, new ArrayList<String>());
+		new SimpleSynchronize().launch(new ArrayList<String>(), getTaskList(), new ArrayList<String>());
 
 		// check the results of the synchronization
 		reloadJndiConnections();
@@ -148,7 +145,7 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "0002"));
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
 		// perform the sync
-		new SimpleSynchronize().launch(new ArrayList<String>(), TASK_LIST, new ArrayList<String>());
+		new SimpleSynchronize().launch(new ArrayList<String>(), getTaskList(), new ArrayList<String>());
 		// check the results of the synchronization
 		reloadJndiConnections();
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "0002"));
@@ -156,16 +153,17 @@ public class Ldap2LdapBinarySyncTest extends CommonLdapSyncTest {
 	}
 	
 	@Test
-	public final void testClean() throws Exception {
+	public void testClean() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
 		assertTrue(dstJndiServices.exists(DN_DELETE_DST));
 		assertFalse(srcJndiServices.exists(DN_DELETE_SRC));
 
 		// perform the clean
-		new SimpleSynchronize().launch(new ArrayList<String>(), new ArrayList<String>(), TASK_LIST);
+		new SimpleSynchronize().launch(new ArrayList<String>(), new ArrayList<String>(), getTaskList());
 
 		// check the results of the clean
 		reloadJndiConnections();
 		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
+		assertTrue(dstJndiServices.exists(DN_MODIFY_DST));
 	}
 }

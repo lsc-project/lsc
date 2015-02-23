@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 12:14:31 PM CEST 
+// Généré le : 2015.02.23 à 10:31:02 AM CET 
 //
 
 
@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}syncOptionsType">
  *       &lt;sequence>
+ *         &lt;element name="pivotTransformation" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pivotTransformationType" minOccurs="0"/>
  *         &lt;element name="defaultDelimiter" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="defaultPolicy" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}policyType"/>
  *         &lt;element name="conditions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}conditionsType" minOccurs="0"/>
@@ -40,6 +41,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "propertiesBasedSyncOptionsType", propOrder = {
+    "pivotTransformation",
     "defaultDelimiter",
     "defaultPolicy",
     "conditions",
@@ -49,12 +51,37 @@ public class PropertiesBasedSyncOptionsType
     extends SyncOptionsType
 {
 
+    protected PivotTransformationType pivotTransformation;
     @XmlElement(required = true, defaultValue = ";")
     protected String defaultDelimiter = ";";
     @XmlElement(required = true, defaultValue = "FORCE")
     protected PolicyType defaultPolicy = PolicyType.FORCE;
     protected ConditionsType conditions;
     protected List<DatasetType> dataset;
+
+    /**
+     * Obtient la valeur de la propriété pivotTransformation.
+     * 
+     * @return
+     *     possible object is
+     *     {@link PivotTransformationType }
+     *     
+     */
+    public PivotTransformationType getPivotTransformation() {
+        return pivotTransformation;
+    }
+
+    /**
+     * Définit la valeur de la propriété pivotTransformation.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link PivotTransformationType }
+     *     
+     */
+    public void setPivotTransformation(PivotTransformationType value) {
+        this.pivotTransformation = value;
+    }
 
     /**
      * Obtient la valeur de la propriété defaultDelimiter.

@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 12:14:31 PM CEST 
+// Généré le : 2015.02.23 à 10:31:02 AM CET 
 //
 
 
@@ -50,6 +50,14 @@ public class ObjectFactory {
      */
     public KeysValuesMap createKeysValuesMap() {
         return new KeysValuesMap();
+    }
+
+    /**
+     * Create an instance of {@link PivotTransformationType }
+     * 
+     */
+    public PivotTransformationType createPivotTransformationType() {
+        return new PivotTransformationType();
     }
 
     /**
@@ -221,6 +229,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link PluginSyncOptionsType }
+     * 
+     */
+    public PluginSyncOptionsType createPluginSyncOptionsType() {
+        return new PluginSyncOptionsType();
+    }
+
+    /**
      * Create an instance of {@link LdapConnectionType }
      * 
      */
@@ -234,14 +250,6 @@ public class ObjectFactory {
      */
     public DatasetType createDatasetType() {
         return new DatasetType();
-    }
-
-    /**
-     * Create an instance of {@link PluginSyncOptionsType }
-     * 
-     */
-    public PluginSyncOptionsType createPluginSyncOptionsType() {
-        return new PluginSyncOptionsType();
     }
 
     /**
@@ -322,6 +330,14 @@ public class ObjectFactory {
      */
     public KeysValuesMap.Entry createKeysValuesMapEntry() {
         return new KeysValuesMap.Entry();
+    }
+
+    /**
+     * Create an instance of {@link PivotTransformationType.Transformation }
+     * 
+     */
+    public PivotTransformationType.Transformation createPivotTransformationTypeTransformation() {
+        return new PivotTransformationType.Transformation();
     }
 
     /**

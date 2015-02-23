@@ -57,6 +57,7 @@ import java.util.StringTokenizer;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
+import org.lsc.configuration.PivotTransformationType.Transformation;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
 import org.lsc.jndi.PullableJndiSrcService;
@@ -576,6 +577,29 @@ public class LscConfiguration {
     		}
     	}
     	return false;
+    }
+    
+    public static List<Transformation> getPivotTransformation(TaskType task) {
+		SyncOptionsType syncOptions = LscConfiguration.getSyncOptions(task);
+		if (! LscConfiguration.getSyncOptionsImplementation(syncOptions).equals(PropertiesBasedSyncOptions.class)) {
+			return null;
+		}
+		PivotTransformationType pivotTransformationType = ((PropertiesBasedSyncOptionsType)syncOptions).getPivotTransformation();
+		if (pivotTransformationType == null) {
+			return null;
+		}
+		return pivotTransformationType.getTransformation();
+    }
+    
+    public static boolean pivotOriginMatchesFromSource(PivotOriginType pivotOrigin, boolean fromSource) {
+    	if (pivotOrigin.equals(PivotOriginType.BOTH)) {
+    		return true;
+    	}
+    	if (fromSource) {
+    		return pivotOrigin.equals(PivotOriginType.SOURCE);
+    	} else {
+    		return pivotOrigin.equals(PivotOriginType.DESTINATION);
+    	}
     }
 }
 	

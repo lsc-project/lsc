@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2015.02.23 à 10:31:02 AM CET 
+// Généré le : 2015.02.27 à 04:49:36 PM CET 
 //
 
 
@@ -38,14 +38,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="syncHook" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;choice>
  *           &lt;element name="databaseSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseSourceServiceType"/>
- *           &lt;element name="googleAppsSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}googleAppsServiceType"/>
  *           &lt;element name="ldapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapSourceServiceType"/>
  *           &lt;element name="asyncLdapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}asyncLdapSourceServiceType"/>
  *           &lt;element name="pluginSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginSourceServiceType"/>
  *         &lt;/choice>
  *         &lt;choice>
  *           &lt;element name="databaseDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseDestinationServiceType"/>
- *           &lt;element name="googleAppsDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}googleAppsServiceType"/>
  *           &lt;element name="ldapDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapDestinationServiceType"/>
  *           &lt;element name="multiDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}multiDestinationServiceType"/>
  *           &lt;element name="xaFileDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}xaFileDestinationServiceType"/>
@@ -83,12 +81,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "cleanHook",
     "syncHook",
     "databaseSourceService",
-    "googleAppsSourceService",
     "ldapSourceService",
     "asyncLdapSourceService",
     "pluginSourceService",
     "databaseDestinationService",
-    "googleAppsDestinationService",
     "ldapDestinationService",
     "multiDestinationService",
     "xaFileDestinationService",
@@ -112,12 +108,10 @@ public class TaskType {
     protected String cleanHook;
     protected String syncHook;
     protected DatabaseSourceServiceType databaseSourceService;
-    protected GoogleAppsServiceType googleAppsSourceService;
     protected LdapSourceServiceType ldapSourceService;
     protected AsyncLdapSourceServiceType asyncLdapSourceService;
     protected PluginSourceServiceType pluginSourceService;
     protected DatabaseDestinationServiceType databaseDestinationService;
-    protected GoogleAppsServiceType googleAppsDestinationService;
     protected LdapDestinationServiceType ldapDestinationService;
     protected MultiDestinationServiceType multiDestinationService;
     protected XaFileDestinationServiceType xaFileDestinationService;
@@ -252,30 +246,6 @@ public class TaskType {
     }
 
     /**
-     * Obtient la valeur de la propriété googleAppsSourceService.
-     * 
-     * @return
-     *     possible object is
-     *     {@link GoogleAppsServiceType }
-     *     
-     */
-    public GoogleAppsServiceType getGoogleAppsSourceService() {
-        return googleAppsSourceService;
-    }
-
-    /**
-     * Définit la valeur de la propriété googleAppsSourceService.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link GoogleAppsServiceType }
-     *     
-     */
-    public void setGoogleAppsSourceService(GoogleAppsServiceType value) {
-        this.googleAppsSourceService = value;
-    }
-
-    /**
      * Obtient la valeur de la propriété ldapSourceService.
      * 
      * @return
@@ -369,30 +339,6 @@ public class TaskType {
      */
     public void setDatabaseDestinationService(DatabaseDestinationServiceType value) {
         this.databaseDestinationService = value;
-    }
-
-    /**
-     * Obtient la valeur de la propriété googleAppsDestinationService.
-     * 
-     * @return
-     *     possible object is
-     *     {@link GoogleAppsServiceType }
-     *     
-     */
-    public GoogleAppsServiceType getGoogleAppsDestinationService() {
-        return googleAppsDestinationService;
-    }
-
-    /**
-     * Définit la valeur de la propriété googleAppsDestinationService.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link GoogleAppsServiceType }
-     *     
-     */
-    public void setGoogleAppsDestinationService(GoogleAppsServiceType value) {
-        this.googleAppsDestinationService = value;
     }
 
     /**

@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2015.02.23 à 10:31:02 AM CET 
+// Généré le : 2015.02.27 à 04:49:36 PM CET 
 //
 
 
@@ -72,8 +72,8 @@ public class PluginDestinationServiceType
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Element }
      * {@link Object }
+     * {@link Element }
      * 
      * 
      */

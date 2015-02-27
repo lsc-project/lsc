@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2015.02.23 à 10:31:02 AM CET 
+// Généré le : 2015.02.27 à 04:49:36 PM CET 
 //
 
 
@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;choice maxOccurs="unbounded" minOccurs="0">
  *         &lt;element name="ldapConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapConnectionType"/>
  *         &lt;element name="databaseConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseConnectionType"/>
- *         &lt;element name="googleAppsConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}googleAppsConnectionType"/>
  *         &lt;element name="pluginConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginConnectionType"/>
  *       &lt;/choice>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -43,33 +42,32 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "connectionsType", propOrder = {
-    "ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection"
+    "ldapConnectionOrDatabaseConnectionOrPluginConnection"
 })
 public class ConnectionsType {
 
     @XmlElements({
         @XmlElement(name = "ldapConnection", type = LdapConnectionType.class),
         @XmlElement(name = "databaseConnection", type = DatabaseConnectionType.class),
-        @XmlElement(name = "googleAppsConnection", type = GoogleAppsConnectionType.class),
         @XmlElement(name = "pluginConnection", type = PluginConnectionType.class)
     })
-    protected List<ConnectionType> ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection;
+    protected List<ConnectionType> ldapConnectionOrDatabaseConnectionOrPluginConnection;
     @XmlAttribute(name = "id")
     protected String id;
 
     /**
-     * Gets the value of the ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection property.
+     * Gets the value of the ldapConnectionOrDatabaseConnectionOrPluginConnection property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection property.
+     * This is why there is not a <CODE>set</CODE> method for the ldapConnectionOrDatabaseConnectionOrPluginConnection property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(newItem);
+     *    getLdapConnectionOrDatabaseConnectionOrPluginConnection().add(newItem);
      * </pre>
      * 
      * 
@@ -77,16 +75,15 @@ public class ConnectionsType {
      * Objects of the following type(s) are allowed in the list
      * {@link LdapConnectionType }
      * {@link DatabaseConnectionType }
-     * {@link GoogleAppsConnectionType }
      * {@link PluginConnectionType }
      * 
      * 
      */
-    public List<ConnectionType> getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection() {
-        if (ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection == null) {
-            ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection = new ArrayList<ConnectionType>();
+    public List<ConnectionType> getLdapConnectionOrDatabaseConnectionOrPluginConnection() {
+        if (ldapConnectionOrDatabaseConnectionOrPluginConnection == null) {
+            ldapConnectionOrDatabaseConnectionOrPluginConnection = new ArrayList<ConnectionType>();
         }
-        return this.ldapConnectionOrDatabaseConnectionOrGoogleAppsConnection;
+        return this.ldapConnectionOrDatabaseConnectionOrPluginConnection;
     }
 
     /**

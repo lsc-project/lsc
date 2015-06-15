@@ -23,11 +23,11 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ldapServiceType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}serviceType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}serviceType">
  *       &lt;sequence>
  *         &lt;element name="baseDn" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="pivotAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
- *         &lt;element name="fetchedAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="pivotAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="fetchedAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}valuesType" minOccurs="0"/>
  *         &lt;choice>
  *           &lt;element name="getAllFilter" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *           &lt;element name="allFilter" type="{http://www.w3.org/2001/XMLSchema}string"/>

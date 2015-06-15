@@ -22,10 +22,10 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="asyncLdapSourceServiceType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapSourceServiceType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapSourceServiceType">
  *       &lt;sequence>
  *         &lt;element name="synchronizingAllWhenStarting" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="serverType" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapServerType"/>
+ *         &lt;element name="serverType" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapServerType"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>

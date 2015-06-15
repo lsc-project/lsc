@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
  * <pre>
  * &lt;complexType name="pluginSyncOptionsType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}syncOptionsType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}syncOptionsType">
  *       &lt;sequence>
  *         &lt;any processContents='lax' maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>

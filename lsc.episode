@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<bindings version="2.1" xmlns="http://java.sun.com/xml/ns/jaxb">
+<bindings version="2.2" xmlns="http://java.sun.com/xml/ns/jaxb">
   <!--
 
 Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-Généré le : 2015.02.27 à 04:49:36 PM CET 
+Généré le : 2015.06.15 à 03:46:42 PM CEST 
 
   -->
-  <bindings scd="x-schema::tns" xmlns:tns="http://lsc-project.org/XSD/lsc-core-2.1.xsd">
+  <bindings scd="x-schema::tns" xmlns:tns="http://lsc-project.org/XSD/lsc-core-2.2.xsd">
     <schemaBindings map="false">
       <package name="org.lsc.configuration"/>
     </schemaBindings>

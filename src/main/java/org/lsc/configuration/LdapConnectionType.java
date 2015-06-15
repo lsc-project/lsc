@@ -22,18 +22,18 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ldapConnectionType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}connectionType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}connectionType">
  *       &lt;sequence>
- *         &lt;element name="authentication" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapAuthenticationType" minOccurs="0"/>
- *         &lt;element name="referral" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapReferralType" minOccurs="0"/>
- *         &lt;element name="derefAliases" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapDerefAliasesType" minOccurs="0"/>
- *         &lt;element name="version" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapVersionType" minOccurs="0"/>
+ *         &lt;element name="authentication" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapAuthenticationType" minOccurs="0"/>
+ *         &lt;element name="referral" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapReferralType" minOccurs="0"/>
+ *         &lt;element name="derefAliases" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapDerefAliasesType" minOccurs="0"/>
+ *         &lt;element name="version" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapVersionType" minOccurs="0"/>
  *         &lt;element name="pageSize" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *         &lt;element name="factory" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="tlsActivated" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="saslMutualAuthentication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="sortedBy" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="binaryAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="binaryAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}valuesType" minOccurs="0"/>
  *         &lt;element name="recursiveDelete" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>

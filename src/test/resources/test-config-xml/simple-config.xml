@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
 	<ldapConnection id="myAdServer">
 		<url>ldap://localhost:1390/dc=AD,dc=net</url>
 		<username>cn=manager,dc=AD,dc=net</username>

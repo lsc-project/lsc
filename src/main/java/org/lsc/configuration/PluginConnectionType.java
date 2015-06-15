@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
  * <pre>
  * &lt;complexType name="pluginConnectionType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}connectionType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}connectionType">
  *       &lt;sequence>
  *         &lt;any processContents='lax' maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>

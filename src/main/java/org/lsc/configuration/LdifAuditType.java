@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ldifAuditType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}auditType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}auditType">
  *       &lt;sequence>
  *         &lt;element name="logOnlyLdif" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>

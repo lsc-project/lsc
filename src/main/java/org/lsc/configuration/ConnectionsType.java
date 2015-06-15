@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element name="ldapConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapConnectionType"/>
- *         &lt;element name="databaseConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseConnectionType"/>
- *         &lt;element name="pluginConnection" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginConnectionType"/>
+ *         &lt;element name="ldapConnection" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapConnectionType"/>
+ *         &lt;element name="databaseConnection" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}databaseConnectionType"/>
+ *         &lt;element name="pluginConnection" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pluginConnectionType"/>
  *       &lt;/choice>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>

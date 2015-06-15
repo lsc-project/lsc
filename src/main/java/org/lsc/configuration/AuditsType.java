@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element name="csvAudit" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}csvAuditType"/>
- *         &lt;element name="ldifAudit" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldifAuditType"/>
- *         &lt;element name="pluginAudit" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginAuditType"/>
+ *         &lt;element name="csvAudit" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}csvAuditType"/>
+ *         &lt;element name="ldifAudit" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldifAuditType"/>
+ *         &lt;element name="pluginAudit" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pluginAuditType"/>
  *       &lt;/choice>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>

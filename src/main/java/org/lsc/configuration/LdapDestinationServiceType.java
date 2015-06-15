@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ldapDestinationServiceType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapServiceType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapServiceType">
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>

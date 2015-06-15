@@ -24,13 +24,13 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="propertiesBasedSyncOptionsType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}syncOptionsType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}syncOptionsType">
  *       &lt;sequence>
- *         &lt;element name="pivotTransformation" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pivotTransformationType" minOccurs="0"/>
+ *         &lt;element name="pivotTransformation" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pivotTransformationType" minOccurs="0"/>
  *         &lt;element name="defaultDelimiter" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="defaultPolicy" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}policyType"/>
- *         &lt;element name="conditions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}conditionsType" minOccurs="0"/>
- *         &lt;element name="dataset" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}datasetType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="defaultPolicy" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}policyType"/>
+ *         &lt;element name="conditions" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}conditionsType" minOccurs="0"/>
+ *         &lt;element name="dataset" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}datasetType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>

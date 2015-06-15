@@ -5,5 +5,5 @@
 // Généré le : 2015.02.27 à 04:49:36 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://lsc-project.org/XSD/lsc-core-2.1.xsd", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "http://lsc-project.org/XSD/lsc-core-2.2.xsd", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.lsc.configuration;

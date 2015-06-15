@@ -26,10 +26,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;all>
- *         &lt;element name="connections" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}connectionsType"/>
- *         &lt;element name="audits" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}auditsType" minOccurs="0"/>
- *         &lt;element name="tasks" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}tasksType"/>
- *         &lt;element name="security" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}securityType" minOccurs="0"/>
+ *         &lt;element name="connections" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}connectionsType"/>
+ *         &lt;element name="audits" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}auditsType" minOccurs="0"/>
+ *         &lt;element name="tasks" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}tasksType"/>
+ *         &lt;element name="security" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}securityType" minOccurs="0"/>
  *       &lt;/all>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="revision" type="{http://www.w3.org/2001/XMLSchema}int" />

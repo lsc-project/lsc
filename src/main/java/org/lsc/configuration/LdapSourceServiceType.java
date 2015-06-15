@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ldapSourceServiceType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapServiceType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapServiceType">
  *       &lt;sequence>
  *         &lt;element name="cleanFilter" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="filterAsync" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>

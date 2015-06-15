@@ -37,25 +37,25 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="cleanHook" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="syncHook" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;choice>
- *           &lt;element name="databaseSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseSourceServiceType"/>
- *           &lt;element name="ldapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapSourceServiceType"/>
- *           &lt;element name="asyncLdapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}asyncLdapSourceServiceType"/>
- *           &lt;element name="pluginSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginSourceServiceType"/>
+ *           &lt;element name="databaseSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}databaseSourceServiceType"/>
+ *           &lt;element name="ldapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapSourceServiceType"/>
+ *           &lt;element name="asyncLdapSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}asyncLdapSourceServiceType"/>
+ *           &lt;element name="pluginSourceService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pluginSourceServiceType"/>
  *         &lt;/choice>
  *         &lt;choice>
- *           &lt;element name="databaseDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}databaseDestinationServiceType"/>
- *           &lt;element name="ldapDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}ldapDestinationServiceType"/>
- *           &lt;element name="multiDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}multiDestinationServiceType"/>
- *           &lt;element name="xaFileDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}xaFileDestinationServiceType"/>
- *           &lt;element name="pluginDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginDestinationServiceType"/>
+ *           &lt;element name="databaseDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}databaseDestinationServiceType"/>
+ *           &lt;element name="ldapDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}ldapDestinationServiceType"/>
+ *           &lt;element name="multiDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}multiDestinationServiceType"/>
+ *           &lt;element name="xaFileDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}xaFileDestinationServiceType"/>
+ *           &lt;element name="pluginDestinationService" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pluginDestinationServiceType"/>
  *         &lt;/choice>
  *         &lt;choice>
- *           &lt;element name="propertiesBasedSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}propertiesBasedSyncOptionsType"/>
- *           &lt;element name="forceSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}forceSyncOptionsType"/>
- *           &lt;element name="pluginSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pluginSyncOptionsType"/>
+ *           &lt;element name="propertiesBasedSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}propertiesBasedSyncOptionsType"/>
+ *           &lt;element name="forceSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}forceSyncOptionsType"/>
+ *           &lt;element name="pluginSyncOptions" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pluginSyncOptionsType"/>
  *         &lt;/choice>
- *         &lt;element name="customLibrary" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
- *         &lt;element name="scriptInclude" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="customLibrary" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}valuesType" minOccurs="0"/>
+ *         &lt;element name="scriptInclude" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}valuesType" minOccurs="0"/>
  *         &lt;element name="auditLog" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>

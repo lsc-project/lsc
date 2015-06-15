@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="databaseConnectionType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}connectionType">
+ *     &lt;extension base="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}connectionType">
  *       &lt;sequence>
  *         &lt;element name="driver" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>

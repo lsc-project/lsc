@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlValue;
  *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *                 &lt;attribute name="fromAttribute" type="{http://www.w3.org/2001/XMLSchema}string" />
  *                 &lt;attribute name="toAttribute" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="pivotOrigin" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pivotOriginType" default="BOTH" />
+ *                 &lt;attribute name="pivotOrigin" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pivotOriginType" default="BOTH" />
  *               &lt;/extension>
  *             &lt;/simpleContent>
  *           &lt;/complexType>
@@ -95,7 +95,7 @@ public class PivotTransformationType {
      *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
      *       &lt;attribute name="fromAttribute" type="{http://www.w3.org/2001/XMLSchema}string" />
      *       &lt;attribute name="toAttribute" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="pivotOrigin" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}pivotOriginType" default="BOTH" />
+     *       &lt;attribute name="pivotOrigin" type="{http://lsc-project.org/XSD/lsc-core-2.2.xsd}pivotOriginType" default="BOTH" />
      *     &lt;/extension>
      *   &lt;/simpleContent>
      * &lt;/complexType>

@@ -606,7 +606,7 @@ public final class BeanComparator {
 				}
 			}
 
-			return attrValues;
+			return splitValues(task, attrName, attrValues);
 		}
 
 		// No force values

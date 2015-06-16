@@ -298,10 +298,10 @@
 					<generateDirectory>src/main/java</generateDirectory>
 					<generatePackage>org.lsc.configuration</generatePackage>
 					<bindingDirectory>src/main/resources/schemas</bindingDirectory>
-					<bindingIncludes><bindingInclude>lsc-core-2.1.xjc</bindingInclude></bindingIncludes>
+					<bindingIncludes><bindingInclude>lsc-core-2.2.xjc</bindingInclude></bindingIncludes>
 					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
 					<schemaIncludes>
-						<schemaInclude>lsc-core-2.1.xsd</schemaInclude>
+						<schemaInclude>lsc-core-2.2.xsd</schemaInclude>
 					</schemaIncludes>
 					<extension>true</extension>
 					<args><arg>-Xdefault-value</arg></args>

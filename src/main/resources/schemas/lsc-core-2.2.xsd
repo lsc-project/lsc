@@ -317,8 +317,7 @@
 			<xsd:extension base="syncOptionsType">
 				<xsd:sequence>
 					<xsd:element name="pivotTransformation" type="pivotTransformationType" minOccurs="0"/>
-					<xsd:element name="defaultDelimiter" type="xsd:string"
-						default=";" />
+					<xsd:element name="defaultDelimiter" type="xsd:string" />
 					<xsd:element name="defaultPolicy" type="policyType"
 						default="FORCE" />
 					<xsd:element name="conditions" type="conditionsType"

@@ -7,7 +7,6 @@ lsc_group=lsc
 id ${lsc_user} &>/dev/null || adduser --quiet --system --no-create-home --home /var/lib/lsc ${lsc_user}
 
 # Always do this
-mkdir -p ${lsc_logdir}
 chown -R ${lsc_user}:${lsc_group} ${lsc_logdir}
 
 # Reconfigure files

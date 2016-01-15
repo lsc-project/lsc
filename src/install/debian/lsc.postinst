@@ -23,9 +23,6 @@ sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' /etc/default/lsc
 sed -i 's:^LSC_USER.*:LSC_USER="lsc":' /etc/default/lsc
 sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' /etc/default/lsc
 sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' /etc/default/lsc
-## sample
-ln -sf /usr/lib/lsc/ /usr/share/doc/lsc/lib/
-ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
 
 # Copy sample configuration for a fresh install
 [ -f /etc/lsc/lsc.xml ] || cp /usr/share/doc/lsc/lsc.xml-sample /etc/lsc/lsc.xml

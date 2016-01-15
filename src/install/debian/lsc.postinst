@@ -4,7 +4,7 @@ lsc_logdir=/var/log/lsc
 lsc_user=lsc
 lsc_group=lsc
 
-id ${lsc_user} &>/dev/null || useradd ${lsc_user}
+id ${lsc_user} &>/dev/null || adduser --quiet --system --no-create-home --home /var/lib/lsc ${lsc_user}
 
 # Always do this
 mkdir -p ${lsc_logdir}

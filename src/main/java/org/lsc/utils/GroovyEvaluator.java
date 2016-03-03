@@ -171,7 +171,12 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 				for (File scriptInclude: task.getScriptIncludes()) {
 					String extension = FilenameUtils.getExtension(scriptInclude.getAbsolutePath());
 					if ("groovy".equals(extension) || "gvy".equals(extension) || "gy".equals(extension) || "gsh".equals(extension)) {
-						engine.eval(new FileReader(scriptInclude), bindings);
+						FileReader reader = new FileReader(scriptInclude);
+						try {
+							engine.eval(reader, bindings);
+						} finally {
+							reader.close();
+						}					
 					}
 				}
 			}

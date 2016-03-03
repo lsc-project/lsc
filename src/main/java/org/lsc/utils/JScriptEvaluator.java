@@ -216,7 +216,12 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 			if (task.getScriptIncludes() != null) {
 				for (File scriptInclude: task.getScriptIncludes()) {
 					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
-						engine.eval(new FileReader(scriptInclude), bindings);
+						FileReader reader = new FileReader(scriptInclude);
+						try {
+							engine.eval(reader, bindings);
+						} finally {
+							reader.close();
+						}
 					}
 				}
 			}

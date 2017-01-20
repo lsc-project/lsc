@@ -1,6 +1,11 @@
+# LDAP Synchronization Connector
+
+[![Build Status (master)](https://travis-ci.org/lsc-project/lsc.svg?branch=master)](https://travis-ci.org/lsc-project/lsc)
+[![Build Status (2.1)](https://travis-ci.org/lsc-project/lsc.svg?branch=v2.1)](https://travis-ci.org/lsc-project/lsc)
+
 Full HTML documentation is available at http://lsc-project.org/
 
-===== What is LSC? =====
+## What is LSC?
 
 Ldap Synchronization Connector reads from any data source including databases,
 LDAP directories or files and transforms and compares this data to an LDAP
@@ -17,8 +22,7 @@ status, last logon, etc ...).
 
 LSC is an open source project written in Java, available under the BSD license.
 
-
-===== Philosophy =====
+## Philosophy
 
 Make it possible: The main goal is to provide a simple and efficient way of
 synchronizing any data source to a LDAP directory quickly.
@@ -35,8 +39,7 @@ behaviour come as part of the software. These functions are extensible to
 include your own, to integrate into your existing infrastructure. Save time,
 by reusing!
 
-
-===== Feature overview =====
+## Feature overview
 
 * Multiple connectors: any LDAPv3 server, any database with a JDBC
   connector, flat files (or anything else you write a connector for)
@@ -70,8 +73,7 @@ by reusing!
 * Possibility to extend any Java class to implement your own specific
   synchronization needs
 
-
-===== Read more =====
+## Read more
 
 Find more documentation, tutorials at http://lsc-project.org/.
 

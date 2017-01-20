@@ -141,7 +141,33 @@
 		<finalName>${project.artifactId}-${project.version}</finalName>
 
 		<plugins>
-
+		
+			<plugin>
+			<!-- 
+			Quickfix so the maven-jaxb2-plugin is JDK 8 compatible
+			See https://java.net/jira/browse/MAVEN_JAXB2_PLUGIN-80. 
+			Please remove this when jaxb plugins is upgraded to 0.9.0+
+			-->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-2</version>
+				<executions>
+					<execution>
+						<id>set-additional-system-properties</id>
+						<goals>
+							<goal>set-system-properties</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<properties>
+						<property>
+							<name>javax.xml.accessExternalSchema</name>
+							<value>file,http</value>
+						</property>
+					</properties>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -193,6 +219,9 @@
 						<goals>
 							<goal>javadoc</goal>
 						</goals>
+						<configuration>
+							<additionalparam>${javadoc.opts}</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -395,6 +424,18 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>jdk18</id>
+			<activation>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<!-- Quickfix for javadoc generation with jdk8. Please remove this after fixing html 
+				validation errors in javadoc commentary. -->
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+				<bc-jdk-version>jdk16</bc-jdk-version>
+			</properties>
+		</profile>
 		<profile>
 			<id>jdk17</id>
 			<activation>

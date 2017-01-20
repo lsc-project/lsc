@@ -5,5 +5,7 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+script: mvn -Popendj test -B
+
 notifications:
   irc: "irc.freenode.org#lsc-project"

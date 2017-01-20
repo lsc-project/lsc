@@ -358,6 +358,11 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
+								<!-- 
+								Quickfix so the maven-jaxb2-plugin is JDK 8 compatible
+								See https://java.net/jira/browse/MAVEN_JAXB2_PLUGIN-80. 
+								Please remove this when jaxb plugins is upgraded to 0.9.0+
+								-->
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>

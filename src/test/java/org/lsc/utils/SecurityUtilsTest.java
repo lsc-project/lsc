@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
@@ -67,6 +68,10 @@ public class SecurityUtilsTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtilsTest.class);
 	
+	@Before
+	public void setUp() {
+		LscConfiguration.reset();
+	}
     @Test
     public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
     	try {

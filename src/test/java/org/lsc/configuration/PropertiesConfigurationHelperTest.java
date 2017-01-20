@@ -45,6 +45,7 @@
  */
 package org.lsc.configuration;
 
+import org.junit.After;
 import org.junit.Test;
 import org.lsc.exception.LscConfigurationException;
 
@@ -58,4 +59,8 @@ public class PropertiesConfigurationHelperTest {
 		PropertiesConfigurationHelper.loadConfigurationFrom(this.getClass().getClassLoader().getResource("etc/lsc-old.properties").getPath());
 	}
 	
+	@After
+	public void resetConf() {
+		LscConfiguration.reset();
+	}
 }

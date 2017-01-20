@@ -1,6 +1,7 @@
 package org.lsc.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,8 +32,6 @@ public class GroovyEvaluatorTest {
 	
 	@Mocked Task task;
 	
-	TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
-	
 	@Before
 	public void setUp() {
 		evaluator = new GroovyEvaluator(new GroovyScriptEngineFactory().getScriptEngine());
@@ -42,6 +41,8 @@ public class GroovyEvaluatorTest {
 	public void test1() throws LscServiceException {
 
 		try {
+			final TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
+			assertNotNull(taskConf);
 			
 			new NonStrictExpectations() {
 				{

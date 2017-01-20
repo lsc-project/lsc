@@ -29,7 +29,6 @@ public class GroovyEvaluatorTest {
 	@Before
 	public void setUp() {
 		evaluator = new GroovyEvaluator(new GroovyScriptEngineFactory().getScriptEngine());
-		LscConfiguration.reset();
 	}
 	
 	@Test

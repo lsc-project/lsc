@@ -434,20 +434,14 @@ public class Configuration {
 		}
 		try {
 			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && new File(System.getProperty("LSC_HOME"), "etc/lsc.xml").exists()) {
-				LOGGER.info("Set up configuration from => " + new File(System.getProperty("LSC_HOME"), "etc/lsc.xml"));
 				Configuration.setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
 			} else {
-				LOGGER.info("Do not exist " + new File(System.getProperty("LSC_HOME"), "etc/lsc.xml"));
 				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
 				if(Configuration.class.getClassLoader().getResource("etc") != null) {
-					LOGGER.info("Will use conf in "+Configuration.class.getClassLoader().getResource("etc").getPath());
 					Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
-				} else {
-					LOGGER.info("ressource /etc do not exist");
 				}
 			}
 		} catch (LscException le) {
-			LOGGER.error(le.getMessage(), le);
 			System.err.println("Something strange appened: " + le.getMessage());// Silently forget le
 		}
 	}
@@ -486,7 +480,6 @@ public class Configuration {
 				File properties = new File(location, Configuration.PROPERTIES_FILENAME);
 				if(xml.exists() && xml.isFile()) {
 					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString()));
-					LOGGER.info("********** lsc.xml found at location " + location);
 				} else if (properties.exists() && properties.isFile()) {
 					LOGGER.warn("LSC configuration loaded from old properties file format !");
 					PropertiesConfigurationHelper.loadConfigurationFrom(properties.getAbsolutePath());

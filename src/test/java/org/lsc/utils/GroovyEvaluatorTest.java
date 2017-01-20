@@ -52,17 +52,20 @@ public class GroovyEvaluatorTest {
 		params.put("a", "b");
 		params.put("b", "a");
 		
-		LOGGER.info("Hello b => " + evaluator.evalToString(task,  	"'Hello ' + a", params));
+		//LOGGER.info("Hello b => " + evaluator.evalToString(task,  	"'Hello ' + a", params));
+		System.out.println("Hello b => " + evaluator.evalToString(task,  	"'Hello ' + a", params));
 		
 		assertEquals("Hello b", evaluator.evalToString(task,  	"'Hello ' + a", params));
 		
-		LOGGER.info("[Hello b] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
+		//LOGGER.info("[Hello b] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
+		System.out.println("[Hello b] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
 		
 		assertEquals(Arrays.asList(new String[] {"Hello b"}), evaluator.evalToStringList(task, "'Hello ' + a", params));
 		
 		params.put("a", new String[] { "b", "c" } );
 		
-		LOGGER.info("[Hello [b, c]] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
+		//LOGGER.info("[Hello [b, c]] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
+		System.out.println("[Hello [b, c]] => " + evaluator.evalToStringList(task, "'Hello ' + a", params));
 		
 		assertEquals(Arrays.asList(new String[] {"Hello [b, c]"}), evaluator.evalToStringList(task, "'Hello ' + a", params));
 		
@@ -71,7 +74,8 @@ public class GroovyEvaluatorTest {
 			"}\n" +
 			"dataToStringEquality a, b";
 		
-		LOGGER.info("false => " + evaluator.evalToBoolean(task, complexExpression, params));
+		//LOGGER.info("false => " + evaluator.evalToBoolean(task, complexExpression, params));
+		System.out.println("false => " + evaluator.evalToBoolean(task, complexExpression, params));
 		
 		assertEquals(false, evaluator.evalToBoolean(task, complexExpression, params));
 	}

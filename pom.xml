@@ -528,23 +528,6 @@
 
 	<repositories>
 		<repository>
-			<id>IBiblio - Maven2</id>
-			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-		</repository>
-		<repository>
-			<id>Codehaus Snapshot</id>
-			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<!-- <repository> <id>JBoss repository</id> <url>http://repository.jboss.org/maven2/</url> 
-			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
-			<updatePolicy>always</updatePolicy> </snapshots> </repository> -->
-		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
 		</repository>
@@ -583,28 +566,6 @@
 	</repositories>
 
 	<pluginRepositories>
-		<pluginRepository>
-			<id>Codehaus Snapshot</id>
-			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-		<pluginRepository>
-			<id>Codehaus</id>
-			<url>https://nexus.codehaus.org/content/repositories/releases/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
 		<pluginRepository>
 			<id>reflections-repo</id>
 			<name>Reflections Maven2 Repository</name>

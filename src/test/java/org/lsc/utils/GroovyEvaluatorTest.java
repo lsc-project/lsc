@@ -30,7 +30,9 @@ public class GroovyEvaluatorTest {
 	private ScriptableEvaluator evaluator;
 	
 	@Mocked Task task;
-
+	
+	TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
+	
 	@Before
 	public void setUp() {
 		evaluator = new GroovyEvaluator(new GroovyScriptEngineFactory().getScriptEngine());
@@ -40,9 +42,9 @@ public class GroovyEvaluatorTest {
 	public void test1() throws LscServiceException {
 
 		try {
+			
 			new NonStrictExpectations() {
 				{
-					TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
 					task.getSourceService(); result = new SimpleJndiSrcService(taskConf);
 					task.getDestinationService(); result = new SimpleJndiDstService(taskConf);
 				}

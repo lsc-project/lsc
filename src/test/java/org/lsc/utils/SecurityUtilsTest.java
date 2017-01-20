@@ -57,38 +57,47 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test security tools.
  */
 public class SecurityUtilsTest {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtilsTest.class);
+	
     @Test
     public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
-        //
-        // First generate a random symmetric key. We could use it then to
-        // do all encryption operations.
-        //
-        String tmpKeyPath = new File(this.getClass().getClassLoader().getResource("").getFile(), "lsc-key.tmp").getAbsolutePath();
-        SymmetricEncryption se = new SymmetricEncryption();
-        assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
-
-        LscConfiguration.getSecurity().getEncryption().setKeyfile(tmpKeyPath);
-
-        //
-        // Now, the test consist to encrypt a random value. Then, we compare the
-        // decrypted value with the initial one, they should be equal.
-        //
-        String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random r = new Random();
-        char[] buf = new char[20];
-        for (int i = 0; i < 20; i++) {
-            buf[i] = chars.charAt(r.nextInt(chars.length()));
-        }
-        String randomValue = new String(buf);
-        String encryptedValue = SecurityUtils.encrypt(randomValue);
-        String decryptedValue = SecurityUtils.decrypt(encryptedValue);
-        assertTrue(randomValue.equals(decryptedValue));
+    	try {
+	        //
+	        // First generate a random symmetric key. We could use it then to
+	        // do all encryption operations.
+	        //
+	        String tmpKeyPath = new File(this.getClass().getClassLoader().getResource("").getFile(), "lsc-key.tmp").getAbsolutePath();
+	        SymmetricEncryption se = new SymmetricEncryption();
+	        assertTrue(se.generateRandomKeyFile(tmpKeyPath, "AES", 128));
+	
+	        LscConfiguration.getSecurity().getEncryption().setKeyfile(tmpKeyPath);
+	
+	        //
+	        // Now, the test consist to encrypt a random value. Then, we compare the
+	        // decrypted value with the initial one, they should be equal.
+	        //
+	        String chars = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	        Random r = new Random();
+	        char[] buf = new char[20];
+	        for (int i = 0; i < 20; i++) {
+	            buf[i] = chars.charAt(r.nextInt(chars.length()));
+	        }
+	        String randomValue = new String(buf);
+	        String encryptedValue = SecurityUtils.encrypt(randomValue);
+	        String decryptedValue = SecurityUtils.decrypt(encryptedValue);
+	        assertTrue(randomValue.equals(decryptedValue));
+    	} catch (Exception e) {
+			LOGGER.error(e.getMessage(),e);
+			throw new RuntimeException(e);
+		}
     }
 
     @Test

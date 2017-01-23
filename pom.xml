@@ -5,7 +5,7 @@
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
 	<name>Ldap Synchronization Connector</name>
-	<version>trunk-SNAPSHOT</version>
+	<version>2.2-SNAPSHOT</version>
 	<description>
 		This project is the Ldap Synchronization Connector which
 		simplifies synchronizations between relation databases and LDAP
@@ -141,7 +141,33 @@
 		<finalName>${project.artifactId}-${project.version}</finalName>
 
 		<plugins>
-
+		
+			<plugin>
+			<!-- 
+			Quickfix so the maven-jaxb2-plugin is JDK 8 compatible
+			See https://java.net/jira/browse/MAVEN_JAXB2_PLUGIN-80. 
+			Please remove this when jaxb plugins is upgraded to 0.9.0+
+			-->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0-alpha-2</version>
+				<executions>
+					<execution>
+						<id>set-additional-system-properties</id>
+						<goals>
+							<goal>set-system-properties</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<properties>
+						<property>
+							<name>javax.xml.accessExternalSchema</name>
+							<value>file,http</value>
+						</property>
+					</properties>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -193,6 +219,9 @@
 						<goals>
 							<goal>javadoc</goal>
 						</goals>
+						<configuration>
+							<additionalparam>${javadoc.opts}</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -329,6 +358,30 @@
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>
+								<!-- 
+								Quickfix so the maven-jaxb2-plugin is JDK 8 compatible
+								See https://java.net/jira/browse/MAVEN_JAXB2_PLUGIN-80. 
+								Please remove this when jaxb plugins is upgraded to 0.9.0+
+								-->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											properties-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0-alpha-2,)
+										</versionRange>
+										<goals>
+											<goal>set-system-properties</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
@@ -364,7 +417,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -383,7 +436,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -395,6 +448,18 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>jdk18</id>
+			<activation>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<!-- Quickfix for javadoc generation with jdk8. Please remove this after fixing html 
+				validation errors in javadoc commentary. -->
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+				<bc-jdk-version>jdk16</bc-jdk-version>
+			</properties>
+		</profile>
 		<profile>
 			<id>jdk17</id>
 			<activation>
@@ -432,10 +497,8 @@
 				<dependency>
 					<groupId>org.forgerock.opendj</groupId>
 					<artifactId>opendj-server</artifactId>
-					<version>2.4.5</version>
-					<type>jar</type>
+					<version>2.6.2</version>
 					<scope>compile</scope>
-					<optional>false</optional>
 				</dependency>
 			</dependencies>
 			<build>
@@ -528,23 +591,6 @@
 
 	<repositories>
 		<repository>
-			<id>IBiblio - Maven2</id>
-			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-		</repository>
-		<repository>
-			<id>Codehaus Snapshot</id>
-			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<!-- <repository> <id>JBoss repository</id> <url>http://repository.jboss.org/maven2/</url> 
-			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
-			<updatePolicy>always</updatePolicy> </snapshots> </repository> -->
-		<repository>
 			<id>java.net Maven 2</id>
 			<url>http://download.java.net/maven/2</url>
 		</repository>
@@ -577,28 +623,6 @@
 	</repositories>
 
 	<pluginRepositories>
-		<pluginRepository>
-			<id>Codehaus Snapshot</id>
-			<url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-		<pluginRepository>
-			<id>Codehaus</id>
-			<url>https://nexus.codehaus.org/content/repositories/releases/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
 		<pluginRepository>
 			<id>reflections-repo</id>
 			<name>Reflections Maven2 Repository</name>

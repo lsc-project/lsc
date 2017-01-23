@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -258,7 +259,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 
 
 		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
-        String expressionImport =
+		String expressionImport =
                         "var version = java.lang.System.getProperty(\"java.version\");\n" +
                         "if (version.startsWith(\"1.8.0\")) { load(\"nashorn:mozilla_compat.js\"); }\n" +
                         "importPackage(org.lsc.utils.directory);\n" +
@@ -335,9 +336,31 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 				}
 				return retarr;
 			} catch(Exception e) {
-	            LOGGER.error(e.toString());
-	            LOGGER.debug(e.toString(), e);
+				LOGGER.error(e.toString());
+				LOGGER.debug(e.toString(), e);
 			}
+		} else if (src instanceof Bindings) {
+			try {
+				final Class<?> cls = Class.forName("jdk.nashorn.api.scripting.ScriptObjectMirror");
+				if (cls.isAssignableFrom(src.getClass())) {
+					final Method isArray = cls.getMethod("isArray");
+					final Object result = isArray.invoke(src);
+					if (result != null && result.equals(true)) {
+						final Method values = cls.getMethod("values");
+						final Object vals = values.invoke(src);
+						if (vals instanceof Collection<?>) {
+							final Collection<?> coll = (Collection<?>) vals;
+							return coll.toArray(new Object[0]);
+						}
+					}
+				}
+			} catch(Exception e) {
+				LOGGER.error(e.toString());
+				LOGGER.debug(e.toString(), e);
+			}
+		} else if (src instanceof List<?>) {
+			final List<?> list = (List<?>) src;
+			return list.toArray(new Object[0]);
 		} else if (src == UniqueTag.NOT_FOUND
 				|| src == UniqueTag.NULL_VALUE) {
 			return null;

@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-
 import org.codehaus.groovy.jsr223.GroovyScriptEngineFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +15,9 @@ import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.jndi.SimpleJndiSrcService;
+
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
 
 
 public class GroovyEvaluatorTest {

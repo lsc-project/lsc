@@ -1,3 +1,21 @@
+lsc (2.1.3-1) unstable; urgency=low
+
+  * Update to 2.1.3
+
+ -- Clement Oudot (LTB-project) <clem.oudot@gmail.com>  Tue, 03 Mar 2015 12:00:00 +0100
+
+lsc (2.1.2-1) unstable; urgency=low
+
+  * Update to 2.1.2
+
+ -- Clement Oudot (LTB-project) <clem.oudot@gmail.com>  Fri, 19 Dec 2014 12:00:00 +0100
+
+lsc (2.1.1-1) unstable; urgency=low
+
+  * Update to 2.1.1
+
+ -- Clement Oudot (LTB-project) <clem.oudot@gmail.com>  Fri, 25 Jul 2014 12:00:00 +0100
+
 lsc (2.1.0-1) unstable; urgency=low
 
   * Update to 2.1.0

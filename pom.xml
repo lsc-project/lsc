@@ -384,6 +384,15 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.12</version>
+            </extension>
+        </extensions>
+
 	</build>
 
 	<profiles>
@@ -801,11 +810,11 @@
 	<distributionManagement>
 		<repository>
 			<id>lsc-project.org</id>
-			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
+			<url>scp://lsc-project.org:/home/lsc-project/maven</url>
 		</repository>
 		<snapshotRepository>
 			<id>lsc-project.org</id>
-			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
+			<url>scp://lsc-project.org:/home/lsc-project/maven</url>
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>

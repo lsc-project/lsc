@@ -872,20 +872,8 @@
 	</distributionManagement>
 
 	<ciManagement>
-		<system>hudson</system>
-		<url>http://build.lsc-project.org/</url>
-		<notifiers>
-			<notifier>
-				<type>mail</type>
-				<sendOnError>true</sendOnError>
-				<sendOnFailure>true</sendOnFailure>
-				<sendOnSuccess>false</sendOnSuccess>
-				<sendOnWarning>false</sendOnWarning>
-				<configuration>
-					<address>lsc-dev@lsc-project.org</address>
-				</configuration>
-			</notifier>
-		</notifiers>
+		<system>travis</system>
+		<url>https://travis-ci.org/lsc-project/</url>
 	</ciManagement>
 
 </project>

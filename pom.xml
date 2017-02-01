@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
-	<name>Ldap Synchronization Connector</name>
+	<name>LDAP Synchronization Connector</name>
 	<version>2.2-SNAPSHOT</version>
 	<description>
 		This project is the Ldap Synchronization Connector which

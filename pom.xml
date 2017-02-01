@@ -47,67 +47,6 @@
 			<archive>http://lists.lsc-project.org/listinfo/lsc-changes</archive>
 		</mailingList>
 	</mailingLists>
-	<developers>
-		<developer>
-			<id>sbahloul</id>
-			<name>Sebastien Bahloul</name>
-			<email>seb@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Project Manager</role>
-				<role>Architect</role>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>jclarke</id>
-			<name>Jonathan Clarke</name>
-			<email>jon@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>tchemineau</id>
-			<name>Thomas Chemineau</name>
-			<email>thomas@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>rschermesser</id>
-			<name>Remy-Christophe Schermesser</name>
-			<email>rcs@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-	</developers>
-
-	<contributors>
-		<contributor>
-			<name>Clement Oudot</name>
-			<email>coudot@linagora.com</email>
-			<organization>Linagora</organization>
-			<roles>
-				<role>Integrator</role>
-				<role>Tests &amp; Q/A</role>
-			</roles>
-			<timezone>+1</timezone>
-		</contributor>
-	</contributors>
 
 	<licenses>
 		<license>

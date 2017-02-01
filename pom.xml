@@ -4,110 +4,49 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
-	<name>Ldap Synchronization Connector</name>
+	<name>LDAP Synchronization Connector</name>
 	<version>2.2-SNAPSHOT</version>
 	<description>
-		This project is the Ldap Synchronization Connector which
+		This project is the LDAP Synchronization Connector which
 		simplifies synchronizations between relation databases and LDAP
 		directories.
 	</description>
 	<url>http://lsc-project.org/</url>
 	<issueManagement>
-		<system>Redmine</system>
-		<url>http://tools.lsc-project.org/</url>
+		<system>github</system>
+		<url>https://github.com/lsc-project/lsc/issues</url>
 	</issueManagement>
 	<inceptionYear>2005</inceptionYear>
 	<mailingLists>
 		<mailingList>
-			<name>Announcements about Ldap Synchronization Project (LSC) - low-volume</name>
+			<name>Announcements about LDAP Synchronization Project (LSC)</name>
 			<subscribe>lsc-announce-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-announce-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-announce@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-announce</archive>
 		</mailingList>
 		<mailingList>
-			<name>General discussions and help for Ldap Synchronization Connector (LSC) - Start here!</name>
+			<name>General discussions and help for LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-users-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-users-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-users@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-users</archive>
 		</mailingList>
 		<mailingList>
-			<name>Development and project discussions about Ldap Synchronization Connector (LSC)</name>
+			<name>Development and project discussions about LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-dev-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-dev-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-dev@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-dev</archive>
 		</mailingList>
 		<mailingList>
-			<name>A commit-list that receives all updates to the code and the wiki (website) for Ldap Synchronization Connector (LSC)</name>
+			<name>A commit-list that receives all updates to the code and the wiki (website) for LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-changes-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-changes-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-changes@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-changes</archive>
 		</mailingList>
 	</mailingLists>
-	<developers>
-		<developer>
-			<id>sbahloul</id>
-			<name>Sebastien Bahloul</name>
-			<email>seb@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Project Manager</role>
-				<role>Architect</role>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>jclarke</id>
-			<name>Jonathan Clarke</name>
-			<email>jon@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>tchemineau</id>
-			<name>Thomas Chemineau</name>
-			<email>thomas@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-		<developer>
-			<id>rschermesser</id>
-			<name>Remy-Christophe Schermesser</name>
-			<email>rcs@lsc-project.org</email>
-			<organization>LSC Project</organization>
-			<organizationUrl>http://www.lsc-project.org/</organizationUrl>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<timezone>+1</timezone>
-		</developer>
-	</developers>
-
-	<contributors>
-		<contributor>
-			<name>Clement Oudot</name>
-			<email>coudot@linagora.com</email>
-			<organization>Linagora</organization>
-			<roles>
-				<role>Integrator</role>
-				<role>Tests &amp; Q/A</role>
-			</roles>
-			<timezone>+1</timezone>
-		</contributor>
-	</contributors>
 
 	<licenses>
 		<license>
@@ -117,9 +56,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:svn:https://lsc-project.org/svn/lsc/trunk</connection>
-		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/trunk</developerConnection>
-		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc/trunk</url>
+		<connection>scm:git:git://github.com:lsc-project/lsc.git</connection>
+		<developerConnection>scm:git:git@github.com:lsc-project/lsc.git</developerConnection>
+		<url>https://github.com/lsc-project/lsc/</url>
 	</scm>
 
 	<organization>
@@ -445,6 +384,15 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>2.12</version>
+            </extension>
+        </extensions>
+
 	</build>
 
 	<profiles>
@@ -846,30 +794,18 @@
 	<distributionManagement>
 		<repository>
 			<id>lsc-project.org</id>
-			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
+			<url>scp://lsc-project.org:/home/lsc-project/maven</url>
 		</repository>
 		<snapshotRepository>
 			<id>lsc-project.org</id>
-			<url>scp://lsc-project.org:/var/www/lsc-project/maven</url>
+			<url>scp://lsc-project.org:/home/lsc-project/maven</url>
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
 
 	<ciManagement>
-		<system>hudson</system>
-		<url>http://build.lsc-project.org/</url>
-		<notifiers>
-			<notifier>
-				<type>mail</type>
-				<sendOnError>true</sendOnError>
-				<sendOnFailure>true</sendOnFailure>
-				<sendOnSuccess>false</sendOnSuccess>
-				<sendOnWarning>false</sendOnWarning>
-				<configuration>
-					<address>lsc-dev@lsc-project.org</address>
-				</configuration>
-			</notifier>
-		</notifiers>
+		<system>travis</system>
+		<url>https://travis-ci.org/lsc-project/</url>
 	</ciManagement>
 
 </project>

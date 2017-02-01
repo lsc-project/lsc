@@ -13,8 +13,8 @@
 	</description>
 	<url>http://lsc-project.org/</url>
 	<issueManagement>
-		<system>Redmine</system>
-		<url>http://tools.lsc-project.org/</url>
+		<system>github</system>
+		<url>https://github.com/lsc-project/lsc/issues</url>
 	</issueManagement>
 	<inceptionYear>2005</inceptionYear>
 	<mailingLists>
@@ -117,9 +117,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:svn:https://lsc-project.org/svn/lsc/trunk</connection>
-		<developerConnection>scm:svn:svn+ssh://login@lsc-project.org/var/lib/svn/lsc-core/trunk</developerConnection>
-		<url>http://tools.lsc-project.org/repositories/browse/lsc/lsc/trunk</url>
+		<connection>scm:git:git://github.com:lsc-project/lsc.git</connection>
+		<developerConnection>scm:git:git@github.com:lsc-project/lsc.git</developerConnection>
+		<url>https://github.com/lsc-project/lsc/</url>
 	</scm>
 
 	<organization>

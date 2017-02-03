@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 05:01:12 PM CEST 
+// Généré le : 2017.02.03 à 01:41:23 PM CET 
 //
 
 
@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="sortedBy" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="binaryAttributes" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}valuesType" minOccurs="0"/>
  *         &lt;element name="recursiveDelete" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="saslQop" type="{http://lsc-project.org/XSD/lsc-core-2.1.xsd}saslQopType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -55,7 +56,8 @@ import javax.xml.bind.annotation.XmlType;
     "saslMutualAuthentication",
     "sortedBy",
     "binaryAttributes",
-    "recursiveDelete"
+    "recursiveDelete",
+    "saslQop"
 })
 public class LdapConnectionType
     extends ConnectionType
@@ -81,6 +83,8 @@ public class LdapConnectionType
     protected ValuesType binaryAttributes;
     @XmlElement(defaultValue = "false")
     protected Boolean recursiveDelete = false;
+    @XmlElement(defaultValue = "auth")
+    protected SaslQopType saslQop = SaslQopType.AUTH;
 
     /**
      * Obtient la valeur de la propriété authentication.
@@ -344,6 +348,30 @@ public class LdapConnectionType
      */
     public void setRecursiveDelete(Boolean value) {
         this.recursiveDelete = value;
+    }
+
+    /**
+     * Obtient la valeur de la propriété saslQop.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SaslQopType }
+     *     
+     */
+    public SaslQopType getSaslQop() {
+        return saslQop;
+    }
+
+    /**
+     * Définit la valeur de la propriété saslQop.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SaslQopType }
+     *     
+     */
+    public void setSaslQop(SaslQopType value) {
+        this.saslQop = value;
     }
 
 }

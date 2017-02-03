@@ -45,16 +45,27 @@
  */
 package org.lsc.jndi;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import org.apache.commons.lang.StringUtils;
+import org.apache.directory.api.ldap.codec.api.ControlFactory;
+import org.apache.directory.api.ldap.codec.api.LdapApiService;
+import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
+import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
+import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
+import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.name.Rdn;
+import org.apache.directory.api.ldap.model.url.LdapUrl;
+import org.lsc.Configuration;
+import org.lsc.LscDatasets;
+import org.lsc.configuration.LdapAuthenticationType;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdapDerefAliasesType;
+import org.lsc.configuration.LdapReferralType;
+import org.lsc.configuration.LdapVersionType;
+import org.lsc.exception.LscConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -87,28 +98,16 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.directory.api.ldap.codec.api.ControlFactory;
-import org.apache.directory.api.ldap.codec.api.LdapApiService;
-import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
-import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
-import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
-import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
-import org.apache.directory.api.ldap.model.name.Dn;
-import org.apache.directory.api.ldap.model.name.Rdn;
-import org.apache.directory.api.ldap.model.url.LdapUrl;
-import org.lsc.Configuration;
-import org.lsc.LscDatasets;
-import org.lsc.configuration.LdapAuthenticationType;
-import org.lsc.configuration.LdapConnectionType;
-import org.lsc.configuration.LdapDerefAliasesType;
-import org.lsc.configuration.LdapReferralType;
-import org.lsc.configuration.LdapVersionType;
-import org.lsc.exception.LscConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * General LDAP services wrapper.
@@ -354,6 +353,7 @@ public final class JndiServices {
 //				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
 				props.put("javax.security.auth.useSubjectCredsOnly", "true");
 				props.put("com.sun.jndi.ldap.trace.ber", System.err); //debug trace
+				props.setProperty("javax.security.sasl.qop", connection.getSaslQop().value());
 				try {
 					LoginContext lc = new LoginContext(JndiServices.class.getName(), new KerberosCallbackHandler(connection.getUsername(), connection.getPassword()));
 					lc.login();
@@ -409,6 +409,7 @@ public final class JndiServices {
         if(connection.isRecursiveDelete() != null) {
             props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
         }
+
 		return props;
 	}
 	

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
-	<name>Ldap Synchronization Connector</name>
+	<name>LDAP Synchronization Connector</name>
 	<version>2.1-SNAPSHOT</version>
 	<description>
 		This project is the Ldap Synchronization Connector which
@@ -19,28 +19,28 @@
 	<inceptionYear>2005</inceptionYear>
 	<mailingLists>
 		<mailingList>
-			<name>Announcements about Ldap Synchronization Project (LSC) - low-volume</name>
+			<name>Announcements about LDAP Synchronization Project (LSC)</name>
 			<subscribe>lsc-announce-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-announce-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-announce@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-announce</archive>
 		</mailingList>
 		<mailingList>
-			<name>General discussions and help for Ldap Synchronization Connector (LSC) - Start here!</name>
+			<name>General discussions and help for LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-users-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-users-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-users@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-users</archive>
 		</mailingList>
 		<mailingList>
-			<name>Development and project discussions about Ldap Synchronization Connector (LSC)</name>
+			<name>Development and project discussions about LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-dev-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-dev-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-dev@lists.lsc-project.org</post>
 			<archive>http://lists.lsc-project.org/listinfo/lsc-dev</archive>
 		</mailingList>
 		<mailingList>
-			<name>A commit-list that receives all updates to the code and the wiki (website) for Ldap Synchronization Connector (LSC)</name>
+			<name>A commit-list that receives all updates to the code and the wiki (website) for LDAP Synchronization Connector (LSC)</name>
 			<subscribe>lsc-changes-subscribe@lists.lsc-project.org</subscribe>
 			<unsubscribe>lsc-changes-unsubscribe@lists.lsc-project.org</unsubscribe>
 			<post>lsc-changes@lists.lsc-project.org</post>

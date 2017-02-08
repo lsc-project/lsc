@@ -14,36 +14,34 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for ldapAuthenticationType.
+ * <p>Java class for saslQopType.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="ldapAuthenticationType">
+ * &lt;simpleType name="saslQopType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="NONE"/>
- *     &lt;enumeration value="SIMPLE"/>
- *     &lt;enumeration value="SASL"/>
- *     &lt;enumeration value="DIGEST-MD5"/>
- *     &lt;enumeration value="GSSAPI"/>
+ *     &lt;enumeration value="auth"/>
+ *     &lt;enumeration value="auth-int"/>
+ *     &lt;enumeration value="auth-conf"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "ldapAuthenticationType")
+@XmlType(name = "saslQopType")
 @XmlEnum
-public enum LdapAuthenticationType {
+public enum SaslQopType {
 
-    NONE("NONE"),
-    SIMPLE("SIMPLE"),
-    SASL("SASL"),
-    @XmlEnumValue("DIGEST-MD5")
-    DIGEST_MD_5("DIGEST-MD5"),
-    GSSAPI("GSSAPI");
+    @XmlEnumValue("auth")
+    AUTH("auth"),
+    @XmlEnumValue("auth-int")
+    AUTH_INT("auth-int"),
+    @XmlEnumValue("auth-conf")
+    AUTH_CONF("auth-conf");
     private final String value;
 
-    LdapAuthenticationType(String v) {
+    SaslQopType(String v) {
         value = v;
     }
 
@@ -51,8 +49,8 @@ public enum LdapAuthenticationType {
         return value;
     }
 
-    public static LdapAuthenticationType fromValue(String v) {
-        for (LdapAuthenticationType c: LdapAuthenticationType.values()) {
+    public static SaslQopType fromValue(String v) {
+        for (SaslQopType c: SaslQopType.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

@@ -100,6 +100,14 @@
 			<xsd:enumeration value="VERSION_3" />
 		</xsd:restriction>
 	</xsd:simpleType>
+	
+	<xsd:simpleType name="saslQopType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="auth"/>
+			<xsd:enumeration value="auth-int"/>
+			<xsd:enumeration value="auth-conf"/>
+		</xsd:restriction>
+	</xsd:simpleType>
 
 	<xsd:complexType name="ldapConnectionType">
 		<xsd:complexContent>
@@ -128,6 +136,8 @@
 						minOccurs="0" />
 					<xsd:element name="recursiveDelete" type="xsd:boolean"
 						default="false" minOccurs="0" />
+					<xsd:element name="saslQop" type="saslQopType"
+								 default="auth" minOccurs="0" />
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

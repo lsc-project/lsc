@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 05:01:12 PM CEST 
+// Généré le : 2017.02.03 à 01:41:23 PM CET 
 //
 
 
@@ -56,14 +56,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "connection"
 })
 @XmlSeeAlso({
-    DatabaseDestinationServiceType.class,
+    PluginSourceServiceType.class,
+    XaFileDestinationServiceType.class,
     PluginDestinationServiceType.class,
+    DatabaseSourceServiceType.class,
     GoogleAppsServiceType.class,
     MultiDestinationServiceType.class,
-    PluginSourceServiceType.class,
     LdapServiceType.class,
-    DatabaseSourceServiceType.class,
-    XaFileDestinationServiceType.class
+    DatabaseDestinationServiceType.class
 })
 public class ServiceType {
 

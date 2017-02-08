@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 05:01:12 PM CEST 
+// Généré le : 2017.02.03 à 01:41:23 PM CET 
 //
 
 
@@ -45,14 +45,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link KeysValuesMap }
-     * 
-     */
-    public KeysValuesMap createKeysValuesMap() {
-        return new KeysValuesMap();
-    }
-
-    /**
      * Create an instance of {@link MultiDestinationServiceType }
      * 
      */
@@ -66,6 +58,14 @@ public class ObjectFactory {
      */
     public TaskType createTaskType() {
         return new TaskType();
+    }
+
+    /**
+     * Create an instance of {@link KeysValuesMap }
+     * 
+     */
+    public KeysValuesMap createKeysValuesMap() {
+        return new KeysValuesMap();
     }
 
     /**
@@ -109,75 +109,35 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link DatabaseDestinationServiceType }
+     * Create an instance of {@link PluginSyncOptionsType }
      * 
      */
-    public DatabaseDestinationServiceType createDatabaseDestinationServiceType() {
-        return new DatabaseDestinationServiceType();
+    public PluginSyncOptionsType createPluginSyncOptionsType() {
+        return new PluginSyncOptionsType();
     }
 
     /**
-     * Create an instance of {@link PluginDestinationServiceType }
+     * Create an instance of {@link GoogleAppsConnectionType }
      * 
      */
-    public PluginDestinationServiceType createPluginDestinationServiceType() {
-        return new PluginDestinationServiceType();
+    public GoogleAppsConnectionType createGoogleAppsConnectionType() {
+        return new GoogleAppsConnectionType();
     }
 
     /**
-     * Create an instance of {@link ValuesType }
+     * Create an instance of {@link PluginConnectionType }
      * 
      */
-    public ValuesType createValuesType() {
-        return new ValuesType();
+    public PluginConnectionType createPluginConnectionType() {
+        return new PluginConnectionType();
     }
 
     /**
-     * Create an instance of {@link LdifAuditType }
+     * Create an instance of {@link EncryptionType }
      * 
      */
-    public LdifAuditType createLdifAuditType() {
-        return new LdifAuditType();
-    }
-
-    /**
-     * Create an instance of {@link LdapDestinationServiceType }
-     * 
-     */
-    public LdapDestinationServiceType createLdapDestinationServiceType() {
-        return new LdapDestinationServiceType();
-    }
-
-    /**
-     * Create an instance of {@link LdapSourceServiceType }
-     * 
-     */
-    public LdapSourceServiceType createLdapSourceServiceType() {
-        return new LdapSourceServiceType();
-    }
-
-    /**
-     * Create an instance of {@link DatabaseConnectionType }
-     * 
-     */
-    public DatabaseConnectionType createDatabaseConnectionType() {
-        return new DatabaseConnectionType();
-    }
-
-    /**
-     * Create an instance of {@link GoogleAppsServiceType }
-     * 
-     */
-    public GoogleAppsServiceType createGoogleAppsServiceType() {
-        return new GoogleAppsServiceType();
-    }
-
-    /**
-     * Create an instance of {@link PropertiesBasedSyncOptionsType }
-     * 
-     */
-    public PropertiesBasedSyncOptionsType createPropertiesBasedSyncOptionsType() {
-        return new PropertiesBasedSyncOptionsType();
+    public EncryptionType createEncryptionType() {
+        return new EncryptionType();
     }
 
     /**
@@ -189,11 +149,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link PluginAuditType }
+     * Create an instance of {@link LdifAuditType }
      * 
      */
-    public PluginAuditType createPluginAuditType() {
-        return new PluginAuditType();
+    public LdifAuditType createLdifAuditType() {
+        return new LdifAuditType();
+    }
+
+    /**
+     * Create an instance of {@link ConnectionType }
+     * 
+     */
+    public ConnectionType createConnectionType() {
+        return new ConnectionType();
     }
 
     /**
@@ -205,11 +173,43 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link GoogleAppsConnectionType }
+     * Create an instance of {@link XaFileDestinationServiceType }
      * 
      */
-    public GoogleAppsConnectionType createGoogleAppsConnectionType() {
-        return new GoogleAppsConnectionType();
+    public XaFileDestinationServiceType createXaFileDestinationServiceType() {
+        return new XaFileDestinationServiceType();
+    }
+
+    /**
+     * Create an instance of {@link PluginDestinationServiceType }
+     * 
+     */
+    public PluginDestinationServiceType createPluginDestinationServiceType() {
+        return new PluginDestinationServiceType();
+    }
+
+    /**
+     * Create an instance of {@link ConditionsType }
+     * 
+     */
+    public ConditionsType createConditionsType() {
+        return new ConditionsType();
+    }
+
+    /**
+     * Create an instance of {@link DatabaseSourceServiceType }
+     * 
+     */
+    public DatabaseSourceServiceType createDatabaseSourceServiceType() {
+        return new DatabaseSourceServiceType();
+    }
+
+    /**
+     * Create an instance of {@link GoogleAppsServiceType }
+     * 
+     */
+    public GoogleAppsServiceType createGoogleAppsServiceType() {
+        return new GoogleAppsServiceType();
     }
 
     /**
@@ -237,67 +237,27 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link PluginSyncOptionsType }
+     * Create an instance of {@link LdapDestinationServiceType }
      * 
      */
-    public PluginSyncOptionsType createPluginSyncOptionsType() {
-        return new PluginSyncOptionsType();
+    public LdapDestinationServiceType createLdapDestinationServiceType() {
+        return new LdapDestinationServiceType();
     }
 
     /**
-     * Create an instance of {@link CsvAuditType }
+     * Create an instance of {@link PropertiesBasedSyncOptionsType }
      * 
      */
-    public CsvAuditType createCsvAuditType() {
-        return new CsvAuditType();
+    public PropertiesBasedSyncOptionsType createPropertiesBasedSyncOptionsType() {
+        return new PropertiesBasedSyncOptionsType();
     }
 
     /**
-     * Create an instance of {@link ConnectionType }
+     * Create an instance of {@link ValuesType }
      * 
      */
-    public ConnectionType createConnectionType() {
-        return new ConnectionType();
-    }
-
-    /**
-     * Create an instance of {@link DatabaseSourceServiceType }
-     * 
-     */
-    public DatabaseSourceServiceType createDatabaseSourceServiceType() {
-        return new DatabaseSourceServiceType();
-    }
-
-    /**
-     * Create an instance of {@link EncryptionType }
-     * 
-     */
-    public EncryptionType createEncryptionType() {
-        return new EncryptionType();
-    }
-
-    /**
-     * Create an instance of {@link PluginConnectionType }
-     * 
-     */
-    public PluginConnectionType createPluginConnectionType() {
-        return new PluginConnectionType();
-    }
-
-    /**
-     * Create an instance of {@link ConditionsType }
-     * 
-     */
-    public ConditionsType createConditionsType() {
-        return new ConditionsType();
-    }
-
-    /**
-     * Create an instance of {@link XaFileDestinationServiceType }
-     * 
-     */
-    public XaFileDestinationServiceType createXaFileDestinationServiceType() {
-        return new XaFileDestinationServiceType();
+    public ValuesType createValuesType() {
+        return new ValuesType();
     }
 
     /**
@@ -309,19 +269,51 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link DatabaseConnectionType }
+     * 
+     */
+    public DatabaseConnectionType createDatabaseConnectionType() {
+        return new DatabaseConnectionType();
+    }
+
+    /**
+     * Create an instance of {@link LdapSourceServiceType }
+     * 
+     */
+    public LdapSourceServiceType createLdapSourceServiceType() {
+        return new LdapSourceServiceType();
+    }
+
+    /**
+     * Create an instance of {@link PluginAuditType }
+     * 
+     */
+    public PluginAuditType createPluginAuditType() {
+        return new PluginAuditType();
+    }
+
+    /**
+     * Create an instance of {@link CsvAuditType }
+     * 
+     */
+    public CsvAuditType createCsvAuditType() {
+        return new CsvAuditType();
+    }
+
+    /**
+     * Create an instance of {@link DatabaseDestinationServiceType }
+     * 
+     */
+    public DatabaseDestinationServiceType createDatabaseDestinationServiceType() {
+        return new DatabaseDestinationServiceType();
+    }
+
+    /**
      * Create an instance of {@link ServiceType.Connection }
      * 
      */
     public ServiceType.Connection createServiceTypeConnection() {
         return new ServiceType.Connection();
-    }
-
-    /**
-     * Create an instance of {@link KeysValuesMap.Entry }
-     * 
-     */
-    public KeysValuesMap.Entry createKeysValuesMapEntry() {
-        return new KeysValuesMap.Entry();
     }
 
     /**
@@ -338,6 +330,14 @@ public class ObjectFactory {
      */
     public TaskType.AuditLog createTaskTypeAuditLog() {
         return new TaskType.AuditLog();
+    }
+
+    /**
+     * Create an instance of {@link KeysValuesMap.Entry }
+     * 
+     */
+    public KeysValuesMap.Entry createKeysValuesMapEntry() {
+        return new KeysValuesMap.Entry();
     }
 
 }

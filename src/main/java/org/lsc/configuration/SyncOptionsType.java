@@ -2,7 +2,7 @@
 // Ce fichier a été généré par l'implémentation de référence JavaTM Architecture for XML Binding (JAXB), v2.2.6 
 // Voir <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Toute modification apportée à ce fichier sera perdue lors de la recompilation du schéma source. 
-// Généré le : 2014.05.15 à 05:01:12 PM CEST 
+// Généré le : 2017.02.03 à 01:41:23 PM CET 
 //
 
 
@@ -41,8 +41,8 @@ import javax.xml.bind.annotation.XmlType;
     "mainIdentifier"
 })
 @XmlSeeAlso({
-    PropertiesBasedSyncOptionsType.class,
     PluginSyncOptionsType.class,
+    PropertiesBasedSyncOptionsType.class,
     ForceSyncOptionsType.class
 })
 public abstract class SyncOptionsType {

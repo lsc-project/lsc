@@ -69,7 +69,7 @@ REM Find the java.exe executable
  GOTO findJava  )
 goto:eof
 
-# Explore the path to find Java
+REM Explore the path to find Java
 :findJava
     if "%PATHQ%"=="" goto WEND
     for /F "delims=;" %%i in ("%PATHQ%") do set JAVA_COMMAND=%%i\java.exe

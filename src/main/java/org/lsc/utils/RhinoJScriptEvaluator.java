@@ -306,8 +306,13 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 			if (task.getScriptIncludes() != null) {
 				for (File scriptInclude: task.getScriptIncludes()) {
 					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
-						Script include = cx.compileReader(new FileReader(scriptInclude), scriptInclude.getAbsolutePath(), 1, null);
-						includes.add(include);
+						FileReader reader = new FileReader(scriptInclude);
+						try {
+							Script include = cx.compileReader(reader, scriptInclude.getAbsolutePath(), 1, null);
+							includes.add(include);
+						} finally {
+							reader.close();
+						}	
 					}
 				}
 			}

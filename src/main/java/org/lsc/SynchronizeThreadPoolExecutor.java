@@ -27,7 +27,7 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 			.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	protected SynchronizeThreadPoolExecutor(int threads) {
-		super(threads, Integer.MAX_VALUE, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
+		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 				// this will block if the queue is full
 				try {

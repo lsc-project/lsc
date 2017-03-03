@@ -2,6 +2,7 @@ package org.lsc;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 
 	static long keepAliveTime = 60;
+	static int queueCapacity=10000;
 
 	BlockingQueue<Runnable> queue;
 
@@ -25,7 +27,18 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 			.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	protected SynchronizeThreadPoolExecutor(int threads) {
-		super(threads, Integer.MAX_VALUE, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(Configuration.MAX_CONCURRENT_SYNCHRONIZED));
+		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
+			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+				// this will block if the queue is full
+				try {
+						executor.getQueue().put(r);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		);
 		queue = getQueue(); 
 	}
 

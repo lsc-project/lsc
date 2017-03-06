@@ -1,6 +1,10 @@
+# LDAP Synchronization Connector
+
+[![Build Status](https://travis-ci.org/lsc-project/lsc.svg?branch=v2.1)](https://travis-ci.org/lsc-project/lsc)
+
 Full HTML documentation is available at http://lsc-project.org/
 
-===== What is LSC? =====
+## What is LSC?
 
 Ldap Synchronization Connector reads from any data source including databases,
 LDAP directories or files and transforms and compares this data to an LDAP
@@ -17,8 +21,7 @@ status, last logon, etc ...).
 
 LSC is an open source project written in Java, available under the BSD license.
 
-
-===== Philosophy =====
+## Philosophy
 
 Make it possible: The main goal is to provide a simple and efficient way of
 synchronizing any data source to a LDAP directory quickly.
@@ -35,8 +38,7 @@ behaviour come as part of the software. These functions are extensible to
 include your own, to integrate into your existing infrastructure. Save time,
 by reusing!
 
-
-===== Feature overview =====
+## Feature overview
 
 * Multiple connectors: any LDAPv3 server, any database with a JDBC
   connector, flat files (or anything else you write a connector for)
@@ -53,25 +55,24 @@ by reusing!
 * Advanced attribute manipulation via a built-in Script engine (include
   support for JavaScript and Groovy scripting languages)
 * Predefined libraries for use in JavaScript attribute manipulation:
-	- LDAP server tools: standard bind operation can be checked on any
-	  LDAPv3 server
-	- Active Directory tools: password update (unicodePwd attribute),
-	  account type and status manipulation (userAccountControl), unused
-	  account detection (lastLogonTimestamp)
-	- String manipulation: formatting for common tasks in identity
-	  management, such as capitalizing first letters in a complex name,
-	  filtering accents for login names, etc …
-	- Security tools: password hashing, bi-directional encryption
+    - LDAP server tools: standard bind operation can be checked on any
+      LDAPv3 server
+    - Active Directory tools: password update (unicodePwd attribute),
+      account type and status manipulation (userAccountControl), unused
+      account detection (lastLogonTimestamp)
+    - String manipulation: formatting for common tasks in identity
+      management, such as capitalizing first letters in a complex name,
+      filtering accents for login names, etc …
+    - Security tools: password hashing, bi-directional encryption
 * Conditions to only create, update, rename or delete entries depending on
   current values
 * Detailed and configurable logging in LDIF (fully RFC-compliant) and CSV
-  formats	
+  formats
 * Monitoring plugin for Nagios
 * Possibility to extend any Java class to implement your own specific
   synchronization needs
 
-
-===== Read more =====
+## Read more
 
 Find more documentation, tutorials at http://lsc-project.org/.
 

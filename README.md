@@ -55,19 +55,19 @@ by reusing!
 * Advanced attribute manipulation via a built-in Script engine (include
   support for JavaScript and Groovy scripting languages)
 * Predefined libraries for use in JavaScript attribute manipulation:
-	- LDAP server tools: standard bind operation can be checked on any
-	  LDAPv3 server
-	- Active Directory tools: password update (unicodePwd attribute),
-	  account type and status manipulation (userAccountControl), unused
-	  account detection (lastLogonTimestamp)
-	- String manipulation: formatting for common tasks in identity
-	  management, such as capitalizing first letters in a complex name,
-	  filtering accents for login names, etc …
-	- Security tools: password hashing, bi-directional encryption
+    - LDAP server tools: standard bind operation can be checked on any
+      LDAPv3 server
+    - Active Directory tools: password update (unicodePwd attribute),
+      account type and status manipulation (userAccountControl), unused
+      account detection (lastLogonTimestamp)
+    - String manipulation: formatting for common tasks in identity
+      management, such as capitalizing first letters in a complex name,
+      filtering accents for login names, etc …
+    - Security tools: password hashing, bi-directional encryption
 * Conditions to only create, update, rename or delete entries depending on
   current values
 * Detailed and configurable logging in LDIF (fully RFC-compliant) and CSV
-  formats	
+  formats
 * Monitoring plugin for Nagios
 * Possibility to extend any Java class to implement your own specific
   synchronization needs

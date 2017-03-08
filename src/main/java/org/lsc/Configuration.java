@@ -518,7 +518,7 @@ public class Configuration {
 				setUpLdifLogging(context);
 			}
 		} catch (JoranException je) {
-			System.err.println("Can not find logging configuration file (logback.xml) !");
+			System.err.println("Cannot find logging configuration file ("+logBackXMLPropertiesFile+") !");
 		}
 		
 		// Logging configured

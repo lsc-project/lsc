@@ -12,7 +12,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	2.1.3
+%define lsc_version	2.1.4
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -28,7 +28,7 @@ License: BSD
 BuildArch: noarch
 
 Group: Applications/System
-URL: http://lsc-project.org
+URL: https://lsc-project.org
 
 Source: %{lsc_name}-core-%{lsc_version}-dist.zip
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -180,6 +180,8 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Sat Mar 25 2017 - Clement Oudot <clem@lsc-project.org> - 2.1.4-0
+- Upgrade to LSC 2.1.4
 * Tue Mar 03 2015 - Clement Oudot <clem@lsc-project.org> - 2.1.3-0
 - Upgrade to LSC 2.1.3
 * Fri Dec 19 2014 - Clement Oudot <clem@lsc-project.org> - 2.1.2-0

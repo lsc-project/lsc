@@ -443,7 +443,7 @@
 			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.forgerock.opendj</groupId>
+					<groupId>org.forgerock.ce.opendj</groupId>
 					<artifactId>opendj-server</artifactId>
 					<version>2.6.2</version>
 					<scope>compile</scope>
@@ -543,10 +543,10 @@
 			<url>http://download.java.net/maven/2</url>
 		</repository>
 		<repository>
-			<id>maven.forgerock.org</id>
-			<name>maven.forgerock.org-snapshot</name>
-			<url>http://maven.forgerock.org/repo/releases</url>
-		</repository>
+                        <id>forgerock-community-repository</id>
+                        <name>ForgeRock CommunityRepository</name>
+                        <url>http://maven.forgerock.org/repo/community</url>
+                </repository>
 		<repository>
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>

@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: Clement Oudot <clem.oudot@gmail.com>
 Build-Depends: debhelper (>> 7)
 Standards-Version: 3.9.5
-Homepage: http://lsc-project.org/
-Vcs-Svn: https://lsc-project.org/svn/
-Vcs-Browser: http://tools.lsc-project.org/repositories/show/lsc
+Homepage: https://lsc-project.org/
+Vcs-Git: https://github.com/lsc-project/lsc.git
+Vcs-Browser: https://github.com/lsc-project/lsc
 
 Package: lsc
 Architecture: all

@@ -194,6 +194,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	@Override
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
+			if (!connection.isConnected()) {
+				connection = getConnection(ldapConn);
+			}
 			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
 					getAttrsId().toArray(new String[getAttrsId().size()])));
 		} catch (RuntimeException e) {
@@ -244,7 +247,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             // When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
             String searchBaseDn = (fromSameService ? id : baseDn);
             SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
-			if(getAttrs() != null) {
+			if (!connection.isConnected()) {
+				connection = getConnection(ldapConn);
+			}
+            if(getAttrs() != null) {
 				List<String> attrList = new ArrayList<String>(getAttrs());
 				attrList.addAll(pivotAttrs.getAttributesNames());
 				entryCursor = connection.search(searchBaseDn, searchString, searchScope, attrList.toArray(new String[attrList.size()]));

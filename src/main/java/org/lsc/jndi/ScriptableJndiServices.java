@@ -48,6 +48,8 @@ package org.lsc.jndi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.lsc.LscDatasets;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -126,6 +128,55 @@ public class ScriptableJndiServices extends ScriptableObject {
 		return jndiServices.getDnList(base, filter, SearchControls.ONELEVEL_SCOPE);
 	}
 
+	
+        /**
+         * <P> Performs a search with subtree scope on a given base DN with a given
+         * filter returning attribute values </P>
+         * 
+         * @param base The base DN to search from.
+         * @param filter The LDAP filter to use.
+         * @attribute attribute The attribute to search.
+         * @return List<String> List of attributes values returned by the search.
+         * @throws NamingException
+         */
+        public final List<String> searchAttribute(final Object base, final Object filter, final Object attribute)
+    	    throws NamingException {
+    	return _searchAttribute((String) base, (String) filter, (String) attribute, SearchControls.SUBTREE_SCOPE);
+        }
+
+        /**
+         * <P> Performs a search with one level scope on a given base DN with a given
+         * filter returning attribute values </P>
+         *
+         * @param base The base DN to search from.
+         * @param filter The LDAP filter to use.
+         * @attribute attribute The attribute to search.
+         * @return List<String> List of attributes values returned by the search.
+         * @throws NamingException
+         */
+        public final List<String> listAttribute(final Object base, final Object filter, final Object attribute)
+    	    throws NamingException {
+    	return _searchAttribute((String) base, (String) filter, (String) attribute, SearchControls.ONELEVEL_SCOPE);
+        }
+
+    	protected List<String> _searchAttribute(final String base, final String filter, final String attribute,
+	    final int scope) throws NamingException {
+
+		List<String> resAttributes = new ArrayList<String>();
+
+		List<String> attrsNames = new ArrayList<String>();
+		attrsNames.add(attribute);
+
+		// Searching attributes values
+		Map<String, LscDatasets> res = jndiServices.getAttrsList(base, filter, scope, attrsNames);	
+ 
+		for (Map.Entry<String, LscDatasets> entry : res.entrySet()) {
+	    		resAttributes.add(entry.getValue().getStringValueAttribute(attribute));
+		}
+
+		return resAttributes;
+    	}
+	
 	/**
 	 * <P>Performs a search with base level scope on a given base DN with a given filter.</P>
 	 * 

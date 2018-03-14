@@ -70,12 +70,14 @@ public final class FrenchFilters {
 		"&agrave;", "&agrave;",
 		"â", "Â",
 		"ä", "Ä",
+		"ã", "Ã",
 		"&eacute;", "&eacute;",
 		"&egrave;", "&egrave;",
 		"ê", "Ê",
 		"ë", "Ë",
 		"È", "É",
 		"é", "è",
+		"ẽ", "Ẽ",
 		"Ì", "ì",
 		"Í", "í",
 		"î", "Î",
@@ -84,12 +86,15 @@ public final class FrenchFilters {
 		"Ó", "ó",
 		"ô", "Ô",
 		"ö", "Ö",
+		"õ", "Õ",
 		"ù", "Ù",
 		"Ú", "ú",
 		"û", "Û",
 		"ü", "Ü",
 		"Ý", "ý",
-		"ç", "Ç"
+		"Ÿ", "ÿ",
+		"ç", "Ç",
+		"ñ", "Ñ"
 	};
 
 	/**
@@ -100,18 +105,21 @@ public final class FrenchFilters {
 		"a", "A",
 		"a", "A",
 		"a", "A",
+		"a", "A",
 		"e", "E",
 		"e", "E",
 		"e", "E",
 		"e", "E",
 		"E", "E",
 		"e", "e",
+		"e", "E",
 		"I", "i",
 		"I", "i",
 		"i", "I",
 		"i", "I",
 		"O", "o",
 		"O", "o",
+		"o", "O",
 		"o", "O",
 		"o", "O",
 		"u", "U",
@@ -119,7 +127,9 @@ public final class FrenchFilters {
 		"u", "U",
 		"u", "U",
 		"Y", "y",
-		"c", "C"
+		"Y", "y",
+		"c", "C",
+		"n", "N"
 	};
 
 	/** Allowed chars for words separator */

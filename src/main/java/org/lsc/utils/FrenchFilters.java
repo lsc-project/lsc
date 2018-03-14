@@ -173,13 +173,13 @@ public final class FrenchFilters {
 
 	/** Regexp for formatting first names */
 	private static final String REGEXP_FOR_FISRTNAME =
-					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
-					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç' -]+";
+					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄãÃ&eacute;&eacute;&egrave;&egrave;" +
+					"êÊëËẽẼÌìÍíîÎïÏÒòÓóôÔöÖõÕùÙÚúûÛüÜÝýŸÿçÇñÑ' -]+";
 
 	/** Regexp for formatting last names */
 	private static final String REGEXP_FOR_LASTNAME =
-					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄ&eacute;&eacute;&egrave;&egrave;" +
-					"êÊëËÌìÍíîÎïÏÒòÓóôÔöÖùÙÚúûÛüÜÝýç'\"\\s -_]+";
+					"[\\p{Alpha}áÁ&agrave;&agrave;âÂäÄãÃ&eacute;&eacute;&egrave;&egrave;" +
+					"êÊëËẽẼÌìÍíîÎïÏÒòÓóôÔöÖõÕùÙÚúûÛüÜÝýŸÿçÇñÑ'\"\\s -_]+";
 
 	/**
 	 * Bad char separators for IDs

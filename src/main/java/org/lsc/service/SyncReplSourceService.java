@@ -148,14 +148,14 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	public static LdapAsyncConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
 		LdapUrl url;
 		try {
-            url = new LdapUrl(ldapConn.getUrl());
-            boolean isLdaps = "ldaps://".equalsIgnoreCase(url.getScheme());
-            int port = url.getPort();
-            if (port == -1) {
-            	port = isLdaps ? 636 : 389;
-            }
-            LdapAsyncConnection conn = new LdapNetworkConnection(url.getHost(), port);
-            LdapConnectionConfig lcc = conn.getConfig();
+			url = new LdapUrl(ldapConn.getUrl());
+			boolean isLdaps = "ldaps://".equalsIgnoreCase(url.getScheme());
+			int port = url.getPort();
+			if (port == -1) {
+				port = isLdaps ? 636 : 389;
+			}
+			LdapAsyncConnection conn = new LdapNetworkConnection(url.getHost(), port);
+			LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setUseSsl(isLdaps);
 			lcc.setUseTls(ldapConn.isTlsActivated());
 			
@@ -179,14 +179,15 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		} catch (LdapURLEncodingException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (LdapException e) {
-            throw new LscServiceConfigurationException(e.toString(), e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new LscServiceConfigurationException(e.toString(), e);
+			throw new LscServiceConfigurationException(e.toString(), e);
+		} catch (NoSuchAlgorithmException e) {
+			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (KeyStoreException e) {
-            throw new LscServiceConfigurationException(e.toString(), e);
+			throw new LscServiceConfigurationException(e.toString(), e);
 		}
 	}
 	
+	@Override
 	public void close() throws IOException {
 		connection.close();
 	}
@@ -194,13 +195,16 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	@Override
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
+			if (!connection.isConnected()) {
+				connection = getConnection(ldapConn);
+			}
 			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
 					getAttrsId().toArray(new String[getAttrsId().size()])));
 		} catch (RuntimeException e) {
 			throw new LscServiceException(e.toString(), e);
 		} catch (LdapException e) {
-            throw new LscServiceException(e.toString(), e);
-        }
+			throw new LscServiceException(e.toString(), e);
+		}
 	}
 
 	/**
@@ -226,7 +230,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdClean; 
 		}
 
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
@@ -240,23 +244,26 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 
 		try {
-		    EntryCursor entryCursor = null;
-            // When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
-            String searchBaseDn = (fromSameService ? id : baseDn);
-            SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
+			EntryCursor entryCursor = null;
+			// When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
+			String searchBaseDn = (fromSameService ? id : baseDn);
+			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
+			if (!connection.isConnected()) {
+				connection = getConnection(ldapConn);
+			}
 			if(getAttrs() != null) {
 				List<String> attrList = new ArrayList<String>(getAttrs());
 				attrList.addAll(pivotAttrs.getAttributesNames());
 				entryCursor = connection.search(searchBaseDn, searchString, searchScope, attrList.toArray(new String[attrList.size()]));
 			} else {
-			    entryCursor = connection.search(searchBaseDn, searchString, searchScope);
+				entryCursor = connection.search(searchBaseDn, searchString, searchScope);
 			}
 
 			srcBean = this.beanClass.newInstance();
 
 			entryCursor.next();
 			if(! entryCursor.available()) {
-			    return null;
+				return null;
 			}
 			Entry entry =  entryCursor.get();
 			// get dn
@@ -292,10 +299,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
 				sf = getConnection(ldapConn).searchAsync(searchRequest);
 			} catch (LdapInvalidDnException e) {
-                throw new LscServiceException(e.toString(), e);
-            } catch (LdapException e) {
-                throw new LscServiceException(e.toString(), e);
-            }
+				throw new LscServiceException(e.toString(), e);
+			} catch (LdapException e) {
+				throw new LscServiceException(e.toString(), e);
+			}
 		}
 		Response searchResponse = null;
 		try {
@@ -312,13 +319,13 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
 		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
-		    LdapResult result = ((SearchResultDone)searchResponse).getLdapResult();
-		    if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
-		        throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
-		    }
-		    sf = null;
+			LdapResult result = ((SearchResultDone)searchResponse).getLdapResult();
+			if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
+				throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
+			}
+			sf = null;
 		}
-        return null;
+		return null;
 	}
 
 	private boolean checkSearchResponse(Response searchResponse) {
@@ -326,7 +333,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			return false;
 		}
 		
-        SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
+		SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
 		if (syncStateCtrl != null && syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE) {
 			return false;
 		}
@@ -334,17 +341,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		return true;
 	}
 
-    private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
+	private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
 		switch(aliasesHandling) {
 		case ALWAYS:
 			return AliasDerefMode.DEREF_ALWAYS;
 		case FIND:
-            return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+			return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
 		case SEARCH:
-            return AliasDerefMode.DEREF_IN_SEARCHING;
+			return AliasDerefMode.DEREF_IN_SEARCHING;
 		case NEVER:
 		default:
-            return AliasDerefMode.NEVER_DEREF_ALIASES;
+			return AliasDerefMode.NEVER_DEREF_ALIASES;
 		}
 	}
 
@@ -352,18 +359,18 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		switch(serverType) {
 		case OPEN_LDAP:
 		case APACHE_DS:
-		    DefaultLdapCodecService codec = new DefaultLdapCodecService();
-		    SyncRequestValueDecorator syncControl = new SyncRequestValueDecorator(codec);
-		    syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
-		    return syncControl;
+			DefaultLdapCodecService codec = new DefaultLdapCodecService();
+			SyncRequestValueDecorator syncControl = new SyncRequestValueDecorator(codec);
+			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
+			return syncControl;
 		case OPEN_DS:
 		case OPEN_DJ:
 		case ORACLE_DS:
 		case SUN_DS:
 		case NETSCAPE_DS:
 		case NOVELL_E_DIRECTORY:
-		    PersistentSearchImpl searchControl = new PersistentSearchImpl();
-		    searchControl.setCritical(true);
+			PersistentSearchImpl searchControl = new PersistentSearchImpl();
+			searchControl.setCritical(true);
 			searchControl.setChangesOnly(true);
 			searchControl.setReturnECs(false);
 			searchControl.setChangeTypes(PersistentSearch.CHANGE_TYPES_MAX);

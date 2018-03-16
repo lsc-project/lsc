@@ -46,7 +46,6 @@
 package org.lsc.jmx;
 
 import java.beans.ConstructorProperties;
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,11 +176,7 @@ public class LscServerImpl implements LscServer, Runnable {
 	}
 	
 	public String getPid() {
-		try {
-			return PidUtil.getPID();
-		} catch (IOException e) {
-			return null;
-		}
+		return PidUtil.getPID();
 	}
 	
 	public String status() {

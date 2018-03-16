@@ -27,9 +27,9 @@ public class ScriptingEvaluator {
 
 	private static Map<String, Class<? extends ScriptableEvaluator>> implementetionsCache;
 
-    public static ScriptEngineManager mgr;
+	public static ScriptEngineManager mgr;
 
-    private Map<String, ScriptableEvaluator> instancesTypeCache;
+	private Map<String, ScriptableEvaluator> instancesTypeCache;
 
 	private ScriptableEvaluator defaultImplementation;
 
@@ -72,10 +72,10 @@ public class ScriptingEvaluator {
 	}
 
 	public static ScriptingEvaluator getInstance() {
-		String threadName = Thread.currentThread().getName();
+        String threadName = Thread.currentThread().getName();
         ScriptingEvaluator scriptingEvaluator = null;
 
-	    scriptingEvaluator = (ScriptingEvaluator) instancesCache.getIfPresent(threadName);
+        scriptingEvaluator = (ScriptingEvaluator) instancesCache.getIfPresent(threadName);
         if (scriptingEvaluator == null) {
             scriptingEvaluator = new ScriptingEvaluator();
             instancesCache.put(threadName, scriptingEvaluator);
@@ -134,6 +134,20 @@ public class ScriptingEvaluator {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
 		return se.evalToStringList(task, getInstance().removePrefix(expression), params);
+	}
+
+	public static List<byte[]> evalToByteArrayList(final Task task,
+			final String expression, final Map<String, Object> params) throws LscServiceException {
+		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
+				expression);
+		return se.evalToByteArrayList(task, getInstance().removePrefix(expression), params);
+	}
+
+	public static byte[] evalToByteArray(final Task task,
+			final String expression, final Map<String, Object> params) throws LscServiceException {
+		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
+				expression);
+		return se.evalToByteArray(task, getInstance().removePrefix(expression), params);
 	}
 
 	public static Boolean evalToBoolean(final Task task,

@@ -12,7 +12,7 @@
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	2.1.4
+%define lsc_version	2.2.0
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc

@@ -4,10 +4,9 @@ lsc_logdir=/var/log/lsc
 lsc_user=lsc
 lsc_group=lsc
 
-id ${lsc_user} &>/dev/null || useradd ${lsc_user}
+id ${lsc_user} &>/dev/null || adduser --quiet --system --no-create-home --home /var/lib/lsc ${lsc_user}
 
 # Always do this
-mkdir -p ${lsc_logdir}
 chown -R ${lsc_user}:${lsc_group} ${lsc_logdir}
 
 # Reconfigure files
@@ -24,9 +23,6 @@ sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' /etc/default/lsc
 sed -i 's:^LSC_USER.*:LSC_USER="lsc":' /etc/default/lsc
 sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' /etc/default/lsc
 sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' /etc/default/lsc
-## sample
-ln -sf /usr/lib/lsc/ /usr/share/doc/lsc/lib/
-ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
 
 # Copy sample configuration for a fresh install
 [ -f /etc/lsc/lsc.xml ] || cp /usr/share/doc/lsc/lsc.xml-sample /etc/lsc/lsc.xml

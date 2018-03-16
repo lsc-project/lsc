@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -153,6 +154,86 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
+	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
+					final Map<String, Object> params) throws LscServiceException {
+        Object result = null;
+	    try {
+	        result = convertJsToJava(instanceEval(task, expression, params));
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
+	    
+		if(result instanceof byte[][]) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (byte[] resultValue : (byte[][])result) {
+				resultsArray.add(resultValue);
+			}
+			return resultsArray;
+		} else if (result instanceof byte[]) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			byte[] resultAsByteArray = (byte[])result;
+			if (resultAsByteArray != null && resultAsByteArray.length > 0) {
+				resultsArray.add(resultAsByteArray);
+			}
+			return resultsArray;
+		} else if (result instanceof String) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			String resultAsString = (String)result;
+			if (resultAsString != null && resultAsString.length() > 0) {
+				resultsArray.add(resultAsString.getBytes());
+			}
+			return resultsArray;
+		} else if (result instanceof List) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (Object resultValue : (List<?>)result) {
+				if (resultValue instanceof byte[]) {
+					resultsArray.add((byte[])resultValue);
+				} else {
+					resultsArray.add(resultValue.toString().getBytes());
+				}
+			}
+			return resultsArray;
+		} else if (result instanceof Set) {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			for (Object resultValue : (Set<?>)result) {
+				if (resultValue instanceof byte[]) {
+					resultsArray.add((byte[])resultValue);
+				} else {
+					resultsArray.add(resultValue.toString().getBytes());
+				}
+			}
+			return resultsArray;
+		} else if(result == null){
+			return null;
+		} else {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			if (result != null) {
+				resultsArray.add(result.toString().getBytes());
+			}
+			return resultsArray;
+		}
+	}
+
+    /** {@inheritDoc} */
+	public byte[] evalToByteArray(final Task task, final String expression,
+					final Map<String, Object> params) throws LscServiceException {
+        Object result = null;
+	    try {
+	        result = convertJsToJava(instanceEval(task, expression, params));
+	    } catch(EvaluatorException e) {
+	        throw new LscServiceException(e);
+	    }
+	    
+		if (result instanceof byte[]) {
+			return (byte[])result;
+		} else if (result instanceof String) {
+			return ((String)result).getBytes();
+		} else {
+			return result.toString().getBytes();
+		}
+	}
+
+    /** {@inheritDoc} */
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
 	    try {
 	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
@@ -179,10 +260,10 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 
 		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
 		String expressionImport =
-						"var version = java.lang.System.getProperty(\"java.version\");\n" +
-						"if (version.startsWith(\"1.8.0\")) { load(\"nashorn:mozilla_compat.js\"); }\n" +
-						"importPackage(org.lsc.utils.directory);\n" +
-						"importPackage(org.lsc.utils);\n" + expression;
+                        "var version = java.lang.System.getProperty(\"java.version\");\n" +
+                        "if (version.startsWith(\"1.8.0\")) { load(\"nashorn:mozilla_compat.js\"); }\n" +
+                        "importPackage(org.lsc.utils.directory);\n" +
+                        "importPackage(org.lsc.utils);\n" + expression;
 
 //		if (cache.containsKey(expressionImport)) {
 //			script = cache.get(expressionImport);

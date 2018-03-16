@@ -49,8 +49,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -118,6 +120,42 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 				resultsArray.add(resultAsString);
 			}
 			return resultsArray;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
+					final Map<String, Object> params) {
+		Object result = instanceEval(task, expression, params);
+
+		if(result instanceof byte[][]) {
+			return Arrays.asList((byte[][])result);
+		} else if (result instanceof byte[]) {
+			return Collections.singletonList((byte[])result);
+		} else if(result instanceof List) {
+			return (List<byte[]>) result;
+		} else if(result instanceof Set) {
+			return new ArrayList<byte[]>((Set<byte[]>)result);
+		} else {
+			List<byte[]> resultsArray = new ArrayList<byte[]>();
+			String resultAsString = result.toString();
+			if (resultAsString != null && resultAsString.length() > 0) {
+				resultsArray.add(resultAsString.getBytes());
+			}
+			return resultsArray;
+		}
+	}
+
+	public byte[] evalToByteArray(final Task task, final String expression,
+					final Map<String, Object> params) {
+		Object result = instanceEval(task, expression, params);
+
+		if(result instanceof byte[]) {
+			return (byte[])result;
+		} else if (result instanceof String) {
+			return ((String)result).getBytes();
+		} else {
+			return result.toString().getBytes();
 		}
 	}
 

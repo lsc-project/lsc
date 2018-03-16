@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<lsc xmlns="http://lsc-project.org/2011/xmlschema-1.4"
-	 xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
 	<ldapConnection id="myAdServer">
 		<url>ldap://localhost:1390/dc=AD,dc=net</url>
 		<username>cn=manager,dc=AD,dc=net</username>
@@ -13,24 +12,13 @@
 		<pageSize>10</pageSize>
 		<tlsActivated>true</tlsActivated>
 	</ldapConnection>
-	<databaseConnection id = "mySQLDBServer">
+	<databaseConnection id="mySQLDBServer">
 		<url>jdbc:hsqldb:file:hsqldb/lsc</url>
 		<username>elilly</username>
 		<password></password>
 		<driver>org.hsqldb.blabla</driver>
-	</databaseConnection><!--
-	<connections>
-		<connection class="org.lsc.configuration.objects.connection.directory.Ldap"
-			name="myAdServer" url="ldap://localhost:1390/dc=AD,dc=net" username="cn=manager,dc=AD,dc=net"
-			password="secret" referral="ignore" derefAliases="never"
-			factory="com.sun.jndi.ldap.LdapCtxFactory" version="3"
-			authentification="simple" pageSize="10" tls="true" />
-		<connection type="org.lsc.configuration.objects.connection.Database"
-			name="myHSQLDBServer" url="jdbc:hsqldb:file:hsqldb/lsc" username="elilly"
-			password="" driver="org.hsqldb.blabla" />
-	</connections>
-	
-	--><csvAudit id="csv">
+	</databaseConnection>
+	<csvAudit id="csv">
 		<name>csv</name>
 		<operations>create, delete</operations>
 		<attributes>cn, dn</attributes>
@@ -43,15 +31,11 @@
 		<append>false</append>
 		<file>/tmp/log.ldif</file>
 	</ldifAudit>
-<!-- <services> <baseDn>ou=people</baseDn> <pivotAttributes>dn, cn</pivotAttributes> 
-		<fetchAttributes>uid, mail, cn</fetchAttributes> <dn>'cn=' + srcBean.getAttributeValueById('uid')</dn> 
-		<getAllFilter>(&(objectClass=inetOrgPerson)(uid=*))</getAllFilter> <getOneFilter>(&(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter> 
-		</service> </services> -->
 
 	<task>
 		<name>myTask</name>
-		<source resolves-to="org.lsc.configuration.objects.services.SrcLdap">
-			<name>myADAccount</name>
+		<ldapSourceService>
+			<name>myAD-src</name>
 			<connection reference="myAdServer" />
 			<baseDn>ou=people</baseDn>
 			<pivotAttributes>dn, cn</pivotAttributes> 
@@ -59,19 +43,24 @@
 			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn> 
 			<getAllFilter>(&amp;(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
 			<getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
-		</source>
-		<destination resolves-to="org.lsc.configuration.objects.services.DstLdap" name="myLdapDestination">
+		</ldapSourceService>
+		<ldapDestinationService>
+			<name>myAD-dst</name>
 			<connection reference="myAdServer"/>
-		</destination>
-		<audit reference="csv"/>
-		<audit reference="ldif"/>
+			<baseDn>ou=contacts</baseDn>
+			<pivotAttributes>dn, cn</pivotAttributes> 
+			<fetchedAttributes>uid, mail, cn</fetchedAttributes>
+			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn> 
+			<getAllFilter>(&amp;(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
+			<getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
+		</ldapDestinationService>
 		<conditions>
 			<create>1 &gt; 0</create>
 			<update>src.getAttr('updateTimeStamp') &gt; dst.getAttr('updateTimeStamp')</update>
 			<delete>false</delete>
 			<changeId>false</changeId>
 		</conditions>
-		<syncOptions resolves-to="org.lsc.configuration.objects.syncoptions.PropertiesBasedSyncOptions">
+		<propertiesBasedSyncOptions>
 			<defaultDelimiter>;</defaultDelimiter>
 			<attribute>
 				<name>cn</name> 
@@ -80,6 +69,6 @@
 				<forceValue>toto</forceValue> 
 				<policy>FORCE</policy> <!-- (force|keep|merge) -->
 			</attribute>
-		</syncOptions>
+		</propertiesBasedSyncOptions>
 	</task>
 </lsc>

@@ -45,12 +45,14 @@
  */
 package org.lsc.service;
 
+import java.util.Collection;
 import java.util.Map;
 
 import javax.naming.NamingException;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.exception.LscServiceException;
 
 /**
@@ -95,4 +97,10 @@ public interface IService {
 	 *             searching the directory.
 	 */
 	Map<String, LscDatasets> getListPivots() throws LscServiceException;
+	
+	/**
+	 * Provides a comprehensive collection of the supported connection types
+	 * @return the supported connection types
+	 */
+	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType();
 }

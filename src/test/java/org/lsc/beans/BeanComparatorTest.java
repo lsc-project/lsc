@@ -490,4 +490,69 @@ public class BeanComparatorTest {
         assertNull(res);
 	}
 
+	@Test
+	public void testGetValuesToSetWithDelimitersForDefault() throws LscServiceException {
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+                task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn"});
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = Arrays.asList(new String[] {"\"Doe;Smith\""});
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				syncOptions.getDelimiter(anyString); result = ";";
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+		HashSet<Object> srcAttrValues = new HashSet<Object>();
+        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		assertEquals(2, res.size());
+	}
+
+	@Test
+	public void testGetValuesToSetWithDelimitersForCreate() throws LscServiceException {
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+                task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn"});
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.KEEP;
+				syncOptions.getForceValues(anyString, anyString); result = null;
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = Arrays.asList(new String[] {"\"Doe;Smith\""});
+				syncOptions.getDelimiter(anyString); result = ";";
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+		HashSet<Object> srcAttrValues = new HashSet<Object>();
+        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
+		assertEquals(2, res.size());
+	}
+
+	@Test
+	public void testGetValuesToSetWithDelimitersForForce() throws LscServiceException {
+		new NonStrictExpectations() {
+			@NonStrict ISyncOptions syncOptions; 
+			{
+                task.getDestinationService(); result = dstService;
+				dstService.getWriteDatasetIds(); result = Arrays.asList(new String[] {"cn"});
+				syncOptions.getStatus(anyString, anyString); result = PolicyType.FORCE;
+				syncOptions.getForceValues(anyString, anyString); result = Arrays.asList(new String[] {"\"Doe;Smith\""});
+				syncOptions.getDefaultValues(anyString, anyString); result = null;
+				syncOptions.getCreateValues(anyString, anyString); result = null;
+				syncOptions.getDelimiter(anyString); result = ";";
+				task.getSyncOptions(); result = syncOptions;
+			}
+		};
+		HashSet<Object> srcAttrValues = new HashSet<Object>();
+        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		assertEquals(2, res.size());
+	}
 }

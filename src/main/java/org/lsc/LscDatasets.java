@@ -98,7 +98,12 @@ public class LscDatasets implements Serializable {
 			SimpleNode<byte[]> filter = new EqualityNode<byte[]>(attribute, binValue);
 			return filter.getEscapedValue().toString();
 		} else {
-			return FilterEncoder.encodeFilterValue(getStringValueAttribute(attribute));
+			String stringValue = getStringValueAttribute(attribute);
+			if (stringValue != null) {
+				return FilterEncoder.encodeFilterValue(stringValue);
+			} else {
+				return null;
+			}
 		}
 	}
 

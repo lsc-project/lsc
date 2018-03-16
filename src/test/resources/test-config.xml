@@ -47,8 +47,8 @@
 			<pivotAttributes>dn, cn</pivotAttributes>
 			<fetchAttributes>uid, mail, cn</fetchAttributes>
 			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn>
-			<getAllFilter>(&(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
-			<getOneFilter>(&(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
+			<getAllFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid=*))]]></getAllFilter>
+			<getOneFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid}))]]></getOneFilter>
 		</service>
 		<service type="SimpleJndiDstService">
 			<name>myDestination</name>

@@ -62,9 +62,12 @@ import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.beans.syncoptions.ISyncOptions;
+import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.PivotTransformationType.Transformation;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IAsynchronousService;
+import org.lsc.service.IService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
@@ -192,7 +195,7 @@ public abstract class AbstractSynchronize {
 
 			try {
 				// Search for the corresponding object in the source
-				taskBean = task.getSourceService().getBean(id.getKey(), id.getValue(), false);
+				taskBean = getBean(task, task.getSourceService(), id.getKey(), id.getValue(), false, false);
 
 				// If we didn't find the object in the source, delete it in the
 				// destination
@@ -207,7 +210,7 @@ public abstract class AbstractSynchronize {
 					} else if (conditionString.matches("false")) {
 						doDelete = false;
 					} else {
-						IBean dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
+						IBean dstBean = getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), true, false);
 						// Log an error if the bean could not be retrieved!
 						// This shouldn't happen.
 						if (dstBean == null) {
@@ -349,6 +352,11 @@ public abstract class AbstractSynchronize {
 	public final synchronized void shutdownAsynchronousSynchronize2Ldap(final String syncName, boolean forceStop) {
 		Thread asyncThread = asynchronousThreads.get(syncName);
         long startTime = System.currentTimeMillis();
+        
+        if(asyncThread == null) {
+            LOGGER.info("Trying to stop a non running asynchronous task: " + syncName);
+            return;
+        }
         
         while(asyncThread.isAlive()) {
         	try {
@@ -509,6 +517,37 @@ public abstract class AbstractSynchronize {
 				", successfully modified entries: "+counter.getCountCompleted()+
 				", errors: "+counter.getCountError();
 		return totalsLogMessage;
+	}
+	
+	protected IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
+		List<Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
+		if (! fromSameService && transformations != null) {
+			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
+			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
+				for (Transformation transformation: transformations) {
+					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
+						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
+					}
+				}
+			}
+			return service.getBean(pivotName, newPivots, fromSameService);
+		}
+		return service.getBean(pivotName, pivotAttributes, fromSameService);
+	}
+
+	protected Object transform(Task task, Transformation transformation, Object value) throws LscServiceException{
+		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
+		javaScriptObjects.put("value", value);
+		if (task.getCustomLibraries() != null) {
+			javaScriptObjects.put("custom", task.getCustomLibraries());
+		}
+		javaScriptObjects.putAll(task.getScriptingVars());
+		if (LscConfiguration.isLdapBinaryAttribute(transformation.getToAttribute())) {
+			return ScriptingEvaluator.evalToByteArray(task, transformation.getValue(), javaScriptObjects);
+		} else {
+			return ScriptingEvaluator.evalToString(task, transformation.getValue(), javaScriptObjects);
+		}
+
 	}
 
 	/**
@@ -686,7 +725,7 @@ class SynchronizeTask implements Runnable {
 	public void run() {
         counter.incrementCountAll();
 		try {
-            run((fromSource ? task.getSourceService() : task.getDestinationService()).getBean(id.getKey(), id.getValue(), fromSource));
+            run(abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(), id.getKey(), id.getValue(), true, fromSource));
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
@@ -720,13 +759,13 @@ class SynchronizeTask implements Runnable {
 
 			// Search destination for matching object
 			if(id != null) {
-				dstBean = task.getDestinationService().getBean(id.getKey(), id.getValue(), true);
+				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), ! fromSource, fromSource);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
 				for(String datasetName: entry.datasets().getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
-				dstBean = task.getDestinationService().getBean(entry.getMainIdentifier(), entryDatasets, true);
+				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), entry.getMainIdentifier(), entryDatasets, ! fromSource, fromSource);
 			}
 
 			// Calculate operation that would be performed

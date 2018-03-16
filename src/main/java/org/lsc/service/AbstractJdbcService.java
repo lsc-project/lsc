@@ -46,6 +46,8 @@
 package org.lsc.service;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +64,7 @@ import org.apache.commons.lang.StringUtils;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -93,6 +96,8 @@ public abstract class AbstractJdbcService implements IService {
 	public abstract String getRequestNameForNextId();
 
     public abstract String getRequestNameForClean();
+
+	public abstract String getRequestNameForObjectOrClean(boolean fromSameService); 
 
     @SuppressWarnings("unchecked")
 	public AbstractJdbcService(SqlMapClient sqlmap, String beanClassname) throws LscServiceConfigurationException {
@@ -194,11 +199,11 @@ public abstract class AbstractJdbcService implements IService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBean getBean(String id, LscDatasets attributes, boolean fromSource) throws LscServiceException {
+	public IBean getBean(String id, LscDatasets attributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			List<?> records = sqlMapper.queryForList((fromSource ? getRequestNameForObject() : getRequestNameForClean()), getAttributesMap(attributes));
+			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService), getAttributesMap(attributes));
 			if(records.size() > 1) {
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
 						"For id=" + id + ", there are " + records.size() + " records !");
@@ -280,4 +285,14 @@ public abstract class AbstractJdbcService implements IService {
 			return value.toString();
 		}
 	}
+
+
+    /**
+     * @see org.lsc.service.IService.getSupportedConnectionType()
+     */
+    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+        list.add(DatabaseConnectionType.class);
+        return list;
+    }
 }

@@ -79,7 +79,6 @@ import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.api.ldap.model.message.AliasDerefMode;
 import org.apache.directory.api.ldap.model.message.Control;
 import org.apache.directory.api.ldap.model.message.LdapResult;
@@ -176,8 +175,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			} else {
 				return null;
 			}
-		} catch (LdapURLEncodingException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
+//		} catch (org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException e) {
+//			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (LdapException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
 		} catch (NoSuchAlgorithmException e) {

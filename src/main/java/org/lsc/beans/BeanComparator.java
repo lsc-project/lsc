@@ -67,6 +67,7 @@ import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.Task;
 import org.lsc.beans.syncoptions.ISyncOptions;
+import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PolicyType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.JndiModificationType;
@@ -599,13 +600,13 @@ public final class BeanComparator {
 		List<String> forceValueDefs = task.getSyncOptions().getForceValues(null, attrName);
 		if (forceValueDefs != null) {
 			for (String forceValueDef : forceValueDefs) {
-				List<String> forceValues = ScriptingEvaluator.evalToStringList(task, forceValueDef, javaScriptObjects);
+				List<? extends Object> forceValues = evaluateExpression(task, attrName, forceValueDef, javaScriptObjects);
 				if (forceValues != null) {
 					attrValues.addAll(forceValues);
 				}
 			}
 
-			return attrValues;
+			return splitValues(task, attrName, attrValues);
 		}
 
 		// No force values
@@ -626,7 +627,7 @@ public final class BeanComparator {
 			}
 			if (newValuesDefs != null) {
 				for (String defaultValueDef : newValuesDefs) {
-					List<String> defaultValues = ScriptingEvaluator.evalToStringList(task, defaultValueDef, javaScriptObjects);
+					List<? extends Object> defaultValues = evaluateExpression(task, attrName, defaultValueDef, javaScriptObjects);
 					if (defaultValues != null) {
 						attrValues.addAll(defaultValues);
 					}
@@ -645,6 +646,14 @@ public final class BeanComparator {
 		}
 
 		return splitValues(task, attrName, attrValues);
+	}
+
+	private static List<? extends Object> evaluateExpression(Task task, String attributeName, String expression, Map<String, Object> scriptingObjects) throws LscServiceException {
+		if (LscConfiguration.isLdapBinaryAttribute(attributeName)) {
+			return ScriptingEvaluator.evalToByteArrayList(task, expression, scriptingObjects);
+		} else {
+			return ScriptingEvaluator.evalToStringList(task, expression, scriptingObjects);
+		}
 	}
 
     private static Set<Object> splitValues(Task task, String attrName, Set<Object> attrValues) {

@@ -45,27 +45,16 @@
  */
 package org.lsc.jndi;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.directory.api.ldap.codec.api.ControlFactory;
-import org.apache.directory.api.ldap.codec.api.LdapApiService;
-import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
-import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
-import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
-import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
-import org.apache.directory.api.ldap.model.name.Dn;
-import org.apache.directory.api.ldap.model.name.Rdn;
-import org.apache.directory.api.ldap.model.url.LdapUrl;
-import org.lsc.Configuration;
-import org.lsc.LscDatasets;
-import org.lsc.configuration.LdapAuthenticationType;
-import org.lsc.configuration.LdapConnectionType;
-import org.lsc.configuration.LdapDerefAliasesType;
-import org.lsc.configuration.LdapReferralType;
-import org.lsc.configuration.LdapVersionType;
-import org.lsc.exception.LscConfigurationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.naming.CommunicationException;
 import javax.naming.Context;
@@ -98,16 +87,29 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.directory.api.ldap.codec.api.ControlFactory;
+import org.apache.directory.api.ldap.codec.api.LdapApiService;
+import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
+import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
+import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
+import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.name.Rdn;
+import org.apache.directory.api.ldap.model.url.LdapUrl;
+import org.lsc.Configuration;
+import org.lsc.LscDatasets;
+import org.lsc.configuration.LdapAuthenticationType;
+import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.LdapDerefAliasesType;
+import org.lsc.configuration.LdapReferralType;
+import org.lsc.configuration.LdapVersionType;
+import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * General LDAP services wrapper.
@@ -1083,6 +1085,41 @@ public final class JndiServices {
 			}
 		}
 	}
+
+    /**
+     * Retrieve a specific attribute from an object
+     * 
+     * @param objectDn
+     * @param attribute
+     * @return
+     * @throws LscServiceException
+     */
+    public List<String> getAttributeValues(String objectDn, String attribute) throws LscServiceException {
+        List<String> values = null;
+        try {
+            // Setup search
+            SearchControls sc = new SearchControls();
+            sc.setDerefLinkFlag(false);
+            sc.setReturningAttributes(new String[] { attribute });
+            sc.setSearchScope(SearchControls.OBJECT_SCOPE);
+            sc.setReturningObjFlag(true);
+
+            // Retrieve attribute values
+            SearchResult res = getEntry(objectDn, "objectClass=*", sc, SearchControls.OBJECT_SCOPE);
+            Attribute attr = res.getAttributes().get(attribute);
+            if (attr != null) {
+                values = new ArrayList<String>();
+                NamingEnumeration<?> enu = attr.getAll();
+                while (enu.hasMoreElements()) {
+                    Object val = enu.next();
+                    values.add(val.toString());
+                }
+            }
+        } catch (NamingException e) {
+            throw new LscServiceException(e);
+        }
+        return values;
+    }
 
 	public Map<String, LscDatasets> doGetAttrsList(final String base,
 			final String filter, final int scope, final List<String> attrsNames)

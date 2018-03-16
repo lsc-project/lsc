@@ -57,11 +57,11 @@ import java.util.StringTokenizer;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
+import org.lsc.configuration.PivotTransformationType.Transformation;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
 import org.lsc.jndi.PullableJndiSrcService;
 import org.lsc.jndi.SimpleJndiDstService;
-import org.lsc.service.GoogleAppsService;
 import org.lsc.service.MultipleDstService;
 import org.lsc.service.SimpleJdbcDstService;
 import org.lsc.service.SimpleJdbcSrcService;
@@ -167,7 +167,7 @@ public class LscConfiguration {
 	public static Collection<ConnectionType> getConnections() {
 		List<ConnectionType> connectionsList = new ArrayList<ConnectionType>();
 		if(getInstance().getLsc().getConnections() != null) {
-	        connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection());
+	        connectionsList.addAll(getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection());
 		}
 		return Collections.unmodifiableCollection(connectionsList);
 	}
@@ -206,12 +206,12 @@ public class LscConfiguration {
 	
 	public static void addConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().add(connection);
 	}
 
 	public static void removeConnection(ConnectionType connection) {
 		logModification(connection);
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().remove(connection);
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().remove(connection);
 	}
 
 	public static void addAudit(AuditType audit) {
@@ -293,10 +293,10 @@ public class LscConfiguration {
 	}
 	
 	public void setConnections(List<ConnectionType> conns) {
-		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().clear();
+		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().clear();
 		for(ConnectionType conn : conns) {
 			logModification(conn);
-			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrGoogleAppsConnection().add(conn);
+			getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().add(conn);
 		}
 	}
 	
@@ -368,8 +368,6 @@ public class LscConfiguration {
 			return t.getLdapDestinationService();
 		} else if (t.getDatabaseDestinationService() != null) {
 			return t.getDatabaseDestinationService();
-        } else if (t.getGoogleAppsDestinationService() != null) {
-            return t.getGoogleAppsDestinationService();
 		} else if (t.getMultiDestinationService() != null) {
 			return t.getMultiDestinationService();
 		} else if (t.getPluginDestinationService() != null) {
@@ -383,8 +381,6 @@ public class LscConfiguration {
 			return t.getAsyncLdapSourceService();
 		} else if (t.getLdapSourceService() != null) {
 			return t.getLdapSourceService();
-        } else if (t.getGoogleAppsSourceService() != null) {
-            return t.getGoogleAppsSourceService();
 		} else if (t.getDatabaseSourceService() != null) {
 			return t.getDatabaseSourceService();
 		} else if (t.getPluginSourceService() != null) {
@@ -398,8 +394,6 @@ public class LscConfiguration {
             t.setDatabaseSourceService((DatabaseSourceServiceType) s);
         } else if (s instanceof LdapSourceServiceType) {
             t.setLdapSourceService((LdapSourceServiceType) s);
-        } else if (s instanceof GoogleAppsServiceType) {
-            t.setGoogleAppsSourceService((GoogleAppsServiceType) s);
         } else if (s instanceof PluginSourceServiceType) {
             t.setPluginSourceService((PluginSourceServiceType) s);
         } else  {
@@ -416,8 +410,6 @@ public class LscConfiguration {
             t.setMultiDestinationService((MultiDestinationServiceType) s);
         } else if (s instanceof LdapDestinationServiceType) {
             t.setLdapDestinationService((LdapDestinationServiceType) s);
-        } else if (s instanceof GoogleAppsServiceType) {
-            t.setGoogleAppsDestinationService((GoogleAppsServiceType) s);
         } else if (s instanceof PluginDestinationServiceType) {
             t.setPluginDestinationService((PluginDestinationServiceType) s);
         } else  {
@@ -438,8 +430,6 @@ public class LscConfiguration {
 			return SimpleJdbcSrcService.class;
 		} else if (service instanceof MultiDestinationServiceType) {
 			return MultipleDstService.class;
-        } else if (service instanceof GoogleAppsServiceType) {
-            return GoogleAppsService.class;
 		} else if (service instanceof PluginDestinationServiceType) {
 			try {
 				return Class.forName(((PluginDestinationServiceType) service).getImplementationClass());
@@ -564,6 +554,41 @@ public class LscConfiguration {
         } else {
             throw new LscConfigurationException("Unknown or null syncoptions type: " + syncOptions.getClass().getName()); 
         }
+    }
+    
+    public static boolean isLdapBinaryAttribute(String attributeName) {
+    	for (ConnectionType connection: getConnections()) {
+    		if (connection instanceof LdapConnectionType) {
+    			ValuesType binaryAttributes = ((LdapConnectionType)connection).getBinaryAttributes();
+				if (binaryAttributes != null && binaryAttributes.getString().contains(attributeName)) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
+    public static List<Transformation> getPivotTransformation(TaskType task) {
+		SyncOptionsType syncOptions = LscConfiguration.getSyncOptions(task);
+		if (! LscConfiguration.getSyncOptionsImplementation(syncOptions).equals(PropertiesBasedSyncOptions.class)) {
+			return null;
+		}
+		PivotTransformationType pivotTransformationType = ((PropertiesBasedSyncOptionsType)syncOptions).getPivotTransformation();
+		if (pivotTransformationType == null) {
+			return null;
+		}
+		return pivotTransformationType.getTransformation();
+    }
+    
+    public static boolean pivotOriginMatchesFromSource(PivotOriginType pivotOrigin, boolean fromSource) {
+    	if (pivotOrigin.equals(PivotOriginType.BOTH)) {
+    		return true;
+    	}
+    	if (fromSource) {
+    		return pivotOrigin.equals(PivotOriginType.SOURCE);
+    	} else {
+    		return pivotOrigin.equals(PivotOriginType.DESTINATION);
+    	}
     }
 }
 	

@@ -48,8 +48,8 @@
  		No new version is released because it has never been implemented before and won't break any existing and functional configuration
   -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
-	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
+	xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
+	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
 	elementFormDefault="qualified"
 	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 	jaxb:version="2.0">
@@ -151,14 +151,6 @@
 					<xsd:element name="driver" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
-	<xsd:complexType name="googleAppsConnectionType">
-		<!-- URL should contain the domain name like domain.com as declared on 
-			google apps -->
-		<xsd:complexContent>
-			<xsd:extension base="connectionType" />
 		</xsd:complexContent>
 	</xsd:complexType>
 
@@ -266,6 +258,30 @@
 		</xsd:sequence>
 		<xsd:attribute name="id" type="xsd:string" use="optional" />
 	</xsd:complexType>
+	
+	<xsd:complexType name="pivotTransformationType">
+		<xsd:sequence>
+			<xsd:element name="transformation" minOccurs="0" maxOccurs="unbounded">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="fromAttribute" type="xsd:string" />
+							<xsd:attribute name="toAttribute" type="xsd:string" />
+							<xsd:attribute name="pivotOrigin" type="pivotOriginType" use="optional" default="BOTH" />
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:simpleType name="pivotOriginType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="SOURCE" />
+			<xsd:enumeration value="DESTINATION" />
+			<xsd:enumeration value="BOTH" />
+		</xsd:restriction>
+	</xsd:simpleType>
 
 	<xsd:complexType name="forceSyncOptionsType">
 		<xsd:complexContent>
@@ -311,8 +327,8 @@
 		<xsd:complexContent>
 			<xsd:extension base="syncOptionsType">
 				<xsd:sequence>
-					<xsd:element name="defaultDelimiter" type="xsd:string"
-						default=";" />
+					<xsd:element name="pivotTransformation" type="pivotTransformationType" minOccurs="0"/>
+					<xsd:element name="defaultDelimiter" type="xsd:string" />
 					<xsd:element name="defaultPolicy" type="policyType"
 						default="FORCE" />
 					<xsd:element name="conditions" type="conditionsType"
@@ -454,27 +470,6 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
-	<xsd:simpleType name="googleAppsProvisioningType">
-		<xsd:restriction base="xsd:string">
-			<xsd:enumeration value="UserAccounts" />
-			<xsd:enumeration value="Groups" />
-			<xsd:enumeration value="OrganizationUnits" />
-		</xsd:restriction>
-	</xsd:simpleType>
-
-	<xsd:complexType name="googleAppsServiceType">
-		<xsd:complexContent>
-			<xsd:extension base="serviceType">
-				<xsd:sequence>
-					<xsd:element name="apiCategory" type="googleAppsProvisioningType"
-						default="UserAccounts" />
-					<xsd:element name="quotaLimitInMb" type="xsd:int"
-						minOccurs="0" default="25000" />
-				</xsd:sequence>
-			</xsd:extension>
-		</xsd:complexContent>
-	</xsd:complexType>
-
 	<xsd:complexType name="pluginDestinationServiceType">
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
@@ -524,14 +519,12 @@
 			<xsd:element name="syncHook" type="xsd:string" minOccurs="0" />
 			<xsd:choice>
 				<xsd:element name="databaseSourceService" type="databaseSourceServiceType" />
-				<xsd:element name="googleAppsSourceService" type="googleAppsServiceType" />
 				<xsd:element name="ldapSourceService" type="ldapSourceServiceType" />
 				<xsd:element name="asyncLdapSourceService" type="asyncLdapSourceServiceType" />
 				<xsd:element name="pluginSourceService" type="pluginSourceServiceType" />
 			</xsd:choice>
 			<xsd:choice>
 				<xsd:element name="databaseDestinationService" type="databaseDestinationServiceType" />
-				<xsd:element name="googleAppsDestinationService" type="googleAppsServiceType" />
 				<xsd:element name="ldapDestinationService" type="ldapDestinationServiceType" />
 				<xsd:element name="multiDestinationService" type="multiDestinationServiceType" />
 				<xsd:element name="xaFileDestinationService" type="xaFileDestinationServiceType" />
@@ -560,7 +553,6 @@
 		<xsd:choice minOccurs="0" maxOccurs="unbounded">
 			<xsd:element name="ldapConnection" type="ldapConnectionType" />
 			<xsd:element name="databaseConnection" type="databaseConnectionType" />
-			<xsd:element name="googleAppsConnection" type="googleAppsConnectionType" />
 			<xsd:element name="pluginConnection" type="pluginConnectionType" />
 		</xsd:choice>
 		<xsd:attribute name="id" type="xsd:string" use="optional" />

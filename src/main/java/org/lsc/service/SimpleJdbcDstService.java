@@ -127,6 +127,11 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
     public String getRequestNameForClean() {
         throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
     }
+    
+    @Override
+    public String getRequestNameForObjectOrClean(boolean fromSameService) {
+    	return getRequestNameForObject();
+    }
 
     @Override
     public List<String> getRequestsNameForInsert() {

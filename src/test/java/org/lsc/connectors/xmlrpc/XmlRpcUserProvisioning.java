@@ -47,6 +47,7 @@ package org.lsc.connectors.xmlrpc;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IWritableService;
 import org.slf4j.Logger;
@@ -238,4 +240,12 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 	public List<String> getWriteDatasetIds() {
 		throw new UnsupportedOperationException("TODO");
 	}
+
+    /**
+     * @see org.lsc.service.IService.getSupportedConnectionType()
+     */
+    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+        return list;
+    }
 }

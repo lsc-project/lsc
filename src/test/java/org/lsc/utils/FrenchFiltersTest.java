@@ -22,6 +22,12 @@ public class FrenchFiltersTest {
 	}
 
 	@Test
+	public void testRemoveBadCharsInNames() {
+		String test = "Clément Niña Aÿla Stãphane";
+		assertEquals("Clement Nina Ayla Staphane", FrenchFilters.removeBadChars(test));
+	}
+
+	@Test
 	public void testFilterPhone() {
 		String phone = "01 02 03 04 05";
 		assertEquals("33102030405", FrenchFilters.filterPhone(phone));

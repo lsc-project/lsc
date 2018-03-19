@@ -309,10 +309,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchResponse = sf.get(1, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.warn("Interrupted search !");
-		} catch (ExecutionException e) {
-			LOGGER.warn("Execution exception while searching !");
-		} catch (TimeoutException e) {
-			LOGGER.warn("Timeout during search !");
 		}
 		if(checkSearchResponse(searchResponse)) {
 			SearchResultEntryDecorator sre = ((SearchResultEntryDecorator) searchResponse);

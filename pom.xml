@@ -630,6 +630,17 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>xmlrpc</groupId>
+			<artifactId>xmlrpc</artifactId>
+			<version>3.0a1</version>
+		</dependency>
+		<dependency>
+			<groupId>xmlrpc</groupId>
+			<artifactId>xmlrpc-common</artifactId>
+			<version>3.0</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.4</version>
@@ -788,7 +799,7 @@
 		<dependency>
 			<groupId>org.apache.directory.api</groupId>
 			<artifactId>api-all</artifactId>
-			<version>1.0.0-M22</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>xml-apis</groupId>

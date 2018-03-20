@@ -629,16 +629,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>xmlrpc</groupId>
-			<artifactId>xmlrpc</artifactId>
-			<version>3.0a1</version>
-		</dependency>
-		<dependency>
-			<groupId>xmlrpc</groupId>
-			<artifactId>xmlrpc-common</artifactId>
-			<version>3.0</version>
-		</dependency>
 		
 		<dependency>
 			<groupId>commons-io</groupId>

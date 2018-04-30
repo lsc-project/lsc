@@ -272,7 +272,7 @@ public abstract class AbstractSynchronize {
 			}
 		}
 
-		logStatus(counter);
+        logStatus(task.getName(), Task.Mode.clean.toString(), counter);
 		return counter.getCountError() == 0;
 	}
 
@@ -330,7 +330,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		logStatus(counter);
+		logStatus(task.getName(), Task.Mode.sync.toString(), counter);
 		return counter.getCountError() == 0;
 	}
 
@@ -388,14 +388,14 @@ public abstract class AbstractSynchronize {
 	}
 	
 	public final String getTaskFullStatus(final String syncName) {
-		Thread asyncThread = asynchronousThreads.get(syncName);
-		if(asyncThread != null && asyncThread.isAlive()) {
-			AsynchronousRunner asyncRunner = mapSTasks.get(syncName);
-			InfoCounter counter = asyncRunner.getCounter();
-			return getLogStatus(counter);
-		} else {
-			return null;
-		}
+        Thread asyncThread = asynchronousThreads.get(syncName);
+        if(asyncThread != null && asyncThread.isAlive()) {
+            AsynchronousRunner asyncRunner = mapSTasks.get(syncName);
+            InfoCounter counter = asyncRunner.getCounter();
+            return getLogStatus(syncName, Task.Mode.async.toString(), counter);
+        } else {
+            return null;
+        }
 	}
 	
 	public abstract boolean isAsynchronousTask(String taskName);
@@ -493,8 +493,8 @@ public abstract class AbstractSynchronize {
 		LSCStructuralLogger.DESTINATION.debug("", lm);
 	}
 	
-	protected void logStatus(InfoCounter counter) {
-		String totalsLogMessage = getLogStatus(counter);
+	protected void logStatus(String taskName, String taskMode, InfoCounter counter) {
+		String totalsLogMessage = getLogStatus(taskName, taskMode, counter);
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage);
 		} else {
@@ -502,13 +502,14 @@ public abstract class AbstractSynchronize {
 		}
 	}
 	
-	protected String getLogStatus(InfoCounter counter) {
-		String totalsLogMessage =
-				"All entries: "+ counter.getCountAll() +
-				", to modify entries: "+ counter.getCountModifiable() +
-				", successfully modified entries: "+counter.getCountCompleted()+
-				", errors: "+counter.getCountError();
-		return totalsLogMessage;
+	protected String getLogStatus(String taskName, String taskMode, InfoCounter counter) {
+        String totalsLogMessage =
+                taskName + " - " + taskMode + 
+                " - All entries: "+ counter.getCountAll() +
+                ", to modify entries: "+ counter.getCountModifiable() +
+                ", successfully modified entries: "+counter.getCountCompleted()+
+                ", errors: "+counter.getCountError();
+        return totalsLogMessage;
 	}
 
 	/**

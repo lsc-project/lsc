@@ -617,7 +617,7 @@ class AsynchronousRunner implements Runnable {
             } else if (task.getSourceService() instanceof IAsynchronousService) {
                 aService = (IAsynchronousService) task.getSourceService();
             } else {
-                LOGGER.error("LSC should never reach this point ! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous service !"); 
+                LOGGER.error("LSC should never reach this point! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous service!"); 
                 return;
             }
 

@@ -124,20 +124,22 @@ public abstract class AbstractJdbcDstService extends AbstractJdbcService impleme
 
     @Override
     public List<String> getWriteDatasetIds() {
-        if(attributesNameCache != null && attributesNameCache.size() > 0) {
-            return attributesNameCache.get(serviceName);
+        List<String> writeDatasetIds = attributesNameCache.get(serviceName);
+        if(writeDatasetIds != null) {
+            return writeDatasetIds;
         }
-        attributesNameCache.put(serviceName, new ArrayList<String>());
+        writeDatasetIds = new ArrayList<String>();
         if(sqlMapper instanceof SqlMapClientImpl) {
             for(String request: getRequestsNameForInsert()) {
                 for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
-                    attributesNameCache.get(serviceName).add(pm.getPropertyName());
+                    writeDatasetIds.add(pm.getPropertyName());
                 }
             }
+            attributesNameCache.put(serviceName, writeDatasetIds);
         } else {
             LOGGER.error("Unable to handle an unknown SQLMap Client type : " + sqlMapper.getClass().getName());
         }
-        return attributesNameCache.get(serviceName);
+        return writeDatasetIds;
     }
 
     public abstract List<String> getRequestsNameForInsert();

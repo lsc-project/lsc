@@ -1,7 +1,7 @@
 dn: dc=lsc-project,dc=org
-objectClass: organization
 dc: lsc-project
 o: LSC Project
+objectClass: organization
 objectClass: dcObject
 objectClass: top
 description: lsc-project naming context

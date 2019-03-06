@@ -108,11 +108,13 @@ public abstract class LscBean implements IBean, Serializable {
 	 * @param id the name
 	 * @return the values dataset or null if non existent
 	 */
+	@Override
 	public final Set<Object> getDatasetById(final String id) {
 		// use lower case since attribute names are case-insensitive
 		return datasets.get(id.toLowerCase());
 	}
 
+	@Override
 	@Deprecated
 	public final Attribute getAttributeById(final String id) {
 		LOGGER.warn("The method getAttributeById() is deprecated and will be removed in a future version of LSC. Please use getDatasetById() instead.");
@@ -132,6 +134,7 @@ public abstract class LscBean implements IBean, Serializable {
 		return datasets.get(id.toLowerCase());
 	}
 
+	@Override
 	@Deprecated
 	public final Set<Object> getAttributeAsSetById(final String id) {
 		LOGGER.warn("The method getAttributeAsSetById() is deprecated and will be removed in a future version of LSC. Please use getDatasetAsSetById() instead.");
@@ -141,17 +144,18 @@ public abstract class LscBean implements IBean, Serializable {
 	/**
 	 * Get the <b>first</b> value of an attribute from its name
 	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
+	 * @param id The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
 	 * @throws NamingException
 	 */
+	@Override
 	public final String getDatasetFirstValueById(final String id)
 			throws NamingException {
 		List<String> allValues = getDatasetValuesById(id);
 		return allValues.size() >= 1 ? allValues.get(0) : "";
 	}
 
+	@Override
 	@Deprecated
 	public final String getAttributeFirstValueById(final String id)
 			throws NamingException {
@@ -160,10 +164,22 @@ public abstract class LscBean implements IBean, Serializable {
 	}
 
 	/**
+	 * Get the <b>first</b> binary value of an attribute from its name
+	 * 
+	 * @param id The attribute name (case insensitive)
+	 * @return String The first value of the attribute, or null.
+	 * @throws NamingException
+	 */
+	@Override
+	public byte[] getDatasetFirstBinaryValueById(String id) throws NamingException {
+		List<byte[]> allValues = getDatasetBinaryValuesById(id);
+		return allValues.size() >= 1 ? allValues.get(0) : null;
+	}
+
+	/**
 	 * Get all values of an attribute from its name
 	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
+	 * @param id The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException
 	 */
@@ -194,6 +210,34 @@ public abstract class LscBean implements IBean, Serializable {
 		return resultsArray;
 	}
 
+	/**
+	 * Get all binary values of an attribute from its name
+	 * 
+	 * @param id The attribute name (case insensitive)
+	 * @return List<String> List of attribute values, or an empty list
+	 * @throws NamingException
+	 */
+	public final List<byte[]> getDatasetBinaryValuesById(final String id) throws NamingException {
+		List<byte[]> resultsArray = new ArrayList<byte[]>();
+
+		Set<Object> attributeValues = datasets.get(id.toLowerCase());
+
+		if (attributeValues != null) {
+			for (Object value : attributeValues) {
+				if (value != null) {
+					if (value instanceof byte[]) {
+						resultsArray.add((byte[]) value);
+					} else {
+						resultsArray.add(value.toString().getBytes());
+					}
+				}
+			}
+		}
+
+		return resultsArray;
+	}
+
+	@Override
 	public final List<String> getAttributeValuesById(final String id)
 			throws NamingException {
 		return getDatasetValuesById(id);
@@ -208,6 +252,7 @@ public abstract class LscBean implements IBean, Serializable {
 		return datasets.keySet();
 	}
 
+	@Override
 	public final Set<String> getAttributesNames() {
 		return getDatasetsNames();
 	}
@@ -215,9 +260,9 @@ public abstract class LscBean implements IBean, Serializable {
 	/**
 	 * Set an attribute. API CHANGE: Do nothing if attribute is empty
 	 * 
-	 * @param attr
-	 *            the attribute to set
+	 * @param attr the attribute to set
 	 */
+	@Override
 	public final void setAttribute(final Attribute attr) {
 		if (attr != null && attr.size() > 0) {
 			// convert the Attribute into a Set of values
@@ -237,11 +282,13 @@ public abstract class LscBean implements IBean, Serializable {
 	 * @param name The dataset name.
 	 * @param values A set of values for this dataset.
 	 */
+	@Override
 	public final void setDataset(String name, Set<Object> values) {
 		// use lower case since attribute names are case-insensitive
 		datasets.put(name.toLowerCase(), values);
 	}
 
+	@Override
 	@Deprecated
 	public final void setAttribute(String name, Set<Object> values) {
 		setDataset(name, values);
@@ -252,10 +299,12 @@ public abstract class LscBean implements IBean, Serializable {
 	 * 
 	 * @return the distinguishedName
 	 */
+	@Override
 	public final String getMainIdentifier() {
 		return mainIdentifier;
 	}
 
+	@Override
 	@Deprecated
 	public final String getDistinguishedName() {
 		return getMainIdentifier();
@@ -289,6 +338,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 * @param id
 	 *            The main identifier to set
 	 */
+	@Override
 	public final void setMainIdentifier(final String id) {
 		mainIdentifier = id;
 	}
@@ -296,6 +346,8 @@ public abstract class LscBean implements IBean, Serializable {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public final void setDistinguishName(final String dn) {
 		if (dn != null) {
 			setMainIdentifier(dn);
@@ -334,7 +386,7 @@ public abstract class LscBean implements IBean, Serializable {
 	@Override
 	public LscBean clone() throws CloneNotSupportedException {
 		try {
-			LscBean bean = (LscBean) this.getClass().newInstance();
+			LscBean bean = this.getClass().newInstance();
 			bean.setMainIdentifier(this.getMainIdentifier());
 
 			for (String attributeName : this.getAttributesNames()) {
@@ -429,10 +481,12 @@ public abstract class LscBean implements IBean, Serializable {
 		return null;
 	}
 
+	@Override
 	public LscDatasets datasets() {
 		return new LscDatasets(datasets);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void setDatasets(LscDatasets datasets) {
 		Map<String, Set<Object>> tmp = new HashMap<String, Set<Object>>();

@@ -121,27 +121,27 @@ public class JScriptEvaluatorTest {
 
 		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetFirstValueById('givenName') + ' ' + srcBean.getDatasetFirstValueById('sn')", table));
 
-		List<String> res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetById('givenName') + ' ' + srcBean.getDatasetById('sn')", table);
+		List<Object> res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetById('givenName') + ' ' + srcBean.getDatasetById('sn')", table);
 		assertNotNull(res);
 		assertEquals("[John] [Doe]", res.get(0));
 
 		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetById('givenName').toArray()[0] + ' ' + srcBean.getDatasetById('sn').toArray()[0]", table));
 
-		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetValuesById('cn')", table);
+		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetValuesById('cn')", table);
 		assertNotNull(res);
 		assertEquals(2, res.size());
 		assertTrue(res.contains("John Doe"));
 		assertTrue(res.contains("DOE John"));
 
-		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetValuesById('nonexistent')", table);
+		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetValuesById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 		
-		res = ScriptingEvaluator.evalToStringList(task, "srcBean.getDatasetFirstValueById('nonexistent')", table);
+		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetFirstValueById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 
-        res = ScriptingEvaluator.evalToStringList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr", table);
+        res = ScriptingEvaluator.evalToObjectList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr", table);
         assertNotNull(res);
         assertEquals(2, res.size());
 
@@ -160,7 +160,7 @@ public class JScriptEvaluatorTest {
 			}
 		};
 		
-		List<String> res = ScriptingEvaluator.evalToStringList(task, "ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
+		List<Object> res = ScriptingEvaluator.evalToObjectList(task, "ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
 		assertEquals("[People, dc=lsc-project,dc=org]", res.toString());
 	}
 }

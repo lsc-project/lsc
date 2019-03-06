@@ -27,7 +27,7 @@ public interface ScriptableEvaluator {
      * @return the evaluation result, null if nothing
      * @throws LscServiceException thrown when a technical error is encountere
      */
-    public List<String> evalToStringList(final Task task, final String expression, final Map<String, Object> params)
+	public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
             throws LscServiceException;
 
     /**

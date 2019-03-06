@@ -53,10 +53,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import mockit.Injectable;
-import mockit.NonStrict;
-import mockit.NonStrictExpectations;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.lsc.configuration.DatasetType;
@@ -66,6 +62,10 @@ import org.lsc.configuration.TaskType;
 import org.lsc.configuration.ValuesType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
+
+import mockit.Injectable;
+import mockit.NonStrict;
+import mockit.NonStrictExpectations;
 
 public class PropertiesBasedSyncOptionsTest {
 
@@ -161,8 +161,8 @@ public class PropertiesBasedSyncOptionsTest {
 		assertEquals("\"uid=00000001\" + \",ou=People,dc=lsc-project,dc=org\"", defaultValue);
 
 		// evaluate JavaScript
-		defaultValues = ScriptingEvaluator.evalToStringList(taskExec, defaultValue, null);
-		assertEquals(1, defaultValues.size());
-		assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValues.get(0));
+		List<Object> defaultValuesObj = ScriptingEvaluator.evalToObjectList(taskExec, defaultValue, null);
+		assertEquals(1, defaultValuesObj.size());
+		assertEquals("uid=00000001,ou=People,dc=lsc-project,dc=org", defaultValuesObj.get(0));
 	}
 }

@@ -599,7 +599,7 @@ public final class BeanComparator {
 		List<String> forceValueDefs = task.getSyncOptions().getForceValues(null, attrName);
 		if (forceValueDefs != null) {
 			for (String forceValueDef : forceValueDefs) {
-				List<String> forceValues = ScriptingEvaluator.evalToStringList(task, forceValueDef, javaScriptObjects);
+				List<Object> forceValues = ScriptingEvaluator.evalToObjectList(task, forceValueDef, javaScriptObjects);
 				if (forceValues != null) {
 					attrValues.addAll(forceValues);
 				}
@@ -626,7 +626,7 @@ public final class BeanComparator {
 			}
 			if (newValuesDefs != null) {
 				for (String defaultValueDef : newValuesDefs) {
-					List<String> defaultValues = ScriptingEvaluator.evalToStringList(task, defaultValueDef, javaScriptObjects);
+					List<Object> defaultValues = ScriptingEvaluator.evalToObjectList(task, defaultValueDef, javaScriptObjects);
 					if (defaultValues != null) {
 						attrValues.addAll(defaultValues);
 					}

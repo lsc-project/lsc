@@ -46,10 +46,10 @@ public class GroovyEvaluatorTest {
 		params.put("a", "b");
 		params.put("b", "a");
 		assertEquals("Hello b", evaluator.evalToString(task,  	"'Hello ' + a", params));
-		assertEquals(Arrays.asList(new String[] {"Hello b"}), evaluator.evalToStringList(task, "'Hello ' + a", params));
+		assertEquals(Arrays.asList(new String[] {"Hello b"}), evaluator.evalToObjectList(task, "'Hello ' + a", params));
 		
 		params.put("a", new String[] { "b", "c" } );
-		assertEquals(Arrays.asList(new String[] {"Hello [b, c]"}), evaluator.evalToStringList(task, "'Hello ' + a", params));
+		assertEquals(Arrays.asList(new String[] {"Hello [b, c]"}), evaluator.evalToObjectList(task, "'Hello ' + a", params));
 		
 		String complexExpression = "def dataToStringEquality = { a, b -> \n" +
 		  	" return a.toString() == b.toString() \n" + 

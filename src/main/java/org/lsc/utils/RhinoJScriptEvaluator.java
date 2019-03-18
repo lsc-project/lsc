@@ -95,7 +95,7 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 
     /** {@inheritDoc} */
     @Override
-	public String evalToString(final Task task, final String expression, final Map<String, Object> params)
+    public String evalToString(final Task task, final String expression, final Map<String, Object> params)
             throws LscServiceException {
         Object result = instanceEval(task, expression, params);
 
@@ -111,8 +111,8 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
     }
 
     /** {@inheritDoc} */
-	@Override
-	public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
+    @Override
+    public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
             throws LscServiceException {
         Object result = null;
         try {
@@ -120,10 +120,10 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
         } catch (EvaluatorException e) {
             throw new LscServiceException(e);
         }
-		if (result == null) {
-			return null;
-		}
-		List<Object> resultsArray = new ArrayList<Object>();
+        if (result == null) {
+            return null;
+        }
+        List<Object> resultsArray = new ArrayList<Object>();
         if (result instanceof String[] || result instanceof Object[]) {
             for (Object resultValue : (Object[]) result) {
                 resultsArray.add(resultValue.toString());
@@ -137,8 +137,8 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
             for (Object resultValue : (List<?>) result) {
                 resultsArray.add(resultValue.toString());
             }
-		} else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
-			resultsArray.add(result);
+        } else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
+            resultsArray.add(result);
         } else {
             if (result != null) {
                 resultsArray.add(result.toString());
@@ -149,7 +149,7 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 
     /** {@inheritDoc} */
     @Override
-	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)
+    public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)
             throws LscServiceException {
         try {
             return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);

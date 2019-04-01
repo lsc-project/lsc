@@ -144,7 +144,7 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
                 resultsArray.add(result.toString());
             }
         }
-		return resultsArray;
+        return resultsArray;
     }
 
     /** {@inheritDoc} */

@@ -81,6 +81,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @return the LDAP attribute
 	 * @deprecated
 	 */
+	@Deprecated
 	Attribute getAttributeById(final String id);
 
     /**
@@ -98,6 +99,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @return the LDAP attribute
 	 * @deprecated
 	 */
+	@Deprecated
 	Set<Object> getAttributeAsSetById(final String id);
 
 	/**
@@ -109,6 +111,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @throws NamingException
 	 * @deprecated
 	 */
+	@Deprecated
 	public String getAttributeFirstValueById(final String id)
 					throws NamingException;
 
@@ -124,6 +127,15 @@ public interface IBean extends Cloneable, Serializable {
 					throws NamingException;
 
 	/**
+	 * Get the <b>first</b> binary value of an attribute from its name
+	 * 
+	 * @param id The attribute name (case insensitive)
+	 * @return byte[] The first value of the attribute, or null.
+	 * @throws NamingException
+	 */
+	public byte[] getDatasetFirstBinaryValueById(final String id) throws NamingException;
+
+	/**
 	 * Get all values of an attribute from its name
 	 * 
 	 * @param id
@@ -132,6 +144,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @throws NamingException
 	 * @deprecated See getDatasetById(String id)
 	 */
+	@Deprecated
 	public List<String> getAttributeValuesById(final String id)
 					throws NamingException;
 
@@ -140,6 +153,7 @@ public interface IBean extends Cloneable, Serializable {
      * @deprecated Since LSC 2.0
 	 * @return a set containing all the attributes name
 	 */
+	@Deprecated
 	Set<String> getAttributesNames();
 
 	/**
@@ -148,6 +162,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param attr
 	 *            the attribute to set
 	 */
+	@Deprecated
 	void setAttribute(Attribute attr);
 
 	/**
@@ -156,6 +171,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param attrName The attribute name.
 	 * @param attrValues A set of values for the attribute.
 	 */
+	@Deprecated
 	void setAttribute(String attrName, Set<Object> attrValues);
 
     /**
@@ -171,6 +187,7 @@ public interface IBean extends Cloneable, Serializable {
      * @deprecated Since LSC 2.0 - switch to getMainIdentifier()
 	 * @return the distinguished name
 	 */
+	@Deprecated
 	String getDistinguishedName();
 
 	/**
@@ -178,6 +195,7 @@ public interface IBean extends Cloneable, Serializable {
      * @deprecated Since LSC 2.0 - switch to setMainIdentifier(String mainIdentifier)
 	 * @param dn The distinguishedName to set
 	 */
+	@Deprecated
 	void setDistinguishName(String dn);
 
 	void setDatasets(LscDatasets datasets);

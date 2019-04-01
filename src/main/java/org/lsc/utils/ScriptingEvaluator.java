@@ -129,11 +129,11 @@ public class ScriptingEvaluator {
 		return se.evalToString(task, getInstance().removePrefix(expression), params);
 	}
 
-	public static List<String> evalToStringList(final Task task,
+	public static List<Object> evalToObjectList(final Task task,
 			final String expression, final Map<String, Object> params) throws LscServiceException {
 		ScriptableEvaluator se = getInstance().identifyScriptingEngine(
 				expression);
-		return se.evalToStringList(task, getInstance().removePrefix(expression), params);
+		return se.evalToObjectList(task, getInstance().removePrefix(expression), params);
 	}
 
 	public static Boolean evalToBoolean(final Task task,

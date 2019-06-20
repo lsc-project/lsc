@@ -1,0 +1,4 @@
+urlid lscdb
+url jdbc:hsqldb:hsql://localhost/lscdb
+username sa
+password

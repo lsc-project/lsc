@@ -1,0 +1,96 @@
+﻿dn: ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: Sample
+description: Sample subtree
+
+dn: mail=thomas@aepik.net,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: thomas@aepik.net
+sn: Chemineau
+cn: Chemineau, Thomas
+userPassword: {SSHA}Atv5dkO92//1ZBMRHYMQqJiWJS2KvzgU4ewOtw==
+uid: t.chemineau
+
+dn: mail=sebastien.bahloul@gmail.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: sebastien.bahloul@gmail.com
+sn: Bahloul
+cn: Bahloul, Sebastien
+userPassword: {SSHA}YvNEQLSBVg9W3Z6yBe6qfKlqUnTTp1mP56ZX/g==
+uid: s.bahloul
+
+dn: mail=remy@schermesser.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: remy@schermesser.com
+sn: Schermesser
+cn: Schermesser, Remy-Christophe
+userPassword: {SSHA}T1YVVdkZXT8gXh8G76VwARe0hJwsqb16PlPumA==
+uid: r.schermesser
+
+dn: mail=jonathan@philipoux.net,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: jonathan@philipoux.net
+sn: Clarke
+cn: Clarke, Jonathan
+userPassword: {SSHA}xLTaRVF9lcjlbsv7eMGZGMzffdGzgnXCWEwBBg==
+carLicense: BHU772
+carLicense: DED899
+uid: j.clarke
+
+dn: mail=clem.oudot@gmail.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: clem.oudot@gmail.com
+sn: Oudot
+cn: Oudot, Clement
+userPassword: {SSHA}C++mlu0WJh4nH2pqBLVyi2oIY4oxpQyAlQC9kQ==
+uid: c.oudot
+
+dn: mail=epereira@linagora.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: epereira@linagora.com
+sn: Pereira
+cn: Pereira, Esteban
+userPassword: {SSHA}LFRPBPafOjhDpc3KMnqJL7CXEdYj1/O85tzTAg==
+uid: e.pereira
+
+dn: mail=dcoutadeur@linagora.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: dcoutadeur@linagora.com
+sn: Coutadeur
+cn: Coutadeur, David
+userPassword: {SSHA}DlqIWPjPeTH0TCTphgN4T2pVN3lHpJ9ulcUVwA==
+uid: d.coutadeur
+
+dn: mail=rouazana@linagora.com,ou=Sample,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+mail: rouazana@linagora.com
+sn: Ouazana
+cn: Ouazana, Raphael
+userPassword: {SSHA}MBocdVM6KilB3rnu3wupiL4wjkdqJ2SY15mw/Q==
+uid: r.ouazana
+

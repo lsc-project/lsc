@@ -94,6 +94,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 	 *                the keys are the name used in the
 	 * @return the evaluation result
 	 */
+	@Override
 	public String evalToString(final Task task, final String expression,
 					final Map<String, Object> params) {
 		Object result = instanceEval(task, expression, params);
@@ -104,17 +105,22 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		return (String) result;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> evalToStringList(final Task task, final String expression,
+	public List<Object> evalToObjectList(final Task task, final String expression,
 					final Map<String, Object> params) {
 		Object result = instanceEval(task, expression, params);
-
+		if (result == null) {
+			return null;
+		}
 		if(result instanceof Object[]) {
-			return Arrays.asList((String[])result);
+			return Arrays.asList(result);
 		} else if(result instanceof List) {
-			return (List<String>) result;
+			return (List<Object>) result;
+		} else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
+			return Arrays.asList(result);
 		} else {
-			List<String> resultsArray = new ArrayList<String>();
+			List<Object> resultsArray = new ArrayList<Object>();
 			String resultAsString = result.toString();
 			if (resultAsString != null && resultAsString.length() > 0) {
 				resultsArray.add(resultAsString);
@@ -123,6 +129,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
 					final Map<String, Object> params) {
@@ -146,6 +153,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		}
 	}
 
+	@Override
 	public byte[] evalToByteArray(final Task task, final String expression,
 					final Map<String, Object> params) {
 		Object result = instanceEval(task, expression, params);
@@ -159,6 +167,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		}
 	}
 
+	@Override
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
 		return (Boolean) instanceEval(task, expression, params);
 	}

@@ -59,6 +59,7 @@
           <string>userPassword</string>
           <string>telephoneNumber</string>
           <string>seeAlso</string>
+          <string>jpegPhoto</string>
         </fetchedAttributes>
         <getAllFilter>(&amp;(sn=*))</getAllFilter>
         <getOneFilter>(sn={sn})</getOneFilter>
@@ -82,6 +83,7 @@
           <string>sn</string>
           <string>telephoneNumber</string>
           <string>seeAlso</string>
+          <string>jpegPhoto</string>
           <string>mail</string>
         </fetchedAttributes>
         <getAllFilter>(sn=*)</getAllFilter>
@@ -148,6 +150,13 @@
         <dataset>
           <name>seeAlso</name>
           <policy>FORCE</policy>
+        </dataset>
+         <dataset>
+          <name>jpegPhoto</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>srcBean.getDatasetFirstBinaryValueById("jpegPhoto")</string>
+          </forceValues>
         </dataset>
         <dataset>
           <name>userPassword</name>

@@ -98,6 +98,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
+	@Override
 	public String evalToString(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
@@ -114,7 +115,8 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
-	public List<String> evalToStringList(final Task task, final String expression,
+	@Override
+	public List<Object> evalToObjectList(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
         Object result = null;
 	    try {
@@ -122,38 +124,35 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	    } catch(EvaluatorException e) {
 	        throw new LscServiceException(e);
 	    }
-	    
+	    if(result == null){
+			return null;
+	    }
+	    List<Object> resultsArray = new ArrayList<Object>();
 		if(result instanceof String[] || result instanceof Object[] ) {
-			List<String> resultsArray = new ArrayList<String>();
 			for (Object resultValue : (Object[])result) {
 				resultsArray.add(resultValue.toString());
 			}
-			return resultsArray;
 		} else if (result instanceof String) {
-			List<String> resultsArray = new ArrayList<String>();
 			String resultAsString = (String)result;
 			if (resultAsString != null && resultAsString.length() > 0) {
 				resultsArray.add(resultAsString);
 			}
-			return resultsArray;
 		} else if (result instanceof List) {
-			List<String> resultsArray = new ArrayList<String>();
 			for (Object resultValue : (List<?>)result) {
 				resultsArray.add(resultValue.toString());
 			}
-			return resultsArray;
-		} else if(result == null){
-			return null;
+		} else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
+			resultsArray.add(result);
 		} else {
-			List<String> resultsArray = new ArrayList<String>();
 			if (result != null) {
 				resultsArray.add(result.toString());
 			}
-			return resultsArray;
 		}
+		return resultsArray;
 	}
 
     /** {@inheritDoc} */
+	@Override
 	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
         Object result = null;
@@ -215,6 +214,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
+	@Override
 	public byte[] evalToByteArray(final Task task, final String expression,
 					final Map<String, Object> params) throws LscServiceException {
         Object result = null;
@@ -234,6 +234,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 	}
 
     /** {@inheritDoc} */
+	@Override
 	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
 	    try {
 	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);

@@ -652,7 +652,7 @@ public final class BeanComparator {
 		if (LscConfiguration.isLdapBinaryAttribute(attributeName)) {
 			return ScriptingEvaluator.evalToByteArrayList(task, expression, scriptingObjects);
 		} else {
-			return ScriptingEvaluator.evalToStringList(task, expression, scriptingObjects);
+			return ScriptingEvaluator.evalToObjectList(task, expression, scriptingObjects);
 		}
 	}
 

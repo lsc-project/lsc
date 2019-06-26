@@ -227,3 +227,20 @@ objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
+﻿dn: ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: ldap2db2TestTask
+
+dn: cn=CN0001,ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org
+objectClass: top
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: inetOrgPersonExtended
+sn: SN0001
+cn: CN0001
+description: Number one's descriptive text
+externalId: 12345678-1234-1234-1234-123456123456
+telephoneNumber: +49-89-5293-79
+

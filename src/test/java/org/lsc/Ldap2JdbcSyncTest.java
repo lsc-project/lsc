@@ -63,6 +63,7 @@ public class Ldap2JdbcSyncTest {
 	private void reloadConnections() {
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));
 		DatabaseConnectionType pc = (DatabaseConnectionType)LscConfiguration.getConnection("dst-jdbc");
+		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 		try {
 			dstSqlMapClient = DaoConfig.getSqlMapClient(pc);
 		} catch (LscServiceConfigurationException e) {
@@ -84,21 +85,21 @@ public class Ldap2JdbcSyncTest {
 		int rowcount = 0;
 		try {
 			// Initialize the Database
-
+			
 			sqlMapSession = dstSqlMapClient.openSession();
 			sqlMapSession.startTransaction();
 			con = sqlMapSession.getCurrentConnection();
 			Assert.assertNotNull(functionName + " - Connection is null", con);
-
+			
 			Statement stm = con.createStatement();
 			String sql = String.format("DROP TABLE %s IF EXISTS; CREATE TABLE %s (%s)",DEST_TABLE,DEST_TABLE,DEST_TABLE_DEF);
 			rs = stm.executeQuery(sql);
 			assertNotNull(functionName + " - ResultSet is null", rs);
 			sqlMapSession.commitTransaction();
-
-
+			
+			
 			// Start the Sync Process for the first time to fill up the database
-
+			
 			launchSyncCleanTask(TASK_NAME, false, true, false);
 			
 			// Check existence of row in destination with data
@@ -109,30 +110,30 @@ public class Ldap2JdbcSyncTest {
 			rowcount = 0;
 			ResultSetMetaData metadata = rs.getMetaData();
 			StringBuffer text = new StringBuffer();
-		    int columnCount = metadata.getColumnCount();    
-		    for (int i = 1; i <= columnCount; i++) {
-		    	if (text.length() > 0) 
-		    		text.append(", ");
-		        text.append(metadata.getColumnName(i));      
-		    }
-		    LOGGER.debug(text.toString());
-		    
-		    text = new StringBuffer();
-		    while (rs.next()) {
-		    	rowcount ++;
-		        for (int i = 1; i <= columnCount; i++) {
-		        	if (i == 2) // Mail
-		        		Assert.assertEquals("After 1st Sync wrong Mail", null,rs.getString(i));
-		        	if (i == 7) // Description
-		        		Assert.assertEquals("After 1st Sync wrong Description", DN_ADD_DESC,rs.getString(i));
-		        	if (i == 8) // Telephone
-		        		Assert.assertEquals("After 1st Sync wrong Telephone", DN_ADD_TEL,rs.getString(i));
-			    	if (text.length() > 0) 
-			    		text.append(", ");
-			    	text.append(rs.getString(i));          
-		        }
-			    LOGGER.debug(text.toString());
-		    }
+			int columnCount = metadata.getColumnCount();
+			for (int i = 1; i <= columnCount; i++) {
+				if (text.length() > 0) 
+					text.append(", ");
+				text.append(metadata.getColumnName(i));
+			}
+			LOGGER.debug(text.toString());
+			
+			text = new StringBuffer();
+			while (rs.next()) {
+				rowcount ++;
+				for (int i = 1; i <= columnCount; i++) {
+					if (i == 2) // Mail
+						Assert.assertEquals("After 1st Sync wrong Mail", null,rs.getString(i));
+					if (i == 7) // Description
+						Assert.assertEquals("After 1st Sync wrong Description", DN_ADD_DESC,rs.getString(i));
+					if (i == 8) // Telephone
+						Assert.assertEquals("After 1st Sync wrong Telephone", DN_ADD_TEL,rs.getString(i));
+					if (text.length() > 0) 
+						text.append(", ");
+					text.append(rs.getString(i));
+				}
+				LOGGER.debug(text.toString());
+			}
 			assertTrue(functionName + " - ResultSet size after insert != 1", rowcount == 1);
 			
 			// Modify data in DB
@@ -155,34 +156,34 @@ public class Ldap2JdbcSyncTest {
 			rowcount = 0;
 			metadata = rs.getMetaData();
 			text = new StringBuffer();
-		    columnCount = metadata.getColumnCount();    
-		    for (int i = 1; i <= columnCount; i++) {
-		    	if (text.length() > 0) 
-		    		text.append(", ");
-		        text.append(metadata.getColumnName(i));      
-		    }
-		    LOGGER.debug(text.toString());
-		    
-		    text = new StringBuffer();
-		    while (rs.next()) {
-		    	rowcount ++;
-		        for (int i = 1; i <= columnCount; i++) {
-		        	if (i == 2) // Mail
-		        		Assert.assertEquals("After update wrong Mail", DB_MOD_MAIL,rs.getString(i));
-		        	if (i == 7) // Description
-		        		Assert.assertEquals("After update wrong Description", DB_MOD_DESC,rs.getString(i));
-		        	if (i == 8) // Telephone
-		        		Assert.assertEquals("After update wrong Telephone", null,rs.getString(i));
-		        	if (text.length() > 0) 
-			    		text.append(", ");
-			    	text.append(rs.getString(i));          
-		        }
-			    LOGGER.debug(text.toString());
-		    }
+			columnCount = metadata.getColumnCount();
+			for (int i = 1; i <= columnCount; i++) {
+				if (text.length() > 0) 
+					text.append(", ");
+				text.append(metadata.getColumnName(i));
+			}
+			LOGGER.debug(text.toString());
+			
+			text = new StringBuffer();
+			while (rs.next()) {
+				rowcount ++;
+				for (int i = 1; i <= columnCount; i++) {
+					if (i == 2) // Mail
+						Assert.assertEquals("After update wrong Mail", DB_MOD_MAIL,rs.getString(i));
+					if (i == 7) // Description
+						Assert.assertEquals("After update wrong Description", DB_MOD_DESC,rs.getString(i));
+					if (i == 8) // Telephone
+						Assert.assertEquals("After update wrong Telephone", null,rs.getString(i));
+					if (text.length() > 0) 
+						text.append(", ");
+					text.append(rs.getString(i));
+				}
+				LOGGER.debug(text.toString());
+			}
 			assertTrue(functionName + " - ResultSet size after insert != 1", rowcount == 1);
-
+			
 			// Start the Sync Process for the first time to fill up the database
-
+			
 			launchSyncCleanTask(TASK_NAME, false, true, false);
 			
 			// Check the result in the DB after the sync
@@ -192,32 +193,32 @@ public class Ldap2JdbcSyncTest {
 			rowcount = 0;
 			metadata = rs.getMetaData();
 			text = new StringBuffer();
-		    columnCount = metadata.getColumnCount();    
-		    for (int i = 1; i <= columnCount; i++) {
-		    	if (text.length() > 0) 
-		    		text.append(", ");
-		        text.append(metadata.getColumnName(i));      
-		    }
-		    LOGGER.debug(text.toString());
-		    
-		    text = new StringBuffer();
-		    while (rs.next()) {
-		    	rowcount ++;
-		        for (int i = 1; i <= columnCount; i++) {
-		        	if (i == 2) // Mail
-		        		Assert.assertEquals("After 2nd Sync wrong Mail", null,rs.getString(i));
-		        	if (i == 7) // Description
-		        		Assert.assertEquals("After 2nd Sync wrong Description", DN_ADD_DESC,rs.getString(i));
-		        	if (i == 8) // Telephone
-		        		Assert.assertEquals("After 2nd Sync wrong Telephone", DN_ADD_TEL,rs.getString(i));
-			    	if (text.length() > 0) 
-			    		text.append(", ");
-			    	text.append(rs.getString(i));          
-		        }
-			    LOGGER.debug(text.toString());
-		    }
+			columnCount = metadata.getColumnCount();
+			for (int i = 1; i <= columnCount; i++) {
+				if (text.length() > 0) 
+					text.append(", ");
+				text.append(metadata.getColumnName(i));
+			}
+			LOGGER.debug(text.toString());
+			
+			text = new StringBuffer();
+			while (rs.next()) {
+				rowcount ++;
+				for (int i = 1; i <= columnCount; i++) {
+					if (i == 2) // Mail
+						Assert.assertEquals("After 2nd Sync wrong Mail", null,rs.getString(i));
+					if (i == 7) // Description
+						Assert.assertEquals("After 2nd Sync wrong Description", DN_ADD_DESC,rs.getString(i));
+					if (i == 8) // Telephone
+						Assert.assertEquals("After 2nd Sync wrong Telephone", DN_ADD_TEL,rs.getString(i));
+					if (text.length() > 0) 
+						text.append(", ");
+					text.append(rs.getString(i));
+				}
+				LOGGER.debug(text.toString());
+			}
 			assertTrue(functionName + " - ResultSet size after insert and syc != 1", rowcount == 1);
-
+			
 			
 			
 		} finally {
@@ -239,20 +240,20 @@ public class Ldap2JdbcSyncTest {
 		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
-
-
+		
+		
 		if (doAsync) {
 			asyncType.add(taskName);
 		}
-
+		
 		if (doSync) {
 			syncType.add(taskName);
 		}
-
+		
 		if (doClean) {
 			cleanType.add(taskName);
 		}
-
+		
 		boolean ret = sync.launch(asyncType, syncType, cleanType);
 		assertTrue("launchSyncCleanTask failed", ret);
 	}

@@ -227,7 +227,7 @@ objectClass: organizationalPerson
 objectClass: person
 objectClass: top
 
-﻿dn: ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org
+dn: ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org
 objectClass: top
 objectClass: organizationalUnit
 ou: ldap2db2TestTask

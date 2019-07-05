@@ -215,10 +215,10 @@ start_dbtool() {
 }
 run() {
 	SYNCTASK=$1
-	if [ -z "$RUNTASK" ]; then
-		RUNTASK=all
+	if [ -z "$SYNCTASK" ]; then
+		SYNCTASK=all
 	fi
-        CLEANTASK=$2
+	CLEANTASK=$2
 	if [ -n "$CLEANTASK" ]; then
 		CLEANTASK="--clean $CLEANTASK"
 	fi
@@ -243,7 +243,7 @@ run() {
 	export CLASSPATH
 	export CONFIGPATH
 
-	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize all --clean all"
+	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize $SYNCTASK $CLEANTASK"
 	echo "Running $command"
 	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --threads 1 --synchronize $SYNCTASK $CLEANTASK
 }

@@ -47,7 +47,7 @@
 	      Stop the ldap server
 	    ===================================================================
 	-->
-	<target name="stopLdapServer" description="Start the ldap server">
+	<target name="stopLdapServer" description="Stop the ldap server">
 		<echo message="Stopping OpenDJ embedded server"/>
 
 		<fail unless="execution.path" message="'execution.path' must be set"/>

@@ -5,3 +5,4 @@ Different samples are available in the sub-directories :
 - hsqldb : a sample synchronizing accounts from HsqlDB to OpenDJ 
 - nis : a sample synchronizing accounts from NIS to OpenLDAP  (nis plugin required)
 - postgresql : a sample synchronizing accounts from OpenDJ to PostgreSQL
+- ldap2hsqldb : a sample synchronizing accounts from OpenDJ to HsqlDB

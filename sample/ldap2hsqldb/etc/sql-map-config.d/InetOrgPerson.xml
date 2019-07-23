@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="InetOrgPerson">
+
+	<select id="getInetOrgPerson" resultClass="java.util.HashMap"
+		parameterClass="java.util.Map">
+		SELECT
+		'inetOrgPerson' objectClass,
+		pers."ID" as externalid,
+		pers."UID",
+		pers."SN",
+		pers."GIVENNAME",
+		pers."CN",
+		pers."MAIL",
+		convert(pers."STATUS", VARCHAR) as accesssa,
+		pers."GIVENNAME",
+		pers."ADDRESS",
+		pers."O",
+		pers."TELEPHONENUMBER",
+		pers."CARLICENSE"
+		FROM userdata pers
+		WHERE pers."ID" LIKE #externalid#
+	</select>
+
+	<select id="getInetOrgPersonList"
+		resultClass="java.util.HashMap">
+		SELECT pers."ID" AS externalid
+		FROM userdata pers
+		WHERE pers."MAIL" IS NOT NULL OR
+		pers.STATUS=TRUE
+	</select>
+
+	<insert id="insertInetOrgPerson" parameterClass="java.util.Map">
+		INSERT INTO userdata
+		( ID , UID , MAIL, MAIL_LOWER, LAST_UPDATE, STATUS, ENDOFVALIDITY , SN
+		, CN , GIVENNAME , O , ADDRESS , TELEPHONENUMBER , CARLICENSE )
+		VALUES ( #externalid# , #uid# , #mail#, LCASE(#mail#), NOW(), #accesssa#,
+		#endofvalidity# , #sn# , #cn# , #givenname# , #o# ,
+		#registeredaddress# , #telephonenumber# , #carlicense# )
+	</insert>
+
+	<update id="updateInetOrgPerson" parameterClass="java.util.Map">
+		UPDATE userdata
+		SET ID = #externalid#,
+		UID = #uid#,
+		MAIL = #mail#,
+		MAIL_LOWER = LCASE(#mail#),
+		LAST_UPDATE = NOW(),
+		STATUS = #accesssa#,
+		ENDOFVALIDITY = #endofvalidity#,
+		SN = #sn#,
+		CN = #cn#,
+		GIVENNAME = #givenname#,
+		O = #o#,
+		ADDRESS = #registeredaddress#,
+		TELEPHONENUMBER = #telephonenumber#,
+		CARLICENSE = #carlicense#
+		WHERE id = #externalid#
+	</update>
+
+	<delete id="deleteInetOrgPerson" parameterClass="java.util.Map">
+		UPDATE userdata
+		SET MAIL = NULL,
+		MAIL_LOWER = NULL,
+		STATUS = FALSE
+		WHERE id = #externalid#
+	</delete>
+
+</sqlMap>

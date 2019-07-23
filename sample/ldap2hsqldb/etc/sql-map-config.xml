@@ -28,9 +28,6 @@
     maxTransactions="32" 
     /> -->
 
-<!-- 	<typeHandler javaType="javax.naming.directory.Attribute"
-		callback="org.lsc.service.AttributeTypeHandler" /> -->
-
   <transactionManager type="JDBC">
     <dataSource type="SIMPLE">
       <property value="${driver}" name="JDBC.Driver" />
@@ -54,8 +51,6 @@
   <sqlMap url="file:/C:/config/FileSqlMap.xml" />
   <sqlMap url="http://www.ibatis.com/maps/WebSqlMap.xml" />
   -->
-
-  <sqlMap url="file:///${lsc.config}/sql-map-config.d/Db2LdapTest.xml"/>
-  <sqlMap url="file:///${lsc.config}/sql-map-config.d/InetOrgPersonTest.xml"/>
+  <sqlMap url="file:///${lsc.config}/sql-map-config.d/InetOrgPerson.xml"/>
 
 </sqlMapConfig>

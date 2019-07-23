@@ -38,6 +38,13 @@
       <password></password>
       <driver>org.hsqldb.jdbcDriver</driver>
     </databaseConnection>
+    <databaseConnection>
+      <name>dst-jdbc</name>
+      <url>jdbc:hsqldb:hsql://localhost/lscdb</url>
+      <username>sa</username>
+      <password></password>
+      <driver>org.hsqldb.jdbcDriver</driver>
+    </databaseConnection>
   </connections>
   <audits></audits>
   <tasks>
@@ -586,6 +593,49 @@
         	</forceValues>
         </dataset>
       </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2dbTestTask</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2dbTestTask-src</name>
+        <connection reference="src-ldap" />
+        <baseDn>ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>externalId</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>externalId</string>
+          <string>description</string>
+          <string>cn</string>
+          <string>sn</string>
+          <string>telephoneNumber</string>
+          <string>carLicense</string>
+        </fetchedAttributes>
+        <getAllFilter>(&amp;(externalId=*))</getAllFilter>
+        <getOneFilter>(externalId={externalId})</getOneFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+      </ldapSourceService>
+      <databaseDestinationService>
+        <name>ldap2dbTestTask-dst</name>
+        <connection reference="dst-jdbc"/>
+        <requestNameForList>getInetOrgPersonList</requestNameForList>
+        <requestNameForObject>getInetOrgPerson</requestNameForObject>
+        <requestsNameForInsert>
+          <string>insertInetOrgPerson</string>
+        </requestsNameForInsert>
+        <requestsNameForUpdate>
+          <string>updateInetOrgPerson</string>
+        </requestsNameForUpdate>
+        <requestsNameForDelete>
+          <string>deleteInetOrgPerson</string>
+        </requestsNameForDelete>
+      </databaseDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>srcBean.getMainIdentifier()</mainIdentifier>
+        <defaultDelimiter>|</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+      </propertiesBasedSyncOptions>      
     </task>
   </tasks>
   <security>

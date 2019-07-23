@@ -260,6 +260,9 @@ public abstract class AbstractJdbcService implements IService {
 		for(LscDatasetModification lam : lscAttributeModifications) {
 			if(lam.getValues().size() > 0) {
 				values.put(lam.getAttributeName(), lam.getValues().get(0));
+			} else {
+				// deleted items get the value null
+				values.put(lam.getAttributeName(), null);
 			}
 		}
 		return values;
@@ -271,6 +274,9 @@ public abstract class AbstractJdbcService implements IService {
 		for(Entry<String, Object> entry : lscAttributes.getDatasets().entrySet()) {
 			if(entry.getValue() != null) {
 				values.put(entry.getKey(), getValue(entry.getValue()));
+			} else {
+				// deleted items get the value null
+				values.put(entry.getKey(), null);
 			}
 		}
 		return values;

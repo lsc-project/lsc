@@ -354,7 +354,6 @@ public final class JndiServices {
 				props.setProperty("javax.security.sasl.server.authentication", ""+connection.isSaslMutualAuthentication());
 //				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
 				props.put("javax.security.auth.useSubjectCredsOnly", "true");
-				props.put("com.sun.jndi.ldap.trace.ber", System.err); //debug trace
 				props.setProperty("javax.security.sasl.qop", connection.getSaslQop().value());
 				try {
 					LoginContext lc = new LoginContext(JndiServices.class.getName(), new KerberosCallbackHandler(connection.getUsername(), connection.getPassword()));

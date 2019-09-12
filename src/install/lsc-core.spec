@@ -33,7 +33,7 @@ URL: https://lsc-project.org
 Source: %{lsc_name}-core-%{lsc_version}-dist.zip
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Prereq: coreutils
+Requires(pre): coreutils
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize

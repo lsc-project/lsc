@@ -156,7 +156,7 @@
 			It may contains synchronization conditions, a default delimiter and datasets synchronization rules (attribute nodes) -->
       <propertiesBasedSyncOptions>
 <!--    ./mainIdentifier This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-        <mainIdentifier>"cn=" + srcBean.getDatasetValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
+        <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
 <!--    ./defaultDelimiter This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
         <defaultDelimiter>;</defaultDelimiter>
 <!--    ./defaultPolicy This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->

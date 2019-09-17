@@ -142,7 +142,7 @@ public class JaxbXmlConfigurationHelper {
                 Set<String> xsdFiles = reflections.getResources(Pattern.compile(".*\\.xsd"));
                 Source[] schemasSource = new Source[xsdFiles.size()];
                 List<String> xsdFilesList = new ArrayList<String>(xsdFiles);
-                Collections.reverse(xsdFilesList);
+                Collections.sort(xsdFilesList, new XsdForLscComparator());
                 for(String schemaFile: xsdFilesList) {
                     LOGGER.debug("Importing XML schema file: " + schemaFile);
                     InputStream schemaStream = this.getClass().getClassLoader().getResourceAsStream(schemaFile);

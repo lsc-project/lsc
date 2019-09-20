@@ -479,7 +479,7 @@ public class Configuration {
 				File xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
 				File properties = new File(location, Configuration.PROPERTIES_FILENAME);
 				if(xml.exists() && xml.isFile()) {
-					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString()));
+					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
 				} else if (properties.exists() && properties.isFile()) {
 					LOGGER.warn("LSC configuration loaded from old properties file format !");
 					PropertiesConfigurationHelper.loadConfigurationFrom(properties.getAbsolutePath());

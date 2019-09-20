@@ -93,7 +93,7 @@ public class ConfigurationLoaderTest {
 	}
 	
 	@Test
-	public void valueFromEnvVariableShoulbBeEscapedWhenLoadingConfigurationWithEnvVariables() throws FileNotFoundException, LscConfigurationException {
+	public void valueFromEnvVariableShouldBeEscapedWhenLoadingConfigurationWithEnvVariables() throws FileNotFoundException, LscConfigurationException {
 		Lsc c = getFile(this.getClass().getClassLoader().getResource("test_with_env_variables.xml").getPath(),
 				ImmutableMap.<String, String>builder()
 				.putAll(ENV_VALUE_BY_KEY)

@@ -105,7 +105,7 @@ public class LDAPTest {
 	// this should fail with a can't connect exception
 	@Test(expected = NamingException.class)
 	public void testCanBindCantConnect() throws NamingException {
-		LDAP.canBind("ldap://no.such.host:33389/", "cn=Directory Manager", "public");
+		LDAP.canBind("ldap://no.such.host.really:33389/", "cn=Directory Manager", "public");
 	}
 
 	// this should fail with a NamingException (no such object)

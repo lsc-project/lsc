@@ -714,7 +714,15 @@ class SynchronizeTask implements Runnable {
 			 */
 			if (entry == null) {
 				counter.incrementCountError();
-				AbstractSynchronize.LOGGER.error("Synchronization aborted because no source object has been found !");
+				StringBuilder sb = new StringBuilder("Cannot synchronize entry");
+				if (id != null) {
+					sb.append(" ").append(id.getKey());
+				}
+				sb.append(": no matching object found in source");
+				if (id != null && id.getValue() != null && !id.getValue().getDatasets().isEmpty()) {
+					sb.append(" with pivots ").append(id.getValue().toString());
+				}
+				AbstractSynchronize.LOGGER.error(sb.toString());
 				return false;
 			}
 

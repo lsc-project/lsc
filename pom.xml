@@ -72,6 +72,7 @@
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<tapestry-release-version>5.2.5</tapestry-release-version>
 		<jmockit-version>0.999.11</jmockit-version>
+		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 	</properties>
 
 	<build>

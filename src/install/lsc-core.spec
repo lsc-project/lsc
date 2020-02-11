@@ -128,8 +128,8 @@ fi
 
 # Always do this
 # Create user and group if needed
-getent group %{lsc_group} > /dev/null 2>&1 || groupadd -r %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || useradd -r -g %{lsc_group} -d /etc/lsc %{lsc_user}
+getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
+getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir /etc/lsc %{lsc_user}
 # Change owner
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 

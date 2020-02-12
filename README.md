@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/lsc-project/lsc.svg?branch=master)](https://travis-ci.org/lsc-project/lsc)
 
-Full HTML documentation is available at http://lsc-project.org/
+Full HTML documentation is available at https://lsc-project.org/
 
 ## What is LSC?
 
@@ -74,7 +74,7 @@ by reusing!
 
 ## Read more
 
-Find more documentation, tutorials at http://lsc-project.org/.
+Find more documentation, tutorials at https://lsc-project.org/.
 
-Join us on IRC in #lsc-project on Freenode, or on mailing lists at
-http://lists.lsc-project.org.
+Join us on IRC in #lsc-project on Freenode, or on mailing lists on OW2 server,
+ see https://lsc-project.org/community#mailing_lists.

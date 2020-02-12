@@ -124,13 +124,12 @@ if [ $1 -eq 1 ]
 then
         # Set lsc as service
         /sbin/chkconfig --add lsc
-
-        # Create user and group
-        /usr/sbin/groupadd %{lsc_group}
-        /usr/sbin/useradd %{lsc_user} -g %{lsc_group}
 fi
 
 # Always do this
+# Create user and group if needed
+getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
+getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir /etc/lsc %{lsc_user}
 # Change owner
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 

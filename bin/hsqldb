@@ -236,7 +236,7 @@ hsqldb_startServer()
 {
   mkdir -p $HSQLDB_DIR
   java -cp $HSQLDB_LIB org.hsqldb.Server \
-    -database.0 file:$HSQLDB_DIR/mydb -dbname.0 lscdb > /dev/null 2>&1 &
+    -database.0 file:$HSQLDB_DIR/mydb -dbname.0 lscdb -address 127.0.0.1 > /dev/null 2>&1 &
   echo $! > $HSQLDB_PIDFILE
   sleep 2
   if [ ! -d $HSQLDB_DIR ]; then

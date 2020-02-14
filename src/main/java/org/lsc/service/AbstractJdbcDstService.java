@@ -128,7 +128,11 @@ public abstract class AbstractJdbcDstService extends AbstractJdbcService impleme
         if(writeDatasetIds != null) {
             return writeDatasetIds;
         }
-        writeDatasetIds = new ArrayList<String>();
+        return buildWriteDatasetIds();
+    }
+
+	private List<String> buildWriteDatasetIds() {
+        List<String> writeDatasetIds = new ArrayList<String>();
         if(sqlMapper instanceof SqlMapClientImpl) {
             for(String request: getRequestsNameForInsert()) {
                 for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
@@ -140,7 +144,7 @@ public abstract class AbstractJdbcDstService extends AbstractJdbcService impleme
             LOGGER.error("Unable to handle an unknown SQLMap Client type : " + sqlMapper.getClass().getName());
         }
         return writeDatasetIds;
-    }
+	}
 
     public abstract List<String> getRequestsNameForInsert();
 

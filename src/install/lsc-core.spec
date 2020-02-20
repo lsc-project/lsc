@@ -180,7 +180,7 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
-* Thu Feb 20 2019 - Clement Oudot <clem@lsc-project.org> - 2.1.5-1
+* Thu Feb 20 2020 - Clement Oudot <clem@lsc-project.org> - 2.1.5-1
 - Upgrade to LSC 2.1.5
 * Sat Mar 25 2017 - Clement Oudot <clem@lsc-project.org> - 2.1.4-0
 - Upgrade to LSC 2.1.4

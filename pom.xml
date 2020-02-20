@@ -20,31 +20,31 @@
 	<mailingLists>
 		<mailingList>
 			<name>Announcements about LDAP Synchronization Project (LSC)</name>
-			<subscribe>lsc-announce-subscribe@lists.lsc-project.org</subscribe>
-			<unsubscribe>lsc-announce-unsubscribe@lists.lsc-project.org</unsubscribe>
-			<post>lsc-announce@lists.lsc-project.org</post>
-			<archive>http://lists.lsc-project.org/listinfo/lsc-announce</archive>
+			<subscribe>https://mail.ow2.org/wws/subscribe/lsc-announces</subscribe>
+			<unsubscribe>https://mail.ow2.org/wws/sigrequest/lsc-announces</unsubscribe>
+			<post>lsc-announces@ow2.org</post>
+			<archive>https://mail.ow2.org/wws/arc/lsc-announces</archive>
 		</mailingList>
 		<mailingList>
 			<name>General discussions and help for LDAP Synchronization Connector (LSC)</name>
-			<subscribe>lsc-users-subscribe@lists.lsc-project.org</subscribe>
-			<unsubscribe>lsc-users-unsubscribe@lists.lsc-project.org</unsubscribe>
-			<post>lsc-users@lists.lsc-project.org</post>
-			<archive>http://lists.lsc-project.org/listinfo/lsc-users</archive>
+			<subscribe>https://mail.ow2.org/wws/subscribe/lsc-users</subscribe>
+			<unsubscribe>https://mail.ow2.org/wws/sigrequest/lsc-users</unsubscribe>
+			<post>lsc-users@ow2.org</post>
+			<archive>https://mail.ow2.org/wws/arc/lsc-users</archive>
 		</mailingList>
 		<mailingList>
 			<name>Development and project discussions about LDAP Synchronization Connector (LSC)</name>
-			<subscribe>lsc-dev-subscribe@lists.lsc-project.org</subscribe>
-			<unsubscribe>lsc-dev-unsubscribe@lists.lsc-project.org</unsubscribe>
-			<post>lsc-dev@lists.lsc-project.org</post>
-			<archive>http://lists.lsc-project.org/listinfo/lsc-dev</archive>
+			<subscribe>https://mail.ow2.org/wws/subscribe/lsc-dev</subscribe>
+			<unsubscribe>https://mail.ow2.org/wws/sigrequest/lsc-dev</unsubscribe>
+			<post>lsc-dev@ow2.org</post>
+			<archive>https://mail.ow2.org/wws/arc/lsc-dev</archive>
 		</mailingList>
 		<mailingList>
 			<name>A commit-list that receives all updates to the code and the wiki (website) for LDAP Synchronization Connector (LSC)</name>
-			<subscribe>lsc-changes-subscribe@lists.lsc-project.org</subscribe>
-			<unsubscribe>lsc-changes-unsubscribe@lists.lsc-project.org</unsubscribe>
-			<post>lsc-changes@lists.lsc-project.org</post>
-			<archive>http://lists.lsc-project.org/listinfo/lsc-changes</archive>
+			<subscribe>https://mail.ow2.org/wws/subscribe/lsc-changes</subscribe>
+			<unsubscribe>https://mail.ow2.org/wws/sigrequest/lsc-changes</unsubscribe>
+			<post>lsc-changes@ow2.org</post>
+			<archive>https://mail.ow2.org/wws/arc/lsc-changes</archive>
 		</mailingList>
 	</mailingLists>
 

@@ -5,14 +5,14 @@
 #
 # BSD License
 #
-# Copyright (c) 2009 - 2012 LSC Project
+# Copyright (c) 2009 - 2020 LSC Project
 #=================================================
 
 #=================================================
 # Variables
 #=================================================
 %define lsc_name	lsc
-%define lsc_version	2.1.4
+%define lsc_version	2.1.5
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -23,7 +23,7 @@
 Summary: LDAP Synchronization Connector
 Name: %{lsc_name}
 Version: %{lsc_version}
-Release: 0%{?dist}
+Release: 1%{?dist}
 License: BSD
 BuildArch: noarch
 
@@ -180,6 +180,8 @@ rm -rf %{buildroot}
 # Changelog
 #=================================================
 %changelog
+* Thu Feb 20 2019 - Clement Oudot <clem@lsc-project.org> - 2.1.5-1
+- Upgrade to LSC 2.1.5
 * Sat Mar 25 2017 - Clement Oudot <clem@lsc-project.org> - 2.1.4-0
 - Upgrade to LSC 2.1.4
 * Tue Mar 03 2015 - Clement Oudot <clem@lsc-project.org> - 2.1.3-0

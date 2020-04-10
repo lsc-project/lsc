@@ -131,7 +131,7 @@ public class JaxbXmlConfigurationHelper {
                 Set<URL> urls = new HashSet<URL>();
                 urls.addAll(ClasspathHelper.forPackage("org.lsc"));
                 if(System.getProperty("LSC.PLUGINS.PACKAGEPATH") != null) {
-                    String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(System.getProperty("path.separator"));
+                    String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(":");
                     for(String pathElement: pathElements) {
                         urls.addAll(ClasspathHelper.forPackage(pathElement));
                     }

@@ -99,7 +99,7 @@ public class JaxbXmlConfigurationHelper {
         String packagesName = Lsc.class.getPackage().getName();
         String pluginsPackagePath = System.getProperty("LSC.PLUGINS.PACKAGEPATH");
         if( pluginsPackagePath != null) {
-            packagesName = packagesName + System.getProperty("path.separator") + pluginsPackagePath;
+            packagesName = packagesName + ":" + pluginsPackagePath;
         }
         try {
             jaxbc = JAXBContext.newInstance( packagesName );

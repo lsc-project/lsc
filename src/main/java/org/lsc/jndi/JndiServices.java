@@ -557,9 +557,9 @@ public final class JndiServices {
 		try {
 			sc.setSearchScope(scope);
 			String rewrittenBase = null;
-			if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
-				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
-				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
+			if (contextDn != null && searchBase.toLowerCase().endsWith(getContextDn().toLowerCase())) {
+				if (!searchBase.equalsIgnoreCase(getContextDn())) {
+				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(getContextDn().toLowerCase()) - 1);
 			} else {
 					rewrittenBase = "";
 				}
@@ -645,7 +645,7 @@ public final class JndiServices {
 
 	public String rewriteBase(final String base) {
 		try {
-			Dn lowerCasedContextDn = (contextDn == null) ? null : new Dn(contextDn.toString().toLowerCase()); 
+			Dn lowerCasedContextDn = (contextDn == null) ? null : new Dn(getContextDn().toLowerCase()); 
 			Dn lowerCasedBaseDn = new Dn(base.toLowerCase());
 			if (!lowerCasedBaseDn.isDescendantOf(lowerCasedContextDn)) {
 				return base;
@@ -1024,7 +1024,7 @@ public final class JndiServices {
 	}
 
 	public List<String> sup(String dn, int level) throws NamingException {
-		int ncLevel = (new LdapName(contextDn.toString())).size();
+		int ncLevel = (new LdapName(getContextDn())).size();
 
 		LdapName lName = new LdapName(dn);
 		List<String> cList = new ArrayList<String>();
@@ -1234,7 +1234,7 @@ public final class JndiServices {
 	 * @return the contextDn
 	 */
 	public String getContextDn() {
-		return contextDn.toString();
+		return (contextDn == null) ? "" : contextDn.toString();
 	}
 
 	/**
@@ -1266,11 +1266,11 @@ public final class JndiServices {
 	}
 
 	public String completeDn(String dn) {
-		if(!dn.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
-			if(dn.length() > 0) {
-				return dn + ","  + contextDn.toString();
+		if (!dn.toLowerCase().endsWith(getContextDn().toLowerCase())) {
+			if (dn.length() > 0) {
+				return dn + ","  + getContextDn();
 			} else {
-				return contextDn.toString();
+				return getContextDn();
 			}
 		}
 		return dn;

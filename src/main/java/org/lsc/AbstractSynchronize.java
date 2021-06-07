@@ -224,6 +224,9 @@ public abstract class AbstractSynchronize {
 						conditionObjects = new HashMap<String, Object>();
 						conditionObjects.put("dstBean", dstBean);
 						conditionObjects.putAll(task.getScriptingVars());
+						if (task.getCustomLibraries() != null) {
+							conditionObjects.put("custom", task.getCustomLibraries());
+						}
 
 						// Evaluate if we have to do something
 						doDelete = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
@@ -793,6 +796,9 @@ class SynchronizeTask implements Runnable {
 				conditionObjects.put("dstBean", dstBean);
 				conditionObjects.put("srcBean", entry);
 				conditionObjects.putAll(task.getScriptingVars());
+				if (task.getCustomLibraries() != null) {
+					conditionObjects.put("custom", task.getCustomLibraries());
+				}
 
 				// Evaluate if we have to do something
 				applyCondition = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);

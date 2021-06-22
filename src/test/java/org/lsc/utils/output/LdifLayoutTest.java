@@ -115,6 +115,7 @@ public class LdifLayoutTest {
 		ILoggingEvent loggingEvent = makeLoggingEvent(jm.toString(), jm);
 
 		LdifLayout layout = new LdifLayout();
+		layout.setContext(lc);
 		layout.setPattern("%m%n");
 		layout.start();
 
@@ -147,6 +148,7 @@ public class LdifLayoutTest {
 		ILoggingEvent loggingEvent = makeLoggingEvent(lm.toString(), lm);
 
 		LdifLayout layout = new LdifLayout();
+		layout.setContext(lc);
 		layout.setPattern("%m%n");
 		layout.start();
 
@@ -183,6 +185,7 @@ public class LdifLayoutTest {
 		ILoggingEvent loggingEvent = makeLoggingEvent(lm.toString(), lm);
 
 		LdifLayout layout = new LdifLayout();
+		layout.setContext(lc);
 		layout.setPattern("%m%n");
 		layout.start();
 

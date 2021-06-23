@@ -93,6 +93,7 @@ public class JaxbXmlConfigurationHelper {
 
 	public static final String LSC_CONF_XML = "lsc.xml";
 	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-2.0.xsd"; 
+	private static final String PACKAGEPATH_SEPARATOR = ":";
 	private JAXBContext jaxbc;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JaxbXmlConfigurationHelper.class);
@@ -105,7 +106,7 @@ public class JaxbXmlConfigurationHelper {
         String packagesName = Lsc.class.getPackage().getName();
         String pluginsPackagePath = System.getProperty("LSC.PLUGINS.PACKAGEPATH");
         if( pluginsPackagePath != null) {
-            packagesName = packagesName + System.getProperty("path.separator") + pluginsPackagePath;
+            packagesName = packagesName + PACKAGEPATH_SEPARATOR + pluginsPackagePath;
         }
         try {
             jaxbc = JAXBContext.newInstance( packagesName );
@@ -150,7 +151,7 @@ public class JaxbXmlConfigurationHelper {
 		    Set<URL> urls = new HashSet<URL>();
 		    urls.addAll(ClasspathHelper.forPackage("org.lsc"));
 		    if(System.getProperty("LSC.PLUGINS.PACKAGEPATH") != null) {
-		        String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(System.getProperty("path.separator"));
+		        String[] pathElements = System.getProperty("LSC.PLUGINS.PACKAGEPATH").split(PACKAGEPATH_SEPARATOR);
 		        for(String pathElement: pathElements) {
 		            urls.addAll(ClasspathHelper.forPackage(pathElement));
 		        }

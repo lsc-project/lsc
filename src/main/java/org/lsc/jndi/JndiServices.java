@@ -221,7 +221,13 @@ public final class JndiServices {
 		}
 
 		/* handle options */
-		contextDn = namingContext.getDn() != null ?  namingContext.getDn() : null;
+		try {
+			contextDn = namingContext.getDn() != null ?  namingContext.getDn() : new Dn("");
+		} catch (LdapInvalidDnException e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			throw new NamingException(e.getMessage());
+		}
 
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null) {
@@ -555,10 +561,10 @@ public final class JndiServices {
 		try {
 			sc.setSearchScope(scope);
 			String rewrittenBase = null;
-			if (contextDn != null && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+			if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
 				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
-				rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
-			} else {
+					rewrittenBase = searchBase.substring(0, searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
+				} else {
 					rewrittenBase = "";
 				}
 			} else {
@@ -643,7 +649,7 @@ public final class JndiServices {
 
 	public String rewriteBase(final String base) {
 		try {
-			Dn lowerCasedContextDn = (contextDn == null) ? null : new Dn(contextDn.toString().toLowerCase()); 
+			Dn lowerCasedContextDn = (getContextDn().isEmpty()) ? null : new Dn(contextDn.toString().toLowerCase());
 			Dn lowerCasedBaseDn = new Dn(base.toLowerCase());
 			if (!lowerCasedBaseDn.isDescendantOf(lowerCasedContextDn)) {
 				return base;

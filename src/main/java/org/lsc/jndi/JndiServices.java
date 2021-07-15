@@ -446,9 +446,9 @@ public final class JndiServices {
 	            return null;
 	        }
 	        if(fqdn.length() > 0) {
-	            fqdn = rdn.getNormValue().getString() + "." + fqdn;
+	            fqdn = rdn.getNormValue() + "." + fqdn;
 	        } else {
-	            fqdn = rdn.getNormValue().getString();
+	            fqdn = rdn.getNormValue();
 	        }
 	    }
 	    return fqdn;

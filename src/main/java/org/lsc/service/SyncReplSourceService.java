@@ -168,7 +168,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				bad.addBinaryAttribute(ldapConn.getBinaryAttributes().getString().toArray(new String[0]));
 				lcc.setBinaryAttributeDetector(bad);
 			}
-//			lco.setFollowReferrals(ldapConn.getReferralHandling() == ReferralHandling.THROUGH);
 			if(conn.connect()) {
 				conn.bind(ldapConn.getUsername(), ldapConn.getPassword());
 				return conn;

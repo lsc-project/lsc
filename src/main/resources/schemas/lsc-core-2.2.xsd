@@ -80,7 +80,6 @@
 		<xsd:restriction base="xsd:string">
 			<xsd:enumeration value="FOLLOW" />
 			<xsd:enumeration value="IGNORE" />
-			<xsd:enumeration value="THROUGH" />
 			<xsd:enumeration value="THROW" />
 			<xsd:enumeration value="ERROR" />
 		</xsd:restriction>

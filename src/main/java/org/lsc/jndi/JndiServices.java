@@ -82,6 +82,7 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.BasicControl;
 import javax.naming.ldap.Control;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
@@ -121,6 +122,8 @@ public final class JndiServices {
 
 	protected static final String TLS_CONFIGURATION = "java.naming.tls";
 
+	protected static final String RELAX_RULES_CONTROL_OID = "1.3.6.1.4.1.4203.666.5.12";
+
 	/** Default LDAP filter. */
 	public static final String DEFAULT_FILTER = "objectClass=*";
 
@@ -145,6 +148,9 @@ public final class JndiServices {
 
 	/** Support for recursive deletion (default to false) */
 	private boolean recursiveDelete;
+
+	/** Send relax rules control when writing in directory (default to false) */
+	private boolean relaxRules;
 
 	/** Attribute name to sort on. */
 	private String sortedBy;
@@ -245,6 +251,13 @@ public final class JndiServices {
 			recursiveDelete = false;
 		}
 		
+		String relaxRulesStr = (String) ctx.getEnvironment().get("java.naming.relaxRules");
+		if (relaxRulesStr != null) {
+			relaxRules = Boolean.parseBoolean(relaxRulesStr);
+		} else {
+			relaxRules = false;
+		}
+
 		/* Load SyncRepl response control */
 		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
 		ControlFactory<?> factory = new SyncStateValueFactory( ldapApiService );
@@ -411,10 +424,12 @@ public final class JndiServices {
 			props.setProperty("java.naming.ldap.sortedBy", connection.getSortedBy());
 		}
 		props.setProperty("java.naming.ldap.version", (connection.getVersion() == LdapVersionType.VERSION_2 ? "2" : "3" ));
-        if(connection.isRecursiveDelete() != null) {
-            props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
-        }
-
+		if(connection.isRecursiveDelete() != null) {
+			props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
+		}
+		if(connection.isRelaxRules() != null) {
+			props.setProperty("java.naming.relaxRules", Boolean.toString(connection.isRelaxRules()));
+		}
 		return props;
 	}
 	
@@ -822,6 +837,17 @@ public final class JndiServices {
 		}
 		
 		try {
+			
+			List<Control> extControls = new ArrayList<Control>();
+			if (relaxRules) {
+				LOGGER.debug("Using relax rules control to apply modifications");
+				// This control is non critical to avoid error "critical extension is unavailable" when ctx is used concurrently for searches
+				extControls.add(new BasicControl(RELAX_RULES_CONTROL_OID, Control.NONCRITICAL, null));
+			}
+			if (!extControls.isEmpty()) {
+				ctx.setRequestControls(extControls.toArray(new Control[extControls.size()]));
+			}
+
 			switch (jm.getOperation()) {
 
 				case ADD_ENTRY:
@@ -902,6 +928,15 @@ public final class JndiServices {
 			}
 			
 			return false;
+		}
+		finally {
+			// clear requestControls for future use of the JNDI context
+			try {
+				ctx.setRequestControls(null);
+			} catch (NamingException ne) {
+				LOGGER.error("Cannot clear request controls from JNDI context: " + ne.getMessage());
+				LOGGER.debug(ne.getMessage(), ne);
+			}
 		}
 	}
 

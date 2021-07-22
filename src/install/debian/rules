@@ -1,9 +1,0 @@
-#!/usr/bin/make -f
-
-# Put depended upon jars in here
-# export CLASSPATH=
-
-%:
-	dh $@ 
-
-override_dh_compress:

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+	<!-- standard output to console -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="org.lsc.utils.output.LdifLayout">
+				<Pattern>%date{MMM dd HH:mm:ss} - %-5level - [%file : %line] - %message%n</Pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<appender name="LSC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Append>true</Append>
+		<File>logs/lsc.log</File>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - [%file : %line] - %message%n</Pattern>
+		</layout>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>lsc.log.%i.gz</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>7</MaxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>10000KB</MaxFileSize>
+		</triggeringPolicy>
+	</appender>
+
+	<appender name="LSC_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Append>true</Append>
+		<File>logs/lsc.error</File>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - [%file : %line] - %message%n</Pattern>
+		</layout>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>lsc.log.%i.gz</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>7</MaxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>10000KB</MaxFileSize>
+		</triggeringPolicy>
+	</appender>
+
+	<appender name="LSC_STATUS" class="ch.qos.logback.core.FileAppender">
+		<append>false</append>
+		<File>logs/lsc.status</File>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%date{MMM dd HH:mm:ss} - %-5level - [%file : %line] - %message%n</Pattern>
+		</layout>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<!-- special logger to have a LDIF file of all modifications applied -->
+	<!-- this file is rotated every 10000KB, compressed and 7 files are kept for history -->
+	<appender name="LDIF" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+		<Append>true</Append>
+		<File>logs/lsc.ldif</File>
+
+		<layout class="org.lsc.utils.output.LdifLayout">
+			<Pattern>%m%n</Pattern>
+			<onlyLdif>true</onlyLdif>
+		</layout>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<FileNamePattern>lsc.ldif.%i.gz</FileNamePattern>
+			<MinIndex>1</MinIndex>
+			<MaxIndex>7</MaxIndex>
+		</rollingPolicy>
+
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>10000KB</MaxFileSize>
+		</triggeringPolicy>
+	</appender>
+
+	<!-- link log sources and log appenders -->
+	<logger name="org.lsc">
+		<appender-ref ref="LSC"/>
+		<appender-ref ref="LSC_STATUS"/>
+		<appender-ref ref="LSC_ERROR"/>
+	</logger>
+	<logger name="lsc">
+		<appender-ref ref="LDIF"/>
+	</logger>
+	<root level="DEBUG">
+		<appender-ref ref="CONSOLE"/>
+	</root>
+</configuration>
+

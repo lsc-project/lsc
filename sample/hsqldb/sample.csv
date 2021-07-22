@@ -1,9 +1,0 @@
-id;uid;endOfValidity;sn;cn;givenName;mail;o;address;telephoneNumber;carLicense
-1;j.clarke;31/12/2015;Clarke;Clarke, Jonathan;Jonathan;jonathan@philipoux.net;Normation;;+33 (0)1 83 62 26 96;BHU772|DED899
-2;r.schermesser;31/12/2015;Schermesser;Schermesser, Remy-Christophe;Remy-Christophe;remy@schermesser.com;Octo;;;
-3;t.chemineau;31/12/2015;Chemineau;Chemineau, Thomas;Thomas;thomas@aepik.net;AFNOR;;;
-4;s.bahloul;31/12/2015;Bahloul;Bahloul, Sebastien;Sebastien;sebastien.bahloul@gmail.com;Dictao;156 av. de Malakof, 75116 PARIS, France;;
-5;c.oudot;31/12/2015;Oudot;Oudot, Clement;Clement;clem.oudot@gmail.com;Linagora;;33(0)810251251;
-6;r.ouazana;31/12/2015;Ouazana;Ouazana, Raphael;Raphael;rouazana@linagora.com;Linagora;;33(0)810251251;
-7;d.coutadeur;31/12/2015;Coutadeur;Coutadeur, David;David;dcoutadeur@linagora.com;Linagora;;33(0)810251251;
-8;e.pereira;31/12/2015;Pereira;Pereira, Esteban;Esteban;epereira@linagora.com;Linagora;;33(0)810251251;

@@ -29,6 +29,36 @@
       <tlsActivated>false</tlsActivated>
       <saslMutualAuthentication>false</saslMutualAuthentication>
     </ldapConnection>
+    <ldapConnection>
+      <name>dst-ldap-relaxrules</name>
+      <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
+      <username>cn=Directory Manager</username>
+      <password>secret</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <saslMutualAuthentication>false</saslMutualAuthentication>
+      <relaxRules>true</relaxRules>
+    </ldapConnection>
+    <ldapConnection>
+      <name>dst-ldap-recursivedelete</name>
+      <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
+      <username>cn=Directory Manager</username>
+      <password>secret</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <saslMutualAuthentication>false</saslMutualAuthentication>
+      <recursiveDelete>true</recursiveDelete>
+    </ldapConnection>
     <databaseConnection>
       <name>src-jdbc</name>
       <url>jdbc:hsqldb:file:hsqldb/lsc</url>

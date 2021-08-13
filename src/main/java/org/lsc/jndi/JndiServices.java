@@ -102,6 +102,7 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -837,30 +838,22 @@ public final class JndiServices {
 		}
 		
 		try {
-			
-			List<Control> extControls = new ArrayList<Control>();
-			if (relaxRules) {
-				LOGGER.debug("Using relax rules control to apply modifications");
-				// This control is non critical to avoid error "critical extension is unavailable" when ctx is used concurrently for searches
-				extControls.add(new BasicControl(RELAX_RULES_CONTROL_OID, Control.NONCRITICAL, null));
-			}
-			if (!extControls.isEmpty()) {
-				ctx.setRequestControls(extControls.toArray(new Control[extControls.size()]));
-			}
+			// Get a derived context to be able to use controls without impacting/being impacted by other thread sharing this context
+			LdapContext updateCtx = getContext(true);
 
 			switch (jm.getOperation()) {
 
 				case ADD_ENTRY:
-					ctx.createSubcontext(
+					updateCtx.createSubcontext(
 									new LdapName(rewriteBase(jm.getDistinguishName())),
 									getAttributes(jm.getModificationItems(), true));
 					break;
 
 				case DELETE_ENTRY:
 					if (recursiveDelete) {
-						deleteChildrenRecursively(rewriteBase(jm.getDistinguishName()));
+						deleteChildrenRecursively(updateCtx, rewriteBase(jm.getDistinguishName()));
 					} else {
-						ctx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
+						updateCtx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
 					}
 					break;
 
@@ -868,13 +861,13 @@ public final class JndiServices {
 					Object[] table = jm.getModificationItems().toArray();
 					ModificationItem[] mis = new ModificationItem[table.length];
 					System.arraycopy(table, 0, mis, 0, table.length);
-					ctx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
+					updateCtx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
 					break;
 
 				case MODRDN_ENTRY:
 					//We do not display this warning if we do not apply the modification with the option modrdn = false
 					LOGGER.warn("WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
-					ctx.rename(
+					updateCtx.rename(
 									new LdapName(rewriteBase(jm.getDistinguishName())),
 									new LdapName(rewriteBase(jm.getNewDistinguishName())));
 					break;
@@ -929,15 +922,6 @@ public final class JndiServices {
 			
 			return false;
 		}
-		finally {
-			// clear requestControls for future use of the JNDI context
-			try {
-				ctx.setRequestControls(null);
-			} catch (NamingException ne) {
-				LOGGER.error("Cannot clear request controls from JNDI context: " + ne.getMessage());
-				LOGGER.debug(ne.getMessage(), ne);
-			}
-		}
 	}
 
 	/**
@@ -945,9 +929,9 @@ public final class JndiServices {
 	 * @param distinguishName the tree head to delete
 	 * @throws NamingException thrown if an error is encountered
 	 */
-	private void deleteChildrenRecursively(String distinguishName) throws NamingException {
+	private void deleteChildrenRecursively(LdapContext updateCtx, String distinguishName) throws NamingException {
 		try {
-			doDeleteChildrenRecursively(distinguishName);
+			doDeleteChildrenRecursively(updateCtx, distinguishName);
 			return;
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
@@ -961,7 +945,7 @@ public final class JndiServices {
 					// throw the initial communication exception
 					throw nex;
 				}
-				doDeleteChildrenRecursively(distinguishName);
+				doDeleteChildrenRecursively(getContext(true), distinguishName);
 				return;
 			} else {
 				throw nex;
@@ -969,16 +953,16 @@ public final class JndiServices {
 		}
 	}
 
-	private void doDeleteChildrenRecursively(String distinguishName) throws NamingException {
+	private void doDeleteChildrenRecursively(LdapContext updateCtx, String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
 		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
 		while (ne.hasMore()) {
 			SearchResult sr = (SearchResult) ne.next();
 			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
-			deleteChildrenRecursively(childrenDn);
+			deleteChildrenRecursively(updateCtx, childrenDn);
 		}
-		ctx.destroySubcontext(new LdapName(distinguishName));
+		updateCtx.destroySubcontext(new LdapName(distinguishName));
 	}
 
 	/**
@@ -1264,8 +1248,34 @@ public final class JndiServices {
 	/**
 	 * Get the JNDI context.
 	 * @return The LDAP context object in use by this class.
+	 * @throws NamingException 
 	 */
-	public LdapContext getContext() {
+	public LdapContext getContext() throws NamingException {
+		return getContext(false);
+	}
+	
+	/**
+	 * Get the initial JNDI context or get a derived context to be able to use controls without 
+	 * impacting or being impacted by other threads sharing a same context
+	 * @param forUpdates if this derived context is for updates
+	 * @return
+	 * @throws NamingException
+	 */
+	public LdapContext getContext(boolean forUpdates) throws NamingException {
+		if (forUpdates && relaxRules) {
+			LOGGER.debug("Using relax rules control to apply modifications");
+			LdapContext newCtx = ctx.newInstance(null);
+			Control[] controls = newCtx.getRequestControls();
+			if (controls == null) {
+				controls = new Control[0];
+			}
+			int length = newCtx.getRequestControls().length;
+			controls = Arrays.copyOf(controls, length + 1);
+			controls[length] = new BasicControl(RELAX_RULES_CONTROL_OID, Control.CRITICAL, null);
+			newCtx.setRequestControls(controls);
+			return newCtx;
+		}
+		// No need to create a derived context
 		return ctx;
 	}
 

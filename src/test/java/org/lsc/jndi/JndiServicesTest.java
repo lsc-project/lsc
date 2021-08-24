@@ -48,6 +48,7 @@ package org.lsc.jndi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
@@ -55,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
@@ -62,6 +64,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
+import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -83,11 +86,15 @@ public class JndiServicesTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
 	private JndiServices dstJndiServices;
-	
+	private JndiServices dstRelaxRulesJndiServices;
+	private JndiServices dstRecursiveDeleteJndiServices;
+
 	@Before
 	public void setup() {
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
+		dstRelaxRulesJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap-relaxrules"));
+		dstRecursiveDeleteJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap-recursivedelete"));
 	}
 	
 	/**
@@ -181,6 +188,76 @@ public class JndiServicesTest {
 		mis.add(mi);
 		jm.setModificationItems(mis);
 		assertFalse(dstJndiServices.apply(jm));
+	}
+
+	private final void createEntryWithChildren(String parent, String name, int currLevel, int maxLevel) throws NamingException {
+		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
+		jm.setDistinguishName("cn="+name+"," + parent);
+		Attribute objectClass = new BasicAttribute("objectClass", "person");
+		Attribute sn = new BasicAttribute("sn", name);
+		Attribute cn = new BasicAttribute("cn", name);
+		List<ModificationItem> mis = new ArrayList<ModificationItem>();
+		mis.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, objectClass));
+		mis.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, sn));
+		mis.add(new ModificationItem(DirContext.ADD_ATTRIBUTE, cn));
+		jm.setModificationItems(mis);
+		assertTrue(dstJndiServices.apply(jm));
+		if (currLevel < maxLevel) {
+			currLevel++;
+			int nbChildren = new Random().nextInt(3) + 1;
+			for (int child=0; child < nbChildren; child++) {
+				createEntryWithChildren("cn="+name+"," + parent, name+child, currLevel, maxLevel);
+			}
+		}
+	}
+
+	@Test
+	public final void testDeleteRecursively() throws NamingException {
+		// First, add parent entry with children on many levels
+		createEntryWithChildren("ou=People", "testDelete", 0, 3);
+		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
+		jm.setDistinguishName("cn=testDelete,ou=People");
+		assertFalse("delete entry with children should fail if not using recursiveDelete option", dstJndiServices.apply(jm));
+		assertTrue("delete entry with children should succeed using recursiveDelete option", dstRecursiveDeleteJndiServices.apply(jm));
+		assertNull("entry should not exist after delete",dstJndiServices.readEntry("cn=testDelete,ou=People", true));
+	}
+
+	@Test
+	public final void testApplyModificationsRelaxRules() throws NamingException {
+		{
+			LdapContext ctx = dstRelaxRulesJndiServices.getContext(true);
+			boolean hasRelaxRulesCtl = false;
+			for (int i=0; i < ctx.getRequestControls().length; i++) {
+				if (ctx.getRequestControls()[i].getID().equals(JndiServices.RELAX_RULES_CONTROL_OID)) {
+					hasRelaxRulesCtl = true;
+					break;
+				}
+			}
+			assertTrue("ctx for updates does not contains relax-rules request control", hasRelaxRulesCtl);
+		}
+		{
+			LdapContext ctx = dstRelaxRulesJndiServices.getContext(false);
+			boolean hasRelaxRulesCtl = false;
+			for (int i=0; i < ctx.getRequestControls().length; i++) {
+				if (ctx.getRequestControls()[i].getID().equals(JndiServices.RELAX_RULES_CONTROL_OID)) {
+					hasRelaxRulesCtl = true;
+					break;
+				}
+			}
+			assertFalse("ctx not for updates contains relax-rules request control", hasRelaxRulesCtl);
+		}
+		{
+			// This fails as OpenDJ does not support relax-rules control
+			Attribute entryUUID = new BasicAttribute("entryUUID");
+			entryUUID.add(java.util.UUID.randomUUID().toString());
+			JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
+			jm.setDistinguishName("ou=People");
+			ModificationItem mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, entryUUID);
+			List<ModificationItem> mis = new ArrayList<ModificationItem>();
+			mis.add(mi);
+			jm.setModificationItems(mis);
+			assertFalse(dstRelaxRulesJndiServices.apply(jm));
+		}
 	}
 
 	/**

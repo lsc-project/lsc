@@ -49,11 +49,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
@@ -121,6 +122,7 @@ public final class Launcher {
 		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
 		options.addOption("x", "convert", false, "Convert lsc.properties to lsc.xml (-f is mandatory while converting)");
 		options.addOption("h", "help", false, "Get this text");
+		options.addOption("V", "version", false, "Get project version");
 	}
 	
 	/**
@@ -240,7 +242,7 @@ public final class Launcher {
 	 * @return the status code (0: OK, >=1 : failed)
 	 */
 	private int parseOptions(final String[] args) {
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 
 		try {
 			cmdLine = parser.parse(options, args);
@@ -268,6 +270,19 @@ public final class Launcher {
 			}
 			if (cmdLine.hasOption("v")) {
 				validateConfiguration = true;
+			}
+			if (cmdLine.hasOption("V")) {
+                            final Properties properties = new Properties();
+                            try {
+                                properties.load(Launcher.class.getClassLoader().getResourceAsStream(".properties"));
+                                System.out.println(properties.getProperty("lsc.version"));
+                            }
+                            catch(IOException e) {
+                                System.err.println(".properties missing in jar, this is a build issue");
+                                e.printStackTrace(System.err);
+                            }
+                            return 1;
+
 			}
 		
 			if(cmdLine.getOptions().length == 0 || 

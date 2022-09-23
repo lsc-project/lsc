@@ -11,7 +11,7 @@
 		simplifies synchronizations between relation databases and LDAP
 		directories.
 	</description>
-	<url>http://lsc-project.org/</url>
+	<url>https://lsc-project.org/</url>
 	<issueManagement>
 		<system>github</system>
 		<url>https://github.com/lsc-project/lsc/issues</url>
@@ -51,7 +51,7 @@
 	<licenses>
 		<license>
 			<name>BSD</name>
-			<url>http://www.opensource.org/licenses/bsd-license.php</url>
+			<url>https://www.opensource.org/licenses/bsd-license.php</url>
 		</license>
 	</licenses>
 
@@ -63,7 +63,7 @@
 
 	<organization>
 		<name>LSC project</name>
-		<url>http://lsc-project.org/</url>
+		<url>https://lsc-project.org/</url>
 	</organization>
 
 	<properties>
@@ -483,26 +483,26 @@
 	<repositories>
 		<repository>
 			<id>java.net Maven 2</id>
-			<url>http://download.java.net/maven/2</url>
+			<url>https://download.java.net/maven/2</url>
 		</repository>
 		<repository>
                         <id>forgerock-community-repository</id>
                         <name>ForgeRock CommunityRepository</name>
-                        <url>http://maven.forgerock.org/repo/community</url>
+                        <url>https://maven.forgerock.org/repo/community</url>
                 </repository>
 		<repository>
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>
-			<url>http://download.oracle.com/maven</url>
+			<url>https://download.oracle.com/maven</url>
 		</repository>
 		<repository>
 			<id>reflections-repo</id>
 			<name>Reflections Maven2 Repository</name>
-			<url>http://reflections.googlecode.com/svn/repo</url>
+			<url>https://reflections.googlecode.com/svn/repo</url>
 		</repository>
 		<repository>
 			<id>lsc-site</id>
-			<url>http://lsc-project.org/maven</url>
+			<url>https://lsc-project.org/maven</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -517,7 +517,12 @@
 		<pluginRepository>
 			<id>reflections-repo</id>
 			<name>Reflections Maven2 Repository</name>
-			<url>http://reflections.googlecode.com/svn/repo</url>
+			<url>https://reflections.googlecode.com/svn/repo</url>
+		</pluginRepository>
+                <pluginRepository>
+                  <id>org.jfrog.jade.plugins.common</id>
+                  <name>openmindonline-jade-plugin</name>
+                  <url>https://repository.openmindonline.it</url>
 		</pluginRepository>
 	</pluginRepositories>
 

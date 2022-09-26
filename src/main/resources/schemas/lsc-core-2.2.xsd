@@ -411,8 +411,6 @@
 		<xsd:complexContent>
 			<xsd:extension base="ldapSourceServiceType">
 				<xsd:sequence>
-					<xsd:element name="synchronizingAllWhenStarting" type="xsd:boolean"
-						minOccurs="0" default="true" />
 					<xsd:element name="serverType" type="ldapServerType" />
 				</xsd:sequence>
 			</xsd:extension>

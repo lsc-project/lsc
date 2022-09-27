@@ -7,4 +7,4 @@ jdk:
 script: mvn -Popendj test -B
 
 notifications:
-  irc: "irc.freenode.org#lsc-project"
+  irc: "irc.libera.chat#lsc-project"

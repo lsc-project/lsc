@@ -76,5 +76,5 @@ by reusing!
 
 Find more documentation, tutorials at https://lsc-project.org/.
 
-Join us on IRC in #lsc-project on Freenode, or on mailing lists on OW2 server,
+Join us on IRC in #lsc-project on Libera Chat, or on mailing lists on OW2 server,
  see https://lsc-project.org/community#mailing_lists.

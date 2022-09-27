@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc.utils.security;
@@ -82,10 +82,10 @@ import org.slf4j.LoggerFactory;
  * installed. Three new configuration parameters could be added to the
  * configuration:</p>
  * <ul>
- *   <li>lsc>security>encryption>keyfile: the path to the file used to
+ *   <li>lsc &gt; security &gt; encryption &gt; keyfile: the path to the file used to
  *   encrypt/decrypt data</li>
- *   <li>lsc>security>encryption>algorithm: the algorithm to use</li>
- *   <li>lsc>security>encryption>strength: the strength in bits</li>
+ *   <li>lsc &gt; security &gt; encryption &gt; algorithm: the algorithm to use</li>
+ *   <li>lsc &gt; security &gt; encryption &gt; strength: the strength in bits</li>
  * </ul>
  */
 public class SymmetricEncryption {

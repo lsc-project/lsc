@@ -74,7 +74,7 @@ import com.google.common.collect.Sets;
 /**
  * Test different use cases of this JScript evaluator
  * 
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
 public class JScriptEvaluatorTest {

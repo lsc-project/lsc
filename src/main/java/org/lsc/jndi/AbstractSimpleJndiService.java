@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * This class is an abstract generic but configurable implementation to get data
  * from the directory.
  * 
- * You can specify where (baseDn) and what (filterId & attr) information will be
+ * You can specify where (baseDn) and what (filterId &amp; attr) information will be
  * read on which type of entries (filterAll and attrId).
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;

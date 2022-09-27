@@ -71,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * This service allows a multiple referential commit two-phase
  * Get object and list object ids calls are done on the first service
  * Updates are done on every one through a XA transaction
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class MultipleDstService implements IWritableService {
 

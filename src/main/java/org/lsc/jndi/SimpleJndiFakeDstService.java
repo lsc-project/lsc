@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc.jndi;
@@ -52,7 +52,7 @@ import org.lsc.exception.LscServiceConfigurationException;
  * This class provides the same functional level as SimpleJndiDstService
  * but does not apply any modification
  * 
- * You can specify where (baseDn) and what (filterId & attr) information will be read on which type of entries
+ * You can specify where (baseDn) and what (filterId &amp; attr) information will be read on which type of entries
  * (filterAll and attrId).
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;

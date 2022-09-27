@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ *         Thomas Chemineau &lt;thomas@lsc-project.org&gt;
+ *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
+ *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
  ****************************************************************************
  */
 package org.lsc.beans;
@@ -136,17 +136,14 @@ public final class BeanComparator {
 
 	/**
 	 * Static comparison method. By default, source information override
-	 * destination (i.e. Database => Directory) But if a piece of information is
+	 * destination (i.e. Database =&gt; Directory) But if a piece of information is
 	 * present only in the destination, it remains
 	 * 
 	 * @param task the corresponding task parameter
 	 * @param srcBean the source bean
 	 * @param dstBean the destination bean
+         * @throws org.lsc.exception.LscServiceException lsc service
 	 * @return modifications to apply to the directory
-	 * @throws NamingException
-	 *             an exception may be thrown if an LDAP data access error is
-	 *             encountered
-	 * @throws CloneNotSupportedException 
 	 */
 	public static LscModifications calculateModifications(
 					Task task, IBean srcBean, IBean dstBean) 
@@ -467,9 +464,9 @@ public final class BeanComparator {
 	 * @param destBean directory object bean
 	 * @param jm modification to apply on the main object
 	 * @return Array of {@link JndiModifications}
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException invocation target
+	 * @throws IllegalAccessException illegal access
+	 * @throws IllegalArgumentException illegal argument
 	 */
 	public static JndiModifications[] checkOtherModifications(IBean srcBean, IBean destBean, JndiModifications jm)
 					throws IllegalAccessException, InvocationTargetException {

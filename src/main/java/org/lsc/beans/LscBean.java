@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc.beans;
@@ -146,7 +146,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 * 
 	 * @param id The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	@Override
 	public final String getDatasetFirstValueById(final String id)
@@ -181,7 +181,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 * 
 	 * @param id The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	public final List<String> getDatasetValuesById(final String id)
 			throws NamingException {
@@ -214,8 +214,8 @@ public abstract class LscBean implements IBean, Serializable {
 	 * Get all binary values of an attribute from its name
 	 * 
 	 * @param id The attribute name (case insensitive)
-	 * @return List<String> List of attribute values, or an empty list
-	 * @throws NamingException
+	 * @return List of attribute values, or an empty list
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	public final List<byte[]> getDatasetBinaryValuesById(final String id) throws NamingException {
 		List<byte[]> resultsArray = new ArrayList<byte[]>();
@@ -381,7 +381,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 * Clone this Bean object.
 	 * 
 	 * @return Object
-	 * @throws java.lang.CloneNotSupportedException
+	 * @throws java.lang.CloneNotSupportedException can't clone
 	 */
 	@Override
 	public LscBean clone() throws CloneNotSupportedException {

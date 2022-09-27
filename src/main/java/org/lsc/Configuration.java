@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc;
@@ -90,8 +90,8 @@ import ch.qos.logback.core.joran.spi.JoranException;
  * It contains deprecated properties based methods to allow smooth updates of 
  * plugins and external methods components 
  * 
- * @author Sebastien Bahloul <seb@lsc-project.org>
- * @author Remy-Christophe Schermesser <rcs@lsc-project.org>
+ * @author Sebastien Bahloul seb@lsc-project.org
+ * @author Remy-Christophe Schermesser rcs@lsc-project.org
  */
 public class Configuration {
 

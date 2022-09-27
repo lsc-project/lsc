@@ -53,7 +53,7 @@ import org.lsc.exception.LscServiceInitializationException;
 
 /**
  * This interface exposes a multi referential XA service
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public interface IXAWritableService extends IWritableService{
 

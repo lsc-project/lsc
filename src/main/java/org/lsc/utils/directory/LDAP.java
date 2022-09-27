@@ -46,7 +46,6 @@
 package org.lsc.utils.directory;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -78,7 +77,7 @@ import org.lsc.jndi.JndiServices;
  * utilization.
  * </P>
  * 
- * @author Jonathan Clarke <jonathan@phillipoux.net>
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class LDAP {
 
@@ -191,8 +190,6 @@ public class LDAP {
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
 	 * @throws LdapURLEncodingException 
-	 * @throws MalformedURLException
-	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String passwordToCheck)
 					throws NamingException, LdapURLEncodingException {
@@ -223,15 +220,13 @@ public class LDAP {
 	 *             any exceptions that occur during connection, other than bind
 	 *             failures and no search results
 	 * @throws LdapURLEncodingException 
-	 * @throws MalformedURLException
-	 *             If the search URL is malformed.
 	 */
 	public static boolean canBindSearchRebind(String url, String bindDn,
 					String bindPassword, String passwordToCheck)
 					throws NamingException, LdapURLEncodingException {
 
 		// interpret the search URL to feed to JndiServices
-		// this is done first to thrown MalformedURLException ASAP, not after
+		// this is done first to throw NamingException ASAP, not after
 		// connecting...
 		LdapUrl urlInstance = new LdapUrl(url);
 

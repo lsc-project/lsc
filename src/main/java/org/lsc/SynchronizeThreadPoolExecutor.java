@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This object is managing LSC tasks. It is now a wrapper for JDK 
  * ThreadPoolExecutor but may rely on a different implementation  
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  *
  */
 public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {

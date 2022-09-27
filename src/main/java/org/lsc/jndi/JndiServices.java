@@ -993,7 +993,7 @@ public final class JndiServices {
 	 * @param attrsToReturn
 	 *                list of attribute names to return (or null for all
 	 *                'standard' attributes)
-	 * @return the map of name => attribute
+	 * @return the map of name =&gt; attribute
 	 * @throws NamingException
 	 *                 thrown if something goes wrong (bad
 	 */

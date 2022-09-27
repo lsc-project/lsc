@@ -80,7 +80,7 @@ import com.ibatis.sqlmap.client.SqlMapClient;
  * Manage retrieving of list and object according t
  * Can be override by a specific implementation in the final class if needed :
  * Get a look at org.lsc.service.StructureJdbcService class
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public abstract class AbstractJdbcService implements IService {
 

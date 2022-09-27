@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is a generic but configurable implementation to get data
- * from the directory.  You can specify where (baseDn) and what (filterId &
+ * from the directory.  You can specify where (baseDn) and what (filterId &amp;
  * attr) information will be read on which type of entries (filterAll and
  * attrId). TODO implements JUnit test
  *

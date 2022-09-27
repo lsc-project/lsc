@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc.beans;
@@ -58,11 +58,11 @@ import org.lsc.LscDatasets;
  * General interface of a bean. A bean in LSC describes an object in a
  * source or destination. It has nothing to do with Java beans (in fact,
  * LSC beans do not have any get- or set- methods).
- * 
+ *
  * <p>
  * An object is described in this bean as datasets (set of named values)
  * and main identifier.
- * </p>
+ * <p>
  * 
  * <p>
  * Most methods are convenience methods to get the values of each dataset.
@@ -108,7 +108,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param id
 	 *            The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 * @deprecated
 	 */
 	@Deprecated
@@ -121,7 +121,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param id
 	 *            The attribute name (case insensitive)
 	 * @return String The first value of the attribute, or the empty string ("")
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	public String getDatasetFirstValueById(final String id)
 					throws NamingException;
@@ -131,7 +131,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * 
 	 * @param id The attribute name (case insensitive)
 	 * @return byte[] The first value of the attribute, or null.
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	public byte[] getDatasetFirstBinaryValueById(final String id) throws NamingException;
 
@@ -141,7 +141,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * @param id
 	 *            The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
-	 * @throws NamingException
+	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 * @deprecated See getDatasetById(String id)
 	 */
 	@Deprecated

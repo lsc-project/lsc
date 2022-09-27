@@ -49,7 +49,7 @@ import java.util.Comparator;
 
 /**
  * Simple string comparator allowing reverse sorting
- * @author Sebastien Bahloul <seb@lsc-project.org>
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class AlphabeticOrderComparator implements
 		Comparator<String> {

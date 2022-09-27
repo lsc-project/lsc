@@ -37,10 +37,10 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Thomas Chemineau <thomas@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul seb@lsc-project.org
+ *         Thomas Chemineau thomas@lsc-project.org
+ *         Jonathan Clarke jon@lsc-project.org
+ *         Remy-Christophe Schermesser rcs@lsc-project.org
  ****************************************************************************
  */
 package org.lsc.utils.directory;
@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * Utility class to manage specific entries for a Microsoft ActiveDirectory
  * 
- * @author Rémy-Christophe Schermesser <remy-christophe@schermesser.com>
+ * @author Rémy-Christophe Schermesser &lt;remy-christophe@schermesser.com&gt;
  *
  */
 public class AD {
@@ -191,7 +191,7 @@ public class AD {
 	 * 
 	 * @param unixTimestampString A Unix timestamp as an long
 	 * @return Timestamp in 100-nanosecond ticks since the AD epoch (1 January 1601 00:00:00 UT)
-	 * @see #unixTimestampToADTime(int)
+	 * @see #aDTimeToUnixTimestamp(long)
 	 */
 	public static long unixTimestampToADTime(String unixTimestampString) {
 		return unixTimestampToADTime(Long.parseLong(unixTimestampString));

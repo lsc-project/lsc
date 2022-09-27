@@ -53,7 +53,7 @@ import java.util.Random;
 /**
  * Manage all common string manipulation for french
  *
- * @author Sebastien Bahloul <seb@lsc-project.org>;
+ * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;;
  */
 public final class FrenchFilters {
 

@@ -50,7 +50,7 @@ import org.lsc.LscModificationType;
 /**
  * Enumeration for the modifications type of an directory
  * 
- * @author Rémy-Christophe Schermesser <remy-christophe@schermesser.com>
+ * @author Rémy-Christophe Schermesser &lt;remy-christophe@schermesser.com&gt;
  *
  */
 public enum JndiModificationType {

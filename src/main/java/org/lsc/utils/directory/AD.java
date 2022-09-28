@@ -116,6 +116,19 @@ public class AD {
 	}
 
 	/**
+	 * Kept for legacy reason, don't use in any new development
+	 *
+	 * @deprecated UnicodePwd attribute is automatically encoded within ActiveDirectoryDstService
+	 *             this method does nothing
+	 *             to find actual encoding see #getUnicodePwdEncoded(String password)
+	 */
+	public static String getUnicodePwd(String password)  throws UnsupportedEncodingException {
+
+		// don't do anything
+		return password;
+	}
+
+	/**
 	 * Encode a password so that it can be updated in Active Directory
 	 * in the field unicodePwd.
 	 *
@@ -123,11 +136,12 @@ public class AD {
 	 * @return The value to write in AD's unicodePwd attribute
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String getUnicodePwd(String password) throws UnsupportedEncodingException {
+	public static byte[] getUnicodePwdEncoded(String password)
+			throws UnsupportedEncodingException
+	{
 		String quotedPassword = "\"" + password + "\"";
-		return new String(quotedPassword.getBytes("UTF-16LE"));
+		return quotedPassword.getBytes("UTF-16LE");
 	}
-
 
 	/**
 	 * The Unix epoch (1 January 1970 00:00:00 UT) in AD's time format 

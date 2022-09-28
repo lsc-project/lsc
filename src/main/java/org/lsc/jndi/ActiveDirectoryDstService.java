@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,11 +67,15 @@ import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.CaseIgnoreStringHashMap;
+import org.lsc.utils.directory.AD;
 
 /**
  * A custom JNDI service to translate modifications on the user's "memberOf"
  * attribute to modifications on the "member" attribute of each groups. This is
  * the way to apply changes on groups with ActiveDirectory.
+ *
+ * Support for UnicodePwd attribute encoding from cleartext.
+ *
  * @author St&eacute;phane Bond &lt;&gt;
  */
 public class ActiveDirectoryDstService extends SimpleJndiDstService {
@@ -78,6 +83,8 @@ public class ActiveDirectoryDstService extends SimpleJndiDstService {
 	final String MEMBER_OF_ATTR = "memberOf";
 
 	final String GROUP_MEMBER_ATTR = "member";
+
+	final String UNICODE_PWD_ATTR = "UnicodePwd";
 
 	public ActiveDirectoryDstService(TaskType task)
 			throws LscServiceConfigurationException {
@@ -101,10 +108,45 @@ public class ActiveDirectoryDstService extends SimpleJndiDstService {
 			}
 		}
 
+		// handle "UnicodePwd" encoding, apply changes on it.
+		for (int i = 0; i < lm.getLscAttributeModifications().size(); i++) {
+			LscDatasetModification dm = lm.getLscAttributeModifications()
+					.get(i);
+			if (dm.getAttributeName().equalsIgnoreCase(UNICODE_PWD_ATTR))
+			{
+
+				if ( dm.getValues().size() > 0 ) {
+					// get only first value, why would there be multiple password values ?
+					String password = (String) dm.getValues().get(0);
+					try {
+						// whole point is that java String have fixed internal encoding
+						// so ldap attribute encoding should be done lately from byte[]
+						byte[] pwdArray = AD.getUnicodePwdEncoded(password);
+						List<ModificationItem> modificationItems = new ArrayList<>();
+						modificationItems.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute(UNICODE_PWD_ATTR, pwdArray)));
+						JndiModifications jndiModifications = new JndiModifications(JndiModificationType.getFromLscModificationType(lm.getOperation()), lm.getTaskName());
+						jndiModifications.setDistinguishName(lm.getMainIdentifier());
+						jndiModifications.setModificationItems(modificationItems);
+						success &= jndiServices.apply(jndiModifications);
+					}
+					catch(UnsupportedEncodingException unsupportedEncoding)
+					{
+						throw new LscServiceException(unsupportedEncoding);
+					}
+					catch (CommunicationException e) {
+						throw new LscServiceException(e);
+					}
+					lm.getLscAttributeModifications().remove(i);
+					break;
+				}
+			}
+		}
+
+
 		// Apply regular changes
 		if (lm.getLscAttributeModifications().size() > 0
 				|| lm.getNewMainIdentifier() != null) {
-			success = super.apply(lm);
+			success &= super.apply(lm);
 		}
 
 		// Apply changes on memberships

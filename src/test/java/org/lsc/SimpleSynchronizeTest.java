@@ -59,7 +59,7 @@ import org.lsc.configuration.LscConfiguration;
  * 
  * Mostly sanity checks for the moment.
  * 
- * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class SimpleSynchronizeTest {
 

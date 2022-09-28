@@ -67,7 +67,7 @@ import org.lsc.jndi.JndiServices;
  * synchronization between two branches of the local LDAP server, and should
  * perform 3 operations : 1 ADD, 1 MODRDN, 1 MODIFY. The
  * 
- * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
+ * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class CommonLdapSyncTest {
 

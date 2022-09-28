@@ -46,19 +46,16 @@ public class ADTest {
             Assert.assertArrayEquals("INTERNAL failure wrong encoding", correct, right);
 
             String outputPassword = AD.getUnicodePwd(inputPassword);
+
+            assertEquals(outputPassword,inputPassword);
             
             System.out.println("Hardcoded right UTF16-LE");
             HexDump.dump(right,0,System.out,0);
 
-            byte[] pwdArray=outputPassword.getBytes("ISO-8859-1");
-            System.out.println("current / via ISO-8859-1");
+            byte[] pwdArray= AD.getUnicodePwdEncoded(inputPassword);
+            System.out.println("current");
             HexDump.dump(pwdArray,0,System.out,0);
 
-            // use default encoding
-            pwdArray=outputPassword.getBytes();
-            System.out.println("current / via default encoding");
-            HexDump.dump(pwdArray,0,System.out,0);
-            
             Assert.assertArrayEquals("wrong encoding", pwdArray, right);
             System.out.println("");
         }	

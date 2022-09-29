@@ -36,9 +36,9 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
- *         Jonathan Clarke <jon@lsc-project.org>
- *         Remy-Christophe Schermesser <rcs@lsc-project.org>
+ *         Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
+ *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
  ****************************************************************************
  */
 package org.lsc.service;

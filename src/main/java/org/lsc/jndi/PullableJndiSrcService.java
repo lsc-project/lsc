@@ -37,7 +37,7 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Sebastien Bahloul <seb@lsc-project.org>
+ *         Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  ****************************************************************************
  */
 package org.lsc.jndi;

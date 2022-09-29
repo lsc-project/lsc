@@ -37,7 +37,7 @@
  *                  ==LICENSE NOTICE==
  *
  *               (c) 2008 - 2011 LSC Project
- *         Jonathan Clarke <jon@lsc-project.org>
+ *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
  ****************************************************************************
  */
 package org.lsc.utils;

@@ -91,8 +91,7 @@
 						-Dcom.sun.management.jmxremote.authenticate=false
 						-Dcom.sun.management.jmxremote.ssl=false
                                                 -Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
-                                                --illegal-access=permit
-                                                --add-reads java.base=java.logging
+                                                ${module.opts}
 						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar</argLine>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
@@ -386,6 +385,25 @@
 	</build>
 
 	<profiles>
+		<!-- Please note you need a java version 8 or newer -->
+		<profile>
+			<id>jdk8</id>
+			<activation>
+				<jdk>[1.8,8]</jdk>
+			</activation>
+			<properties>
+				<module.opts></module.opts>
+			</properties>
+		</profile>
+		<profile>
+			<id>jdk9</id>
+			<activation>
+				<jdk>[9,19]</jdk>
+			</activation>
+			<properties>
+				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
+			</properties>
+		</profile>
 		<profile>
 			<id>opendj</id>
 			<activation>
@@ -544,7 +562,7 @@
 	</pluginRepositories>
 
 	<dependencies>
-                <dependency>
+		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis2</artifactId>
 			<version>2.4.4</version>

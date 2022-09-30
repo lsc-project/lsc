@@ -71,7 +71,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<tapestry-release-version>5.2.5</tapestry-release-version>
-		<jmockit-version>0.999.11</jmockit-version>
+		<jmockit-version>1.5</jmockit-version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 	</properties>
 
@@ -90,6 +90,9 @@
 						-Dcom.sun.management.jmxremote.port=1099
 						-Dcom.sun.management.jmxremote.authenticate=false
 						-Dcom.sun.management.jmxremote.ssl=false
+                                                -Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
+                                                --illegal-access=permit
+                                                --add-reads java.base=java.logging
 						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar</argLine>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
@@ -100,9 +103,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.10.1</version>
 				<configuration>
-					<source>7</source>
-					<target>7</target>
-					<compilerVersion>1.8</compilerVersion>
+					<source>8</source>
+					<target>8</target>
+					<compilerVersion>8</compilerVersion>
 					<encoding>utf-8</encoding>
 				</configuration>
 				<executions>

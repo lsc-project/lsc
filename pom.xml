@@ -73,6 +73,8 @@
 		<tapestry-release-version>5.2.5</tapestry-release-version>
 		<jmockit-version>1.5</jmockit-version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
+		<graalvm.version>22.2.0</graalvm.version>
+		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
 
 	<build>
@@ -90,11 +92,64 @@
 						-Dcom.sun.management.jmxremote.port=1099
 						-Dcom.sun.management.jmxremote.authenticate=false
 						-Dcom.sun.management.jmxremote.ssl=false
-                                                -Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
-                                                ${module.opts}
-						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar</argLine>
+						-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
+						${module.opts}
+						${graalvm.opts}
+						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar
+					</argLine>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.graalvm.compiler</groupId>
+									<artifactId>compiler</artifactId>
+									<version>${graalvm.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<destFileName>compiler.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.graalvm.compiler</groupId>
+									<artifactId>compiler-management</artifactId>
+									<version>${graalvm.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<destFileName>compiler-management.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.graalvm.truffle</groupId>
+									<artifactId>truffle-api</artifactId>
+									<version>${graalvm.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<destFileName>truffle-api.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.graalvm.sdk</groupId>
+									<artifactId>graal-sdk</artifactId>
+									<version>${graalvm.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<destFileName>graal-sdk.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${compiler.dir}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -393,17 +448,63 @@
 			</activation>
 			<properties>
 				<module.opts></module.opts>
+				<!-- no GraalVM compiler embedded in jvm -->
+				<graalvm.opts></graalvm.opts>
 			</properties>
 		</profile>
 		<profile>
 			<id>jdk9</id>
 			<activation>
-				<jdk>[9,19]</jdk>
+				<jdk>[9,11[</jdk>
 			</activation>
 			<properties>
 				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
+				<!-- no GraalVM compiler embedded in jvm -->
+				<graalvm.opts></graalvm.opts>
 			</properties>
 		</profile>
+		<profile>
+			<id>jdk11</id>
+			<activation>
+				<jdk>[11,</jdk>
+			</activation>
+			<properties>
+				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
+				<!-- GraalVM compiler embedded in jvm -->
+				<graalvm.opts>-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI --module-path=${compiler.dir} --upgrade-module-path=${compiler.dir}/compiler.jar${path.separator}${compiler.dir}/compiler-management.jar</graalvm.opts>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.graalvm.sdk</groupId>
+					<artifactId>graal-sdk</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js-scriptengine</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>profiler</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>chromeinspector</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+
 		<profile>
 			<id>opendj</id>
 			<activation>
@@ -659,7 +760,7 @@
 		<dependency>
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
-			<version>1.7R4</version>
+			<version>1.7.14</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>

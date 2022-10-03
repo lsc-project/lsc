@@ -3,9 +3,9 @@ package org.lsc.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
+import javax.script.*;
 
 import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
@@ -54,12 +54,22 @@ public class ScriptingEvaluator {
 							new GroovyEvaluator(sef.getScriptEngine()));
 					break;
 				}
+				else if ("graal.js".equals(name)) {
+					/** for some reason graal.js is not enumerated in factories this code is not hit
+					 * so leave it out by getting it explicitly with
+					 * ScriptEngineManager().getEngineByName("graal.js");
+					 * later.
+					 */
+					break;
+
+				}
 				loaded = false;
 			}
 			if(!loaded) {
 				LOGGER.debug("Unsupported scripting engine: " + sef.getEngineName());
 			}
 		}
+
         // Add the rhino engine without debugging capabilities
 		instancesTypeCache.put("rjs",
                 new RhinoJScriptEvaluator(false));
@@ -67,8 +77,19 @@ public class ScriptingEvaluator {
         instancesTypeCache.put("rdjs",
                 new RhinoJScriptEvaluator(true));
 
-        // Default to Javascript
-		defaultImplementation = instancesTypeCache.get("js");
+		ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
+		if ( graaljsEngine != null ) {
+			Bindings bindings = graaljsEngine.getBindings(ScriptContext.ENGINE_SCOPE);
+			bindings.put("polyglot.js.allowHostAccess", true);
+			bindings.put("polyglot.js.allowHostClassLookup", (Predicate<String>) s -> true);
+			bindings.put( "polyglot.js.nashorn-compat", true);
+			JScriptEvaluator graaljsevaluator = new JScriptEvaluator(graaljsEngine);
+			instancesTypeCache.put("gj", graaljsevaluator);
+			defaultImplementation = graaljsevaluator;
+		}
+		else {
+			defaultImplementation = instancesTypeCache.get("js");
+		}
 	}
 
 	public static ScriptingEvaluator getInstance() {

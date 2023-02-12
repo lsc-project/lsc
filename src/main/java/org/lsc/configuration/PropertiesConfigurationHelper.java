@@ -49,7 +49,7 @@ import java.io.File;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.lsc.Configuration;
 import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
@@ -154,7 +154,7 @@ public class PropertiesConfigurationHelper {
             // Iterate on each task
             StringTokenizer tasksSt = new StringTokenizer(tasks, ",");
     		while (tasksSt.hasMoreTokens()) {
-    			String taskName = tasksSt.nextToken();
+    			String taskName = tasksSt.nextToken().trim();
     			lscInstance.getTasks().getTask().add(newTask(taskName, conf));
     		}
         }

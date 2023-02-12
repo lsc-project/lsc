@@ -57,8 +57,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang.StringUtils;
 import org.lsc.configuration.CsvAuditType;
 import org.lsc.configuration.JaxbXmlConfigurationHelper;
@@ -202,7 +204,7 @@ public class Configuration {
 
 	@Deprecated
 	public static Properties getAsProperties(PropertiesConfiguration propsConf, final String prefix) {
-		org.apache.commons.configuration.Configuration conf =  propsConf.subset(prefix);
+		org.apache.commons.configuration2.Configuration conf =  propsConf.subset(prefix);
 		if (conf == null) {
 			return null;
 		}
@@ -322,7 +324,11 @@ public class Configuration {
 			try {
 				url = new File(filename).toURI().toURL();
 				LOGGER.debug("Loading configuration url: {}", url);
-				config = new PropertiesConfiguration(url);
+
+				config = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
+						.configure(new Parameters().properties()
+										.setURL(url))
+						.getConfiguration();
 				config.getKeys();
 
 				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
@@ -370,22 +376,6 @@ public class Configuration {
 			value = StringUtils.join(list.iterator(), ",");
 		}
 		return (String) value;
-	}
-
-	/**
-	 * Set the new properties
-	 * @param prefix the prefix or null
-	 * @param props the news properties
-	 * @throws ConfigurationException
-	 */
-	public static void setProperties(String prefix, Properties props) throws ConfigurationException {
-		Enumeration<Object> propsEnum = props.keys();
-		PropertiesConfiguration conf = Configuration.getConfiguration();
-		while (propsEnum.hasMoreElements()) {
-			String key = (String) propsEnum.nextElement();
-			conf.setProperty((prefix != null ? prefix + "." : "") + key, props.getProperty(key));
-		}
-		conf.save();
 	}
 
 	/**

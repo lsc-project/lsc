@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.Test;
 import org.lsc.configuration.TaskType.AuditLog;
 import org.lsc.exception.LscConfigurationException;

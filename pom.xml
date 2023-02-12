@@ -70,7 +70,6 @@
 		<!--Force UTF-8 for the build -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
-		<tapestry-release-version>5.2.5</tapestry-release-version>
 		<jmockit-version>1.5</jmockit-version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<graalvm.version>22.3.1</graalvm.version>
@@ -787,13 +786,6 @@
 			<groupId>org.samba.jcifs</groupId>
 			<artifactId>jcifs</artifactId>
 			<version>1.2.19</version>
-			<type>jar</type>
-			<optional>false</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tapestry</groupId>
-			<artifactId>tapestry5-annotations</artifactId>
-			<version>${tapestry-release-version}</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>

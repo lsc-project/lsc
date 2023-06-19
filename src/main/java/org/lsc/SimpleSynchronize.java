@@ -157,10 +157,10 @@ public class SimpleSynchronize extends AbstractSynchronize {
             LscServerImpl.startJmx(this);
 		}
 		
-		for (Task task: cache.values()) {
-
-			// Launch the task either if explicitly specified or if "all" magic keyword used
-			if (isSyncTaskAll || syncTasks.contains(task.getName())) {
+		if (isSyncTaskAll)
+		{
+			// run all tasks defined in configuration file
+			for (Task task: cache.values()) {
 				foundATask = true;
 
 				if (!launchTask(task, Task.Mode.sync)) {
@@ -171,7 +171,33 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					}
 				}
 			}
-			if (isCleanTaskAll || cleanTasks.contains(task.getName())) {
+		}
+		else
+		{
+			// Parse each sync task passed in argument, in the order given by user
+			for (String sTask: syncTasks) {
+				// Parse each task in configuration file
+				for (Task task: cache.values()) {
+					// Launch the task if it fits the task in configuration file
+					if (sTask.equals(task.getName())) {
+						foundATask = true;
+
+						if (!launchTask(task, Task.Mode.sync)) {
+							launchResult = false;
+						} else {
+							if(task.getSyncHook() != null && task.getSyncHook() != "") {
+								runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (isCleanTaskAll)
+		{
+			// run all tasks defined in configuration file
+			for (Task task: cache.values()) {
 				foundATask = true;
 
 				if (!launchTask(task, Task.Mode.clean)) {
@@ -182,9 +208,35 @@ public class SimpleSynchronize extends AbstractSynchronize {
 					}
 				}
 			}
-			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
+		}
+		else
+		{
+			// Parse each clean task passed in argument, in the order given by user
+			for (String cTask: cleanTasks) {
+				// Parse each task in configuration file
+				for (Task task: cache.values()) {
+					// Launch the task if it fits the task in configuration file
+					if (cTask.equals(task.getName())) {
+						foundATask = true;
+
+						if (!launchTask(task, Task.Mode.clean)) {
+							launchResult = false;
+						} else {
+							if(task.getCleanHook() != null && task.getCleanHook() != "") {
+								runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (isASyncTaskAll)
+		{
+			// run all tasks defined in configuration file
+			for (Task task: cache.values()) {
 				foundATask = true;
-				
+
 				canClose = false;
 
 				if(!launchTask(task, Task.Mode.async)) {
@@ -192,7 +244,26 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				}
 			}
 		}
-		
+		else
+		{
+			// Parse each async task passed in argument, in the order given by user
+			for (String aTask: asyncTasks) {
+				// Parse each task in configuration file
+				for (Task task: cache.values()) {
+					// Launch the task if it fits the task in configuration file
+					if (aTask.equals(task.getName())) {
+						foundATask = true;
+
+						canClose = false;
+
+						if(!launchTask(task, Task.Mode.async)) {
+							launchResult = false;
+						}
+					}
+				}
+			}
+		}
+
 		if (canClose) {
 			close();
 		}

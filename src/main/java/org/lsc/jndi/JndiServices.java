@@ -89,7 +89,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.api.ldap.codec.api.ControlFactory;
 import org.apache.directory.api.ldap.codec.api.LdapApiService;
 import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
@@ -263,10 +263,10 @@ public final class JndiServices {
 		/* Load SyncRepl response control */
 		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
 		ControlFactory<?> factory = new SyncStateValueFactory( ldapApiService );
-		ldapApiService.registerControl( factory );
+		ldapApiService.registerResponseControl( factory );
 		/* Load Persistent Search response control */
 		factory = new PersistentSearchFactory(ldapApiService);
-		ldapApiService.registerControl(factory);
+		ldapApiService.registerResponseControl(factory);
 	}
 
 	private void logConnectingTo(Properties connProps) {
@@ -429,9 +429,9 @@ public final class JndiServices {
 	            return null;
 	        }
 	        if(fqdn.length() > 0) {
-	            fqdn = rdn.getNormValue() + "." + fqdn;
+	            fqdn = rdn.getValue() + "." + fqdn;
 	        } else {
-	            fqdn = rdn.getNormValue();
+	            fqdn = rdn.getValue();
 	        }
 	    }
 	    return fqdn;

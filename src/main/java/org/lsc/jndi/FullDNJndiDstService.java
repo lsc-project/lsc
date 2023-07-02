@@ -57,7 +57,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.commons.collections.map.ListOrderedMap;
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.TaskType;

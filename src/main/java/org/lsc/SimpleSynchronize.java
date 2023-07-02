@@ -58,7 +58,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;

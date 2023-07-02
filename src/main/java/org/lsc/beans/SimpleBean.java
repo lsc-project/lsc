@@ -51,7 +51,7 @@ import java.util.Set;
 
 import javax.management.openmbean.CompositeData;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 
 
 /**

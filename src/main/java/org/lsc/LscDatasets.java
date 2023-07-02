@@ -51,10 +51,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.directory.api.ldap.model.entry.BinaryValue;
+import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.filter.EqualityNode;
 import org.apache.directory.api.ldap.model.filter.FilterEncoder;
 import org.apache.directory.api.ldap.model.filter.SimpleNode;
+import org.apache.directory.api.ldap.model.schema.AttributeType;
 import org.lsc.utils.CaseIgnoreStringHashMap;
 
 /**
@@ -94,9 +95,9 @@ public class LscDatasets implements Serializable {
 	public String getValueForFilter(String attribute) {
 		Object value = values.get(attribute);
 		if(value instanceof byte[]) {
-			BinaryValue binValue = new BinaryValue((byte[])value);
-			SimpleNode<byte[]> filter = new EqualityNode<byte[]>(attribute, binValue);
-			return filter.getEscapedValue().toString();
+			Value binValue = new Value((byte[])value);
+			SimpleNode<byte[]> filter = new EqualityNode<>(new AttributeType(attribute), binValue);
+			return filter.getEscapedValue();
 		} else {
 			String stringValue = getStringValueAttribute(attribute);
 			if (stringValue != null) {

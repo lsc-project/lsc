@@ -59,10 +59,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.lsc.configuration.JaxbXmlConfigurationHelper;
 import org.lsc.configuration.LscConfiguration;
-import org.lsc.configuration.PropertiesConfigurationHelper;
-import org.lsc.exception.LscConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +117,6 @@ public final class Launcher {
 		options.addOption("f", "config", true, "Specify configuration directory");
 		options.addOption("t", "threads", true, "Number of parallel threads to synchronize a task (default: 5)");
 		options.addOption("i", "time-limit", true, "Time limit in parallel server mode in seconds (default: 3600)");
-		options.addOption("x", "convert", false, "Convert lsc.properties to lsc.xml (-f is mandatory while converting)");
 		options.addOption("h", "help", false, "Get this text");
 		options.addOption("V", "version", false, "Get project version");
 	}
@@ -175,19 +171,7 @@ public final class Launcher {
 	 */
 	public int run() {
 		try {
-			if(convertConfiguration) {
-				if(configurationLocation == null) {
-					printHelp();
-					return 1;
-				}
-				// if a configuration directory was set on command line, use it to set up Configuration
-				Configuration.setUp(configurationLocation, false);
-				int status = convertConfiguration();
-				if(status == 0) {
-					LOGGER.info("Configuration successfully converted !");
-				}
-				return status;
-			} else if (validateConfiguration) {
+			if (validateConfiguration) {
 				if(configurationLocation == null) {
 					printHelp();
 					return 1;
@@ -265,9 +249,6 @@ public final class Launcher {
 			if (cmdLine.hasOption("c")) {
 				cleanType = parseSyncType(cmdLine.getOptionValue("c"));
 			}
-			if (cmdLine.hasOption("x")) {
-				convertConfiguration = true;
-			}
 			if (cmdLine.hasOption("v")) {
 				validateConfiguration = true;
 			}
@@ -334,26 +315,6 @@ public final class Launcher {
 	private static void printHelp() {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp("lsc", options);
-	}
-
-	private int convertConfiguration() {
-		try {
-			File xmlFile = new File(configurationLocation, JaxbXmlConfigurationHelper.LSC_CONF_XML);
-			if(!xmlFile.exists()) {
-				PropertiesConfigurationHelper.loadConfigurationFrom(new File(configurationLocation, Configuration.PROPERTIES_FILENAME).getAbsolutePath());
-				new JaxbXmlConfigurationHelper().saveConfiguration(new File(configurationLocation, JaxbXmlConfigurationHelper.LSC_CONF_XML).getAbsolutePath(),
-						LscConfiguration.getInstance().getLsc());
-				LOGGER.info("Configuration file format successfully converted to " + xmlFile.getAbsolutePath());
-				return 0;
-			} else {
-				LOGGER.error(xmlFile.getAbsolutePath() + " already exists. Please move it away to avoid overriding it !");
-			}
-		} catch (LscConfigurationException e) {
-			LOGGER.error(e.toString(), e);
-		} catch (IOException e) {
-			LOGGER.error(e.toString(), e);
-		}
-		return 1;
 	}
 
 }

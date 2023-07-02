@@ -46,31 +46,14 @@
 package org.lsc;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.lang.StringUtils;
 import org.lsc.configuration.CsvAuditType;
 import org.lsc.configuration.JaxbXmlConfigurationHelper;
-import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdifAuditType;
 import org.lsc.configuration.LscConfiguration;
-import org.lsc.configuration.PropertiesConfigurationHelper;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
-import org.lsc.jndi.JndiServices;
 import org.lsc.utils.output.CsvLayout;
 import org.lsc.utils.output.LdifLayout;
 import org.slf4j.Logger;
@@ -99,12 +82,6 @@ public class Configuration {
 
 	// Logger
 	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
-
-	/** Filename of the <code>lsc.properties</code> file */
-	public static final String PROPERTIES_FILENAME = "lsc.properties";
-
-	/** Filename of the <code>database.properties</code> file */
-	public static final String DATABASE_PROPERTIES_FILENAME = "database.properties";
 
 	/** Default location for configuration filename */
 	public static String location;
@@ -145,9 +122,6 @@ public class Configuration {
 	// The maximum user identifier length
 	public static int UID_MAX_LENGTH = 8;
 
-	// LSC configuration of the application
-	private static PropertiesConfiguration config = null;
-
 	/** Prefix for tasks configuration elements in lsc.properties */
 	public static final String LSC_TASKS_PREFIX = "lsc.tasks";
 	
@@ -161,65 +135,6 @@ public class Configuration {
 	protected Configuration() {
 	}
 
-	/**
-	 * Get data source connection properties.
-	 * 
-	 * @return the data source connection properties
-	 * @throws LscConfigurationException 
-	 */
-	@Deprecated
-	public static Properties getSrcProperties() throws LscConfigurationException {
-		return JndiServices.getLdapProperties((org.lsc.configuration.LdapConnectionType) LscConfiguration.getConnection("src-ldap"));
-	}
-
-	/**
-	 * Get data destination connection properties.
-	 * 
-	 * @return the data destination connection properties
-	 * @throws LscConfigurationException 
-	 */
-	@Deprecated
-	public static Properties getDstProperties() throws LscConfigurationException {
-		return JndiServices.getLdapProperties((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
-	}
-
-	/**
-	 * Create a Properties object that is a subset of this configuration.
-	 * If there are no properties matching the prefix, an empty Properties
-	 * object is returned.
-	 * 
-	 * @param prefix
-	 *            The prefix used to select the properties.
-	 * @return Properties object with the requests properties without the prefix
-	 */
-	@Deprecated
-	public static Properties getAsProperties(final String prefix) {
-		return getAsProperties(getConfiguration(), prefix);
-	}
-
-	@Deprecated
-	public static Properties getAsProperties(final String filename, final String prefix) {
-		return getAsProperties(getConfiguration(filename), prefix);
-	}
-
-	@Deprecated
-	public static Properties getAsProperties(PropertiesConfiguration propsConf, final String prefix) {
-		org.apache.commons.configuration2.Configuration conf =  propsConf.subset(prefix);
-		if (conf == null) {
-			return null;
-		}
-		Iterator<?> it = conf.getKeys();
-		Properties result = new Properties();
-		String key = null;
-		Object value = null;
-		while (it.hasNext()) {
-			key = (String) it.next();
-			value = asString(conf.getProperty(key));
-			result.put(key, value);
-		}
-		return result;
-	}
-	
 	public static Properties getPropertiesSubset(final Properties originalProperties, String prefix) {
 		if (originalProperties == null) {
 			return null;
@@ -233,52 +148,6 @@ public class Configuration {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Get a int associated with the given property key
-	 * 
-	 * @param key
-	 *            The property key.
-	 * @param defaultValue
-	 *            The default value.
-	 * @return The associated int.
-	 */
-	@Deprecated
-	public static int getInt(final String key, int defaultValue) {
-		return getConfiguration().getInt(key, defaultValue);
-	}
-
-	/**
-	 * Get a string associated with the given property key
-	 * 
-	 * @param key
-	 *            The property key.
-	 * @return The associated string.
-	 */
-	@Deprecated
-	public static String getString(final String key) {
-		// beware of List problems, so get the object and convert it to a string
-		return asString(getConfiguration().getProperty(key));
-	}
-
-	/**
-	 * Get a string associated with the given property key
-	 * 
-	 * @param key
-	 *            The property key.
-	 * @param defaultValue
-	 *            The default value.
-	 * @return The associated string.
-	 */
-	@Deprecated
-	public static String getString(final String key, String defaultValue) {
-		// beware of List problems, so get the object and convert it to a string
-		Object o = getConfiguration().getProperty(key);
-		if (o == null) {
-			return defaultValue;
-		}
-		return asString(o);
 	}
 
 	private static String cleanup(String path) {
@@ -304,112 +173,6 @@ public class Configuration {
 			setUp();
 		}
 		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
-	}
-
-	/**
-	 * Helper method to do lazy default configuration. This was mainly done to
-	 * make this class easily testable.
-	 * 
-	 * @return the configuration instance used by this class.
-	 */
-	@Deprecated
-	protected static PropertiesConfiguration getConfiguration() {
-		return getConfiguration(new File(location, PROPERTIES_FILENAME).getAbsolutePath());
-	}
-
-	@Deprecated
-	protected static PropertiesConfiguration getConfiguration(String filename) {
-		if (config == null) {
-			URL url = null;
-			try {
-				url = new File(filename).toURI().toURL();
-				LOGGER.debug("Loading configuration url: {}", url);
-
-				config = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
-						.configure(new Parameters().properties()
-										.setURL(url))
-						.getConfiguration();
-				config.getKeys();
-
-				DN_PEOPLE = Configuration.getString("dn.people", DN_PEOPLE);
-				DN_LDAP_SCHEMA = Configuration.getString("dn.ldap_schema",
-								DN_LDAP_SCHEMA);
-				DN_ENHANCED_SCHEMA = Configuration.getString("dn.ldap_schema",
-								DN_ENHANCED_SCHEMA);
-				DN_STRUCTURES = Configuration.getString("dn.structures",
-								DN_STRUCTURES);
-				DN_ACCOUNTS = Configuration.getString("dn.accounts",
-								DN_STRUCTURES);
-				OBJECTCLASS_PERSON = Configuration.getString(
-								"objectclass.person", OBJECTCLASS_PERSON);
-				OBJECTCLASS_EMPLOYEE = Configuration.getString(
-								"objectclass.employee", OBJECTCLASS_EMPLOYEE);
-				DAYS_BEFORE_SUPPRESSION = Configuration.getInt(
-								"suppression.MARQUAGE_NOMBRE_DE_JOURS", DAYS_BEFORE_SUPPRESSION);
-				DN_REAL_ROOT = Configuration.getString("dn.real_root",
-								DN_REAL_ROOT);
-				UID_MAX_LENGTH = Configuration.getInt("uid.maxlength", UID_MAX_LENGTH);
-
-			} catch (ConfigurationException e) {
-				throw new RuntimeException("Unable to find '" + url + "' file", e);
-			} catch (MalformedURLException e) {
-				throw new RuntimeException("Unable to find file", e);
-			}
-		}
-		return config;
-	}
-
-	/**
-	 * commons-configuration automatically parse a comma separated value in key
-	 * and return a list, that's not what we want here, we need to conserve the
-	 * commas. An appropriate method should be added soon to the API.
-	 * 
-	 * @param value
-	 *            the value to convert, it should be either a String or a List
-	 * @return the object as a string.
-	 * @throws ClassCastException
-	 *             if the object is not a string nor a list.
-	 */
-	private static String asString(Object value) {
-		if (value instanceof List) {
-			List<?> list = (List<?>) value;
-			value = StringUtils.join(list.iterator(), ",");
-		}
-		return (String) value;
-	}
-
-	/**
-	 * Helper method to read a file from the filesystem and return it as Properties.
-	 * 
-	 * @param pathToFile Absolute filename on the filesystem to read.
-	 * @return Properties from the file
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static Properties getPropertiesFromFile(String pathToFile) throws FileNotFoundException, IOException {
-		File propertiesFile = new File(pathToFile);
-		Properties props = new Properties();
-		InputStream st = new FileInputStream(propertiesFile);
-		try {
-			props.load(st);
-		} finally {
-			st.close();
-		}
-		return props;
-	}
-
-	/**
-	 * Helper method to read a file from the configuration directory and return it as Properties.
-
-	 * @param fileName Filename relative to the configuration directory.
-	 * @return Properties from the file
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static Properties getPropertiesFromFileInConfigDir(String fileName) throws FileNotFoundException, IOException {
-		return getPropertiesFromFile(Configuration.getConfigurationDirectory() + fileName);
 	}
 
 	/**
@@ -456,8 +219,7 @@ public class Configuration {
 		String message = null;
 		if(lscConfigurationPath == null 
 				|| ! new File(lscConfigurationPath).isDirectory()
-				|| ( ! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()
-						&& ! new File(lscConfigurationPath, PROPERTIES_FILENAME).isFile())) {
+				|| ! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile() ) {
 			message = "Defined configuration location (" + lscConfigurationPath + ") points to a non existing LSC configured instance. " +
 				"LSC configuration loading will fail !";
 			LOGGER.error(message);
@@ -467,12 +229,8 @@ public class Configuration {
 			location = cleanup(lscConfigurationPath);
 			if(!LscConfiguration.isInitialized()) {
 				File xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
-				File properties = new File(location, Configuration.PROPERTIES_FILENAME);
 				if(xml.exists() && xml.isFile()) {
 					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
-				} else if (properties.exists() && properties.isFile()) {
-					LOGGER.warn("LSC configuration loaded from old properties file format !");
-					PropertiesConfigurationHelper.loadConfigurationFrom(properties.getAbsolutePath());
 				} else {
 		            message = "Unable to load configuration configuration inside the directory: " + location;
 		            LOGGER.error(message);

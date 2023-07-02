@@ -292,38 +292,6 @@ public final class JndiServices {
 		}
 	}
 
-	/**
-	 * Get the source directory connected service.
-	 * @return the source directory connected service
-	 */
-	@Deprecated
-	public static JndiServices getSrcInstance() {
-		try {
-			Properties srcProperties = Configuration.getSrcProperties();
-			if (srcProperties != null && srcProperties.size() > 0) {
-				return getInstance(srcProperties);
-			}
-			return null;
-		} catch (Exception e) {
-			LOGGER.error("Error opening the LDAP connection to the source!");
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Get the target directory connected service.
-	 * @return the target directory connected service
-	 */
-	@Deprecated
-	public static JndiServices getDstInstance() {
-		try {
-			return getInstance(Configuration.getDstProperties());
-		} catch (Exception e) {
-			LOGGER.error("Error opening the LDAP connection to the destination!");
-			throw new RuntimeException(e);
-		}
-	}
-
 	public static JndiServices getInstance(final Properties props) throws NamingException, IOException {
 		return getInstance(props, false);
 	}

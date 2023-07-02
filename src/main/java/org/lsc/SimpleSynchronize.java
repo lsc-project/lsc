@@ -59,7 +59,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;

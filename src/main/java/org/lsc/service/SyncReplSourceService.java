@@ -67,28 +67,18 @@ import javax.naming.NamingException;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.apache.directory.api.ldap.codec.api.DefaultConfigurableBinaryAttributeDetector;
-import org.apache.directory.api.ldap.codec.decorators.SearchResultEntryDecorator;
-import org.apache.directory.api.ldap.codec.osgi.DefaultLdapCodecService;
 import org.apache.directory.api.ldap.extras.controls.SynchronizationModeEnum;
+import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRequestValue;
+import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRequestValueImpl;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateTypeEnum;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateValue;
-import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncRequestValueDecorator;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.message.AliasDerefMode;
-import org.apache.directory.api.ldap.model.message.Control;
-import org.apache.directory.api.ldap.model.message.LdapResult;
-import org.apache.directory.api.ldap.model.message.MessageTypeEnum;
-import org.apache.directory.api.ldap.model.message.Response;
-import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
-import org.apache.directory.api.ldap.model.message.SearchRequest;
-import org.apache.directory.api.ldap.model.message.SearchRequestImpl;
-import org.apache.directory.api.ldap.model.message.SearchResultDone;
-import org.apache.directory.api.ldap.model.message.SearchScope;
+import org.apache.directory.api.ldap.model.message.*;
 import org.apache.directory.api.ldap.model.message.controls.AbstractControl;
 import org.apache.directory.api.ldap.model.message.controls.PersistentSearch;
 import org.apache.directory.api.ldap.model.message.controls.PersistentSearchImpl;
@@ -309,7 +299,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			LOGGER.warn("Interrupted search !");
 		}
 		if(checkSearchResponse(searchResponse)) {
-			SearchResultEntryDecorator sre = ((SearchResultEntryDecorator) searchResponse);
+			SearchResultEntry sre = ((SearchResultEntry) searchResponse);
 			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
 			return temporaryMap.entrySet().iterator().next();
 		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
@@ -353,8 +343,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		switch(serverType) {
 		case OPEN_LDAP:
 		case APACHE_DS:
-			DefaultLdapCodecService codec = new DefaultLdapCodecService();
-			SyncRequestValueDecorator syncControl = new SyncRequestValueDecorator(codec);
+			SyncRequestValue syncControl = new SyncRequestValueImpl(true);
 			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
 			return syncControl;
 		case OPEN_DS:
@@ -392,11 +381,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		while(entryAttributes.hasNext()) {
 			Attribute attr = entryAttributes.next();
 			if(attr != null && attr.size() > 0)  {
-				Iterator<Value<?>> values = attr.iterator();
+				Iterator<Value> values = attr.iterator();
 				if(!onlyFirstValue) {
 					Set<Object> datasetsValues = new HashSet<Object>();
 					while(values.hasNext()) {
-						Value<?> value = values.next();
+						Value value = values.next();
 						if (value.isHumanReadable()) {
 							datasetsValues.add(value.getString());
 						} else {
@@ -405,7 +394,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 					}
 					converted.getDatasets().put(attr.getId(), datasetsValues);
 				} else {
-					Value<?> value = values.next();
+					Value value = values.next();
 					converted.getDatasets().put(attr.getId(), value.isHumanReadable() ? value.getString() : value.getBytes());
 				}
 			}

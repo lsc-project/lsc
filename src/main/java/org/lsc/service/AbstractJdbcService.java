@@ -59,8 +59,8 @@ import javax.naming.CommunicationException;
 import javax.naming.NamingException;
 import javax.naming.directory.BasicAttribute;
 
-import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections4.map.ListOrderedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;

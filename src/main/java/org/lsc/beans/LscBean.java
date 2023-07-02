@@ -60,7 +60,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.SearchResult;
 
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.lsc.LscDatasets;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;

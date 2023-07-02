@@ -70,7 +70,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.lsc.beans.SimpleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

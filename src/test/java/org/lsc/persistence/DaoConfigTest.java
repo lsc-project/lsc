@@ -54,7 +54,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +74,7 @@ public class DaoConfigTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
 	@Before
-	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, ConfigurationException, LscConfigurationException {
+	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, LscConfigurationException {
 		LscConfiguration.reset();
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
 		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");

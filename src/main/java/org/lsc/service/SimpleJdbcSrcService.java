@@ -81,39 +81,6 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
 	 * and calls the appropriate SQL requests defined in sql-map-config.d
 	 * 
-	 * @deprecated
-	 * @param props Configuration properties
-	 * @throws LscServiceInitializationException 
-	 */
-	@Deprecated
-	public SimpleJdbcSrcService(Properties props, String beanClassName) throws LscServiceException {
-		super(DaoConfig.getSqlMapClient(Configuration.getAsProperties("src.database")), beanClassName);
-		requestNameForList = props.getProperty("requestNameForList");
-		requestNameForObject = props.getProperty("requestNameForObject");
-		requestNameForNextId = props.getProperty("requestNameForNextId");
-		requestNameForClean = props.getProperty("requestNameForClean");
-		
-		try {
-			// check that we have all parameters, or abort
-			Configuration.assertPropertyNotEmpty("requestNameForList", requestNameForList, this.getClass().getName());
-			Configuration.assertPropertyNotEmpty("requestNameForObject", requestNameForObject, this.getClass().getName());
-			
-			if(props.getProperty("interval") != null) {
-				interval = Integer.parseInt(props.getProperty("interval"));
-			} else {
-				interval = -1;
-			}
-		} catch (NumberFormatException e) {
-			throw new LscServiceInitializationException(e);
-		} catch (LscConfigurationException e) {
-			throw new LscServiceConfigurationException(e);
-		}
-	}
-
-	/**
-	 * Simple JDBC source service that gets SQL request names from lsc.properties
-	 * and calls the appropriate SQL requests defined in sql-map-config.d
-	 * 
 	 * @param task Initialized task containing all necessary pieces of information to initiate connection
 	 * 				and load settings 
 	 * @throws LscServiceInitializationException 

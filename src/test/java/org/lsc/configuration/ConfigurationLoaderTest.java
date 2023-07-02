@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.Test;
 import org.lsc.configuration.TaskType.AuditLog;
 import org.lsc.exception.LscConfigurationException;
@@ -128,7 +127,7 @@ public class ConfigurationLoaderTest {
 	}
 		
 	@Test
-	public void testDumpSimpleConfiguration() throws ConfigurationException, IOException, LscConfigurationException {
+	public void testDumpSimpleConfiguration() throws IOException, LscConfigurationException {
 		Lsc c = getFile(this.getClass().getClassLoader().getResource("test.xml").getPath(), ImmutableMap.<String, String>of());
 		LscConfiguration.loadFromInstance(c);
 
@@ -150,8 +149,6 @@ public class ConfigurationLoaderTest {
 			new ConfigurationLoaderTest().testDumpSimpleConfiguration();
 			new ConfigurationLoaderTest().testLoadSimpleConfiguration();
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		} catch (LscConfigurationException e) {
 			e.printStackTrace();

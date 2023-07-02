@@ -689,7 +689,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -712,7 +712,7 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.19</version>
+			<version>1.4.20</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>

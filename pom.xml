@@ -268,7 +268,7 @@
 			<plugin>
 				<groupId>org.reflections</groupId>
 				<artifactId>reflections-maven</artifactId>
-				<version>0.9.9-RC1</version>
+				<version>0.9.9-RC2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -806,13 +806,12 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>0.9.12</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.1-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>

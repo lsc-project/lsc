@@ -75,13 +75,10 @@ import org.lsc.service.IService;
 import org.lsc.utils.directory.LDAP;
 
 /**
- * This test case attempts to reproduce a typical ldap2ldap setup via
- * SimpleSynchronize. This relies on settings in lsc.properties from the test
- * resources, and entries in the local OpenDS directory. testSync() performs a
- * synchronization between two branches of the local LDAP server, and should
- * perform 3 operations : 1 ADD, 1 MODRDN, 1 MODIFY. The
- * 
- * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
+ * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
+ * It attempts to launch all the 3 tasks defined in
+ * src/test/resources/etc/lsc.xml
+ * ldap2ldapOrderedTestTask3, ldap2ldapOrderedTestTask2, and ldap2ldapOrderedTestTask1
  */
 public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 
@@ -98,7 +95,7 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 	@Test
 	public final void testLdap2LdapOrderedSyncTest() throws Exception {
 
-		// make sure the contents of the directory are as we expect to begin with
+		// Declare the tasks to launch in the correct order
 		List<String> user_tasks = Arrays.asList("ldap2ldapOrderedTestTask3", "ldap2ldapOrderedTestTask2", "ldap2ldapOrderedTestTask1");
 
 		// perform the sync
@@ -114,6 +111,17 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 
 
 		// check Operation order
+                /*
+                 * Here there is nothing to check really
+                 * - either every task has succeeded
+                 * - either one task has failed, which means the order is not enforced
+                 * Indeed, the task can only succeed in this precise order:
+                 *     - ldap2ldapOrderedTestTask3 (creates an entry cn=CN0001-A from cn=CN0001),
+                 *     - ldap2ldapOrderedTestTask2 (creates an entry cn=CN0001-B from cn=CN0001-A),
+                 *     - ldap2ldapOrderedTestTask1 (creates an entry cn=CN0001-C from cn=CN0001-B)
+                 * See src/test/resources/etc/lsc.xml for more details
+                 * if the order was taken from the position of the tasks in lsc.xml, it would fail
+                 */
 
 	}
 
@@ -146,45 +154,5 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 
 		boolean ret = sync.launch(asyncType, syncType, cleanType);
 		assertTrue(ret);
-	}
-
-	@Override
-	public void checkAttributeIsEmpty(String dn, String attributeName)
-					throws NamingException {
-		SearchResult sr = dstJndiServices.readEntry(dn, false);
-		assertNull(sr.getAttributes().get(attributeName));
-	}
-
-	/**
-	 * Get an object from the destination directory, and check that a given attribute
-	 * has one value exactly that matches the value provided.
-	 * 
-	 * In these tests we use this function to read from the source too, since
-	 * it is in reality the same directory.
-	 * 
-	 * @param dn The object to read.
-	 * @param attributeName The attribute to check.
-	 * @param value The value expected in the attribute.
-	 * @throws NamingException
-	 */
-	@Override
-	public void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
-		SearchResult sr = dstJndiServices.readEntry(dn, false);
-		Attribute at = sr.getAttributes().get(attributeName);
-		assertNotNull(at);
-		assertEquals(1, at.size());
-
-		String realValue = (String) at.get();
-		assertEquals(value, realValue);
-	}
-
-	private void checkBinaryAttributeValue(String dn, String attributeName, String valueBase64) throws NamingException {
-		SearchResult sr = dstJndiServices.readEntry(dn, false);
-		Attribute at = sr.getAttributes().get(attributeName);
-		assertNotNull(at);
-		assertEquals(1, at.size());
-
-		byte[] realValue = (byte[]) at.get();
-		assertTrue(Arrays.equals(Base64.decodeBase64(valueBase64.getBytes()), realValue));
 	}
 }

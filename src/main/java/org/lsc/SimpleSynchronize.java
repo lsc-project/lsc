@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.lsc.beans.IBean;
@@ -138,61 +139,55 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 					final List<String> cleanTasks) throws Exception {
-		Boolean foundATask = false;
+		boolean foundATask = false;
 		boolean canClose = true;
 		boolean launchResult = true;
 
-		// Get the list of defined tasks from LSC properties
-		// Iterate on each task
-		boolean isASyncTaskAll = asyncTasks.contains(ALL_TASKS_KEYWORD);
-		boolean isSyncTaskAll = syncTasks.contains(ALL_TASKS_KEYWORD);
-		boolean isCleanTaskAll = cleanTasks.contains(ALL_TASKS_KEYWORD);
-		
 		if(getTasksName() == null) {
 			return false;
 		} else if(getTasks().length == 0) {
 			init();
 		}
 		if(!asyncTasks.isEmpty()) {
-            LscServerImpl.startJmx(this);
+			LscServerImpl.startJmx(this);
 		}
-		
-		for (Task task: cache.values()) {
 
-			// Launch the task either if explicitly specified or if "all" magic keyword used
-			if (isSyncTaskAll || syncTasks.contains(task.getName())) {
-				foundATask = true;
+		Collection<Task> asyncTasksToLaunch = userOrderedTask(asyncTasks, asyncTasks.contains(ALL_TASKS_KEYWORD));
+		Collection<Task> syncTasksToLaunch = userOrderedTask(syncTasks, syncTasks.contains(ALL_TASKS_KEYWORD));
+		Collection<Task> cleanTasksToLaunch = userOrderedTask(cleanTasks, cleanTasks.contains(ALL_TASKS_KEYWORD));
 
-				if (!launchTask(task, Task.Mode.sync)) {
-					launchResult = false;
-				} else {
-					if(task.getSyncHook() != null && task.getSyncHook() != "") {
-						runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
-					}
-				}
-			}
-			if (isCleanTaskAll || cleanTasks.contains(task.getName())) {
-				foundATask = true;
+		for (Task task: syncTasksToLaunch) {
+			foundATask = true;
 
-				if (!launchTask(task, Task.Mode.clean)) {
-					launchResult = false;
-				} else {
-					if(task.getCleanHook() != null && task.getCleanHook() != "") {
-						runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
-					}
-				}
-			}
-			if (isASyncTaskAll || asyncTasks.contains(task.getName())) {
-				foundATask = true;
-				
-				canClose = false;
-
-				if(!launchTask(task, Task.Mode.async)) {
-					launchResult = false;
+			if (!launchTask(task, Task.Mode.sync)) {
+				launchResult = false;
+			} else {
+				if(task.getSyncHook() != null && task.getSyncHook() != "") {
+					runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
 				}
 			}
 		}
-		
+		for (Task task: cleanTasksToLaunch) {
+			foundATask = true;
+
+			if (!launchTask(task, Task.Mode.clean)) {
+				launchResult = false;
+			} else {
+				if(task.getCleanHook() != null && task.getCleanHook() != "") {
+					runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
+				}
+			}
+		}
+		for (Task task: asyncTasksToLaunch) {
+			foundATask = true;
+
+			canClose = false;
+
+			if(!launchTask(task, Task.Mode.async)) {
+				launchResult = false;
+			}
+		}
+
 		if (canClose) {
 			close();
 		}
@@ -203,6 +198,18 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 
 		return launchResult;
+	}
+
+	private Collection<Task> userOrderedTask(List<String> userValues, boolean all) {
+		Collection<Task> allTasks = cache.values();
+		if (all) {
+			return allTasks;
+		}
+		Collection<String> allTaskNames = allTasks.stream().map(Task::getName).collect(Collectors.toList());
+		return userValues.stream()
+				.filter(allTaskNames::contains)
+				.map(cache::get)
+				.collect(Collectors.toList());
 	}
 
 	/**

@@ -84,7 +84,7 @@
       <ldapSourceService>
         <name>ldap2ldapTestTask-src</name>
         <connection reference="src-ldap"/>
-        <baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>cn</string>
           <string>sn</string>
@@ -666,6 +666,194 @@
         <defaultDelimiter>|</defaultDelimiter>
         <defaultPolicy>FORCE</defaultPolicy>
       </propertiesBasedSyncOptions>      
+    </task>
+    <task>
+      <name>ldap2ldapOrderedTestTask1</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapOrderedTestTask1-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-B)</getAllFilter>
+        <getOneFilter>(cn=CN0001-B)</getOneFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapOrderedTestTask1-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-C)</getAllFilter>
+        <getOneFilter>(cn=CN0001-C)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-C,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-C"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-C"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapOrderedTestTask2</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapOrderedTestTask2-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-A)</getAllFilter>
+        <getOneFilter>(cn=CN0001-A)</getOneFilter>
+        <cleanFilter>(cn=CN0001-A)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapOrderedTestTask2-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-B)</getAllFilter>
+        <getOneFilter>(cn=CN0001-B)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-B,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-B"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-B"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapOrderedTestTask3</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapOrderedTestTask3-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001)</getAllFilter>
+        <getOneFilter>(cn=CN0001)</getOneFilter>
+        <cleanFilter>(cn=CN0001)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapOrderedTestTask3-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-A)</getAllFilter>
+        <getOneFilter>(cn=CN0001-A)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-A,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-A"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-A"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
     </task>
   </tasks>
   <security>

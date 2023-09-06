@@ -222,7 +222,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-5</version><!--$NO-MVN-MAN-VER$ -->
+				<version>2.6</version><!--$NO-MVN-MAN-VER$ -->
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/dist.xml</descriptor>

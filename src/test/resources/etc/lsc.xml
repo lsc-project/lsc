@@ -84,7 +84,7 @@
       <ldapSourceService>
         <name>ldap2ldapTestTask-src</name>
         <connection reference="src-ldap"/>
-        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <baseDn>ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org</baseDn>
         <pivotAttributes>
           <string>cn</string>
           <string>sn</string>

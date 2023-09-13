@@ -43,15 +43,17 @@ public class ScriptingEvaluator {
 		instancesTypeCache = new HashMap<String, ScriptableEvaluator>();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
 		for (ScriptEngineFactory sef : factories) {
-			boolean loaded = true;
+			boolean loaded = false;
 			for (String name : sef.getNames()) {
 				if ("js".equals(name)) {
 					instancesTypeCache.put(name,
 							new JScriptEvaluator(sef.getScriptEngine()));
+					loaded = true;
 					break;
 				} else if ("groovy".equals(name)) {
 					instancesTypeCache.put("gr",
 							new GroovyEvaluator(sef.getScriptEngine()));
+					loaded = true;
 					break;
 				}
 				else if ("graal.js".equals(name)) {
@@ -60,10 +62,10 @@ public class ScriptingEvaluator {
 					 * ScriptEngineManager().getEngineByName("graal.js");
 					 * later.
 					 */
+					loaded = true;
 					break;
 
 				}
-				loaded = false;
 			}
 			if(!loaded) {
 				LOGGER.debug("Unsupported scripting engine: " + sef.getEngineName());

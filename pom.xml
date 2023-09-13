@@ -71,7 +71,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<jmockit-version>1.5</jmockit-version>
-		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<graalvm.version>22.3.1</graalvm.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
@@ -197,7 +196,7 @@
 							<goal>javadoc</goal>
 						</goals>
 						<configuration>
-							<additionalparam>${javadoc.opts}</additionalparam>
+							<doclint>none</doclint>
 						</configuration>
 					</execution>
 				</executions>

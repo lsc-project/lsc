@@ -175,7 +175,7 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.3.1</version>
 				<configuration>
-					<propertiesEncoding>ISO-8859-1</propertiesEncoding><!-- To avoid warning during plugin execution. The project currently doesn't include properties files. -->
+					<propertiesEncoding>UTF-8</propertiesEncoding><!-- To avoid warning during plugin execution. -->
 				</configuration>
 			</plugin>
 

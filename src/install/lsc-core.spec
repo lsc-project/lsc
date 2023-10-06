@@ -66,6 +66,7 @@ mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
 mkdir -p %{buildroot}/etc/cron.d
 mkdir -p %{buildroot}/etc/init.d
 mkdir -p %{buildroot}/etc/default
+mkdir -p %{buildroot}/lib/systemd/system
 mkdir -p %{buildroot}/usr/share/doc/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}/var/lib/lsc/nagios
@@ -92,6 +93,8 @@ cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
 ## init
 cp -a etc/init.d/lsc %{buildroot}/etc/init.d/lsc
 cp -a etc/default/lsc %{buildroot}/etc/default/lsc
+## systemd
+cp -a lib/systemd/system/lsc.service %{buildroot}/lib/systemd/system/lsc.service
 ## nagios
 cp -a bin/check_lsc* %{buildroot}/var/lib/lsc/nagios
 
@@ -171,6 +174,7 @@ rm -rf %{buildroot}
 /usr/bin/lsc-agent
 /usr/bin/hsqldb
 /etc/init.d/lsc
+/lib/systemd/system/lsc.service
 /usr/%{_lib}/lsc/
 /usr/share/doc/lsc
 %{lsc_logdir}

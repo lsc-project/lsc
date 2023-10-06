@@ -1,0 +1,19 @@
+[Unit]
+Description=Run LSC jobs
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/lsc -f /etc/lsc -s all
+User=lsc
+Group=lsc
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+ReadWritePaths=/var/log/lsc
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

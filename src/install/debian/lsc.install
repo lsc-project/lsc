@@ -11,6 +11,8 @@ sample/* usr/share/doc/lsc
 ## init
 etc/init.d/lsc etc/init.d
 etc/default/lsc etc/default
+# systemd
+lib/systemd/system/lsc.service lib/systemd/system
 ## nagios
 bin/check_lsc* var/lib/lsc/nagios
 

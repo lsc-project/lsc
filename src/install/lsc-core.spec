@@ -54,8 +54,6 @@ a JDBC connector, another LDAP directory, flat files...
 # Installation
 #=================================================
 %install
-rm -rf %{buildroot}
-
 # Create directories
 mkdir -p %{buildroot}/usr/bin
 mkdir -p %{buildroot}/usr/%{_lib}/lsc

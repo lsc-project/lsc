@@ -177,34 +177,48 @@ fi
 %changelog
 * Tue Aug 24 2021 - Clement Oudot <clem@lsc-project.org> - 2.1.6-1
 - Upgrade to LSC 2.1.6
+
 * Thu Feb 20 2020 - Clement Oudot <clem@lsc-project.org> - 2.1.5-1
 - Upgrade to LSC 2.1.5
+
 * Sat Mar 25 2017 - Clement Oudot <clem@lsc-project.org> - 2.1.4-0
 - Upgrade to LSC 2.1.4
+
 * Tue Mar 03 2015 - Clement Oudot <clem@lsc-project.org> - 2.1.3-0
 - Upgrade to LSC 2.1.3
+
 * Fri Dec 19 2014 - Clement Oudot <clem@lsc-project.org> - 2.1.2-0
 - Upgrade to LSC 2.1.2
+
 * Fri Jul 25 2014 - Clement Oudot <clem@lsc-project.org> - 2.1.1-0
 - Upgrade to LSC 2.1.1
+
 * Fri Apr 25 2014 - Clement Oudot <clem@lsc-project.org> - 2.1.0-0
 - Upgrade to LSC 2.1.0
+
 * Thu Mar 06 2014 - Clement Oudot <clem@lsc-project.org> - 2.0.4-0
 - Upgrade to LSC 2.0.4
+
 * Fri Sep 13 2013 - Clement Oudot <clem@lsc-project.org> - 2.0.3-0
 - Upgrade to LSC 2.0.3
+
 * Fri Mar 22 2013 - Clement Oudot <clem@lsc-project.org> - 2.0.2-0
 - Upgrade to LSC 2.0.2
+
 * Thu Oct 11 2012 - Clement Oudot <clem@lsc-project.org> - 2.0.1-0
 - Upgrade to LSC 2.0.1
+
 * Mon Apr 02 2012 - Clement Oudot <clem@lsc-project.org> - 2.0-0
 - Upgrade to LSC 2.0
+
 * Thu Feb 09 2012 - Clement Oudot <clem@lsc-project.org> - 1.2.2-0
 - Upgrade to LSC 1.2.2
 - Change ownership of configuration files (#396)
 - Add symlink for sample (#302)
+
 * Sun Jul 18 2010 - Clement Oudot <clem@lsc-project.org> - 1.2.1-0
 - Upgrade to LSC 1.2.1
 - Build package from source
+
 * Thu May 25 2010 - Clement Oudot <clem@lsc-project.org> - 1.2.0-0
 - First package for LSC

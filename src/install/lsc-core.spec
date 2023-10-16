@@ -108,6 +108,11 @@ sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
 sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
 sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}%{_sysconfdir}/default/lsc
 
+%pre
+# Create user and group if needed
+getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
+getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
+
 %post
 #=================================================
 # Post Installation
@@ -121,9 +126,6 @@ then
 fi
 
 # Always do this
-# Create user and group if needed
-getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
 # Change owner
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 

@@ -27,7 +27,6 @@ Release: 0%{?dist}
 License: BSD
 BuildArch: noarch
 
-Group: Applications/System
 URL: https://lsc-project.org
 
 Source: %{lsc_name}-core-%{lsc_version}-dist.zip

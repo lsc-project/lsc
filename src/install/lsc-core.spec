@@ -112,6 +112,11 @@ sed -i 's:^LIB_DIR.*:LIB_DIR="%{_libdir}/lsc":' %{buildroot}%{_bindir}/lsc %{bui
 sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
 sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}%{_bindir}/hsqldb
 
+%pre
+# Create user and group if needed
+getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
+getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
+
 %post
 %systemd_post lsc-async.service
 %systemd_post lsc-async@.service
@@ -119,9 +124,6 @@ sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}%{_bindir}/hsqldb
 %systemd_post lsc-sync@.service
 
 # Always do this
-# Create user and group if needed
-getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
 # Change owner
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 

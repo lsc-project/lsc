@@ -52,6 +52,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Hex;
+
 /**
  * Utility class to manage specific entries for a Microsoft ActiveDirectory
  * 
@@ -241,6 +243,22 @@ public class AD {
 	 */
 	public static long getAccountExpires(String expireDate) throws ParseException {
 		return getAccountExpires(expireDate, "yyyy-MM-dd");
+	}
+
+	/**
+	 * <p>Decode the binary value of a GUID and convert into a readble string representation of this UUID.</p>
+	 * <p>Call this method with binary value of objectGUID attribute:<br/> 
+	 * 	AD.binaryGuidToReadableUUID(srcBean.getDatasetFirstBinaryValueById("objectGUID"));</p>
+	 * <p>Attribute objectGUID needs to be declared as binary in your AD connexion for this method to work.</p>
+	 * @param GUID the binary GUID as sent by Microsoft AD
+	 * @return the UUID/string representation of this binary GUID
+	 */
+	public static String binaryGuidToReadableUUID(byte[] GUID) {
+		if (GUID != null) {
+			String hex = new String(Hex.encodeHex(GUID));
+			return hex.replaceFirst("^(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)(..)$","$4$3$2$1-$6$5-$8$7-$9$10-$11$12$13$14$15$16").toUpperCase();
+		}
+		return "";
 	}
 
 	/* The Hash of values to set or to unset  */

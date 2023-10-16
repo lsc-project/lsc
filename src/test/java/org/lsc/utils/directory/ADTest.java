@@ -45,6 +45,7 @@
  */
 package org.lsc.utils.directory;
 
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -69,7 +70,11 @@ public class ADTest {
 	// representation of a date where Unix time need a long: Tue, 19 Jan 2038 03:14:10 GMT
 	private static final long otherTimeADLong = 137919572500000000L;
 	private static final long otherTimeUnixLong= 2147483650L;
-
+	// base64 encoding of a binary objectGUID
+	private static final byte[] refObjectGUIDBase64 = Base64.getDecoder().decode(new String("Pd0OMI8MTEiq0mBIG8tg2A==").getBytes());
+	// UUID/String reprensentation of above binary objectGUID 
+	private static final String refObjectGUIDAsUUIDString = "300EDD3D-0C8F-484C-AAD2-60481BCB60D8";
+	
 	@Before
 	public void setUp() {
 		refTimeCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -177,4 +182,11 @@ public class ADTest {
 		assertEquals(otherTimeADLong, AD.unixTimestampToADTime(otherTimeUnixLong));
 	}
 	
+	/**
+	 * Test for the {@link AD#binaryGuidToReadableUUID(byte[])} method.
+	 */
+	@Test
+	public final void testBinaryGuidToReadableUUID () {
+		assertEquals(refObjectGUIDAsUUIDString, AD.binaryGuidToReadableUUID(refObjectGUIDBase64));
+	}
 }

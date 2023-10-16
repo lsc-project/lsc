@@ -156,7 +156,12 @@ fi
 #=================================================
 %files
 %license LICENSE.txt
-%config(noreplace) %{_sysconfdir}/lsc/
+%dir %{_sysconfdir}/lsc/
+%config(noreplace) %{_sysconfdir}/lsc/lsc.xml
+%config(noreplace) %{_sysconfdir}/lsc/logback.xml
+%config(noreplace) %{_sysconfdir}/lsc/sql-map-config.xml
+%dir %{_sysconfdir}/lsc/sql-map-config.d/
+%config(noreplace) %{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
 %config(noreplace) %{_sysconfdir}/cron.d/lsc
 %config(noreplace) %{_sysconfdir}/default/lsc-sync
 %config(noreplace) %{_sysconfdir}/default/lsc-async

@@ -11,7 +11,7 @@
 #=================================================
 # Variables
 #=================================================
-%define lsc_logdir      /var/log/lsc
+%define lsc_logdir      %{_localstatedir}/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
 
@@ -53,60 +53,60 @@ a JDBC connector, another LDAP directory, flat files...
 #=================================================
 %install
 # Create directories
-mkdir -p %{buildroot}/usr/bin
-mkdir -p %{buildroot}/usr/%{_lib}/lsc
-mkdir -p %{buildroot}/etc/lsc
-mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
-mkdir -p %{buildroot}/etc/cron.d
-mkdir -p %{buildroot}/etc/init.d
-mkdir -p %{buildroot}/etc/default
-mkdir -p %{buildroot}/usr/share/doc/lsc/bin
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_libdir}/lsc
+mkdir -p %{buildroot}%{_sysconfdir}/lsc
+mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
+mkdir -p %{buildroot}%{_sysconfdir}/cron.d
+mkdir -p %{buildroot}%{_initddir}
+mkdir -p %{buildroot}%{_sysconfdir}/default
+mkdir -p %{buildroot}%{_docdir}/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
-mkdir -p %{buildroot}/var/lib/lsc/nagios
+mkdir -p %{buildroot}%{_sharedstatedir}/lsc/nagios
 
 # Copy files
 ## bin
-cp -a bin/lsc %{buildroot}/usr/bin
-cp -a bin/lsc-agent %{buildroot}/usr/bin
-cp -a bin/hsqldb %{buildroot}/usr/bin
+cp -a bin/lsc %{buildroot}%{_bindir}
+cp -a bin/lsc-agent %{buildroot}%{_bindir}
+cp -a bin/hsqldb %{buildroot}%{_bindir}
 ## config
-cp -a etc/logback.xml %{buildroot}/etc/lsc
-cp -a etc/lsc.xml-sample %{buildroot}/etc/lsc/lsc.xml
-cp -a etc/lsc.xml-sample %{buildroot}/usr/share/doc/lsc/
-cp -a etc/sql-map-config.xml-sample %{buildroot}/etc/lsc/sql-map-config.xml
-cp -a etc/sql-map-config.xml-sample %{buildroot}/usr/share/doc/lsc/
-cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}/etc/lsc/sql-map-config.d/InetOrgPerson.xml
-cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}/usr/share/doc/lsc/
+cp -a etc/logback.xml %{buildroot}%{_sysconfdir}/lsc
+cp -a etc/lsc.xml-sample %{buildroot}%{_sysconfdir}/lsc/lsc.xml
+cp -a etc/lsc.xml-sample %{buildroot}%{_docdir}/lsc/
+cp -a etc/sql-map-config.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.xml
+cp -a etc/sql-map-config.xml-sample %{buildroot}%{_docdir}/lsc/
+cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
+cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}%{_docdir}/lsc/
 ## lib
-cp -a lib/* %{buildroot}/usr/%{_lib}/lsc
+cp -a lib/* %{buildroot}%{_libdir}/lsc
 ## sample
-cp -a sample/ %{buildroot}/usr/share/doc/lsc
+cp -a sample/ %{buildroot}%{_docdir}/lsc
 ## cron
-cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
+cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## init
-cp -a etc/init.d/lsc %{buildroot}/etc/init.d/lsc
-cp -a etc/default/lsc %{buildroot}/etc/default/lsc
+cp -a etc/init.d/lsc %{buildroot}%{_initddir}/lsc
+cp -a etc/default/lsc %{buildroot}%{_sysconfdir}/default/lsc
 ## nagios
-cp -a bin/check_lsc* %{buildroot}/var/lib/lsc/nagios
+cp -a bin/check_lsc* %{buildroot}%{_sharedstatedir}/lsc/nagios
 
 # Reconfigure files
 ## logback
-sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' %{buildroot}/etc/lsc/logback.xml
+sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' %{buildroot}%{_sysconfdir}/lsc/logback.xml
 ## cron
-sed -i 's: root : %{lsc_user} :' %{buildroot}/etc/cron.d/lsc
-sed -i 's:#LSC_BIN#:/usr/bin/lsc:g' %{buildroot}/etc/cron.d/lsc
-sed -i 's:^30:#30:' %{buildroot}/etc/cron.d/lsc
+sed -i 's: root : %{lsc_user} :' %{buildroot}%{_sysconfdir}/cron.d/lsc
+sed -i 's:#LSC_BIN#:%{_bindir}/lsc:g' %{buildroot}%{_sysconfdir}/cron.d/lsc
+sed -i 's:^30:#30:' %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## bin
-sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
-sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/%{_lib}/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
-sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
-sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}/usr/bin/hsqldb
+sed -i 's:^CFG_DIR.*:CFG_DIR="%{_sysconfdir}/lsc":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
+sed -i 's:^LIB_DIR.*:LIB_DIR="%{_libdir}/lsc":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
+sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
+sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}%{_bindir}/hsqldb
 ## init
-sed -i 's:^LSC_BIN.*:LSC_BIN="/usr/bin/lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}/etc/default/lsc
+sed -i 's:^LSC_BIN.*:LSC_BIN="%{_bindir}/lsc":' %{buildroot}%{_sysconfdir}/default/lsc
+sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="%{_sysconfdir}/lsc":' %{buildroot}%{_sysconfdir}/default/lsc
+sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
+sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
+sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}%{_sysconfdir}/default/lsc
 
 %post
 #=================================================
@@ -123,13 +123,13 @@ fi
 # Always do this
 # Create user and group if needed
 getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir /etc/lsc %{lsc_user}
+getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
 # Change owner
 /bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
 
 # Add symlink for sample to work
-ln -sf /usr/%{_lib}/lsc/ /usr/share/doc/lsc/%{_lib}
-ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
+ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
+ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
 
 %postun
 #=================================================
@@ -140,8 +140,8 @@ ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
 if [ $1 -eq 0 ]
 then
 	# Remove sample symlinks
-	rm -rf /usr/share/doc/lsc/%{_lib}
-	rm -rf /usr/share/doc/lsc/bin/
+	rm -rf %{_docdir}/lsc/%{_lib}
+	rm -rf %{_docdir}/lsc/bin/
 
         # Delete user and group
         /usr/sbin/userdel -r %{lsc_user}
@@ -152,17 +152,17 @@ fi
 #=================================================
 %files
 %license LICENSE.txt
-%config(noreplace) /etc/lsc/
-%config(noreplace) /etc/cron.d/lsc
-%config(noreplace) /etc/default/lsc
-/usr/bin/lsc
-/usr/bin/lsc-agent
-/usr/bin/hsqldb
-/etc/init.d/lsc
-/usr/%{_lib}/lsc/
-/usr/share/doc/lsc
+%config(noreplace) %{_sysconfdir}/lsc/
+%config(noreplace) %{_sysconfdir}/cron.d/lsc
+%config(noreplace) %{_sysconfdir}/default/lsc
+%{_bindir}/lsc
+%{_bindir}/lsc-agent
+%{_bindir}/hsqldb
+%{_initddir}/lsc
+%{_libdir}/lsc/
+%{_docdir}/lsc
 %{lsc_logdir}
-/var/lib/lsc/nagios
+%{_sharedstatedir}/lsc/nagios
 
 #=================================================
 # Changelog

@@ -27,7 +27,7 @@ BuildArch: noarch
 
 URL: https://lsc-project.org
 
-Source: %{lsc_name}-core-%{lsc_version}-dist.zip
+Source: https://lsc-project.org/archives/%{name}-core-%{version}-dist.tar.gz
 
 Requires(pre): coreutils
 Requires: which

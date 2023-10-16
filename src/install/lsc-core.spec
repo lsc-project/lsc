@@ -11,8 +11,6 @@
 #=================================================
 # Variables
 #=================================================
-%define lsc_name	lsc
-%define lsc_version	2.2.0
 %define lsc_logdir      /var/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
@@ -21,8 +19,8 @@
 # Header
 #=================================================
 Summary: LDAP Synchronization Connector
-Name: %{lsc_name}
-Version: %{lsc_version}
+Name: lsc
+Version: 2.2.0
 Release: 0%{?dist}
 License: BSD-3-Clause
 BuildArch: noarch
@@ -43,7 +41,7 @@ a JDBC connector, another LDAP directory, flat files...
 # Source preparation
 #=================================================
 %prep
-%setup -n  %{lsc_name}-%{lsc_version}
+%setup -n  %{name}-%{version}
 
 #=================================================
 # Build

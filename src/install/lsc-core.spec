@@ -30,7 +30,6 @@ BuildArch: noarch
 URL: https://lsc-project.org
 
 Source: %{lsc_name}-core-%{lsc_version}-dist.zip
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{?fedora}%{?el9}
 BuildRequires:  systemd-rpm-macros

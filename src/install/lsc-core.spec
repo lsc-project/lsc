@@ -24,7 +24,7 @@ Summary: LDAP Synchronization Connector
 Name: %{lsc_name}
 Version: %{lsc_version}
 Release: 0%{?dist}
-License: BSD
+License: BSD-3-Clause
 BuildArch: noarch
 
 URL: https://lsc-project.org
@@ -153,6 +153,7 @@ fi
 # Files
 #=================================================
 %files
+%license LICENSE.txt
 %config(noreplace) /etc/lsc/
 %config(noreplace) /etc/cron.d/lsc
 %config(noreplace) /etc/default/lsc

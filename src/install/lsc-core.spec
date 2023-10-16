@@ -169,7 +169,7 @@ fi
 %{_libdir}/lsc/
 %{_docdir}/lsc
 %{lsc_logdir}
-%{_sharedstatedir}/lsc/nagios
+%{_sharedstatedir}/lsc/
 
 #=================================================
 # Changelog

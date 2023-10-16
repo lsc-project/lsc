@@ -156,7 +156,6 @@ fi
 # Files
 #=================================================
 %files
-%defattr(-, root, root, 0755)
 %config(noreplace) /etc/lsc/
 %config(noreplace) /etc/cron.d/lsc
 %config(noreplace) /etc/default/lsc-sync

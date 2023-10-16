@@ -146,9 +146,6 @@ then
 	# Remove sample symlinks
 	rm -rf %{_docdir}/lsc/%{_lib}
 	rm -rf %{_docdir}/lsc/bin/
-
-        # Delete user and group
-        /usr/sbin/userdel -r %{lsc_user}
 fi
 
 #=================================================

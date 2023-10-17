@@ -120,9 +120,6 @@ then
 fi
 
 # Always do this
-# Change owner
-/bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
-
 # Add symlink for sample to work
 ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
 ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
@@ -158,7 +155,7 @@ fi
 %{_bindir}/hsqldb
 %{_initddir}/lsc
 %{_libdir}/lsc/
-%{lsc_logdir}
+%attr(-,lsc,lsc) %{lsc_logdir}
 %{_sharedstatedir}/lsc/
 
 #=================================================

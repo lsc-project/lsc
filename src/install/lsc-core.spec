@@ -41,7 +41,7 @@ a JDBC connector, another LDAP directory, flat files...
 # Source preparation
 #=================================================
 %prep
-%setup -n  %{name}-%{version}
+%setup -q
 
 #=================================================
 # Build

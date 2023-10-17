@@ -60,7 +60,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
 mkdir -p %{buildroot}%{_sysconfdir}/cron.d
 mkdir -p %{buildroot}%{_initddir}
 mkdir -p %{buildroot}%{_sysconfdir}/default
-mkdir -p %{buildroot}%{_docdir}/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}%{_sharedstatedir}/lsc/nagios
 
@@ -72,15 +71,10 @@ cp -a bin/hsqldb %{buildroot}%{_bindir}
 ## config
 cp -a etc/logback.xml %{buildroot}%{_sysconfdir}/lsc
 cp -a etc/lsc.xml-sample %{buildroot}%{_sysconfdir}/lsc/lsc.xml
-cp -a etc/lsc.xml-sample %{buildroot}%{_docdir}/lsc/
 cp -a etc/sql-map-config.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.xml
-cp -a etc/sql-map-config.xml-sample %{buildroot}%{_docdir}/lsc/
 cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
-cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}%{_docdir}/lsc/
 ## lib
 cp -a lib/* %{buildroot}%{_libdir}/lsc
-## sample
-cp -a sample/ %{buildroot}%{_docdir}/lsc
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## init
@@ -151,6 +145,8 @@ fi
 #=================================================
 %files
 %license LICENSE.txt
+%doc sample/ etc/lsc.xml-sample etc/sql-map-config.xml-sample
+%doc etc/sql-map-config.d/InetOrgPerson.xml-sample
 %dir %{_sysconfdir}/lsc/
 %config(noreplace) %{_sysconfdir}/lsc/*.xml
 %dir %{_sysconfdir}/lsc/sql-map-config.d/
@@ -162,7 +158,6 @@ fi
 %{_bindir}/hsqldb
 %{_initddir}/lsc
 %{_libdir}/lsc/
-%{_docdir}/lsc
 %{lsc_logdir}
 %{_sharedstatedir}/lsc/
 

@@ -118,9 +118,6 @@ getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group
 %systemd_post lsc-sync@.service
 
 # Always do this
-# Change owner
-/bin/chown -R %{lsc_user}:%{lsc_group} %{lsc_logdir}
-
 # Add symlink for sample to work
 ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
 ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
@@ -167,7 +164,7 @@ fi
 %{_unitdir}/lsc-sync@.service
 %{_unitdir}/lsc-sync.timer
 %{_libdir}/lsc/
-%{lsc_logdir}
+%attr(-,lsc,lsc) %{lsc_logdir}
 %{_sharedstatedir}/lsc/
 
 #=================================================

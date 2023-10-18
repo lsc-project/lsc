@@ -87,22 +87,31 @@ cp -a bin/check_lsc* %{buildroot}%{_sharedstatedir}/lsc/nagios
 
 # Reconfigure files
 ## logback
-sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' %{buildroot}%{_sysconfdir}/lsc/logback.xml
+sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' \
+  %{buildroot}%{_sysconfdir}/lsc/logback.xml
 ## cron
 sed -i 's: root : %{lsc_user} :' %{buildroot}%{_sysconfdir}/cron.d/lsc
 sed -i 's:#LSC_BIN#:%{_bindir}/lsc:g' %{buildroot}%{_sysconfdir}/cron.d/lsc
 sed -i 's:^30:#30:' %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## bin
-sed -i 's:^CFG_DIR.*:CFG_DIR="%{_sysconfdir}/lsc":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
-sed -i 's:^LIB_DIR.*:LIB_DIR="%{_libdir}/lsc":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
-sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}%{_bindir}/lsc %{buildroot}%{_bindir}/lsc-agent %{buildroot}%{_bindir}/hsqldb
-sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}%{_bindir}/hsqldb
+sed -i \
+  -e 's:^CFG_DIR.*:CFG_DIR="%{_sysconfdir}/lsc":' \
+  -e 's:^LIB_DIR.*:LIB_DIR="%{_libdir}/lsc":' \
+  -e 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' \
+  %{buildroot}%{_bindir}/lsc \
+  %{buildroot}%{_bindir}/lsc-agent \
+  %{buildroot}%{_bindir}/hsqldb
+sed -i \
+  -e 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' \
+  %{buildroot}%{_bindir}/hsqldb
 ## init
-sed -i 's:^LSC_BIN.*:LSC_BIN="%{_bindir}/lsc":' %{buildroot}%{_sysconfdir}/default/lsc
-sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="%{_sysconfdir}/lsc":' %{buildroot}%{_sysconfdir}/default/lsc
-sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
-sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}%{_sysconfdir}/default/lsc
-sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}%{_sysconfdir}/default/lsc
+sed -i \
+  -e 's:^LSC_BIN.*:LSC_BIN="%{_bindir}/lsc":' \
+  -e 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="%{_sysconfdir}/lsc":' \
+  -e 's:^LSC_USER.*:LSC_USER="lsc":' \
+  -e 's:^LSC_GROUP.*:LSC_GROUP="lsc":' \
+  -e 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' \
+  %{buildroot}%{_sysconfdir}/default/lsc
 
 %pre
 # Create user and group if needed

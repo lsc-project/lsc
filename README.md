@@ -1,6 +1,6 @@
 # LDAP Synchronization Connector
 
-[![Build Status](https://travis-ci.org/lsc-project/lsc.svg?branch=master)](https://travis-ci.org/lsc-project/lsc)
+[![Build Status](https://github.com/lsc-project/lsc/actions/workflows/maven.yml/badge.svg)](https://github.com/lsc-project/lsc/actions/workflows/maven.yml)
 
 Full HTML documentation is available at https://lsc-project.org/
 

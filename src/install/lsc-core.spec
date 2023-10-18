@@ -28,6 +28,7 @@ Source: https://lsc-project.org/archives/%{name}-core-%{version}-dist.tar.gz
 BuildArch: noarch
 
 Requires(pre): coreutils
+Requires: crontabs
 Requires: which
 Requires(post):   chkconfig
 Requires(preun):  chkconfig

@@ -61,11 +61,15 @@ import org.apache.commons.cli.Options;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
+import org.lsc.beans.InfoCounter;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PivotTransformationType.Transformation;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceException;
+import org.lsc.runnable.AsynchronousRunner;
+import org.lsc.runnable.CleanEntryRunner;
+import org.lsc.runnable.SynchronizeEntryRunner;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
 import org.lsc.utils.LSCStructuralLogger;
@@ -92,30 +96,30 @@ public abstract class AbstractSynchronize {
 		options.addOption("nr", "nomodrdn", false, "Don't rename (MODRDN)");
 		options.addOption("n", "dryrun", false, "Don't update the directory at all");
 	}
-	
+
 	/**
 	 * This is the flag to prevent entries add operation in the target
 	 * directory.
 	 */
-	protected boolean nocreate = false;
+	public boolean nocreate = false;
 
 	/**
 	 * This is the flag to prevent entries update operation in the target
 	 * directory.
 	 */
-	protected boolean noupdate = false;
+	public boolean noupdate = false;
 
 	/**
 	 * This is the flag to prevent entries delete operation in the target
 	 * directory.
 	 */
-	protected boolean nodelete = false;
+	public boolean nodelete = false;
 
 	/**
 	 * This is the flag to prevent entries modrdn operation in the target
 	 * directory.
 	 */
-	protected boolean nomodrdn = false;
+	public boolean nomodrdn = false;
 
 	/**
 	 * Number of parallel threads handling synchronization and cleaning
@@ -133,7 +137,7 @@ public abstract class AbstractSynchronize {
 	 * Map used to keep trace of all running threads
 	 */
 	private Map<String, Thread> asynchronousThreads;
-	
+
 	/**
 	 * Map used to get SyncrhonizeTaks from task name
 	 */
@@ -152,19 +156,15 @@ public abstract class AbstractSynchronize {
 	 * Clean the destination LDAP directory (delete objects not present in
 	 * source).
 	 * 
-	 * @param syncName
-	 *            the synchronization name
-	 * @param srcService
-	 *            the source service (JDBC or JNDI)
-	 * @param dstJndiService
-	 *            the jndi destination service
+	 * @param task the task to perform
 	 */
 	protected final boolean clean2Ldap(Task task) {
 
 		InfoCounter counter = new InfoCounter();
-
 		// Get list of all entries from the destination
 		Set<Entry<String, LscDatasets>> ids = null;
+		SynchronizeThreadPoolExecutor threadPool = null;
+
 		try {
 			ids = task.getDestinationService().getListPivots().entrySet();
 		} catch (LscServiceException e) {
@@ -178,104 +178,18 @@ public abstract class AbstractSynchronize {
 			LOGGER.error("Empty or non existant destination (no IDs found)");
 			return false;
 		}
-
-		ISyncOptions syncOptions = task.getSyncOptions();
-
-		LscModifications lm = null;
-
-		/** Hash table to pass objects into JavaScript condition */
-		Map<String, Object> conditionObjects = null;
-
-		IBean taskBean;
-
-		// Loop on all entries in the destination and delete them if they're not
-		// found in the source
+		
+		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
 		for (Entry<String, LscDatasets> id : ids) {
-			counter.incrementCountAll();
-
-			try {
-				// Search for the corresponding object in the source
-				taskBean = getBean(task, task.getSourceService(), id.getKey(), id.getValue(), false, false);
-
-				// If we didn't find the object in the source, delete it in the
-				// destination
-				if (taskBean == null) {
-					// Retrieve condition to evaluate before deleting
-					Boolean doDelete = null;
-					String conditionString = syncOptions.getDeleteCondition();
-
-					// Don't use JavaScript evaluator for primitive cases
-					if (conditionString.matches("true")) {
-						doDelete = true;
-					} else if (conditionString.matches("false")) {
-						doDelete = false;
-					} else {
-						IBean dstBean = getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), true, false);
-						// Log an error if the bean could not be retrieved!
-						// This shouldn't happen.
-						if (dstBean == null) {
-							LOGGER.error("Could not retrieve the object {} from the directory!", id.getKey());
-							counter.incrementCountError();
-							continue;
-						}
-
-						// Put the bean in a map to pass to JavaScript
-						// evaluator
-						conditionObjects = new HashMap<String, Object>();
-						conditionObjects.put("dstBean", dstBean);
-						conditionObjects.putAll(task.getScriptingVars());
-						if (task.getCustomLibraries() != null) {
-							conditionObjects.put("custom", task.getCustomLibraries());
-						}
-
-						// Evaluate if we have to do something
-						doDelete = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
-					}
-
-					if (doDelete) {
-						lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
-						lm.setMainIdentifer(id.getKey());
-
-						List<LscDatasetModification> attrsMod = new ArrayList<LscDatasetModification>();
-						for (Entry<String,Object> attr : id.getValue().getDatasets().entrySet()) {
-							attrsMod.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, attr.getKey(), Collections.singletonList(attr.getValue())));
-						}
-						lm.setLscAttributeModifications(attrsMod);
-
-	                    counter.incrementCountModifiable();
-	                    
-						// if "nodelete" was specified in command line options,
-						// log action for debugging purposes and continue
-	                    if (nodelete) {
-							logShouldAction(lm, task.getName());
-	                    	continue;
-	                    }
-					} else {
-						continue;
-					}
-
-					// if we got here, we have a modification to apply - let's
-					// do it!
-					if (task.getDestinationService().apply(lm)) {
-						counter.incrementCountCompleted();
-						logAction(lm, id, task.getName());
-					} else {
-						counter.incrementCountError();
-						logActionError(lm, id.getValue(), new Exception("Technical problem while applying modifications to destination service"));
-					}
-				}
-			} catch (LscServiceException e) {
-				counter.incrementCountError();
-				logActionError(lm, id.getValue(), e);
-				if(e.getCause().getClass().isAssignableFrom(CommunicationException.class)) {
-					// we lost the connection to the source or destination, stop
-					// everything!
-					LOGGER.error("Connection lost! Aborting.");
-					return false;
-				} else {
-					LOGGER.error("Unable to delete object {} ({})", id.getKey(), e.toString());
-				}
-			}
+			threadPool.runTask(new CleanEntryRunner(task, counter, this, id));
+		}
+		
+		try {
+			threadPool.shutdown();
+			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
+			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
 		logStatus(counter);
@@ -286,20 +200,10 @@ public abstract class AbstractSynchronize {
 	 * Synchronize the destination LDAP directory (create and update objects
 	 * from source).
 	 * 
-	 * @param syncName
-	 *            the synchronization name
-	 * @param srcService
-	 *            the source service (JDBC or JNDI or anything else)
-	 * @param dstService
-	 *            the JNDI destination service
-	 * @param objectBean
-	 * @param customLibrary
+	 * @param task the task to perform
 	 */
 	protected final boolean synchronize2Ldap(final Task task) {
-		/*final String syncName,
-		final IService srcService, final IService dstService,
-		final Object customLibrary*/
-
+		
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
 		Set<Entry<String, LscDatasets>> ids = null;
@@ -326,7 +230,7 @@ public abstract class AbstractSynchronize {
 		 * destination
 		 */
 		for (Entry<String, LscDatasets> id : ids) {
-			threadPool.runTask(new SynchronizeTask(task, counter, this, id, true));
+			threadPool.runTask(new SynchronizeEntryRunner(task, counter, this, id, true));
 		}
 		try {
 			threadPool.shutdown();
@@ -344,7 +248,7 @@ public abstract class AbstractSynchronize {
 
 		AsynchronousRunner asyncRunner = new AsynchronousRunner(task, this);
 		String taskName = task.getName();
-		
+
 		Thread thread = new Thread(asyncRunner);
 		thread.setName(taskName);
 		asynchronousThreads.put(taskName, thread);
@@ -354,33 +258,33 @@ public abstract class AbstractSynchronize {
 
 	public final synchronized void shutdownAsynchronousSynchronize2Ldap(final String syncName, boolean forceStop) {
 		Thread asyncThread = asynchronousThreads.get(syncName);
-        long startTime = System.currentTimeMillis();
-        
-        if(asyncThread == null) {
-            LOGGER.info("Trying to stop a non running asynchronous task: " + syncName);
-            return;
-        }
-        
-        while(asyncThread.isAlive()) {
-        	try {
-    			asyncThread.join(1000);
-                if ((System.currentTimeMillis() - startTime) > 5000) {
-                	if(forceStop) {
-                    	// After 5 secondes, leaving
-            			asyncThread.interrupt();
-            			asyncThread.join(1000);
-                	} else {
-                		break;
-                	}
-                }
-        	} catch(InterruptedException ie) {
-        		// Thread has been interrupted, doing nothing
-        	}
-        }
-        if(!asyncThread.isAlive()) {
-    		asynchronousThreads.remove(syncName);
-    		mapSTasks.remove(syncName);
-        }
+		long startTime = System.currentTimeMillis();
+
+		if(asyncThread == null) {
+			LOGGER.info("Trying to stop a non running asynchronous task: " + syncName);
+			return;
+		}
+
+		while(asyncThread.isAlive()) {
+			try {
+				asyncThread.join(1000);
+				if ((System.currentTimeMillis() - startTime) > 5000) {
+					if(forceStop) {
+						// After 5 secondes, leaving
+						asyncThread.interrupt();
+						asyncThread.join(1000);
+					} else {
+						break;
+					}
+				}
+			} catch(InterruptedException ie) {
+				// Thread has been interrupted, doing nothing
+			}
+		}
+		if(!asyncThread.isAlive()) {
+			asynchronousThreads.remove(syncName);
+			mapSTasks.remove(syncName);
+		}
 	}
 
 	public final boolean isAsynchronousTaskRunning(final String syncName) {
@@ -397,7 +301,7 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 	}
-	
+
 	public final String getTaskFullStatus(final String syncName) {
 		Thread asyncThread = asynchronousThreads.get(syncName);
 		if(asyncThread != null && asyncThread.isAlive()) {
@@ -408,22 +312,19 @@ public abstract class AbstractSynchronize {
 			return null;
 		}
 	}
-	
+
 	public abstract boolean isAsynchronousTask(String taskName);
 	public abstract Task[] getTasks();
 	public abstract Task getTask(String taskName);
-        
+
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm
-	 *            List of modification to do on the Ldap server
-	 * @param identifier
-	 *            object identifier
-	 * @param except
-	 *            synchronization process name
+	 * @param jm List of modification to do on the Ldap server
+	 * @param identifier object identifier
+	 * @param except synchronization process name
 	 */
-	protected final void logActionError(final LscModifications lm,
+	public final void logActionError(final LscModifications lm,
 			final Object data,
 			final Exception except) {
 
@@ -439,34 +340,31 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm
-	 *            List of modification to do on the Ldap server
-	 * @param id
-	 *            object identifier
-	 * @param syncName
-	 *            synchronization process name
+	 * @param jm List of modification to do on the Ldap server
+	 * @param id object identifier
+	 * @param syncName synchronization process name
 	 */
-	protected final void logAction(final LscModifications lm,
+	public final void logAction(final LscModifications lm,
 			final Entry<String, LscDatasets> id, final String syncName) {
 		switch (lm.getOperation()) {
-			case CREATE_OBJECT:
-				LSCStructuralLogger.DESTINATION.info("# Adding new object {} for {}", lm.getMainIdentifier(), syncName);
-				break;
+		case CREATE_OBJECT:
+			LSCStructuralLogger.DESTINATION.info("# Adding new object {} for {}", lm.getMainIdentifier(), syncName);
+			break;
 
-			case UPDATE_OBJECT:
-				LSCStructuralLogger.DESTINATION.info("# Updating object {} for {}", lm.getMainIdentifier(), syncName);
-				break;
+		case UPDATE_OBJECT:
+			LSCStructuralLogger.DESTINATION.info("# Updating object {} for {}", lm.getMainIdentifier(), syncName);
+			break;
 
-			case CHANGE_ID:
-				LSCStructuralLogger.DESTINATION.info("# Renaming object {} for {}", lm.getMainIdentifier(), syncName);
-				break;
+		case CHANGE_ID:
+			LSCStructuralLogger.DESTINATION.info("# Renaming object {} for {}", lm.getMainIdentifier(), syncName);
+			break;
 
-			case DELETE_OBJECT:
-				LSCStructuralLogger.DESTINATION.info("# Removing object {} for {}", lm.getMainIdentifier(), syncName);
-				break;
+		case DELETE_OBJECT:
+			LSCStructuralLogger.DESTINATION.info("# Removing object {} for {}", lm.getMainIdentifier(), syncName);
+			break;
 
-			default:
-				LSCStructuralLogger.DESTINATION.info("Error: unknown changetype ({} for {})", lm.getMainIdentifier(), syncName);
+		default:
+			LSCStructuralLogger.DESTINATION.info("Error: unknown changetype ({} for {})", lm.getMainIdentifier(), syncName);
 		}
 
 		// TODO Fix LdifLogger to avoid this
@@ -478,32 +376,32 @@ public abstract class AbstractSynchronize {
 	 * @param id
 	 * @param syncName
 	 */
-	protected final void logShouldAction(final LscModifications lm, final String syncName) {
+	public final void logShouldAction(final LscModifications lm, final String syncName) {
 		switch (lm.getOperation()) {
-			case CREATE_OBJECT:
-				LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}", lm.getMainIdentifier());
-				break;
+		case CREATE_OBJECT:
+			LSCStructuralLogger.DESTINATION.debug("Create condition false. Should have added object {}", lm.getMainIdentifier());
+			break;
 
-			case UPDATE_OBJECT:
-				LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object {}", lm.getMainIdentifier());
-				break;
+		case UPDATE_OBJECT:
+			LSCStructuralLogger.DESTINATION.debug("Update condition false. Should have modified object {}", lm.getMainIdentifier());
+			break;
 
-			case CHANGE_ID:
-				LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object {}", lm.getMainIdentifier());
-				break;
+		case CHANGE_ID:
+			LSCStructuralLogger.DESTINATION.debug("ModRDN condition false. Should have renamed object {}", lm.getMainIdentifier());
+			break;
 
-			case DELETE_OBJECT:
-				LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object {}", lm.getMainIdentifier());
-				break;
+		case DELETE_OBJECT:
+			LSCStructuralLogger.DESTINATION.debug("Delete condition false. Should have removed object {}", lm.getMainIdentifier());
+			break;
 
-			default:
-				LSCStructuralLogger.DESTINATION.debug("Error: unknown changetype ({} for {})", lm.getMainIdentifier(), syncName);
+		default:
+			LSCStructuralLogger.DESTINATION.debug("Error: unknown changetype ({} for {})", lm.getMainIdentifier(), syncName);
 		}
 
 		// TODO Fix LdifLogger to avoid this
 		LSCStructuralLogger.DESTINATION.debug("", lm);
 	}
-	
+
 	protected void logStatus(InfoCounter counter) {
 		String totalsLogMessage = getLogStatus(counter);
 		if (counter.getCountError() > 0) {
@@ -512,7 +410,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.info(totalsLogMessage);
 		}
 	}
-	
+
 	protected String getLogStatus(InfoCounter counter) {
 		String totalsLogMessage =
 				"All entries: "+ counter.getCountAll() +
@@ -521,8 +419,8 @@ public abstract class AbstractSynchronize {
 				", errors: "+counter.getCountError();
 		return totalsLogMessage;
 	}
-	
-	protected IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
+
+	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
 		List<Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
 		if (! fromSameService && transformations != null) {
 			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
@@ -556,8 +454,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Parse the command line arguments according the selected filter.
 	 * 
-	 * @param cmdLine
-	 *            Command line options
+	 * @param cmdLine command line options
 	 * @return the parsing status
 	 */
 	public final boolean parseOptions(final CommandLine cmdLine) {
@@ -604,9 +501,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Parallel synchronizing threads accessor
 	 * 
-	 * @param threads
-	 *            the number of parallels threads dedicated to tasks
-	 *            synchronization
+	 * @param threads the number of parallels threads dedicated to tasks synchronization
 	 */
 	public void setThreads(int threads) {
 		this.threads = threads;
@@ -629,313 +524,4 @@ public abstract class AbstractSynchronize {
 		this.timeLimit = timeLimit;
 	}
 
-}
-
-class AsynchronousRunner implements Runnable {
-    
-    static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousRunner.class);
-
-    private AbstractSynchronize abstractSynchronize;
-    private Task task;
-    private InfoCounter counter;
-    
-    public AsynchronousRunner(Task task, AbstractSynchronize abstractSynchronize) {
-        this.task = task;
-        this.abstractSynchronize = abstractSynchronize;
-    }
-
-    public void run() {
-        counter = new InfoCounter();
-
-        SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(abstractSynchronize.getThreads());
-
-        Entry<String, LscDatasets> nextId = null;
-        try {
-            IAsynchronousService aService = null;
-            boolean fromSource = true;
-            if (task.getDestinationService() instanceof IAsynchronousService) {
-                aService = (IAsynchronousService) task.getDestinationService();
-                fromSource = false;
-            } else if (task.getSourceService() instanceof IAsynchronousService) {
-                aService = (IAsynchronousService) task.getSourceService();
-            } else {
-                LOGGER.error("LSC should never reach this point! Please consider debugging the code because we are trying to launch an asynchronous sync without any asynchronous service!"); 
-                return;
-            }
-
-            AbstractSynchronize.LOGGER.debug("Asynchronous synchronize {}", task.getName());
-
-            boolean interrupted = false;
-            while (!interrupted) {
-                nextId = aService.getNextId();
-                if (nextId != null) {
-                    threadPool.runTask(new SynchronizeTask(task, counter, abstractSynchronize, nextId, fromSource));
-                } else {
-                    try {
-                        Thread.sleep(aService.getInterval());
-                    } catch (InterruptedException e) {
-                        AbstractSynchronize.LOGGER.debug("Synchronization thread interrupted !");
-                        interrupted = true;
-                    }
-                }
-            }
-        } catch (LscServiceException e) {
-            counter.incrementCountError();
-            abstractSynchronize.logActionError(null, nextId, e);
-        }
-        
-		try {
-			threadPool.shutdown();
-			threadPool.awaitTermination(abstractSynchronize.getTimeLimit(), TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
-			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
-		}
-
-    }
-    
-    public InfoCounter getCounter() {
-    	return counter;
-    }
-}
-
-/**
- * @author sbahloul
- */
-class SynchronizeTask implements Runnable {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeTask.class);
-
-    private String syncName;
-	private InfoCounter counter;
-	private AbstractSynchronize abstractSynchronize;
-	private Entry<String, LscDatasets> id;
-	private Task task;
-	private boolean fromSource;
-
-	public SynchronizeTask(final Task task, InfoCounter counter,
-			AbstractSynchronize abstractSynchronize,
-			Entry<String, LscDatasets> id,
-			boolean fromSource) {
-		this.syncName = task.getName();
-		this.counter = counter;
-		this.task = task;
-		this.abstractSynchronize = abstractSynchronize;
-		this.id = id;
-		this.fromSource = fromSource;
-	}
-
-	public void run() {
-        counter.incrementCountAll();
-		try {
-            run(abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(), id.getKey(), id.getValue(), true, fromSource));
-		} catch (RuntimeException e) {
-			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, id.getValue(), e);
-			
-			if (e.getCause() instanceof LscServiceCommunicationException) {
-				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
-			}
-		} catch (Exception e) {
-			counter.incrementCountError();
-			abstractSynchronize.logActionError(null, id.getValue(), e);
-		}
-	}
-
-	public boolean run(IBean entry) {
-		
-		LscModifications lm = null;
-		IBean dstBean = null;
-		/** Hash table to pass objects into JavaScript condition */
-		Map<String, Object> conditionObjects = null;
-
-		try {
-			/*
-			 * Log an error if the source object could not be retrieved! This
-			 * shouldn't happen.
-			 */
-			if (entry == null) {
-				counter.incrementCountError();
-				StringBuilder sb = new StringBuilder("Cannot synchronize entry");
-				if (id != null) {
-					sb.append(" ").append(id.getKey());
-				}
-				sb.append(": no matching object found in source");
-				if (id != null && id.getValue() != null && !id.getValue().getDatasets().isEmpty()) {
-					sb.append(" with pivots ").append(id.getValue().toString());
-				}
-				AbstractSynchronize.LOGGER.error(sb.toString());
-				return false;
-			}
-
-			// Search destination for matching object
-			if(id != null) {
-				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), ! fromSource, fromSource);
-			} else {
-				LscDatasets entryDatasets = new LscDatasets();
-				for(String datasetName: entry.datasets().getAttributesNames()) {
-					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
-				}
-				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), entry.getMainIdentifier(), entryDatasets, ! fromSource, fromSource);
-			}
-
-			// Calculate operation that would be performed
-			LscModificationType modificationType = BeanComparator.calculateModificationType(task, entry, dstBean);
-
-			// Retrieve condition to evaluate before creating/updating
-			Boolean applyCondition = null;
-			String conditionString = task.getSyncOptions().getCondition(modificationType);
-
-			// Don't use JavaScript evaluator for primitive cases
-			if (conditionString.matches("true")) {
-				applyCondition = true;
-			} else if (conditionString.matches("false")) {
-				applyCondition = false;
-			} else {
-				conditionObjects = new HashMap<String, Object>();
-				conditionObjects.put("dstBean", dstBean);
-				conditionObjects.put("srcBean", entry);
-				conditionObjects.putAll(task.getScriptingVars());
-				if (task.getCustomLibraries() != null) {
-					conditionObjects.put("custom", task.getCustomLibraries());
-				}
-
-				// Evaluate if we have to do something
-				applyCondition = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
-			}
-
-			if (applyCondition) {
-				lm = BeanComparator.calculateModifications(task, entry, dstBean);
-
-				// if there's nothing to do, skip to the next object
-				if (lm == null) {
-					return true;
-				}
-
-	            counter.incrementCountModifiable();
-
-	            // no modification: log action for debugging purposes and forget
-				if ((modificationType == LscModificationType.CREATE_OBJECT && abstractSynchronize.nocreate)
-						|| (modificationType == LscModificationType.UPDATE_OBJECT && abstractSynchronize.noupdate)
-						|| (modificationType == LscModificationType.CHANGE_ID && (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate))) {
-					abstractSynchronize.logShouldAction(lm, syncName);
-					return true;
-				}
-
-			} else {
-				return true;
-			}
-
-			// if we got here, we have a modification to apply - let's do it!
-			if (task.getDestinationService().apply(lm)) {
-				counter.incrementCountCompleted();
-				abstractSynchronize.logAction(lm, id, syncName);
-				return true;
-			} else {
-				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), new Exception("Technical problem while applying modifications to the destination"));
-				return false;
-			}
-		} catch (RuntimeException e) {
-			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : ( entry != null ? entry.getMainIdentifier() : e.toString())), e);
-			
-			if (e.getCause() instanceof LscServiceCommunicationException) {
-				AbstractSynchronize.LOGGER.error("Connection lost! Aborting.");
-			}
-			return false;
-		} catch (Exception e) {
-			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
-			return false;
-		}
-	}
-
-	public String getSyncName() {
-		return syncName;
-	}
-
-	public InfoCounter getCounter() {
-		return counter;
-	}
-
-	public AbstractSynchronize getAbstractSynchronize() {
-		return abstractSynchronize;
-	}
-
-	public Entry<String, LscDatasets> getId() {
-		return id;
-	}
-
-}
-
-/**
- * This object is storing counters across all tasks Update methods are specified
- * as synchronized to avoid loosing counts of operations
- * 
- * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
- */
-class InfoCounter {
-
-	private int countAll = 0;
-	private int countError = 0;
-	private int countModifiable = 0;
-	private int countCompleted = 0;
-
-	public synchronized void incrementCountAll() {
-		countAll++;
-	}
-
-	public synchronized void incrementCountError() {
-		countError++;
-	}
-
-	public synchronized void incrementCountModifiable() {
-		countModifiable++;
-	}
-
-	public synchronized void incrementCountCompleted() {
-		countCompleted++;
-	}
-
-	/**
-	 * Return the count of all objects concerned by synchronization It does not
-	 * include objects in data source that are not selected by requests or
-	 * filters, but it includes any of the objects retrieved from the data
-	 * source
-	 * 
-	 * @return the count of all objects taken from the data source
-	 */
-	public synchronized int getCountAll() {
-		return countAll;
-	}
-
-	/**
-	 * Return the count of all objects that have encountered an error while
-	 * synchronizing, either for a technical or for a functional reason
-	 * 
-	 * @return the number of objects in error
-	 */
-	public synchronized int getCountError() {
-		return countError;
-	}
-
-	/**
-	 * Return the count of all objects that should be modify
-	 * 
-	 * @return the count of all updates to do
-	 */
-	public synchronized int getCountModifiable() {
-		return countModifiable;
-	}
-
-	/**
-	 * Return the count of all objects that have been embraced in a data
-	 * modification successfully
-	 * 
-	 * @return the count of all successful updates
-	 */
-	public synchronized int getCountCompleted() {
-		return countCompleted;
-	}
 }

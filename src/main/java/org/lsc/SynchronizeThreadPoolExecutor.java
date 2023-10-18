@@ -6,6 +6,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.lsc.runnable.AbstractEntryRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +24,9 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	BlockingQueue<Runnable> queue;
 
 	/** Default logger */
-	final Logger LOGGER = LoggerFactory
-			.getLogger(SynchronizeThreadPoolExecutor.class);
+	final Logger LOGGER = LoggerFactory.getLogger(SynchronizeThreadPoolExecutor.class);
 
-	protected SynchronizeThreadPoolExecutor(int threads) {
+	public SynchronizeThreadPoolExecutor(int threads) {
 		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 				// this will block if the queue is full
@@ -48,19 +48,9 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	 * the pool consume it as soon as it can, in a FIFO way without any priority
 	 * @param task the runnable object
 	 */
-	protected void runTask(SynchronizeTask task) {
-//		if (LOGGER.isDebugEnabled()) {
-//			LOGGER.debug("Task count.." + getTaskCount());
-//			LOGGER.debug("Queue Size before assigning the task.."
-//					+ queue.size());
-//		}
-		execute(task);
+	public void runTask(AbstractEntryRunner task) {
 		this.beforeExecute(new Thread(task.getSyncName() + "-" + task.getId().getKey()), task);
-//		if (LOGGER.isDebugEnabled()) {
-//			LOGGER.debug("Queue Size after assigning the task: {}", queue.size());
-//			LOGGER.debug("Pool Size after assigning the task: {}", getActiveCount());
-//			LOGGER.debug("Task count: {}", getTaskCount());
-//		}
+		execute(task);
 	}
 	
 	/**
@@ -71,10 +61,10 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	 */
 	@Override
 	protected void beforeExecute(Thread t, Runnable r) {
-		super.beforeExecute(t, r);
-		if(r instanceof SynchronizeTask) {
-			SynchronizeTask task = (SynchronizeTask) r;
+		if(r instanceof AbstractEntryRunner) {
+			AbstractEntryRunner task = (AbstractEntryRunner) r;
 			t.setName(task.getSyncName() + "-" + t.getId());
 		}
+		super.beforeExecute(t, r);
 	}
 }

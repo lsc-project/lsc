@@ -61,10 +61,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lsc.beans.IBean;
+import org.lsc.beans.InfoCounter;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.jmx.LscServerImpl;
+import org.lsc.runnable.SynchronizeEntryRunner;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.slf4j.Logger;
@@ -98,14 +100,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		setThreads(5); 
 		cache = new TreeMap<String, Task>();
 	}
-	
+
 	public void init() throws LscConfigurationException {
 		Collection<TaskType> tasks = LscConfiguration.getTasks();
 		for(TaskType t: tasks) {
 			cache.put(t.getName(), new Task(t));
 		}
 	}
-	
+
 	private void close() {
 		for (Task task: cache.values()) {
 			if (task.getSourceService() instanceof Closeable) {
@@ -128,17 +130,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 * @param asyncTasks 
-	 *                string list of the asynchronous synchronization tasks to launch
+	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks string list of the synchronization tasks to launch
 	 * @param cleanTasks string list of the cleaning tasks to launch
-	 *
-	 * @return the launch status - true if all tasks executed successfully, 
-	 * 				false if no tasks were executed or any failed
+	 * @return the launch status - true if all tasks executed successfully, false if no tasks were executed or any failed
 	 * @throws Exception
 	 */
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
-					final List<String> cleanTasks) throws Exception {
+			final List<String> cleanTasks) throws Exception {
 		boolean foundATask = false;
 		boolean canClose = true;
 		boolean launchResult = true;
@@ -215,48 +214,45 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Launch a task. Call this for once each task type and task mode.
 	 *
-	 * @param taskName
-	 *                the task name (historically the LDAP object class name, but can be any string)
-	 * @param taskMode
-	 *                the task mode (clean or sync)
-	 *
+	 * @param taskName the task name (historically the LDAP object class name, but can be any string)
+	 * @param taskMode the task mode (clean or sync)
 	 * @return boolean true on success, false if an error occurred
 	 * @throws Exception
 	 */
 	private boolean launchTask(final Task task, final Task.Mode taskMode) throws Exception {
-        boolean status = true;
-        
-        addScriptingContext(task);
-        
+		boolean status = true;
+
+		addScriptingContext(task);
+
 		try {
 			LSCStructuralLogger.DESTINATION.info("Starting {} for {}", taskMode.name(), task.getName());
 			// Do the work!
 			switch (taskMode) {
-				case clean:
-					status = clean2Ldap(task);
-					break;
-				case sync:
-					status = synchronize2Ldap(task);
-					break;
-				case async:
-					if(task.getSourceService() instanceof IAsynchronousService
-					        || task.getDestinationService() instanceof IAsynchronousService) {
-						startAsynchronousSynchronize2Ldap(task);
-					} else {
-						LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + task.getSourceService().getClass().getName() + ")");
-					}
-					break;
-				default:
-					//Should not happen
-					LOGGER.error("Unknown task mode type {}", taskMode.toString());
-					throw new InvalidParameterException("Unknown task mode type " + taskMode.toString());
+			case clean:
+				status = clean2Ldap(task);
+				break;
+			case sync:
+				status = synchronize2Ldap(task);
+				break;
+			case async:
+				if(task.getSourceService() instanceof IAsynchronousService
+						|| task.getDestinationService() instanceof IAsynchronousService) {
+					startAsynchronousSynchronize2Ldap(task);
+				} else {
+					LOGGER.error("Requested asynchronous source service does not implement IAsynchronousService ! (" + task.getSourceService().getClass().getName() + ")");
+				}
+				break;
+			default:
+				//Should not happen
+				LOGGER.error("Unknown task mode type {}", taskMode.toString());
+				throw new InvalidParameterException("Unknown task mode type " + taskMode.toString());
 			}
 
 			// Manage exceptions
 		} catch (Exception e) {
 			Class<?>[] exceptionsCaught = {InstantiationException.class, IllegalAccessException.class,
-				ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,
-				IllegalArgumentException.class, InvocationTargetException.class};
+					ClassNotFoundException.class, SecurityException.class, NoSuchMethodException.class,
+					IllegalArgumentException.class, InvocationTargetException.class};
 
 			if (ArrayUtils.contains(exceptionsCaught, e.getClass())) {
 				String errorDetail;
@@ -275,7 +271,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 		return status;
 	}
-	
+
 	private void addScriptingContext(Task task) {
 		task.addScriptingVar("nocreate", nocreate);
 		task.addScriptingVar("noupdate", noupdate);
@@ -341,7 +337,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	public Set<Entry<String, Task>> getTasksName() {
 		return cache.entrySet();
 	}
-	
+
 	public boolean isAsynchronousTask(String taskName) {
 		return cache.get(taskName).getSourceService() instanceof IAsynchronousService;
 	}
@@ -366,7 +362,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();
 		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
-		    new SynchronizeTask(task, counter, this, entry, true).run();
+			new SynchronizeEntryRunner(task, counter, this, entry, true).run();
 		}
 		return counter.getCountError() == 0; 
 	}
@@ -374,6 +370,6 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	public final boolean launch(String taskName, IBean bean) {
 		Task task = cache.get(taskName);
 		InfoCounter counter = new InfoCounter();
-		return new SynchronizeTask(task, counter, this, null, true).run(bean);
+		return new SynchronizeEntryRunner(task, counter, this, null, true).run(bean);
 	}
 }

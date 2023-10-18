@@ -144,9 +144,9 @@ fi
 # Don't do this if newer version is installed
 if [ $1 -eq 0 ]
 then
-	# Remove sample symlinks
-	rm -rf %{_docdir}/lsc/%{_lib}
-	rm -rf %{_docdir}/lsc/bin/
+  # Remove sample symlinks
+  rm -rf %{_docdir}/lsc/%{_lib}
+  rm -rf %{_docdir}/lsc/bin/
 fi
 
 #=================================================

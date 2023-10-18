@@ -18,16 +18,14 @@
 #=================================================
 # Header
 #=================================================
-Summary: LDAP Synchronization Connector
 Name: lsc
 Version: 2.2.0
 Release: 0%{?dist}
+Summary: LDAP Synchronization Connector
 License: BSD-3-Clause
-BuildArch: noarch
-
 URL: https://lsc-project.org
-
 Source: https://lsc-project.org/archives/%{name}-core-%{version}-dist.tar.gz
+BuildArch: noarch
 
 %if 0%{?fedora}%{?el9}
 BuildRequires:  systemd-rpm-macros

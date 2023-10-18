@@ -31,6 +31,10 @@ Source: https://lsc-project.org/archives/%{name}-core-%{version}-dist.tar.gz
 
 Requires(pre): coreutils
 Requires: which
+Requires(post):   chkconfig
+Requires(preun):  chkconfig
+Requires(preun):  initscripts
+Requires(postun): initscripts
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize
@@ -111,18 +115,17 @@ getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group
 #=================================================
 # Post Installation
 #=================================================
-
-# Do this at first install
-if [ $1 -eq 1 ]
-then
-        # Set lsc as service
-        /sbin/chkconfig --add lsc
-fi
-
+/sbin/chkconfig --add lsc
 # Always do this
 # Add symlink for sample to work
 ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
 ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
+
+%preun
+if [ $1 -eq 0 ] ; then
+  /sbin/service lsc stop >/dev/null 2>&1
+  /sbin/chkconfig --del lsc
+fi
 
 %postun
 #=================================================

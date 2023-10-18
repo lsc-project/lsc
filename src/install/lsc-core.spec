@@ -64,6 +64,7 @@ mkdir -p %{buildroot}%{_initddir}
 mkdir -p %{buildroot}%{_sysconfdir}/default
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}%{_sharedstatedir}/lsc/nagios
+mkdir -p %{buildroot}%{_mandir}/man{1,5}/
 
 # Copy files
 ## bin
@@ -84,6 +85,9 @@ cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## init
 cp -a etc/init.d/lsc %{buildroot}%{_initddir}/lsc
 cp -a etc/default/lsc %{buildroot}%{_sysconfdir}/default/lsc
+## man
+cp -a doc/man/man1/* %{buildroot}%{_mandir}/man1/
+cp -a doc/man/man5/* %{buildroot}%{_mandir}/man5/
 ## nagios
 cp -a bin/check_lsc* %{buildroot}%{_sharedstatedir}/lsc/nagios
 
@@ -169,6 +173,8 @@ fi
 %{_libdir}/lsc/
 %attr(-,lsc,lsc) %{lsc_logdir}
 %{_sharedstatedir}/lsc/
+%{_mandir}/man1/lsc*.1*
+%{_mandir}/man5/lsc*.5*
 
 #=================================================
 # Changelog

@@ -33,6 +33,7 @@ BuildRequires:  systemd-rpm-macros
 BuildRequires:  systemd
 %endif
 Requires(pre): coreutils
+Requires: crontabs
 Requires: which
 
 %description

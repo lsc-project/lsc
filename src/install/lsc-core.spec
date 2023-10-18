@@ -74,8 +74,10 @@ cp -a bin/hsqldb %{buildroot}%{_bindir}
 ## config
 cp -a etc/logback.xml %{buildroot}%{_sysconfdir}/lsc
 cp -a etc/lsc.xml-sample %{buildroot}%{_sysconfdir}/lsc/lsc.xml
-cp -a etc/sql-map-config.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.xml
-cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
+cp -a etc/sql-map-config.xml-sample \
+  %{buildroot}%{_sysconfdir}/lsc/sql-map-config.xml
+cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample \
+  %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
 ## lib
 cp -a lib/* %{buildroot}%{_libdir}/lsc
 ## cron

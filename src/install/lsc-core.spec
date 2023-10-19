@@ -136,24 +136,13 @@ getent passwd %{lsc_user} > /dev/null 2>&1 || \
 %systemd_post lsc-async@.service
 %systemd_post lsc-sync.service
 %systemd_post lsc-sync@.service
-
-# Always do this
-# Add symlink for sample to work
-ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
-ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
+# Handle symlink hack in doc removal
+[ -h %{_docdir}/lsc/%{_lib} ] && rm -f %{_docdir}/lsc/%{_lib}
+[ -h %{_docdir}/lsc/bin/lsc ] && rm -rf %{_docdir}/lsc/bin
 
 %preun
 %systemd_preun lsc-async.service
 %systemd_preun lsc-sync.service
-
-%postun
-# Don't do this if newer version is installed
-if [ $1 -eq 0 ]
-then
-  # Remove sample symlinks
-  rm -rf %{_docdir}/lsc/%{_lib}
-  rm -rf %{_docdir}/lsc/bin/
-fi
 
 
 %files

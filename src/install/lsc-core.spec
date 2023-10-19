@@ -8,16 +8,10 @@
 # Copyright (c) 2009 - 2012 LSC Project
 #=================================================
 
-#=================================================
-# Variables
-#=================================================
 %define lsc_logdir      %{_localstatedir}/log/lsc
 %define lsc_user        lsc
 %define lsc_group       lsc
 
-#=================================================
-# Header
-#=================================================
 Name: lsc
 Version: 2.2.0
 Release: 0%{?dist}
@@ -54,20 +48,14 @@ Requires: nagios-common
 Nagios plugins to check lsc.
 
 
-#=================================================
-# Source preparation
-#=================================================
 %prep
 %setup -q
 
-#=================================================
-# Build
-#=================================================
-%build
 
-#=================================================
-# Installation
-#=================================================
+%build
+# Nothing to build
+
+
 %install
 # Create directories
 mkdir -p %{buildroot}%{_bindir}
@@ -133,8 +121,8 @@ sed -i \
   -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="%{_rundir}/hsqldb.pid":' \
   %{buildroot}%{_bindir}/hsqldb
 
+
 %pre
-# Create user and group if needed
 getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
 getent passwd %{lsc_user} > /dev/null 2>&1 || \
   useradd --system --gid %{lsc_group} \
@@ -159,10 +147,6 @@ ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
 %systemd_preun lsc-sync.service
 
 %postun
-#=================================================
-# Post uninstallation
-#=================================================
-
 # Don't do this if newer version is installed
 if [ $1 -eq 0 ]
 then
@@ -171,9 +155,7 @@ then
   rm -rf %{_docdir}/lsc/bin/
 fi
 
-#=================================================
-# Files
-#=================================================
+
 %files
 %license LICENSE.txt
 %doc sample/ etc/lsc.xml-sample etc/sql-map-config.xml-sample
@@ -206,9 +188,6 @@ fi
 %{_libdir}/nagios/plugins/check_lsc*
 
 
-#=================================================
-# Changelog
-#=================================================
 %changelog
 * Tue Aug 24 2021 - Clement Oudot <clem@lsc-project.org> - 2.1.6-1
 - Upgrade to LSC 2.1.6

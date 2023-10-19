@@ -130,6 +130,7 @@ sed -i \
   %{buildroot}%{_bindir}/hsqldb
 sed -i \
   -e 's:^VAR_DIR.*:VAR_DIR="%{_sharedstatedir}/lsc":' \
+  -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="%{_rundir}/hsqldb.pid":' \
   %{buildroot}%{_bindir}/hsqldb
 
 %pre

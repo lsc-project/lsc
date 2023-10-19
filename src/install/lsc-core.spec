@@ -129,13 +129,18 @@ sed -i \
   %{buildroot}%{_bindir}/lsc-agent \
   %{buildroot}%{_bindir}/hsqldb
 sed -i \
-  -e 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' \
+  -e 's:^VAR_DIR.*:VAR_DIR="%{_sharedstatedir}/lsc":' \
   %{buildroot}%{_bindir}/hsqldb
 
 %pre
 # Create user and group if needed
 getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group} --home-dir %{_sysconfdir}/lsc %{lsc_user}
+getent passwd %{lsc_user} > /dev/null 2>&1 || \
+  useradd --system --gid %{lsc_group} \
+   --home-dir %{_sharedstatedir}/lsc \
+   --shell "/sbin/nologin" \
+   --comment "LDAP Synchronization Connector user" \
+   %{lsc_user}
 
 %post
 %systemd_post lsc-async.service
@@ -191,7 +196,7 @@ fi
 %{_unitdir}/lsc-sync.timer
 %{_libdir}/lsc/
 %attr(-,lsc,lsc) %{lsc_logdir}
-%{_sharedstatedir}/lsc/
+%attr(-,lsc,lsc) %{_sharedstatedir}/lsc/
 %{_mandir}/man1/lsc*.1*
 %{_mandir}/man5/lsc*.5*
 

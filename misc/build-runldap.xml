@@ -1,4 +1,4 @@
-<project name="lsc-sample" default="lsc::help" basedir=".." xmlns:artifact="urn:maven-artifact-ant">
+<project name="lsc-sample" default="lsc::help" basedir=".." xmlns:artifact="urn:maven-artifact-ant" xmlns:unless="ant:unless">
     
     <!-- look for properties in ~/.lsc-build.properties, ~/lsc.properties -->
 	<property file="${user.home}/.${ant.project.name}-build.properties" />
@@ -11,6 +11,10 @@
 	<property name="src.main.dir" value="${basedir}/src/main" />
 	<property name="src.test.dir" value="${basedir}/src/test" />
 	<property name="build.test-classes.dir" value="${build.dir}/test-classes" />
+
+	<condition property="java8">
+		<equals arg1="${ant.java.version}" arg2="1.8" />
+	</condition>
     
   <!--
 	    ===================================================================
@@ -34,7 +38,7 @@
 		<forget daemon="true">
 			<java classname="org.lsc.opendj.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 				<arg line="-a" />
-				<jvmarg line="--add-exports=java.base/sun.security.tools.keytool=ALL-UNNAMED --add-exports=java.base/sun.security.x509=ALL-UNNAMED" />
+				<jvmarg line="--add-exports=java.base/sun.security.tools.keytool=ALL-UNNAMED --add-exports=java.base/sun.security.x509=ALL-UNNAMED" unless:set="java8"/>
 			</java>
 		</forget>
 		<waitfor maxwait="100" maxwaitunit="second" checkevery="5" checkeveryunit="second">

@@ -8,9 +8,9 @@
 # Copyright (c) 2009 - 2012 LSC Project
 #=================================================
 
-%define lsc_logdir      %{_localstatedir}/log/lsc
-%define lsc_user        lsc
-%define lsc_group       lsc
+%global lsc_logdir      %{_localstatedir}/log/lsc
+%global lsc_user        lsc
+%global lsc_group       lsc
 
 Name: lsc
 Version: 2.2.0

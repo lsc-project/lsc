@@ -124,6 +124,7 @@ sed -i \
   %{buildroot}%{_bindir}/hsqldb
 sed -i \
   -e 's:^VAR_DIR.*:VAR_DIR="%{_sharedstatedir}/lsc":' \
+  -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="%{_rundir}/hsqldb.pid":' \
   %{buildroot}%{_bindir}/hsqldb
 ## init
 sed -i \
@@ -131,8 +132,9 @@ sed -i \
   -e 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="%{_sysconfdir}/lsc":' \
   -e 's:^LSC_USER.*:LSC_USER="lsc":' \
   -e 's:^LSC_GROUP.*:LSC_GROUP="lsc":' \
-  -e 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' \
-  %{buildroot}%{_sysconfdir}/default/lsc
+  -e 's:^LSC_PID_FILE.*:LSC_PID_FILE="%{_rundir}/lsc.pid":' \
+  %{buildroot}%{_sysconfdir}/default/lsc \
+  %{buildroot}%{_initddir}/lsc
 
 %pre
 # Create user and group if needed

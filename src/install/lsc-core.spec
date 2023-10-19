@@ -50,6 +50,8 @@ Nagios plugins to check lsc.
 
 %prep
 %setup -q
+# Drop useless windows stuff
+find . -type f -name '*.bat' -delete
 
 
 %build

@@ -146,6 +146,7 @@ fi
 
 %files
 %license LICENSE.txt
+%doc README.md doc/html/
 %doc sample/ etc/lsc.xml-sample etc/sql-map-config.xml-sample
 %doc etc/sql-map-config.d/InetOrgPerson.xml-sample
 %dir %{_sysconfdir}/lsc/

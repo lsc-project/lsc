@@ -59,10 +59,30 @@ fi
 
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
-LOG_DIR="/tmp"
+
+# Get logdir property from logback.xml
+logdir=$( grep 'property[ ]\+name="logdir"' "${CFG_DIR}/logback.xml" | sed -e 's/^.*value="\([^"]*\)".*$/\1/' )
+if [ "${logdir}" = "\${TMP_DIR}" ] || [ "${logdir}" = "\$TMP_DIR" ]; then
+	# Create temp directory
+	LOG_DIR="$( mktemp -d /tmp/lsc-$(date +%Y-%M-%d-%T).XXXXXXXXXX )"
+	echo "Using temporary log directory: ${LOG_DIR}"
+	# Pass LOG_DIR java system property with the temp directory value
+	JAVA_OPTS="${JAVA_OPTS} -DTMP_DIR=${LOG_DIR}"
+elif [ "${logdir}" = "" ]; then
+	echo "WARN: empty log dir in logback.xml, using LOG_DIR=/tmp"
+	LOG_DIR="/tmp"
+else
+	# Just use static value of logdir from logback.xml
+	LOG_DIR="${logdir}"
+	echo "Use static log directory: ${LOG_DIR}"
+fi
 LOG_FILE="$LOG_DIR/lsc.log"
 
+# Create LOG_DIR in case LOG_DIR has been defined statically above
 mkdir -p "$LOG_DIR"
+if [ ! -d ${LOG_DIR} ]; then
+	echo "ERROR: LOG_DIR ${LOG_DIR} does not exist!"
+fi
 
 PARAMETERS="$*"
 
@@ -177,6 +197,8 @@ if [ $run_status -eq 1 ]
 then
 	log "LSC finished running"
 fi
+
+echo "LSC has used LOG_DIR=\"${LOG_DIR}\""
 
 #====================================================================
 # Exit

@@ -2,7 +2,9 @@
 
 <configuration>
 
-	<property name="logdir" value="/tmp/lsc/log" />
+	<!-- logdir value can be set to a static directory path or to ${TMP_DIR} -->
+	<!-- ${TMP_DIR} is a temporary directory computed by bin/lsc and transmitted as a java system property -->
+	<property name="logdir" value="${TMP_DIR}" />
 
 	<!-- Standard output to console -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

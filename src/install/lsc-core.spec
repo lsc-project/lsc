@@ -136,23 +136,11 @@ getent passwd %{lsc_user} > /dev/null 2>&1 || \
 
 %post
 /sbin/chkconfig --add lsc
-# Add symlink for sample to work
-ln -sf %{_libdir}/lsc/ %{_docdir}/lsc/%{_lib}
-ln -sf %{_bindir}/lsc %{_docdir}/lsc/bin/
 
 %preun
 if [ $1 -eq 0 ] ; then
   /sbin/service lsc stop >/dev/null 2>&1
   /sbin/chkconfig --del lsc
-fi
-
-%postun
-# Don't do this if newer version is installed
-if [ $1 -eq 0 ]
-then
-  # Remove sample symlinks
-  rm -rf %{_docdir}/lsc/%{_lib}
-  rm -rf %{_docdir}/lsc/bin/
 fi
 
 

@@ -41,6 +41,19 @@ The Ldap Synchronization Connector project provides tools to synchronize
 a LDAP directory from a list of data sources including any database with
 a JDBC connector, another LDAP directory, flat files... 
 
+
+%package -n nagios-plugins-lsc
+Summary: Nagios plugins to check lsc
+BuildRequires: perl-generators
+BuildRequires: perl(File::Basename)
+BuildRequires: perl(Getopt::Long)
+BuildRequires: perl(strict)
+Requires: nagios-common
+
+%description -n nagios-plugins-lsc
+Nagios plugins to check lsc.
+
+
 #=================================================
 # Source preparation
 #=================================================
@@ -64,7 +77,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
 mkdir -p %{buildroot}%{_sysconfdir}/cron.d
 mkdir -p %{buildroot}%{_sysconfdir}/default
 mkdir -p %{buildroot}%{lsc_logdir}
-mkdir -p %{buildroot}%{_sharedstatedir}/lsc/nagios
+mkdir -p %{buildroot}%{_sharedstatedir}/lsc/
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_mandir}/man{1,5}/
 
@@ -96,7 +109,8 @@ install -p -m 0644 lib/systemd/system/lsc-sync.timer %{buildroot}%{_unitdir}/
 cp -a doc/man/man1/* %{buildroot}%{_mandir}/man1/
 cp -a doc/man/man5/* %{buildroot}%{_mandir}/man5/
 ## nagios
-cp -a bin/check_lsc* %{buildroot}%{_sharedstatedir}/lsc/nagios
+mkdir -p %{buildroot}%{_libdir}/nagios/plugins/
+cp -a bin/check_lsc* %{buildroot}%{_libdir}/nagios/plugins/
 
 # Reconfigure files
 ## logback
@@ -180,6 +194,11 @@ fi
 %{_sharedstatedir}/lsc/
 %{_mandir}/man1/lsc*.1*
 %{_mandir}/man5/lsc*.5*
+
+%files -n nagios-plugins-lsc
+%license LICENSE.txt
+%{_libdir}/nagios/plugins/check_lsc*
+
 
 #=================================================
 # Changelog

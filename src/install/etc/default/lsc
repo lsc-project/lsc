@@ -1,5 +1,5 @@
 #====================================================================
-# Configuration for LSC init script
+# Configuration for LSC init script and systemd script
 # (http://www.lsc-project.org).
 #====================================================================
 
@@ -17,3 +17,10 @@ LSC_JMXPORT="1099"
 
 # JAVA
 #JAVA_HOME=/usr/java/jdk/jre
+
+# specific parameters for systemd script
+LSC_CONFIG_DIR="/etc/lsc"
+LSC_SYNC_TASKS="-s all"
+LSC_ASYNC_TASKS=""
+LSC_CLEAN_TASKS=""
+LSC_EXTRA_ARGS=""

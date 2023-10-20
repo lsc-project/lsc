@@ -3,7 +3,8 @@ Description=Run LSC jobs
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/lsc -f /etc/lsc -s all
+EnvironmentFile=/etc/default/lsc
+ExecStart=/usr/bin/lsc -f ${LSC_CONFIG_DIR} ${LSC_SYNC_TASKS} ${LSC_ASYNC_TASKS} ${LSC_CLEAN_TASKS} ${LSC_EXTRA_ARGS}
 User=lsc
 Group=lsc
 

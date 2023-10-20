@@ -4,6 +4,7 @@
 /AuditType.java
 /AuditsType.java
 /ConditionsType.java
+/HooksType.java
 /ConnectionType.java
 /ConnectionsType.java
 /CsvAuditType.java

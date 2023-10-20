@@ -154,6 +154,37 @@ public interface ISyncOptions {
 	String getCondition(LscModificationType operation);
 
 	/**
+	 * Returns the posthook for a creation
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	String getCreatePostHook();
+
+	/**
+	 * Returns the posthook for an update
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	String getUpdatePostHook();
+
+	/**
+	 * Returns the posthook for a delete
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	String getDeletePostHook();
+
+	/**
+	 * Returns the posthook for a id change
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	String getChangeIdPostHook();
+
+
+	String getPostHook(LscModificationType operation);
+
+	/**
 	 * Return the expression used to infer the new object DN
 	 * @return the new object dn pattern
 	 */

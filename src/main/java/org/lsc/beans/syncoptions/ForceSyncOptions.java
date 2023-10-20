@@ -128,6 +128,26 @@ public class ForceSyncOptions implements ISyncOptions {
 		return DEFAULT_CONDITION;
 	}
 
+	public String getCreatePostHook() {
+		return "";
+	}
+
+	public String getDeletePostHook() {
+		return "";
+	}
+
+	public String getUpdatePostHook() {
+		return "";
+	}
+
+	public String getChangeIdPostHook() {
+		return "";
+	}
+
+	public String getPostHook(LscModificationType operation) {
+		return "";
+	}
+
 	public String getDn() {
 		return null;//((Ldap)task.getDestinationService()).getDn();
 	}

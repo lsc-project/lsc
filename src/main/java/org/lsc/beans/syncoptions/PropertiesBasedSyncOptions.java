@@ -196,6 +196,53 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		}
 		return result;
 	}
+
+	public String getCreatePostHook() {
+		if (conf.getHooks() == null || conf.getHooks().getCreatePostHook() == null) {
+			return "";
+		}
+		return conf.getHooks().getCreatePostHook();
+	}
+
+	public String getDeletePostHook() {
+		if (conf.getHooks() == null || conf.getHooks().getDeletePostHook() == null) {
+			return "";
+		}
+		return conf.getHooks().getDeletePostHook();
+	}
+
+	public String getUpdatePostHook() {
+		if (conf.getHooks() == null || conf.getHooks().getUpdatePostHook() == null) {
+			return "";
+		}
+		return conf.getHooks().getUpdatePostHook();
+	}
+
+	public String getChangeIdPostHook() {
+		if (conf.getHooks() == null || conf.getHooks().getChangeIdPostHook() == null) {
+			return "";
+		}
+		return conf.getHooks().getChangeIdPostHook();
+	}
+
+	public String getPostHook(LscModificationType operation) {
+		String result = "";
+		switch (operation) {
+			case CREATE_OBJECT:
+				result = this.getCreatePostHook();
+				break;
+			case UPDATE_OBJECT:
+				result = this.getUpdatePostHook();
+				break;
+			case DELETE_OBJECT:
+				result = this.getDeletePostHook();
+				break;
+			case CHANGE_ID:
+				result = this.getChangeIdPostHook();
+				break;
+		}
+		return result;
+	}
 	
 	public String getDelimiter(String name) {
         DatasetType dataset = LscConfiguration.getDataset(conf, name);

@@ -16,6 +16,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.lsc.Hooks;
 
 /**
  * @author sbahloul
@@ -137,6 +138,9 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 
 			// if we got here, we have a modification to apply - let's do it!
 			if (task.getDestinationService().apply(lm)) {
+				// Retrieve posthook for the current operation
+				String hook = task.getSyncOptions().getPostHook(modificationType);
+				Hooks.postSyncHook(hook, lm);
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
 				return true;
@@ -161,3 +165,4 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 	}
 
 }
+

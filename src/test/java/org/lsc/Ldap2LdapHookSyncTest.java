@@ -1,0 +1,159 @@
+/*
+ ****************************************************************************
+ * Ldap Synchronization Connector provides tools to synchronize
+ * electronic identities from a list of data sources including
+ * any database with a JDBC connector, another LDAP directory,
+ * flat files...
+ *
+ *                  ==LICENSE NOTICE==
+ * 
+ * Copyright (c) 2008 - 2011 LSC Project 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+
+ *    * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the LSC Project nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *                  ==LICENSE NOTICE==
+ *
+ *               (c) 2008 - 2011 LSC Project
+ *         Sebastien Bahloul &lt;seb@lsc-project.org&gt;
+ *         Thomas Chemineau &lt;thomas@lsc-project.org&gt;
+ *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
+ *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
+ ****************************************************************************
+ */
+package org.lsc;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.lsc.configuration.LscConfiguration;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.io.File;
+import java.util.Scanner;
+
+
+/**
+ * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
+ * It attempts to launch the tasks defined in src/test/resources/etc/lsc.xml:
+ * ldap2ldapHookTestCreate ldap2ldapHookTestUpdate ldap2ldapHookTestDelete
+ */
+public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
+
+
+	@Before
+	public void setup() {
+		LscConfiguration.reset();
+		LscConfiguration.getInstance();
+		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		reloadJndiConnections();
+	}
+
+	@Test
+	public final void testLdap2LdapHookSyncTest() throws Exception {
+
+		// Declare the tasks to launch in the correct order
+		List<String> sync_tasks = Arrays.asList("ldap2ldapHookTestCreate", "ldap2ldapHookTestUpdate");
+		List<String> clean_tasks = Arrays.asList("ldap2ldapHookTestDelete");
+
+		// perform the sync
+		launchSyncCleanTask(sync_tasks, false, true, false);
+		launchSyncCleanTask(clean_tasks, false, false, true);
+
+		// check the results of the synchronization
+		reloadJndiConnections();
+		checkSyncResults();
+	}
+
+	/*
+	 * Read hook log file to check passed arguments
+	*/
+	private final void checkSyncResults() throws Exception {
+
+		List<String> hookResults = new ArrayList<String>();
+		try {
+			File hookFile = new File("hook.log");
+			Scanner hookReader = new Scanner(hookFile);
+
+			while (hookReader.hasNextLine()) {
+				String data = hookReader.nextLine();
+				hookResults.add(data);
+			}
+			hookReader.close();
+			hookFile.delete(); // remove hook log
+		} catch (Exception e) {
+			fail("Error while reading hook.log");
+		}
+		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
+		assertEquals(hookResults.get(1), "create");
+		assertTrue("Hook logs: ADD_VALUES not found in created entry", hookResults.get(2).matches("^.*ADD_VALUES.*$"));
+		assertEquals(hookResults.get(3), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
+		assertEquals(hookResults.get(4), "update");
+		assertTrue("Hook logs: REPLACE_VALUES not found in updated entry", hookResults.get(5).matches("^.*REPLACE_VALUES.*$"));
+		assertEquals(hookResults.get(6), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
+		assertEquals(hookResults.get(7), "delete");
+
+	}
+
+	public static void launchSyncCleanTask(List<String> tasks, boolean doAsync, boolean doSync,
+					boolean doClean) throws Exception {
+		// initialize required stuff
+		SimpleSynchronize sync = new SimpleSynchronize();
+		List<String> asyncType = new ArrayList<String>();
+		List<String> syncType = new ArrayList<String>();
+		List<String> cleanType = new ArrayList<String>();
+
+
+		if (doAsync) {
+			for(String taskName: tasks) {
+				asyncType.add(taskName);
+			}
+		}
+		
+		if (doSync) {
+			for(String taskName: tasks) {
+				syncType.add(taskName);
+			}
+		}
+
+		if (doClean) {
+			for(String taskName: tasks) {
+				cleanType.add(taskName);
+			}
+		}
+
+		boolean ret = sync.launch(asyncType, syncType, cleanType);
+		assertTrue(ret);
+	}
+}

@@ -72,7 +72,7 @@ public class ADTest {
 	private static final long otherTimeUnixLong= 2147483650L;
 	// base64 encoding of a binary objectGUID
 	private static final byte[] refObjectGUIDBase64 = Base64.getDecoder().decode(new String("Pd0OMI8MTEiq0mBIG8tg2A==").getBytes());
-	// UUID/String reprensentation of above binary objectGUID 
+	// UUID/String representation of above binary objectGUID
 	private static final String refObjectGUIDAsUUIDString = "300EDD3D-0C8F-484C-AAD2-60481BCB60D8";
 	
 	@Before

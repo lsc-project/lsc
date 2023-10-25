@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 
-<installation version="1.0">
+<izpack:installation version="5.0"
+                     xmlns:izpack="http://izpack.org/schema/installation"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
 
 	<info>
 		<appname>${project.name}</appname>
 		<appversion>@{project.version}</appversion>
-		<appsubpath>LSC</appsubpath>
-		<url>@{project.url}</url>
 		<appsubpath>LSC</appsubpath>
 		<uninstaller name="uninstall.jar" path="${INSTALL_PATH}" write="yes" />
 		<javaversion>1.6</javaversion>
@@ -55,7 +56,7 @@
 	</panels>
 
 	<listeners>
-		<listener installer="SummaryLoggerInstallerListener">
+		<listener classname="SummaryLoggerInstallerListener" stage="install">
 			<os family="windows" />
 		</listener>
 	</listeners>
@@ -71,8 +72,10 @@
 		The native libraries to add. This is required for creating shortcuts
 		on Windows
 	-->
-	<native type="izpack" name="ShellLink.dll">
-		<os family="windows"/>
-	</native>
+	<natives>
+		<native type="izpack" name="ShellLink.dll">
+			<os family="windows"/>
+		</native>
+	</natives>
 
-</installation>
+</izpack:installation>

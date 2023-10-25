@@ -250,15 +250,15 @@
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>
-				<version>1.0-alpha-5</version>
+				<version>5.2.0</version>
 
 				<!-- common configuration by all executions -->
 				<configuration>
-					<descriptor>${basedir}/src/install/install.xml</descriptor>
-					<descriptorEncoding>UTF-8</descriptorEncoding>
-					<fileExtension>jar</fileExtension>
-					<installerFile>${project.build.directory}/${project.artifactId}-${project.version}-installer.jar</installerFile>
-					<izpackBasedir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</izpackBasedir>
+					<baseDir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</baseDir>
+					<installFile>src/install/install.xml</installFile>
+					<finalName>${project.artifactId}-${project.version}-installer.jar</finalName>
+					<mkdirs>true</mkdirs>
+					<enableAttachArtifact>false</enableAttachArtifact>
 				</configuration>
 
 				<executions>

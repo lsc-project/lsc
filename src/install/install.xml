@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 
-<installation version="1.0">
+<installation version="5.0">
 
 	<info>
 		<appname>${project.name}</appname>
 		<appversion>@{project.version}</appversion>
 		<appsubpath>LSC</appsubpath>
-		<url>@{project.url}</url>
+		<!-- <url>@{project.url}</url> -->
 		<appsubpath>LSC</appsubpath>
 		<uninstaller name="uninstall.jar" path="${INSTALL_PATH}" write="yes" />
 		<javaversion>1.6</javaversion>
@@ -55,7 +55,7 @@
 	</panels>
 
 	<listeners>
-		<listener installer="SummaryLoggerInstallerListener">
+		<listener classname="SummaryLoggerInstallerListener" stage="install">
 			<os family="windows" />
 		</listener>
 	</listeners>

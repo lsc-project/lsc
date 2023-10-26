@@ -154,6 +154,13 @@ public interface ISyncOptions {
 	String getCondition(LscModificationType operation);
 
 	/**
+	 * Returns the posthook output format
+	 *
+	 * @return the posthook output format or "" if none is specified (default)
+	 */
+	String getPostHookOutputFormat();
+
+	/**
 	 * Returns the posthook for a creation
 	 *
 	 * @return the posthook or "" if none is specified (default)

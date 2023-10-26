@@ -140,7 +140,8 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			if (task.getDestinationService().apply(lm)) {
 				// Retrieve posthook for the current operation
 				String hook = task.getSyncOptions().getPostHook(modificationType);
-				Hooks.postSyncHook(hook, lm);
+				String outputFormat = task.getSyncOptions().getPostHookOutputFormat();
+				Hooks.postSyncHook(hook, outputFormat, lm);
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
 				return true;

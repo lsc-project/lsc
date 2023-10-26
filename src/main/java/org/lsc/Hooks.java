@@ -44,12 +44,13 @@ package org.lsc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.ProcessBuilder;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import org.lsc.utils.output.LdifLayout;
 import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
 import com.fasterxml.jackson.databind.ObjectWriter;
-
 
 
 /**
@@ -63,31 +64,56 @@ public class Hooks {
 	 *
 	 * return nothing
 	 */
-	public final static void postSyncHook(final String hook, final LscModifications lm) {
+	public final static void postSyncHook(final String hook, final String outputFormat, final LscModifications lm) {
 
 		if( hook != null && ! hook.equals("") )
 		{
-			// Compute json modifications
-			String jsonModifications = null;
+
+			String format = "";
+			if( outputFormat.equals("json") ) {
+				format = "json";
+			}
+			else
+			{
+				format = "ldif";
+			}
+
+			// Compute json/ldif modifications
+			String modifications = null;
 
 			switch (lm.getOperation()) {
 				case CREATE_OBJECT:
-					jsonModifications = getJsonModifications(lm);
-					callHook("create", hook, lm.getMainIdentifier(), jsonModifications);
+					if( format.equals("json") ) {
+						modifications = getJsonModifications(lm);
+					}
+					else {
+						modifications = LdifLayout.format(lm);
+					}
+					callHook("create", hook, lm.getMainIdentifier(), format, modifications);
 					break;
 
 				case UPDATE_OBJECT:
-					jsonModifications = getJsonModifications(lm);
-					callHook("update", hook, lm.getMainIdentifier(), jsonModifications);
+					if( format.equals("json") ) {
+						modifications = getJsonModifications(lm);
+					}
+					else {
+						modifications = LdifLayout.format(lm);
+					}
+					callHook("update", hook, lm.getMainIdentifier(), format, modifications);
 					break;
 
 				case CHANGE_ID:
-					jsonModifications = getJsonModifications(lm);
-					callHook("changeId", hook, lm.getMainIdentifier(), jsonModifications);
+					if( format.equals("json") ) {
+						modifications = getJsonModifications(lm);
+					}
+					else {
+						modifications = LdifLayout.format(lm);
+					}
+					callHook("changeId", hook, lm.getMainIdentifier(), format, modifications);
 					break;
 
 				case DELETE_OBJECT:
-					callHook("delete", hook, lm.getMainIdentifier(), jsonModifications);
+					callHook("delete", hook, lm.getMainIdentifier(), format, modifications);
 					break;
 
 				default:
@@ -96,20 +122,32 @@ public class Hooks {
 		}
 	}
 
+	/**
+	* Method calling the hook
+	*
+	* return nothing
+	*/
 	public final static void callHook(	String operationType,
 						String hook,
 						String identifier,
-						String jsonModifications) {
+						String format,
+						String modifications) {
 
-		LOGGER.info("Calling {} posthook {} for {}", operationType, hook, identifier);
+		LOGGER.info("Calling {} posthook {} with format {} for {}", operationType, hook, format, identifier);
 		try {
-			if( jsonModifications != null ) {
+			if( modifications != null ) {
 				Process p = new ProcessBuilder(
 					hook,
 					identifier,
-					operationType,
-					jsonModifications)
+					operationType)
 				.start();
+
+				// sends ldif modifications to stdin of hook script
+				OutputStream stdin = p.getOutputStream();
+				stdin.write(modifications.getBytes());
+				stdin.write("\n".getBytes());
+				stdin.flush();
+				stdin.close();
 			}
 			else {
 				Process p = new ProcessBuilder(
@@ -123,16 +161,16 @@ public class Hooks {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
-			LOGGER.error("Error while calling {} posthook {} for {}: {}",
-					operationType,hook, identifier, sw.toString());
+			LOGGER.error("Error while calling {} posthook {} with format {} for {}: {}",
+					operationType, hook, format, identifier, sw.toString());
 		}
 	}
 
 	/**
-	 * Method computing modifications as json
-	 *
-	 * @return modifications in a json String
-	 */
+	* Method computing modifications as json
+	*
+	* @return modifications in a json String
+	*/
 	public final static String getJsonModifications(final LscModifications lm) {
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = "";

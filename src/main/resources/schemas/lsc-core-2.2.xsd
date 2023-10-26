@@ -326,6 +326,7 @@
 
 	<xsd:complexType name="hooksType">
 		<xsd:sequence>
+			<xsd:element name="outputFormat" type="xsd:string" minOccurs="0" />
 			<xsd:element name="createPostHook" type="xsd:string" minOccurs="0" />
 			<xsd:element name="updatePostHook" type="xsd:string" minOccurs="0" />
 			<xsd:element name="deletePostHook" type="xsd:string" minOccurs="0" />

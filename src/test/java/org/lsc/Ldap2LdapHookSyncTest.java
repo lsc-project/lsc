@@ -45,6 +45,15 @@
  */
 package org.lsc;
 
+import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -55,7 +64,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.lsc.configuration.LscConfiguration;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,11 +89,11 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 	}
 
 	@Test
-	public final void testLdap2LdapHookSyncTest() throws Exception {
+	public final void testLdap2LdapJSONHookSyncTest() throws Exception {
 
 		// Declare the tasks to launch in the correct order
-		List<String> sync_tasks = Arrays.asList("ldap2ldapHookTestCreate", "ldap2ldapHookTestUpdate");
-		List<String> clean_tasks = Arrays.asList("ldap2ldapHookTestDelete");
+		List<String> sync_tasks = Arrays.asList("ldap2ldapJSONHookTestCreate", "ldap2ldapJSONHookTestUpdate");
+		List<String> clean_tasks = Arrays.asList("ldap2ldapJSONHookTestDelete");
 
 		// perform the sync
 		launchSyncCleanTask(sync_tasks, false, true, false);
@@ -93,17 +101,66 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 		// check the results of the synchronization
 		reloadJndiConnections();
-		checkSyncResults();
+
+		ObjectMapper mapperCreatedEntry = new ObjectMapper();
+		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree("[ { \"attributeName\" : \"objectClass\", \"values\" : [ \"inetOrgPerson\", \"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"cn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"sn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
+
+		checkJSONSyncResults("create", expectedCreatedEntry);
+
+		ObjectMapper mapperUpdatedEntry = new ObjectMapper();
+		JsonNode expectedUpdatedEntry = mapperUpdatedEntry.readTree("[ { \"attributeName\" : \"description\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" } ]");
+
+		checkJSONSyncResults("update", expectedUpdatedEntry);
+
+		checkJSONSyncResults("delete", null);
+	}
+
+	@Test
+	public final void testLdap2LdapLDIFHookSyncTest() throws Exception {
+
+		// Declare the tasks to launch in the correct order
+		List<String> sync_tasks = Arrays.asList("ldap2ldapLDIFHookTestCreate", "ldap2ldapLDIFHookTestUpdate");
+		List<String> clean_tasks = Arrays.asList("ldap2ldapLDIFHookTestDelete");
+
+		// perform the sync
+		launchSyncCleanTask(sync_tasks, false, true, false);
+		launchSyncCleanTask(clean_tasks, false, false, true);
+
+		// check the results of the synchronization
+		reloadJndiConnections();
+
+		List<String> expectedCreatedEntry = Arrays.asList(
+			"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+			"changetype: add",
+			"objectClass: inetOrgPerson",
+			"objectClass: person",
+			"objectClass: top",
+			"cn: CN0001-hook",
+			"sn: CN0001-hook"
+		);
+
+		checkLDIFSyncResults("create", expectedCreatedEntry);
+
+		List<String> expectedUpdatedEntry = Arrays.asList(
+			"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+			"changetype: modify",
+			"replace: description",
+			"description: CN0001-hook"
+		);
+
+		checkLDIFSyncResults("update", expectedUpdatedEntry);
+
+		checkLDIFSyncResults("delete", new ArrayList<String>());
 	}
 
 	/*
-	 * Read hook log file to check passed arguments
+	 * Read hook log file to check passed arguments and modification passed as input
 	*/
-	private final void checkSyncResults() throws Exception {
+	private final void checkLDIFSyncResults(String operation, List<String> expectedEntry) throws Exception {
 
 		List<String> hookResults = new ArrayList<String>();
 		try {
-			File hookFile = new File("hook.log");
+			File hookFile = new File("hook-ldif-" + operation + ".log");
 			Scanner hookReader = new Scanner(hookFile);
 
 			while (hookReader.hasNextLine()) {
@@ -113,16 +170,61 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			hookReader.close();
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
-			fail("Error while reading hook.log");
+			fail("Error while reading hook-ldif-" + operation + ".log");
 		}
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
-		assertEquals(hookResults.get(1), "create");
-		assertTrue("Hook logs: ADD_VALUES not found in created entry", hookResults.get(2).matches("^.*ADD_VALUES.*$"));
-		assertEquals(hookResults.get(3), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
-		assertEquals(hookResults.get(4), "update");
-		assertTrue("Hook logs: REPLACE_VALUES not found in updated entry", hookResults.get(5).matches("^.*REPLACE_VALUES.*$"));
-		assertEquals(hookResults.get(6), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
-		assertEquals(hookResults.get(7), "delete");
+		assertEquals(hookResults.get(1), operation);
+
+		if(operation != "delete") {
+			// Make sure all attributes in expectedEntry are present in the hook file
+			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
+			for (String attr : expectedEntry) {
+				assertTrue("Attribute " + attr + " not found in " + operation + " entry " + entry.toString(), entry.contains(attr));
+			}
+		}
+
+	}
+
+	/*
+	 * Read hook log file to check passed arguments and modification passed as input
+	*/
+	private final void checkJSONSyncResults(String operation, JsonNode expectedEntry) throws Exception {
+
+		List<String> hookResults = new ArrayList<String>();
+		try {
+			File hookFile = new File("hook-json-" + operation + ".log");
+			Scanner hookReader = new Scanner(hookFile);
+
+			while (hookReader.hasNextLine()) {
+				String data = hookReader.nextLine();
+				hookResults.add(data);
+			}
+			hookReader.close();
+			hookFile.delete(); // remove hook log
+		} catch (Exception e) {
+			fail("Error while reading hook-json-" + operation + ".log");
+		}
+		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
+		assertEquals(hookResults.get(1), operation);
+
+		if(operation != "delete") {
+			// Make sure all attributes in expectedEntry are present in the hook file
+			String entry = String.join("", new ArrayList(hookResults.subList(2, hookResults.size())));
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonFactory factory = mapper.getJsonFactory();
+			JsonParser jp = factory.createJsonParser(entry);
+			try {
+				JsonNode hookOperation = mapper.readTree(jp);
+				assertEquals(hookOperation, expectedEntry);
+			}
+			catch (Exception e) {
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				e.printStackTrace(pw);
+				fail("Error while decoding operation in hook-json-" + operation + ".log as JSON:" + sw.toString());
+			}
+		}
 
 	}
 

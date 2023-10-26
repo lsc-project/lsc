@@ -197,6 +197,13 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		return result;
 	}
 
+	public String getPostHookOutputFormat() {
+		if (conf.getHooks() == null || conf.getHooks().getOutputFormat() == null) {
+			return "";
+		}
+		return conf.getHooks().getOutputFormat();
+	}
+
 	public String getCreatePostHook() {
 		if (conf.getHooks() == null || conf.getHooks().getCreatePostHook() == null) {
 			return "";

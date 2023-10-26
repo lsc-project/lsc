@@ -128,6 +128,10 @@ public class ForceSyncOptions implements ISyncOptions {
 		return DEFAULT_CONDITION;
 	}
 
+	public String getPostHookOutputFormat() {
+		return "";
+	}
+
 	public String getCreatePostHook() {
 		return "";
 	}

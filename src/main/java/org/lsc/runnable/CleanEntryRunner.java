@@ -111,7 +111,8 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 				if (task.getDestinationService().apply(lm)) {
 					// Retrieve posthook for the current operation
 					String hook = syncOptions.getDeletePostHook();
-					Hooks.postSyncHook(hook, lm);
+					String outputFormat = syncOptions.getPostHookOutputFormat();
+					Hooks.postSyncHook(hook, outputFormat, lm);
 					counter.incrementCountCompleted();
 					abstractSynchronize.logAction(lm, id, task.getName());
 				} else {

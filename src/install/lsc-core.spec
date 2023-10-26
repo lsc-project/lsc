@@ -11,14 +11,18 @@
 %global lsc_logdir      %{_localstatedir}/log/lsc
 %global lsc_user        lsc
 %global lsc_group       lsc
+# Build from snapshot
+# Caution: percent sign is expanded even after a #
+# Escape with %%
+#%%global snapshot        1
 
 Name: lsc
-Version: 2.2.0
+Version: 2.2
 Release: 0%{?dist}
 Summary: LDAP Synchronization Connector
 License: BSD-3-Clause
 URL: https://lsc-project.org
-Source: https://lsc-project.org/archives/%{name}-core-%{version}-dist.tar.gz
+Source: https://lsc-project.org/archives/%{name}-core-%{version}%{?snapshot:-SNAPSHOT}-dist.tar.gz
 BuildArch: noarch
 
 %if 0%{?fedora}%{?el9}
@@ -49,7 +53,7 @@ Nagios plugins to check lsc.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}%{?snapshot:-SNAPSHOT}
 # Drop useless windows stuff
 find . -type f -name '*.bat' -delete
 

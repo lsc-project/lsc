@@ -47,6 +47,7 @@ package org.lsc.beans.syncoptions;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import org.lsc.LscModificationType;
 import org.lsc.configuration.PolicyType;
@@ -128,28 +129,28 @@ public class ForceSyncOptions implements ISyncOptions {
 		return DEFAULT_CONDITION;
 	}
 
-	public String getPostHookOutputFormat() {
-		return "";
+	public OutputFormat getPostHookOutputFormat() {
+		return OutputFormat.LDIF;
 	}
 
-	public String getCreatePostHook() {
-		return "";
+	public Optional<String> getCreatePostHook() {
+		return Optional.ofNullable(null);
 	}
 
-	public String getDeletePostHook() {
-		return "";
+	public Optional<String> getDeletePostHook() {
+		return Optional.ofNullable(null);
 	}
 
-	public String getUpdatePostHook() {
-		return "";
+	public Optional<String> getUpdatePostHook() {
+		return Optional.ofNullable(null);
 	}
 
-	public String getChangeIdPostHook() {
-		return "";
+	public Optional<String> getChangeIdPostHook() {
+		return Optional.ofNullable(null);
 	}
 
-	public String getPostHook(LscModificationType operation) {
-		return "";
+	public Optional<String> getPostHook(LscModificationType operation) {
+		return Optional.ofNullable(null);
 	}
 
 	public String getDn() {

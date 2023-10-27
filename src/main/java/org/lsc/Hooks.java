@@ -46,9 +46,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.ProcessBuilder;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.PrintWriter;
+import java.util.Optional;
 import org.lsc.utils.output.LdifLayout;
+import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -58,62 +58,33 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  */
 public class Hooks {
 
-	static final Logger LOGGER = LoggerFactory.getLogger(AbstractSynchronize.class);
+	static final Logger LOGGER = LoggerFactory.getLogger(Hooks.class);
+
+	private static final ObjectMapper Mapper = new ObjectMapper();
 	/**
 	 * Method calling a postSyncHook if necessary
 	 *
 	 * return nothing
 	 */
-	public final static void postSyncHook(final String hook, final String outputFormat, final LscModifications lm) {
+	public final void postSyncHook(final Optional<String> hook, final OutputFormat outputFormat, final LscModifications lm) {
 
-		if( hook != null && ! hook.equals("") )
+		if( hook != null && hook.isPresent() )
 		{
-
-			String format = "";
-			if( outputFormat.equals("json") ) {
-				format = "json";
-			}
-			else
-			{
-				format = "ldif";
-			}
-
-			// Compute json/ldif modifications
-			String modifications = null;
-
 			switch (lm.getOperation()) {
 				case CREATE_OBJECT:
-					if( format.equals("json") ) {
-						modifications = getJsonModifications(lm);
-					}
-					else {
-						modifications = LdifLayout.format(lm);
-					}
-					callHook("create", hook, lm.getMainIdentifier(), format, modifications);
+					callHook("create", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
 					break;
 
 				case UPDATE_OBJECT:
-					if( format.equals("json") ) {
-						modifications = getJsonModifications(lm);
-					}
-					else {
-						modifications = LdifLayout.format(lm);
-					}
-					callHook("update", hook, lm.getMainIdentifier(), format, modifications);
+					callHook("update", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
 					break;
 
 				case CHANGE_ID:
-					if( format.equals("json") ) {
-						modifications = getJsonModifications(lm);
-					}
-					else {
-						modifications = LdifLayout.format(lm);
-					}
-					callHook("changeId", hook, lm.getMainIdentifier(), format, modifications);
+					callHook("changeId", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
 					break;
 
 				case DELETE_OBJECT:
-					callHook("delete", hook, lm.getMainIdentifier(), format, modifications);
+					callHook("delete", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
 					break;
 
 				default:
@@ -122,18 +93,30 @@ public class Hooks {
 		}
 	}
 
-	/**
-	* Method calling the hook
-	*
-	* return nothing
-	*/
 	public final static void callHook(	String operationType,
 						String hook,
 						String identifier,
-						String format,
-						String modifications) {
+						OutputFormat outputFormat,
+						LscModifications lm) {
 
-		LOGGER.info("Calling {} posthook {} with format {} for {}", operationType, hook, format, identifier);
+		LOGGER.info("Calling {} posthook {} with format {} for {}",
+				operationType,
+				hook,
+				outputFormat.toString(),
+				identifier);
+
+		String modifications = null;
+		// Compute modifications only in a create / update / changeid operation
+		if( ! operationType.equals("delete") )
+			{
+			if( outputFormat == OutputFormat.JSON ) {
+				modifications = getJsonModifications(lm);
+			}
+			else {
+				modifications = LdifLayout.format(lm);
+			}
+		}
+
 		try {
 			if( modifications != null ) {
 				Process p = new ProcessBuilder(
@@ -158,11 +141,12 @@ public class Hooks {
 			}
 		}
 		catch(IOException e) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			LOGGER.error("Error while calling {} posthook {} with format {} for {}: {}",
-					operationType, hook, format, identifier, sw.toString());
+			LOGGER.error("Error while calling {} posthook {} with format {} for {}",
+					operationType,
+					hook,
+					outputFormat.toString(),
+					identifier);
+			LOGGER.error("posthook error: ", e);
 		}
 	}
 
@@ -172,16 +156,14 @@ public class Hooks {
 	* @return modifications in a json String
 	*/
 	public final static String getJsonModifications(final LscModifications lm) {
-		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		ObjectWriter ow = Mapper.writer().withDefaultPrettyPrinter();
 		String json = "";
 		try {
 			json = ow.writeValueAsString(lm.getLscAttributeModifications());
 		}
 		catch(Exception e) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			LOGGER.error("Error while encoding LSC modifications to json", sw.toString());
+			LOGGER.error("Error while encoding LSC modifications to json");
+			LOGGER.error("encoding error: ", e);
 		}
 		return json;
 	}

@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import org.lsc.LscModificationType;
 import org.lsc.configuration.DatasetType;
@@ -197,43 +198,41 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		return result;
 	}
 
-	public String getPostHookOutputFormat() {
+	public OutputFormat getPostHookOutputFormat() {
+		// default: returns LDIF format
 		if (conf.getHooks() == null || conf.getHooks().getOutputFormat() == null) {
-			return "";
+			return OutputFormat.LDIF;
 		}
-		return conf.getHooks().getOutputFormat();
+		switch(conf.getHooks().getOutputFormat()){
+			case "json":
+				return OutputFormat.JSON;
+			default:
+				return OutputFormat.LDIF;
+		}
 	}
 
-	public String getCreatePostHook() {
-		if (conf.getHooks() == null || conf.getHooks().getCreatePostHook() == null) {
-			return "";
-		}
-		return conf.getHooks().getCreatePostHook();
+	public Optional<String> getCreatePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getCreatePostHook()).filter(s -> !s.isEmpty());
+		return hook;
 	}
 
-	public String getDeletePostHook() {
-		if (conf.getHooks() == null || conf.getHooks().getDeletePostHook() == null) {
-			return "";
-		}
-		return conf.getHooks().getDeletePostHook();
+	public Optional<String> getDeletePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getDeletePostHook()).filter(s -> !s.isEmpty());
+		return hook;
 	}
 
-	public String getUpdatePostHook() {
-		if (conf.getHooks() == null || conf.getHooks().getUpdatePostHook() == null) {
-			return "";
-		}
-		return conf.getHooks().getUpdatePostHook();
+	public Optional<String> getUpdatePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getUpdatePostHook()).filter(s -> !s.isEmpty());
+		return hook;
 	}
 
-	public String getChangeIdPostHook() {
-		if (conf.getHooks() == null || conf.getHooks().getChangeIdPostHook() == null) {
-			return "";
-		}
-		return conf.getHooks().getChangeIdPostHook();
+	public Optional<String> getChangeIdPostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getChangeIdPostHook()).filter(s -> !s.isEmpty());
+		return hook;
 	}
 
-	public String getPostHook(LscModificationType operation) {
-		String result = "";
+	public Optional<String> getPostHook(LscModificationType operation) {
+		Optional<String> result = Optional.ofNullable(null);
 		switch (operation) {
 			case CREATE_OBJECT:
 				result = this.getCreatePostHook();

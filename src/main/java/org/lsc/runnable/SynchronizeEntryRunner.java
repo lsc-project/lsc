@@ -3,6 +3,7 @@ package org.lsc.runnable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.lsc.AbstractSynchronize;
 import org.lsc.beans.InfoCounter;
@@ -17,6 +18,7 @@ import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.Hooks;
+import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 
 /**
  * @author sbahloul
@@ -139,9 +141,10 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			// if we got here, we have a modification to apply - let's do it!
 			if (task.getDestinationService().apply(lm)) {
 				// Retrieve posthook for the current operation
-				String hook = task.getSyncOptions().getPostHook(modificationType);
-				String outputFormat = task.getSyncOptions().getPostHookOutputFormat();
-				Hooks.postSyncHook(hook, outputFormat, lm);
+				Optional<String> hook = task.getSyncOptions().getPostHook(modificationType);
+				OutputFormat outputFormat = task.getSyncOptions().getPostHookOutputFormat();
+				Hooks hookObject = new Hooks();
+				hookObject.postSyncHook(hook, outputFormat, lm);
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
 				return true;

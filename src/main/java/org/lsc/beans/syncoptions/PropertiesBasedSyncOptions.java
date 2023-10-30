@@ -232,22 +232,17 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public Optional<String> getPostHook(LscModificationType operation) {
-		Optional<String> result = Optional.ofNullable(null);
 		switch (operation) {
 			case CREATE_OBJECT:
-				result = this.getCreatePostHook();
-				break;
+				return this.getCreatePostHook();
 			case UPDATE_OBJECT:
-				result = this.getUpdatePostHook();
-				break;
+				return this.getUpdatePostHook();
 			case DELETE_OBJECT:
-				result = this.getDeletePostHook();
-				break;
+				return this.getDeletePostHook();
 			case CHANGE_ID:
-				result = this.getChangeIdPostHook();
-				break;
+				return this.getChangeIdPostHook();
 		}
-		return result;
+		return Optional.empty();
 	}
 	
 	public String getDelimiter(String name) {

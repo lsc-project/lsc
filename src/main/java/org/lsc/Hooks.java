@@ -68,46 +68,24 @@ public class Hooks {
 	 */
 	public final void postSyncHook(final Optional<String> hook, final OutputFormat outputFormat, final LscModifications lm) {
 
-		if( hook != null && hook.isPresent() )
-		{
-			switch (lm.getOperation()) {
-				case CREATE_OBJECT:
-					callHook("create", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
-					break;
-
-				case UPDATE_OBJECT:
-					callHook("update", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
-					break;
-
-				case CHANGE_ID:
-					callHook("changeId", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
-					break;
-
-				case DELETE_OBJECT:
-					callHook("delete", hook.get(), lm.getMainIdentifier(), outputFormat, lm);
-					break;
-
-				default:
-					LOGGER.info("Error: unknown operation for posthook {}", hook);
-			}
-		}
+		hook.ifPresent( h -> callHook(lm.getOperation(), h, lm.getMainIdentifier(), outputFormat, lm));
 	}
 
-	public final static void callHook(	String operationType,
+	public final static void callHook(	LscModificationType operationType,
 						String hook,
 						String identifier,
 						OutputFormat outputFormat,
 						LscModifications lm) {
 
 		LOGGER.info("Calling {} posthook {} with format {} for {}",
-				operationType,
+				operationType.getDescription(),
 				hook,
 				outputFormat.toString(),
 				identifier);
 
 		String modifications = null;
 		// Compute modifications only in a create / update / changeid operation
-		if( ! operationType.equals("delete") )
+		if( operationType != LscModificationType.DELETE_OBJECT)
 			{
 			if( outputFormat == OutputFormat.JSON ) {
 				modifications = getJsonModifications(lm);
@@ -122,7 +100,7 @@ public class Hooks {
 				Process p = new ProcessBuilder(
 					hook,
 					identifier,
-					operationType)
+					operationType.getDescription())
 				.start();
 
 				// sends ldif modifications to stdin of hook script
@@ -136,17 +114,17 @@ public class Hooks {
 				Process p = new ProcessBuilder(
 					hook,
 					identifier,
-					operationType)
+					operationType.getDescription())
 				.start();
 			}
 		}
 		catch(IOException e) {
 			LOGGER.error("Error while calling {} posthook {} with format {} for {}",
-					operationType,
+					operationType.getDescription(),
 					hook,
 					outputFormat.toString(),
-					identifier);
-			LOGGER.error("posthook error: ", e);
+					identifier,
+					e);
 		}
 	}
 
@@ -162,8 +140,7 @@ public class Hooks {
 			json = ow.writeValueAsString(lm.getLscAttributeModifications());
 		}
 		catch(Exception e) {
-			LOGGER.error("Error while encoding LSC modifications to json");
-			LOGGER.error("encoding error: ", e);
+			LOGGER.error("Error while encoding LSC modifications to json", e);
 		}
 		return json;
 	}

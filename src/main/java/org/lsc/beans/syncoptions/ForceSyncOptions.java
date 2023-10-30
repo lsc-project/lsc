@@ -134,23 +134,23 @@ public class ForceSyncOptions implements ISyncOptions {
 	}
 
 	public Optional<String> getCreatePostHook() {
-		return Optional.ofNullable(null);
+		return Optional.empty();
 	}
 
 	public Optional<String> getDeletePostHook() {
-		return Optional.ofNullable(null);
+		return Optional.empty();
 	}
 
 	public Optional<String> getUpdatePostHook() {
-		return Optional.ofNullable(null);
+		return Optional.empty();
 	}
 
 	public Optional<String> getChangeIdPostHook() {
-		return Optional.ofNullable(null);
+		return Optional.empty();
 	}
 
 	public Optional<String> getPostHook(LscModificationType operation) {
-		return Optional.ofNullable(null);
+		return Optional.empty();
 	}
 
 	public String getDn() {

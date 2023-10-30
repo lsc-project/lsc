@@ -34,11 +34,13 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(CleanEntryRunner.class);
 
+	private Hooks hooks;
 
 	public CleanEntryRunner(final Task task, InfoCounter counter,
 			AbstractSynchronize abstractSynchronize,
 			Entry<String, LscDatasets> id) {
 		super(task, counter, abstractSynchronize, id);
+		this.hooks = new Hooks();
 	}
 
 	@Override
@@ -112,10 +114,9 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 				// do it!
 				if (task.getDestinationService().apply(lm)) {
 					// Retrieve posthook for the current operation
-					Optional<String> hook = syncOptions.getDeletePostHook();
-					OutputFormat outputFormat = syncOptions.getPostHookOutputFormat();
-					Hooks hookObject = new Hooks();
-					hookObject.postSyncHook(hook, outputFormat, lm);
+					hooks.postSyncHook(	syncOptions.getDeletePostHook(),
+								syncOptions.getPostHookOutputFormat(),
+								lm);
 					counter.incrementCountCompleted();
 					abstractSynchronize.logAction(lm, id, task.getName());
 				} else {

@@ -27,6 +27,7 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeEntryRunner.class);
 	private boolean fromSource;
+	private Hooks hooks;
 
 	public SynchronizeEntryRunner(final Task task, InfoCounter counter,
 			AbstractSynchronize abstractSynchronize,
@@ -34,6 +35,7 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			boolean fromSource) {
 		super(task, counter, abstractSynchronize, id);
 		this.fromSource = fromSource;
+		this.hooks = new Hooks();
 	}
 	
 	@Override
@@ -141,10 +143,9 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			// if we got here, we have a modification to apply - let's do it!
 			if (task.getDestinationService().apply(lm)) {
 				// Retrieve posthook for the current operation
-				Optional<String> hook = task.getSyncOptions().getPostHook(modificationType);
-				OutputFormat outputFormat = task.getSyncOptions().getPostHookOutputFormat();
-				Hooks hookObject = new Hooks();
-				hookObject.postSyncHook(hook, outputFormat, lm);
+				hooks.postSyncHook(	task.getSyncOptions().getPostHook(modificationType),
+							task.getSyncOptions().getPostHookOutputFormat(),
+							lm);
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
 				return true;

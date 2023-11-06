@@ -9,8 +9,6 @@
 #=================================================
 
 %global lsc_logdir      %{_localstatedir}/log/lsc
-%global lsc_user        lsc
-%global lsc_group       lsc
 # Build from snapshot
 # Caution: percent sign is expanded even after a #
 # Escape with %%
@@ -111,7 +109,7 @@ cp -a bin/check_lsc* %{buildroot}%{_libdir}/nagios/plugins/
 sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' \
   %{buildroot}%{_sysconfdir}/lsc/logback.xml
 ## cron
-sed -i 's: root : %{lsc_user} :' %{buildroot}%{_sysconfdir}/cron.d/lsc
+sed -i 's: root : lsc :' %{buildroot}%{_sysconfdir}/cron.d/lsc
 sed -i 's:#LSC_BIN#:%{_bindir}/lsc:g' %{buildroot}%{_sysconfdir}/cron.d/lsc
 sed -i 's:^30:#30:' %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## bin
@@ -129,13 +127,13 @@ sed -i \
 
 
 %pre
-getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || \
-  useradd --system --gid %{lsc_group} \
+getent group lsc > /dev/null 2>&1 || groupadd --system lsc
+getent passwd lsc > /dev/null 2>&1 || \
+  useradd --system --gid lsc \
    --home-dir %{_sharedstatedir}/lsc \
    --shell "/sbin/nologin" \
    --comment "LDAP Synchronization Connector user" \
-   %{lsc_user}
+   lsc
 
 %post
 %systemd_post lsc-async.service

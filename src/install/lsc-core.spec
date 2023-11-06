@@ -9,8 +9,6 @@
 #=================================================
 
 %global lsc_logdir      %{_localstatedir}/log/lsc
-%global lsc_user        lsc
-%global lsc_group       lsc
 %global snapshot        1
 
 Name: lsc
@@ -129,13 +127,13 @@ sed -i \
 
 
 %pre
-getent group %{lsc_group} > /dev/null 2>&1 || groupadd --system %{lsc_group}
-getent passwd %{lsc_user} > /dev/null 2>&1 || \
-  useradd --system --gid %{lsc_group} \
+getent group lsc > /dev/null 2>&1 || groupadd --system lsc
+getent passwd lsc > /dev/null 2>&1 || \
+  useradd --system --gid lsc \
    --home-dir %{_sharedstatedir}/lsc \
    --shell "/sbin/nologin" \
    --comment "LDAP Synchronization Connector user" \
-   %{lsc_user}
+   lsc
 
 %post
 /sbin/chkconfig --add lsc

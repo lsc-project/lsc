@@ -145,6 +145,18 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
+		<!-- Systemd files -->
+		<fileSet>
+			<directory>src/install/lib/systemd/system</directory>
+			<includes>
+				<include>lsc.service</include>
+			</includes>
+			<outputDirectory>lib/systemd/system</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
+		<!-- System conf files -->
 		<fileSet>
 			<directory>src/install/etc/default</directory>
 			<includes> <include>lsc</include> </includes>

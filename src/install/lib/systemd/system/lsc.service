@@ -1,0 +1,27 @@
+[Unit]
+Description=LSC server
+After=network.target
+
+[Service]
+Type=forking
+User=lsc
+Group=lsc
+PIDFile=/run/lsc.pid
+Environment="LSC_CONFIG_DIR=/etc/lsc"
+Environment="LSC_ASYNC_TASKS=-a all"
+Environment="LSC_EXTRA_ARGS="
+Environment="LSC_JMXPORT="
+EnvironmentFile=-/etc/default/lsc
+ExecStartPre=/usr/bin/lsc -v -f ${LSC_CONFIG_DIR}
+ExecStart=/usr/bin/lsc -f ${LSC_CONFIG_DIR} ${LSC_ASYNC_TASKS} ${LSC_EXTRA_ARGS}
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+ReadWritePaths=/var/log/lsc
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

@@ -18,12 +18,6 @@ sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' /usr/bin/lsc /usr/bin/lsc-agent /usr/b
 sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' /usr/bin/lsc /usr/bin/lsc-agent /usr/bin/hsqldb
 sed -i "s:^LOG_DIR.*:LOG_DIR=\"${lsc_logdir}\":" /usr/bin/lsc /usr/bin/lsc-agent /usr/bin/hsqldb
 sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' /usr/bin/hsqldb
-## init
-sed -i 's:^LSC_BIN.*:LSC_BIN="/usr/bin/lsc":' /etc/default/lsc
-sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' /etc/default/lsc
-sed -i 's:^LSC_USER.*:LSC_USER="lsc":' /etc/default/lsc
-sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' /etc/default/lsc
-sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' /etc/default/lsc
 
 # Copy sample configuration for a fresh install
 [ -f /etc/lsc/lsc.xml ] || cp /usr/share/doc/lsc/lsc.xml-sample /etc/lsc/lsc.xml

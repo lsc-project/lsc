@@ -7,3 +7,21 @@
 	dh $@ 
 
 override_dh_compress:
+
+override_dh_testdir:
+## systemd
+	cp -f lib/systemd/system/lsc-async.service debian/
+	cp -f lib/systemd/system/lsc-async@.service debian/
+	cp -f lib/systemd/system/lsc-sync.service debian/
+	cp -f lib/systemd/system/lsc-sync.timer debian/
+	cp -f lib/systemd/system/lsc-sync@.service debian/
+	cp -f etc/default/lsc-async debian/lsc-async.default
+	cp -f etc/default/lsc-sync debian/lsc-sync.default
+	dh_testdir
+
+override_dh_installsystemd:
+	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-async
+	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-async@
+	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-sync
+	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-sync@
+	dh_installsystemd --name=lsc-sync.timer

@@ -33,6 +33,11 @@ URL: https://lsc-project.org
 Source: %{lsc_name}-core-%{lsc_version}-dist.zip
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
+%if 0%{?fedora}%{?el9}
+BuildRequires:  systemd-rpm-macros
+%else
+BuildRequires:  systemd
+%endif
 Requires(pre): coreutils
 Requires: which
 
@@ -64,11 +69,12 @@ mkdir -p %{buildroot}/usr/%{_lib}/lsc
 mkdir -p %{buildroot}/etc/lsc
 mkdir -p %{buildroot}/etc/lsc/sql-map-config.d
 mkdir -p %{buildroot}/etc/cron.d
-mkdir -p %{buildroot}/etc/init.d
 mkdir -p %{buildroot}/etc/default
 mkdir -p %{buildroot}/usr/share/doc/lsc/bin
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}/var/lib/lsc/nagios
+mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_sysconfdir}/default
 
 # Copy files
 ## bin
@@ -89,9 +95,14 @@ cp -a lib/* %{buildroot}/usr/%{_lib}/lsc
 cp -a sample/ %{buildroot}/usr/share/doc/lsc
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}/etc/cron.d/lsc
-## init
-cp -a etc/init.d/lsc %{buildroot}/etc/init.d/lsc
-cp -a etc/default/lsc %{buildroot}/etc/default/lsc
+## systemd
+cp -a etc/default/lsc-async %{buildroot}%{_sysconfdir}/default/lsc-async
+cp -a etc/default/lsc-sync %{buildroot}%{_sysconfdir}/default/lsc-sync
+install -p -m 0644 lib/systemd/system/lsc-async.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-async@.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-sync.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-sync@.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-sync.timer %{buildroot}%{_unitdir}/
 ## nagios
 cp -a bin/check_lsc* %{buildroot}/var/lib/lsc/nagios
 
@@ -107,24 +118,12 @@ sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/
 sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/%{_lib}/lsc":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
 sed -i 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' %{buildroot}/usr/bin/lsc %{buildroot}/usr/bin/lsc-agent %{buildroot}/usr/bin/hsqldb
 sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' %{buildroot}/usr/bin/hsqldb
-## init
-sed -i 's:^LSC_BIN.*:LSC_BIN="/usr/bin/lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_CFG_DIR.*:LSC_CFG_DIR="/etc/lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_USER.*:LSC_USER="lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_GROUP.*:LSC_GROUP="lsc":' %{buildroot}/etc/default/lsc
-sed -i 's:^LSC_PID_FILE.*:LSC_PID_FILE="/var/run/lsc.pid":' %{buildroot}/etc/default/lsc
 
 %post
-#=================================================
-# Post Installation
-#=================================================
-
-# Do this at first install
-if [ $1 -eq 1 ]
-then
-        # Set lsc as service
-        /sbin/chkconfig --add lsc
-fi
+%systemd_post lsc-async.service
+%systemd_post lsc-async@.service
+%systemd_post lsc-sync.service
+%systemd_post lsc-sync@.service
 
 # Always do this
 # Create user and group if needed
@@ -136,6 +135,10 @@ getent passwd %{lsc_user} > /dev/null 2>&1 || useradd --system --gid %{lsc_group
 # Add symlink for sample to work
 ln -sf /usr/%{_lib}/lsc/ /usr/share/doc/lsc/%{_lib}
 ln -sf /usr/bin/lsc /usr/share/doc/lsc/bin/
+
+%preun
+%systemd_preun lsc-async.service
+%systemd_preun lsc-sync.service
 
 %postun
 #=================================================
@@ -166,11 +169,16 @@ rm -rf %{buildroot}
 %defattr(-, root, root, 0755)
 %config(noreplace) /etc/lsc/
 %config(noreplace) /etc/cron.d/lsc
-%config(noreplace) /etc/default/lsc
+%config(noreplace) /etc/default/lsc-sync
+%config(noreplace) /etc/default/lsc-async
 /usr/bin/lsc
 /usr/bin/lsc-agent
 /usr/bin/hsqldb
-/etc/init.d/lsc
+%{_unitdir}/lsc-async.service
+%{_unitdir}/lsc-async@.service
+%{_unitdir}/lsc-sync.service
+%{_unitdir}/lsc-sync@.service
+%{_unitdir}/lsc-sync.timer
 /usr/%{_lib}/lsc/
 /usr/share/doc/lsc
 %{lsc_logdir}

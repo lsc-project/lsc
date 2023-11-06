@@ -17,16 +17,17 @@ Release: 0%{?dist}
 Summary: LDAP Synchronization Connector
 License: BSD-3-Clause
 URL: https://lsc-project.org
-Source: https://lsc-project.org/archives/%{name}-core-%{version}%{?snapshot:-SNAPSHOT}-dist.tar.gz
+Source0: https://lsc-project.org/archives/%{name}-core-%{version}%{?snapshot:-SNAPSHOT}-dist.tar.gz
 BuildArch: noarch
 
+%if 0%{?fedora}%{?el9}
+BuildRequires:  systemd-rpm-macros
+%else
+BuildRequires:  systemd
+%endif
 Requires(pre): coreutils
 Requires: crontabs
 Requires: which
-Requires(post):   chkconfig
-Requires(preun):  chkconfig
-Requires(preun):  initscripts
-Requires(postun): initscripts
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize
@@ -63,7 +64,7 @@ mkdir -p %{buildroot}%{_libdir}/lsc
 mkdir -p %{buildroot}%{_sysconfdir}/lsc
 mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
 mkdir -p %{buildroot}%{_sysconfdir}/cron.d
-mkdir -p %{buildroot}%{_initddir}
+mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_sysconfdir}/default
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}%{_sharedstatedir}/lsc/
@@ -85,9 +86,9 @@ cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample \
 cp -a lib/* %{buildroot}%{_libdir}/lsc
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
-## init
-cp -a etc/init.d/lsc %{buildroot}%{_initddir}/lsc
+## systemd
 cp -a etc/default/lsc %{buildroot}%{_sysconfdir}/default/lsc
+install -p -m 0644 lib/systemd/system/lsc.service %{buildroot}%{_unitdir}/
 ## man
 cp -a doc/man/man1/* %{buildroot}%{_mandir}/man1/
 cp -a doc/man/man5/* %{buildroot}%{_mandir}/man5/
@@ -122,8 +123,7 @@ sed -i \
   -e 's:^LSC_USER.*:LSC_USER="lsc":' \
   -e 's:^LSC_GROUP.*:LSC_GROUP="lsc":' \
   -e 's:^LSC_PID_FILE.*:LSC_PID_FILE="%{_rundir}/lsc.pid":' \
-  %{buildroot}%{_sysconfdir}/default/lsc \
-  %{buildroot}%{_initddir}/lsc
+  %{buildroot}%{_sysconfdir}/default/lsc
 
 
 %pre
@@ -136,13 +136,13 @@ getent passwd lsc > /dev/null 2>&1 || \
    lsc
 
 %post
-/sbin/chkconfig --add lsc
+%systemd_post lsc.service
 
 %preun
-if [ $1 -eq 0 ] ; then
-  /sbin/service lsc stop >/dev/null 2>&1
-  /sbin/chkconfig --del lsc
-fi
+%systemd_preun lsc.service
+
+%postun
+%systemd_postun_with_restart lsc.service
 
 
 %files
@@ -159,7 +159,7 @@ fi
 %{_bindir}/lsc
 %{_bindir}/lsc-agent
 %{_bindir}/hsqldb
-%{_initddir}/lsc
+%{_unitdir}/lsc.service
 %{_libdir}/lsc/
 %attr(-,lsc,lsc) %{lsc_logdir}
 %{_sharedstatedir}/lsc/

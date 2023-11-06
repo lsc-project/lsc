@@ -150,6 +150,8 @@
 			<directory>src/install/lib/systemd/system</directory>
 			<includes>
 				<include>lsc.service</include>
+				<include>lsc-oneshot.service</include>
+				<include>lsc-oneshot.timer</include>
 			</includes>
 			<outputDirectory>lib/systemd/system</outputDirectory>
 			<fileMode>0644</fileMode>

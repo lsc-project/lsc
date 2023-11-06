@@ -1,0 +1,5 @@
+[Unit]
+Description=Periodically run LSC
+
+[Timer]
+OnCalendar= *:30:00

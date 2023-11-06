@@ -26,7 +26,6 @@ BuildRequires:  systemd-rpm-macros
 BuildRequires:  systemd
 %endif
 Requires(pre): coreutils
-Requires: crontabs
 Requires: which
 
 %description
@@ -63,7 +62,6 @@ mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}/lsc
 mkdir -p %{buildroot}%{_sysconfdir}/lsc
 mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
-mkdir -p %{buildroot}%{_sysconfdir}/cron.d
 mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_sysconfdir}/default
 mkdir -p %{buildroot}%{lsc_logdir}
@@ -84,11 +82,11 @@ cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample \
   %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
 ## lib
 cp -a lib/* %{buildroot}%{_libdir}/lsc
-## cron
-cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## systemd
 cp -a etc/default/lsc %{buildroot}%{_sysconfdir}/default/lsc
 install -p -m 0644 lib/systemd/system/lsc.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-oneshot.service %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-oneshot.timer %{buildroot}%{_unitdir}/
 ## man
 cp -a doc/man/man1/* %{buildroot}%{_mandir}/man1/
 cp -a doc/man/man5/* %{buildroot}%{_mandir}/man5/
@@ -100,10 +98,6 @@ cp -a bin/check_lsc* %{buildroot}%{_libdir}/nagios/plugins/
 ## logback
 sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' \
   %{buildroot}%{_sysconfdir}/lsc/logback.xml
-## cron
-sed -i 's: root : %{lsc_user} :' %{buildroot}%{_sysconfdir}/cron.d/lsc
-sed -i 's:#LSC_BIN#:%{_bindir}/lsc:g' %{buildroot}%{_sysconfdir}/cron.d/lsc
-sed -i 's:^30:#30:' %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## bin
 sed -i \
   -e 's:^CFG_DIR.*:CFG_DIR="%{_sysconfdir}/lsc":' \
@@ -154,12 +148,13 @@ getent passwd lsc > /dev/null 2>&1 || \
 %config(noreplace) %{_sysconfdir}/lsc/*.xml
 %dir %{_sysconfdir}/lsc/sql-map-config.d/
 %config(noreplace) %{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
-%config(noreplace) %{_sysconfdir}/cron.d/lsc
 %config(noreplace) %{_sysconfdir}/default/lsc
 %{_bindir}/lsc
 %{_bindir}/lsc-agent
 %{_bindir}/hsqldb
 %{_unitdir}/lsc.service
+%{_unitdir}/lsc-oneshot.service
+%{_unitdir}/lsc-oneshot.timer
 %{_libdir}/lsc/
 %attr(-,lsc,lsc) %{lsc_logdir}
 %{_sharedstatedir}/lsc/

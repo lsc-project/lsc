@@ -630,7 +630,7 @@
 		<repository>
                         <id>forgerock-community-repository</id>
                         <name>ForgeRock CommunityRepository</name>
-                        <url>https://maven.forgerock.org/repo/community</url>
+                        <url>https://maven.forgerock.org/artifactory/community</url>
                 </repository>
 		<repository>
 			<id>oracleReleases</id>

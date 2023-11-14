@@ -461,7 +461,7 @@
 		<profile>
 			<id>jdk9</id>
 			<activation>
-				<jdk>[9,11[</jdk>
+				<jdk>[9,11)</jdk>
 			</activation>
 			<properties>
 				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>

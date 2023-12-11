@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.naming.CommunicationException;
 
@@ -23,6 +24,8 @@ import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.lsc.Hooks;
+import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 
 /**
  * @author sfroger
@@ -31,11 +34,13 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 
 	static final Logger LOGGER = LoggerFactory.getLogger(CleanEntryRunner.class);
 
+	private Hooks hooks;
 
 	public CleanEntryRunner(final Task task, InfoCounter counter,
 			AbstractSynchronize abstractSynchronize,
 			Entry<String, LscDatasets> id) {
 		super(task, counter, abstractSynchronize, id);
+		this.hooks = new Hooks();
 	}
 
 	@Override
@@ -108,6 +113,10 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 				// if we got here, we have a modification to apply - let's
 				// do it!
 				if (task.getDestinationService().apply(lm)) {
+					// Retrieve posthook for the current operation
+					hooks.postSyncHook(	syncOptions.getDeletePostHook(),
+								syncOptions.getPostHookOutputFormat(),
+								lm);
 					counter.incrementCountCompleted();
 					abstractSynchronize.logAction(lm, id, task.getName());
 				} else {

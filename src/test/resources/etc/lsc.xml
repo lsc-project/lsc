@@ -855,6 +855,375 @@
         </dataset>
       </propertiesBasedSyncOptions>
     </task>
+    <task>
+      <name>ldap2ldapLDIFHookTestCreate</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapLDIFHookTestCreate-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001)</getAllFilter>
+        <getOneFilter>(cn=CN0001)</getOneFilter>
+        <cleanFilter>(cn=CN0001)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapLDIFHookTestCreate-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>ldif</outputFormat>
+          <createPostHook>bin/hook-ldif.sh</createPostHook>
+        </hooks>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapLDIFHookTestUpdate</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapLDIFHookTestUpdate-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001)</getAllFilter>
+        <getOneFilter>(cn=CN0001)</getOneFilter>
+        <cleanFilter>(cn=CN0001)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapLDIFHookTestUpdate-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>ldif</outputFormat>
+          <updatePostHook>bin/hook-ldif.sh</updatePostHook>
+        </hooks>
+        <dataset>
+          <name>description</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapLDIFHookTestDelete</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapLDIFHookTestDelete-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getAllFilter>
+        <getOneFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getOneFilter>
+        <cleanFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapLDIFHookTestDelete-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>description</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>ldif</outputFormat>
+          <deletePostHook>bin/hook-ldif.sh</deletePostHook>
+        </hooks>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapJSONHookTestCreate</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapJSONHookTestCreate-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001)</getAllFilter>
+        <getOneFilter>(cn=CN0001)</getOneFilter>
+        <cleanFilter>(cn=CN0001)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapJSONHookTestCreate-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>json</outputFormat>
+          <createPostHook>bin/hook-json.sh</createPostHook>
+        </hooks>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>sn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapJSONHookTestUpdate</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapJSONHookTestUpdate-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001)</getAllFilter>
+        <getOneFilter>(cn=CN0001)</getOneFilter>
+        <cleanFilter>(cn=CN0001)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapJSONHookTestUpdate-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>description</string>
+          <string>userCertificate;binary</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>json</outputFormat>
+          <updatePostHook>bin/hook-json.sh</updatePostHook>
+        </hooks>
+        <dataset>
+          <name>description</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>userCertificate;binary</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>
+            <![CDATA[
+              function toBinary(base64) {
+                  return java.util.Base64.getDecoder().decode(new java.lang.String(base64));
+              }
+              toBinary("MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvcNAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTALBgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzMDQxWhcNMzMxMDI0MTQzMDQxWjBYMQswCQYDVQQGEwJGUjENMAsGA1UECAwEdGVzdDENMAsGA1UEBwwEdGVzdDENMAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdWt0QgFnEi7a1hIJQv4ZdOM5y0GGLHQYNrUNSReArvpkYUY5zasFNVzVHCApRuj0t1NMDrn1gNzKkxTIbYGaWRSn+21J0ow+Nxh2TAQW8dkJnWTksCfyGGGItI5q3ST3EUKnepaAzUYYENcSHRyx7UY/3XuzcW0aGhy4PrVTIHBpyLq0Uzv8nH5nbWM+LYt6YbQMmlAz/psTXIC2dfEZhUb4plLGSo7rZxM5geC6Z+os+I8+uw+mGjps1VP7eGq0jCGHNs2rUHMqBNgLvwMH2WlMXo/iNarAb8fUEPdp59FwiTygBlWAn6GoKHJ1HWPpqMxdtjL2Y5+ZMcp70eJqcCAwEAAaNTMFEwHQYDVR0OBBYEFLwffjUBL/Rp4a6MgeCJiFnCZFu8MB8GA1UdIwQYMBaAFLwffjUBL/Rp4a6MgeCJiFnCZFu8MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBACjwsg1Z9PyauoKAhkIfyPTEnlEOCo1nN37c2vnH4fyY6fuBdV6GWtk/u9FCuDmYT/4KDRxe33ZUChwSUX0INgamOarWRES3UoPC1GeOvuMf7uustEMLcHAYZVKXSZUrsOjw+VIZ5XrD6GDE64QtvW5Ve3jf43aGgLf27NF0vhF9+gHOZjjBT33S977HUutMUKfRu9PdHAn8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqUSZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=")
+            ]]>
+            </string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
+    <task>
+      <name>ldap2ldapJSONHookTestDelete</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+      <ldapSourceService>
+        <name>ldap2ldapJSONHookTestDelete-src</name>
+        <connection reference="src-ldap"/>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getAllFilter>
+        <getOneFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getOneFilter>
+        <cleanFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</cleanFilter>
+        <dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
+        <interval>5</interval>
+      </ldapSourceService>
+      <ldapDestinationService>
+        <name>ldap2ldapJSONHookTestDelete-dst</name>
+        <connection reference="dst-ldap"></connection>
+        <baseDn>ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
+        <pivotAttributes>
+          <string>cn</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>sn</string>
+          <string>description</string>
+          <string>objectClass</string>
+        </fetchedAttributes>
+        <getAllFilter>(cn=CN0001-hook)</getAllFilter>
+        <getOneFilter>(cn=CN0001-hook)</getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+        <defaultDelimiter>,</defaultDelimiter>
+        <defaultPolicy>KEEP</defaultPolicy>
+        <hooks>
+          <outputFormat>json</outputFormat>
+          <deletePostHook>bin/hook-json.sh</deletePostHook>
+        </hooks>
+        <dataset>
+          <name>objectclass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"person"</string>
+            <string>"top"</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>cn</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"CN0001-hook"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+    </task>
   </tasks>
   <security>
     <encryption>

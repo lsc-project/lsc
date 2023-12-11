@@ -47,6 +47,7 @@ package org.lsc.beans.syncoptions;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import org.lsc.LscModificationType;
 import org.lsc.configuration.PolicyType;
@@ -60,6 +61,9 @@ public interface ISyncOptions {
 
 	/** default condition if none is given */
 	public static final String DEFAULT_CONDITION = "true";
+
+	/** list of output formats */
+	public enum OutputFormat { LDIF, JSON };
 	
 	/**
 	 * Initialize the synchronization options policy.
@@ -152,6 +156,44 @@ public interface ISyncOptions {
 	
 
 	String getCondition(LscModificationType operation);
+
+	/**
+	 * Returns the posthook output format
+	 *
+	 * @return the posthook output format (default = OutputFormat.LDIF)
+	 */
+	OutputFormat getPostHookOutputFormat();
+
+	/**
+	 * Returns the posthook for a creation
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	Optional<String> getCreatePostHook();
+
+	/**
+	 * Returns the posthook for an update
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	Optional<String> getUpdatePostHook();
+
+	/**
+	 * Returns the posthook for a delete
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	Optional<String> getDeletePostHook();
+
+	/**
+	 * Returns the posthook for a id change
+	 *
+	 * @return the posthook or "" if none is specified (default)
+	 */
+	Optional<String> getChangeIdPostHook();
+
+
+	Optional<String> getPostHook(LscModificationType operation);
 
 	/**
 	 * Return the expression used to infer the new object DN

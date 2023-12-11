@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import org.lsc.LscModificationType;
 import org.lsc.configuration.DatasetType;
@@ -195,6 +196,53 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 				break;
 		}
 		return result;
+	}
+
+	public OutputFormat getPostHookOutputFormat() {
+		// default: returns LDIF format
+		if (conf.getHooks() == null || conf.getHooks().getOutputFormat() == null) {
+			return OutputFormat.LDIF;
+		}
+		switch(conf.getHooks().getOutputFormat()){
+			case "json":
+				return OutputFormat.JSON;
+			default:
+				return OutputFormat.LDIF;
+		}
+	}
+
+	public Optional<String> getCreatePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getCreatePostHook()).filter(s -> !s.isEmpty());
+		return hook;
+	}
+
+	public Optional<String> getDeletePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getDeletePostHook()).filter(s -> !s.isEmpty());
+		return hook;
+	}
+
+	public Optional<String> getUpdatePostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getUpdatePostHook()).filter(s -> !s.isEmpty());
+		return hook;
+	}
+
+	public Optional<String> getChangeIdPostHook() {
+		Optional<String> hook = Optional.ofNullable(conf.getHooks().getChangeIdPostHook()).filter(s -> !s.isEmpty());
+		return hook;
+	}
+
+	public Optional<String> getPostHook(LscModificationType operation) {
+		switch (operation) {
+			case CREATE_OBJECT:
+				return this.getCreatePostHook();
+			case UPDATE_OBJECT:
+				return this.getUpdatePostHook();
+			case DELETE_OBJECT:
+				return this.getDeletePostHook();
+			case CHANGE_ID:
+				return this.getChangeIdPostHook();
+		}
+		return Optional.empty();
 	}
 	
 	public String getDelimiter(String name) {

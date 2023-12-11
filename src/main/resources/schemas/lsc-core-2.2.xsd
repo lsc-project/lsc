@@ -324,6 +324,16 @@
 		</xsd:sequence>
 	</xsd:complexType>
 
+	<xsd:complexType name="hooksType">
+		<xsd:sequence>
+			<xsd:element name="outputFormat" type="xsd:string" minOccurs="0" />
+			<xsd:element name="createPostHook" type="xsd:string" minOccurs="0" />
+			<xsd:element name="updatePostHook" type="xsd:string" minOccurs="0" />
+			<xsd:element name="deletePostHook" type="xsd:string" minOccurs="0" />
+			<xsd:element name="changeIdPostHook" type="xsd:string" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
 	<xsd:complexType name="propertiesBasedSyncOptionsType">
 		<xsd:complexContent>
 			<xsd:extension base="syncOptionsType">
@@ -334,6 +344,7 @@
 						default="FORCE" />
 					<xsd:element name="conditions" type="conditionsType"
 						minOccurs="0" />
+					<xsd:element name="hooks" type="hooksType" minOccurs="0" />
 					<xsd:element name="dataset" type="datasetType"
 						minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>

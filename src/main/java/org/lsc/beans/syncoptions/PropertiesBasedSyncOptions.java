@@ -212,22 +212,22 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public Optional<String> getCreatePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks().getCreatePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getCreatePostHook()).filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getDeletePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks().getDeletePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getDeletePostHook()).filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getUpdatePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks().getUpdatePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getUpdatePostHook()).filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getChangeIdPostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks().getChangeIdPostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getChangeIdPostHook()).filter(s -> !s.isEmpty());
 		return hook;
 	}
 

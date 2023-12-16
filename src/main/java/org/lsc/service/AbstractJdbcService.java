@@ -205,17 +205,42 @@ public abstract class AbstractJdbcService implements IService {
 			srcBean = beanClass.newInstance();
 			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService), getAttributesMap(attributes));
 			if(records.size() > 1) {
+				// this is useful for multivalued entries, for groups.
+				// To use with caution when few column are used because there will be many duplicated content.
+				// TODO : name of multivalued column should be configured, then only this one is returned as multiple values.
+				// TODO : if no multivalued column is set then throws an exception
+				/*
 				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
 						"For id=" + id + ", there are " + records.size() + " records !");
+				 */
+				for ( Object recordObject : records ) {
+					Map<String, Object> record = (Map<String, Object>) recordObject;
+					for (Entry<String, Object> entry : record.entrySet()) {
+						if (entry.getValue() != null) {
+							Set<Object> previousValues = srcBean.getDatasetById(entry.getKey());
+							if ( previousValues != null ) {
+								previousValues.add(entry.getValue());
+								srcBean.setDataset(entry.getKey(), previousValues);
+							}
+							else {
+								srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
+							}
+						} else {
+							srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
+						}
+					}
+				}
 			} else if (records.size() == 0) {
 				return null;
 			}
-			Map<String, Object> record = (Map<String, Object>) records.get(0);
-			for(Entry<String, Object> entry: record.entrySet()) {
-				if(entry.getValue() != null) {
-					srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
-				} else {
-                    srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
+			else {
+				Map<String, Object> record = (Map<String, Object>) records.get(0);
+				for (Entry<String, Object> entry : record.entrySet()) {
+					if (entry.getValue() != null) {
+						srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
+					} else {
+						srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
+					}
 				}
 			}
 			srcBean.setMainIdentifier(id);

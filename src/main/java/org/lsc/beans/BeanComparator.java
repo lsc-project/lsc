@@ -321,22 +321,32 @@ public final class BeanComparator {
 
 				case REPLACE_VALUES:
 					if (attrStatus == PolicyType.FORCE) {
-						multiMi = new ArrayList<LscDatasetModification>(2);
-						
 						// check if there are any extra values to be added
 						Set<Object> missingValues = SetUtils.findMissingNeedles(dstAttrValues, toSetAttrValues);
-						if (missingValues.size() > 0) {
-							LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
-											new Object[]{logPrefix, attrName, missingValues});
-							multiMi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, dstAttr.getID(), missingValues));
-						}
-
 						// check if there are any extra values to be removed
 						Set<Object> extraValues = SetUtils.findMissingNeedles(toSetAttrValues, dstAttrValues);
-						if (extraValues.size() > 0) {
-							LOGGER.debug("{} Removing values from attribute \"{}\": old values are {}",
-											new Object[]{logPrefix, attrName, extraValues});
-							multiMi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, dstAttr.getID(), extraValues));
+
+						if((missingValues.size() + extraValues.size()) >= toSetAttrValues.size()) {
+							// More things to add and delete than remaining in the final set
+							// so, replace with the final set directly.
+							LOGGER.debug("{} Replacing attribute \"{}\": source values are {}, old values were {}, new values are {}",
+											new Object[]{logPrefix, attrName, srcAttrValues, dstAttrValues, toSetAttrValues});
+							mi = new LscDatasetModification(operationType, dstAttr.getID(), toSetAttrValues);
+						} else {
+							// Adding and deleting the values is less expensive than replacing everything
+							multiMi = new ArrayList<LscDatasetModification>(2);
+
+							if (missingValues.size() > 0) {
+								LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
+								new Object[]{logPrefix, attrName, missingValues});
+								multiMi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, dstAttr.getID(), missingValues));
+							}
+
+							if (extraValues.size() > 0) {
+								LOGGER.debug("{} Removing values from attribute \"{}\": old values are {}",
+								new Object[]{logPrefix, attrName, extraValues});
+								multiMi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, dstAttr.getID(), extraValues));
+							}
 						}
 					} else if (attrStatus == PolicyType.MERGE) {
 						// check if there are any extra values to be added

@@ -136,18 +136,29 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
-		<!-- Init script -->
+		<!-- Systemd files -->
 		<fileSet>
-			<directory>src/install/etc/init.d</directory>
-			<includes> <include>lsc</include> </includes>
-			<outputDirectory>etc/init.d</outputDirectory>
-			<fileMode>0755</fileMode>
+			<directory>src/install/lib/systemd/system</directory>
+			<includes>
+				<include>lsc-async.service</include>
+				<include>lsc-async@.service</include>
+				<include>lsc-sync.service</include>
+				<include>lsc-sync@.service</include>
+				<include>lsc-sync.timer</include>
+			</includes>
+			<outputDirectory>lib/systemd/system</outputDirectory>
+			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
+		<!-- System conf files -->
 		<fileSet>
 			<directory>src/install/etc/default</directory>
-			<includes> <include>lsc</include> </includes>
+			<includes>
+                                <include>lsc</include>
+                                <include>lsc-sync</include>
+                                <include>lsc-async</include>
+                        </includes>
 			<outputDirectory>etc/default</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>

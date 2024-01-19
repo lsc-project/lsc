@@ -1,0 +1,23 @@
+[Unit]
+Description=Run LSC jobs on demand
+After=network.target
+
+[Service]
+Type=oneshot
+User=lsc
+Group=lsc
+Environment="LSC_CONFIG_DIR=/etc/lsc"
+Environment="LSC_SYNC_TASKS=-s all"
+Environment="LSC_CLEAN_TASKS=-c all"
+Environment="LSC_EXTRA_ARGS="
+EnvironmentFile=-/etc/default/lsc-sync
+ExecStartPre=/usr/bin/lsc -v -f ${LSC_CONFIG_DIR}
+ExecStart=/usr/bin/lsc -f ${LSC_CONFIG_DIR} ${LSC_SYNC_TASKS} ${LSC_CLEAN_TASKS} ${LSC_EXTRA_ARGS}
+
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+ReadWritePaths=/var/log/lsc
+UMask=0007

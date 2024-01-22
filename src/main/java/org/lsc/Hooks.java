@@ -44,9 +44,11 @@ package org.lsc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.ProcessBuilder;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Scanner;
 import org.lsc.utils.output.LdifLayout;
 import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
@@ -96,14 +98,15 @@ public class Hooks {
 		}
 
 		try {
+			Process p;
 			if( modifications != null ) {
-				Process p = new ProcessBuilder(
+				p = new ProcessBuilder(
 					hook,
 					identifier,
 					operationType.getDescription())
 				.start();
 
-				// sends ldif modifications to stdin of hook script
+				// sends modifications to stdin of hook script
 				OutputStream stdin = p.getOutputStream();
 				stdin.write(modifications.getBytes());
 				stdin.write("\n".getBytes());
@@ -111,12 +114,24 @@ public class Hooks {
 				stdin.close();
 			}
 			else {
-				Process p = new ProcessBuilder(
+				p = new ProcessBuilder(
 					hook,
 					identifier,
 					operationType.getDescription())
 				.start();
 			}
+			printHookOutput(p.getInputStream(),
+					"stdout",
+					operationType.getDescription(),
+					hook,
+					outputFormat.toString(),
+					identifier);
+			printHookOutput(p.getErrorStream(),
+					"stderr",
+					operationType.getDescription(),
+					hook,
+					outputFormat.toString(),
+					identifier);
 		}
 		catch(IOException e) {
 			LOGGER.error("Error while calling {} posthook {} with format {} for {}",
@@ -143,6 +158,25 @@ public class Hooks {
 			LOGGER.error("Error while encoding LSC modifications to json", e);
 		}
 		return json;
+	}
+
+	private static void printHookOutput(	final InputStream src, String output,
+						String operation, String hook,
+						String outputFormat, String identifier) {
+		new Thread(new Runnable() {
+			public void run() {
+				Scanner sc = new Scanner(src);
+				while (sc.hasNextLine()) {
+					LOGGER.warn("Hook {} with format {} for identifier {} and operation {} returned {}: {}",
+							hook,
+							outputFormat,
+							identifier,
+							operation,
+							output,
+							sc.nextLine());
+				}
+			}
+		}).start();
 	}
 
 }

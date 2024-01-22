@@ -4,25 +4,26 @@ lsc_logdir=/var/log/lsc
 lsc_user=lsc
 lsc_group=lsc
 
-getent group ${lsc_group} > /dev/null 2>&1 || groupadd --system ${lsc_group}
-getent passwd ${lsc_user} > /dev/null 2>&1 || useradd --system --gid ${lsc_group} --home-dir /etc/lsc ${lsc_user}
-
 # Always do this
 chown -R ${lsc_user}:${lsc_group} ${lsc_logdir}
+chown ${lsc_user}:${lsc_group} /var/lib/lsc
 
 # Reconfigure files
 ## logback
-sed -i "s:/tmp/lsc/log:${lsc_logdir}:" /etc/lsc/logback.xml
+sed -i "s:/tmp/lsc/log:${lsc_logdir}:" \
+  /etc/lsc/logback.xml
 ## bin
-sed -i 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' /usr/bin/lsc /usr/bin/lsc-agent /usr/bin/hsqldb
-sed -i 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' /usr/bin/lsc /usr/bin/lsc-agent /usr/bin/hsqldb
-sed -i "s:^LOG_DIR.*:LOG_DIR=\"${lsc_logdir}\":" /usr/bin/lsc /usr/bin/lsc-agent /usr/bin/hsqldb
-sed -i 's:^VAR_DIR.*:VAR_DIR="/var/lsc":' /usr/bin/hsqldb
-
-# Copy sample configuration for a fresh install
-[ -f /etc/lsc/lsc.xml ] || cp /usr/share/doc/lsc/lsc.xml-sample /etc/lsc/lsc.xml
-[ -f /etc/lsc/sql-map-config.xml ] || cp /usr/share/doc/lsc/sql-map-config.xml-sample /etc/lsc/sql-map-config.xml
-[ -f /etc/lsc/sql-map-config.d/InetOrgPerson.xml ] || cp /usr/share/doc/lsc/InetOrgPerson.xml-sample /etc/lsc/sql-map-config.d/InetOrgPerson.xml
+sed -i \
+  -e 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' \
+  -e 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' \
+  -e "s:^LOG_DIR.*:LOG_DIR=\"${lsc_logdir}\":" \
+  /usr/bin/lsc \
+  /usr/bin/lsc-agent \
+  /usr/bin/hsqldb
+sed -i \
+  -e 's:^VAR_DIR.*:VAR_DIR="/var/lib/lsc":' \
+  -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="/run/hsqldb.pid":' \
+  /usr/bin/hsqldb
 
 #DEBHELPER#
 

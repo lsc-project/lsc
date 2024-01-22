@@ -2,8 +2,6 @@
 bin/lsc usr/bin
 bin/lsc-agent usr/bin
 bin/hsqldb usr/bin
-## config
-etc/logback.xml etc/lsc
 ## lib
 lib/* usr/lib/lsc
 ## sample
@@ -11,6 +9,4 @@ sample/* usr/share/doc/lsc
 ## systemd
 etc/default/lsc-sync etc/default
 etc/default/lsc-async etc/default
-## nagios
-bin/check_lsc* var/lib/lsc/nagios
 

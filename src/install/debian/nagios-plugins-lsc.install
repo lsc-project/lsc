@@ -1,0 +1,2 @@
+## nagios
+bin/check_lsc* usr/lib/nagios/plugins

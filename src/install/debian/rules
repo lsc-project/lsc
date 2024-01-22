@@ -9,7 +9,7 @@
 override_dh_compress:
 
 override_dh_testdir:
-## systemd
+	# systemd
 	cp -f lib/systemd/system/lsc-async.service debian/
 	cp -f lib/systemd/system/lsc-async@.service debian/
 	cp -f lib/systemd/system/lsc-sync.service debian/
@@ -25,3 +25,16 @@ override_dh_installsystemd:
 	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-sync
 	dh_installsystemd --no-start --no-enable --no-stop-on-upgrade --name=lsc-sync@
 	dh_installsystemd --name=lsc-sync.timer
+
+
+override_dh_install:
+	dh_install
+	# Copy configuration files
+	mkdir -p `pwd`/debian/lsc/var/lib/lsc
+	mkdir -p `pwd`/debian/lsc/etc/lsc/sql-map-config.d
+	cp -a etc/logback.xml `pwd`/debian/lsc/etc/lsc/logback.xml
+	cp -a etc/lsc.xml-sample `pwd`/debian/lsc/etc/lsc/lsc.xml
+	cp -a etc/sql-map-config.xml-sample `pwd`/debian/lsc/etc/lsc/sql-map-config.xml
+	cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample `pwd`/debian/lsc/etc/lsc/sql-map-config.d/InetOrgPerson.xml
+	# Remove useless windows .bat files
+	find debian/lsc -type f -name '*.bat' -delete

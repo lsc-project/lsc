@@ -8,9 +8,9 @@ tar.gz and .zip files available in target/ directory
 RPM
 ===
 
-Copy lsc-VERSION.zip in SOURCES/ and lsc-core.spec in SPECS/ and run:
+Copy lsc-VERSION.zip in SOURCES/ and lsc.spec in SPECS/ and run:
 
-$ rpmbuild -ba SPECS/lsc-core.spec
+$ rpmbuild -ba SPECS/lsc.spec
 
 DEBIAN
 ======

@@ -123,9 +123,9 @@ public class AD {
 	 * @return The value to write in AD's unicodePwd attribute
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String getUnicodePwd(String password) throws UnsupportedEncodingException {
+	public static byte[] getUnicodePwd(String password) throws UnsupportedEncodingException {
 		String quotedPassword = "\"" + password + "\"";
-		return new String(quotedPassword.getBytes("UTF-16LE"));
+		return quotedPassword.getBytes("UTF-16LE");
 	}
 
 

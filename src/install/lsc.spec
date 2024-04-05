@@ -97,6 +97,7 @@ install -p -m 0644 lib/systemd/system/lsc-async@.service %{buildroot}%{_unitdir}
 install -p -m 0644 lib/systemd/system/lsc-sync.service %{buildroot}%{_unitdir}/
 install -p -m 0644 lib/systemd/system/lsc-sync@.service %{buildroot}%{_unitdir}/
 install -p -m 0644 lib/systemd/system/lsc-sync.timer %{buildroot}%{_unitdir}/
+install -p -m 0644 lib/systemd/system/lsc-sync@.timer %{buildroot}%{_unitdir}/
 ## man
 cp -a doc/man/man1/* %{buildroot}%{_mandir}/man1/
 cp -a doc/man/man5/* %{buildroot}%{_mandir}/man5/
@@ -171,6 +172,7 @@ getent passwd lsc > /dev/null 2>&1 || \
 %{_unitdir}/lsc-sync.service
 %{_unitdir}/lsc-sync@.service
 %{_unitdir}/lsc-sync.timer
+%{_unitdir}/lsc-sync@.timer
 %{_libdir}/lsc/
 %attr(-,lsc,lsc) %{lsc_logdir}
 %attr(-,lsc,lsc) %{_sharedstatedir}/lsc/

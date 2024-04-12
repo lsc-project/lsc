@@ -483,7 +483,7 @@
       <propertiesBasedSyncOptions>
         <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <pivotTransformation>
-        	<transformation fromAttribute="personalSignature" toAttribute="favouriteDrink"><![CDATA[js:
+        	<transformation fromAttribute="personalSignature" toAttribute="favouriteDrink"><![CDATA[
         		var result = "";
         		for (var i = 0; i < value.length; i++) {
         			if (result != "") {
@@ -493,7 +493,7 @@
         		}
         		result;
         	]]></transformation>
-        	<transformation fromAttribute="favouriteDrink" toAttribute="personalSignature"><![CDATA[js:
+        	<transformation fromAttribute="favouriteDrink" toAttribute="personalSignature"><![CDATA[
         		var result = [];
         		for (var i = 0; i < value.length; i++) {
         			if (value[i] != '-') {
@@ -526,7 +526,7 @@
         <dataset>
         	<name>favouriteDrink</name>
         	<forceValues>
-        	  <string><![CDATA[js:
+        	  <string><![CDATA[
         	    var value = srcBean.getDatasetById("personalSignature").iterator().next();
         		var result = "";
         		for (var i = 0; i < value.length; i++) {
@@ -590,10 +590,10 @@
       <propertiesBasedSyncOptions>
         <mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
         <pivotTransformation>
-        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="SOURCE"><![CDATA[js:
+        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="SOURCE"><![CDATA[
         		value.replace('-src', '-dst');
         	]]></transformation>
-        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="DESTINATION"><![CDATA[js:
+        	<transformation fromAttribute="favouriteDrink" toAttribute="favouriteDrink" pivotOrigin="DESTINATION"><![CDATA[
         		value.replace('-dst', '-src');
         	]]></transformation>
         </pivotTransformation>
@@ -616,7 +616,7 @@
         <dataset>
         	<name>favouriteDrink</name>
         	<forceValues>
-        	  <string><![CDATA[js:
+        	  <string><![CDATA[
         	    var value = srcBean.getDatasetFirstValueById("favouriteDrink");
         	    value.replace('-src', '-dst');
         	]]></string>

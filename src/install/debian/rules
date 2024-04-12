@@ -38,3 +38,20 @@ override_dh_install:
 	cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample `pwd`/debian/lsc/etc/lsc/sql-map-config.d/InetOrgPerson.xml
 	# Remove useless windows .bat files
 	find debian/lsc -type f -name '*.bat' -delete
+	# Reconfigure files
+	## logback
+	sed -i "s:/tmp/lsc/log:/var/log/lsc:" \
+		`pwd`/debian/lsc/etc/lsc/logback.xml
+	## bin
+	sed -i \
+		-e 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' \
+		-e 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' \
+		-e "s:^LOG_DIR.*:LOG_DIR=\"/var/log/lsc\":" \
+		`pwd`/debian/lsc/usr/bin/lsc \
+		`pwd`/debian/lsc/usr/bin/lsc-agent \
+		`pwd`/debian/lsc/usr/bin/hsqldb
+	sed -i \
+		-e 's:^VAR_DIR.*:VAR_DIR="/var/lib/lsc":' \
+		-e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="/run/hsqldb.pid":' \
+		`pwd`/debian/lsc/usr/bin/hsqldb
+

@@ -8,23 +8,6 @@ lsc_group=lsc
 chown -R ${lsc_user}:${lsc_group} ${lsc_logdir}
 chown ${lsc_user}:${lsc_group} /var/lib/lsc
 
-# Reconfigure files
-## logback
-sed -i "s:/tmp/lsc/log:${lsc_logdir}:" \
-  /etc/lsc/logback.xml
-## bin
-sed -i \
-  -e 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' \
-  -e 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' \
-  -e "s:^LOG_DIR.*:LOG_DIR=\"${lsc_logdir}\":" \
-  /usr/bin/lsc \
-  /usr/bin/lsc-agent \
-  /usr/bin/hsqldb
-sed -i \
-  -e 's:^VAR_DIR.*:VAR_DIR="/var/lib/lsc":' \
-  -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="/run/hsqldb.pid":' \
-  /usr/bin/hsqldb
-
 #DEBHELPER#
 
 exit 0

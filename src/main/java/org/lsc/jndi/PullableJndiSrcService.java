@@ -163,4 +163,18 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 	public long getInterval() {
 		return interval*1000;
 	}
+
+	/**
+	* Getter for lastSuccessfulSync, useful in cases where the consumer has to work around this to reset this to zero for a forced fresh sync.
+	*/
+	public Date getLastSuccessfulSync() {
+		return this.lastSuccessfulSync;
+	}
+
+	/**
+	* Setter for lastSuccessfulSync, useful in cases where the consumer has to work around this to reset this to zero for a forced fresh sync.
+	*/
+	public void setLastSuccessfulSync(Date lastSuccessfulSync) {
+		this.lastSuccessfulSync = lastSuccessfulSync;
+	}
 }

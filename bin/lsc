@@ -60,8 +60,16 @@ fi
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
 
+# Get configuration directory from command line
+cfg_dir="${CFG_DIR}" # default value
+while getopts "f:" opt > /dev/null 2>&1; do
+  case "${opt}" in
+    f)  cfg_dir=${OPTARG}
+      ;;
+  esac
+done
 # Get logdir property from logback.xml
-logdir=$( grep 'property[ ]\+name="logdir"' "${CFG_DIR}/logback.xml" | sed -e 's/^.*value="\([^"]*\)".*$/\1/' )
+logdir=$( grep 'property[ ]\+name="logdir"' "${cfg_dir}/logback.xml" | sed -e 's/^.*value="\([^"]*\)".*$/\1/' )
 if [ "${logdir}" = "\${TMP_DIR}" ] || [ "${logdir}" = "\$TMP_DIR" ]; then
 	# Create temp directory
 	LOG_DIR="$( mktemp -d /tmp/lsc-$(date +%Y-%M-%d-%T).XXXXXXXXXX )"

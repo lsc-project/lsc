@@ -66,19 +66,6 @@
 				</jaxb:bindings>
 			</jaxb:bindings>
 		</jaxb:bindings>
-		<jaxb:bindings node="xsd:complexType[@name='taskType']">
-			<jaxb:bindings node="xsd:sequence">
-				<jaxb:bindings node="xsd:element[@name='auditLog']">
-					<jaxb:bindings node="xsd:complexType">
-						<jaxb:bindings node="xsd:attribute[@name='reference']">
-							<jaxb:property>
-								<jaxb:baseType name="org.lsc.configuration.AuditType"/>
-							</jaxb:property>
-						</jaxb:bindings>
-					</jaxb:bindings>
-				</jaxb:bindings>
-			</jaxb:bindings>
-		</jaxb:bindings>
 		<jaxb:bindings node="xsd:complexType[@name='multiDestinationServiceType']">
 			<jaxb:bindings node="xsd:complexContent">
 				<jaxb:bindings node="xsd:extension">

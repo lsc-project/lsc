@@ -35,15 +35,6 @@
 			<tlsActivated>false</tlsActivated>
 		</ldapConnection>
 	</connections>
-	<audits>
-		<csvAudit>
-			<name>csvAudit</name>
-			<append>false</append>
-			<file>$TEMP/log.csv</file>
-			<datasets>cn, sn, givenName</datasets>
-			<separator>;</separator>
-		</csvAudit>
-	</audits>
 	<tasks>
 		<task>
 			<name>ldap2ldapTestTask</name>
@@ -146,7 +137,6 @@
 		          </createValues>
 		        </dataset>
 			</propertiesBasedSyncOptions>
-			<auditLog reference="csvAudit"/>
 		</task>
 		<task>
 			<name>db2ldapTestTask</name>

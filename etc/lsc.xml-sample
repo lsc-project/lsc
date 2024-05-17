@@ -65,26 +65,6 @@
     </ldapConnection>
   </connections>
 
-<!--  ./audits Audits list node -->
-  <audits>
-
-<!--./audit Audit node, here a CSV audit, may also be a LDIF or any contributed audit type -->
-	<csvAudit>
-<!--    ./name mandatory, audit name -->
-		<name>csv</name>
-<!--    ./append optional, default to false, specify to create a new log file or to append to the existing one  -->
-		<append>true</append>
-<!--    ./operations optional, comma separated list of operations (create, delete, update or rename) -->
-		<operations>create, delete</operations>
-<!--	./file mandatory, define the location of the file where the CSV data will be written -->
-		<file>/tmp/dump.csv</file>
-<!--    ./datasets optional, comma separated list of datasets modification to log -->
-		<datasets>cn, dn</datasets>
-<!--    ./separator optional, default to ";", specify the values separator -->
-		<separator>,</separator>
-	</csvAudit>
-  </audits>
-
 <!--  ./tasks Task list node, must contain at least one task -->
   <tasks>
 

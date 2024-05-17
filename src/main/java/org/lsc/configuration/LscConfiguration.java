@@ -90,8 +90,6 @@ public class LscConfiguration {
 	
 	private ArrayList<ConnectionType> connections;
 	
-	private ArrayList<AuditType> audits;
-	
 	private ArrayList<TaskType> tasks;
 
 	private boolean underInitialization;
@@ -120,7 +118,6 @@ public class LscConfiguration {
 			original = instance;
 		} 	
 		instance.lscObject = new Lsc();
-		instance.lscObject.setAudits(lscInstance.getAudits());
 		instance.lscObject.setConnections(lscInstance.getConnections());
 		instance.lscObject.setId(lscInstance.getId());
 		instance.lscObject.setRevision(lscInstance.getRevision());
@@ -143,25 +140,9 @@ public class LscConfiguration {
 		underInitialization = true;
 		modified = false;
 		connections = new ArrayList<ConnectionType>();
-		audits = new ArrayList<AuditType>();
 		tasks = new ArrayList<TaskType>();
 //		otherSettings = new HashMap<String, String>();
 		revision = 0;
-	}
-
-	public static Collection<AuditType> getAudits() {
-		return Collections.unmodifiableCollection(getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit());
-	}
-
-	public static AuditType getAudit(String name) {
-        if(getInstance().getLsc().getAudits() != null) {
-    		for(AuditType audit: getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit()) {
-    			if(audit.getName().equalsIgnoreCase(name)) {
-    				return audit;
-    			}
-    		}
-        }
-		return null;
 	}
 
 	public static Collection<ConnectionType> getConnections() {
@@ -214,16 +195,6 @@ public class LscConfiguration {
 		getInstance().getLsc().getConnections().getLdapConnectionOrDatabaseConnectionOrPluginConnection().remove(connection);
 	}
 
-	public static void addAudit(AuditType audit) {
-		logModification(audit);
-		getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit().add(audit);
-	}
-
-	public static void removeAudit(AuditType audit) {
-		logModification(audit);
-		getInstance().getLsc().getAudits().getCsvAuditOrLdifAuditOrPluginAudit().remove(audit);
-	}
-
 //	public static void reinitialize() {
 //		getInstance().lscObject = new Lsc();
 //	}
@@ -237,9 +208,6 @@ public class LscConfiguration {
 	public LscConfiguration clone() {
 		LscConfiguration clone = new LscConfiguration();
 		clone.revision 		= revision;
-		if(audits != null) {
-			clone.audits 		= (ArrayList<AuditType>) audits.clone();
-		}
 		if(connections != null) {
 			clone.connections 	= (ArrayList<ConnectionType>) connections.clone();
 		}
@@ -279,11 +247,9 @@ public class LscConfiguration {
 	}
 	
 	public static void revertToInitialState() {
-		instance.audits = original.audits;
 		instance.connections = original.connections;
 		instance.tasks = original.tasks;
 		instance.security = original.security;
-		instance.audits = original.audits;
 		instance.revision = original.revision;
 		instance.modified = false;
 	}
@@ -313,7 +279,7 @@ public class LscConfiguration {
 	}
 
 	public void validate() throws LscException {
-		// Tasks will check used audits and connections
+		// Tasks will check used connections
 		for(TaskType task: getTasks()) {
 			validate(task);
 		}

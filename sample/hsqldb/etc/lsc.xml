@@ -23,7 +23,6 @@
       <driver>org.hsqldb.jdbcDriver</driver>
     </databaseConnection>
   </connections>
-  <audits/>  
   <tasks>
     <task>
       <name>MySyncTask</name>

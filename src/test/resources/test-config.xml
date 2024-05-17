@@ -22,23 +22,6 @@
 		</connection>
 	</connections>
 
-	<audits>
-		<audit type="csv">
-			<name>csv</name>
-			<operations>create, delete</operations>
-			<attributes>cn, dn</attributes>
-			<separator>;</separator>
-			<append>true</append>
-			<file>/tmp/log.csv</file>
-		</audit>
-		<audit type="ldif">
-			<name>ldif</name>
-			<operations>create, delete</operations>
-			<append>false</append>
-			<file>/tmp/log.ldif</file>
-		</audit>
-	</audits>
-
 	<services>
 		<service type="SimpleJndiSrcService">
 			<name>myADAccount</name>
@@ -61,10 +44,6 @@
 			<name>myTask</name>
 			<source>myADAccount</source>
 			<destination>myDestination</destination>
-			<auditLogs>
-				<audit>csv</audit>
-				<audit>ldif</audit>
-			</auditLogs>
 			<conditions>
 				<create>1 > 0</create>
 				<update>src.getAttr('updateTimeStamp') > dst.getAttr('updateTimeStamp')</update>

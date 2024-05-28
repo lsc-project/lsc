@@ -25,4 +25,4 @@ $ $LSC_HOME/bin/lsc -f $LSC_HOME/etc -a all -t 1
 
 or 
 
-> %LSC_HOME%\bin\lsc.bat -f %LSC_HOME%\etc -a all -t 1
+> %LSC_HOME%\bin\lsc.cmd -f %LSC_HOME%\etc -a all -t 1

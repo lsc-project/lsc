@@ -91,12 +91,15 @@ public class ScriptingEvaluator {
 			defaultImplementation = graaljsevaluator;
 		}
 		else {
+			ScriptableEvaluator fetchedDefaultImplementation = null;
 			for ( String name: new String[] {"js","rjs"} ) {
-				defaultImplementation = instancesTypeCache.get(name);
-				if ( defaultImplementation != null ) {
+				fetchedDefaultImplementation = instancesTypeCache.get(name);
+				if ( fetchedDefaultImplementation != null ) {
+					defaultImplementation = fetchedDefaultImplementation;
 					break;
 				}
 			}
+
 		}
 	}
 

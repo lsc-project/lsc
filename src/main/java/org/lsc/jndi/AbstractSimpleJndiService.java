@@ -327,7 +327,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 
 
 	/**
-	 * @see org.lsc.service.IService.getSupportedConnectionType()
+	 * @see org.lsc.service.IService#getSupportedConnectionType()
 	 */
 	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
 	    Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();

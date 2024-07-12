@@ -118,7 +118,7 @@ public class RhinoDebugger implements Runnable {
     /**
      * Is Debugger visible?
      * 
-     * @return
+     * @return true if {@link SwingGui} is visible
      */
     public boolean isVisible() {
         return debugGui != null && debugGui.isVisible();

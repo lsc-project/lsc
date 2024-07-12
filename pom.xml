@@ -256,10 +256,9 @@
 				<!-- common configuration by all executions -->
 				<configuration>
 					<baseDir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</baseDir>
-					<installFile>src/install/install.xml</installFile>
+					<installFile>${project.basedir}/src/install/install.xml</installFile>
 					<mkdirs>true</mkdirs>
 					<finalName>${project.artifactId}-${project.version}-installer.jar</finalName>
-					<enableAttachArtifact>false</enableAttachArtifact>
 					<autoIncludeUrl>true</autoIncludeUrl>
 				</configuration>
 

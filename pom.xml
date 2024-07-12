@@ -258,7 +258,6 @@
 					<installFile>src/install/install.xml</installFile>
 					<mkdirs>true</mkdirs>
 					<finalName>${project.artifactId}-${project.version}-installer.jar</finalName>
-					<enableAttachArtifact>false</enableAttachArtifact>
 					<autoIncludeUrl>true</autoIncludeUrl>
 				</configuration>
 

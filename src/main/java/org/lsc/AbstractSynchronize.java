@@ -320,8 +320,8 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm List of modification to do on the Ldap server
-	 * @param identifier object identifier
+	 * @param lm List of modification to do on the Ldap server
+	 * @param data object identifier
 	 * @param except synchronization process name
 	 */
 	public final void logActionError(final LscModifications lm,
@@ -340,7 +340,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm List of modification to do on the Ldap server
+	 * @param lm List of modification to do on the Ldap server
 	 * @param id object identifier
 	 * @param syncName synchronization process name
 	 */
@@ -372,9 +372,8 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
-	 * @param jm
-	 * @param id
-	 * @param syncName
+	 * @param lm List of modification to do on the Ldap server
+	 * @param syncName synchronization process name
 	 */
 	public final void logShouldAction(final LscModifications lm, final String syncName) {
 		switch (lm.getOperation()) {
@@ -412,12 +411,10 @@ public abstract class AbstractSynchronize {
 	}
 
 	protected String getLogStatus(InfoCounter counter) {
-		String totalsLogMessage =
-				"All entries: "+ counter.getCountAll() +
+		return "All entries: "+ counter.getCountAll() +
 				", to modify entries: "+ counter.getCountModifiable() +
 				", successfully modified entries: "+counter.getCountCompleted()+
 				", errors: "+counter.getCountError();
-		return totalsLogMessage;
 	}
 
 	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {

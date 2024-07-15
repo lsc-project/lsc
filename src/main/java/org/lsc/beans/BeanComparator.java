@@ -66,7 +66,6 @@ import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
 import org.lsc.Task;
-import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PolicyType;
 import org.lsc.exception.LscServiceException;
@@ -442,9 +441,6 @@ public final class BeanComparator {
 	 * attributes, and all force valued/default valued/create valued attributes.
 	 * </P>
 	 *
-	 * @param syncOptions
-	 *            Instance of {@link ISyncOptions} to provide transformation
-	 *            configuration
 	 * @param srcBean
 	 *            The original bean read from the source
 	 * @return Set of attribute names to be updated
@@ -592,9 +588,6 @@ public final class BeanComparator {
 	 * @param srcAttrValues
 	 *            {@link Set}<Object> All values of the considered attribute
 	 *            read from the source.
-	 * @param syncOptions
-	 *            {@link ISyncOptions} Object to read syncoptions from
-	 *            configuration.
 	 * @param javaScriptObjects
 	 *            {@link Map}<String, Object> Object map to pass objects into
 	 *            JavaScript environment.

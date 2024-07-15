@@ -52,12 +52,7 @@ import java.util.Set;
 import java.util.Optional;
 
 import org.lsc.LscModificationType;
-import org.lsc.configuration.DatasetType;
-import org.lsc.configuration.LscConfiguration;
-import org.lsc.configuration.PolicyType;
-import org.lsc.configuration.PropertiesBasedSyncOptionsType;
-import org.lsc.configuration.TaskType;
-import org.lsc.configuration.ValuesType;
+import org.lsc.configuration.*;
 
 /**
  * Synchronization options based on a properties file

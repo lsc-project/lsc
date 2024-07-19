@@ -55,11 +55,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.lsc.configuration.DatasetType;
-import org.lsc.configuration.PolicyType;
-import org.lsc.configuration.PropertiesBasedSyncOptionsType;
-import org.lsc.configuration.TaskType;
-import org.lsc.configuration.ValuesType;
+import org.lsc.configuration.*;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 
@@ -72,7 +68,8 @@ public class PropertiesBasedSyncOptionsTest {
 	PropertiesBasedSyncOptionsType conf ;
 	DatasetType pbsoNonExistingAttr;
 	DatasetType pbsoExistingAttr;
-	@Injectable @NonStrict TaskType task;
+	@Injectable @NonStrict
+	TaskType task;
 	@Injectable @NonStrict org.lsc.Task taskExec;
 
 	@Before

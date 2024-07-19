@@ -50,18 +50,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 
-import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.DatabaseSourceServiceType;
 import org.lsc.configuration.TaskType;
-import org.lsc.exception.LscConfigurationException;
-import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
-import org.lsc.persistence.DaoConfig;
 
 /**
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;

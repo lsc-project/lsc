@@ -155,6 +155,9 @@ public final class JndiServices {
 	
 	/** Remember connection properties to reconnect */
 	private Properties connProps;
+
+	/** Remember default resquest controls */
+	private Control[] defaultRequestControls;
 	
 	/**
 	 * Initiate the object and the connection according to the properties.
@@ -233,15 +236,6 @@ public final class JndiServices {
 			throw new NamingException(e.getMessage());
 		}
 
-		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
-		if (pageSizeStr != null) {
-			pageSize = Integer.parseInt(pageSizeStr);
-		} else {
-			pageSize = -1;
-		}
-
-		sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
-		
 		String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
 		if (recursiveDeleteStr != null) {
 			recursiveDelete = Boolean.parseBoolean(recursiveDeleteStr);
@@ -741,28 +735,37 @@ public final class JndiServices {
 	private List<String> doGetDnList(final String base, final String filter,
 			final int scope) throws NamingException {
 		NamingEnumeration<SearchResult> ne = null;
-		List<String> iist = new ArrayList<String>();
+		List<String> list = new ArrayList<String>();
 		try {
+			contextRequestControls();
 			SearchControls sc = new SearchControls();
 			sc.setDerefLinkFlag(false);
 			sc.setReturningAttributes(new String[]{"1.1"});
 			sc.setSearchScope(scope);
 			sc.setReturningObjFlag(true);
-			ne = ctx.search(base, filter, sc);
-			
-			String completedBaseDn = "";
-			if (base.length() > 0) {
-				completedBaseDn = "," + base;
-			}
+			byte[] pagedResultsResponse = null;
+			do {
+				ne = ctx.search(base, filter, sc);
+				String completedBaseDn = "";
+				if (base.length() > 0) {
+					completedBaseDn = "," + base;
+				}
 			while (ne.hasMoreElements()) {
-				iist.add(((SearchResult) ne.next()).getName() + completedBaseDn);
+				list.add(ne.next().getName() + completedBaseDn);
 			}
+			pagedResultsResponse = pagination();
+			} while (pagedResultsResponse != null);
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 			throw e;
+		} catch (IOException e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+		} finally {
+			ctx.setRequestControls(defaultRequestControls);
 		}
-		return iist;
+		return list;
 	}
 
 	/**
@@ -1131,30 +1134,9 @@ public final class JndiServices {
 		constraints.setReturningAttributes(attributes);
 		constraints.setSearchScope(scope);
 		constraints.setReturningObjFlag(true);
-
 		try {
-			boolean requestPagedResults = false;
-
-			List<Control> extControls = new ArrayList<Control>();
-
-			if (pageSize > 0) {
-				requestPagedResults = true;
-				LOGGER.debug("Using pagedResults control for {} entries at a time", pageSize);
-			}
-
-			if (requestPagedResults) {
-				extControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
-			}
-			
-			if(sortedBy != null) {
-			    extControls.add(new SortControl(sortedBy, Control.CRITICAL));
-			}
-
-			if (extControls.size() > 0) {
-				ctx.setRequestControls(extControls.toArray(new Control[extControls.size()]));
-			}
-
-			byte[] pagedResultsResponse = null;
+			byte[] pagedResultsResponse;
+			contextRequestControls();
 			do {
 				NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
 
@@ -1176,46 +1158,80 @@ public final class JndiServices {
 						res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
 					}
 				}
-				
-				Control[] respCtls = ctx.getResponseControls();
-				if (respCtls != null) {
-					for(Control respCtl : respCtls) {
-						if (requestPagedResults && respCtl instanceof PagedResultsResponseControl) {
-							pagedResultsResponse = ((PagedResultsResponseControl) respCtl).getCookie();
-						}
-					}
-				}
 
-				if (requestPagedResults && pagedResultsResponse != null) {
-					ctx.setRequestControls(new Control[]{
-										new PagedResultsControl(pageSize, pagedResultsResponse, Control.CRITICAL)});
-				}
-
+				pagedResultsResponse = pagination();
 			} while (pagedResultsResponse != null);
-
-			// clear requestControls for future use of the JNDI context
-			if (requestPagedResults) {
-				ctx.setRequestControls(null);
-			}
-        } catch (CommunicationException e) {
+		}
+		catch (CommunicationException e) {
             // Avoid handling the communication exception as a generic one
             throw e;
         } catch (ServiceUnavailableException e) {
             // Avoid handling the service unavailable exception as a generic one
             throw e;
-		} catch (NamingException e) {
-			// clear requestControls for future use of the JNDI context
-			ctx.setRequestControls(null);
+		} catch (NamingException | IOException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
-			
-		} catch (IOException e) {
-			// clear requestControls for future use of the JNDI context
-			ctx.setRequestControls(null);
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
+		} finally {
+			ctx.setRequestControls(defaultRequestControls);
 		}
 		return res;
+	}
+
+	/**
+	 * Obtain pagination cookie to retrieve all elements in search request.
+	 * @return paging cookie
+	 * @throws IOException
+	 * @throws NamingException
+	 */
+	public byte[] pagination() throws IOException, NamingException {
+		byte[] pagedResultsResponse = null;
+		Control[] respCtls = ctx.getResponseControls();
+		if (respCtls != null) {
+			for(Control respCtl : respCtls) {
+				if (respCtl instanceof PagedResultsResponseControl) {
+					pagedResultsResponse = ((PagedResultsResponseControl) respCtl).getCookie();
+				}
+			}
+		}
+		if (pagedResultsResponse != null) {
+			ctx.setRequestControls(new Control[]{
+					new PagedResultsControl(pageSize, pagedResultsResponse, Control.CRITICAL)});
+		}
+		return pagedResultsResponse;
+	}
+
+	/**
+	 * Applying request controls such as pageSize and sortedBy for LDAP Context.
+	 */
+	public void contextRequestControls() {
+		List<BasicControl> requestControls = new ArrayList<>();
+				try {
+			// Storing default request controls
+			defaultRequestControls = ctx.getRequestControls();
+				} catch (NamingException e) {
+						throw new RuntimeException(e);
+				}
+				try {
+			// Setting global pageSize variable
+			String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
+			if (pageSizeStr != null && Integer.parseInt(pageSizeStr) > -1) {
+				pageSize = Integer.parseInt(pageSizeStr);
+				requestControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
+			}
+			ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+		} catch (NamingException | IOException e) {
+			throw new RuntimeException(e);
+		}
+		try {
+			// Setting global sortedBy variable
+			sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
+			if (sortedBy != null) {
+				requestControls.add(new SortControl(sortedBy, Control.CRITICAL));
+			}
+			ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+		} catch (NamingException | IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

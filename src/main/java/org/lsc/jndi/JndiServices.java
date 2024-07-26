@@ -237,14 +237,13 @@ public final class JndiServices {
 			throw new NamingException(e.getMessage());
 		}
 
+		// Setting global pageSize variable for LDAPContext
 		String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
 		if (pageSizeStr != null && Integer.parseInt(pageSizeStr) > -1) {
 			pageSize = Integer.parseInt(pageSizeStr);
 			List<PagedResultsControl> requestControls = new ArrayList<>();
 			requestControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
 			ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
-		} else {
-			pageSize = -1;
 		}
 
 		sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");

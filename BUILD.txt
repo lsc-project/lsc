@@ -1,7 +1,7 @@
 Build distribution
 ==================
 
-$ mvn -Popendj clean package
+$ mvn -Popendj --file pom.xml clean package
 
 tar.gz and .zip files available in target/ directory
 

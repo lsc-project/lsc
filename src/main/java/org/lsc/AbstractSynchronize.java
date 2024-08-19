@@ -183,7 +183,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		logStatus(counter);
+		logStatus(task.getName(), Task.Mode.clean.toString(), counter);
 		return counter.getCountError() == 0;
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		logStatus(counter);
+		logStatus(task.getName(), Task.Mode.clean.toString(), counter);
 		return counter.getCountError() == 0;
 	}
 
@@ -298,7 +298,7 @@ public abstract class AbstractSynchronize {
 		if(asyncThread != null && asyncThread.isAlive()) {
 			AsynchronousRunner asyncRunner = mapSTasks.get(syncName);
 			InfoCounter counter = asyncRunner.getCounter();
-			return getLogStatus(counter);
+			return getLogStatus(syncName, Task.Mode.async.toString(), counter);
 		} else {
 			return null;
 		}
@@ -392,8 +392,8 @@ public abstract class AbstractSynchronize {
 		LSCStructuralLogger.DESTINATION.debug("", lm);
 	}
 
-	protected void logStatus(InfoCounter counter) {
-		String totalsLogMessage = getLogStatus(counter);
+	protected void logStatus(String taskName, String taskMode, InfoCounter counter) {
+		String totalsLogMessage = getLogStatus(taskName, taskMode, counter);
 		if (counter.getCountError() > 0) {
 			LOGGER.error(totalsLogMessage);
 		} else {
@@ -401,11 +401,15 @@ public abstract class AbstractSynchronize {
 		}
 	}
 
-	protected String getLogStatus(InfoCounter counter) {
-		return "All entries: "+ counter.getCountAll() +
-				", to modify entries: "+ counter.getCountModifiable() +
-				", successfully modified entries: "+counter.getCountCompleted()+
-				", errors: "+counter.getCountError();
+	protected String getLogStatus(String taskName, String taskMode, InfoCounter counter) {
+
+		String totalsLogMessage =
+			taskName + " - " + taskMode +
+			" - All entries: "+ counter.getCountAll() +
+			", to modify entries: "+ counter.getCountModifiable() +
+			", successfully modified entries: "+counter.getCountCompleted()+
+			", errors: "+counter.getCountError();
+		return totalsLogMessage;
 	}
 
 	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {

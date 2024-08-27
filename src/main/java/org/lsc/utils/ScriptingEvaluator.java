@@ -40,6 +40,7 @@ public class ScriptingEvaluator {
 	}
 
 	private ScriptingEvaluator() {
+		defaultImplementation = new ErrorMissingScriptEvaluator();
 		instancesTypeCache = new HashMap<String, ScriptableEvaluator>();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
 		for (ScriptEngineFactory sef : factories) {
@@ -90,7 +91,15 @@ public class ScriptingEvaluator {
 			defaultImplementation = graaljsevaluator;
 		}
 		else {
-			defaultImplementation = instancesTypeCache.get("js");
+			ScriptableEvaluator fetchedDefaultImplementation = null;
+			for ( String name: new String[] {"js","rjs"} ) {
+				fetchedDefaultImplementation = instancesTypeCache.get(name);
+				if ( fetchedDefaultImplementation != null ) {
+					defaultImplementation = fetchedDefaultImplementation;
+					break;
+				}
+			}
+
 		}
 	}
 

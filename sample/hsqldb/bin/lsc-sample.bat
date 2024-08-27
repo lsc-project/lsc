@@ -72,4 +72,4 @@ set CLASSPATH=
  )
 set CLASSPATH=!CLASSPATH!
 
-"%LSC_HSQLDBSAMPLE%\..\..\bin\lsc.bat" -f "%LSC_HSQLDBSAMPLE%\etc" -s all 
+"%LSC_HSQLDBSAMPLE%\..\..\bin\lsc.cmd" -f "%LSC_HSQLDBSAMPLE%\etc" -s all 

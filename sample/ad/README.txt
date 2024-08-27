@@ -19,7 +19,7 @@ $ $LSC_HOME/bin/lsc -f $LSC_HOME/sample/ad/etc-ad2opendj etc -a all -t 1
 
 or 
 
-> %LSC_HOME%\bin\lsc.bat -f %LSC_HOME%\sample\ad\etc-ad2opendj -a all -t 1
+> %LSC_HOME%\bin\lsc.cmd -f %LSC_HOME%\sample\ad\etc-ad2opendj -a all -t 1
 
 If you don't give any details about the host and URL, LSC will locate a domain controller through a DNS request 
 (_ldap._tcp.foo.bar for the naming context DC=FOO,DC=BAR) and will try to connect on the 389 port. 

@@ -48,9 +48,7 @@ package org.lsc;
 import java.io.File;
 import java.util.Properties;
 
-import org.lsc.configuration.CsvAuditType;
 import org.lsc.configuration.JaxbXmlConfigurationHelper;
-import org.lsc.configuration.LdifAuditType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
@@ -258,13 +256,6 @@ public class Configuration {
 		try {
 			configurator.doConfigure(logBackXMLPropertiesFile);
 			LOGGER.info("Logging configuration successfully loaded from " + logBackXMLPropertiesFile + " ");
-			if(LscConfiguration.getAudit("CSV") != null) {
-				setUpCsvLogging(context);
-			}
-
-			if(LscConfiguration.getAudit("LDIF") != null) {
-				setUpLdifLogging(context);
-			}
 		} catch (JoranException je) {
 			System.err.println("Cannot find logging configuration file ("+logBackXMLPropertiesFile+") !");
 		}
@@ -312,53 +303,4 @@ public class Configuration {
 		return loggingSetup;
 	}
 
-	protected static void setUpCsvLogging(LoggerContext context) {
-		CsvAuditType audit = (CsvAuditType) LscConfiguration.getAudit("CSV");
-
-		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
-		appender.setName(audit.getName());
-		appender.setAppend(audit.isAppend());
-		appender.setFile(audit.getFile());
-		appender.setContext(context);
-
-		CsvLayout csvLayout = new CsvLayout();
-		csvLayout.setLogOperations(audit.getOperations());
-		csvLayout.setAttrs(audit.getDatasets());
-		csvLayout.setSeparator(audit.getSeparator());
-		csvLayout.setOutputHeader(audit.isOutputHeader());
-		if(audit.getTaskNames() != null && audit.getTaskNames().getString() != null) {
-			csvLayout.setTaskNames(audit.getTaskNames().getString().toArray(new String[audit.getTaskNames().getString().size()]));
-		}
-		csvLayout.setContext(context);
-		csvLayout.start();
-
-		appender.setLayout(csvLayout);
-		appender.start();
-		ch.qos.logback.classic.Logger rootLogger = context.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-		rootLogger.addAppender(appender);
-	}
-
-	protected static void setUpLdifLogging(LoggerContext context) {
-		LdifAuditType audit = (LdifAuditType) LscConfiguration.getAudit("LDIF");
-
-		FileAppender<ILoggingEvent> appender = new FileAppender<ILoggingEvent>();
-		appender.setName(audit.getName());
-		appender.setAppend(audit.isAppend());
-		appender.setFile(audit.getFile());
-		appender.setContext(context);
-
-		LdifLayout ldifLayout = new LdifLayout();
-		ldifLayout.setLogOperations(audit.getOperations());
-		if(audit.isLogOnlyLdif() != null) {
-			ldifLayout.setOnlyLdif(audit.isLogOnlyLdif());
-		}
-		ldifLayout.setContext(context);
-		ldifLayout.start();
-
-		appender.setLayout(ldifLayout);
-		appender.start();
-		ch.qos.logback.classic.Logger rootLogger = context.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-		rootLogger.addAppender(appender);
-	}
-	
 }

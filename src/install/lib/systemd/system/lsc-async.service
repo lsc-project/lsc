@@ -3,7 +3,7 @@ Description=LSC server
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=lsc
 Group=lsc
 PIDFile=/var/run/lsc.pid

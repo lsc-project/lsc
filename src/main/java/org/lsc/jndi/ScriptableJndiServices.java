@@ -135,7 +135,7 @@ public class ScriptableJndiServices extends ScriptableObject {
          * 
          * @param base The base DN to search from.
          * @param filter The LDAP filter to use.
-         * @attribute attribute The attribute to search.
+         * @param attribute The attribute to search.
          * @return List<String> List of attributes values returned by the search.
          * @throws NamingException
          */
@@ -150,7 +150,7 @@ public class ScriptableJndiServices extends ScriptableObject {
          *
          * @param base The base DN to search from.
          * @param filter The LDAP filter to use.
-         * @attribute attribute The attribute to search.
+         * @param attribute The attribute to search.
          * @return List<String> List of attributes values returned by the search.
          * @throws NamingException
          */

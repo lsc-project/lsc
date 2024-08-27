@@ -68,10 +68,10 @@ import mockit.NonStrictExpectations;
 import org.junit.Test;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
+import org.lsc.Task;
 import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.PolicyType;
 import org.lsc.exception.LscServiceException;
-import org.lsc.jndi.JndiModificationType;
 import org.lsc.utils.SetUtils;
 
 /**
@@ -84,8 +84,8 @@ public class BeanComparatorTest {
     @Mocked org.lsc.jndi.SimpleJndiDstService dstService;
 	
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
 	 * @throws LscServiceException 
 	 */
 	@Test
@@ -141,7 +141,7 @@ public class BeanComparatorTest {
 	 *
 	 * With an invalid syntax error.
 	 * @throws NamingException As thrown when reading JNDI Attribute values.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(ISyncOptions, IBean, IBean, Object)}.
+	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
 	 * @throws LscServiceException 
 	 */
 	@Test
@@ -210,7 +210,7 @@ public class BeanComparatorTest {
 	}
 
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(String, Set, ISyncOptions, Map, JndiModificationType)}.
+	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(Task, String, Set, Set, Map, LscModificationType)}.
 	 * @throws LscServiceException 
 	 */
 	@Test

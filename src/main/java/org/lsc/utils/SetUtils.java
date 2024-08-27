@@ -68,8 +68,7 @@ public class SetUtils {
 	 * Return a new HashSet containing all the Objects that are an Attribute's
 	 * values.
 	 * 
-	 * @param attr
-	 *            An Attribute containing values to extract.
+	 * @param attr An Attribute containing values to extract.
 	 * @return {@link HashSet}<Object> Values as a set. Never null.
 	 * @throws NamingException
 	 */
@@ -207,11 +206,9 @@ public class SetUtils {
 	 * in the same order. This method is type-aware and will intelligently compare
 	 * byte[], String, etc.
 	 * 
-	 * @param first
-	 *            First set of Objects to compare.
-	 * @param second
-	 *            Second set of Objects.
-	 * @return {@link boolean} if the order is the same.
+	 * @param first First set of Objects to compare.
+	 * @param second Second set of Objects.
+	 * @return true if the order is the same.
 	 */
 	public static boolean checkOrder(Set<?> first, Set<Object> second) {
 		if (first.size() != second.size()) {

@@ -145,6 +145,7 @@
 				<include>lsc-sync.service</include>
 				<include>lsc-sync@.service</include>
 				<include>lsc-sync.timer</include>
+				<include>lsc-sync@.timer</include>
 			</includes>
 			<outputDirectory>lib/systemd/system</outputDirectory>
 			<fileMode>0644</fileMode>

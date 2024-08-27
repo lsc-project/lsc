@@ -45,8 +45,6 @@
  */
 package org.lsc;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,23 +52,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.naming.CommunicationException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.lsc.LscDatasetModification.LscDatasetModificationType;
-import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.beans.InfoCounter;
-import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.configuration.LscConfiguration;
-import org.lsc.configuration.PivotTransformationType.Transformation;
-import org.lsc.exception.LscServiceCommunicationException;
+import org.lsc.configuration.PivotTransformationType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.runnable.AsynchronousRunner;
 import org.lsc.runnable.CleanEntryRunner;
 import org.lsc.runnable.SynchronizeEntryRunner;
-import org.lsc.service.IAsynchronousService;
 import org.lsc.service.IService;
 import org.lsc.utils.LSCStructuralLogger;
 import org.lsc.utils.ScriptingEvaluator;
@@ -320,8 +311,8 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm List of modification to do on the Ldap server
-	 * @param identifier object identifier
+	 * @param lm List of modification to do on the Ldap server
+	 * @param data object identifier
 	 * @param except synchronization process name
 	 */
 	public final void logActionError(final LscModifications lm,
@@ -340,7 +331,7 @@ public abstract class AbstractSynchronize {
 	/**
 	 * Log all effective action.
 	 * 
-	 * @param jm List of modification to do on the Ldap server
+	 * @param lm List of modification to do on the Ldap server
 	 * @param id object identifier
 	 * @param syncName synchronization process name
 	 */
@@ -372,9 +363,8 @@ public abstract class AbstractSynchronize {
 	}
 
 	/**
-	 * @param jm
-	 * @param id
-	 * @param syncName
+	 * @param lm List of modification to do on the Ldap server
+	 * @param syncName synchronization process name
 	 */
 	public final void logShouldAction(final LscModifications lm, final String syncName) {
 		switch (lm.getOperation()) {
@@ -412,20 +402,18 @@ public abstract class AbstractSynchronize {
 	}
 
 	protected String getLogStatus(InfoCounter counter) {
-		String totalsLogMessage =
-				"All entries: "+ counter.getCountAll() +
+		return "All entries: "+ counter.getCountAll() +
 				", to modify entries: "+ counter.getCountModifiable() +
 				", successfully modified entries: "+counter.getCountCompleted()+
 				", errors: "+counter.getCountError();
-		return totalsLogMessage;
 	}
 
 	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
-		List<Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
+		List<PivotTransformationType.Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
 		if (! fromSameService && transformations != null) {
 			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
 			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
-				for (Transformation transformation: transformations) {
+				for (PivotTransformationType.Transformation transformation: transformations) {
 					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
 						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
 					}
@@ -436,7 +424,7 @@ public abstract class AbstractSynchronize {
 		return service.getBean(pivotName, pivotAttributes, fromSameService);
 	}
 
-	protected Object transform(Task task, Transformation transformation, Object value) throws LscServiceException{
+	protected Object transform(Task task, PivotTransformationType.Transformation transformation, Object value) throws LscServiceException{
 		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
 		javaScriptObjects.put("value", value);
 		if (task.getCustomLibraries() != null) {

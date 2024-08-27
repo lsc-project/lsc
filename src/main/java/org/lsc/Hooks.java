@@ -41,6 +41,7 @@
  */
 package org.lsc;
 
+import org.slf4j.event.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.ProcessBuilder;
@@ -125,13 +126,15 @@ public class Hooks {
 					operationType.getDescription(),
 					hook,
 					outputFormat.toString(),
-					identifier);
+					identifier,
+					Level.INFO);
 			printHookOutput(p.getErrorStream(),
 					"stderr",
 					operationType.getDescription(),
 					hook,
 					outputFormat.toString(),
-					identifier);
+					identifier,
+					Level.ERROR);
 		}
 		catch(IOException e) {
 			LOGGER.error("Error while calling {} posthook {} with format {} for {}",
@@ -162,18 +165,20 @@ public class Hooks {
 
 	private static void printHookOutput(	final InputStream src, String output,
 						String operation, String hook,
-						String outputFormat, String identifier) {
+						String outputFormat, String identifier,
+						Level level) {
 		new Thread(new Runnable() {
 			public void run() {
 				Scanner sc = new Scanner(src);
 				while (sc.hasNextLine()) {
-					LOGGER.warn("Hook {} with format {} for identifier {} and operation {} returned {}: {}",
-							hook,
-							outputFormat,
-							identifier,
-							operation,
-							output,
-							sc.nextLine());
+					LOGGER.atLevel(level).log(
+						"Hook {} with format {} for identifier {} and operation {} returned on {}: {}",
+						hook,
+						outputFormat,
+						identifier,
+						operation,
+						output,
+						sc.nextLine());
 				}
 			}
 		}).start();

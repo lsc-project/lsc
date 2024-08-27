@@ -4,7 +4,7 @@
 <manpage name="lsc" section="1" desc="LSC command">
 
   <synopsis>
-    $LSC_HOME/bin/lsc or $LSC_HOME/bin/lsc.bat
+    $LSC_HOME/bin/lsc or $LSC_HOME/bin/lsc.cmd
   </synopsis>
 
   <description>

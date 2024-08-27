@@ -18,19 +18,6 @@
 		<password></password>
 		<driver>org.hsqldb.blabla</driver>
 	</databaseConnection>
-	<csvAudit id="csv">
-		<name>csv</name>
-		<operations>create, delete</operations>
-		<attributes>cn, dn</attributes>
-		<separator>;</separator>
-		<append>true</append>
-		<file>/tmp/log.csv</file>
-	</csvAudit>
-	<ldifAudit id="ldif">
-		<operations>create, delete</operations>
-		<append>false</append>
-		<file>/tmp/log.ldif</file>
-	</ldifAudit>
 
 	<task>
 		<name>myTask</name>

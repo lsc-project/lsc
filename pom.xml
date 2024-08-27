@@ -256,10 +256,9 @@
 				<!-- common configuration by all executions -->
 				<configuration>
 					<baseDir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</baseDir>
-					<installFile>src/install/install.xml</installFile>
+					<installFile>${project.basedir}/src/install/install.xml</installFile>
 					<mkdirs>true</mkdirs>
 					<finalName>${project.artifactId}-${project.version}-installer.jar</finalName>
-					<enableAttachArtifact>false</enableAttachArtifact>
 					<autoIncludeUrl>true</autoIncludeUrl>
 				</configuration>
 
@@ -309,11 +308,11 @@
 				</executions>
 				<configuration>
 					<episode>true</episode>
-					<episodeFile>${basedir}/lsc.episode</episodeFile>
-					<generateDirectory>src/main/java</generateDirectory>
 					<generatePackage>org.lsc.configuration</generatePackage>
 					<bindingDirectory>src/main/resources/schemas</bindingDirectory>
-					<bindingIncludes><bindingInclude>lsc-core-2.2.xjc</bindingInclude></bindingIncludes>
+					<bindingIncludes>
+						<bindingInclude>lsc-core-2.2.xjc</bindingInclude>
+					</bindingIncludes>
 					<schemaDirectory>src/main/resources/schemas</schemaDirectory>
 					<schemaIncludes>
 						<schemaInclude>lsc-core-2.2.xsd</schemaInclude>
@@ -762,7 +761,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.75</version>
+			<version>1.78</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>

@@ -76,7 +76,6 @@
       <driver>org.hsqldb.jdbcDriver</driver>
     </databaseConnection>
   </connections>
-  <audits></audits>
   <tasks>
     <task>
       <name>ldap2ldapTestTask</name>

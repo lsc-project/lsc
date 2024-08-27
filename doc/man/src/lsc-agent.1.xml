@@ -4,7 +4,7 @@
 <manpage name="lsc-agent" section="1" desc="LSC remote command">
 
   <synopsis>
-    $LSC_HOME/bin/lsc-agent or $LSC_HOME/bin/lsc-agent.bat
+    $LSC_HOME/bin/lsc-agent or $LSC_HOME/bin/lsc-agent.cmd
   </synopsis>
 
   <description>

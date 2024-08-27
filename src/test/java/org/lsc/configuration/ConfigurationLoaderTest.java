@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Test;
-import org.lsc.configuration.TaskType.AuditLog;
 import org.lsc.exception.LscConfigurationException;
 
 import com.google.common.collect.ImmutableMap;
@@ -66,7 +65,6 @@ public class ConfigurationLoaderTest {
 		assertNotNull(c);
 		LscConfiguration.loadFromInstance(c);
 		assertEquals(3, LscConfiguration.getConnections().size());
-		assertEquals(1, LscConfiguration.getAudits().size());
 		assertEquals(2, LscConfiguration.getTasks().size());
 	}
 
@@ -131,16 +129,6 @@ public class ConfigurationLoaderTest {
 		Lsc c = getFile(this.getClass().getClassLoader().getResource("test.xml").getPath(), ImmutableMap.<String, String>of());
 		LscConfiguration.loadFromInstance(c);
 
-		CsvAuditType csvAudit = new CsvAuditType();
-		csvAudit.setId("csvAudit-1");
-		csvAudit.setAppend(false);
-		csvAudit.setDatasets("cn, sn, givenName");
-		csvAudit.setName("csvAudit-1");
-		csvAudit.setSeparator(";");
-		LscConfiguration.addAudit(csvAudit);
-		AuditLog auditLog = new AuditLog();
-		auditLog.setReference(csvAudit);
-		LscConfiguration.getTasks().iterator().next().getAuditLog().add(auditLog);
 		new JaxbXmlConfigurationHelper().saveConfiguration(new File(this.getClass().getClassLoader().getResource("etc").getFile(),"test-dump.xml").toString(), LscConfiguration.getInstance().getLsc());
 	}
 

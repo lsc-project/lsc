@@ -1,197 +1,124 @@
 <?xml version="1.0" ?>
-<!-- 
-	In the following file, comments are describing each node. Elements are
-	referenced through XPath expression, whereas attributes are prefixed with
-	'@'
-
-	//lsc Root node of the XML configuration file
-	@xmlns XML Schema validation is not ready yet (Reserved for futur use)
-	@id optional, added by XML API
-	@revision mandatory, used by the Web Administration Interface to version
-				this file
-	 -->
 <lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="0">
 
-<!--	./connections Connections list node, must contain at least two connections -->
+  <connections>
 
-	<connections>
+    <ldapConnection>
+      <name>ldap-src-conn</name>
+      <url>ldaps://ldap.example.com/dc=example,dc=com</url>
+      <username>cn=admin,dc=example,dc=com</username>
+      <password>secret</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <saslMutualAuthentication>false</saslMutualAuthentication>
+    </ldapConnection>
 
-<!--	
-	./connection Connection node, include definition of the required parameters.
-					Depending on the connection type, properties vary.
-			 			Existing class type are : ldapConnection, databaseConnnection
-			 			Plugins also provides : nisConnection, jndiExecDstConnection
---> 
-		<databaseConnection>
-<!--	./name identify the connection according to its node number, used in the 
-					service node to specify the source or destination connection -->
-			<name>hsqldb-source-conn</name>
-<!--	./url mandatory, the JDBC URL -->
-			<url>jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc</url>
-<!--	./username mandatory, the JDBC username -->
-			<username>sa</username>
-<!--	./password mandatory, the JDBC credential -->
-			<password></password>
-<!--	./driver mandatory, the Java classname to use as JDBC driver -->
-			<driver>org.hsqldb.jdbcDriver</driver>
-<!--	./otherSettings optional, may contain the list of complementary values, passed to the JDBC driver
-		<otherSettings>
-			<entry><key><value></entry>
-		</otherSettings> -->
-		</databaseConnection>
+    <ldapConnection>
+      <name>ldap-dst-conn</name>
+      <url>ldaps://directory.acme.com/dc=acme,dc=com</url>
+      <username>cn=administrator,cn=users,dc=acme,dc=com</username>
+      <password>secret</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <saslMutualAuthentication>false</saslMutualAuthentication>
+    </ldapConnection>
+  </connections>
 
-		<ldapConnection>
-			<name>ldap-dst-conn</name>
-<!--	./url mandatory, the JNDI URL -->
-			<url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-<!--	./username mandatory, the DN to bind with -->
-			<username>cn=Directory Manager</username>
-<!--	./password mandatory, credentials to bind with -->
-			<password>secret</password>
-<!--	./authentication mandatory, must contain either ANONYMOUS, SIMPLE, SASL, GSSAPI or DIGEST_MD5 -->
-			<authentication>SIMPLE</authentication>
-<!--	./referral mandatory, must contain either IGNORE, THROUGH, THROW or FOLLOW -->
-			<referral>IGNORE</referral>
-<!--	./derefAliases mandatory, must contain either NEVER, SEARCH, FIND, ALWAYS -->
-			<derefAliases>NEVER</derefAliases>
-<!--	./version mandatory, must contain either VERSION_2, VERSION_3 -->
-			<version>VERSION_3</version>
-<!--	./pageSize optional, specify the paged size when searching -->
-			<pageSize>-1</pageSize>
-<!--	./factory mandatory, points to LDAP Context Factory, com.sun.jndi.ldap.LdapCtxFactory for a SUN JDK -->
-			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
-<!--	./tlsActivated optional, specify if SSL/TLS is activated to connect to the LDAP server -->
-			<tlsActivated>false</tlsActivated>
-		</ldapConnection>
-	</connections>
+  <tasks>
 
-<!--	./tasks Task list node, must contain at least one task -->
-	<tasks>
+    <task>
+      <name>user</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
 
-<!--	./task Task node, this is the main node, in which synchronization is defined -->
-		<task>
-<!--	./name mandatory task node this is the main node, in which synchronization is defined -->
-			<name>MySyncTask</name>
-<!--	./bean optional bean node, default to org.lsc.beans.SimpleBean, define the pivot object used to store datasets and values -->
-			<bean>org.lsc.beans.SimpleBean</bean>
-<!--	./sourceService mandatory node containing definition of the source service settings	
-			possible builtin types are :
-				databaseSourceService, ldapSourceService 
-					Plugins also provides: syncreplSourceService, nisSourceService
-		-->
-			<databaseSourceService>
-<!-- 	A database source service will have to contain at least a name, a connection reference, a request for listing available objects,
-			and a request to get a complete object from its ids -->
-				<name>hsqldb-source-service</name>
-				<connection reference="hsqldb-source-conn" />
-<!--	./requestNameForList mandatory node providing the SQL request name to list available objects in the data source -->
-				<requestNameForList>getInetOrgPersonList</requestNameForList>
-<!--	./requestNameForNextId this optional node may be provided to enable a asynchronous mode of the datasource. If provided, this request will be
-				called to get the next updated id. This request may return nothing and LSC will wait until the next modification or its own stop
-				<requestNameForNextId>mandatory but not used yet</requestNameForNextId> -->
-<!--	./requestNameForObject mandatory node providing the SQL request name to get the full object according to the datasets identifying it uniquely -->
-				<requestNameForObject>getInetOrgPerson</requestNameForObject>
-<!--	./requestNameForClean optional node providing the SQL request name to check that the object still exissts. If not it will be deleted -->
-				<requestNameForClean>checkPersonForClean</requestNameForClean>
-			</databaseSourceService>
-<!--	./destinationService mandatory node containing definition of the source service settings	
-			@class define the implementation, possible builtin types are :
-				databaseDestinationService, ldapDestinationService 
-					Plugins also provides: jndiExecDstService
-		-->
-			<ldapDestinationService>
-<!-- 	A ldap destination service will have to contain at least a name, a connection reference, a base DN, a filter to list
-			entries, a filter to get a particular entry, a list of pivot attributes and a list of fetched attributes -->
-				<name>ldap-dst-service</name>
-				<connection reference="ldap-dst-conn" />
-<!--	./baseDn This mandatory node provide the directory base branch that will be used to look for entries (list and get) -->
-				<baseDn>ou=Users,dc=lsc-project,dc=org</baseDn>
-<!--	./pivotAttributes This mandatory node must include string nodes with attributes name that will be used with their values 
-			as pivot datasets (used to get the corresponding entry and to identify the counter-part object, here in the source database
-			used during the clean phase to delete the corresponding entry if no corresponding object is found)-->
-				<pivotAttributes>
-					<string>mail</string>
-				</pivotAttributes>
-<!--	./fetchedAttributes This mandatory node must include string nodes with attributes name that will fill the full object.
-			In a LDAP destination service, fetched attributes will be written to the target directory, whereas source provided datasets
-			that are not listed their will silently be canceled, i.e. not synchronized with the directory. -->
-				<fetchedAttributes>
-					<string>description</string>
-					<string>cn</string>
-					<string>sn</string>
-					<string>userPassword</string>
-					<string>objectClass</string>
-					<string>uid</string>
-					<string>mail</string>
-				</fetchedAttributes>
-<!--	./getAllFilter This mandatory node must include the filter that will be used to list all target objects. In a LDAP destination service
-					this value is used during the clean phase to look for every object that it has a corresponding object in the source database -->
-				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-<!--	./getOneFilter This mandatory node must include the filter that will be used to get a particular entry. In a LDAP destination service
-					this value is used during the synchronization phase to get the object - in conjonction with fetchedAttributes to synchronize them -->
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-			</ldapDestinationService>
-<!--	./syncOptions This mandatory node describes how to handle the various situations encountered while synchronizing datasets.
-			It must contains a main identifier construction rule and a default policy.
-			It may contains synchronization conditions, a default delimiter and datasets synchronization rules (attribute nodes) -->
-			<propertiesBasedSyncOptions>
-<!--		./mainIdentifier This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>
-<!--		./defaultDelimiter This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-				<defaultDelimiter>;</defaultDelimiter>
-<!--		./defaultPolicy This mandatory node must contain a string Javascript expression that will enforce the object main identifier.-->
-				<defaultPolicy>FORCE</defaultPolicy>
-<!--		./conditions This optional node may contain one or more of the four node : create, update, delete and changeId -->
-				<conditions>
-<!--			 ./create This optional node may contain a boolean Javascript expression that will indicate whenever a new entry must be created or not -->
-					<create>true</create>
-<!--			 ./update This optional node may contain a boolean Javascript expression that will indicate whenever a existing entry must be updated or not -->
-					<update>true</update>
-<!--			 ./delete This optional node may contain a boolean Javascript expression that will indicate whenever a existing entry must be deleted or not -->
-					<delete>true</delete>
-<!--			 ./changeId This optional node may contain a boolean Javascript expression that will indicate whenever an existing object main identifier must be changed or not -->
-					<changeId>false</changeId>
-				</conditions>
-<!--		./dataset This multi-valued node may contain a structure that will describe how to synchronize the corresponding dataset -->
-				<dataset>
-<!--			./name Mandatory node containing the dataset name -->
-					<name>objectClass</name>
-<!--			./policy Mandatory node containing the policy to apply to this dataset. Contains KEEP, FORCE or MERGE value -->
-					<policy>KEEP</policy>
-<!--			./defaultValues Optional node containing a list of string values that will be used if noone is provided by datasource -->
-					<defaultValues></defaultValues>
-<!--			./forceValues Optional node containing a list of string values that will be used to force destination service dataset values -->
-					<forceValues></forceValues>
-<!--			./createValues Optional node containing a list of string values that will be used to force destination service dataset values when creating object -->
-					<createValues>
-						<string>"user"</string>
-						<string>"top"</string>
-					</createValues>
-<!--			./delimiter Used when multiples values are provided in a single joined value -->
-					<delimiter>,</delimiter>
-				</dataset>
-				<dataset>
-					<name>userPassword</name>
-					<policy>KEEP</policy>
-					<defaultValues>
-						<string>"changethis"</string>
-					</defaultValues>
-					<forceValues></forceValues>
-					<createValues></createValues>
-				</dataset>
-			</propertiesBasedSyncOptions>
-		</task>
-	</tasks>
-<!-- ./security This mandatory node contains the security settings used by LSC -->
-	<security>
-<!-- ./encryption This optional node contains the encryption settings -->
-		<encryption>
-<!--	./keyfile This optional node contains the keyfile location -->
-			<keyfile>etc/lsc.key</keyfile>
-<!--	./algorithm This optional node contains the encryption algorithm -->
-			<algorithm>AES</algorithm>
-<!--	./strength This optional node contains the algorithm key length -->
-			<strength>128</strength>
-		</encryption>
-	</security>
+      <ldapSourceService>
+        <name>user-src-service</name>
+        <connection reference="ldap-src-conn"/>
+        <baseDn>ou=users,dc=example,dc=com</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>givenName</string>
+          <string>mail</string>
+          <string>sn</string>
+          <string>uid</string>
+        </fetchedAttributes>
+        <getAllFilter>(&amp;(objectClass=inetOrgPerson))</getAllFilter>
+        <getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
+        <cleanFilter>(&amp;(objectClass=inetOrgPerson)(uid={sAMAccountName}))</cleanFilter>
+      </ldapSourceService>
+
+      <ldapDestinationService>
+        <name>user-dst-service</name>
+        <connection reference="ldap-dst-conn" />
+        <baseDn>cn=users,dc=acme,dc=com</baseDn>
+        <pivotAttributes>
+          <string>sAMAccountName</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>description</string>
+          <string>givenName</string>
+          <string>mail</string>
+          <string>objectClass</string>
+          <string>sAMAccountName</string>
+          <string>sn</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=user)</getAllFilter>
+        <getOneFilter>(&amp;(objectClass=user)(sAMAccountName={uid}))</getOneFilter>
+      </ldapDestinationService>
+
+      <propertiesBasedSyncOptions>
+
+        <mainIdentifier>"cn=" + javax.naming.ldap.Rdn.escapeValue( srcBean.getDatasetFirstValueById("cn") ) + ",ou=users,dc=acme,dc=com"</mainIdentifier>
+        <defaultDelimiter>;</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+
+        <conditions>
+            <create>true</create>
+            <update>true</update>
+            <delete>true</delete>
+            <changeId>true</changeId>
+        </conditions>
+
+        <dataset>
+          <name>description</name>
+          <forceValues>
+            <string>"Synchronized by LSC"</string>
+          </forceValues>
+        </dataset>
+
+        <dataset>
+          <name>objectClass</name>
+          <policy>KEEP</policy>
+          <createValues>
+            <string>"top"</string>
+            <string>"user"</string>
+          </createValues>
+        </dataset>
+
+        <dataset>
+          <name>sAMAccountName</name>
+          <forceValues>
+            <string>srcBean.getDatasetFirstValueById("uid")</string>
+          </forceValues>
+        </dataset>
+
+      </propertiesBasedSyncOptions>
+
+    </task>
+
+  </tasks>
+
 </lsc>

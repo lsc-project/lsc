@@ -231,7 +231,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
 
-		logStatus(task.getName(), Task.Mode.clean.toString(), counter);
+		logStatus(task.getName(), Task.Mode.sync.toString(), counter);
 		return counter.getCountError() == 0;
 	}
 

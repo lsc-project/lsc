@@ -3,6 +3,7 @@ package org.lsc.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.script.*;
@@ -31,7 +32,7 @@ public class ScriptingEvaluator {
 
 	private Map<String, ScriptableEvaluator> instancesTypeCache;
 
-	private ScriptableEvaluator defaultImplementation;
+	private Optional<ScriptableEvaluator> defaultImplementation;
 
 	static {
 		implementetionsCache = new HashMap<String, Class<? extends ScriptableEvaluator>>();
@@ -87,10 +88,11 @@ public class ScriptingEvaluator {
 			bindings.put( "polyglot.js.nashorn-compat", true);
 			JScriptEvaluator graaljsevaluator = new JScriptEvaluator(graaljsEngine);
 			instancesTypeCache.put("gj", graaljsevaluator);
-			defaultImplementation = graaljsevaluator;
+			defaultImplementation = Optional.of(graaljsevaluator);
 		}
 		else {
-			defaultImplementation = instancesTypeCache.get("js");
+			defaultImplementation = Optional.ofNullable(instancesTypeCache.get("js"))
+					.or(() -> Optional.ofNullable(instancesTypeCache.get("rjs")));
 		}
 	}
 
@@ -111,13 +113,13 @@ public class ScriptingEvaluator {
 		implementetionsCache.put(implementationName, implementationClass);
 	}
 
-	private ScriptableEvaluator identifyScriptingEngine(String expression) {
+	private ScriptableEvaluator identifyScriptingEngine(String expression) throws LscServiceException {
 		String[] parts = expression.split(":");
 		if (parts != null && parts.length > 0 && parts[0].length() < 10
 				&& instancesTypeCache.containsKey(parts[0])) {
 			return instancesTypeCache.get(parts[0]);
 		}
-		return defaultImplementation;
+		return defaultImplementation.orElseThrow(() -> new LscServiceException("Missing Script evaluator"));
 	}
 
 	/**

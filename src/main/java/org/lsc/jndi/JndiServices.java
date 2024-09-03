@@ -102,11 +102,7 @@ import org.apache.directory.api.ldap.model.name.Rdn;
 import org.apache.directory.api.ldap.model.url.LdapUrl;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
-import org.lsc.configuration.LdapAuthenticationType;
-import org.lsc.configuration.LdapConnectionType;
-import org.lsc.configuration.LdapDerefAliasesType;
-import org.lsc.configuration.LdapReferralType;
-import org.lsc.configuration.LdapVersionType;
+import org.lsc.configuration.*;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.slf4j.Logger;
@@ -1080,10 +1076,10 @@ public final class JndiServices {
     /**
      * Retrieve a specific attribute from an object
      * 
-     * @param objectDn
-     * @param attribute
-     * @return
-     * @throws LscServiceException
+     * @param objectDn Distinguished Name of object attributes
+     * @param attribute Attributes returned by query
+     * @return List of objects returned from Source
+     * @throws LscServiceException Thrown when LSC fails to general issues
      */
     public List<String> getAttributeValues(String objectDn, String attribute) throws LscServiceException {
         List<String> values = null;
@@ -1262,7 +1258,7 @@ public final class JndiServices {
 	 * Get the initial JNDI context or get a derived context to be able to use controls without 
 	 * impacting or being impacted by other threads sharing a same context
 	 * @param forUpdates if this derived context is for updates
-	 * @return
+	 * @return {@link LdapContext} object for LDAPv3 connection
 	 * @throws NamingException
 	 */
 	public LdapContext getContext(boolean forUpdates) throws NamingException {

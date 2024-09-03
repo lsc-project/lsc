@@ -175,7 +175,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		for (String attr: ldapService.getFetchedAttributes().getString()) {
 			attrs.add(attr);
 		}
-		jndiServices = JndiServices.getInstance((LdapConnectionType)ldapService.getConnection().getReference());
+		jndiServices = JndiServices.getInstance((LdapConnectionType) ldapService.getConnection().getReference());
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
 			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
 		}
@@ -327,7 +327,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 
 
 	/**
-	 * @see org.lsc.service.IService.getSupportedConnectionType()
+	 * @see org.lsc.service.IService#getSupportedConnectionType()
 	 */
 	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
 	    Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();

@@ -57,7 +57,6 @@ import java.util.StringTokenizer;
 
 import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
-import org.lsc.configuration.PivotTransformationType.Transformation;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
 import org.lsc.jndi.PullableJndiSrcService;
@@ -534,7 +533,7 @@ public class LscConfiguration {
     	return false;
     }
     
-    public static List<Transformation> getPivotTransformation(TaskType task) {
+    public static List<PivotTransformationType.Transformation> getPivotTransformation(TaskType task) {
 		SyncOptionsType syncOptions = LscConfiguration.getSyncOptions(task);
 		if (! LscConfiguration.getSyncOptionsImplementation(syncOptions).equals(PropertiesBasedSyncOptions.class)) {
 			return null;

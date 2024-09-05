@@ -91,8 +91,8 @@ public class ScriptingEvaluator {
 			defaultImplementation = Optional.of(graaljsevaluator);
 		}
 		else {
-			defaultImplementation = Optional.ofNullable(instancesTypeCache.get("js"))
-					.or(() -> Optional.ofNullable(instancesTypeCache.get("rjs")));
+			defaultImplementation = Optional.ofNullable(Optional.ofNullable(instancesTypeCache.get("js"))
+					.orElse(instancesTypeCache.get("rjs")));
 		}
 	}
 

@@ -94,7 +94,7 @@ public class ScriptingEvaluator {
 		}
 	}
 
-	public static ScriptingEvaluator getInstance() {
+	private static ScriptingEvaluator getInstance() {
         String threadName = Thread.currentThread().getName();
         ScriptingEvaluator scriptingEvaluator = null;
 

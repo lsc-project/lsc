@@ -205,9 +205,9 @@ unless ( $last =~ /All entries:/ ) {
 }
 
 # Get statistics
-my ( $all, $modify, $modified, $errors ) =
+my ( $taskname, $taskmode, $all, $modify, $modified, $errors ) =
   ( $last =~
-/All entries: (\d+), to modify entries: (\d+), (?:successfully )?modified entries: (\d+), errors: (\d+)/mi
+/(\w+) - (\w+) - All entries: (\d+), to modify entries: (\d+), (?:successfully )?modified entries: (\d+), errors: (\d+)/mi
   );
 
 #==========================================================================
@@ -224,17 +224,17 @@ if ($perf_data) {
 # Test the errors and exit
 if ( $errors == 0 or $errors < $warning ) {
     print
-"OK - LSC is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
+"OK - LSC task $taskname in mode $taskmode is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
     exit $ERRORS{'OK'};
 }
 elsif ( $errors >= $warning and $errors < $critical ) {
     print
-"WARNING - LSC is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
+"WARNING - LSC task $taskname in mode $taskmode is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
     exit $ERRORS{'WARNING'};
 }
 else {
     print
-"CRITICAL - LSC is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
+"CRITICAL - LSC task $taskname in mode $taskmode is running with $errors errors (W:$warning - C:$critical)$perfparse\n";
     exit $ERRORS{'CRITICAL'};
 }
 

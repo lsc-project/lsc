@@ -70,7 +70,7 @@
 		<!--Force UTF-8 for the build -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
-		<jmockit-version>1.5</jmockit-version>
+		<jmockit-version>1.7</jmockit-version>
 		<graalvm.version>22.3.5</graalvm.version>
 		<graaljs.version>24.1.1</graaljs.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
@@ -819,6 +819,18 @@
 			<version>${jmockit-version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.15.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.15.2</version>
+            <scope>test</scope>
+        </dependency>
 		<!--dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

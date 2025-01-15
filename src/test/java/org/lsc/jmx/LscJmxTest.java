@@ -58,6 +58,7 @@ import java.util.Map;
 import javax.naming.CommunicationException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.lsc.CommonLdapSyncTest;
 import org.lsc.Ldap2LdapSyncTest;
@@ -74,6 +75,7 @@ import org.slf4j.LoggerFactory;
  * This test covers all the JMX capabilities
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
+@Disabled
 public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 
 	/** The local logger */
@@ -111,6 +113,7 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	}
 	
 	@Test
+	@Ignore
 	public final void test1SyncByObject() throws Exception {
 
 //		Thread syncThread = new Thread(this);

@@ -45,7 +45,7 @@
  */
 package org.lsc.utils.output;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,8 +55,8 @@ import java.util.List;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;
@@ -86,7 +86,7 @@ public class LdifLayoutTest {
 						new Exception(), new Object[]{object});
 	}
 
-	@Before
+	@BeforeEach
 	public final void init() {
 		new NonStrictExpectations() {
 			{

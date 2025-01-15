@@ -45,12 +45,11 @@
  */
 package org.lsc.jndi.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.HashMap;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 /**

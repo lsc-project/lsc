@@ -45,34 +45,17 @@
  */
 package org.lsc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.SearchResult;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.commons.codec.binary.Base64;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.lsc.beans.IBean;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.configuration.LscConfiguration;
-import org.lsc.exception.LscServiceException;
-import org.lsc.jndi.SimpleJndiSrcService;
-import org.lsc.service.IService;
-import org.lsc.utils.directory.LDAP;
 
 /**
  * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
@@ -83,12 +66,12 @@ import org.lsc.utils.directory.LDAP;
 public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
-		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		reloadJndiConnections();
 	}
 
@@ -107,7 +90,6 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 	}
 
 	private final void checkSyncResults() throws Exception {
-		List<String> attributeValues = null;
 
 
 		// check Operation order

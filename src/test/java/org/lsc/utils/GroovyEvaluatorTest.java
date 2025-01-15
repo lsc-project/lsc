@@ -1,14 +1,14 @@
 package org.lsc.utils;
 
-import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.groovy.jsr223.GroovyScriptEngineFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.lsc.Task;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
@@ -26,7 +26,7 @@ public class GroovyEvaluatorTest {
 	
 	@Mocked Task task;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		evaluator = new GroovyEvaluator(new GroovyScriptEngineFactory().getScriptEngine());
 	}

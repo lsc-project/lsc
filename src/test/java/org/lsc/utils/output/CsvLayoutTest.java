@@ -45,13 +45,13 @@
  */
 package org.lsc.utils.output;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
 import org.lsc.LscModificationType;

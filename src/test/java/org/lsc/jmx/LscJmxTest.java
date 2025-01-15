@@ -45,8 +45,10 @@
  */
 package org.lsc.jmx;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,9 +57,8 @@ import java.util.Map;
 
 import javax.naming.CommunicationException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.CommonLdapSyncTest;
 import org.lsc.Ldap2LdapSyncTest;
 import org.lsc.SimpleSynchronize;
@@ -101,10 +102,10 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	
 	private JndiServices jndiServices;
 	
-	@Before
+	@BeforeEach
 	public void setupJmx() throws CommunicationException {
 		LscConfiguration.reset();
-		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		jndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 		clean();
 	}
@@ -118,14 +119,14 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 
 		LscAgent lscAgent = new LscAgent();
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
-		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", getTaskName(), 
 				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
 		Map<String, List<String>> values = new HashMap<String, List<String>>();
 		values.put("sn", Arrays.asList(new String[] {"SN0003"}));
 		values.put("cn", Arrays.asList(new String[] {"CN0003"}));
 		values.put("objectClass", Arrays.asList(new String[] {"person", "top"}));
-		Assert.assertTrue(lscAgent.syncByObject(getTaskName(), DN_ADD_SRC, values));
+		assertTrue(lscAgent.syncByObject(getTaskName(), DN_ADD_SRC, values));
 	}
 	
 	@Test
@@ -145,10 +146,10 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 		// And launch it through JMX
 		LscAgent lscAgent = new LscAgent();
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-l"} );
-		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
 		lscAgent.parseOptions(new String[] {"-h", "localhost", "-p", "1099", "-a", getTaskName(), 
 				"-i", DN_ADD_SRC, "-t", "sn=SN0003"} );
-		Assert.assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
+		assertEquals(lscAgent.run(lscAgent.getOperation()), 0);
 		
 		assertTrue(jndiServices.exists(DN_ADD_DST));
 		

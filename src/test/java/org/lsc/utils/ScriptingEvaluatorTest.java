@@ -1,12 +1,12 @@
 package org.lsc.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.lsc.Task;
 import org.lsc.configuration.*;
 import org.lsc.exception.LscServiceConfigurationException;
@@ -19,7 +19,7 @@ public class ScriptingEvaluatorTest {
 
     @Mocked Task task;
 
-    @Before
+    @BeforeEach
     public void setUp() throws LscServiceConfigurationException {
         new NonStrictExpectations() {
             {

@@ -45,7 +45,8 @@
  */
 package org.lsc.utils;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,9 +54,8 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
 import org.slf4j.Logger;
@@ -68,10 +68,11 @@ public class SecurityUtilsTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtilsTest.class);
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		LscConfiguration.reset();
 	}
+	
     @Test
     public final void testSymmetricEncryption() throws GeneralSecurityException, IOException {
     	try {
@@ -130,7 +131,7 @@ public class SecurityUtilsTest {
         //
         try {
             String result = SecurityUtils.computeSambaLMPassword(password);
-            Assert.assertEquals(result, passwordSambaLM);
+            assertEquals(result, passwordSambaLM);
         } catch (Exception ex) {
             assertTrue(false);
         }
@@ -139,7 +140,7 @@ public class SecurityUtilsTest {
         //
         try {
             String result = SecurityUtils.computeSambaNTPassword(password);
-            Assert.assertEquals(result, passwordSambaNT);
+            assertEquals(result, passwordSambaNT);
         } catch (Exception ex) {
             assertTrue(false);
         }

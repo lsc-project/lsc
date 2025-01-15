@@ -45,13 +45,14 @@
  */
 package org.lsc.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.text.ParseException;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test conversion date utils.
@@ -64,7 +65,7 @@ public class DateUtilsTest {
 	 * Launch the parse test.
 	 * @throws ParseException Thrown if the parsing operation failed
 	 */
-	@Test
+	@org.junit.jupiter.api.Test
 	public final void testParse() throws ParseException {
 		// Please take care : use 5 instead of 6 because month is a 0 starting value
 		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
@@ -95,8 +96,8 @@ public class DateUtilsTest {
 	/**
 	 * Launch the format test.
 	 */
-	@Test(expected=ParseException.class)
+	@Test
 	public final void testError() throws ParseException {
-		DateUtils.parse("0Z");
+        assertThrows( ParseException.class, () -> DateUtils.parse("0Z") );
 	}
 }

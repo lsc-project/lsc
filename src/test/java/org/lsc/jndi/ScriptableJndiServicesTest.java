@@ -45,13 +45,14 @@
  */
 package org.lsc.jndi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import javax.naming.NamingException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 
@@ -59,7 +60,7 @@ public class ScriptableJndiServicesTest {
 
 	private JndiServices dstJndiServices;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));

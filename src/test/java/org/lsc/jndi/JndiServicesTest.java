@@ -45,11 +45,11 @@
  */
 package org.lsc.jndi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -68,8 +68,8 @@ import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.LscDatasets;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
@@ -89,7 +89,7 @@ public class JndiServicesTest {
 	private JndiServices dstRelaxRulesJndiServices;
 	private JndiServices dstRecursiveDeleteJndiServices;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
@@ -217,9 +217,9 @@ public class JndiServicesTest {
 		createEntryWithChildren("ou=People", "testDelete", 0, 3);
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("cn=testDelete,ou=People");
-		assertFalse("delete entry with children should fail if not using recursiveDelete option", dstJndiServices.apply(jm));
-		assertTrue("delete entry with children should succeed using recursiveDelete option", dstRecursiveDeleteJndiServices.apply(jm));
-		assertNull("entry should not exist after delete",dstJndiServices.readEntry("cn=testDelete,ou=People", true));
+		assertFalse(dstJndiServices.apply(jm), "delete entry with children should fail if not using recursiveDelete option");
+		assertTrue(dstRecursiveDeleteJndiServices.apply(jm), "delete entry with children should succeed using recursiveDelete option");
+		assertNull(dstJndiServices.readEntry("cn=testDelete,ou=People", true), "entry should not exist after delete");
 	}
 
 	@Test
@@ -233,7 +233,7 @@ public class JndiServicesTest {
 					break;
 				}
 			}
-			assertTrue("ctx for updates does not contains relax-rules request control", hasRelaxRulesCtl);
+			assertTrue(hasRelaxRulesCtl, "ctx for updates does not contains relax-rules request control");
 		}
 		{
 			LdapContext ctx = dstRelaxRulesJndiServices.getContext(false);
@@ -244,7 +244,7 @@ public class JndiServicesTest {
 					break;
 				}
 			}
-			assertFalse("ctx not for updates contains relax-rules request control", hasRelaxRulesCtl);
+			assertFalse(hasRelaxRulesCtl, "ctx not for updates contains relax-rules request control");
 		}
 		{
 			// This fails as OpenDJ does not support relax-rules control

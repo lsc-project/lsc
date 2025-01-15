@@ -54,20 +54,20 @@ import com.fasterxml.jackson.core.JsonParser;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.lsc.configuration.LscConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 
@@ -77,14 +77,12 @@ import java.util.Scanner;
  * ldap2ldapHookTestCreate ldap2ldapHookTestUpdate ldap2ldapHookTestDelete
  */
 public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
-
-
-	@Before
+	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
-		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		reloadJndiConnections();
 	}
 
@@ -155,31 +153,40 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 	/*
 	 * Read hook log file to check passed arguments and modification passed as input
-	*/
+	 */
 	private final void checkLDIFSyncResults(String operation, List<String> expectedEntry) throws Exception {
 
 		List<String> hookResults = new ArrayList<String>();
 		try {
 			File hookFile = new File("hook-ldif-" + operation + ".log");
-			Scanner hookReader = new Scanner(hookFile);
 
-			while (hookReader.hasNextLine()) {
-				String data = hookReader.nextLine();
-				hookResults.add(data);
-			}
-			hookReader.close();
+            Thread.sleep(1000L);
+
+            if (!hookFile.exists()) {
+                System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
+            }
+
+            try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
+    			while (hookReader.hasNextLine()) {
+    				String data = hookReader.nextLine();
+    				hookResults.add(data);
+    			}
+            } catch (FileNotFoundException fnfe) {
+                fail("Cannot find the  hook file" + "hook-ldif-" + operation + ".log " + fnfe.getMessage());
+            } 
+
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
-			fail("Error while reading hook-ldif-" + operation + ".log");
+			fail("Error while reading hook-ldif-" + operation + ".log " + e.getMessage());
 		}
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
 		if(operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
-			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
+			List<String> entry = new ArrayList<>(hookResults.subList(3, (hookResults.size()-1)));
 			for (String attr : expectedEntry) {
-				assertTrue("Attribute " + attr + " not found in " + operation + " entry " + entry.toString(), entry.contains(attr));
+				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
 			}
 		}
 
@@ -193,23 +200,32 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		List<String> hookResults = new ArrayList<String>();
 		try {
 			File hookFile = new File("hook-json-" + operation + ".log");
-			Scanner hookReader = new Scanner(hookFile);
+            
+            Thread.sleep( 1000L );
+            
+            if (!hookFile.exists()) {
+                System.out.println( "!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist" );
+            }
 
-			while (hookReader.hasNextLine()) {
-				String data = hookReader.nextLine();
-				hookResults.add(data);
-			}
-			hookReader.close();
+			try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
+    			while (hookReader.hasNextLine()) {
+    				String data = hookReader.nextLine();
+    				hookResults.add(data);
+    			}
+			} catch (FileNotFoundException fnfe) {
+	            fail("Cannot find the  hook file" + "hook-json-" + operation + ".log " + fnfe.getMessage());
+	        } 
+
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
-			fail("Error while reading hook-json-" + operation + ".log");
+			fail("Error while reading hook-json-" + operation + ".log " + e.getMessage());
 		}
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
 		if(operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
-			String entry = String.join("", new ArrayList(hookResults.subList(2, hookResults.size())));
+			String entry = String.join("", new ArrayList<>(hookResults.subList(2, hookResults.size())));
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonFactory factory = mapper.getJsonFactory();

@@ -45,13 +45,13 @@
  */
 package org.lsc;
 
-import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.configuration.LscConfiguration;
 
 /**
@@ -63,7 +63,7 @@ import org.lsc.configuration.LscConfiguration;
  */
 public class SimpleSynchronizeTest {
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
 	}
@@ -82,5 +82,4 @@ public class SimpleSynchronizeTest {
 		
 		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
 	}
-	
 }

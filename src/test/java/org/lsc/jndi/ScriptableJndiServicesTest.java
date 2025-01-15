@@ -51,12 +51,66 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import javax.naming.NamingException;
 
+import org.apache.directory.server.annotations.CreateLdapServer;
+import org.apache.directory.server.annotations.CreateTransport;
+import org.apache.directory.server.core.annotations.ApplyLdifFiles;
+import org.apache.directory.server.core.annotations.ApplyLdifs;
+import org.apache.directory.server.core.annotations.ContextEntry;
+import org.apache.directory.server.core.annotations.CreateDS;
+import org.apache.directory.server.core.annotations.CreateIndex;
+import org.apache.directory.server.core.annotations.CreatePartition;
+import org.apache.directory.server.core.annotations.LoadSchema;
+import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
+import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 
-public class ScriptableJndiServicesTest {
+@ExtendWith( { ApacheDSTestExtension.class } )
+@CreateDS(
+    name = "DSWithPartitionAndServer",
+    loadedSchemas =
+        {
+            @LoadSchema(name = "other", enabled = true)
+        },
+    partitions =
+        {
+            @CreatePartition(
+                name = "lsc-project",
+                suffix = "dc=lsc-project,dc=org",
+                contextEntry = @ContextEntry(
+                    entryLdif =
+                    "dn: dc=lsc-project,dc=org\n" +
+                        "dc: lsc-project\n" +
+                        "objectClass: top\n" +
+                        "objectClass: domain\n\n"),
+                indexes =
+                    {
+                        @CreateIndex(attribute = "objectClass"),
+                        @CreateIndex(attribute = "dc"),
+                        @CreateIndex(attribute = "ou")
+                })
+    })
+@CreateLdapServer(
+    transports =
+        {
+            @CreateTransport(protocol = "LDAP", port = 33389),
+            @CreateTransport(protocol = "LDAPS", port = 33636)
+    })
+@ApplyLdifs(
+        {
+            // Entry # 0
+            "dn: cn=Directory Manager,ou=system",
+            "objectClass: person",
+            "objectClass: top",
+            "cn: Directory Manager",
+            "description: Directory Manager",
+            "sn: Directory Manager",
+            "userpassword: secret"
+        })
+@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})public class ScriptableJndiServicesTest extends AbstractLdapTestUnit {
 
 	private JndiServices dstJndiServices;
 	

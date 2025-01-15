@@ -45,8 +45,9 @@
  */
 package org.lsc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,9 +55,8 @@ import java.util.List;
 
 import javax.naming.CommunicationException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.directory.LDAP;
 
@@ -86,12 +86,12 @@ public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 	}
 	
 
-	@Before
+	@BeforeEach
 	public void setup() throws CommunicationException {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
-		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		reloadJndiConnections();
 	}
 	

@@ -5,9 +5,9 @@
 
 package org.lsc.utils;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -49,10 +49,12 @@ public class FrenchFiltersTest {
 		assertEquals("Me Myself And I", FrenchFilters.filterSn(sn));
 	}
 
-	@Test(expected=CharacterUnacceptedException.class)
+	@Test
 	public void testFilterSnException() throws Exception {
 		String sn = "Me MySelf §!°^¨$*€`£ù%+=:/;,?# I";
-		FrenchFilters.filterSn(sn);
+        assertThrows( CharacterUnacceptedException.class, ( ) -> {
+		  FrenchFilters.filterSn(sn);
+        });
 	}
 
 	@Test

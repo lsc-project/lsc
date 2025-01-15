@@ -45,9 +45,10 @@
  */
 package org.lsc.jndi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,8 +59,8 @@ import javax.naming.directory.BasicAttribute;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.beans.SimpleBean;
@@ -81,7 +82,7 @@ public class JScriptEvaluatorTest {
 
 	@Mocked Task task;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		LscConfiguration.reset();
 	}
@@ -93,12 +94,13 @@ public class JScriptEvaluatorTest {
 		assertEquals("b", ScriptingEvaluator.evalToString(task, "srcAttr.get()", table));
 	}
 
-	@Test(expected=LscServiceException.class)
+	@Test
 	public void testNk() throws EcmaError, LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
-		ScriptingEvaluator.evalToString(task, "src.get()", table);
+		assertThrows( LscServiceException.class, () ->
+		  ScriptingEvaluator.evalToString(task, "src.get()", table));
 	}
 
 	@Test

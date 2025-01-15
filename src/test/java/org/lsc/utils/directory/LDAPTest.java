@@ -45,8 +45,9 @@
  */
 package org.lsc.utils.directory;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
@@ -54,7 +55,7 @@ import javax.naming.NamingException;
 import mockit.Mocked;
 
 import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
@@ -103,15 +104,17 @@ public class LDAPTest {
 	}
 
 	// this should fail with a can't connect exception
-	@Test(expected = NamingException.class)
+	@Test
 	public void testCanBindCantConnect() throws NamingException {
-		LDAP.canBind("ldap://no.such.host.really:33389/", "cn=Directory Manager", "public");
+	    assertThrows( NamingException.class, () ->
+		  LDAP.canBind("ldap://no.such.host.really:33389/", "cn=Directory Manager", "public") );
 	}
 
 	// this should fail with a NamingException (no such object)
-	@Test(expected = NameNotFoundException.class)
+	@Test
 	public void testCanBindSearchRebindNoSuchObject() throws NamingException, LdapURLEncodingException {
-		LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?(cn=CN0001)",
-						"cn=Directory Manager", "secret", "secret");
+        assertThrows( NameNotFoundException.class, () ->
+		  LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?(cn=CN0001)",
+						"cn=Directory Manager", "secret", "secret") );
 	}
 }

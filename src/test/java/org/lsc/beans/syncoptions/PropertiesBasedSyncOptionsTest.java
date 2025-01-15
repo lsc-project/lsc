@@ -48,6 +48,8 @@ package org.lsc.beans.syncoptions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -55,22 +57,19 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.lsc.Task;
 import org.lsc.configuration.*;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 
-import mockit.Injectable;
-import mockit.NonStrict;
-import mockit.NonStrictExpectations;
 
 public class PropertiesBasedSyncOptionsTest {
 
 	PropertiesBasedSyncOptionsType conf ;
 	DatasetType pbsoNonExistingAttr;
 	DatasetType pbsoExistingAttr;
-	@Injectable @NonStrict
-	TaskType task;
-	@Injectable @NonStrict org.lsc.Task taskExec;
+	TaskType task = mock(TaskType.class);
+    Task taskExec = mock(Task.class);
 
 	@BeforeEach
 	public void setup() {
@@ -90,11 +89,7 @@ public class PropertiesBasedSyncOptionsTest {
 		conf.getDataset().add(delimitedAttr);
 		conf.setDefaultPolicy(PolicyType.FORCE);
 
-		new NonStrictExpectations() {
-			{
-				task.getPropertiesBasedSyncOptions(); result = conf;
-			}
-		};
+		when(task.getPropertiesBasedSyncOptions()).thenReturn(conf);
 
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
@@ -117,11 +112,7 @@ public class PropertiesBasedSyncOptionsTest {
 		pbsoExistingAttr.setName("sampleAttribute");
 		conf.getDataset().add(pbsoExistingAttr); 
 
-		new NonStrictExpectations() {
-			{
-				task.getPropertiesBasedSyncOptions(); result = conf;
-			}
-		};
+	    when(task.getPropertiesBasedSyncOptions()).thenReturn( conf );
 
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);
@@ -139,11 +130,7 @@ public class PropertiesBasedSyncOptionsTest {
 		jsAttr.setName("JsAttribute");
 		conf.getDataset().add(jsAttr);
 
-		new NonStrictExpectations() {
-			{
-				task.getPropertiesBasedSyncOptions(); result = conf;
-			}
-		};
+		when(task.getPropertiesBasedSyncOptions()).thenReturn( conf);
 		
 		ISyncOptions iso = new PropertiesBasedSyncOptions();
 		assertNotNull(iso);

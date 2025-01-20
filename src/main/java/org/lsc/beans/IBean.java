@@ -76,8 +76,7 @@ public interface IBean extends Cloneable, Serializable {
 	/**
 	 * Get an attribute from its name.
 	 * 
-	 * @param id
-	 *            the name
+	 * @param id the name
 	 * @return the LDAP attribute
 	 * @deprecated
 	 */
@@ -138,8 +137,7 @@ public interface IBean extends Cloneable, Serializable {
 	/**
 	 * Get all values of an attribute from its name
 	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
+	 * @param id The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 * @deprecated See getDatasetById(String id)

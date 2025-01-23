@@ -84,30 +84,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M8</version>
+				<version>3.5.2</version>
 				<configuration>
-					<argLine>-Dcom.sun.management.jmxremote
-						-Dcom.sun.management.jmxremote.port=1099
-						-Dcom.sun.management.jmxremote.authenticate=false
-						-Dcom.sun.management.jmxremote.ssl=false
-						-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
+					<argLine>
+						-Dcom.sun.management.jmxremote 
+						-Dcom.sun.management.jmxremote.port=1099  
+						-Dcom.sun.management.jmxremote.ssl=false 
+						-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true 
+						-Dcom.sun.management.jmxremote.authenticate=false 
+						-Djava.rmi.server.hostname=localhost 
+						-Dcom.sun.management.jmxremote.rmi.port=1099
 						${module.opts}
 						${graalvm.opts}
-						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar
 					</argLine>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
-				<!--
-					Force surefire provider to junit4
-					as surefire-junit-platform does not correctly detect tests
-				-->
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit4</artifactId>
-						<version>3.5.2</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

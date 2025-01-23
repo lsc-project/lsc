@@ -68,7 +68,6 @@ import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.annotations.LoadSchema;
 import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.CommonLdapSyncTest;
@@ -167,7 +166,6 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	}
 	
 	@Test
-	//@Disabled
 	public final void test1SyncByObject() throws Exception {
 
 //		Thread syncThread = new Thread(this);
@@ -187,7 +185,6 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	}
 	
 	@Test
-    //@Disabled
 	public final void test2List() throws Exception {
 		clean();
 		assertTrue(jndiServices.exists(DN_ADD_SRC));

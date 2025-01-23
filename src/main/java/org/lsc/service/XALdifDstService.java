@@ -86,40 +86,41 @@ import org.xadisk.filesystem.standalone.StandaloneFileSystemConfiguration;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class XALdifDstService implements
-		IXAWritableService {
+public class XALdifDstService implements IXAWritableService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(XALdifDstService.class);
 
 	/** the service unique identifier */
 	private String id;
-	
-    /** the XA object */
-    private XAFileSystem xafs;
-    
-    private TransactionManager tm;
-    
-    /** The path where file are stored */
-    private String outputDirectory;
-    
-    private Map<String, XASession> xaSessions;
-	
+
+	/** the XA object */
+	private XAFileSystem xafs;
+
+	private TransactionManager tm;
+
+	/** The path where file are stored */
+	private String outputDirectory;
+
+	private Map<String, XASession> xaSessions;
+
 	public XALdifDstService(TaskType task) throws LscServiceException {
 		xaSessions = new HashMap<String, XASession>();
 		this.id = LscConfiguration.getDestinationService(task).getName();
 		this.outputDirectory = task.getXaFileDestinationService().getOutputDirectory();
-		if(LOGGER.isDebugEnabled()) LOGGER.debug("Botting an XADisk instance...");
-        StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(outputDirectory, id);
-        xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
-        try {
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Botting an XADisk instance...");
+		StandaloneFileSystemConfiguration configuration = new StandaloneFileSystemConfiguration(outputDirectory, id);
+		xafs = XAFileSystemProxy.bootNativeXAFileSystem(configuration);
+		try {
 			xafs.waitForBootup(-1);
 		} catch (InterruptedException e) {
 			throw new LscServiceException(e);
 		}
-        if(LOGGER.isDebugEnabled()) LOGGER.debug("Successfully booted the XADisk instance.\n");
-        tm = new bitronix.tm.BitronixTransactionManager();
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Successfully booted the XADisk instance.\n");
+		tm = new bitronix.tm.BitronixTransactionManager();
 	}
-	
+
 	@Override
 	public String getId() {
 		return id;
@@ -128,20 +129,22 @@ public class XALdifDstService implements
 	@Override
 	public String start() throws LscServiceException {
 
-		if(xaSessions.containsKey("" + Thread.currentThread().getId())) {
+		if (xaSessions.containsKey("" + Thread.currentThread().getId())) {
 			LOGGER.debug("XA transaction already started in this thread !");
 			return null;
 		}
 
-		if(LOGGER.isDebugEnabled()) LOGGER.debug("Starting an XA transaction...");
-        try {
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("Starting an XA transaction...");
+		try {
 			tm.begin();
-	        Transaction tx1 = tm.getTransaction();
-	        XASession xaSession = xafs.createSessionForXATransaction();
-	        if(LOGGER.isDebugEnabled()) LOGGER.debug ("Enlisting XADisk in the XA transaction.");
-	        XAResource xaResource = xaSession.getXAResource();
-	        tx1.enlistResource(xaResource);
-	        xaSessions.put("" + Thread.currentThread().getId(), xaSession);
+			Transaction tx1 = tm.getTransaction();
+			XASession xaSession = xafs.createSessionForXATransaction();
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("Enlisting XADisk in the XA transaction.");
+			XAResource xaResource = xaSession.getXAResource();
+			tx1.enlistResource(xaResource);
+			xaSessions.put("" + Thread.currentThread().getId(), xaSession);
 		} catch (NotSupportedException e) {
 			throw new LscServiceException(e);
 		} catch (SystemException e) {
@@ -155,15 +158,14 @@ public class XALdifDstService implements
 	}
 
 	@Override
-	public void submit(String xid, LscModifications lm)
-			throws LscServiceException {
+	public void submit(String xid, LscModifications lm) throws LscServiceException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void commit(String xid) throws LscServiceException {
-        try {
+		try {
 			tm.commit();
 		} catch (SecurityException e) {
 			throw new LscServiceException(e);
@@ -191,8 +193,6 @@ public class XALdifDstService implements
 		return XAResource.XA_OK;
 	}
 
-	
-	
 	@Override
 	public void rollback(String xid) throws LscServiceException {
 		try {
@@ -211,10 +211,12 @@ public class XALdifDstService implements
 
 		XASession xaSession = xaSessions.get("" + Thread.currentThread().getId());
 
-		if(xaSession != null) {
-	        if(LOGGER.isDebugEnabled()) LOGGER.debug("Performing transactional work over XADisk and other involved resources (e.g. Oracle, MQ)\n");
-	        try {
-	        	File ldifFile = new File(outputDirectory, lm.getMainIdentifier());
+		if (xaSession != null) {
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug(
+						"Performing transactional work over XADisk and other involved resources (e.g. Oracle, MQ)\n");
+			try {
+				File ldifFile = new File(outputDirectory, lm.getMainIdentifier());
 				xaSession.createFile(ldifFile, false);
 				FileOutputStream fos = new FileOutputStream(ldifFile);
 				fos.write(LdifLayout.format(lm).getBytes());
@@ -237,12 +239,12 @@ public class XALdifDstService implements
 				throw new LscServiceException(e);
 			}
 		}
-        return false;
+		return false;
 	}
 
 	@Override
-	public IBean getBean(String pivotName, LscDatasets pivotAttributes,
-			boolean fromSameService) throws LscServiceException {
+	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService)
+			throws LscServiceException {
 		return null;
 	}
 
@@ -261,12 +263,11 @@ public class XALdifDstService implements
 		throw new UnsupportedOperationException("TODO");
 	}
 
-
-    /**
-     * @see org.lsc.service.IService#getSupportedConnectionType()
-     */
-    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
-        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
-        return list;
-    }
+	/**
+	 * @see org.lsc.service.IService#getSupportedConnectionType()
+	 */
+	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+		Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+		return list;
+	}
 }

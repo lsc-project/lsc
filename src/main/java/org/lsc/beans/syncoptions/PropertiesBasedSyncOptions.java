@@ -57,9 +57,8 @@ import org.lsc.configuration.*;
 /**
  * Synchronization options based on a properties file
  * 
- * This class interprets properties to get detailed options for
- * synchronization, including behavior and values for the general
- * case or attribute by attribute.
+ * This class interprets properties to get detailed options for synchronization,
+ * including behavior and values for the general case or attribute by attribute.
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
@@ -73,7 +72,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public void initialize(TaskType task) {
 		conf = task.getPropertiesBasedSyncOptions();
 	}
-	
+
 	public final PolicyType getStatus(final String id, final String attributeName) {
 		PolicyType statusType = LscConfiguration.getDataset(conf, attributeName).getPolicy();
 		return (statusType != null ? statusType : conf.getDefaultPolicy());
@@ -109,42 +108,39 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	@Override
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(DatasetType attr : conf.getDataset()) {
-			if(!attr.getCreateValues().getString().isEmpty()) {
+		for (DatasetType attr : conf.getDataset()) {
+			if (!attr.getCreateValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
 		return createAttrs;
 	}
-
 
 	@Override
 	public Set<String> getDefaultValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(DatasetType attr : conf.getDataset()) {
-			if(!attr.getDefaultValues().getString().isEmpty()) {
+		for (DatasetType attr : conf.getDataset()) {
+			if (!attr.getDefaultValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
 		return createAttrs;
 	}
-
 
 	@Override
 	public Set<String> getForceValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
-		for(DatasetType attr : conf.getDataset()) {
-			if(!attr.getForceValues().getString().isEmpty()) {
+		for (DatasetType attr : conf.getDataset()) {
+			if (!attr.getForceValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
 		return createAttrs;
 	}
-	
+
 	public String getDn() {
 		return conf.getMainIdentifier();
 	}
-
 
 	public String getCreateCondition() {
 		if (conf.getConditions() == null || conf.getConditions().getCreate() == null) {
@@ -198,7 +194,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		if (conf.getHooks() == null || conf.getHooks().getOutputFormat() == null) {
 			return OutputFormat.LDIF;
 		}
-		switch(conf.getHooks().getOutputFormat()){
+		switch (conf.getHooks().getOutputFormat()) {
 			case "json":
 				return OutputFormat.JSON;
 			default:
@@ -207,22 +203,26 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public Optional<String> getCreatePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getCreatePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getCreatePostHook())
+				.filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getDeletePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getDeletePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getDeletePostHook())
+				.filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getUpdatePostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getUpdatePostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getUpdatePostHook())
+				.filter(s -> !s.isEmpty());
 		return hook;
 	}
 
 	public Optional<String> getChangeIdPostHook() {
-		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getChangeIdPostHook()).filter(s -> !s.isEmpty());
+		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getChangeIdPostHook())
+				.filter(s -> !s.isEmpty());
 		return hook;
 	}
 
@@ -239,13 +239,13 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		}
 		return Optional.empty();
 	}
-	
+
 	public String getDelimiter(String name) {
-        DatasetType dataset = LscConfiguration.getDataset(conf, name);
-        if(dataset != null && dataset.getDelimiter() != null) {
-            return dataset.getDelimiter();
-        } else {
-            return conf.getDefaultDelimiter();
-        }
+		DatasetType dataset = LscConfiguration.getDataset(conf, name);
+		if (dataset != null && dataset.getDelimiter() != null) {
+			return dataset.getDelimiter();
+		} else {
+			return conf.getDefaultDelimiter();
+		}
 	}
 }

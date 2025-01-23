@@ -80,21 +80,24 @@ import org.lsc.utils.SetUtils;
 public class BeanComparatorTest {
 
 	Task task = mock(Task.class);
-    SimpleJndiDstService dstService = mock(SimpleJndiDstService.class);
-	
+	SimpleJndiDstService dstService = mock(SimpleJndiDstService.class);
+
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
-	 * @throws LscServiceException 
+	 * Test method for
+	 * {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
+	 * 
+	 * @throws CloneNotSupportedException As thrown by
+	 *                                    {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
+	 * @throws LscServiceException
 	 */
 	@Test
 	public void testCalculateModificationType() throws CloneNotSupportedException, LscServiceException {
 		ISyncOptions syncOptions = mock(ISyncOptions.class);
-		
+
 		when(syncOptions.getDn()).thenReturn("\"destination DN\"");
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-        IBean srcBean = new SimpleBean();
+		IBean srcBean = new SimpleBean();
 		IBean dstBean = new SimpleBean();
 
 		// test null and null --> null
@@ -108,7 +111,8 @@ public class BeanComparatorTest {
 
 		// test both not null, and syncoptions to make DNs identical --> modify
 		dstBean.setMainIdentifier("destination DN");
-		assertEquals(LscModificationType.UPDATE_OBJECT, BeanComparator.calculateModificationType(task, srcBean, dstBean));
+		assertEquals(LscModificationType.UPDATE_OBJECT,
+				BeanComparator.calculateModificationType(task, srcBean, dstBean));
 
 		when(syncOptions.getDn()).thenReturn(null);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
@@ -120,29 +124,30 @@ public class BeanComparatorTest {
 	}
 
 	/**
-	 * This test ensures that a source bean containing fields with only
-	 * empty string values is not output as a modification to be applied
-	 * to the destination.
+	 * This test ensures that a source bean containing fields with only empty string
+	 * values is not output as a modification to be applied to the destination.
 	 *
 	 * If this is not the case, LDAP operations follow for LDIF like this:
-	 * modificationType: add
-	 * add: sn
-	 * sn:
+	 * modificationType: add add: sn sn:
 	 *
 	 * With an invalid syntax error.
-	 * @throws NamingException As thrown when reading JNDI Attribute values.
-	 * @throws CloneNotSupportedException As thrown by {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
-	 * @throws LscServiceException 
+	 * 
+	 * @throws NamingException            As thrown when reading JNDI Attribute
+	 *                                    values.
+	 * @throws CloneNotSupportedException As thrown by
+	 *                                    {@link org.lsc.beans.BeanComparator#calculateModificationType(Task, IBean, IBean)}.
+	 * @throws LscServiceException
 	 */
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsAdd() throws NamingException, CloneNotSupportedException, LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+	public void testCalculateModificationsWithEmptyFieldsAdd()
+			throws NamingException, CloneNotSupportedException, LscServiceException {
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-		when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.FORCE);
-		when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.FORCE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 		when(task.getDestinationService()).thenReturn(dstService);
-		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
 
 		IBean srcBean, destBean;
 
@@ -150,7 +155,7 @@ public class BeanComparatorTest {
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
 		srcBean.setDataset("sn", new HashSet<Object>());
-        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"real cn"})));
+		srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] { "real cn" })));
 		destBean = null;
 
 		LscModifications lm = BeanComparator.calculateModifications(task, srcBean, destBean);
@@ -162,26 +167,27 @@ public class BeanComparatorTest {
 	}
 
 	@Test
-	public void testCalculateModificationsWithEmptyFieldsModify() throws NamingException, CloneNotSupportedException, LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+	public void testCalculateModificationsWithEmptyFieldsModify()
+			throws NamingException, CloneNotSupportedException, LscServiceException {
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.FORCE);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.FORCE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
 		IBean srcBean, destBean;
 
 		// test mod
 		srcBean = new SimpleBean();
 		srcBean.setMainIdentifier("something");
-        srcBean.setDataset("sn", new HashSet<Object>());
-        srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"real cn"})));
+		srcBean.setDataset("sn", new HashSet<Object>());
+		srcBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] { "real cn" })));
 
 		destBean = new SimpleBean();
 		destBean.setMainIdentifier("something");
-		destBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] {"old cn"})));
+		destBean.setDataset("cn", new HashSet<Object>(Arrays.asList(new String[] { "old cn" })));
 
 		LscModifications lam = BeanComparator.calculateModifications(task, srcBean, destBean);
 
@@ -192,26 +198,28 @@ public class BeanComparatorTest {
 	}
 
 	/**
-	 * Test method for {@link org.lsc.beans.BeanComparator#getValuesToSet(Task, String, Set, Set, Map, LscModificationType)}.
-	 * @throws LscServiceException 
+	 * Test method for
+	 * {@link org.lsc.beans.BeanComparator#getValuesToSet(Task, String, Set, Set, Map, LscModificationType)}.
+	 * 
+	 * @throws LscServiceException
 	 */
 	@Test
 	public void testGetValuesToSet() throws LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(task.getSyncOptions()).thenReturn(syncOptions);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
 
 		// Set up objects needed to test
 		String attrName = "cn";
 
 		Set<Object> srcAttrValues = null;
-        Set<Object> dstAttrValues = null;
+		Set<Object> dstAttrValues = null;
 		Map<String, Object> javaScriptObjects = null;
 
 //		Map<String, STATUS_TYPE> statusMap = null;
@@ -226,29 +234,29 @@ public class BeanComparatorTest {
 
 		Set<Object> res = null;
 
-
 		// First test: no default values, no force values, no source values (empty list)
 		// Should return an empty List
 		srcAttrValues = new HashSet<Object>();
-        dstAttrValues = new HashSet<Object>();
+		dstAttrValues = new HashSet<Object>();
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
 
-
-		// First test again: no default values, no force values, no source values (null list)
+		// First test again: no default values, no force values, no source values (null
+		// list)
 		// Should return an empty List
 		srcAttrValues = null;
 		javaScriptObjects = new HashMap<String, Object>();
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(0, res.size());
-
 
 		// Second test: just source values.
 		// Should return the source values, unchanged
@@ -256,81 +264,81 @@ public class BeanComparatorTest {
 		srcAttrValues.add("Megan Fox");
 		srcAttrValues.add("Lucy Liu");
 
-        when(task.getDestinationService()).thenReturn(dstService );
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(jsCreateValues);
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(jsCreateValues);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(srcAttrValues.size(), res.size());
 		assertTrue(SetUtils.doSetsMatch(srcAttrValues, res));
 
-
 		// Third test: source values to be replaced with force values
 		// Should return just the force values
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(jsValues);
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(jsValues);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
 		for (int i = 0; i < jsValues.size(); i++) {
 			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
 		}
-
 
 		// Fourth test: no source values, no force values, just default values
 		// Should return just the default values
 		srcAttrValues = new HashSet<Object>();
 
-	    when(task.getDestinationService()).thenReturn(dstService);
-	    when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-	    when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-	    when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-	    when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(jsValues);
-	    when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
-	    when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(jsValues);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
 		for (int i = 0; i < jsValues.size(); i++) {
 			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
 		}
-
 
 		// 5th test: source values, and default values, attribute status "Force"
 		// Should return just source values
 		srcAttrValues = new HashSet<Object>();
 
 		when(task.getDestinationService()).thenReturn(dstService);
-		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-		when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.FORCE);
-		when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(jsValues);
-		when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.FORCE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(jsValues);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size(), res.size());
 		for (int i = 0; i < jsValues.size(); i++) {
 			assertTrue(res.contains("JavaScript has parsed this value (" + i + ")"));
 		}
-
 
 		// 6th test: source values, and default values, attribute status "Merge"
 		// Should return source values AND default values
@@ -339,14 +347,15 @@ public class BeanComparatorTest {
 		srcAttrValues.add("Lucy Liu");
 
 		when(task.getDestinationService()).thenReturn(dstService);
-		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-		when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.MERGE);
-		when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(jsValues);
-		when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.MERGE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(jsValues);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsValues.size() + srcAttrValues.size(), res.size());
@@ -359,23 +368,23 @@ public class BeanComparatorTest {
 		}
 		assertTrue(SetUtils.doSetsMatch(res, expectedValues));
 
-
-		// 7th test: source values, and create values, attribute status "Merge", creating new entry
+		// 7th test: source values, and create values, attribute status "Merge",
+		// creating new entry
 		// Should return source values AND create values but no default values
 		srcAttrValues = new HashSet<Object>();
 		srcAttrValues.add("Megan Fox");
 		srcAttrValues.add("Lucy Liu");
 
 		when(task.getDestinationService()).thenReturn(dstService);
-		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-		when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.MERGE);
-		when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(jsCreateValues);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.MERGE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(jsCreateValues);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.CREATE_OBJECT);
 
 		assertNotNull(res);
 		assertEquals(jsCreateValues.size() + srcAttrValues.size(), res.size());
@@ -388,102 +397,109 @@ public class BeanComparatorTest {
 		}
 		assertTrue(SetUtils.doSetsMatch(res, expectedValues));
 
-
 		// test that attributes configured for create values only
 		// (no force_values, default_values or source values)
 		// are ignored if this is not an Add operation
 		srcAttrValues = new HashSet<Object>();
 
 		when(task.getDestinationService()).thenReturn(dstService);
-		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-		when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.FORCE);
-		when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-		when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(jsCreateValues);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.FORCE);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(jsCreateValues);
 		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
 		assertNull(res);
 
-		// Check that neither create nor default values are checked if the destination already contains at least one value with a KEEP policy
-		
+		// Check that neither create nor default values are checked if the destination
+		// already contains at least one value with a KEEP policy
 
-	    final List<String> jsThrowException = new ArrayList<String>();
-	    jsThrowException.add("throw 'We should not reach this point !'");
+		final List<String> jsThrowException = new ArrayList<String>();
+		jsThrowException.add("throw 'We should not reach this point !'");
 
-	    when(task.getDestinationService()).thenReturn(dstService);
-	    when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn", "sn"}));
-	    when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-	    when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-	    when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(jsThrowException);
-	    when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(jsThrowException);
-	    when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn", "sn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(jsThrowException);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(jsThrowException);
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
-        dstAttrValues.add("At least a single CN value");
+		dstAttrValues.add("At least a single CN value");
 
-        res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		res = BeanComparator.getValuesToSet(task, attrName, srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 
-        assertNull(res);
+		assertNull(res);
 	}
 
 	@Test
 	public void testGetValuesToSetWithDelimitersForDefault() throws LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(Arrays.asList(new String[] {"\"Doe;Smith\""}));
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDelimiter((String)any())).thenReturn(";");
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any()))
+				.thenReturn(Arrays.asList(new String[] { "\"Doe;Smith\"" }));
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDelimiter((String) any())).thenReturn(";");
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
 		HashSet<Object> srcAttrValues = new HashSet<Object>();
-        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashSet<Object> dstAttrValues = new HashSet<Object>();
 		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
-		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 		assertEquals(2, res.size());
 	}
 
 	@Test
 	public void testGetValuesToSetWithDelimitersForCreate() throws LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.KEEP);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(Arrays.asList(new String[] {"\"Doe;Smith\""}));
-        when(syncOptions.getDelimiter((String)any())).thenReturn(";");
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.KEEP);
+		when(syncOptions.getForceValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any()))
+				.thenReturn(Arrays.asList(new String[] { "\"Doe;Smith\"" }));
+		when(syncOptions.getDelimiter((String) any())).thenReturn(";");
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
 		HashSet<Object> srcAttrValues = new HashSet<Object>();
-        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashSet<Object> dstAttrValues = new HashSet<Object>();
 		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
-		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.CREATE_OBJECT);
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.CREATE_OBJECT);
 		assertEquals(2, res.size());
 	}
 
 	@Test
 	public void testGetValuesToSetWithDelimitersForForce() throws LscServiceException {
-        ISyncOptions syncOptions = mock(ISyncOptions.class);
+		ISyncOptions syncOptions = mock(ISyncOptions.class);
 
-        when(task.getDestinationService()).thenReturn(dstService);
-        when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] {"cn"}));
-        when(syncOptions.getStatus((String)any(), (String)any())).thenReturn(PolicyType.FORCE);
-        when(syncOptions.getForceValues((String)any(), (String)any())).thenReturn(Arrays.asList(new String[] {"\"Doe;Smith\""}));
-        when(syncOptions.getDefaultValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getCreateValues((String)any(), (String)any())).thenReturn(null);
-        when(syncOptions.getDelimiter((String)any())).thenReturn(";");
-        when(task.getSyncOptions()).thenReturn(syncOptions);
+		when(task.getDestinationService()).thenReturn(dstService);
+		when(dstService.getWriteDatasetIds()).thenReturn(Arrays.asList(new String[] { "cn" }));
+		when(syncOptions.getStatus((String) any(), (String) any())).thenReturn(PolicyType.FORCE);
+		when(syncOptions.getForceValues((String) any(), (String) any()))
+				.thenReturn(Arrays.asList(new String[] { "\"Doe;Smith\"" }));
+		when(syncOptions.getDefaultValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getCreateValues((String) any(), (String) any())).thenReturn(null);
+		when(syncOptions.getDelimiter((String) any())).thenReturn(";");
+		when(task.getSyncOptions()).thenReturn(syncOptions);
 
 		HashSet<Object> srcAttrValues = new HashSet<Object>();
-        HashSet<Object> dstAttrValues = new HashSet<Object>();
+		HashSet<Object> dstAttrValues = new HashSet<Object>();
 		HashMap<String, Object> javaScriptObjects = new HashMap<String, Object>();
-		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects, LscModificationType.UPDATE_OBJECT);
+		Set<Object> res = BeanComparator.getValuesToSet(task, "cn", srcAttrValues, dstAttrValues, javaScriptObjects,
+				LscModificationType.UPDATE_OBJECT);
 		assertEquals(2, res.size());
 	}
 }

@@ -54,8 +54,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
@@ -94,16 +92,16 @@ public class LdifLayoutTest {
 	@Test
 	public final void testAdd() throws IOException {
 		try (MockedConstruction<Date> dateCtr = Mockito.mockConstruction(Date.class,(mock,context)-> {
-            when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {
+			when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {
 			List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
 			mi.add(new LscDatasetModification(
-			    LscDatasetModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] {"name"})));
+					LscDatasetModificationType.ADD_VALUES, "cn", Arrays.asList(new Object[] {"name"})));
 			mi.add(new LscDatasetModification(
-			    LscDatasetModificationType.ADD_VALUES, "sn", Arrays.asList(new Object[] {"<non safe string>"})));
+					LscDatasetModificationType.ADD_VALUES, "sn", Arrays.asList(new Object[] {"<non safe string>"})));
 			mi.add(new LscDatasetModification(
-			    LscDatasetModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] {"Sébastien"})));
+					LscDatasetModificationType.ADD_VALUES, "givenName", Arrays.asList(new Object[] {"Sébastien"})));
 			mi.add(new LscDatasetModification(
-			    LscDatasetModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {""})));
+					LscDatasetModificationType.ADD_VALUES, "description", Arrays.asList(new Object[] {""})));
 	
 			LscModifications jm = new LscModifications(LscModificationType.CREATE_OBJECT);
 			jm.setMainIdentifer("givenName=Sébastien,dc=lsc-project,dc=org");
@@ -116,25 +114,25 @@ public class LdifLayoutTest {
 			layout.setPattern("%m%n");
 			layout.start();
 	
-	        assertEquals(
-	    	    "# Wed Dec 12 16:25:01 CET 2012\n"
-	    	    + "dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\n"
-	    	    + "changetype: add\n"
-	    	    + "cn: name\n"
-	    	    + "sn:: PG5vbiBzYWZlIHN0cmluZz4=\n"
-	    	    + "givenName:: U8OpYmFzdGllbg==\n"
-	    	    + "description: \n\n",
-	    					layout.doLayout(loggingEvent));
+			assertEquals(
+				"# Wed Dec 12 16:25:01 CET 2012\n"
+				+ "dn:: Z2l2ZW5OYW1lPVPDqWJhc3RpZW4sZGM9bHNjLXByb2plY3QsZGM9b3Jn\n"
+				+ "changetype: add\n"
+				+ "cn: name\n"
+				+ "sn:: PG5vbiBzYWZlIHN0cmluZz4=\n"
+				+ "givenName:: U8OpYmFzdGllbg==\n"
+				+ "description: \n\n",
+				layout.doLayout(loggingEvent));
 	
 			jm.setMainIdentifer("dc=lsc-project,dc=org");
 			assertEquals(
-			    "# Wed Dec 12 16:25:01 CET 2012\n"
-			    + "dn: dc=lsc-project,dc=org\n"
-			    + "changetype: add\ncn: name\n"
-			    + "sn:: PG5vbiBzYWZlIHN0cmluZz4=\n"
-			    + "givenName:: U8OpYmFzdGllbg==\n"
-			    + "description: \n\n",
-							layout.doLayout(loggingEvent));
+				"# Wed Dec 12 16:25:01 CET 2012\n"
+				+ "dn: dc=lsc-project,dc=org\n"
+				+ "changetype: add\ncn: name\n"
+				+ "sn:: PG5vbiBzYWZlIHN0cmluZz4=\n"
+				+ "givenName:: U8OpYmFzdGllbg==\n"
+				+ "description: \n\n",
+				layout.doLayout(loggingEvent));
 		}
 	}
 
@@ -146,7 +144,7 @@ public class LdifLayoutTest {
 	@Test
 	public final void testModify() throws IOException {
 		try (MockedConstruction<Date> dateCtr = Mockito.mockConstruction(Date.class,(mock,context)-> {
-            when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {		List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
+			when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {		List<LscDatasetModification> mi = new ArrayList<LscDatasetModification>();
 			mi.add(new LscDatasetModification(LscDatasetModificationType.REPLACE_VALUES, "cn", Arrays.asList(new Object[] {"new_name"})));
 			mi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, "uid", Arrays.asList(new Object[] {"old_id"})));
 			mi.add(new LscDatasetModification(LscDatasetModificationType.REPLACE_VALUES, "sn", Arrays.asList(new Object[] {"À là bas"})));
@@ -193,7 +191,7 @@ public class LdifLayoutTest {
 	@Test
 	public final void testRemove() throws IOException {
 		try (MockedConstruction<Date> dateCtr = Mockito.mockConstruction(Date.class,(mock,context)-> {
-            when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {
+			when(mock.toString()).thenReturn("Wed Dec 12 16:25:01 CET 2012");})) {
 			LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT);
 			lm.setMainIdentifer("uid=a,dc=lsc-project,dc=org");
 	
@@ -205,9 +203,9 @@ public class LdifLayoutTest {
 			layout.start();
 	
 			assertEquals(
-			    "# Wed Dec 12 16:25:01 CET 2012\n"
-			    + "dn: uid=a,dc=lsc-project,dc=org\n"
-			    + "changetype: delete\n\n",
+				"# Wed Dec 12 16:25:01 CET 2012\n"
+				+ "dn: uid=a,dc=lsc-project,dc=org\n"
+				+ "changetype: delete\n\n",
 							layout.doLayout(loggingEvent));
 		}
 	}

@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class represent a LSC task
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class Task {
@@ -73,9 +74,7 @@ public class Task {
 	 * Enum for the type of mode
 	 */
 	public enum Mode {
-		clean,
-		sync,
-		async;
+		clean, sync, async;
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
@@ -83,52 +82,53 @@ public class Task {
 	private String name;
 
 	private IWritableService destinationService;
-	
+
 	private IService sourceService;
 
 	private ISyncOptions syncOptions;
-	
+
 	private Object[] customLibraries;
-	
+
 	private List<File> scriptIncludes;
 
 	private Map<String, Object> scriptingVars = new HashMap<String, Object>();
 
 	private String cleanHook;
-	
+
 	private String syncHook;
-	
+
 	private TaskType taskType;
-	
+
 	public Task(TaskType t) throws LscConfigurationException {
 		this.name = t.getName();
 		this.taskType = t;
 		try {
 			cleanHook = t.getCleanHook();
 			syncHook = t.getSyncHook();
-			
+
 			// Instantiate the destination service from properties
 			if (LscConfiguration.getSourceService(t) == null) {
 				throw new LscConfigurationException("Missing source service for task=" + t.getName());
-			} else if(LscConfiguration.getDestinationService(t) == null) {
+			} else if (LscConfiguration.getDestinationService(t) == null) {
 				throw new LscConfigurationException("Missing destination service for task=" + t.getName());
 			}
-			Constructor<?> constr = LscConfiguration.getServiceImplementation(LscConfiguration.getDestinationService(t)).getConstructor(new Class[]{TaskType.class});
-			destinationService = (IWritableService) constr.newInstance(new Object[]{t});
-	
+			Constructor<?> constr = LscConfiguration.getServiceImplementation(LscConfiguration.getDestinationService(t))
+					.getConstructor(new Class[] { TaskType.class });
+			destinationService = (IWritableService) constr.newInstance(new Object[] { t });
+
 			// Instantiate custom JavaScript library from properties
 			if (t.getCustomLibrary() != null && t.getCustomLibrary().getString() != null) {
 				customLibraries = new Object[t.getCustomLibrary().getString().size()];
 				int customLibrariesIndex = 0;
-				for(String custumLibraryClassName: t.getCustomLibrary().getString()) {
+				for (String custumLibraryClassName : t.getCustomLibrary().getString()) {
 					customLibraries[customLibrariesIndex++] = Class.forName(custumLibraryClassName).newInstance();
 				}
 			}
-			
+
 			// Load custom scripts
 			if (t.getScriptInclude() != null && t.getScriptInclude().getString() != null) {
 				scriptIncludes = new ArrayList<File>();
-				for (String script: t.getScriptInclude().getString()) {
+				for (String script : t.getScriptInclude().getString()) {
 					File scriptFile = new File(Configuration.getConfigurationDirectory() + "/" + script);
 					if (scriptFile.exists()) {
 						scriptIncludes.add(scriptFile);
@@ -137,15 +137,17 @@ public class Task {
 					}
 				}
 			}
-	
+
 			// Instantiate source service and pass parameters
-			Constructor<?> constrSrcService = LscConfiguration.getServiceImplementation(LscConfiguration.getSourceService(t)).getConstructor(new Class[]{TaskType.class});
-			sourceService = (IService) constrSrcService.newInstance(new Object[]{t});
-	
+			Constructor<?> constrSrcService = LscConfiguration
+					.getServiceImplementation(LscConfiguration.getSourceService(t))
+					.getConstructor(new Class[] { TaskType.class });
+			sourceService = (IService) constrSrcService.newInstance(new Object[] { t });
+
 			initializeSyncOptions(t);
-		// Manage exceptions
-        } catch (InvocationTargetException e) {
-            throw new LscConfigurationException(e.getCause());
+			// Manage exceptions
+		} catch (InvocationTargetException e) {
+			throw new LscConfigurationException(e.getCause());
 		} catch (LscConfigurationException e) {
 			throw e;
 		} catch (Exception e) {
@@ -153,12 +155,12 @@ public class Task {
 		}
 
 	}
-	
+
 	/**
-	 * @param t 
+	 * @param t
 	 * @param syncName
 	 * @return ISyncOptions syncoptions object for the specified syncName
-	 * @throws LscConfigurationException 
+	 * @throws LscConfigurationException
 	 */
 	protected void initializeSyncOptions(TaskType t) throws LscConfigurationException {
 		syncOptions = SyncOptionsFactory.convert(t);
@@ -172,11 +174,11 @@ public class Task {
 			syncOptions = new ForceSyncOptions();
 		}
 	}
-	
+
 	public String getCleanHook() {
 		return cleanHook;
 	}
-	
+
 	public String getSyncHook() {
 		return syncHook;
 	}
@@ -184,7 +186,7 @@ public class Task {
 	public String getName() {
 		return name;
 	}
-	
+
 	public IService getSourceService() {
 		return sourceService;
 	}
@@ -192,7 +194,7 @@ public class Task {
 	public IWritableService getDestinationService() {
 		return destinationService;
 	}
-	
+
 	public ISyncOptions getSyncOptions() {
 		return syncOptions;
 	}
@@ -200,7 +202,7 @@ public class Task {
 	public Object[] getCustomLibraries() {
 		return customLibraries;
 	}
-	
+
 	public List<File> getScriptIncludes() {
 		return scriptIncludes;
 	}
@@ -208,7 +210,7 @@ public class Task {
 	public Map<String, Object> getScriptingVars() {
 		return scriptingVars;
 	}
-	
+
 	public void addScriptingVar(String identifier, Object value) {
 		scriptingVars.put(identifier, value);
 	}

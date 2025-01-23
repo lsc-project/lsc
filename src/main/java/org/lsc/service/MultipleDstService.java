@@ -68,9 +68,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service allows a multiple referential commit two-phase
- * Get object and list object ids calls are done on the first service
- * Updates are done on every one through a XA transaction
+ * This service allows a multiple referential commit two-phase Get object and
+ * list object ids calls are done on the first service Updates are done on every
+ * one through a XA transaction
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class MultipleDstService implements IWritableService {
@@ -78,22 +79,23 @@ public class MultipleDstService implements IWritableService {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(MultipleDstService.class);
 
 	private List<IXAWritableService> xaServices;
-	
+
 	@SuppressWarnings("unchecked")
 	public MultipleDstService(TaskType task) throws LscServiceConfigurationException {
 		xaServices = new ArrayList<IXAWritableService>();
 		try {
-			for(Object service: task.getMultiDestinationService().getXaServices().getReference()){
-				if(service instanceof ServiceType) {
-					ServiceType wrService = (ServiceType)service;
-					Constructor<IXAWritableService> xaServiceConstructor = (Constructor<IXAWritableService>) LscConfiguration.getServiceImplementation(wrService).getConstructor(TaskType.class);
+			for (Object service : task.getMultiDestinationService().getXaServices().getReference()) {
+				if (service instanceof ServiceType) {
+					ServiceType wrService = (ServiceType) service;
+					Constructor<IXAWritableService> xaServiceConstructor = (Constructor<IXAWritableService>) LscConfiguration
+							.getServiceImplementation(wrService).getConstructor(TaskType.class);
 					IXAWritableService xaService = xaServiceConstructor.newInstance(task);
 					xaServices.add(xaService);
 				} else {
 					LOGGER.error("Unknown referenced service: " + service.toString());
 				}
 			}
-		} catch(InstantiationException e) {
+		} catch (InstantiationException e) {
 			throw new LscServiceConfigurationException(e);
 		} catch (SecurityException e) {
 			throw new LscServiceConfigurationException(e);
@@ -107,10 +109,10 @@ public class MultipleDstService implements IWritableService {
 			throw new LscServiceConfigurationException(e);
 		}
 	}
-	
+
 	@Override
-	public IBean getBean(String pivotName, LscDatasets pivotAttributes,
-			boolean fromSameService) throws LscServiceException {
+	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService)
+			throws LscServiceException {
 		// use the first service getBean result
 		return xaServices.get(0).getBean(pivotName, pivotAttributes, fromSameService);
 	}
@@ -126,31 +128,31 @@ public class MultipleDstService implements IWritableService {
 		Map<String, String> transactionIds = new HashMap<String, String>();
 		try {
 			boolean doNotCommit = false;
-			for(IXAWritableService iws : xaServices) {
+			for (IXAWritableService iws : xaServices) {
 				String transactionId = iws.start();
 				transactionIds.put(iws.getId(), transactionId);
 			}
-			for(IXAWritableService iws : xaServices) {
+			for (IXAWritableService iws : xaServices) {
 				iws.submit(transactionIds.get(iws.getId()), lm);
 			}
-			for(IXAWritableService iws : xaServices) {
+			for (IXAWritableService iws : xaServices) {
 				iws.end(transactionIds.get(iws.getId()));
 			}
-			for(IXAWritableService iws : xaServices) {
+			for (IXAWritableService iws : xaServices) {
 				int retCode = iws.prepare(transactionIds.get(iws.getId()));
 				if (retCode != XAResource.XA_OK && retCode != XAResource.XA_RDONLY) {
-			           doNotCommit = true;
+					doNotCommit = true;
 				}
 			}
-			if(doNotCommit) {
+			if (doNotCommit) {
 				return false;
 			}
-			for(IXAWritableService iws : xaServices) {
+			for (IXAWritableService iws : xaServices) {
 				iws.commit(transactionIds.get(iws.getId()));
 			}
-		} catch ( LscServiceException lse ) {
-			for(IXAWritableService iws : xaServices) {
-				if(transactionIds.get(iws.getId()) != null) {
+		} catch (LscServiceException lse) {
+			for (IXAWritableService iws : xaServices) {
+				if (transactionIds.get(iws.getId()) != null) {
 					iws.rollback(transactionIds.get(iws.getId()));
 				}
 			}
@@ -162,17 +164,17 @@ public class MultipleDstService implements IWritableService {
 	@Override
 	public List<String> getWriteDatasetIds() {
 		List<String> writableDatasetIds = new ArrayList<String>();
-		for(IXAWritableService xaService: xaServices) {
+		for (IXAWritableService xaService : xaServices) {
 			writableDatasetIds.addAll(xaService.getWriteDatasetIds());
 		}
 		return writableDatasetIds;
 	}
 
-    /**
-     * @see org.lsc.service.IService#getSupportedConnectionType()
-     */
-    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
-        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
-        return list;
-    }
+	/**
+	 * @see org.lsc.service.IService#getSupportedConnectionType()
+	 */
+	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+		Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+		return list;
+	}
 }

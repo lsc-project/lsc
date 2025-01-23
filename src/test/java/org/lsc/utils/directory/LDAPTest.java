@@ -71,50 +71,20 @@ import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
 import org.lsc.utils.ScriptingEvaluator;
 
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    allowAnonymousAccess = true,
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 /**
  * Test LDAP function library.
  * 
@@ -122,51 +92,53 @@ import org.lsc.utils.ScriptingEvaluator;
  */
 public class LDAPTest extends AbstractLdapTestUnit {
 	Task task = mock(Task.class);
-	
+
 	@Test
 	public final void testCanBind() throws NamingException, LdapURLEncodingException, LscServiceException {
 		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system", "secret"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system", "public"));
 		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=nobody,ou=system", "secret"));
 
-		assertTrue(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
-				+ "\"cn=Directory Manager,ou=system\", \"secret\")", null));
-		assertFalse(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
-				+ "\"cn=Directory Manager,ou=system\", \"public\")", null));
-		assertFalse(ScriptingEvaluator.evalToBoolean(task, "LDAP.canBind(\"ldap://localhost:33389/\", "
-				+ "\"cn=nobody,ou=system\", \"secret\")", null));
+		assertTrue(ScriptingEvaluator.evalToBoolean(task,
+				"LDAP.canBind(\"ldap://localhost:33389/\", " + "\"cn=Directory Manager,ou=system\", \"secret\")",
+				null));
+		assertFalse(ScriptingEvaluator.evalToBoolean(task,
+				"LDAP.canBind(\"ldap://localhost:33389/\", " + "\"cn=Directory Manager,ou=system\", \"public\")",
+				null));
+		assertFalse(ScriptingEvaluator.evalToBoolean(task,
+				"LDAP.canBind(\"ldap://localhost:33389/\", " + "\"cn=nobody,ou=system\", \"secret\")", null));
 
-		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system",
-						"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "secret"));
-		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system",
-						"secret", "uid=00000001,ou=People,dc=lsc-project,dc=org", "public"));
-		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system",
-						"secret", "uid=nobody,ou=People,dc=lsc-project,dc=org", "secret"));
+		assertTrue(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system", "secret",
+				"uid=00000001,ou=People,dc=lsc-project,dc=org", "secret"));
+		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system", "secret",
+				"uid=00000001,ou=People,dc=lsc-project,dc=org", "public"));
+		assertFalse(LDAP.canBind("ldap://localhost:33389/", "cn=Directory Manager,ou=system", "secret",
+				"uid=nobody,ou=People,dc=lsc-project,dc=org", "secret"));
 
 		assertTrue(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=00000001)",
-						"cn=Directory Manager,ou=system", "secret", "secret"));
+				"cn=Directory Manager,ou=system", "secret", "secret"));
 		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=00000001)",
-						"cn=Directory Manager,ou=system", "secret", "public"));
+				"cn=Directory Manager,ou=system", "secret", "public"));
 		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(uid=nonexistant)",
-						"cn=Directory Manager,ou=system", "secret", "secret"));
+				"cn=Directory Manager,ou=system", "secret", "secret"));
 
 		// this should fail since there are two cn=CN0001 entries
 		assertFalse(LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=org??sub?(cn=CN0001)",
-						"cn=Directory Manager,ou=system", "secret", "secret"));
+				"cn=Directory Manager,ou=system", "secret", "secret"));
 	}
 
 	// this should fail with a can't connect exception
 	@Test
 	public void testCanBindCantConnect() throws NamingException {
-	    assertThrows( NamingException.class, () ->
-		  LDAP.canBind("ldap://no.such.host.really:33389/", "cn=Directory Manager", "public") );
+		assertThrows(NamingException.class,
+				() -> LDAP.canBind("ldap://no.such.host.really:33389/", "cn=Directory Manager", "public"));
 	}
 
 	// this should fail with a NamingException (no such object)
 	@Test
 	public void testCanBindSearchRebindNoSuchObject() throws NamingException, LdapURLEncodingException {
-        assertThrows( NamingException.class, () ->
-		  LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?(cn=CN0001)",
-						"cn=Directory Manager", "secret", "secret") );
+		assertThrows(NamingException.class,
+				() -> LDAP.canBindSearchRebind("ldap://localhost:33389/dc=lsc-project,dc=com??sub?(cn=CN0001)",
+						"cn=Directory Manager", "secret", "secret"));
 	}
 }

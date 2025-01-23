@@ -81,56 +81,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-
 /**
  * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
  * It attempts to launch the tasks defined in src/test/resources/etc/lsc.xml:
  * ldap2ldapHookTestCreate ldap2ldapHookTestUpdate ldap2ldapHookTestDelete
  */
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    allowAnonymousAccess = true, 
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 	@BeforeEach
 	public void setup() {
@@ -156,12 +125,14 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 
 		ObjectMapper mapperCreatedEntry = new ObjectMapper();
-		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree("[ { \"attributeName\" : \"objectClass\", \"values\" : [ \"inetOrgPerson\", \"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"cn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"sn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
+		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
+				"[ { \"attributeName\" : \"objectClass\", \"values\" : [ \"inetOrgPerson\", \"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"cn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"sn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
 
 		checkJSONSyncResults("create", expectedCreatedEntry);
 
 		ObjectMapper mapperUpdatedEntry = new ObjectMapper();
-		JsonNode expectedUpdatedEntry = mapperUpdatedEntry.readTree("[ { \"attributeName\" : \"description\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" }, {\"attributeName\":\"userCertificate;binary\",\"values\":[\"MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvcNAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTALBgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzMDQxWhcNMzMxMDI0MTQzMDQxWjBYMQswCQYDVQQGEwJGUjENMAsGA1UECAwEdGVzdDENMAsGA1UEBwwEdGVzdDENMAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdWt0QgFnEi7a1hIJQv4ZdOM5y0GGLHQYNrUNSReArvpkYUY5zasFNVzVHCApRuj0t1NMDrn1gNzKkxTIbYGaWRSn+21J0ow+Nxh2TAQW8dkJnWTksCfyGGGItI5q3ST3EUKnepaAzUYYENcSHRyx7UY/3XuzcW0aGhy4PrVTIHBpyLq0Uzv8nH5nbWM+LYt6YbQMmlAz/psTXIC2dfEZhUb4plLGSo7rZxM5geC6Z+os+I8+uw+mGjps1VP7eGq0jCGHNs2rUHMqBNgLvwMH2WlMXo/iNarAb8fUEPdp59FwiTygBlWAn6GoKHJ1HWPpqMxdtjL2Y5+ZMcp70eJqcCAwEAAaNTMFEwHQYDVR0OBBYEFLwffjUBL/Rp4a6MgeCJiFnCZFu8MB8GA1UdIwQYMBaAFLwffjUBL/Rp4a6MgeCJiFnCZFu8MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBACjwsg1Z9PyauoKAhkIfyPTEnlEOCo1nN37c2vnH4fyY6fuBdV6GWtk/u9FCuDmYT/4KDRxe33ZUChwSUX0INgamOarWRES3UoPC1GeOvuMf7uustEMLcHAYZVKXSZUrsOjw+VIZ5XrD6GDE64QtvW5Ve3jf43aGgLf27NF0vhF9+gHOZjjBT33S977HUutMUKfRu9PdHAn8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqUSZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=\"],\"operation\":\"REPLACE_VALUES\"} ]");
+		JsonNode expectedUpdatedEntry = mapperUpdatedEntry.readTree(
+				"[ { \"attributeName\" : \"description\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" }, {\"attributeName\":\"userCertificate;binary\",\"values\":[\"MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvcNAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTALBgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzMDQxWhcNMzMxMDI0MTQzMDQxWjBYMQswCQYDVQQGEwJGUjENMAsGA1UECAwEdGVzdDENMAsGA1UEBwwEdGVzdDENMAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdWt0QgFnEi7a1hIJQv4ZdOM5y0GGLHQYNrUNSReArvpkYUY5zasFNVzVHCApRuj0t1NMDrn1gNzKkxTIbYGaWRSn+21J0ow+Nxh2TAQW8dkJnWTksCfyGGGItI5q3ST3EUKnepaAzUYYENcSHRyx7UY/3XuzcW0aGhy4PrVTIHBpyLq0Uzv8nH5nbWM+LYt6YbQMmlAz/psTXIC2dfEZhUb4plLGSo7rZxM5geC6Z+os+I8+uw+mGjps1VP7eGq0jCGHNs2rUHMqBNgLvwMH2WlMXo/iNarAb8fUEPdp59FwiTygBlWAn6GoKHJ1HWPpqMxdtjL2Y5+ZMcp70eJqcCAwEAAaNTMFEwHQYDVR0OBBYEFLwffjUBL/Rp4a6MgeCJiFnCZFu8MB8GA1UdIwQYMBaAFLwffjUBL/Rp4a6MgeCJiFnCZFu8MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBACjwsg1Z9PyauoKAhkIfyPTEnlEOCo1nN37c2vnH4fyY6fuBdV6GWtk/u9FCuDmYT/4KDRxe33ZUChwSUX0INgamOarWRES3UoPC1GeOvuMf7uustEMLcHAYZVKXSZUrsOjw+VIZ5XrD6GDE64QtvW5Ve3jf43aGgLf27NF0vhF9+gHOZjjBT33S977HUutMUKfRu9PdHAn8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqUSZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=\"],\"operation\":\"REPLACE_VALUES\"} ]");
 
 		checkJSONSyncResults("update", expectedUpdatedEntry);
 
@@ -183,23 +154,15 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 
 		List<String> expectedCreatedEntry = Arrays.asList(
-			"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
-			"changetype: add",
-			"objectClass: inetOrgPerson",
-			"objectClass: person",
-			"objectClass: top",
-			"cn: CN0001-hook",
-			"sn: CN0001-hook"
-		);
+				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", "changetype: add",
+				"objectClass: inetOrgPerson", "objectClass: person", "objectClass: top", "cn: CN0001-hook",
+				"sn: CN0001-hook");
 
 		checkLDIFSyncResults("create", expectedCreatedEntry);
 
 		List<String> expectedUpdatedEntry = Arrays.asList(
-			"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
-			"changetype: modify",
-			"replace: description",
-			"description: CN0001-hook"
-		);
+				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", "changetype: modify",
+				"replace: description", "description: CN0001-hook");
 
 		checkLDIFSyncResults("update", expectedUpdatedEntry);
 
@@ -215,20 +178,20 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		try {
 			File hookFile = new File("hook-ldif-" + operation + ".log");
 
-            Thread.sleep(1000L);
+			Thread.sleep(1000L);
 
-            if (!hookFile.exists()) {
-                System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
-            }
+			if (!hookFile.exists()) {
+				System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
+			}
 
-            try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
-    			while (hookReader.hasNextLine()) {
-    				String data = hookReader.nextLine();
-    				hookResults.add(data);
-    			}
-            } catch (FileNotFoundException fnfe) {
-                fail("Cannot find the  hook file" + "hook-ldif-" + operation + ".log " + fnfe.getMessage());
-            } 
+			try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
+				while (hookReader.hasNextLine()) {
+					String data = hookReader.nextLine();
+					hookResults.add(data);
+				}
+			} catch (FileNotFoundException fnfe) {
+				fail("Cannot find the  hook file" + "hook-ldif-" + operation + ".log " + fnfe.getMessage());
+			}
 
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
@@ -237,11 +200,12 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
-		if(operation != "delete") {
+		if (operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
-			List<String> entry = new ArrayList<>(hookResults.subList(3, (hookResults.size()-1)));
+			List<String> entry = new ArrayList<>(hookResults.subList(3, (hookResults.size() - 1)));
 			for (String attr : expectedEntry) {
-				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
+				assertTrue(entry.contains(attr),
+						"Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
 			}
 		}
 
@@ -249,27 +213,27 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 	/*
 	 * Read hook log file to check passed arguments and modification passed as input
-	*/
+	 */
 	private final void checkJSONSyncResults(String operation, JsonNode expectedEntry) throws Exception {
 
 		List<String> hookResults = new ArrayList<String>();
 		try {
 			File hookFile = new File("hook-json-" + operation + ".log");
-            
-            Thread.sleep( 1000L );
-            
-            if (!hookFile.exists()) {
-                System.out.println( "!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist" );
-            }
+
+			Thread.sleep(1000L);
+
+			if (!hookFile.exists()) {
+				System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
+			}
 
 			try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
-    			while (hookReader.hasNextLine()) {
-    				String data = hookReader.nextLine();
-    				hookResults.add(data);
-    			}
+				while (hookReader.hasNextLine()) {
+					String data = hookReader.nextLine();
+					hookResults.add(data);
+				}
 			} catch (FileNotFoundException fnfe) {
-	            fail("Cannot find the  hook file" + "hook-json-" + operation + ".log " + fnfe.getMessage());
-	        } 
+				fail("Cannot find the  hook file" + "hook-json-" + operation + ".log " + fnfe.getMessage());
+			}
 
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
@@ -278,7 +242,7 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
-		if(operation != "delete") {
+		if (operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
 			String entry = String.join("", new ArrayList<>(hookResults.subList(2, hookResults.size())));
 
@@ -288,8 +252,7 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			try {
 				JsonNode hookOperation = mapper.readTree(jp);
 				assertEquals(hookOperation, expectedEntry);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				StringWriter sw = new StringWriter();
 				PrintWriter pw = new PrintWriter(sw);
 				e.printStackTrace(pw);
@@ -299,29 +262,28 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 	}
 
-	public static void launchSyncCleanTask(List<String> tasks, boolean doAsync, boolean doSync,
-					boolean doClean) throws Exception {
+	public static void launchSyncCleanTask(List<String> tasks, boolean doAsync, boolean doSync, boolean doClean)
+			throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
 		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-
 		if (doAsync) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				asyncType.add(taskName);
 			}
 		}
-		
+
 		if (doSync) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				syncType.add(taskName);
 			}
 		}
 
 		if (doClean) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				cleanType.add(taskName);
 			}
 		}

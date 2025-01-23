@@ -45,7 +45,6 @@
  */
 package org.lsc.jndi;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -68,58 +67,30 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})public class ScriptableJndiServicesTest extends AbstractLdapTestUnit {
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
+public class ScriptableJndiServicesTest extends AbstractLdapTestUnit {
 
 	private JndiServices dstJndiServices;
-	
+
 	@BeforeEach
 	public void setup() {
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
-		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
 	}
-	
+
 	@Test
 	public void testValuesOutOfRange() throws NamingException {
 		ScriptableJndiServices sjs = new ScriptableJndiServices();

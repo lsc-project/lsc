@@ -95,54 +95,21 @@ import org.lsc.utils.directory.LDAP;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    additionalInterceptors =  
-        {
-            SshaPasswordHashingInterceptor.class
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    allowAnonymousAccess = true, 
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, additionalInterceptors = {
+				SshaPasswordHashingInterceptor.class }, partitions = {
+						@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+								+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+										@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+										@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
 	private static final String JPEG_PHOTO = "/9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAAAgAAADEBAgAMAAAAWgAAADIBAgAUAAAAZgAAAHoAAAAsAQAAAQAAACwBAAABAAAAR0lNUCAyLjEwLjgAMjAxOTowMzowNSAxNzozMjo1NwAIAAABBAABAAAAAAEAAAEBBAABAAAAAAEAAAIBAwADAAAA4AAAAAMBAwABAAAABgAAAAYBAwABAAAABgAAABUBAwABAAAAAwAAAAECBAABAAAA5gAAAAICBAABAAAAdQYAAAAAAAAIAAgACAD/2P/gABBKRklGAAEBAAABAAEAAP/bAEMACAYGBwYFCAcHBwkJCAoMFA0MCwsMGRITDxQdGh8eHRocHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAQABAAMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOfooor9MPnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9kA/9sAQwD//////////////////////////////////////////////////////////////////////////////////////9sAQwH//////////////////////////////////////////////////////////////////////////////////////8IAEQgAAQABAwERAAIRAQMRAf/EABQAAQAAAAAAAAAAAAAAAAAAAAH/xAAUAQEAAAAAAAAAAAAAAAAAAAAB/9oADAMBAAIQAxAAAAET/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oADAMBAAIAAwAAABD/AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Qf//EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Qf//Z";
@@ -157,13 +124,15 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 	}
 
 	/**
-	 * Test reading the userPassword attribute from our source directory through Object
-	 * and Bean. This attribute has a binary syntax, so we must confirm we can parse it as a String.
-	 * @throws NamingException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws LscServiceException 
+	 * Test reading the userPassword attribute from our source directory through
+	 * Object and Bean. This attribute has a binary syntax, so we must confirm we
+	 * can parse it as a String.
+	 * 
+	 * @throws NamingException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws LscServiceException
 	 */
 	@Test
 	public final void testReadUserPasswordFromLdap() throws Exception {
@@ -181,8 +150,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// so we can't test the full value, just the beginning.
 		// This is sufficient to confirm we can read the attribute as a String.
 		assertTrue(userPassword.startsWith("{SSHA}"));
-		
-		((SimpleJndiSrcService)srcService).close();
+
+		((SimpleJndiSrcService) srcService).close();
 	}
 
 	@Test
@@ -270,9 +239,11 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// check MODRDN
 
 		// the password was set and can be used
-		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
+		assertTrue(
+				LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
 
-		// the description was copied over since this is an existing object and it description is set to MERGE
+		// the description was copied over since this is an existing object and it
+		// description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("modified: Number two's descriptive text");
 //		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODRDN_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
@@ -284,7 +255,6 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		attributeValues.add("123456");
 		attributeValues.add("789987");
 		checkAttributeValues(DN_MODRDN_DST_AFTER, "telephoneNumber", attributeValues);
-
 
 		// check ADD
 
@@ -300,7 +270,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
 	private final void checkSyncResultsCommon() throws Exception {
 		List<String> attributeValues = null;
-		
+
 		// check MODRDN
 		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
 		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
@@ -313,7 +283,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_ADD_DST, "secretCN0003"));
 
-		// objectClass has inetOrgPerson and all above classes, since it was created with a create_value and MERGE status
+		// objectClass has inetOrgPerson and all above classes, since it was created
+		// with a create_value and MERGE status
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("top");
 		attributeValues.add("person");
@@ -326,10 +297,11 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		checkAttributeValue(DN_MODIFY_DST, "sn", "SN0001");
 		// the password was set and can be used
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
-		// the description was copied over since this is an existing object and it description is set to MERGE
+		// the description was copied over since this is an existing object and it
+		// description is set to MERGE
 		attributeValues = new ArrayList<String>(2);
 		attributeValues.add("Number one's descriptive text");
-        attributeValues.add("modified: Number one's descriptive text");
+		attributeValues.add("modified: Number one's descriptive text");
 //		attributeValues.add(new String((byte[]) srcJndiServices.getEntry(DN_MODIFY_SRC, "objectclass=*").getAttributes().get("userPassword").get()));
 		checkAttributeValues(DN_MODIFY_DST, "description", attributeValues);
 		// the telephoneNumber was merged with existing values
@@ -342,8 +314,8 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		attributeValues = new ArrayList<String>(4);
 		attributeValues.add("top");
 		attributeValues.add("person");
-        attributeValues.add("organizationalPerson");
-        attributeValues.add("inetOrgPerson");
+		attributeValues.add("organizationalPerson");
+		attributeValues.add("inetOrgPerson");
 		checkAttributeValues(DN_MODIFY_DST, "objectClass", attributeValues);
 		// the givenName was deleted
 		attributeValues = new ArrayList<String>();
@@ -366,19 +338,18 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
 	}
 
-	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync,
-					boolean doClean) throws Exception {
+	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync, boolean doClean)
+			throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
 		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-
 		if (doAsync) {
 			asyncType.add(taskName);
 		}
-		
+
 		if (doSync) {
 			syncType.add(taskName);
 		}
@@ -392,22 +363,21 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 	}
 
 	@Override
-	public void checkAttributeIsEmpty(String dn, String attributeName)
-					throws NamingException {
+	public void checkAttributeIsEmpty(String dn, String attributeName) throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		assertNull(sr.getAttributes().get(attributeName));
 	}
 
 	/**
-	 * Get an object from the destination directory, and check that a given attribute
-	 * has one value exactly that matches the value provided.
+	 * Get an object from the destination directory, and check that a given
+	 * attribute has one value exactly that matches the value provided.
 	 * 
-	 * In these tests we use this function to read from the source too, since
-	 * it is in reality the same directory.
+	 * In these tests we use this function to read from the source too, since it is
+	 * in reality the same directory.
 	 * 
-	 * @param dn The object to read.
+	 * @param dn            The object to read.
 	 * @param attributeName The attribute to check.
-	 * @param value The value expected in the attribute.
+	 * @param value         The value expected in the attribute.
 	 * @throws NamingException
 	 */
 	@Override

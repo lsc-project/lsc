@@ -78,14 +78,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>This new class allows symmetric encryption. You should have BouncyCastle
+ * <p>
+ * This new class allows symmetric encryption. You should have BouncyCastle
  * installed. Three new configuration parameters could be added to the
- * configuration:</p>
+ * configuration:
+ * </p>
  * <ul>
- *   <li>lsc &gt; security &gt; encryption &gt; keyfile: the path to the file used to
- *   encrypt/decrypt data</li>
- *   <li>lsc &gt; security &gt; encryption &gt; algorithm: the algorithm to use</li>
- *   <li>lsc &gt; security &gt; encryption &gt; strength: the strength in bits</li>
+ * <li>lsc &gt; security &gt; encryption &gt; keyfile: the path to the file used
+ * to encrypt/decrypt data</li>
+ * <li>lsc &gt; security &gt; encryption &gt; algorithm: the algorithm to
+ * use</li>
+ * <li>lsc &gt; security &gt; encryption &gt; strength: the strength in
+ * bits</li>
  * </ul>
  */
 public class SymmetricEncryption {
@@ -103,6 +107,7 @@ public class SymmetricEncryption {
 
 	/**
 	 * New SymmetricEncryption object with default values.
+	 * 
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public SymmetricEncryption() throws GeneralSecurityException {
@@ -112,19 +117,22 @@ public class SymmetricEncryption {
 
 	/**
 	 * New SymmetricEncryption object.
+	 * 
 	 * @param encryption the encryption required structure
 	 * @throws java.security.GeneralSecurityException
 	 */
 	public SymmetricEncryption(EncryptionType encryption) throws GeneralSecurityException {
-	    if(encryption == null) {
-            throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
-        } else if(encryption.getKeyfile() == null) {
-            throw new RuntimeException("lsc>security>encryption>keyfile node of the LSC configuration cannot be null !");
-        } else if(encryption.getAlgorithm() == null) {
-            throw new RuntimeException("lsc>security>encryption>algorithm node of the LSC configuration cannot be null !");
-        }
+		if (encryption == null) {
+			throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+		} else if (encryption.getKeyfile() == null) {
+			throw new RuntimeException(
+					"lsc>security>encryption>keyfile node of the LSC configuration cannot be null !");
+		} else if (encryption.getAlgorithm() == null) {
+			throw new RuntimeException(
+					"lsc>security>encryption>algorithm node of the LSC configuration cannot be null !");
+		}
 
-        this.securityProvider = new BouncyCastleProvider();
+		this.securityProvider = new BouncyCastleProvider();
 		this.algorithm = encryption.getAlgorithm();
 		this.strength = encryption.getStrength();
 		this.keyPath = encryption.getKeyfile();
@@ -134,6 +142,7 @@ public class SymmetricEncryption {
 
 	/**
 	 * Encrypt bytes.
+	 * 
 	 * @param toEncrypt
 	 * @return Encrypted bytes.
 	 * @throws java.security.GeneralSecurityException
@@ -144,6 +153,7 @@ public class SymmetricEncryption {
 
 	/**
 	 * Decrypt bytes.
+	 * 
 	 * @param toDecrypt
 	 * @return Decrypted bytes.
 	 * @throws java.security.GeneralSecurityException
@@ -154,14 +164,16 @@ public class SymmetricEncryption {
 
 	/**
 	 * Generate a random key file with default value
+	 * 
 	 * @return boolean false if an error occurred
-	 * @throws NoSuchAlgorithmException 
-	 * @throws NoSuchProviderException 
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
 	 */
 	public boolean generateDefaultRandomKeyFile() throws NoSuchAlgorithmException, NoSuchProviderException {
 		File keypath = new File(Configuration.getConfigurationDirectory(), "lsc.key");
-		if(keypath.exists()) {
-			LOGGER.error("Existing key file in {}. Please move it away before generating a new key !", keypath.getAbsolutePath());
+		if (keypath.exists()) {
+			LOGGER.error("Existing key file in {}. Please move it away before generating a new key !",
+					keypath.getAbsolutePath());
 			return false;
 		}
 		boolean status = this.generateRandomKeyFile(keypath.getAbsolutePath(), this.algorithm, this.strength);
@@ -171,14 +183,16 @@ public class SymmetricEncryption {
 
 	/**
 	 * Generate a random key file.
-	 * @param keyPath The filename where to write the key
-	 * @param algo The supported algorithm to use
+	 * 
+	 * @param keyPath  The filename where to write the key
+	 * @param algo     The supported algorithm to use
 	 * @param strength The encryption strength
 	 * @return boolean false if an error occurred
-	 * @throws NoSuchAlgorithmException 
-	 * @throws NoSuchProviderException 
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchProviderException
 	 */
-	public boolean generateRandomKeyFile(String keyPath, String algo, int strength) throws NoSuchAlgorithmException, NoSuchProviderException {
+	public boolean generateRandomKeyFile(String keyPath, String algo, int strength)
+			throws NoSuchAlgorithmException, NoSuchProviderException {
 		OutputStream os = null;
 		try {
 			KeyGenerator kg = KeyGenerator.getInstance(algo, securityProvider.getName());
@@ -188,24 +202,25 @@ public class SymmetricEncryption {
 			os = new FileOutputStream(keyPath);
 			os.write(cipherKey.getEncoded());
 		} catch (IOException e) {
-			LOGGER.error("Unable to write new generated key in " + keyPath + ". Encountered exception is : " + e.getLocalizedMessage(), e);
+			LOGGER.error("Unable to write new generated key in " + keyPath + ". Encountered exception is : "
+					+ e.getLocalizedMessage(), e);
 			return false;
 		} finally {
 			try {
-				if(os != null) {
+				if (os != null) {
 					os.close();
 				}
-			}
-			catch (IOException e1) {
+			} catch (IOException e1) {
 			}
 		}
 		return true;
 	}
 
 	/**
-	 * Return the default filename of the key to use.
-	 * The filename could be specified in the configuration file through the
+	 * Return the default filename of the key to use. The filename could be
+	 * specified in the configuration file through the
 	 * lsc.security.encryption.keyfile property.
+	 * 
 	 * @return A filename
 	 */
 	public static String getKeyPath() {
@@ -213,10 +228,11 @@ public class SymmetricEncryption {
 	}
 
 	/**
-	 * Return the default supported algorithm to use.
-	 * The algorithm could be specified in the configuration file through the
-	 * lsc.security.encryption.algorithm property. See constant values defined
-	 * in this class which specified supported algorithms.
+	 * Return the default supported algorithm to use. The algorithm could be
+	 * specified in the configuration file through the
+	 * lsc.security.encryption.algorithm property. See constant values defined in
+	 * this class which specified supported algorithms.
+	 * 
 	 * @return A supported algorithm
 	 */
 	public static String getAlgorithm() {
@@ -224,9 +240,10 @@ public class SymmetricEncryption {
 	}
 
 	/**
-	 * Return the default encryption strength.
-	 * The encryption strength could be specified in the configuration file
-	 * through the lsc.security.encryption.strength property.
+	 * Return the default encryption strength. The encryption strength could be
+	 * specified in the configuration file through the
+	 * lsc.security.encryption.strength property.
+	 * 
 	 * @return int
 	 */
 	public static int getStrength() {
@@ -235,8 +252,9 @@ public class SymmetricEncryption {
 
 	/**
 	 * Initialize encryption object from the configuration file.
+	 * 
 	 * @return boolean (always true if no exception)
-	 * @throws GeneralSecurityException 
+	 * @throws GeneralSecurityException
 	 */
 	public boolean initialize() throws GeneralSecurityException {
 		InputStream input = null;
@@ -256,23 +274,24 @@ public class SymmetricEncryption {
 			fail = true;
 		} finally {
 			try {
-				if(input != null) {
+				if (input != null) {
 					input.close();
 				}
 			} catch (IOException e) {
 			}
 		}
-		
+
 		if (fail) {
 			LOGGER.error("Error reading the key for SymmetricEncryption! ({})", this.keyPath);
 			return false;
 		}
-		
+
 		return true;
 	}
 
 	/**
 	 * This main allow user to generate random key file.
+	 * 
 	 * @param argv
 	 */
 	public static void main(String argv[]) {
@@ -282,7 +301,8 @@ public class SymmetricEncryption {
 			CommandLine cmdLine = new GnuParser().parse(options, argv);
 
 			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f")) {
-				// if a configuration directory was set on command line, use it to set up Configuration
+				// if a configuration directory was set on command line, use it to set up
+				// Configuration
 				Configuration.setUp(cmdLine.getOptionValue("f"), false);
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
@@ -291,10 +311,10 @@ public class SymmetricEncryption {
 			}
 		} catch (ParseException e) {
 			StringBuilder sbf = new StringBuilder();
-			for(String arg : argv) {
+			for (String arg : argv) {
 				sbf.append(arg).append(" ");
 			}
-			
+
 			LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
 			System.exit(1);
 		} catch (LscException e) {
@@ -303,14 +323,16 @@ public class SymmetricEncryption {
 		}
 
 		try {
-            if(LscConfiguration.getSecurity() == null) {
-                throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
-            } else if(LscConfiguration.getSecurity().getEncryption() == null) {
-                throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
-            }
+			if (LscConfiguration.getSecurity() == null) {
+				throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
+			} else if (LscConfiguration.getSecurity().getEncryption() == null) {
+				throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+			}
 			SymmetricEncryption se = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption());
 			if (se.generateDefaultRandomKeyFile()) {
-				LOGGER.info("Key generated: {}. Do not forget to check the lsc>security>encryption>keyfile node value in your configuration file !", se.keyPath );
+				LOGGER.info(
+						"Key generated: {}. Do not forget to check the lsc>security>encryption>keyfile node value in your configuration file !",
+						se.keyPath);
 			}
 		} catch (GeneralSecurityException ex) {
 			LOGGER.debug(ex.toString(), ex);

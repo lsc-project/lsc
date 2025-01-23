@@ -45,7 +45,6 @@
  */
 package org.lsc;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,55 +70,24 @@ import org.lsc.configuration.LscConfiguration;
 /**
  * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
  * It attempts to launch all the 3 tasks defined in
- * src/test/resources/etc/lsc.xml
- * ldap2ldapOrderedTestTask3, ldap2ldapOrderedTestTask2, and ldap2ldapOrderedTestTask1
+ * src/test/resources/etc/lsc.xml ldap2ldapOrderedTestTask3,
+ * ldap2ldapOrderedTestTask2, and ldap2ldapOrderedTestTask1
  */
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    allowAnonymousAccess = true, 
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
-
 
 	@BeforeEach
 	public void setup() {
@@ -134,7 +102,8 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 	public final void testLdap2LdapOrderedSyncTest() throws Exception {
 
 		// Declare the tasks to launch in the correct order
-		List<String> user_tasks = Arrays.asList("ldap2ldapOrderedTestTask3", "ldap2ldapOrderedTestTask2", "ldap2ldapOrderedTestTask1");
+		List<String> user_tasks = Arrays.asList("ldap2ldapOrderedTestTask3", "ldap2ldapOrderedTestTask2",
+				"ldap2ldapOrderedTestTask1");
 
 		// perform the sync
 		launchSyncCleanTask(user_tasks, false, true, false);
@@ -146,45 +115,42 @@ public class Ldap2LdapOrderedSyncTest extends CommonLdapSyncTest {
 
 	private final void checkSyncResults() throws Exception {
 
-
 		// check Operation order
-                /*
-                 * Here there is nothing to check really
-                 * - either every task has succeeded
-                 * - either one task has failed, which means the order is not enforced
-                 * Indeed, the task can only succeed in this precise order:
-                 *     - ldap2ldapOrderedTestTask3 (creates an entry cn=CN0001-A from cn=CN0001),
-                 *     - ldap2ldapOrderedTestTask2 (creates an entry cn=CN0001-B from cn=CN0001-A),
-                 *     - ldap2ldapOrderedTestTask1 (creates an entry cn=CN0001-C from cn=CN0001-B)
-                 * See src/test/resources/etc/lsc.xml for more details
-                 * if the order was taken from the position of the tasks in lsc.xml, it would fail
-                 */
+		/*
+		 * Here there is nothing to check really - either every task has succeeded -
+		 * either one task has failed, which means the order is not enforced Indeed, the
+		 * task can only succeed in this precise order: - ldap2ldapOrderedTestTask3
+		 * (creates an entry cn=CN0001-A from cn=CN0001), - ldap2ldapOrderedTestTask2
+		 * (creates an entry cn=CN0001-B from cn=CN0001-A), - ldap2ldapOrderedTestTask1
+		 * (creates an entry cn=CN0001-C from cn=CN0001-B) See
+		 * src/test/resources/etc/lsc.xml for more details if the order was taken from
+		 * the position of the tasks in lsc.xml, it would fail
+		 */
 
 	}
 
-	public static void launchSyncCleanTask(List<String> tasks, boolean doAsync, boolean doSync,
-					boolean doClean) throws Exception {
+	public static void launchSyncCleanTask(List<String> tasks, boolean doAsync, boolean doSync, boolean doClean)
+			throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
 		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-
 		if (doAsync) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				asyncType.add(taskName);
 			}
 		}
-		
+
 		if (doSync) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				syncType.add(taskName);
 			}
 		}
 
 		if (doClean) {
-			for(String taskName: tasks) {
+			for (String taskName : tasks) {
 				cleanType.add(taskName);
 			}
 		}

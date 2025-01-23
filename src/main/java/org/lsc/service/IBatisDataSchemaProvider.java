@@ -55,33 +55,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class provides the data schema by reading the request schema
- * via iBatis
+ * This class provides the data schema by reading the request schema via iBatis
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class IBatisDataSchemaProvider implements DataSchemaProvider {
 
 //	private ResultSetMetaData metadata;
-	
-	private Map<String, String> metadataCache;
-	
-    /** This is the local logger. */
-    public static final Logger LOGGER = 
-        LoggerFactory.getLogger(IBatisDataSchemaProvider.class);
 
-    public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
+	private Map<String, String> metadataCache;
+
+	/** This is the local logger. */
+	public static final Logger LOGGER = LoggerFactory.getLogger(IBatisDataSchemaProvider.class);
+
+	public IBatisDataSchemaProvider(ResultSetMetaData metadata) {
 //    	this.metadata = metadata;
-    	metadataCache = new HashMap<String, String>();
-    	try {
-    		for(int i = 1; i <= metadata.getColumnCount(); i++) {
-    			metadataCache.put(metadata.getColumnLabel(i), metadata.getColumnTypeName(i));
-    		}
-    	} catch (SQLException e) {
-    		
-    	}
-    }
-    
-    
+		metadataCache = new HashMap<String, String>();
+		try {
+			for (int i = 1; i <= metadata.getColumnCount(); i++) {
+				metadataCache.put(metadata.getColumnLabel(i), metadata.getColumnTypeName(i));
+			}
+		} catch (SQLException e) {
+
+		}
+	}
+
 	public Collection<String> getElementsName() {
 		return metadataCache.keySet();
 	}
@@ -96,8 +94,9 @@ public class IBatisDataSchemaProvider implements DataSchemaProvider {
 
 	/**
 	 * Never return true, or maybe in a 3D database implementation :)
+	 * 
 	 * @param elementName Name of the element
-	 * @return false 
+	 * @return false
 	 */
 	public boolean isElementMultivalued(String elementName) {
 		return false;

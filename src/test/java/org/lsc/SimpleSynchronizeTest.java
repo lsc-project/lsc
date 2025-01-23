@@ -45,7 +45,6 @@
  */
 package org.lsc;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,59 +72,30 @@ import org.lsc.configuration.LscConfiguration;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", port = 33389) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class SimpleSynchronizeTest extends AbstractLdapTestUnit {
 
 	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
 	}
-	
+
 	@Test
 	public void testParameters() throws Exception {
 		SimpleSynchronize sync = new SimpleSynchronize();
-		
+
 		List<String> asyncTasks = new ArrayList<String>();
 		List<String> syncTasks = new ArrayList<String>();
 		List<String> cleanTasks = new ArrayList<String>();
@@ -133,7 +103,7 @@ public class SimpleSynchronizeTest extends AbstractLdapTestUnit {
 		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
 
 		syncTasks.add("nonexistent");
-		
+
 		assertFalse(sync.launch(asyncTasks, syncTasks, cleanTasks));
 	}
 }

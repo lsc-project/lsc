@@ -69,7 +69,7 @@ public class PropertiesBasedSyncOptionsTest {
 	DatasetType pbsoNonExistingAttr;
 	DatasetType pbsoExistingAttr;
 	TaskType task = mock(TaskType.class);
-    Task taskExec = mock(Task.class);
+	Task taskExec = mock(Task.class);
 
 	@BeforeEach
 	public void setup() {

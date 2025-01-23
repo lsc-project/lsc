@@ -63,6 +63,7 @@ public class DateUtilsTest {
 
 	/**
 	 * Launch the parse test.
+	 * 
 	 * @throws ParseException Thrown if the parsing operation failed
 	 */
 	@org.junit.jupiter.api.Test
@@ -98,6 +99,6 @@ public class DateUtilsTest {
 	 */
 	@Test
 	public final void testError() throws ParseException {
-        assertThrows( ParseException.class, () -> DateUtils.parse("0Z") );
+		assertThrows(ParseException.class, () -> DateUtils.parse("0Z"));
 	}
 }

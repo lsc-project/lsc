@@ -141,7 +141,7 @@ public final class BeanComparator {
 	 * @param task the corresponding task parameter
 	 * @param srcBean the source bean
 	 * @param dstBean the destination bean
-         * @throws org.lsc.exception.LscServiceException lsc service
+	 * @throws org.lsc.exception.LscServiceException lsc service
 	 * @return modifications to apply to the directory
 	 */
 	public static LscModifications calculateModifications(
@@ -671,23 +671,23 @@ public final class BeanComparator {
 		}
 	}
 
-    private static Set<Object> splitValues(Task task, String attrName, Set<Object> attrValues) {
-        Set<Object> ret = new LinkedHashSet<Object>();
-        for(Object value : attrValues) {
-            if(value instanceof String) {
-                String delimiter = task.getSyncOptions().getDelimiter(attrName);
-                if(delimiter != null) {
-                    StringTokenizer sTok = new StringTokenizer((String) value, delimiter);
-                    while( sTok.hasMoreTokens() ) {
-                        ret.add(sTok.nextToken());
-                    }
-                } else {
-                    ret.add(value);
-                }
-            } else {
-                ret.add(value);
-            }
-        }
-        return ret;
-    }
+	private static Set<Object> splitValues(Task task, String attrName, Set<Object> attrValues) {
+		Set<Object> ret = new LinkedHashSet<Object>();
+		for (Object value : attrValues) {
+			if (value instanceof String) {
+				String delimiter = task.getSyncOptions().getDelimiter(attrName);
+				if (delimiter != null) {
+					StringTokenizer sTok = new StringTokenizer((String) value, delimiter);
+					while (sTok.hasMoreTokens()) {
+						ret.add(sTok.nextToken());
+					}
+				} else {
+					ret.add(value);
+				}
+			} else {
+				ret.add(value);
+			}
+		}
+		return ret;
+	}
 }

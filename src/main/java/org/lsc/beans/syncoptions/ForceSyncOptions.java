@@ -161,8 +161,8 @@ public class ForceSyncOptions implements ISyncOptions {
 		return null;
 	}
 
-    @Override
-    public String getDelimiter(String attributeName) {
-        return null;
-    }
+	@Override
+	public String getDelimiter(String attributeName) {
+		return null;
+	}
 }

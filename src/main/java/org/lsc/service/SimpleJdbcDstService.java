@@ -72,7 +72,7 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
 	 * 
 	 * @deprecated
 	 * @param props Configuration properties
-	 * @throws LscServiceInitializationException 
+	 * @throws LscServiceInitializationException
 	 */
 	@Deprecated
 	public SimpleJdbcDstService(Properties props, String beanClassName) throws LscServiceException {
@@ -84,18 +84,21 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
 	 * and calls the appropriate SQL requests defined in sql-map-config.d
 	 * 
-	 * @param task Initialized task containing all necessary pieces of information to initiate connection
-	 * 				and load settings 
-	 * @throws LscServiceInitializationException 
+	 * @param task Initialized task containing all necessary pieces of information
+	 *             to initiate connection and load settings
+	 * @throws LscServiceInitializationException
 	 */
 	public SimpleJdbcDstService(final TaskType task) throws LscServiceException {
-		super(task.getDatabaseDestinationService().getName(), 
-		        DaoConfig.getSqlMapClient((DatabaseConnectionType)task.getDatabaseDestinationService().getConnection().getReference()),
-		        task.getBean());
+		super(task.getDatabaseDestinationService().getName(),
+				DaoConfig.getSqlMapClient(
+						(DatabaseConnectionType) task.getDatabaseDestinationService().getConnection().getReference()),
+				task.getBean());
 		serviceConf = task.getDatabaseDestinationService();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForList()
 	 */
 	@Override
@@ -103,7 +106,9 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
 		return serviceConf.getRequestNameForList();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
 	 */
 	@Override
@@ -111,7 +116,9 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
 		return serviceConf.getRequestNameForObject();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForId()
 	 */
 	@Override
@@ -119,33 +126,34 @@ public class SimpleJdbcDstService extends AbstractJdbcDstService {
 		throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
+	 */
+	@Override
+	public String getRequestNameForClean() {
+		throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
+	}
 
-    /* (non-Javadoc)
-     * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
-     */
-    @Override
-    public String getRequestNameForClean() {
-        throw new UnsupportedOperationException("This method should never be called  - this is a software BUG !");
-    }
-    
-    @Override
-    public String getRequestNameForObjectOrClean(boolean fromSameService) {
-    	return getRequestNameForObject();
-    }
+	@Override
+	public String getRequestNameForObjectOrClean(boolean fromSameService) {
+		return getRequestNameForObject();
+	}
 
-    @Override
-    public List<String> getRequestsNameForInsert() {
-        return serviceConf.getRequestsNameForInsert().getString();
-    }
+	@Override
+	public List<String> getRequestsNameForInsert() {
+		return serviceConf.getRequestsNameForInsert().getString();
+	}
 
-    @Override
-    public List<String> getRequestsNameForUpdate() {
-        return serviceConf.getRequestsNameForUpdate().getString();
-    }
+	@Override
+	public List<String> getRequestsNameForUpdate() {
+		return serviceConf.getRequestsNameForUpdate().getString();
+	}
 
-    @Override
-    public List<String> getRequestsNameForDelete() {
-        return serviceConf.getRequestsNameForDelete().getString();
-    }
+	@Override
+	public List<String> getRequestsNameForDelete() {
+		return serviceConf.getRequestsNameForDelete().getString();
+	}
 
 }

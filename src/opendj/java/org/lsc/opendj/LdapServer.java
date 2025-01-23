@@ -68,6 +68,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * Used to manage directory state (start/stop/status/...)
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class LdapServer {
@@ -75,22 +76,22 @@ public class LdapServer {
 	/** The local logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LdapServer.class);
 	private static Options options;
-	
+
 	public final static void start() throws Exception {
 		EmbeddedOpenDJ.startServer();
 		EmbeddedOpenDJ.initializeTestBackend(false, Configuration.DN_REAL_ROOT);
 		Backend backend = DirectoryServer.getBackend(DN.decode(Configuration.DN_REAL_ROOT));
 		backend.addEntry(StaticUtils.createEntry(DN.decode(Configuration.DN_REAL_ROOT)), null);
-		
+
 		String ldifPath = EmbeddedOpenDJ.getPathToConfigFile("test.ldif");
-		if(ldifPath == null || "".equals(ldifPath)) {
+		if (ldifPath == null || "".equals(ldifPath)) {
 			LOGGER.error("Unable to load LDIF sample content !");
 		} else {
 			EmbeddedOpenDJ.importLdif(ldifPath);
 			LOGGER.info("LDIF sample content loaded successfully");
 		}
 	}
-	
+
 	public final static void stop() {
 		EmbeddedOpenDJ.shutdownServer("Normal stop process");
 	}
@@ -102,11 +103,11 @@ public class LdapServer {
 	 */
 	public static void main(final String[] args) {
 		parseOptionsForConfiguration(args);
-		
+
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		JoranConfigurator configurator = new JoranConfigurator();
 		configurator.setContext(context);
-		context.reset(); //reset configuration
+		context.reset(); // reset configuration
 
 		String logBackXMLPropertiesFile = Configuration.getConfigurationDirectory() + "logback-opends.xml";
 
@@ -138,7 +139,7 @@ public class LdapServer {
 		CommandLineParser parser = new GnuParser();
 		return parser.parse(options, args);
 	}
-	
+
 	private static void parseOptionsForConfiguration(String[] args) {
 		try {
 			CommandLine cmdLine = getOptionsCmdLine(args);
@@ -151,24 +152,25 @@ public class LdapServer {
 				printHelp(options);
 			}
 		} catch (ParseException e) {
-			if(LOGGER.isErrorEnabled()) {
+			if (LOGGER.isErrorEnabled()) {
 				StringBuilder sbf = new StringBuilder();
-				for(String arg: args) {
+				for (String arg : args) {
 					sbf.append(arg).append(" ");
 				}
 				LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
 			}
 			LOGGER.debug(e.toString(), e);
 		} catch (LscException e) {
-            LOGGER.warn("Error while loading configuration: " + e.toString());
+			LOGGER.warn("Error while loading configuration: " + e.toString());
 		}
 	}
-	
+
 	/**
 	 * Manage command line options
+	 * 
 	 * @param args command line
 	 * @return the status code (0: OK, >=1 : failed)
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private static int usage(String[] args) throws Exception {
 		try {
@@ -185,9 +187,9 @@ public class LdapServer {
 				return 1;
 			}
 		} catch (ParseException e) {
-			if(LOGGER.isErrorEnabled()) {
+			if (LOGGER.isErrorEnabled()) {
 				StringBuilder sbf = new StringBuilder();
-				for(String arg: args) {
+				for (String arg : args) {
 					sbf.append(arg).append(" ");
 				}
 				LOGGER.error("Unable to parse options : {}({})", sbf.toString(), e);
@@ -200,6 +202,7 @@ public class LdapServer {
 
 	/**
 	 * Print the formater
+	 * 
 	 * @param options
 	 */
 	private static void printHelp(Options options) {

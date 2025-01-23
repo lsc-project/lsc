@@ -92,58 +92,29 @@ import com.google.common.collect.Sets;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke <jonathan@phillipoux.net>
  */
-@ExtendWith( { ApacheDSTestExtension.class } )
-@CreateDS(
-    name = "DSWithPartitionAndServer",
-    loadedSchemas =
-        {
-            @LoadSchema(name = "other", enabled = true)
-        },
-    partitions =
-        {
-            @CreatePartition(
-                name = "lsc-project",
-                suffix = "dc=lsc-project,dc=org",
-                contextEntry = @ContextEntry(
-                    entryLdif =
-                    "dn: dc=lsc-project,dc=org\n" +
-                        "dc: lsc-project\n" +
-                        "objectClass: top\n" +
-                        "objectClass: domain\n\n"),
-                indexes =
-                    {
-                        @CreateIndex(attribute = "objectClass"),
-                        @CreateIndex(attribute = "dc"),
-                        @CreateIndex(attribute = "ou")
-                })
-    })
-@CreateLdapServer(
-    transports =
-        {
-            @CreateTransport(protocol = "LDAP", port = 33389),
-            @CreateTransport(protocol = "LDAPS", port = 33636)
-    })
-@ApplyLdifs(
-        {
-            // Entry # 0
-            "dn: cn=Directory Manager,ou=system",
-            "objectClass: person",
-            "objectClass: top",
-            "cn: Directory Manager",
-            "description: Directory Manager",
-            "sn: Directory Manager",
-            "userpassword: secret"
-        })
-@ApplyLdifFiles({"lsc-schema.ldif","lsc-project.ldif"})
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class JScriptEvaluatorTest extends AbstractLdapTestUnit {
 
-	private static Task task = mock( Task.class );
-	
+	private static Task task = mock(Task.class);
+
 	@BeforeEach
 	public void before() {
 		LscConfiguration.reset();
 	}
-	
+
 	@Test
 	public void testOk() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
@@ -156,8 +127,7 @@ public class JScriptEvaluatorTest extends AbstractLdapTestUnit {
 		Map<String, Object> table = new HashMap<String, Object>();
 		table.put("srcAttr", new BasicAttribute("a", "b"));
 
-		assertThrows( LscServiceException.class, () ->
-		  ScriptingEvaluator.evalToString(task, "src.get()", table));
+		assertThrows(LscServiceException.class, () -> ScriptingEvaluator.evalToString(task, "src.get()", table));
 	}
 
 	@Test
@@ -172,19 +142,23 @@ public class JScriptEvaluatorTest extends AbstractLdapTestUnit {
 	public void testList() throws LscServiceException {
 		Map<String, Object> table = new HashMap<String, Object>();
 		IBean bean = (IBean) new SimpleBean();
-		bean.setDataset("sn", Sets.newHashSet((Object)"Doe"));
-        bean.setDataset("givenName", Sets.newHashSet((Object)"John"));
-        bean.setDataset("cn", Sets.newHashSet((Object)"John Doe", (Object)"DOE John"));
+		bean.setDataset("sn", Sets.newHashSet((Object) "Doe"));
+		bean.setDataset("givenName", Sets.newHashSet((Object) "John"));
+		bean.setDataset("cn", Sets.newHashSet((Object) "John Doe", (Object) "DOE John"));
 
 		table.put("srcBean", bean);
 
-		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetFirstValueById('givenName') + ' ' + srcBean.getDatasetFirstValueById('sn')", table));
+		assertEquals("John Doe", ScriptingEvaluator.evalToString(task,
+				"srcBean.getDatasetFirstValueById('givenName') + ' ' + srcBean.getDatasetFirstValueById('sn')", table));
 
-		List<Object> res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetById('givenName') + ' ' + srcBean.getDatasetById('sn')", table);
+		List<Object> res = ScriptingEvaluator.evalToObjectList(task,
+				"srcBean.getDatasetById('givenName') + ' ' + srcBean.getDatasetById('sn')", table);
 		assertNotNull(res);
 		assertEquals("[John] [Doe]", res.get(0));
 
-		assertEquals("John Doe", ScriptingEvaluator.evalToString(task, "srcBean.getDatasetById('givenName').toArray()[0] + ' ' + srcBean.getDatasetById('sn').toArray()[0]", table));
+		assertEquals("John Doe", ScriptingEvaluator.evalToString(task,
+				"srcBean.getDatasetById('givenName').toArray()[0] + ' ' + srcBean.getDatasetById('sn').toArray()[0]",
+				table));
 
 		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetValuesById('cn')", table);
 		assertNotNull(res);
@@ -195,14 +169,15 @@ public class JScriptEvaluatorTest extends AbstractLdapTestUnit {
 		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetValuesById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
-		
+
 		res = ScriptingEvaluator.evalToObjectList(task, "srcBean.getDatasetFirstValueById('nonexistent')", table);
 		assertNotNull(res);
 		assertEquals(0, res.size());
 
-        res = ScriptingEvaluator.evalToObjectList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr", table);
-        assertNotNull(res);
-        assertEquals(2, res.size());
+		res = ScriptingEvaluator.evalToObjectList(task, "var arr = new Array(); \n arr[0]='a'; \n  arr[1]='b'; arr",
+				table);
+		assertNotNull(res);
+		assertEquals(2, res.size());
 
 	}
 
@@ -212,15 +187,16 @@ public class JScriptEvaluatorTest extends AbstractLdapTestUnit {
 
 		final TaskType taskConf = LscConfiguration.getTask("ldap2ldapTestTask");
 		assertNotNull(taskConf);
-		
-		when(task.getDestinationService()).thenReturn( new SimpleJndiDstService(taskConf) );
-		/*new NonStrictExpectations() {
-			{
-				task.getDestinationService(); result = new SimpleJndiDstService(taskConf);
-			}
-		};*/
-		
-		List<Object> res = ScriptingEvaluator.evalToObjectList(task, "ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))", table);
+
+		when(task.getDestinationService()).thenReturn(new SimpleJndiDstService(taskConf));
+		/*
+		 * new NonStrictExpectations() { { task.getDestinationService(); result = new
+		 * SimpleJndiDstService(taskConf); } };
+		 */
+
+		List<Object> res = ScriptingEvaluator.evalToObjectList(task,
+				"ldap.or(ldap.attribute('ou=People,dc=lsc-project,dc=org','ou'), ldap.fsup('ou=People,dc=lsc-project,dc=org','dc=*'))",
+				table);
 		assertEquals("[People, dc=lsc-project,dc=org]", res.toString());
 	}
 }

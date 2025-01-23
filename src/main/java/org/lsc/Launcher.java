@@ -64,8 +64,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Main launching class This is the main wrapper for generic launcher.
- * This class is responsible of parameters analysis
+ * Main launching class This is the main wrapper for generic launcher. This
+ * class is responsible of parameters analysis
  *
  * @author S. Bahloul &lt;seb@lsc-project.org&gt;
  */
@@ -91,26 +91,26 @@ public final class Launcher {
 	/** Number of parallel threads to run a task */
 	private int threads;
 
-	/** Time limit in seconds*/
+	/** Time limit in seconds */
 	private int timeLimit;
-	
+
 	/** Available command line options definition */
 	private static Options options;
-	
+
 	/** Convert the old properties format to new XML */
 	private boolean convertConfiguration;
-	
+
 	/** Perform a complete configuration validation */
 	private boolean validateConfiguration;
-	
+
 	/** Parsed command line options */
 	private CommandLine cmdLine;
-	
+
 	// define command line options recognized
 	static {
 		options = SimpleSynchronize.getOptions();
 		options.addOption("a", "asynchronous-synchronize", true,
-						"Asynchronous synchronization task (one of the available tasks or 'all')");
+				"Asynchronous synchronization task (one of the available tasks or 'all')");
 		options.addOption("s", "synchronize", true, "Synchronization task (one of the available tasks or 'all')");
 		options.addOption("c", "clean", true, "Cleaning type (one of the available tasks or 'all')");
 		options.addOption("v", "validate", false, "Validate configuration (check connections ...)");
@@ -120,7 +120,7 @@ public final class Launcher {
 		options.addOption("h", "help", false, "Get this text");
 		options.addOption("V", "version", false, "Get project version");
 	}
-	
+
 	/**
 	 * Default constructor - instantiate objects.
 	 */
@@ -137,18 +137,17 @@ public final class Launcher {
 	 */
 	public static void main(final String[] args) {
 		int status = launch(args);
-		if(status != 0) {
+		if (status != 0) {
 			System.exit(status);
 		}
 	}
 
-		
 	public static int launch(final String[] args) {
 		try {
 			// Create the object and parse options
 			Launcher obj = new Launcher();
 			int retCode = obj.parseOptions(args);
-	
+
 			if (retCode != 0) {
 				return retCode;
 			}
@@ -172,25 +171,27 @@ public final class Launcher {
 	public int run() {
 		try {
 			if (validateConfiguration) {
-				if(configurationLocation == null) {
+				if (configurationLocation == null) {
 					printHelp();
 					return 1;
 				}
-				// if a configuration directory was set on command line, use it to set up Configuration
+				// if a configuration directory was set on command line, use it to set up
+				// Configuration
 				Configuration.setUp(configurationLocation, true);
-				if(LscConfiguration.isInitialized()) {
-	                LOGGER.info("Configuration and environment successfully checked !");
-	                return 0;
+				if (LscConfiguration.isInitialized()) {
+					LOGGER.info("Configuration and environment successfully checked !");
+					return 0;
 				} else {
-				    LOGGER.info("Configuration validation failed !");
-				    return 255;
+					LOGGER.info("Configuration validation failed !");
+					return 255;
 				}
 			}
-			
-			// if a configuration directory was set on command line, use it to set up Configuration
+
+			// if a configuration directory was set on command line, use it to set up
+			// Configuration
 			Configuration.setUp(configurationLocation);
-			if(!LscConfiguration.isInitialized()) {
-			    return 255;
+			if (!LscConfiguration.isInitialized()) {
+				return 255;
 			}
 
 			// initialize the synchronization engine
@@ -201,10 +202,10 @@ public final class Launcher {
 			}
 			// do the work!
 			if (threads > 0) {
-				sync.setThreads( threads );
+				sync.setThreads(threads);
 			}
 			if (timeLimit > 0) {
-				sync.setTimeLimit( timeLimit );
+				sync.setTimeLimit(timeLimit);
 			}
 			sync.launch(asyncType, syncType, cleanType);
 		} catch (Exception e) {
@@ -222,6 +223,7 @@ public final class Launcher {
 
 	/**
 	 * Manage command line options.
+	 * 
 	 * @param args command line
 	 * @return the status code (0: OK, >=1 : failed)
 	 */
@@ -253,28 +255,27 @@ public final class Launcher {
 				validateConfiguration = true;
 			}
 			if (cmdLine.hasOption("V")) {
-                            final Properties properties = new Properties();
-                            try {
-                                properties.load(Launcher.class.getClassLoader().getResourceAsStream(".properties"));
-                                System.out.println(properties.getProperty("lsc.version"));
-                            }
-                            catch(IOException e) {
-                                System.err.println(".properties missing in jar, this is a build issue");
-                                e.printStackTrace(System.err);
-                            }
-                            return 1;
+				final Properties properties = new Properties();
+				try {
+					properties.load(Launcher.class.getClassLoader().getResourceAsStream(".properties"));
+					System.out.println(properties.getProperty("lsc.version"));
+				} catch (IOException e) {
+					System.err.println(".properties missing in jar, this is a build issue");
+					e.printStackTrace(System.err);
+				}
+				return 1;
 
 			}
-		
-			if(cmdLine.getOptions().length == 0 || 
-							cmdLine.hasOption("h") || 
-							((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0)) 
-							&& ! convertConfiguration && ! validateConfiguration ) {
+
+			if (cmdLine.getOptions().length == 0 || cmdLine.hasOption("h")
+					|| ((asyncType.size() == 0) && (syncType.size() == 0) && (cleanType.size() == 0))
+							&& !convertConfiguration && !validateConfiguration) {
 				printHelp();
 				return 1;
 			}
-			if(!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
-				System.err.println("Asynchronous synchronization is mutually exclusive with synchronous synchronizing and cleaning !");
+			if (!asyncType.isEmpty() && (!syncType.isEmpty() || !cleanType.isEmpty())) {
+				System.err.println(
+						"Asynchronous synchronization is mutually exclusive with synchronous synchronizing and cleaning !");
 				printHelp();
 				return 1;
 			}
@@ -291,8 +292,9 @@ public final class Launcher {
 	}
 
 	/**
-	 * Parse the synchronization string to find the right type of
-	 * synchronization or cleaning.
+	 * Parse the synchronization string to find the right type of synchronization or
+	 * cleaning.
+	 * 
 	 * @param syncValue the string comma separated synchronization name
 	 * @return the synchronizations name
 	 */

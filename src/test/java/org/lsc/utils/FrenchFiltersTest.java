@@ -18,7 +18,7 @@ public class FrenchFiltersTest {
 	@Test
 	public void testRemoveBadChars() {
 		String test = "Ç'ést lä lùttè fînâÀàlÉ";
-		assertEquals("C'est la lutte finaAalE", FrenchFilters.removeBadChars(test));	
+		assertEquals("C'est la lutte finaAalE", FrenchFilters.removeBadChars(test));
 	}
 
 	@Test
@@ -52,9 +52,9 @@ public class FrenchFiltersTest {
 	@Test
 	public void testFilterSnException() throws Exception {
 		String sn = "Me MySelf §!°^¨$*€`£ù%+=:/;,?# I";
-        assertThrows( CharacterUnacceptedException.class, ( ) -> {
-		  FrenchFilters.filterSn(sn);
-        });
+		assertThrows(CharacterUnacceptedException.class, () -> {
+			FrenchFilters.filterSn(sn);
+		});
 	}
 
 	@Test
@@ -84,8 +84,8 @@ public class FrenchFiltersTest {
 	 *
 	 * @param name the last name to filter
 	 * @return the filtered patronimic name
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
+	 * @throws CharacterUnacceptedException thrown if an rejected character is
+	 *                                      encountered during analysis
 	 */
 //	public static String filterLastName(final String name)
 //					throws CharacterUnacceptedException {
@@ -95,8 +95,8 @@ public class FrenchFiltersTest {
 	 *
 	 * @param name the first name to filter
 	 * @return the filtered public given name
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
+	 * @throws CharacterUnacceptedException thrown if an rejected character is
+	 *                                      encountered during analysis
 	 */
 //	public static String filterFirstName(final String name)
 //					throws CharacterUnacceptedException {
@@ -106,18 +106,19 @@ public class FrenchFiltersTest {
 	 *
 	 * @param oldValue the value to filter
 	 * @return the filtered givenname
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
+	 * @throws CharacterUnacceptedException thrown if an rejected character is
+	 *                                      encountered during analysis
 	 */
 //	public static String filterGivenName(final String oldValue)
 //					throws CharacterUnacceptedException {
-	
+
 	/**
 	 * Filter all alphanumeric characters.
+	 * 
 	 * @param value the original value
 	 * @return the filtered string
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
+	 * @throws CharacterUnacceptedException thrown if an rejected character is
+	 *                                      encountered during analysis
 	 */
 //	public static String filterAlpha(final String value)
 //					throws CharacterUnacceptedException {
@@ -130,38 +131,36 @@ public class FrenchFiltersTest {
 //	public static String generatePwd() {
 
 	/**
-	 * Remove trailing and starting spaces
-	 * and replace remaining spaces and dots by dashes
+	 * Remove trailing and starting spaces and replace remaining spaces and dots by
+	 * dashes
 	 *
 	 * @param aString the string to filter
 	 *
 	 * @return the filtered string
 	 */
 //	public static String filterName(final String aString) {
-	
+
 	/**
 	 * Filters numerical identifier.
 	 *
 	 * @param value the string
 	 * @return the normalized String
-	 * @throws CharacterUnacceptedException launch if and only if the argument
-	 *         is not a numerical identifier
+	 * @throws CharacterUnacceptedException launch if and only if the argument is
+	 *                                      not a numerical identifier
 	 */
 //	public static String filterNumber(final String value)
 //					throws CharacterUnacceptedException {
-		
 
 	/**
 	 * Converts Date into timestamp string.
 	 *
-	 * @param value A string representation fo a date
-	 * @param format The format of Date with representation used by
-	 *        SimpleDateFormat
+	 * @param value  A string representation fo a date
+	 * @param format The format of Date with representation used by SimpleDateFormat
 	 *
 	 * @return String A string containing correspondant timestamp
 	 *
-	 * @throws CharacterUnacceptedException thrown if an rejected character
-	 * is encountered during analysis
+	 * @throws CharacterUnacceptedException thrown if an rejected character is
+	 *                                      encountered during analysis
 	 */
 //	public static String filterDate(final String value, final String format)
 //					throws CharacterUnacceptedException {

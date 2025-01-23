@@ -54,20 +54,23 @@ import org.lsc.exception.LscServiceException;
 
 /**
  * Extende default IService interface to add an asynchronous method
+ * 
  * @author Sebastien Bahloul
  */
 public interface IAsynchronousService extends IService {
-    /**
-     * This call is blocking until a data available on the data source
-     * @return the next available bean
-     * @throws NamingException 
-     * @throws LscServiceException 
-     */
+	/**
+	 * This call is blocking until a data available on the data source
+	 * 
+	 * @return the next available bean
+	 * @throws NamingException
+	 * @throws LscServiceException
+	 */
 	Entry<String, LscDatasets> getNextId() throws LscServiceException;
 
-    /**
-     * The delay in milliseconds to look for available updates
-     * @return the delay
-     */
+	/**
+	 * The delay in milliseconds to look for available updates
+	 * 
+	 * @return the delay
+	 */
 	long getInterval();
 }

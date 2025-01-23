@@ -62,7 +62,8 @@ import ch.qos.logback.core.LayoutBase;
 /**
  *
  *
- * @author R&eacute;my-Christophe Schermesser &lt;remy-christophe@schermesser.com&gt;
+ * @author R&eacute;my-Christophe Schermesser
+ *         &lt;remy-christophe@schermesser.com&gt;
  *
  */
 public class CsvLayout extends LayoutBase<ILoggingEvent> {
@@ -91,7 +92,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 
 	/* Output header to a CSV file? */
 	private Boolean outputHeader = false;
-	
+
 	/**
 	 * Name of the attribute for the dn
 	 */
@@ -101,10 +102,12 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		operations = new HashSet<LscModificationType>();
 		taskNamesList = new HashSet<String>();
 	}
-	
+
 	/**
-	 * Output log events in CSV format for the JndiModifications class
-	 * WARN : We only write the first value of each attribute because we write in a 2 dimensional format
+	 * Output log events in CSV format for the JndiModifications class WARN : We
+	 * only write the first value of each attribute because we write in a 2
+	 * dimensional format
+	 * 
 	 * @param event {@link ILoggingEvent} object representing an event to log
 	 * @return The String to log
 	 */
@@ -112,23 +115,19 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		Object[] messages = event.getArgumentArray();
 		String result = "";
 
-		if (messages != null &&
-						messages.length != 0 &&
-						messages[0] != null &&
-						LscModifications.class.isAssignableFrom(messages[0].getClass()) ) {
+		if (messages != null && messages.length != 0 && messages[0] != null
+				&& LscModifications.class.isAssignableFrom(messages[0].getClass())) {
 			LscModifications lm = (LscModifications) messages[0];
 
-
-			if (operations.contains(lm.getOperation()) && 
-							( taskNamesList.size() == 0 ||
-							  taskNamesList.contains(lm.getTaskName().toLowerCase()))) {
+			if (operations.contains(lm.getOperation())
+					&& (taskNamesList.size() == 0 || taskNamesList.contains(lm.getTaskName().toLowerCase()))) {
 				StringBuilder sb = new StringBuilder(1024);
 
 				Map<String, List<Object>> modifications = lm.getModificationsItemsByHash();
 
 				List<Object> values = null;
 
-				for(String attributeName: attributes) {
+				for (String attributeName : attributes) {
 					/* Does the modification has the attribute ? */
 					if (modifications.containsKey(attributeName)) {
 						values = modifications.get(attributeName);
@@ -138,11 +137,11 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 					} else if (attributeName.equalsIgnoreCase(DN_STRING)) {
 						sb.append(lm.getMainIdentifier());
 					}
-					
+
 					sb.append(separator);
 				}
-				//Remove the last unecessary separator
-				sb.deleteCharAt(sb.length()-1).append("\n");
+				// Remove the last unecessary separator
+				sb.deleteCharAt(sb.length() - 1).append("\n");
 				result = sb.toString();
 			}
 		}
@@ -158,7 +157,8 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
-	 * Parse logOpertaions string for backward compatibility to configuration old style
+	 * Parse logOpertaions string for backward compatibility to configuration old
+	 * style
 	 */
 	@Override
 	public void start() {
@@ -174,9 +174,9 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 					operations.add(op);
 				}
 			}
-		} else if (operations.isEmpty()){
+		} else if (operations.isEmpty()) {
 			/* Add all the operations */
-			for(LscModificationType type: LscModificationType.values()) {
+			for (LscModificationType type : LscModificationType.values()) {
 				operations.add(type);
 			}
 		}
@@ -184,7 +184,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		/* Parse attributes to log */
 		attributes = new ArrayList<String>();
 		if (attrs != null) {
-			for(String st: attrs.split(separator)) {
+			for (String st : attrs.split(separator)) {
 				attributes.add(st.toLowerCase());
 			}
 		} else {
@@ -201,18 +201,18 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 				taskNamesList.add(token);
 			}
 		}
-		
+
 		super.start();
 	}
 
-    /**
+	/**
 	 * @param logOperations the logOperation to set
 	 */
 	public void setLogOperations(LscModificationType[] logOperations) {
 		operations.addAll(Arrays.asList(logOperations));
 	}
 
-    /**
+	/**
 	 * @param logOperations the logOperation to set
 	 */
 	public void setLogOperations(String logOperations) {
@@ -244,7 +244,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 * @param taskNames the taskNames to set
 	 */
 	public void setTaskNames(String[] taskNames) {
-		if(taskNames != null) {
+		if (taskNames != null) {
 			this.taskNamesList.addAll(Arrays.asList(taskNames));
 		}
 	}
@@ -255,7 +255,7 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	public void setOutputHeader(Boolean outputHeader) {
 		this.outputHeader = outputHeader;
 	}
-	
+
 	/* package */ Set<LscModificationType> getLogOperations() {
 		return operations;
 	}

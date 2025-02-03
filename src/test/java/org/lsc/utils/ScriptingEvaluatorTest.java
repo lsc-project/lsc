@@ -42,4 +42,39 @@ public class ScriptingEvaluatorTest {
         boolean booleanOutput = ScriptingEvaluator.evalToBoolean(task, expression, new HashMap<>());
         assertTrue(booleanOutput);
     }
+
+    @Test
+    public void testJSPrefix1() throws LscServiceException {
+        String expression = "\njs:true";
+        boolean booleanOutput = ScriptingEvaluator.evalToBoolean(task, expression, new HashMap<>());
+        assertTrue(booleanOutput);
+    }
+
+    @Test
+    public void testJSPrefix2() throws LscServiceException {
+        String expression = "\njs:\ntrue";
+        boolean booleanOutput = ScriptingEvaluator.evalToBoolean(task, expression, new HashMap<>());
+        assertTrue(booleanOutput);
+    }
+
+    @Test
+    public void testJSPrefix3() throws LscServiceException {
+        String expression = "\njs:test=\"js\"";
+        String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
+        assertEquals("js", stringOutput);
+    }
+
+    @Test
+    public void testJSPrefix4() throws LscServiceException {
+        String expression = "\njs:\ntest=\"js\"";
+        String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
+        assertEquals("js", stringOutput);
+    }
+
+    @Test
+    public void testJSPrefix5() throws LscServiceException {
+        String expression = "\n\njs:\n\ntest=\"js\"";
+        String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
+        assertEquals("js", stringOutput);
+    }
 }

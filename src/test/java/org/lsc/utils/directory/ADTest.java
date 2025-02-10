@@ -49,10 +49,12 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test AD specific function library.
@@ -75,7 +77,7 @@ public class ADTest {
 	// UUID/String representation of above binary objectGUID
 	private static final String refObjectGUIDAsUUIDString = "300EDD3D-0C8F-484C-AAD2-60481BCB60D8";
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		refTimeCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		refTimeCalendar.clear();

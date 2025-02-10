@@ -76,20 +76,19 @@ public interface IBean extends Cloneable, Serializable {
 	/**
 	 * Get an attribute from its name.
 	 * 
-	 * @param id
-	 *            the name
+	 * @param id the name
 	 * @return the LDAP attribute
 	 * @deprecated
 	 */
 	@Deprecated
 	Attribute getAttributeById(final String id);
 
-    /**
-     * Get an dataset from its name.
-     * 
-     * @param id the name
-     * @return the values dataset or null if non existent
-     */
+	/**
+	 * Get an dataset from its name.
+	 * 
+	 * @param id the name
+	 * @return the values dataset or null if non existent
+	 */
 	Set<Object> getDatasetById(final String id);
 
 	/**
@@ -138,8 +137,7 @@ public interface IBean extends Cloneable, Serializable {
 	/**
 	 * Get all values of an attribute from its name
 	 * 
-	 * @param id
-	 *            The attribute name (case insensitive)
+	 * @param id The attribute name (case insensitive)
 	 * @return List<String> List of attribute values, or an empty list
 	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 * @deprecated See getDatasetById(String id)
@@ -150,7 +148,8 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Get the attributes name.
-     * @deprecated Since LSC 2.0
+	 * 
+	 * @deprecated Since LSC 2.0
 	 * @return a set containing all the attributes name
 	 */
 	@Deprecated
@@ -158,33 +157,35 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Set an attribute.
-     * @deprecated Since LSC 2.0
-	 * @param attr
-	 *            the attribute to set
+	 * 
+	 * @deprecated Since LSC 2.0
+	 * @param attr the attribute to set
 	 */
 	@Deprecated
 	void setAttribute(Attribute attr);
 
 	/**
 	 * Set an attribute.
-     * @deprecated Since LSC 2.0
-	 * @param attrName The attribute name.
+	 * 
+	 * @deprecated Since LSC 2.0
+	 * @param attrName   The attribute name.
 	 * @param attrValues A set of values for the attribute.
 	 */
 	@Deprecated
 	void setAttribute(String attrName, Set<Object> attrValues);
 
-    /**
-     * Set an dataset.
-     * 
-     * @param name The dataset name.
-     * @param values A set of values for this dataset.
-     */
-    public void setDataset(String name, Set<Object> values);
-    
+	/**
+	 * Set an dataset.
+	 * 
+	 * @param name   The dataset name.
+	 * @param values A set of values for this dataset.
+	 */
+	public void setDataset(String name, Set<Object> values);
+
 	/**
 	 * Get the distinguished name.
-     * @deprecated Since LSC 2.0 - switch to getMainIdentifier()
+	 * 
+	 * @deprecated Since LSC 2.0 - switch to getMainIdentifier()
 	 * @return the distinguished name
 	 */
 	@Deprecated
@@ -192,7 +193,9 @@ public interface IBean extends Cloneable, Serializable {
 
 	/**
 	 * Set the distinguished name.
-     * @deprecated Since LSC 2.0 - switch to setMainIdentifier(String mainIdentifier)
+	 * 
+	 * @deprecated Since LSC 2.0 - switch to setMainIdentifier(String
+	 *             mainIdentifier)
 	 * @param dn The distinguishedName to set
 	 */
 	@Deprecated

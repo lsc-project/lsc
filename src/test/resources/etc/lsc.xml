@@ -4,7 +4,7 @@
     <ldapConnection>
       <name>src-ldap</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
+      <username>cn=Directory Manager,ou=system</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>
@@ -19,7 +19,7 @@
     <ldapConnection>
       <name>dst-ldap</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
+      <username>cn=Directory Manager,ou=system</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>
@@ -34,7 +34,7 @@
     <ldapConnection>
       <name>dst-ldap-relaxrules</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
+      <username>cn=Directory Manager,ou=system</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>
@@ -49,7 +49,7 @@
     <ldapConnection>
       <name>dst-ldap-recursivedelete</name>
       <url>ldap://localhost:33389/dc=lsc-project,dc=org</url>
-      <username>cn=Directory Manager</username>
+      <username>cn=Directory Manager,ou=system</username>
       <password>secret</password>
       <authentication>SIMPLE</authentication>
       <referral>IGNORE</referral>

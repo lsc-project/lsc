@@ -42,7 +42,8 @@
  *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
  *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
  ****************************************************************************
- */package org.lsc.utils;
+ */
+package org.lsc.utils;
 
 import java.awt.event.ActionEvent;
 
@@ -58,91 +59,91 @@ import org.mozilla.javascript.tools.shell.Global;
 
 public class RhinoDebugger implements Runnable {
 
-    private Dim            dim;
-    private SwingGui       debugGui;
+	private Dim dim;
+	private SwingGui debugGui;
 
-     private Context        cx;
-    private Scriptable     scope;
-    private Script         script;
+	private Context cx;
+	private Scriptable scope;
+	private Script script;
 
-    private static Global  global;
+	private static Global global;
 
-    public RhinoDebugger(String source, ContextFactory factory) {
+	public RhinoDebugger(String source, ContextFactory factory) {
 
-        dim = new Dim();
-        dim.setSourceProvider(new LscSourceProvider(source));
-        dim.attachTo(factory);// org.mozilla.javascript.tools.shell.Main.shellContextFactory);
+		dim = new Dim();
+		dim.setSourceProvider(new LscSourceProvider(source));
+		dim.attachTo(factory);// org.mozilla.javascript.tools.shell.Main.shellContextFactory);
 
-        debugGui = new LscRhinoGui(dim, "Debugging LSC javascript", this);
-        debugGui.setExitAction(this);
-        debugGui.pack();
-        debugGui.setSize(600, 460);
+		debugGui = new LscRhinoGui(dim, "Debugging LSC javascript", this);
+		debugGui.setExitAction(this);
+		debugGui.pack();
+		debugGui.setSize(600, 460);
 
-    }
+	}
 
-    public void initContext(Context cx, Scriptable scope, Script script) {
-        this.cx = cx;
-        this.scope = scope;
-        this.script = script;
+	public void initContext(Context cx, Scriptable scope, Script script) {
+		this.cx = cx;
+		this.scope = scope;
+		this.script = script;
 
-        if (global == null || !global.isInitialized()) {
-            global = new Global(cx);
-            global.setIn(System.in);
-            global.setOut(System.out);
-            global.setErr(System.err);
-        }
-        // dim.setScopeProvider(new LscScopeProvider(global));
+		if (global == null || !global.isInitialized()) {
+			global = new Global(cx);
+			global.setIn(System.in);
+			global.setOut(System.out);
+			global.setErr(System.err);
+		}
+		// dim.setScopeProvider(new LscScopeProvider(global));
 
-    }
+	}
 
-    public Object exec() {
-   		debugGui.setVisible(true);
-        dim.setBreak();
-        dim.setBreakOnEnter(true);
-        dim.setBreakOnExceptions(true);
-        return script.exec(cx, scope);
-    }
-    
-    public void execInclude(Script include) {
-    	include.exec(cx, scope);
-    }
+	public Object exec() {
+		debugGui.setVisible(true);
+		dim.setBreak();
+		dim.setBreakOnEnter(true);
+		dim.setBreakOnExceptions(true);
+		return script.exec(cx, scope);
+	}
+
+	public void execInclude(Script include) {
+		include.exec(cx, scope);
+	}
 
 	/**
-     * Exit action.
-     */
-    @Override
-    public void run() {
-        debugGui.dispose();
-    }
+	 * Exit action.
+	 */
+	@Override
+	public void run() {
+		debugGui.dispose();
+	}
 
-    /**
-     * Is Debugger visible?
-     * 
-     * @return true if {@link SwingGui} is visible
-     */
-    public boolean isVisible() {
-        return debugGui != null && debugGui.isVisible();
-    }
+	/**
+	 * Is Debugger visible?
+	 * 
+	 * @return true if {@link SwingGui} is visible
+	 */
+	public boolean isVisible() {
+		return debugGui != null && debugGui.isVisible();
+	}
 
-    private static class LscRhinoGui extends SwingGui {
+	private static class LscRhinoGui extends SwingGui {
 
-        private static final long serialVersionUID = -6368924684609097200L;
-        private RhinoDebugger     debugger;
+		private static final long serialVersionUID = -6368924684609097200L;
+		private RhinoDebugger debugger;
 
-        public LscRhinoGui(Dim dim, String title, RhinoDebugger debugger) {
-            super(dim, title);
-            this.debugger = debugger;
-        }
+		public LscRhinoGui(Dim dim, String title, RhinoDebugger debugger) {
+			super(dim, title);
+			this.debugger = debugger;
+		}
 
-        public void actionPerformed(ActionEvent e) {
-            String cmd = e.getActionCommand();
-            if (cmd.equals("Exit")) {
-                debugger.run();
-            } else {
-                super.actionPerformed(e);
-            }
-        }
-    }
+		public void actionPerformed(ActionEvent e) {
+			String cmd = e.getActionCommand();
+			if (cmd.equals("Exit")) {
+				debugger.run();
+			} else {
+				super.actionPerformed(e);
+			}
+		}
+	}
 
 //    private static class LscScopeProvider implements ScopeProvider {
 //
@@ -165,18 +166,18 @@ public class RhinoDebugger implements Runnable {
 //        }
 //    }
 
-    private static class LscSourceProvider implements SourceProvider {
+	private static class LscSourceProvider implements SourceProvider {
 
-        private String source;
+		private String source;
 
-        public LscSourceProvider(String source) {
-            this.source = source;
-        }
+		public LscSourceProvider(String source) {
+			this.source = source;
+		}
 
-        @Override
-        public String getSource(DebuggableScript script) {
-            return source;
-        }
+		@Override
+		public String getSource(DebuggableScript script) {
+			return source;
+		}
 
-    }
+	}
 }

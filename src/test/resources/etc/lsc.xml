@@ -894,7 +894,7 @@
         <defaultPolicy>KEEP</defaultPolicy>
         <hooks>
           <outputFormat>ldif</outputFormat>
-          <createPostHook>/Users/elecharny/worteks/lsc-worteks/src/test/resources/bin/hook-ldif.sh</createPostHook>
+          <createPostHook>bin/hook-ldif.sh</createPostHook>
         </hooks>
         <dataset>
           <name>objectclass</name>
@@ -959,7 +959,7 @@
         <defaultPolicy>KEEP</defaultPolicy>
         <hooks>
           <outputFormat>ldif</outputFormat>
-          <updatePostHook>/Users/elecharny/worteks/lsc-worteks/src/test/resources/bin/hook-ldif.sh</updatePostHook>
+          <updatePostHook>bin/hook-ldif.sh</updatePostHook>
         </hooks>
         <dataset>
           <name>description</name>
@@ -1011,7 +1011,7 @@
         <defaultPolicy>KEEP</defaultPolicy>
         <hooks>
           <outputFormat>ldif</outputFormat>
-          <deletePostHook>/Users/elecharny/worteks/lsc-worteks/src/test/resources/bin/hook-ldif.sh</deletePostHook>
+          <deletePostHook>bin/hook-ldif.sh</deletePostHook>
         </hooks>
         <dataset>
           <name>objectclass</name>

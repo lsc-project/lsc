@@ -154,8 +154,12 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 
 		List<String> expectedCreatedEntry = Arrays.asList(
-				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", "changetype: add",
-				"objectClass: inetOrgPerson", "objectClass: person", "objectClass: top", "cn: CN0001-hook",
+				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", 
+				"changetype: add",
+				"objectClass: inetOrgPerson", 
+				"objectClass: person", 
+				"objectClass: top", 
+				"cn: CN0001-hook",
 				"sn: CN0001-hook");
 
 		checkLDIFSyncResults("create", expectedCreatedEntry);
@@ -173,42 +177,33 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 	 * Read hook log file to check passed arguments and modification passed as input
 	 */
 	private final void checkLDIFSyncResults(String operation, List<String> expectedEntry) throws Exception {
-
 		List<String> hookResults = new ArrayList<String>();
 		try {
 			File hookFile = new File("hook-ldif-" + operation + ".log");
+			Scanner hookReader = new Scanner(hookFile);
 
-			Thread.sleep(1000L);
-
-			if (!hookFile.exists()) {
-				System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
+			while (hookReader.hasNextLine()) {
+				String data = hookReader.nextLine();
+				hookResults.add(data);
 			}
-
-			try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
-				while (hookReader.hasNextLine()) {
-					String data = hookReader.nextLine();
-					hookResults.add(data);
-				}
-			} catch (FileNotFoundException fnfe) {
-				fail("Cannot find the  hook file" + "hook-ldif-" + operation + ".log " + fnfe.getMessage());
-			}
-
+			
+			hookReader.close();
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
-			fail("Error while reading hook-ldif-" + operation + ".log " + e.getMessage());
+			fail("Error while reading hook-ldif-" + operation + ".log");
 		}
+		
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
-		if (operation != "delete") {
+		if(operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
-			List<String> entry = new ArrayList<>(hookResults.subList(3, (hookResults.size() - 1)));
+			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
+			
 			for (String attr : expectedEntry) {
-				assertTrue(entry.contains(attr),
-						"Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
+				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
 			}
 		}
-
 	}
 
 	/*

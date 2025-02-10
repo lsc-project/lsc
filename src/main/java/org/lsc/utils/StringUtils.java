@@ -42,24 +42,27 @@
  *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
  *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
  ****************************************************************************
- */package org.lsc.utils;
+ */
+package org.lsc.utils;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 /**
  * This method provides various helpers for handling strings
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class StringUtils {
 
-    /**
-     * This method will convert Base 64 encoded strings to Base 16 (hexa) 
-     * @param base64encodedstring the base64 encoded string
-     * @return the base16 encoded string
-     */
-    public static String Base64toBase16(String base64encodedstring) {
-        return new String(Hex.encodeHex(Base64.decodeBase64(base64encodedstring.getBytes())));
-    }
+	/**
+	 * This method will convert Base 64 encoded strings to Base 16 (hexa)
+	 * 
+	 * @param base64encodedstring the base64 encoded string
+	 * @return the base16 encoded string
+	 */
+	public static String Base64toBase16(String base64encodedstring) {
+		return new String(Hex.encodeHex(Base64.decodeBase64(base64encodedstring.getBytes())));
+	}
 
 }

@@ -67,6 +67,7 @@ import org.lsc.utils.security.SymmetricEncryption;
 
 /**
  * Provides some methods to encrypt, decrypt or hash data.
+ * 
  * @see org.lsc.utils.security.SymmetricEncryption
  */
 public class SecurityUtils {
@@ -77,24 +78,26 @@ public class SecurityUtils {
 	public static final String HASH_SHA512 = "SHA512";
 
 	private static SymmetricEncryption encryptionInstance;
-	
+
 	// Utility class
-	private SecurityUtils() {}
-	
+	private SecurityUtils() {
+	}
+
 	private static SymmetricEncryption getEncryptionInstance() throws GeneralSecurityException {
-		if(encryptionInstance == null) {
-            if(LscConfiguration.getSecurity() == null) {
-                throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
-            } else if(LscConfiguration.getSecurity().getEncryption() == null) {
-                throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
-            }
-            encryptionInstance = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption());
+		if (encryptionInstance == null) {
+			if (LscConfiguration.getSecurity() == null) {
+				throw new RuntimeException("lsc>security node of the LSC configuration cannot be null !");
+			} else if (LscConfiguration.getSecurity().getEncryption() == null) {
+				throw new RuntimeException("lsc>security>encryption node of the LSC configuration cannot be null !");
+			}
+			encryptionInstance = new SymmetricEncryption(LscConfiguration.getSecurity().getEncryption());
 		}
 		return encryptionInstance;
 	}
-	
+
 	/**
 	 * Decrypt a base64 value.
+	 * 
 	 * @param value The value
 	 * @return The decrypted String
 	 * @throws java.security.GeneralSecurityException
@@ -110,6 +113,7 @@ public class SecurityUtils {
 
 	/**
 	 * Encrypt a value.
+	 * 
 	 * @param value The value
 	 * @return The encrypted String, base64 encoded
 	 * @throws java.security.GeneralSecurityException
@@ -125,7 +129,10 @@ public class SecurityUtils {
 
 	/**
 	 * Hash a value within a supported hash type.
-	 * @param type A valid hash type: SecurityUtils.HASH_MD5, SecurityUtils.HASH_SHA1, SecurityUtils.HASH_SHA256 or SecurityUtils.HASH_SHA512
+	 * 
+	 * @param type  A valid hash type: SecurityUtils.HASH_MD5,
+	 *              SecurityUtils.HASH_SHA1, SecurityUtils.HASH_SHA256 or
+	 *              SecurityUtils.HASH_SHA512
 	 * @param value A value to hash
 	 * @return A valid base64 encoded hash
 	 * @throws java.security.NoSuchAlgorithmException
@@ -135,19 +142,22 @@ public class SecurityUtils {
 		byte hash[] = MessageDigest.getInstance(type).digest(data);
 		return new String(new Base64().encode(hash));
 	}
-	
+
 	/**
 	 * Encrypt a password for samba, LMPassword version.
+	 * 
 	 * @param password the password to encrypt
 	 * @return the LMPassword
 	 * @throws UnsupportedEncodingException
-	 * @throws NoSuchPaddingException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws InvalidKeyException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
+	 * @throws NoSuchPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws BadPaddingException
+	 * @throws IllegalBlockSizeException
 	 */
-	public static String computeSambaLMPassword(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public static String computeSambaLMPassword(String password)
+			throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			IllegalBlockSizeException, BadPaddingException {
 		byte[] oemPwd = password.toUpperCase().getBytes("US-ASCII");
 		int pwdLength = Math.min(oemPwd.length, 14);
 
@@ -162,39 +172,42 @@ public class SecurityUtils {
 
 		des.init(Cipher.ENCRYPT_MODE, lowKey);
 		byte[] lowHash = des.doFinal(constantKGS);
-		
+
 		des.init(Cipher.ENCRYPT_MODE, highKey);
 		byte[] highHash = des.doFinal(constantKGS);
-		
+
 		System.arraycopy(lowHash, 0, lmHash, 0, 8);
 		System.arraycopy(highHash, 0, lmHash, 8, 8);
 
 		return bytesToHexString(lmHash);
 	}
-	
+
 	/**
 	 * Encrypt a password for samba, NTPassword version.
+	 * 
 	 * @param password the password to encrypt
 	 * @return the NTPassword
 	 * @throws UnsupportedEncodingException
-	 * @throws NoSuchProviderException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws NoSuchProviderException
+	 * @throws NoSuchAlgorithmException
 	 */
-	public static String computeSambaNTPassword(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchProviderException {
+	public static String computeSambaNTPassword(String password)
+			throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchProviderException {
 		byte[] unicodePassword = password.getBytes("UnicodeLittleUnmarked");
-		
+
 		MessageDigest md4 = MessageDigest.getInstance("MD4", new BouncyCastleProvider());
 		byte[] ntHash = md4.digest(unicodePassword);
-		
+
 		return bytesToHexString(ntHash);
 	}
-	
+
 	/**
 	 * Convert a byte array to an hexadecimal string.
+	 * 
 	 * @param bytes to convert
 	 * @return hexadecimal string
 	 */
-	private static final String bytesToHexString(final byte [] bytes) {
+	private static final String bytesToHexString(final byte[] bytes) {
 		StringBuffer hexString = new StringBuffer();
 		for (int i = 0; i < bytes.length; i++) {
 			int hex = (0xff & bytes[i]);
@@ -202,22 +215,21 @@ public class SecurityUtils {
 			tmp = (tmp.length() < 2) ? "0" + tmp : tmp; // if tmp=="9" => tmp=="09"
 			hexString.append(tmp);
 		}
- 
+
 		return hexString.toString().toUpperCase();
 	}
 
-    /**
-     *  Copyright Â© 2003, 2006 Eric Glass
-     *  Permission to use, copy, modify, and distribute this document 
-     *  for any purpose and without any fee is hereby granted, provided 
-     *  that the above copyright notice and this list of conditions appear 
-     *  in all copies.
-     *  
-     *  The most current version of this document may be obtained 
-     *  from http://davenport.sourceforge.net/ntlm.html. The author may 
-     *  be contacted vie e-mail at eric.glass at gmail.com.
-     */
-    private static Key createDESKey(byte[] bytes, int offset) {
+	/**
+	 * Copyright Â© 2003, 2006 Eric Glass Permission to use, copy, modify, and
+	 * distribute this document for any purpose and without any fee is hereby
+	 * granted, provided that the above copyright notice and this list of conditions
+	 * appear in all copies.
+	 * 
+	 * The most current version of this document may be obtained from
+	 * http://davenport.sourceforge.net/ntlm.html. The author may be contacted vie
+	 * e-mail at eric.glass at gmail.com.
+	 */
+	private static Key createDESKey(byte[] bytes, int offset) {
 		byte[] keyBytes = new byte[7];
 		System.arraycopy(bytes, offset, keyBytes, 0, 7);
 		byte[] material = new byte[8];
@@ -231,30 +243,28 @@ public class SecurityUtils {
 		material[7] = (byte) (keyBytes[6] << 1);
 		oddParity(material);
 		return new SecretKeySpec(material, "DES");
-    }
-    
-    /**
-     *  Copyright Â© 2003, 2006 Eric Glass
-     *  Permission to use, copy, modify, and distribute this document 
-     *  for any purpose and without any fee is hereby granted, provided 
-     *  that the above copyright notice and this list of conditions appear 
-     *  in all copies.
-     *  
-     *  The most current version of this document may be obtained 
-     *  from http://davenport.sourceforge.net/ntlm.html. The author may 
-     *  be contacted vie e-mail at eric.glass at gmail.com.
-     */
-    private static void oddParity(byte[] bytes) {
+	}
+
+	/**
+	 * Copyright Â© 2003, 2006 Eric Glass Permission to use, copy, modify, and
+	 * distribute this document for any purpose and without any fee is hereby
+	 * granted, provided that the above copyright notice and this list of conditions
+	 * appear in all copies.
+	 * 
+	 * The most current version of this document may be obtained from
+	 * http://davenport.sourceforge.net/ntlm.html. The author may be contacted vie
+	 * e-mail at eric.glass at gmail.com.
+	 */
+	private static void oddParity(byte[] bytes) {
 		for (int i = 0; i < bytes.length; i++) {
-		    byte b = bytes[i];
-		    boolean needsParity = (((b >>> 7) ^ (b >>> 6) ^ (b >>> 5) ^
-								    (b >>> 4) ^ (b >>> 3) ^ (b >>> 2) ^
-								    (b >>> 1)) & 0x01) == 0;
-		    if (needsParity) {
+			byte b = bytes[i];
+			boolean needsParity = (((b >>> 7) ^ (b >>> 6) ^ (b >>> 5) ^ (b >>> 4) ^ (b >>> 3) ^ (b >>> 2) ^ (b >>> 1))
+					& 0x01) == 0;
+			if (needsParity) {
 				bytes[i] |= (byte) 0x01;
-		    } else {
+			} else {
 				bytes[i] &= (byte) 0xfe;
-		    }
+			}
 		}
-    }
+	}
 }

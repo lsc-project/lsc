@@ -45,10 +45,11 @@
  */
 package org.lsc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -56,6 +57,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
+import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiServices;
@@ -69,7 +71,7 @@ import org.lsc.jndi.JndiServices;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-public class CommonLdapSyncTest {
+public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 
 	public final static String TASK_NAME = "ldap2ldapTestTask";
 	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
@@ -118,7 +120,7 @@ public class CommonLdapSyncTest {
 	 * @param expectedValues List of values expected in the attribute.
 	 * @throws NamingException
 	 */
-	public void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
+	protected void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		if (expectedValues.size() > 0) {
@@ -140,7 +142,7 @@ public class CommonLdapSyncTest {
 		}
 	}
 
-	public void checkAttributeIsEmpty(String dn, String attributeName)
+	protected void checkAttributeIsEmpty(String dn, String attributeName)
 			throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		assertNull(sr.getAttributes().get(attributeName));
@@ -158,7 +160,7 @@ public class CommonLdapSyncTest {
 	 * @param value The value expected in the attribute.
 	 * @throws NamingException
 	 */
-	public void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
+	protected void checkAttributeValue(String dn, String attributeName, String value) throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		assertNotNull(at);

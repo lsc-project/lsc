@@ -52,23 +52,24 @@ package org.lsc.utils;
  */
 public class CharacterUnacceptedException extends Exception {
 
-    /**
-     * For eclipse
-     */
-    private static final long serialVersionUID = 831208214048900952L;
+	/**
+	 * For eclipse
+	 */
+	private static final long serialVersionUID = 831208214048900952L;
 
-    /**
-     * Default constructor.
-     */
-    public CharacterUnacceptedException() {
-        super();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public CharacterUnacceptedException() {
+		super();
+	}
 
-    /**
-     * Default constructor.
-     * @param string the message
-     */
-    public CharacterUnacceptedException(final String string) {
-        super(string);
-    }
+	/**
+	 * Default constructor.
+	 * 
+	 * @param string the message
+	 */
+	public CharacterUnacceptedException(final String string) {
+		super(string);
+	}
 }

@@ -171,14 +171,15 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		return null;
 	}
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * 
-     * @return	Map of all entries DNs (this is not for display only!)
-     * 			that are returned by the directory with an associated map of attribute names and values (never null)
-     * @throws LscServiceException 
-     * @throws NamingException 
-     */
+	/**
+	 * Returns a list of all the objects' identifiers.
+	 * 
+	 * @return Map of all entries DNs (this is not for display only!) that are
+	 *         returned by the directory with an associated map of attribute names
+	 *         and values (never null)
+	 * @throws LscServiceException
+	 * @throws NamingException
+	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		List<String> idList = null;

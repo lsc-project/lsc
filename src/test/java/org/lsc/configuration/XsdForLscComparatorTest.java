@@ -45,13 +45,13 @@
  */
 package org.lsc.configuration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 
@@ -62,7 +62,6 @@ public class XsdForLscComparatorTest {
 	private static final String BEFORE_2="schemas/c.xsd";
 	private static final String AFTER="schemas/p.xsd";
 	private static final String AFTER_2="schemas/z.xsd";
-	private static final ImmutableList<String> unsortedList = ImmutableList.of(AFTER, BEFORE_2, CORE, AFTER_2, BEFORE);
 	
 	@Test
 	public void sortedListShouldHaveCoreAsFirstElementThenBeSortedAlphabetically() {

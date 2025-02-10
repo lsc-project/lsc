@@ -29,71 +29,71 @@ import org.slf4j.LoggerFactory;
  * @author Santhosh Kumar T &lt;santhosh.tekuri@gmail.com&gt;
  */
 public class PidUtil {
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(PidUtil.class);
 
-    public static String getPID(final String fallback) {
-        // Note: may fail in some JVM implementations
-        // therefore fallback has to be provided
+	private static final Logger LOGGER = LoggerFactory.getLogger(PidUtil.class);
 
-        // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
-        final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-        final int index = jvmName.indexOf('@');
+	public static String getPID(final String fallback) {
+		// Note: may fail in some JVM implementations
+		// therefore fallback has to be provided
 
-        if (index < 1) {
-            // part before '@' empty (index = 0) / '@' not found (index = -1)
-            return fallback;
-        }
+		// something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
+		final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+		final int index = jvmName.indexOf('@');
 
-        try {
-            return Long.toString(Long.parseLong(jvmName.substring(0, index)));
-        } catch (NumberFormatException e) {
-            // ignore
-        }
-        return fallback;
-    }
-    
-    public static String getPID() {
-        String pid = System.getProperty("pid"); // NOI18N
-        try {
-            if (pid == null) {
-                if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) {
-                    Process p = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "echo $$ $PPID" });
-                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                    pump(p.getInputStream(), bout, false, true);
-                    StringTokenizer stok = new StringTokenizer(bout.toString());
-                    stok.nextToken(); // this is pid of the process we spanned
-                    pid = stok.nextToken();
-                } else {
-                    pid = getPID(null);
-                }
-                if (pid != null) {
-                    System.setProperty("pid", pid); // NOI18N
-                }
-            }
-        } catch(IOException e) {
-            LOGGER.debug("Exception: " + e.toString());
-        }
-        return pid;
-    }
+		if (index < 1) {
+			// part before '@' empty (index = 0) / '@' not found (index = -1)
+			return fallback;
+		}
 
-    public static void pump(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
-        byte[] bytes = new byte[1024];
-        int read;
-        try {
-            while ((read = in.read(bytes)) != -1)
-                out.write(bytes, 0, read);
-        } finally {
-            if (closeIn && in != null) {
-                in.close();
-            }
-            if (closeOut && out != null) {
-                out.close();
-            }
-        }
-    }
+		try {
+			return Long.toString(Long.parseLong(jvmName.substring(0, index)));
+		} catch (NumberFormatException e) {
+			// ignore
+		}
+		return fallback;
+	}
 
-    public static void main(String[] args) throws IOException {
-        System.out.println(getPID());
-    }
+	public static String getPID() {
+		String pid = System.getProperty("pid"); // NOI18N
+		try {
+			if (pid == null) {
+				if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) {
+					Process p = Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "echo $$ $PPID" });
+					ByteArrayOutputStream bout = new ByteArrayOutputStream();
+					pump(p.getInputStream(), bout, false, true);
+					StringTokenizer stok = new StringTokenizer(bout.toString());
+					stok.nextToken(); // this is pid of the process we spanned
+					pid = stok.nextToken();
+				} else {
+					pid = getPID(null);
+				}
+				if (pid != null) {
+					System.setProperty("pid", pid); // NOI18N
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.debug("Exception: " + e.toString());
+		}
+		return pid;
+	}
+
+	public static void pump(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
+		byte[] bytes = new byte[1024];
+		int read;
+		try {
+			while ((read = in.read(bytes)) != -1)
+				out.write(bytes, 0, read);
+		} finally {
+			if (closeIn && in != null) {
+				in.close();
+			}
+			if (closeOut && out != null) {
+				out.close();
+			}
+		}
+	}
+
+	public static void main(String[] args) throws IOException {
+		System.out.println(getPID());
+	}
 }

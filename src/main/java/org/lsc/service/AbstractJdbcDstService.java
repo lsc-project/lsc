@@ -59,97 +59,99 @@ import com.ibatis.sqlmap.client.SqlMapClient;
 import com.ibatis.sqlmap.engine.impl.SqlMapClientImpl;
 import com.ibatis.sqlmap.engine.mapping.parameter.ParameterMapping;
 
-
 /**
  * This class is a Database abstraction layour for a destination service
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public abstract class AbstractJdbcDstService extends AbstractJdbcService implements IWritableService{
+public abstract class AbstractJdbcDstService extends AbstractJdbcService implements IWritableService {
 
-    private String serviceName;
-    
-    public AbstractJdbcDstService(String serviceName, SqlMapClient sqlMapClient, String bean) throws LscServiceConfigurationException {
-        super(sqlMapClient, bean);
-        this.serviceName = serviceName;
-    }
+	private String serviceName;
 
-    @Override
-    public boolean apply(LscModifications lm) throws LscServiceException {
-        Map<String, Object> attributeMap = getAttributesMap(lm.getLscAttributeModifications());
-        try {
-            sqlMapper.startTransaction();
-            switch(lm.getOperation()) {
-            case CHANGE_ID:
-                // Silently return without doing anything
-                break;
-            case CREATE_OBJECT:
-                for(String request: getRequestsNameForInsert()) {
-              	    LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
-                    sqlMapper.insert(request, attributeMap);
-                }
-                break;
-            case DELETE_OBJECT:
-                for(String request: getRequestsNameForDelete()) {
-                	  LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
-                    sqlMapper.delete(request, attributeMap);
-                }
-                break;
-            case UPDATE_OBJECT:
-                // Push the destination value
-                attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
-                for(String request: getRequestsNameForUpdate()) {
-              	    LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
-                    sqlMapper.update(request, attributeMap);
-                }
-            }
-            sqlMapper.commitTransaction();
-        } catch (SQLException e) {
-            LOGGER.error(e.toString(), e);
-            LOGGER.error("Error caused by operation " + lm.getOperation().getDescription() + ", attributes " + attributeMap.toString());
-            return false;
-        } finally {
-            try {
-                sqlMapper.endTransaction();
-            } catch (SQLException e) {
-                LOGGER.error(e.toString(), e);
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    /** Fetched attributes name cache */
-    private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
-
-    @Override
-    public List<String> getWriteDatasetIds() {
-        List<String> writeDatasetIds = attributesNameCache.get(serviceName);
-        if(writeDatasetIds != null) {
-            return writeDatasetIds;
-        }
-        return buildWriteDatasetIds();
-    }
-
-	private List<String> buildWriteDatasetIds() {
-        List<String> writeDatasetIds = new ArrayList<String>();
-        if(sqlMapper instanceof SqlMapClientImpl) {
-            for(String request: getRequestsNameForInsert()) {
-                for(ParameterMapping pm : ((SqlMapClientImpl)sqlMapper).getDelegate().getMappedStatement(request).getParameterMap().getParameterMappings()) {
-                    writeDatasetIds.add(pm.getPropertyName());
-                }
-            }
-            attributesNameCache.put(serviceName, writeDatasetIds);
-        } else {
-            LOGGER.error("Unable to handle an unknown SQLMap Client type : " + sqlMapper.getClass().getName());
-        }
-        return writeDatasetIds;
+	public AbstractJdbcDstService(String serviceName, SqlMapClient sqlMapClient, String bean)
+			throws LscServiceConfigurationException {
+		super(sqlMapClient, bean);
+		this.serviceName = serviceName;
 	}
 
-    public abstract List<String> getRequestsNameForInsert();
+	@Override
+	public boolean apply(LscModifications lm) throws LscServiceException {
+		Map<String, Object> attributeMap = getAttributesMap(lm.getLscAttributeModifications());
+		try {
+			sqlMapper.startTransaction();
+			switch (lm.getOperation()) {
+				case CHANGE_ID:
+					// Silently return without doing anything
+					break;
+				case CREATE_OBJECT:
+					for (String request : getRequestsNameForInsert()) {
+						LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
+						sqlMapper.insert(request, attributeMap);
+					}
+					break;
+				case DELETE_OBJECT:
+					for (String request : getRequestsNameForDelete()) {
+						LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
+						sqlMapper.delete(request, attributeMap);
+					}
+					break;
+				case UPDATE_OBJECT:
+					// Push the destination value
+					attributeMap = fillAttributesMap(attributeMap, lm.getDestinationBean());
+					for (String request : getRequestsNameForUpdate()) {
+						LOGGER.debug("Executing " + request + "(" + attributeMap + ")");
+						sqlMapper.update(request, attributeMap);
+					}
+			}
+			sqlMapper.commitTransaction();
+		} catch (SQLException e) {
+			LOGGER.error(e.toString(), e);
+			LOGGER.error("Error caused by operation " + lm.getOperation().getDescription() + ", attributes "
+					+ attributeMap.toString());
+			return false;
+		} finally {
+			try {
+				sqlMapper.endTransaction();
+			} catch (SQLException e) {
+				LOGGER.error(e.toString(), e);
+				return false;
+			}
+		}
+		return true;
+	}
 
-    public abstract List<String> getRequestsNameForUpdate();
-    
-    public abstract List<String> getRequestsNameForDelete();
+	/** Fetched attributes name cache */
+	private static Map<String, List<String>> attributesNameCache = new HashMap<String, List<String>>();
+
+	@Override
+	public List<String> getWriteDatasetIds() {
+		List<String> writeDatasetIds = attributesNameCache.get(serviceName);
+		if (writeDatasetIds != null) {
+			return writeDatasetIds;
+		}
+		return buildWriteDatasetIds();
+	}
+
+	private List<String> buildWriteDatasetIds() {
+		List<String> writeDatasetIds = new ArrayList<String>();
+		if (sqlMapper instanceof SqlMapClientImpl) {
+			for (String request : getRequestsNameForInsert()) {
+				for (ParameterMapping pm : ((SqlMapClientImpl) sqlMapper).getDelegate().getMappedStatement(request)
+						.getParameterMap().getParameterMappings()) {
+					writeDatasetIds.add(pm.getPropertyName());
+				}
+			}
+			attributesNameCache.put(serviceName, writeDatasetIds);
+		} else {
+			LOGGER.error("Unable to handle an unknown SQLMap Client type : " + sqlMapper.getClass().getName());
+		}
+		return writeDatasetIds;
+	}
+
+	public abstract List<String> getRequestsNameForInsert();
+
+	public abstract List<String> getRequestsNameForUpdate();
+
+	public abstract List<String> getRequestsNameForDelete();
 
 }

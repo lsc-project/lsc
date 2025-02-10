@@ -68,7 +68,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	private final String requestNameForNextId;
 	private final String requestNameForObject;
 	private final String requestNameForClean;
-	
+
 	/** Period in (milliseconds) */
 	private int interval;
 
@@ -76,25 +76,28 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	 * Simple JDBC source service that gets SQL request names from lsc.properties
 	 * and calls the appropriate SQL requests defined in sql-map-config.d
 	 * 
-	 * @param task Initialized task containing all necessary pieces of information to initiate connection
-	 * 				and load settings 
-	 * @throws LscServiceInitializationException 
+	 * @param task Initialized task containing all necessary pieces of information
+	 *             to initiate connection and load settings
+	 * @throws LscServiceInitializationException
 	 */
 	public SimpleJdbcSrcService(final TaskType task) throws LscServiceException {
-		super((DatabaseConnectionType)task.getDatabaseSourceService().getConnection().getReference(), task.getBean());
+		super((DatabaseConnectionType) task.getDatabaseSourceService().getConnection().getReference(), task.getBean());
 		DatabaseSourceServiceType serviceConf = task.getDatabaseSourceService();
 		requestNameForList = serviceConf.getRequestNameForList();
 		requestNameForObject = serviceConf.getRequestNameForObject();
-        requestNameForNextId = serviceConf.getRequestNameForNextId();
+		requestNameForNextId = serviceConf.getRequestNameForNextId();
 		requestNameForClean = serviceConf.getRequestNameForClean();
-		if(requestNameForClean == null) {
-            LOGGER.warn("No clean request has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+		if (requestNameForClean == null) {
+			LOGGER.warn("No clean request has been specified for task=" + task.getName()
+					+ ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
 		}
-		
+
 		interval = (serviceConf.getInterval() != null ? serviceConf.getInterval().intValue() : 5) * 1000;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForList()
 	 */
 	@Override
@@ -102,7 +105,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForList;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForObject()
 	 */
 	@Override
@@ -110,7 +115,9 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForObject;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForNextId()
 	 */
 	@Override
@@ -118,21 +125,23 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 		return requestNameForNextId;
 	}
 
-    /* (non-Javadoc)
-     * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
-     */
-    @Override
-    public String getRequestNameForClean() {
-        return requestNameForClean;
-    }
-    
-    @Override
-    public String getRequestNameForObjectOrClean(boolean fromSameService) {
-    	if (fromSameService) {
-    		return getRequestNameForObject();
-    	}
-    	return getRequestNameForClean();
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.lsc.service.AbstractJdbcService#getRequestNameForClean()
+	 */
+	@Override
+	public String getRequestNameForClean() {
+		return requestNameForClean;
+	}
+
+	@Override
+	public String getRequestNameForObjectOrClean(boolean fromSameService) {
+		if (fromSameService) {
+			return getRequestNameForObject();
+		}
+		return getRequestNameForClean();
+	}
 
 	static int count = 0;
 
@@ -149,10 +158,10 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 			LOGGER.warn("Error while looking for next entry ({})", e);
 			LOGGER.debug(e.toString(), e);
 		}
-		
+
 		return null;
 	}
-	
+
 	public long getInterval() {
 		return interval;
 	}

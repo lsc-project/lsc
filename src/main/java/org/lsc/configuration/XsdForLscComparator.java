@@ -49,7 +49,7 @@ import java.util.Comparator;
 
 public class XsdForLscComparator implements Comparator<String> {
 	
-   private static final String CORE = "lsc-core";
+	private static final String CORE = "lsc-core";
 	
 	@Override
 	public int compare(String o1, String o2) {

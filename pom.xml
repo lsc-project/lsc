@@ -188,17 +188,17 @@
 				<configuration>
 					<show>public</show>
 					<quiet>true</quiet>
-                    			<!-- workaround for https://bugs.openjdk.java.net/browse/JDK-8212233 -->
-                    			<javaApiLinks>
-                        			<property>
-                            				<name>foo</name>
-                            				<value>bar</value>
-                        			</property>
-                    			</javaApiLinks>
-                                        <source>8</source>
-                                        <detectJavaApiLink>false</detectJavaApiLink>
-                                        <!-- xsd generation creates invalid javadoc in java 8 those are errors -->
-                                        <doclint>none</doclint>
+								<!-- workaround for https://bugs.openjdk.java.net/browse/JDK-8212233 -->
+								<javaApiLinks>
+									<property>
+											<name>foo</name>
+											<value>bar</value>
+									</property>
+								</javaApiLinks>
+										<source>8</source>
+										<detectJavaApiLink>false</detectJavaApiLink>
+										<!-- xsd generation creates invalid javadoc in java 8 those are errors -->
+										<doclint>none</doclint>
 				</configuration>
 				<executions>
 					<execution>
@@ -438,13 +438,13 @@
 			</plugins>
 		</pluginManagement>
 
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.12</version>
-            </extension>
-        </extensions>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>2.12</version>
+			</extension>
+		</extensions>
 
 	</build>
 
@@ -532,16 +532,16 @@
 				</dependency>
 			</dependencies>
 			<build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources-filtered</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>false</filtering>
-                    </resource>
-                </resources>
+				<resources>
+					<resource>
+						<directory>src/main/resources-filtered</directory>
+						<filtering>true</filtering>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>false</filtering>
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
@@ -635,10 +635,10 @@
 			<url>https://download.java.net/maven/2</url>
 		</repository>
 		<repository>
-            <id>forgerock-community-repository</id>
-            <name>ForgeRock CommunityRepository</name>
-            <url>https://maven.forgerock.org/artifactory/community</url>
-        </repository>
+			<id>forgerock-community-repository</id>
+			<name>ForgeRock CommunityRepository</name>
+			<url>https://maven.forgerock.org/artifactory/community</url>
+		</repository>
 		<repository>
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>
@@ -668,10 +668,10 @@
 			<name>Reflections Maven2 Repository</name>
 			<url>https://reflections.googlecode.com/svn/repo</url>
 		</pluginRepository>
-                <pluginRepository>
-                  <id>org.jfrog.jade.plugins.common</id>
-                  <name>openmindonline-jade-plugin</name>
-                  <url>https://repository.openmindonline.it</url>
+				<pluginRepository>
+				  <id>org.jfrog.jade.plugins.common</id>
+				  <name>openmindonline-jade-plugin</name>
+				  <url>https://repository.openmindonline.it</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -696,12 +696,12 @@
 			<version>3.1.3</version>
 			<type>jar</type>
 			<optional>false</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -811,17 +811,17 @@
 			<scope>test</scope>
 		<dependency-->
 		<dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.15.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.15.2</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.15.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.15.2</version>
+			<scope>test</scope>
+		</dependency>
 		<!--dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -849,9 +849,9 @@
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-                <!--
-                    jaxb 2.3.6 with maven-jaxb2-plugin 0.15.1
-                -->
+				<!--
+					jaxb 2.3.6 with maven-jaxb2-plugin 0.15.1
+				-->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
@@ -861,12 +861,12 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
 			<version>3.0.0</version>
-	        </dependency>
+			</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
 			<version>4.0.5</version>
-	        </dependency>
+			</dependency>
 		<dependency>
 			<groupId>net.java.xadisk</groupId>
 			<artifactId>xadisk</artifactId>
@@ -887,28 +887,28 @@
 			<artifactId>groovy-all</artifactId>
 			<version>4.0.22</version>
 			<type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.junit.platform</groupId>
-                    <artifactId>junit-platform-launcher</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.junit.platform</groupId>
-                    <artifactId>junit-platform-engine</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.junit.platform</groupId>
-                    <artifactId>junit-jupiter-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.junit.platform</groupId>
-                    <artifactId>junit-jupiter-engine</artifactId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-platform-launcher</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-platform-engine</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-jupiter-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-jupiter-engine</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--dependency>
 			<groupId>org.apache.directory.api</groupId>
@@ -927,60 +927,60 @@
 		</dependency>
 		
 		<!-- ApacheDS dependencies -->
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-core-annotations</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-server-annotations</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-core-api</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-i18n</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-protocol-ldap</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-protocol-shared</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-core-integ</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-test-framework</artifactId>
-            <version>2.0.0.AM27</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-annotations</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-server-annotations</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-api</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-i18n</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-protocol-ldap</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-protocol-shared</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-integ</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-test-framework</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-            <version>5.11.0</version>
-        </dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+			<version>5.11.0</version>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>

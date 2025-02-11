@@ -42,11 +42,11 @@
  *         Sebastien Bahloul <seb@lsc-project.org>
  ****************************************************************************
  -->
- <!-- 
+<!-- 
  	Changelog:
  	- 02/05/2012: nisConnectionType and nisServiceType have been moved to dedicated XSD file inside the corresponding plugin
  		No new version is released because it has never been implemented before and won't break any existing and functional configuration
-  -->
+-->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 	xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
 	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.2.xsd"

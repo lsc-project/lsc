@@ -257,7 +257,7 @@
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.2.1</version>
+				<version>5.2.3</version>
 
 				<!-- common configuration by all executions -->
 				<configuration>

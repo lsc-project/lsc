@@ -502,14 +502,14 @@ public abstract class LscBean implements IBean, Serializable {
 				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
 				valuesAsSet.add(values);
 				tmp.put(name, valuesAsSet);
-            } else if (values instanceof Boolean) {
-                Set<Object> valuesAsSet = new LinkedHashSet<Object>();
-                valuesAsSet.add(values.toString());
-                tmp.put(name, valuesAsSet);
-            } else if (values instanceof Integer) {
-                Set<Object> valuesAsSet = new LinkedHashSet<Object>();
-                valuesAsSet.add("" + values);
-                tmp.put(name, valuesAsSet);
+			} else if (values instanceof Boolean) {
+				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
+				valuesAsSet.add(values.toString());
+				tmp.put(name, valuesAsSet);
+			} else if (values instanceof Integer) {
+				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
+				valuesAsSet.add("" + values);
+				tmp.put(name, valuesAsSet);
 			} else {
 				LOGGER.warn("Appending unknown type inside lsc bean as Set: "
 						+ values);

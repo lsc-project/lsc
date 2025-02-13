@@ -354,39 +354,41 @@ public class LscConfiguration {
 		return null;
 	}
 
-    public static void setSourceService(TaskType t, ServiceType s) throws LscConfigurationException {
-        if(s instanceof DatabaseSourceServiceType) {
-            t.setDatabaseSourceService((DatabaseSourceServiceType) s);
-        } else if (s instanceof LdapSourceServiceType) {
-            t.setLdapSourceService((LdapSourceServiceType) s);
-        } else if (s instanceof PluginSourceServiceType) {
-            t.setPluginSourceService((PluginSourceServiceType) s);
-        } else  {
-            throw new LscConfigurationException("Unable to map source service type to a known type: " + s.getClass().getName());
-        }
-    }
+	public static void setSourceService(TaskType t, ServiceType s) throws LscConfigurationException {
+		if (s instanceof DatabaseSourceServiceType) {
+			t.setDatabaseSourceService((DatabaseSourceServiceType) s);
+		} else if (s instanceof LdapSourceServiceType) {
+			t.setLdapSourceService((LdapSourceServiceType) s);
+		} else if (s instanceof PluginSourceServiceType) {
+			t.setPluginSourceService((PluginSourceServiceType) s);
+		} else {
+			throw new LscConfigurationException(
+					"Unable to map source service type to a known type: " + s.getClass().getName());
+		}
+	}
 
-    public static void setDestinationService(TaskType t, ServiceType s) throws LscConfigurationException {
-        if(s instanceof DatabaseDestinationServiceType) {
-            t.setDatabaseDestinationService((DatabaseDestinationServiceType) s);
-        } else if (s instanceof XaFileDestinationServiceType) {
-            t.setXaFileDestinationService((XaFileDestinationServiceType) s);
-        } else if (s instanceof MultiDestinationServiceType) {
-            t.setMultiDestinationService((MultiDestinationServiceType) s);
-        } else if (s instanceof LdapDestinationServiceType) {
-            t.setLdapDestinationService((LdapDestinationServiceType) s);
-        } else if (s instanceof PluginDestinationServiceType) {
-            t.setPluginDestinationService((PluginDestinationServiceType) s);
-        } else  {
-            throw new LscConfigurationException("Unable to map destination service type to a known type: " + s.getClass().getName());
-        }
-    }
+	public static void setDestinationService(TaskType t, ServiceType s) throws LscConfigurationException {
+		if (s instanceof DatabaseDestinationServiceType) {
+			t.setDatabaseDestinationService((DatabaseDestinationServiceType) s);
+		} else if (s instanceof XaFileDestinationServiceType) {
+			t.setXaFileDestinationService((XaFileDestinationServiceType) s);
+		} else if (s instanceof MultiDestinationServiceType) {
+			t.setMultiDestinationService((MultiDestinationServiceType) s);
+		} else if (s instanceof LdapDestinationServiceType) {
+			t.setLdapDestinationService((LdapDestinationServiceType) s);
+		} else if (s instanceof PluginDestinationServiceType) {
+			t.setPluginDestinationService((PluginDestinationServiceType) s);
+		} else {
+			throw new LscConfigurationException(
+					"Unable to map destination service type to a known type: " + s.getClass().getName());
+		}
+	}
 
 	public static Class<?> getServiceImplementation(ServiceType service) {
-		if(service instanceof LdapDestinationServiceType) {
+		if (service instanceof LdapDestinationServiceType) {
 			return SimpleJndiDstService.class;
-        } else if (service instanceof AsyncLdapSourceServiceType) {
-            return SyncReplSourceService.class;
+		} else if (service instanceof AsyncLdapSourceServiceType) {
+			return SyncReplSourceService.class;
 		} else if (service instanceof LdapSourceServiceType) {
 			return PullableJndiSrcService.class;
 		} else if (service instanceof DatabaseDestinationServiceType) {
@@ -399,14 +401,16 @@ public class LscConfiguration {
 			try {
 				return Class.forName(((PluginDestinationServiceType) service).getImplementationClass());
 			} catch (ClassNotFoundException e) {
-				throw new UnsupportedOperationException("Unknown plugin implementation: " + ((PluginDestinationServiceType) service).getImplementationClass());
+				throw new UnsupportedOperationException("Unknown plugin implementation: "
+						+ ((PluginDestinationServiceType) service).getImplementationClass());
 			}
-        } else if (service instanceof PluginSourceServiceType) {
-            try {
-                return Class.forName(((PluginSourceServiceType) service).getImplementationClass());
-            } catch (ClassNotFoundException e) {
-                throw new UnsupportedOperationException("Unknown plugin implementation: " + ((PluginSourceServiceType) service).getImplementationClass());
-            }
+		} else if (service instanceof PluginSourceServiceType) {
+			try {
+				return Class.forName(((PluginSourceServiceType) service).getImplementationClass());
+			} catch (ClassNotFoundException e) {
+				throw new UnsupportedOperationException("Unknown plugin implementation: "
+						+ ((PluginSourceServiceType) service).getImplementationClass());
+			}
 		} else {
 			throw new UnsupportedOperationException("Unknown service type: " + service.getClass().getName());
 		}
@@ -509,31 +513,32 @@ public class LscConfiguration {
 		original = null;
 	}
 
-    public static void setSyncOptions(TaskType task, SyncOptionsType syncOptions) throws LscConfigurationException {
-        if(syncOptions instanceof ForceSyncOptionsType) {
-            task.setForceSyncOptions((ForceSyncOptionsType) syncOptions);
-        } else if(syncOptions instanceof PropertiesBasedSyncOptionsType) {
-            task.setPropertiesBasedSyncOptions((PropertiesBasedSyncOptionsType) syncOptions);
-        } else if(syncOptions instanceof PluginSyncOptionsType) {
-            task.setPluginSyncOptions((PluginSyncOptionsType) syncOptions);
-        } else {
-            throw new LscConfigurationException("Unknown or null syncoptions type: " + syncOptions.getClass().getName()); 
-        }
-    }
-    
-    public static boolean isLdapBinaryAttribute(String attributeName) {
-    	for (ConnectionType connection: getConnections()) {
-    		if (connection instanceof LdapConnectionType) {
-    			ValuesType binaryAttributes = ((LdapConnectionType)connection).getBinaryAttributes();
+	public static void setSyncOptions(TaskType task, SyncOptionsType syncOptions) throws LscConfigurationException {
+		if (syncOptions instanceof ForceSyncOptionsType) {
+			task.setForceSyncOptions((ForceSyncOptionsType) syncOptions);
+		} else if (syncOptions instanceof PropertiesBasedSyncOptionsType) {
+			task.setPropertiesBasedSyncOptions((PropertiesBasedSyncOptionsType) syncOptions);
+		} else if (syncOptions instanceof PluginSyncOptionsType) {
+			task.setPluginSyncOptions((PluginSyncOptionsType) syncOptions);
+		} else {
+			throw new LscConfigurationException(
+					"Unknown or null syncoptions type: " + syncOptions.getClass().getName());
+		}
+	}
+
+	public static boolean isLdapBinaryAttribute(String attributeName) {
+		for (ConnectionType connection : getConnections()) {
+			if (connection instanceof LdapConnectionType) {
+				ValuesType binaryAttributes = ((LdapConnectionType) connection).getBinaryAttributes();
 				if (binaryAttributes != null && binaryAttributes.getString().contains(attributeName)) {
-    				return true;
-    			}
-    		}
-    	}
-    	return false;
-    }
-    
-    public static List<PivotTransformationType.Transformation> getPivotTransformation(TaskType task) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public static List<PivotTransformationType.Transformation> getPivotTransformation(TaskType task) {
 		SyncOptionsType syncOptions = LscConfiguration.getSyncOptions(task);
 		if (! LscConfiguration.getSyncOptionsImplementation(syncOptions).equals(PropertiesBasedSyncOptions.class)) {
 			return null;
@@ -543,17 +548,16 @@ public class LscConfiguration {
 			return null;
 		}
 		return pivotTransformationType.getTransformation();
-    }
-    
-    public static boolean pivotOriginMatchesFromSource(PivotOriginType pivotOrigin, boolean fromSource) {
-    	if (pivotOrigin.equals(PivotOriginType.BOTH)) {
-    		return true;
-    	}
-    	if (fromSource) {
-    		return pivotOrigin.equals(PivotOriginType.SOURCE);
-    	} else {
-    		return pivotOrigin.equals(PivotOriginType.DESTINATION);
-    	}
-    }
-}
-	
+	}
+
+	public static boolean pivotOriginMatchesFromSource(PivotOriginType pivotOrigin, boolean fromSource) {
+		if (pivotOrigin.equals(PivotOriginType.BOTH)) {
+			return true;
+		}
+		if (fromSource) {
+			return pivotOrigin.equals(PivotOriginType.SOURCE);
+		} else {
+			return pivotOrigin.equals(PivotOriginType.DESTINATION);
+		}
+	}
+}	

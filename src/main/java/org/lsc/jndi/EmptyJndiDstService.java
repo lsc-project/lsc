@@ -94,12 +94,12 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 		return null;
 	}
 
-    /**
-     * Returns a list of all the objects' identifiers.
-     * 
-     * @return Map Always null since this simulates an empty directory
-     * @throws NamingException Never thrown.
-     */
+	/**
+	 * Returns a list of all the objects' identifiers.
+	 * 
+	 * @return Map Always null since this simulates an empty directory
+	 * @throws NamingException Never thrown.
+	 */
 	public Map<String, LscDatasets> getListPivots() {
 		return null;
 	}

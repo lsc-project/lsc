@@ -206,8 +206,8 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 
 		NamingEnumeration<?> ne = sr.getAttributes().getAll();
 		while (ne.hasMore()) {
-            Attribute attr = (Attribute) ne.next();
-            beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
+			Attribute attr = (Attribute) ne.next();
+			beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
 		}
 		return beanToFill;
 	}
@@ -244,7 +244,8 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
+				.replaceAll(Matcher.quoteReplacement(id));
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());

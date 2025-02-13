@@ -45,8 +45,9 @@
  */
 package org.lsc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,12 +55,36 @@ import java.util.List;
 
 import javax.naming.CommunicationException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.directory.server.annotations.CreateLdapServer;
+import org.apache.directory.server.annotations.CreateTransport;
+import org.apache.directory.server.core.annotations.ApplyLdifFiles;
+import org.apache.directory.server.core.annotations.ApplyLdifs;
+import org.apache.directory.server.core.annotations.ContextEntry;
+import org.apache.directory.server.core.annotations.CreateDS;
+import org.apache.directory.server.core.annotations.CreateIndex;
+import org.apache.directory.server.core.annotations.CreatePartition;
+import org.apache.directory.server.core.annotations.LoadSchema;
+import org.apache.directory.server.core.integ.ApacheDSTestExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.directory.LDAP;
 
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 
 	public static String SOURCE_DN = "ou=ldap2ldapBinaryTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
@@ -70,31 +95,30 @@ public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 	public String getTaskName() {
 		return TASK_NAME;
 	}
-	
+
 	@Override
 	public String getSourceDn() {
 		return SOURCE_DN;
 	}
-	
+
 	@Override
 	public String getDestinationDn() {
 		return DESTINATION_DN;
 	}
-	
+
 	public List<String> getTaskList() {
 		return Arrays.asList(getTaskName());
 	}
-	
 
-	@Before
+	@BeforeEach
 	public void setup() throws CommunicationException {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
-		Assert.assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		Assert.assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("src-ldap"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		reloadJndiConnections();
 	}
-	
+
 	@Test
 	public void testSync() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with
@@ -122,7 +146,7 @@ public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 
 		// check the results of the synchronization
 		reloadJndiConnections();
-		
+
 		// check MODRDN
 		assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
 		assertFalse(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
@@ -140,18 +164,20 @@ public class Ldap2LdapBinaryPivotSyncTest extends CommonLdapSyncTest {
 		// the password was set and can be used
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
-		
+
 		// check convergence after MODRDN
 		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "0002"));
-		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
+		assertFalse(
+				LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
 		// perform the sync
 		new SimpleSynchronize().launch(new ArrayList<String>(), getTaskList(), new ArrayList<String>());
 		// check the results of the synchronization
 		reloadJndiConnections();
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "0002"));
-		assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
+		assertTrue(
+				LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODRDN_DST_AFTER, "secretCN0002"));
 	}
-	
+
 	@Test
 	public void testClean() throws Exception {
 		// make sure the contents of the directory are as we expect to begin with

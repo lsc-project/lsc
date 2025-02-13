@@ -45,11 +45,11 @@
  */
 package org.lsc.jndi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -68,8 +68,20 @@ import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.directory.server.annotations.CreateLdapServer;
+import org.apache.directory.server.annotations.CreateTransport;
+import org.apache.directory.server.core.annotations.ApplyLdifFiles;
+import org.apache.directory.server.core.annotations.ApplyLdifs;
+import org.apache.directory.server.core.annotations.ContextEntry;
+import org.apache.directory.server.core.annotations.CreateDS;
+import org.apache.directory.server.core.annotations.CreateIndex;
+import org.apache.directory.server.core.annotations.CreatePartition;
+import org.apache.directory.server.core.annotations.LoadSchema;
+import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
+import org.apache.directory.server.core.integ.ApacheDSTestExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.LscDatasets;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
@@ -81,7 +93,20 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class JndiServicesTest {
+@ExtendWith({ ApacheDSTestExtension.class })
+@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, partitions = {
+				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
+						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
+								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
+								@CreateIndex(attribute = "ou") }) })
+@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", port = 33389) })
+@ApplyLdifs({
+		// Entry # 0
+		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
+		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
+public class JndiServicesTest extends AbstractLdapTestUnit {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JndiServicesTest.class);
 
@@ -89,21 +114,24 @@ public class JndiServicesTest {
 	private JndiServices dstRelaxRulesJndiServices;
 	private JndiServices dstRecursiveDeleteJndiServices;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
-		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
-		dstRelaxRulesJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap-relaxrules"));
-		dstRecursiveDeleteJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap-recursivedelete"));
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+		dstRelaxRulesJndiServices = JndiServices
+				.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap-relaxrules"));
+		dstRecursiveDeleteJndiServices = JndiServices
+				.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap-recursivedelete"));
 	}
-	
+
 	/**
 	 * Just check that the connection is ready.
 	 */
 	@Test
 	public final void testConnection() {
 		assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		assertEquals(true, JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap")).exists(""));
+		assertEquals(true,
+				JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("src-ldap")).exists(""));
 	}
 
 	@Test
@@ -111,39 +139,34 @@ public class JndiServicesTest {
 		Map<String, LscDatasets> values = null;
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add("objectClass");
-		values = dstJndiServices.getAttrsList("",
-						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
+		values = dstJndiServices.getAttrsList("", JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
 		assertEquals(1, values.size());
 		assertNotNull(values.get(values.keySet().iterator().next()));
-		assertNotNull(dstJndiServices.getSchema(
-						new String[]{"objectclasses"}));
+		assertNotNull(dstJndiServices.getSchema(new String[] { "objectclasses" }));
 	}
 
 	@Test
 	public final void testSup() throws NamingException {
 		assertEquals(null, dstJndiServices.sup("", -1));
-		assertEquals(new ArrayList<String>(), dstJndiServices.sup(
-						"ou=People", 1));
+		assertEquals(new ArrayList<String>(), dstJndiServices.sup("ou=People", 1));
 		List<String> test2list = new ArrayList<String>();
 		test2list.add("ou=test2,ou=test3");
-		assertEquals(test2list, dstJndiServices.sup(
-						"ou=test1,ou=test2,ou=test3", 1));
+		assertEquals(test2list, dstJndiServices.sup("ou=test1,ou=test2,ou=test3", 1));
 		test2list.add(0, "ou=test1,ou=test2,ou=test3");
-		assertEquals(test2list, dstJndiServices.sup(
-						"ou=test1,ou=test2,ou=test3", 0));
+		assertEquals(test2list, dstJndiServices.sup("ou=test1,ou=test2,ou=test3", 0));
 	}
 
 	@Test
 	public final void testGetDnList() throws NamingException {
 		List<String> test2list = new ArrayList<String>();
 		test2list.add("");
-		assertEquals(test2list, dstJndiServices.getDnList("",
-						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE));
+		assertEquals(test2list,
+				dstJndiServices.getDnList("", JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE));
 
 		test2list = new ArrayList<String>();
 		test2list.add("uid=00000001,ou=People");
-		assertEquals(test2list, dstJndiServices.getDnList("ou=People",
-						"objectclass=person", SearchControls.SUBTREE_SCOPE));
+		assertEquals(test2list,
+				dstJndiServices.getDnList("ou=People", "objectclass=person", SearchControls.SUBTREE_SCOPE));
 	}
 
 	@Test
@@ -156,8 +179,8 @@ public class JndiServicesTest {
 		String attrName = "description";
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add(attrName);
-		Map<String, LscDatasets> values = dstJndiServices.getAttrsList("ou=People",
-						JndiServices.DEFAULT_FILTER, SearchControls.OBJECT_SCOPE, attrsName);
+		Map<String, LscDatasets> values = dstJndiServices.getAttrsList("ou=People", JndiServices.DEFAULT_FILTER,
+				SearchControls.OBJECT_SCOPE, attrsName);
 		Attribute descAttr = new BasicAttribute(attrName);
 		String descValue = (String) values.get(values.keySet().iterator().next()).getStringValueAttribute(attrName);
 		try {
@@ -168,11 +191,9 @@ public class JndiServicesTest {
 			descValue = descValue + "-1";
 		}
 		descAttr.add(descValue);
-		JndiModifications jm = new JndiModifications(
-						JndiModificationType.MODIFY_ENTRY);
+		JndiModifications jm = new JndiModifications(JndiModificationType.MODIFY_ENTRY);
 		jm.setDistinguishName("ou=People");
-		ModificationItem mi = new ModificationItem(
-						DirContext.REPLACE_ATTRIBUTE, descAttr);
+		ModificationItem mi = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, descAttr);
 		List<ModificationItem> mis = new ArrayList<ModificationItem>();
 		mis.add(mi);
 		jm.setModificationItems(mis);
@@ -190,9 +211,10 @@ public class JndiServicesTest {
 		assertFalse(dstJndiServices.apply(jm));
 	}
 
-	private final void createEntryWithChildren(String parent, String name, int currLevel, int maxLevel) throws NamingException {
+	private final void createEntryWithChildren(String parent, String name, int currLevel, int maxLevel)
+			throws NamingException {
 		JndiModifications jm = new JndiModifications(JndiModificationType.ADD_ENTRY);
-		jm.setDistinguishName("cn="+name+"," + parent);
+		jm.setDistinguishName("cn=" + name + "," + parent);
 		Attribute objectClass = new BasicAttribute("objectClass", "person");
 		Attribute sn = new BasicAttribute("sn", name);
 		Attribute cn = new BasicAttribute("cn", name);
@@ -205,8 +227,8 @@ public class JndiServicesTest {
 		if (currLevel < maxLevel) {
 			currLevel++;
 			int nbChildren = new Random().nextInt(3) + 1;
-			for (int child=0; child < nbChildren; child++) {
-				createEntryWithChildren("cn="+name+"," + parent, name+child, currLevel, maxLevel);
+			for (int child = 0; child < nbChildren; child++) {
+				createEntryWithChildren("cn=" + name + "," + parent, name + child, currLevel, maxLevel);
 			}
 		}
 	}
@@ -217,9 +239,11 @@ public class JndiServicesTest {
 		createEntryWithChildren("ou=People", "testDelete", 0, 3);
 		JndiModifications jm = new JndiModifications(JndiModificationType.DELETE_ENTRY);
 		jm.setDistinguishName("cn=testDelete,ou=People");
-		assertFalse("delete entry with children should fail if not using recursiveDelete option", dstJndiServices.apply(jm));
-		assertTrue("delete entry with children should succeed using recursiveDelete option", dstRecursiveDeleteJndiServices.apply(jm));
-		assertNull("entry should not exist after delete",dstJndiServices.readEntry("cn=testDelete,ou=People", true));
+		assertFalse(dstJndiServices.apply(jm),
+				"delete entry with children should fail if not using recursiveDelete option");
+		assertTrue(dstRecursiveDeleteJndiServices.apply(jm),
+				"delete entry with children should succeed using recursiveDelete option");
+		assertNull(dstJndiServices.readEntry("cn=testDelete,ou=People", true), "entry should not exist after delete");
 	}
 
 	@Test
@@ -227,24 +251,24 @@ public class JndiServicesTest {
 		{
 			LdapContext ctx = dstRelaxRulesJndiServices.getContext(true);
 			boolean hasRelaxRulesCtl = false;
-			for (int i=0; i < ctx.getRequestControls().length; i++) {
+			for (int i = 0; i < ctx.getRequestControls().length; i++) {
 				if (ctx.getRequestControls()[i].getID().equals(JndiServices.RELAX_RULES_CONTROL_OID)) {
 					hasRelaxRulesCtl = true;
 					break;
 				}
 			}
-			assertTrue("ctx for updates does not contains relax-rules request control", hasRelaxRulesCtl);
+			assertTrue(hasRelaxRulesCtl, "ctx for updates does not contains relax-rules request control");
 		}
 		{
 			LdapContext ctx = dstRelaxRulesJndiServices.getContext(false);
 			boolean hasRelaxRulesCtl = false;
-			for (int i=0; i < ctx.getRequestControls().length; i++) {
+			for (int i = 0; i < ctx.getRequestControls().length; i++) {
 				if (ctx.getRequestControls()[i].getID().equals(JndiServices.RELAX_RULES_CONTROL_OID)) {
 					hasRelaxRulesCtl = true;
 					break;
 				}
 			}
-			assertFalse("ctx not for updates contains relax-rules request control", hasRelaxRulesCtl);
+			assertFalse(hasRelaxRulesCtl, "ctx not for updates contains relax-rules request control");
 		}
 		{
 			// This fails as OpenDJ does not support relax-rules control
@@ -269,8 +293,8 @@ public class JndiServicesTest {
 		LOGGER.debug("Counting all the directory entries ...");
 		List<String> attrsName = new ArrayList<String>();
 		attrsName.add(attrName);
-		Map<String, LscDatasets> results = dstJndiServices.
-						getAttrsList("", attrName + "=*", SearchControls.ONELEVEL_SCOPE, attrsName);
+		Map<String, LscDatasets> results = dstJndiServices.getAttrsList("", attrName + "=*",
+				SearchControls.ONELEVEL_SCOPE, attrsName);
 		Iterator<String> iter = results.keySet().iterator();
 		int i = 0;
 		for (; iter.hasNext(); i++) {
@@ -280,7 +304,7 @@ public class JndiServicesTest {
 		}
 		LOGGER.debug(" Final count : {}", i);
 	}
-	
+
 	public void testAuthenticationThroughJAAS() {
 		LoginContext lc = null;
 		String user = "";
@@ -288,16 +312,16 @@ public class JndiServicesTest {
 
 		URL url = getClass().getResource("jaas.conf");
 		System.setProperty("java.security.auth.login.config", url.toExternalForm());
-		
+
 		try {
-	 
-		    lc = new LoginContext(JndiServices.class.getName(), JndiServices.getCallbackHandler(user, pass));
-		    lc.login();
+
+			lc = new LoginContext(JndiServices.class.getName(), JndiServices.getCallbackHandler(user, pass));
+			lc.login();
 		} catch (LoginException le) {
-		    System.err.println("Authentication attempt failed" + le);
-		    System.exit(-1);
+			System.err.println("Authentication attempt failed" + le);
+			System.exit(-1);
 		}
 		System.out.println("Authenticated via GSS-API");
-		//Subject.doAs(lc.getSubject(), new JndiServices());	
+		// Subject.doAs(lc.getSubject(), new JndiServices());
 	}
 }

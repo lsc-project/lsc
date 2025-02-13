@@ -871,7 +871,7 @@
 		<dependency>
 			<groupId>org.apache.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>4.0.22</version>
+			<version>4.0.25</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>

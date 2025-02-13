@@ -965,7 +965,7 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
-			<version>5.11.0</version>
+			<version>5.11.4</version>
 		</dependency>
 	</dependencies>
 

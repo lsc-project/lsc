@@ -46,10 +46,8 @@
 package org.lsc;
 
 import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -214,12 +212,6 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		List<String> hookResults = new ArrayList<String>();
 		try {
 			File hookFile = new File("hook-json-" + operation + ".log");
-
-			Thread.sleep(1000L);
-
-			if (!hookFile.exists()) {
-				System.out.println("!!!!!!!!!!!!!!!!!!! File " + hookFile.getAbsolutePath() + " does not exist");
-			}
 
 			try (Scanner hookReader = new Scanner(hookFile.getAbsoluteFile())) {
 				while (hookReader.hasNextLine()) {

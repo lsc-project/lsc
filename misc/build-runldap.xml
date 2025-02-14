@@ -1,11 +1,11 @@
 <project name="lsc-sample" default="lsc::help" basedir=".." xmlns:artifact="urn:maven-artifact-ant" xmlns:unless="ant:unless">
-    
-    <!-- look for properties in ~/.lsc-build.properties, ~/lsc.properties -->
+
+	<!-- look for properties in ~/.lsc-build.properties, ~/lsc.properties -->
 	<property file="${user.home}/.${ant.project.name}-build.properties" />
 	<property file="${user.home}/build.properties" />
 	<property file="build.properties" />
 	<property environment="env" />
-    
+
 	<property name="build.dir" value="${basedir}/target" />
 	<property name="build.classes.dir" value="${build.dir}/classes" />
 	<property name="src.main.dir" value="${basedir}/src/main" />
@@ -15,26 +15,26 @@
 	<condition property="java8">
 		<equals arg1="${ant.java.version}" arg2="1.8" />
 	</condition>
-    
-  <!--
-	    ===================================================================
-	      Start the ldap server
-	    ===================================================================
+
+	<!--
+		===================================================================
+		Start the ldap server
+		===================================================================
 	-->
 	<target name="startLdapServer" description="Start the ldap server">
 		<echo message="Starting OpenDJ embedded server from ${build.test-classes.dir}"/>
 		<copy todir="${build.test-classes.dir}">
 			<fileset dir="${src.test.dir}/java" includes="**/*.ldif*"/>
 		</copy>
-        
+
 		<taskdef resource="net/sf/antcontrib/antlib.xml">
 			<classpath>
 				<fileset dir="${basedir}/lib" includes="**/ant-contrib*.jar"/>
 			</classpath>
 		</taskdef>
-       
+
 		<fail unless="execution.path" message="'execution.path' must be set"/>
-        
+
 		<forget daemon="true">
 			<java classname="org.lsc.opendj.LdapServer" classpath="${build.classes.dir}:${build.test-classes.dir}:${execution.path}" fork="true" maxmemory="512M" dir="${build.test-classes.dir}">
 				<arg line="-a" />
@@ -47,10 +47,10 @@
 
 	</target>
 
-    <!--
-	    ===================================================================
-	      Stop the ldap server
-	    ===================================================================
+	<!--
+		===================================================================
+		Stop the ldap server
+		===================================================================
 	-->
 	<target name="stopLdapServer" description="Stop the ldap server">
 		<echo message="Stopping OpenDJ embedded server"/>
@@ -61,25 +61,24 @@
 		</java>
 	</target>
 
-    <!--
-        ===================================================================
-          Print the help message
-        ===================================================================
+	<!--
+		===================================================================
+		Print the help message
+		===================================================================
 	-->
 	<target name="lsc::help">
 		<echo>
-            *****************************************
-            Ldap Synchronization Connector project
-            *****************************************
-            
-            To start the embedded OpenDJ
-            &gt; ant startLdapServer
-            
-            To stop the embedded OpenDJ
-            &gt; ant stopLdapServer
-            
+			*****************************************
+			Ldap Synchronization Connector project
+			*****************************************
+
+			To start the embedded OpenDJ
+			&gt; ant startLdapServer
+
+			To stop the embedded OpenDJ
+			&gt; ant stopLdapServer
+
 		</echo>
 	</target>
-    
 </project>
 

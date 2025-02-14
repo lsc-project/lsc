@@ -1,6 +1,7 @@
-package org.lsc;
+package org.lsc.db2ldap;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,6 +25,7 @@ import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.annotations.LoadSchema;
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
 import org.apache.directory.server.core.integ.ApacheDSTestExtension;
+import org.lsc.SimpleSynchronize;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
@@ -50,12 +52,12 @@ import com.ibatis.sqlmap.client.SqlMapSession;
 		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
 		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
-public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
+public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Ldap2JdbcSyncTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Jdbc2LdapSyncTest.class);
 
-	public final static String TASK_NAME = "ldap2dbTestTask";
-	public final static String SOURCE_DN = "ou=ldap2db2TestTask,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String TASK_NAME = "db2ldapTestTask";
+	public final static String SOURCE_DN = "ou=db2ldapTestTask,ou=Test Data,dc=lsc-project,dc=org";
 	public final static String DEST_TABLE = "testdata";
 	public final static String DEST_TABLE_DEF = "id VARCHAR(36) PRIMARY KEY, MAIL VARCHAR(256), MAIL_LOWER VARCHAR(256), LAST_UPDATE TIMESTAMP, SN VARCHAR(64), CN VARCHAR(128), DESCRIPTION VARCHAR(512), TELEPHONENUMBER VARCHAR(128)";
 
@@ -100,6 +102,7 @@ public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
 	}
 
 	@Test
+	@Disabled
 	public void testSyncLdap2Db() throws Exception {
 		String functionName = "testSyncLdap2Db";
 

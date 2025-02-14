@@ -22,13 +22,13 @@
 	</select>
 
 	<insert id="insertInetOrgPerson" parameterClass="java.util.Map">
-                INSERT INTO testdata
-                        ( ID , MAIL , MAIL_LOWER , LAST_UPDATE , SN , CN , DESCRIPTION , TELEPHONENUMBER )
-                        VALUES ( #externalid# , #mail# , LCASE(#mail#) , NOW() , #sn# , #cn# , #description# , #telephonenumber# )
-        </insert>
+				INSERT INTO testdata
+						( ID , MAIL , MAIL_LOWER , LAST_UPDATE , SN , CN , DESCRIPTION , TELEPHONENUMBER )
+						VALUES ( #externalid# , #mail# , LCASE(#mail#) , NOW() , #sn# , #cn# , #description# , #telephonenumber# )
+		</insert>
 
-        <update id="updateInetOrgPerson" parameterClass="java.util.Map">
-                UPDATE testdata
+		<update id="updateInetOrgPerson" parameterClass="java.util.Map">
+				UPDATE testdata
 			SET  ID = #externalid#,
 			MAIL = #mail#,
 			MAIL_LOWER = LCASE(#mail#),
@@ -37,12 +37,12 @@
 			CN = #cn#,
 			DESCRIPTION = #description#,
 			TELEPHONENUMBER = #telephonenumber#
-        	WHERE id = #externalid#
-        </update>
+			WHERE id = #externalid#
+		</update>
 
-        <delete id="deleteInetOrgPerson" parameterClass="java.util.Map">
-                DELETE FROM testdata
-                WHERE id = #externalid#
-        </delete>
+		<delete id="deleteInetOrgPerson" parameterClass="java.util.Map">
+				DELETE FROM testdata
+				WHERE id = #externalid#
+		</delete>
 
 </sqlMap>

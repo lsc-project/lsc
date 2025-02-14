@@ -84,7 +84,7 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //	private Map<String, Script> cache;
 
 	private ScriptEngine engine;
-	
+
 	/** The local Rhino context. */
 //	private ScriptContext cx;
 
@@ -97,16 +97,16 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //		cx = se.getContext();//new ContextFactory().enterContext();
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public String evalToString(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
+	public String evalToString(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 
 		if (result == null) {
 			return null;
 		} else if (result instanceof String) {
-			return (String)result;
+			return (String) result;
 		} else {
 			return result.toString();
 		}
@@ -114,31 +114,31 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 //		return (String) Context.jsToJava(result, String.class);
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public List<Object> evalToObjectList(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
-        Object result = null;
-	    try {
-	        result = convertJsToJava(instanceEval(task, expression, params));
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
-	    if(result == null){
+	public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+		if (result == null) {
 			return null;
-	    }
-	    List<Object> resultsArray = new ArrayList<Object>();
-		if(result instanceof String[] || result instanceof Object[] ) {
-			for (Object resultValue : (Object[])result) {
+		}
+		List<Object> resultsArray = new ArrayList<Object>();
+		if (result instanceof String[] || result instanceof Object[]) {
+			for (Object resultValue : (Object[]) result) {
 				resultsArray.add(resultValue.toString());
 			}
 		} else if (result instanceof String) {
-			String resultAsString = (String)result;
+			String resultAsString = (String) result;
 			if (resultAsString != null && resultAsString.length() > 0) {
 				resultsArray.add(resultAsString);
 			}
 		} else if (result instanceof List) {
-			for (Object resultValue : (List<?>)result) {
+			for (Object resultValue : (List<?>) result) {
 				resultsArray.add(resultValue.toString());
 			}
 		} else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
@@ -151,42 +151,42 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		return resultsArray;
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
-        Object result = null;
-	    try {
-	        result = convertJsToJava(instanceEval(task, expression, params));
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
-	    
-		if(result instanceof byte[][]) {
+	public List<byte[]> evalToByteArrayList(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+
+		if (result instanceof byte[][]) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (byte[] resultValue : (byte[][])result) {
+			for (byte[] resultValue : (byte[][]) result) {
 				resultsArray.add(resultValue);
 			}
 			return resultsArray;
 		} else if (result instanceof byte[]) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			byte[] resultAsByteArray = (byte[])result;
+			byte[] resultAsByteArray = (byte[]) result;
 			if (resultAsByteArray != null && resultAsByteArray.length > 0) {
 				resultsArray.add(resultAsByteArray);
 			}
 			return resultsArray;
 		} else if (result instanceof String) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			String resultAsString = (String)result;
+			String resultAsString = (String) result;
 			if (resultAsString != null && resultAsString.length() > 0) {
 				resultsArray.add(resultAsString.getBytes());
 			}
 			return resultsArray;
 		} else if (result instanceof List) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (Object resultValue : (List<?>)result) {
+			for (Object resultValue : (List<?>) result) {
 				if (resultValue instanceof byte[]) {
-					resultsArray.add((byte[])resultValue);
+					resultsArray.add((byte[]) resultValue);
 				} else {
 					resultsArray.add(resultValue.toString().getBytes());
 				}
@@ -194,15 +194,15 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 			return resultsArray;
 		} else if (result instanceof Set) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (Object resultValue : (Set<?>)result) {
+			for (Object resultValue : (Set<?>) result) {
 				if (resultValue instanceof byte[]) {
-					resultsArray.add((byte[])resultValue);
+					resultsArray.add((byte[]) resultValue);
 				} else {
 					resultsArray.add(resultValue.toString().getBytes());
 				}
 			}
 			return resultsArray;
-		} else if(result == null){
+		} else if (result == null) {
 			return null;
 		} else {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
@@ -213,58 +213,57 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		}
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public byte[] evalToByteArray(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
-        Object result = null;
-	    try {
-	        result = convertJsToJava(instanceEval(task, expression, params));
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
-	    
+	public byte[] evalToByteArray(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+
 		if (result instanceof byte[]) {
-			return (byte[])result;
+			return (byte[]) result;
 		} else if (result instanceof String) {
-			return ((String)result).getBytes();
+			return ((String) result).getBytes();
 		} else {
 			return result.toString().getBytes();
 		}
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) throws LscServiceException {
-	    try {
-	        return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
+	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		try {
+			return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
 	}
 
 	/**
 	 * Local instance evaluation.
 	 *
-	 * @param expression
-	 *                the expression to eval
-	 * @param params
-	 *                the keys are the name used in the
+	 * @param expression the expression to eval
+	 * @param params     the keys are the name used in the
 	 * @return the evaluation result
-	 * @throws LscServiceException 
+	 * @throws LscServiceException
 	 */
-	private Object instanceEval(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
+	private Object instanceEval(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
 //		Script script = null;
 		Bindings bindings = engine.createBindings();
 
-
-		/* Allow to have shorter names for function in the package org.lsc.utils.directory */
-		String expressionImport =
-                        "var version = java.lang.System.getProperty(\"java.version\");\n" +
-                        "load(\"nashorn:mozilla_compat.js\");\n" +
-                        "importPackage(org.lsc.utils.directory);\n" +
-                        "importPackage(org.lsc.utils);\n" + expression;
+		/*
+		 * Allow to have shorter names for function in the package
+		 * org.lsc.utils.directory
+		 */
+		String expressionImport = "var version = java.lang.System.getProperty(\"java.version\");\n"
+				+ "load(\"nashorn:mozilla_compat.js\");\n" + "importPackage(org.lsc.utils.directory);\n"
+				+ "importPackage(org.lsc.utils);\n" + expression;
 
 //		if (cache.containsKey(expressionImport)) {
 //			script = cache.get(expressionImport);
@@ -276,27 +275,27 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 		// add LDAP interface for destination
 		if (!bindings.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
 			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-			dstSjs.setJndiServices(((AbstractSimpleJndiService)task.getDestinationService()).getJndiServices());
+			dstSjs.setJndiServices(((AbstractSimpleJndiService) task.getDestinationService()).getJndiServices());
 			bindings.put("ldap", dstSjs);
 		}
 
 		// add LDAP interface for source
 		if (!bindings.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
 			ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-			srcSjs.setJndiServices(((AbstractSimpleJndiService)task.getSourceService()).getJndiServices());
+			srcSjs.setJndiServices(((AbstractSimpleJndiService) task.getSourceService()).getJndiServices());
 			bindings.put("srcLdap", srcSjs);
 		}
 
-		if(params != null) {
-			for(String paramName: params.keySet()) {
+		if (params != null) {
+			for (String paramName : params.keySet()) {
 				bindings.put(paramName, params.get(paramName));
 			}
 		}
-		
+
 		Object ret = null;
 		try {
 			if (task.getScriptIncludes() != null) {
-				for (File scriptInclude: task.getScriptIncludes()) {
+				for (File scriptInclude : task.getScriptIncludes()) {
 					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
 						FileReader reader = new FileReader(scriptInclude);
 						try {
@@ -309,15 +308,18 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 			}
 			ret = engine.eval(expressionImport, bindings);
 		} catch (ScriptException e) {
-            LOGGER.error("Fail to compute expression: " + expression + " on " + 
-                    (params.containsKey("srcBean") && ((IBean)params.get("srcBean")).getMainIdentifier() != null ? "id=" + ((IBean)params.get("srcBean")).getMainIdentifier() : 
-                        ( params.containsKey("dstBean") && ((IBean)params.get("dstBean")).getMainIdentifier() != null ? "id=" + ((IBean)params.get("dstBean")).getMainIdentifier() :
-                            "unknown id !"))
-                    + "\nReason: " + e.toString());
-            LOGGER.debug(e.toString(), e);
-            throw new LscServiceException (e);
+			LOGGER.error("Fail to compute expression: " + expression + " on "
+					+ (params.containsKey("srcBean") && ((IBean) params.get("srcBean")).getMainIdentifier() != null
+							? "id=" + ((IBean) params.get("srcBean")).getMainIdentifier()
+							: (params.containsKey("dstBean")
+									&& ((IBean) params.get("dstBean")).getMainIdentifier() != null
+											? "id=" + ((IBean) params.get("dstBean")).getMainIdentifier()
+											: "unknown id !"))
+					+ "\nReason: " + e.toString());
+			LOGGER.debug(e.toString(), e);
+			throw new LscServiceException(e);
 		} catch (RuntimeException e) {
-            throw new LscServiceException (e);
+			throw new LscServiceException(e);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
@@ -326,22 +328,23 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 
 		return ret;
 	}
-	
+
 	private static Object convertJsToJava(Object src) {
 		if (src == null) {
 			return null;
-		} else if(src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
+		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
 			return Context.jsToJava(src, Object.class);
 		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
 			try {
-				Method getMethod = src.getClass().getMethod("get", int.class, Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
+				Method getMethod = src.getClass().getMethod("get", int.class,
+						Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
 				Object length = src.getClass().getMethod("getLength").invoke(src);
 				Object[] retarr = new Object[Integer.parseInt(length.toString())];
 				for (int index = 0; index < retarr.length; index++) {
 					retarr[index] = getMethod.invoke(src, index, null);
 				}
 				return retarr;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
@@ -360,15 +363,14 @@ public final class JScriptEvaluator implements ScriptableEvaluator {
 						}
 					}
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				LOGGER.error(e.toString());
 				LOGGER.debug(e.toString(), e);
 			}
 		} else if (src instanceof List<?>) {
 			final List<?> list = (List<?>) src;
 			return list.toArray(new Object[0]);
-		} else if (src == UniqueTag.NOT_FOUND
-				|| src == UniqueTag.NULL_VALUE) {
+		} else if (src == UniqueTag.NOT_FOUND || src == UniqueTag.NULL_VALUE) {
 			return null;
 		}
 		return src;

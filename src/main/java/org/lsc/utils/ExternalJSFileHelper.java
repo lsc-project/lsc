@@ -42,7 +42,8 @@
  *         Jonathan Clarke &lt;jon@lsc-project.org&gt;
  *         Remy-Christophe Schermesser &lt;rcs@lsc-project.org&gt;
  ****************************************************************************
- */package org.lsc.utils;
+ */
+package org.lsc.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -57,42 +58,44 @@ import org.mozilla.javascript.ScriptableObject;
 
 /**
  * First try to load and execute an function specified inside another js file.
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class ExternalJSFileHelper extends ScriptableObject {
 
-    private static final long serialVersionUID = 8803488253722834372L;
+	private static final long serialVersionUID = 8803488253722834372L;
 
-    /**
-     * 
-     * @param jsFile relative or full path to the Javascript file
-     * @param fctName the function name to call
-     * @param args the array containing the various function parameters
-     * @return the function result
-     * @throws LscServiceException thrown if an error occurs while reading the file or parsing it
-     */
-    public static Object invoke(String jsFile, String fctName, Object[] args) throws LscServiceException {
-        Context ctx = ContextFactory.getGlobal().enterContext();
-        try {
-            InputStream fis = new FileInputStream(jsFile);
-            byte[] arr = new byte[30000];
-            fis.read(arr);
-            fis.close();
-            ScriptableObject scope = ctx.initStandardObjects();
-            ctx.evaluateString(scope, new String(arr).trim(), jsFile, 1, null);
-            Function fct = (Function)scope.get(fctName, scope);
-            return fct.call(ctx, scope, scope, args);
-        } catch(EvaluatorException e) {
-            throw new LscServiceException(e);
-        } catch (IOException e) {
-            throw new LscServiceException(e);
-        } finally {
-            Context.exit();
-        }
-    }
+	/**
+	 * 
+	 * @param jsFile  relative or full path to the Javascript file
+	 * @param fctName the function name to call
+	 * @param args    the array containing the various function parameters
+	 * @return the function result
+	 * @throws LscServiceException thrown if an error occurs while reading the file
+	 *                             or parsing it
+	 */
+	public static Object invoke(String jsFile, String fctName, Object[] args) throws LscServiceException {
+		Context ctx = ContextFactory.getGlobal().enterContext();
+		try {
+			InputStream fis = new FileInputStream(jsFile);
+			byte[] arr = new byte[30000];
+			fis.read(arr);
+			fis.close();
+			ScriptableObject scope = ctx.initStandardObjects();
+			ctx.evaluateString(scope, new String(arr).trim(), jsFile, 1, null);
+			Function fct = (Function) scope.get(fctName, scope);
+			return fct.call(ctx, scope, scope, args);
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		} catch (IOException e) {
+			throw new LscServiceException(e);
+		} finally {
+			Context.exit();
+		}
+	}
 
-    @Override
-    public String getClassName() {
-        return this.getClass().getName();
-    }
+	@Override
+	public String getClassName() {
+		return this.getClass().getName();
+	}
 }

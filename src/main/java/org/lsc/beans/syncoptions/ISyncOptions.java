@@ -204,7 +204,7 @@ public interface ISyncOptions {
 	/**
 	 * Return the delimiter name for the corresponding dataset
 	 * @param name dataset name
-     * @return the delimiter for this dataset or the default delimiter
+	 * @return the delimiter for this dataset or the default delimiter
 	 */
 	String getDelimiter(String name);
 }

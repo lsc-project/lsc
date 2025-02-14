@@ -78,112 +78,112 @@ import org.slf4j.LoggerFactory;
  */
 public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 
-    // Logger
-    private static final Logger LOGGER = LoggerFactory.getLogger(RhinoJScriptEvaluator.class);
+	// Logger
+	private static final Logger LOGGER = LoggerFactory.getLogger(RhinoJScriptEvaluator.class);
 
-    /** The local Rhino context. */
-    private Context             cx;
+	/** The local Rhino context. */
+	private Context cx;
 
-    /** debug flag */
-    private boolean debug;
-    
-    /**
-     * Default public constructor.
-     */
-    public RhinoJScriptEvaluator(boolean debug) {
-        this.debug = debug;
-    }
+	/** debug flag */
+	private boolean debug;
 
-    /** {@inheritDoc} */
-    @Override
-    public String evalToString(final Task task, final String expression, final Map<String, Object> params)
-            throws LscServiceException {
-        Object result = instanceEval(task, expression, params);
+	/**
+	 * Default public constructor.
+	 */
+	public RhinoJScriptEvaluator(boolean debug) {
+		this.debug = debug;
+	}
 
-        if (result == null) {
-            return null;
-        } else if (result instanceof String) {
-            return (String) result;
-        } else {
-            return result.toString();
-        }
-
-        // return (String) Context.jsToJava(result, String.class);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
-            throws LscServiceException {
-        Object result = null;
-        try {
-            result = convertJsToJava(instanceEval(task, expression, params));
-        } catch (EvaluatorException e) {
-            throw new LscServiceException(e);
-        }
-        if (result == null) {
-            return null;
-        }
-        List<Object> resultsArray = new ArrayList<Object>();
-        if (result instanceof String[] || result instanceof Object[]) {
-            for (Object resultValue : (Object[]) result) {
-                resultsArray.add(resultValue.toString());
-            }
-        } else if (result instanceof String) {
-            String resultAsString = (String) result;
-            if (resultAsString != null && resultAsString.length() > 0) {
-                resultsArray.add(resultAsString);
-            }
-        } else if (result instanceof List) {
-            for (Object resultValue : (List<?>) result) {
-                resultsArray.add(resultValue.toString());
-            }
-        } else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
-            resultsArray.add(result);
-        } else {
-            if (result != null) {
-                resultsArray.add(result.toString());
-            }
-        }
-        return resultsArray;
-    }
-
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
-        Object result = null;
-	    try {
-	        result = convertJsToJava(instanceEval(task, expression, params));
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
-	    
-		if(result instanceof byte[][]) {
+	public String evalToString(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = instanceEval(task, expression, params);
+
+		if (result == null) {
+			return null;
+		} else if (result instanceof String) {
+			return (String) result;
+		} else {
+			return result.toString();
+		}
+
+		// return (String) Context.jsToJava(result, String.class);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public List<Object> evalToObjectList(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+		if (result == null) {
+			return null;
+		}
+		List<Object> resultsArray = new ArrayList<Object>();
+		if (result instanceof String[] || result instanceof Object[]) {
+			for (Object resultValue : (Object[]) result) {
+				resultsArray.add(resultValue.toString());
+			}
+		} else if (result instanceof String) {
+			String resultAsString = (String) result;
+			if (resultAsString != null && resultAsString.length() > 0) {
+				resultsArray.add(resultAsString);
+			}
+		} else if (result instanceof List) {
+			for (Object resultValue : (List<?>) result) {
+				resultsArray.add(resultValue.toString());
+			}
+		} else if (result.getClass().isArray() && result.getClass().getComponentType().equals(byte.class)) {
+			resultsArray.add(result);
+		} else {
+			if (result != null) {
+				resultsArray.add(result.toString());
+			}
+		}
+		return resultsArray;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public List<byte[]> evalToByteArrayList(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+
+		if (result instanceof byte[][]) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (byte[] resultValue : (byte[][])result) {
+			for (byte[] resultValue : (byte[][]) result) {
 				resultsArray.add(resultValue);
 			}
 			return resultsArray;
 		} else if (result instanceof byte[]) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			byte[] resultAsByteArray = (byte[])result;
+			byte[] resultAsByteArray = (byte[]) result;
 			if (resultAsByteArray != null && resultAsByteArray.length > 0) {
 				resultsArray.add(resultAsByteArray);
 			}
 			return resultsArray;
 		} else if (result instanceof String) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			String resultAsString = (String)result;
+			String resultAsString = (String) result;
 			if (resultAsString != null && resultAsString.length() > 0) {
 				resultsArray.add(resultAsString.getBytes());
 			}
 			return resultsArray;
 		} else if (result instanceof List) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (Object resultValue : (List<?>)result) {
+			for (Object resultValue : (List<?>) result) {
 				if (resultValue instanceof byte[]) {
-					resultsArray.add((byte[])resultValue);
+					resultsArray.add((byte[]) resultValue);
 				} else {
 					resultsArray.add(resultValue.toString().getBytes());
 				}
@@ -191,15 +191,15 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 			return resultsArray;
 		} else if (result instanceof Set) {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
-			for (Object resultValue : (Set<?>)result) {
+			for (Object resultValue : (Set<?>) result) {
 				if (resultValue instanceof byte[]) {
-					resultsArray.add((byte[])resultValue);
+					resultsArray.add((byte[]) resultValue);
 				} else {
 					resultsArray.add(resultValue.toString().getBytes());
 				}
 			}
 			return resultsArray;
-		} else if(result == null){
+		} else if (result == null) {
 			return null;
 		} else {
 			List<byte[]> resultsArray = new ArrayList<byte[]>();
@@ -210,102 +210,102 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 		}
 	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
-	public byte[] evalToByteArray(final Task task, final String expression,
-					final Map<String, Object> params) throws LscServiceException {
-        Object result = null;
-	    try {
-	        result = convertJsToJava(instanceEval(task, expression, params));
-	    } catch(EvaluatorException e) {
-	        throw new LscServiceException(e);
-	    }
-	    
-		if( result instanceof byte[]) {
-			return (byte[])result;
+	public byte[] evalToByteArray(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		Object result = null;
+		try {
+			result = convertJsToJava(instanceEval(task, expression, params));
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+
+		if (result instanceof byte[]) {
+			return (byte[]) result;
 		} else if (result instanceof String) {
-			return ((String)result).getBytes();
+			return ((String) result).getBytes();
 		} else {
 			return result.toString().getBytes();
 		}
 	}
 
-    /** {@inheritDoc} */
-    @Override
-    public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)
-            throws LscServiceException {
-        try {
-            return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
-        } catch (EvaluatorException e) {
-            throw new LscServiceException(e);
-        }
-    }
+	/** {@inheritDoc} */
+	@Override
+	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
+		try {
+			return (Boolean) Context.jsToJava(instanceEval(task, expression, params), Boolean.class);
+		} catch (EvaluatorException e) {
+			throw new LscServiceException(e);
+		}
+	}
 
-    /**
-     * Local instance evaluation.
-     * 
-     * @param expression the expression to eval
-     * @param params the keys are the name used in the
-     * @return the evaluation result
-     * @throws LscServiceException
-     */
-    private Object instanceEval(final Task task, final String expression, final Map<String, Object> params)
-            throws LscServiceException {
+	/**
+	 * Local instance evaluation.
+	 * 
+	 * @param expression the expression to eval
+	 * @param params     the keys are the name used in the
+	 * @return the evaluation result
+	 * @throws LscServiceException
+	 */
+	private Object instanceEval(final Task task, final String expression, final Map<String, Object> params)
+			throws LscServiceException {
 
-        RhinoDebugger rhinoDebugger = null;
-        Map<String, Object> localParams = new HashMap<String, Object>();
-        if (params != null) {
-            localParams.putAll(params);
-        }
-        
-        /* Allow to have shorter names for function in the package org.lsc.utils.directory */
-        String expressionImport = 
-            "with (new JavaImporter(Packages.org.lsc.utils.directory)) {"
-            + "with (new JavaImporter(Packages.org.lsc.utils)) {\n" 
-            + expression + "\n}}";
+		RhinoDebugger rhinoDebugger = null;
+		Map<String, Object> localParams = new HashMap<String, Object>();
+		if (params != null) {
+			localParams.putAll(params);
+		}
 
-        ContextFactory factory = new ContextFactory();
-        
-        if(debug) {
-            rhinoDebugger = new RhinoDebugger(expressionImport, factory);
-        }
+		/*
+		 * Allow to have shorter names for function in the package
+		 * org.lsc.utils.directory
+		 */
+		String expressionImport = "with (new JavaImporter(Packages.org.lsc.utils.directory)) {"
+				+ "with (new JavaImporter(Packages.org.lsc.utils)) {\n" + expression + "\n}}";
 
-        cx = factory.enterContext();
-        
+		ContextFactory factory = new ContextFactory();
+
+		if (debug) {
+			rhinoDebugger = new RhinoDebugger(expressionImport, factory);
+		}
+
+		cx = factory.enterContext();
+
 //        if(debug) {
 //            cx.setGeneratingDebug(true);
 //            cx.setGeneratingSource(true);
 //            cx.setOptimizationLevel(-1);
 //        }
 
-        Scriptable scope = cx.initStandardObjects();
-        Script script = cx.compileString(expressionImport, "<cmd>", 1, null);
+		Scriptable scope = cx.initStandardObjects();
+		Script script = cx.compileString(expressionImport, "<cmd>", 1, null);
 
-        
-     // add LDAP interface for destination
-        if (!localParams.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
-            ScriptableJndiServices dstSjs = new ScriptableJndiServices();
-            dstSjs.setJndiServices(((AbstractSimpleJndiService) task.getDestinationService()).getJndiServices());
-            localParams.put("ldap", dstSjs);
-        }
+		// add LDAP interface for destination
+		if (!localParams.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
+			ScriptableJndiServices dstSjs = new ScriptableJndiServices();
+			dstSjs.setJndiServices(((AbstractSimpleJndiService) task.getDestinationService()).getJndiServices());
+			localParams.put("ldap", dstSjs);
+		}
 
-        // add LDAP interface for source
-        if (!localParams.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
-            ScriptableJndiServices srcSjs = new ScriptableJndiServices();
-            srcSjs.setJndiServices(((AbstractSimpleJndiService) task.getSourceService()).getJndiServices());
-            localParams.put("srcLdap", srcSjs);
-        }
+		// add LDAP interface for source
+		if (!localParams.containsKey("srcLdap") && task.getSourceService() instanceof AbstractSimpleJndiService) {
+			ScriptableJndiServices srcSjs = new ScriptableJndiServices();
+			srcSjs.setJndiServices(((AbstractSimpleJndiService) task.getSourceService()).getJndiServices());
+			localParams.put("srcLdap", srcSjs);
+		}
 
-        for (Entry<String, Object> entry : localParams.entrySet()) {
-            Object jsObj = Context.javaToJS(entry.getValue(), scope);
-            ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
-        }
+		for (Entry<String, Object> entry : localParams.entrySet()) {
+			Object jsObj = Context.javaToJS(entry.getValue(), scope);
+			ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
+		}
 
-        Object ret = null;
-        try {
-        	List<Script> includes = new ArrayList<Script>();
+		Object ret = null;
+		try {
+			List<Script> includes = new ArrayList<Script>();
 			if (task.getScriptIncludes() != null) {
-				for (File scriptInclude: task.getScriptIncludes()) {
+				for (File scriptInclude : task.getScriptIncludes()) {
 					if ("js".equals(FilenameUtils.getExtension(scriptInclude.getAbsolutePath()))) {
 						FileReader reader = new FileReader(scriptInclude);
 						try {
@@ -313,64 +313,65 @@ public final class RhinoJScriptEvaluator implements ScriptableEvaluator {
 							includes.add(include);
 						} finally {
 							reader.close();
-						}	
+						}
 					}
 				}
 			}
-            if(debug) {
-                rhinoDebugger.initContext(cx, scope, script);
-                Object jsObj = Context.javaToJS(rhinoDebugger, scope);
-                ScriptableObject.putProperty(scope, "rhinoDebugger", jsObj);
-                for (Script include: includes) {
-                	rhinoDebugger.execInclude(include);
-                }
-                ret = rhinoDebugger.exec();
-            } else {
-                for (Script include: includes) {
-                	include.exec(cx, scope);
-                }
-                ret = script.exec(cx, scope);
-            }
-        } catch (EcmaError e) {
-            LOGGER.error(e.toString());
-            LOGGER.debug(e.toString(), e);
-            return null;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error(e.toString());
-            LOGGER.debug(e.toString(), e);
-            return null;
-        } finally {
-            if(debug) {
-                rhinoDebugger.run();
-            }
-            Context.exit();
-        }
-        return ret;
-    }
+			if (debug) {
+				rhinoDebugger.initContext(cx, scope, script);
+				Object jsObj = Context.javaToJS(rhinoDebugger, scope);
+				ScriptableObject.putProperty(scope, "rhinoDebugger", jsObj);
+				for (Script include : includes) {
+					rhinoDebugger.execInclude(include);
+				}
+				ret = rhinoDebugger.exec();
+			} else {
+				for (Script include : includes) {
+					include.exec(cx, scope);
+				}
+				ret = script.exec(cx, scope);
+			}
+		} catch (EcmaError e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			return null;
+		} catch (RuntimeException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			LOGGER.debug(e.toString(), e);
+			return null;
+		} finally {
+			if (debug) {
+				rhinoDebugger.run();
+			}
+			Context.exit();
+		}
+		return ret;
+	}
 
-    private static Object convertJsToJava(Object src) {
-        if (src == null) {
-            return null;
-        } else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
-            return Context.jsToJava(src, Object.class);
-        } else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
-            try {
-                Method getMethod = src.getClass().getMethod("get", int.class, Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
-                Object length = src.getClass().getMethod("getLength").invoke(src);
-                Object[] retarr = new Object[Integer.parseInt(length.toString())];
-                for (int index = 0; index < retarr.length; index++) {
-                    retarr[index] = getMethod.invoke(src, index, null);
-                }
-                return retarr;
-            } catch (Exception e) {
-                LOGGER.error(e.toString());
-                LOGGER.debug(e.toString(), e);
-            }
-        } else if (src == UniqueTag.NOT_FOUND || src == UniqueTag.NULL_VALUE) {
-            return null;
-        }
-        return src;
-    }
+	private static Object convertJsToJava(Object src) {
+		if (src == null) {
+			return null;
+		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeJavaObject")) {
+			return Context.jsToJava(src, Object.class);
+		} else if (src.getClass().getName().equals("sun.org.mozilla.javascript.internal.NativeArray")) {
+			try {
+				Method getMethod = src.getClass().getMethod("get", int.class,
+						Class.forName("sun.org.mozilla.javascript.internal.Scriptable"));
+				Object length = src.getClass().getMethod("getLength").invoke(src);
+				Object[] retarr = new Object[Integer.parseInt(length.toString())];
+				for (int index = 0; index < retarr.length; index++) {
+					retarr[index] = getMethod.invoke(src, index, null);
+				}
+				return retarr;
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+				LOGGER.debug(e.toString(), e);
+			}
+		} else if (src == UniqueTag.NOT_FOUND || src == UniqueTag.NULL_VALUE) {
+			return null;
+		}
+		return src;
+	}
 }

@@ -77,6 +77,7 @@
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<jmockit-version>1.7</jmockit-version>
 		<graalvm.version>23.0.7</graalvm.version>
+		<graaljs.version>24.1.1</graaljs.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
 
@@ -474,11 +475,6 @@
 			</properties>
 			<dependencies>
 				<dependency>
-					<groupId>org.graalvm.sdk</groupId>
-					<artifactId>graal-sdk</artifactId>
-					<version>${graalvm.version}</version>
-				</dependency>
-				<dependency>
 					<groupId>org.graalvm.js</groupId>
 					<artifactId>js</artifactId>
 					<version>${graalvm.version}</version>
@@ -500,6 +496,12 @@
 					<artifactId>chromeinspector</artifactId>
 					<version>23.0.7</version>
 					<scope>runtime</scope>
+        </dependency>
+        <dependency>
+					<groupId>org.graalvm.polyglot</groupId>
+					<artifactId>js-community</artifactId>
+					<version>${graaljs.version}</version>
+					<type>pom</type>
 				</dependency>
 				<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 				<dependency>

@@ -12,6 +12,11 @@
 		directories.
 	</description>
 	<url>https://lsc-project.org/</url>
+
+	<prerequisites>
+		<maven>3.8.0</maven>
+	</prerequisites>
+
 	<issueManagement>
 		<system>github</system>
 		<url>https://github.com/lsc-project/lsc/issues</url>
@@ -70,9 +75,13 @@
 		<!--Force UTF-8 for the build -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
-		<jmockit-version>1.5</jmockit-version>
-		<graalvm.version>22.3.5</graalvm.version>
-		<graaljs.version>24.1.1</graaljs.version>
+		<jmockit-version>1.7</jmockit-version>
+		<graalvm.tools.version>23.0.7</graalvm.tools.version>
+		<graalvm.js.version>23.0.7</graalvm.js.version>
+		<graalvm.compiler.version>23.0.7</graalvm.compiler.version>
+		<graalvm.truffle.version>23.0.7</graalvm.truffle.version>
+		<graalvm.sdk.version>23.0.7</graalvm.sdk.version>
+		<graalvm.polyglot.version>24.1.2</graalvm.polyglot.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
 
@@ -85,35 +94,26 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M8</version>
+				<version>3.5.2</version>
 				<configuration>
-					<argLine>-Dcom.sun.management.jmxremote
-						-Dcom.sun.management.jmxremote.port=1099
-						-Dcom.sun.management.jmxremote.authenticate=false
-						-Dcom.sun.management.jmxremote.ssl=false
-						-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true
+					<argLine>
+						-Dcom.sun.management.jmxremote 
+						-Dcom.sun.management.jmxremote.port=1099  
+						-Dcom.sun.management.jmxremote.ssl=false 
+						-Dcom.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize=true 
+						-Dcom.sun.management.jmxremote.authenticate=false 
+						-Djava.rmi.server.hostname=localhost 
+						-Dcom.sun.management.jmxremote.rmi.port=1099
 						${module.opts}
 						${graalvm.opts}
-						-javaagent:"${settings.localRepository}"/com/googlecode/jmockit/jmockit/${jmockit-version}/jmockit-${jmockit-version}.jar
 					</argLine>
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
-				<!--
-					Force surefire provider to junit4
-					as surefire-junit-platform does not correctly detect tests
-				-->
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit4</artifactId>
-						<version>3.5.2</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.8.1</version>
 				<executions>
 					<execution>
 						<id>copy</id>
@@ -126,7 +126,7 @@
 								<artifactItem>
 									<groupId>org.graalvm.compiler</groupId>
 									<artifactId>compiler</artifactId>
-									<version>${graalvm.version}</version>
+									<version>${graalvm.compiler.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 									<destFileName>compiler.jar</destFileName>
@@ -134,7 +134,7 @@
 								<artifactItem>
 									<groupId>org.graalvm.compiler</groupId>
 									<artifactId>compiler-management</artifactId>
-									<version>${graalvm.version}</version>
+									<version>${graalvm.compiler.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 									<destFileName>compiler-management.jar</destFileName>
@@ -142,7 +142,7 @@
 								<artifactItem>
 									<groupId>org.graalvm.truffle</groupId>
 									<artifactId>truffle-api</artifactId>
-									<version>${graalvm.version}</version>
+									<version>${graalvm.truffle.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 									<destFileName>truffle-api.jar</destFileName>
@@ -150,7 +150,7 @@
 								<artifactItem>
 									<groupId>org.graalvm.sdk</groupId>
 									<artifactId>graal-sdk</artifactId>
-									<version>${graalvm.version}</version>
+									<version>${graalvm.sdk.version}</version>
 									<type>jar</type>
 									<overWrite>true</overWrite>
 									<destFileName>graal-sdk.jar</destFileName>
@@ -165,7 +165,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.13.0</version>
 				<configuration>
 					<source>8</source>
 					<target>8</target>
@@ -193,21 +193,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.11.2</version>
 				<configuration>
 					<show>public</show>
 					<quiet>true</quiet>
-                    			<!-- workaround for https://bugs.openjdk.java.net/browse/JDK-8212233 -->
-                    			<javaApiLinks>
-                        			<property>
-                            				<name>foo</name>
-                            				<value>bar</value>
-                        			</property>
-                    			</javaApiLinks>
-                                        <source>8</source>
-                                        <detectJavaApiLink>false</detectJavaApiLink>
-                                        <!-- xsd generation creates invalid javadoc in java 8 those are errors -->
-                                        <doclint>none</doclint>
+								<!-- workaround for https://bugs.openjdk.java.net/browse/JDK-8212233 -->
+								<javaApiLinks>
+									<property>
+											<name>foo</name>
+											<value>bar</value>
+									</property>
+								</javaApiLinks>
+										<source>8</source>
+										<detectJavaApiLink>false</detectJavaApiLink>
+										<!-- xsd generation creates invalid javadoc in java 8 those are errors -->
+										<doclint>none</doclint>
 				</configuration>
 				<executions>
 					<execution>
@@ -228,7 +228,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>3.4.2</version>
 				<executions>
 					<execution>
 						<goals>
@@ -262,7 +262,7 @@
 			<plugin>
 				<groupId>org.codehaus.izpack</groupId>
 				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.2.1</version>
+				<version>5.2.3</version>
 
 				<!-- common configuration by all executions -->
 				<configuration>
@@ -285,23 +285,9 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections-maven</artifactId>
-				<version>0.9.9-RC2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>reflections</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.3.7</version>
+				<version>6.0.0</version>
 				<inherited>true</inherited>
 				<extensions>true</extensions>
 			</plugin>
@@ -309,7 +295,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.15.1</version>
+				<version>0.15.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -447,13 +433,13 @@
 			</plugins>
 		</pluginManagement>
 
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.12</version>
-            </extension>
-        </extensions>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>2.12</version>
+			</extension>
+		</extensions>
 
 	</build>
 
@@ -493,14 +479,32 @@
 			</properties>
 			<dependencies>
 				<dependency>
-					<groupId>org.graalvm.polyglot</groupId>
-					<artifactId>polyglot</artifactId>
-					<version>${graaljs.version}</version>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js</artifactId>
+					<version>${graalvm.js.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js-scriptengine</artifactId>
+					<version>${graalvm.js.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>profiler</artifactId>
+					<version>${graalvm.tools.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>chromeinspector</artifactId>
+					<version>${graalvm.tools.version}</version>
+					<scope>runtime</scope>
 				</dependency>
 				<dependency>
 					<groupId>org.graalvm.polyglot</groupId>
 					<artifactId>js-community</artifactId>
-					<version>${graaljs.version}</version>
+					<version>${graalvm.polyglot.version}</version>
 					<type>pom</type>
 				</dependency>
 				<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
@@ -522,7 +526,7 @@
 				<dependency>
 					<groupId>org.javassist</groupId>
 					<artifactId>javassist</artifactId>
-					<version>3.25.0-GA</version>
+					<version>3.30.2-GA</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -541,21 +545,21 @@
 				</dependency>
 			</dependencies>
 			<build>
-                          <resources>
-                            <resource>
-                              <directory>src/main/resources-filtered</directory>
-                              <filtering>true</filtering>
-                            </resource>
-                            <resource>
-                              <directory>src/main/resources</directory>
-                              <filtering>false</filtering>
-                            </resource>
-                          </resources>
+				<resources>
+					<resource>
+						<directory>src/main/resources-filtered</directory>
+						<filtering>true</filtering>
+					</resource>
+					<resource>
+						<directory>src/main/resources</directory>
+						<filtering>false</filtering>
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>build-helper-maven-plugin</artifactId>
-						<version>3.3.0</version>
+						<version>3.6.0</version>
 						<executions>
 							<execution>
 								<id>add-source</id>
@@ -644,10 +648,10 @@
 			<url>https://download.java.net/maven/2</url>
 		</repository>
 		<repository>
-                        <id>forgerock-community-repository</id>
-                        <name>ForgeRock CommunityRepository</name>
-                        <url>https://maven.forgerock.org/artifactory/community</url>
-                </repository>
+			<id>forgerock-community-repository</id>
+			<name>ForgeRock CommunityRepository</name>
+			<url>https://maven.forgerock.org/artifactory/community</url>
+		</repository>
 		<repository>
 			<id>oracleReleases</id>
 			<name>Oracle Released Java Packages</name>
@@ -677,10 +681,10 @@
 			<name>Reflections Maven2 Repository</name>
 			<url>https://reflections.googlecode.com/svn/repo</url>
 		</pluginRepository>
-                <pluginRepository>
-                  <id>org.jfrog.jade.plugins.common</id>
-                  <name>openmindonline-jade-plugin</name>
-                  <url>https://repository.openmindonline.it</url>
+				<pluginRepository>
+				  <id>org.jfrog.jade.plugins.common</id>
+				  <name>openmindonline-jade-plugin</name>
+				  <url>https://repository.openmindonline.it</url>
 		</pluginRepository>
 	</pluginRepositories>
 
@@ -688,7 +692,7 @@
 		<dependency>
 			<groupId>org.mybatis</groupId>
 			<artifactId>mybatis2</artifactId>
-			<version>2.5.0</version>
+			<version>2.6.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -705,31 +709,37 @@
 			<version>3.1.3</version>
 			<type>jar</type>
 			<optional>false</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.16.1</version>
+			<version>2.18.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<version>3.17.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>1.3.4</version>
+			<version>1.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.20</version>
+			<version>1.4.21</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -743,14 +753,14 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.3.13</version>
+			<version>1.5.16</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.3.14</version>
+			<version>1.5.16</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -776,7 +786,7 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.78.1</version>
+			<version>1.80</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -807,19 +817,31 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>com.googlecode.jmockit</groupId>
 			<artifactId>jmockit</artifactId>
 			<version>${jmockit-version}</version>
 			<scope>test</scope>
+		<dependency-->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.15.2</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>5.15.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!--dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
 			<type>jar</type>
 			<optional>false</optional>
-		</dependency>
+		</dependency-->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
@@ -828,7 +850,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.3.0-jre</version>
+			<version>33.4.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
@@ -840,9 +862,9 @@
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-                <!--
-                    jaxb 2.3.6 with maven-jaxb2-plugin 0.15.1
-                -->
+				<!--
+					jaxb 2.3.6 with maven-jaxb2-plugin 0.15.1
+				-->
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
@@ -852,12 +874,12 @@
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
 			<version>3.0.0</version>
-	        </dependency>
+			</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
 			<version>4.0.5</version>
-	        </dependency>
+			</dependency>
 		<dependency>
 			<groupId>net.java.xadisk</groupId>
 			<artifactId>xadisk</artifactId>
@@ -876,14 +898,36 @@
 		<dependency>
 			<groupId>org.apache.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>4.0.22</version>
+			<version>4.0.25</version>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-platform-launcher</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-platform-engine</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-jupiter-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.platform</groupId>
+					<artifactId>junit-jupiter-engine</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>org.apache.directory.api</groupId>
 			<artifactId>api-all</artifactId>
 			<version>2.1.7</version>
-		</dependency>
+		<dependency-->
 		<dependency>
 			<groupId>xml-apis</groupId>
 			<artifactId>xml-apis</artifactId>
@@ -892,7 +936,63 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.17.2</version>
+			<version>2.18.2</version>
+		</dependency>
+		
+		<!-- ApacheDS dependencies -->
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-annotations</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-server-annotations</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-api</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-i18n</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-protocol-ldap</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-protocol-shared</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-core-integ</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.directory.server</groupId>
+			<artifactId>apacheds-test-framework</artifactId>
+			<version>2.0.0.AM27</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+			<version>5.11.4</version>
 		</dependency>
 	</dependencies>
 

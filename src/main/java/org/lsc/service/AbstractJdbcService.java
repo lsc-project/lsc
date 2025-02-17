@@ -76,17 +76,17 @@ import org.slf4j.LoggerFactory;
 import com.ibatis.sqlmap.client.SqlMapClient;
 
 /**
- * Generic JDBC iBatis Service
- * Manage retrieving of list and object according t
+ * Generic JDBC iBatis Service Manage retrieving of list and object according t
  * Can be override by a specific implementation in the final class if needed :
  * Get a look at org.lsc.service.StructureJdbcService class
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public abstract class AbstractJdbcService implements IService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractJdbcService.class);
 	protected SqlMapClient sqlMapper;
-	
+
 	private Class<IBean> beanClass;
 
 	public abstract String getRequestNameForList();
@@ -95,42 +95,47 @@ public abstract class AbstractJdbcService implements IService {
 
 	public abstract String getRequestNameForNextId();
 
-    public abstract String getRequestNameForClean();
+	public abstract String getRequestNameForClean();
 
-	public abstract String getRequestNameForObjectOrClean(boolean fromSameService); 
+	public abstract String getRequestNameForObjectOrClean(boolean fromSameService);
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public AbstractJdbcService(SqlMapClient sqlmap, String beanClassname) throws LscServiceConfigurationException {
 		sqlMapper = sqlmap;
 
 		try {
-            this.beanClass = (Class<IBean>) Class.forName(beanClassname);
-        } catch (ClassNotFoundException e) {
-            throw new LscServiceConfigurationException(e);
-        }
+			this.beanClass = (Class<IBean>) Class.forName(beanClassname);
+		} catch (ClassNotFoundException e) {
+			throw new LscServiceConfigurationException(e);
+		}
 	}
 
-    @SuppressWarnings("unchecked")
-	public AbstractJdbcService(DatabaseConnectionType destinationConnection, String beanClassname) throws LscServiceConfigurationException {
-	    sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
+	@SuppressWarnings("unchecked")
+	public AbstractJdbcService(DatabaseConnectionType destinationConnection, String beanClassname)
+			throws LscServiceConfigurationException {
+		sqlMapper = DaoConfig.getSqlMapClient(destinationConnection);
 
-        try {
-            this.beanClass = (Class<IBean>) Class.forName(beanClassname);
-        } catch (ClassNotFoundException e) {
-            throw new LscServiceConfigurationException(e);
-        }
+		try {
+			this.beanClass = (Class<IBean>) Class.forName(beanClassname);
+		} catch (ClassNotFoundException e) {
+			throw new LscServiceConfigurationException(e);
+		}
 	}
 
-    /**
+	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param pivotName Name of the entry to be returned, which is the name returned by
-	 *            {@link #getListPivots()} (used for display only)
-	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
-	 *            entry in the source.
+	 * @param pivotName       Name of the entry to be returned, which is the name
+	 *                        returned by {@link #getListPivots()} (used for display
+	 *                        only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data
+	 *                        identifier in the source such as returned by
+	 *                        {@link #getListPivots()}. It must identify a unique
+	 *                        entry in the source.
 	 * @return The bean, or null if not found
-	 * @throws LscServiceException May throw a embedded {@link CommunicationException} if an SQLException is encountered 
+	 * @throws LscServiceException May throw a embedded
+	 *                             {@link CommunicationException} if an SQLException
+	 *                             is encountered
 	 */
 	public IBean getBean(String pivotName, LscDatasets pivotAttributes) throws LscServiceException {
 		Map<String, Object> attributeMap = pivotAttributes.getDatasets();
@@ -140,31 +145,35 @@ public abstract class AbstractJdbcService implements IService {
 			LOGGER.warn("Error while looking for a specific entry with id={} ({})", pivotName, e);
 			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
-			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
+			// This is a dirty hack to make sure we stop everything, and don't risk deleting
+			// everything...
 			throw new LscServiceException(new CommunicationException(e.getMessage()));
 		}
 	}
 
 	/**
 	 * Execute a database request to get a list of object identifiers. This request
-	 * must be a very simple and efficient request because it will get all the requested
-	 * identifiers.
-	 * @return Map of all entries names that are returned by the directory with an associated map of
-	 *         attribute names and values (never null)
+	 * must be a very simple and efficient request because it will get all the
+	 * requested identifiers.
+	 * 
+	 * @return Map of all entries names that are returned by the directory with an
+	 *         associated map of attribute names and values (never null)
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, LscDatasets> getListPivots() {
-		/* TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the list returned,
-		 * since it may be important when coming from a database.
-		 * This is really an API bug, getListPivots() should return a List, not a Map.
+		/*
+		 * TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the
+		 * list returned, since it may be important when coming from a database. This is
+		 * really an API bug, getListPivots() should return a List, not a Map.
 		 */
 		Map<String, LscDatasets> ret = new ListOrderedMap();
 
 		try {
-			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper.queryForList(getRequestNameForList());
+			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper
+					.queryForList(getRequestNameForList());
 			Iterator<HashMap<String, Object>> idsIter = ids.iterator();
 			Map<String, Object> idMap;
-			
+
 			for (int count = 1; idsIter.hasNext(); count++) {
 				idMap = idsIter.next();
 				ret.put(getMapKey(idMap, count), new LscDatasets(idMap));
@@ -176,14 +185,14 @@ public abstract class AbstractJdbcService implements IService {
 
 		return ret;
 	}
-	
+
 	protected String getMapKey(Map<String, Object> idMap, int count) {
 
 		String key;
 		// the key of the result Map is usually the DN
 		// since we don't have a DN from a database, we use a concatenation of:
-		//     - all pivot attributes
-		//     - a count of all objects (to make sure the key is unique)
+		// - all pivot attributes
+		// - a count of all objects (to make sure the key is unique)
 		// unless there's only one pivot, to be backwards compatible
 		if (idMap.values().size() == 1) {
 			key = idMap.values().iterator().next().toString();
@@ -192,10 +201,11 @@ public abstract class AbstractJdbcService implements IService {
 		}
 		return key;
 	}
-	
+
 	/**
 	 * Override default AbstractJdbcSrcService to get a SimpleBean
-	 * @throws LscServiceException 
+	 * 
+	 * @throws LscServiceException
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -203,19 +213,21 @@ public abstract class AbstractJdbcService implements IService {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();
-			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService), getAttributesMap(attributes));
-			if(records.size() > 1) {
-				throw new LscServiceException("Only a single record can be returned from a getObject request ! " +
-						"For id=" + id + ", there are " + records.size() + " records !");
+			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService),
+					getAttributesMap(attributes));
+			if (records.size() > 1) {
+				throw new LscServiceException("Only a single record can be returned from a getObject request ! "
+						+ "For id=" + id + ", there are " + records.size() + " records !");
 			} else if (records.size() == 0) {
 				return null;
 			}
 			Map<String, Object> record = (Map<String, Object>) records.get(0);
-			for(Entry<String, Object> entry: record.entrySet()) {
-				if(entry.getValue() != null) {
-					srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
+			for (Entry<String, Object> entry : record.entrySet()) {
+				if (entry.getValue() != null) {
+					srcBean.setDataset(entry.getKey(),
+							SetUtils.attributeToSet(new BasicAttribute(entry.getKey(), entry.getValue())));
 				} else {
-                    srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
+					srcBean.setDataset(entry.getKey(), SetUtils.attributeToSet(new BasicAttribute(entry.getKey())));
 				}
 			}
 			srcBean.setMainIdentifier(id);
@@ -232,33 +244,33 @@ public abstract class AbstractJdbcService implements IService {
 			LOGGER.warn("Error while looking for a specific entry with id={} ({})", id, e);
 			LOGGER.debug(e.toString(), e);
 			// TODO This SQLException may mean we lost the connection to the DB
-			// This is a dirty hack to make sure we stop everything, and don't risk deleting everything...
+			// This is a dirty hack to make sure we stop everything, and don't risk deleting
+			// everything...
 			throw new LscServiceException(new CommunicationException(e.getMessage()));
 		} catch (NamingException e) {
-            LOGGER.error("Unable to get handle cast: " + e.toString());
-            LOGGER.debug(e.toString(), e);
-        }
+			LOGGER.error("Unable to get handle cast: " + e.toString());
+			LOGGER.debug(e.toString(), e);
+		}
 		return null;
 	}
 
-
-	public static Map<String, Object> fillAttributesMap(
-			Map<String, Object> datasets, IBean destinationBean) {
-		for(String attributeName : destinationBean.datasets().getAttributesNames()) {
-			if(!datasets.containsKey(attributeName)) {
-				if(destinationBean.getDatasetById(attributeName) != null && destinationBean.getDatasetById(attributeName).size() > 0) {
-					datasets.put(attributeName, destinationBean.getDatasetById(attributeName).iterator().next().toString());
+	public static Map<String, Object> fillAttributesMap(Map<String, Object> datasets, IBean destinationBean) {
+		for (String attributeName : destinationBean.datasets().getAttributesNames()) {
+			if (!datasets.containsKey(attributeName)) {
+				if (destinationBean.getDatasetById(attributeName) != null
+						&& destinationBean.getDatasetById(attributeName).size() > 0) {
+					datasets.put(attributeName,
+							destinationBean.getDatasetById(attributeName).iterator().next().toString());
 				}
 			}
 		}
 		return datasets;
 	}
 
-	public static Map<String, Object> getAttributesMap(
-			List<LscDatasetModification> lscAttributeModifications) {
+	public static Map<String, Object> getAttributesMap(List<LscDatasetModification> lscAttributeModifications) {
 		Map<String, Object> values = new HashMap<String, Object>();
-		for(LscDatasetModification lam : lscAttributeModifications) {
-			if(lam.getValues().size() > 0) {
+		for (LscDatasetModification lam : lscAttributeModifications) {
+			if (lam.getValues().size() > 0) {
 				values.put(lam.getAttributeName(), lam.getValues().get(0));
 			} else {
 				// deleted items get the value null
@@ -267,12 +279,11 @@ public abstract class AbstractJdbcService implements IService {
 		}
 		return values;
 	}
-	
-	public static Map<String, String> getAttributesMap(
-			LscDatasets lscAttributes) {
+
+	public static Map<String, String> getAttributesMap(LscDatasets lscAttributes) {
 		Map<String, String> values = new HashMap<String, String>(lscAttributes.getDatasets().size());
-		for(Entry<String, Object> entry : lscAttributes.getDatasets().entrySet()) {
-			if(entry.getValue() != null) {
+		for (Entry<String, Object> entry : lscAttributes.getDatasets().entrySet()) {
+			if (entry.getValue() != null) {
 				values.put(entry.getKey(), getValue(entry.getValue()));
 			} else {
 				// deleted items get the value null
@@ -281,24 +292,23 @@ public abstract class AbstractJdbcService implements IService {
 		}
 		return values;
 	}
-	
+
 	public static String getValue(Object value) {
-		if(value instanceof List) {
-			return ((List<?>)value).iterator().next().toString();
-		} else if(value instanceof Set) {
-			return ((Set<?>)value).iterator().next().toString();
+		if (value instanceof List) {
+			return ((List<?>) value).iterator().next().toString();
+		} else if (value instanceof Set) {
+			return ((Set<?>) value).iterator().next().toString();
 		} else {
 			return value.toString();
 		}
 	}
 
-
-    /**
-     * @see org.lsc.service.IService#getSupportedConnectionType()
-     */
-    public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
-        Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
-        list.add(DatabaseConnectionType.class);
-        return list;
-    }
+	/**
+	 * @see org.lsc.service.IService#getSupportedConnectionType()
+	 */
+	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
+		Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
+		list.add(DatabaseConnectionType.class);
+		return list;
+	}
 }

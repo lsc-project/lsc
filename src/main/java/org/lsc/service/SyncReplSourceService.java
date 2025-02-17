@@ -120,7 +120,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			throws LscServiceConfigurationException {
 		super(task);
 		srsc = task.getAsyncLdapSourceService();
- 		// Default interval
+		// Default interval
 		interval = (srsc.getInterval() != null ? srsc.getInterval().intValue() : 5) * 1000;
 		
 		ldapConn = (LdapConnectionType) srsc.getConnection().getReference();

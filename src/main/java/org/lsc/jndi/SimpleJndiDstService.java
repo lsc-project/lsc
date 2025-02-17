@@ -83,20 +83,21 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	private Class<IBean> beanClass;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiDstService.class);
-	
-    private List<String> writableDatasetIds;
-	
+
+	private List<String> writableDatasetIds;
+
 	/**
-	 * Constructor adapted to the context properties and the bean class name to instantiate.
+	 * Constructor adapted to the context properties and the bean class name to
+	 * instantiate.
 	 * 
-	 * @param task Initialized task containing all necessary pieces of information to initiate connection
-	 * 				and load settings 
-	 * @throws LscServiceException 
+	 * @param task Initialized task containing all necessary pieces of information
+	 *             to initiate connection and load settings
+	 * @throws LscServiceException
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
 		super(task.getLdapDestinationService());
-        writableDatasetIds = task.getLdapDestinationService().getFetchedAttributes().getString();
+		writableDatasetIds = task.getLdapDestinationService().getFetchedAttributes().getString();
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
@@ -105,30 +106,34 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 		}
 	}
 
-    /**
-     * @param ldapService 
-     * @param writableDatasetIds
-     * @param beanClass
-     * @throws LscServiceException 
-     */
-    public SimpleJndiDstService(final LdapServiceType ldapService, List<String> writableDatasetIds, Class<IBean> beanClass) throws LscServiceConfigurationException {
-        super(ldapService);
-        this.writableDatasetIds = writableDatasetIds; 
-        this.beanClass = beanClass;
-    }
+	/**
+	 * @param ldapService
+	 * @param writableDatasetIds
+	 * @param beanClass
+	 * @throws LscServiceException
+	 */
+	public SimpleJndiDstService(final LdapServiceType ldapService, List<String> writableDatasetIds,
+			Class<IBean> beanClass) throws LscServiceConfigurationException {
+		super(ldapService);
+		this.writableDatasetIds = writableDatasetIds;
+		this.beanClass = beanClass;
+	}
 
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param pivotName Name of the entry to be returned, which is the name returned by
-	 *            {@link #getListPivots()} (used for display only)
-	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
-	 *            entry in the source.
+	 * @param pivotName       Name of the entry to be returned, which is the name
+	 *                        returned by {@link #getListPivots()} (used for display
+	 *                        only)
+	 * @param pivotAttributes Map of attribute names and values, which is the data
+	 *                        identifier in the source such as returned by
+	 *                        {@link #getListPivots()}. It must identify a unique
+	 *                        entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
-	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
-	 *             directory, or if more than one object would be returned.
+	 * @throws LscServiceException May throw a {@link NamingException} if the object
+	 *                             is not found in the directory, or if more than
+	 *                             one object would be returned.
 	 */
 	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		try {
@@ -165,19 +170,18 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	/**
 	 * Returns a list of all the objects' identifiers.
 	 * 
-	 * @return Map of all entries names that are returned by the directory with an associated map of
-	 *         attribute names and values (never null)
-	 * @throws LscServiceException May throw a {@link NamingException} if an error occurs while
-	 *             searching the directory.
+	 * @return Map of all entries names that are returned by the directory with an
+	 *         associated map of attribute names and values (never null)
+	 * @throws LscServiceException May throw a {@link NamingException} if an error
+	 *                             occurs while searching the directory.
 	 */
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException  {
-        try {
-			return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE,
-			        getAttrsId());
+	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+		try {
+			return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE, getAttrsId());
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}
-    }
+	}
 
 	/**
 	 * Apply directory modifications.

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import javax.script.*;
 
@@ -34,6 +35,8 @@ public class ScriptingEvaluator {
 
 	private Optional<ScriptableEvaluator> defaultImplementation;
 
+	private Map<Pattern, String> prefixRegex = new HashMap<>();
+
 	static {
 		implementetionsCache = new HashMap<String, Class<? extends ScriptableEvaluator>>();
         instancesCache = CacheBuilder.newBuilder().maximumSize(15).build();
@@ -41,7 +44,7 @@ public class ScriptingEvaluator {
 	}
 
 	private ScriptingEvaluator() {
-		instancesTypeCache = new HashMap<String, ScriptableEvaluator>();
+		instancesTypeCache = new HashMap<>();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
 		for (ScriptEngineFactory sef : factories) {
 			boolean loaded = false;
@@ -94,6 +97,9 @@ public class ScriptingEvaluator {
 			defaultImplementation = Optional.ofNullable(Optional.ofNullable(instancesTypeCache.get("js"))
 					.orElse(instancesTypeCache.get("rjs")));
 		}
+
+		// Compile regex jscript pattern match
+		compileRegexPatternMatch();
 	}
 
 	private static ScriptingEvaluator getInstance() {
@@ -115,11 +121,38 @@ public class ScriptingEvaluator {
 
 	private ScriptableEvaluator identifyScriptingEngine(String expression) throws LscServiceException {
 		String[] parts = expression.split(":");
-		if (parts != null && parts.length > 0 && parts[0].length() < 10
-				&& instancesTypeCache.containsKey(parts[0])) {
-			return instancesTypeCache.get(parts[0]);
+		String match = matchJScriptEvaluator(parts[0]);
+		if (!match.isEmpty()) {
+			return instancesTypeCache.get(match);
 		}
 		return defaultImplementation.orElseThrow(() -> new LscServiceException("Missing Script evaluator"));
+	}
+
+	/**
+	 * Matches the prefix specifying the jscript evaluator.
+	 *
+	 * @param jscript the prefix
+	 * @return the matched jscript evaluator
+	 */
+	public String matchJScriptEvaluator(String jscript) {
+		for (Map.Entry<Pattern, String> entry : prefixRegex.entrySet()) {
+			if (entry.getKey().matcher(jscript).matches()) {
+				return entry.getValue();
+			}
+		}
+		return "";
+	}
+
+	/**
+	 * Compiling Regex pattern to match jscript engine.
+	 */
+	public void compileRegexPatternMatch() {
+		for (String jscriptEngine: instancesTypeCache.keySet()) {
+			Pattern pattern = Pattern.compile("((\\n.*)+)" + jscriptEngine);
+			prefixRegex.put(pattern, jscriptEngine);
+			pattern = Pattern.compile(jscriptEngine);
+			prefixRegex.put(pattern, jscriptEngine);
+		}
 	}
 
 	/**

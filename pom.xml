@@ -76,8 +76,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<jmockit-version>1.7</jmockit-version>
-		<graalvm.version>23.0.7</graalvm.version>
-		<graaljs.version>24.1.1</graaljs.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
 
@@ -466,24 +464,58 @@
 		<profile>
 			<id>jdk11</id>
 			<activation>
-				<jdk>[11,</jdk>
+				<!-- 11 <= JDK < 21, ie 11 and 17-->
+				<jdk>[11,21)</jdk>
 			</activation>
 			<properties>
 				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
 				<!-- GraalVM compiler embedded in jvm -->
 				<graalvm.opts>-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI --module-path=${compiler.dir} --upgrade-module-path=${compiler.dir}/compiler.jar${path.separator}${compiler.dir}/compiler-management.jar</graalvm.opts>
+				<graalvm.version>22.3.5</graalvm.version>
 			</properties>
 			<dependencies>
 				<dependency>
-					<groupId>org.graalvm.polyglot</groupId>
-					<artifactId>polyglot</artifactId>
-					<version>${graaljs.version}</version>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.graalvm.polyglot</groupId>
-					<artifactId>js-community</artifactId>
-					<version>${graaljs.version}</version>
-					<type>pom</type>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js-scriptengine</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>profiler</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.tools</groupId>
+					<artifactId>chromeinspector</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler-management</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.truffle</groupId>
+					<artifactId>truffle-api</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.sdk</groupId>
+					<artifactId>graal-sdk</artifactId>
+					<version>${graalvm.version}</version>
 				</dependency>
 				<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 				<dependency>
@@ -507,6 +539,179 @@
 					<version>3.30.2-GA</version>
 				</dependency>
 			</dependencies>
+		</profile>
+
+		<profile>
+			<id>jdk21</id>
+			<activation>
+				<!-- JDK >= 21 -->
+				<jdk>[21,</jdk>
+			</activation>
+			<properties>
+				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
+				<!-- GraalVM compiler embedded in jvm -->
+				<graalvm.opts>-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI --module-path=${compiler.dir} --upgrade-module-path=${compiler.dir}/compiler.jar${path.separator}${compiler.dir}/compiler-management.jar</graalvm.opts>
+				<graalvm.version>23.1.6</graalvm.version>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.graalvm.polyglot</groupId>
+					<artifactId>polyglot</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.js</groupId>
+					<artifactId>js-scriptengine</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<!-- runtime -->
+				<dependency>
+					<groupId>org.graalvm.polyglot</groupId>
+					<artifactId>js-community</artifactId>
+					<version>${graalvm.version}</version>
+					<type>pom</type>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.polyglot</groupId>
+					<artifactId>profiler-community</artifactId>
+					<version>${graalvm.version}</version>
+					<type>pom</type>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.polyglot</groupId>
+					<artifactId>inspect-community</artifactId>
+					<version>${graalvm.version}</version>
+					<type>pom</type>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.truffle</groupId>
+					<artifactId>truffle-compiler</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.truffle</groupId>
+					<artifactId>truffle-runtime</artifactId>
+					<version>${graalvm.version}</version>
+					<scope>runtime</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler-management</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.truffle</groupId>
+					<artifactId>truffle-api</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.sdk</groupId>
+					<artifactId>graal-sdk</artifactId>
+					<version>${graalvm.version}</version>
+				</dependency>
+				<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+				<dependency>
+					<groupId>com.sun.xml.bind</groupId>
+					<artifactId>jaxb-core</artifactId>
+					<version>2.3.0.1</version>
+				</dependency>
+				<dependency>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+					<version>2.3.1</version>
+				</dependency>
+				<dependency>
+					<groupId>com.sun.xml.bind</groupId>
+					<artifactId>jaxb-impl</artifactId>
+					<version>2.3.1</version>
+				</dependency>
+				<dependency>
+					<groupId>org.javassist</groupId>
+					<artifactId>javassist</artifactId>
+					<version>3.30.2-GA</version>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-dependency-plugin</artifactId>
+						<version>3.8.1</version>
+						<executions>
+							<execution>
+								<id>copy</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<artifactItems>
+										<artifactItem>
+											<groupId>org.graalvm.sdk</groupId>
+											<artifactId>collections</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<destFileName>collections.jar</destFileName>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.sdk</groupId>
+											<artifactId>word</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<destFileName>word.jar</destFileName>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.truffle</groupId>
+											<artifactId>truffle-api</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.truffle</groupId>
+											<artifactId>truffle-compiler</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<destFileName>truffle-compiler.jar</destFileName>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.compiler</groupId>
+											<artifactId>compiler</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<destFileName>compiler.jar</destFileName>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.compiler</groupId>
+											<artifactId>compiler-management</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.graalvm.polyglot</groupId>
+											<artifactId>polyglot</artifactId>
+											<version>${graalvm.version}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+										</artifactItem>
+									</artifactItems>
+									<outputDirectory>${compiler.dir}</outputDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>

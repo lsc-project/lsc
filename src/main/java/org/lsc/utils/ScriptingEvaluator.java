@@ -53,7 +53,7 @@ public class ScriptingEvaluator {
 					instancesTypeCache.put("gr", new GroovyEvaluator(sef.getScriptEngine()));
 					loaded = true;
 					break;
-				} else if ("graal.js".equals(name)) {
+				} else if ("Graal.js".equals(name)) {
 					/**
 					 * for some reason graal.js is not enumerated in factories this code is not hit
 					 * so leave it out by getting it explicitly with
@@ -74,7 +74,7 @@ public class ScriptingEvaluator {
 		// Add the rhino engine with debugging capabilities
 		instancesTypeCache.put("rdjs", new RhinoJScriptEvaluator(true));
 
-		ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
+		ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("Graal.js");
 		if (graaljsEngine != null) {
 			Bindings bindings = graaljsEngine.getBindings(ScriptContext.ENGINE_SCOPE);
 			bindings.put("polyglot.js.allowHostAccess", true);
@@ -83,9 +83,11 @@ public class ScriptingEvaluator {
 			JScriptEvaluator graaljsevaluator = new JScriptEvaluator(graaljsEngine);
 			instancesTypeCache.put("gj", graaljsevaluator);
 			defaultImplementation = Optional.of(graaljsevaluator);
+			LOGGER.info("Default JS implementation: GraalJS");
 		} else {
 			defaultImplementation = Optional.ofNullable(
 					Optional.ofNullable(instancesTypeCache.get("js")).orElse(instancesTypeCache.get("rjs")));
+			LOGGER.info("Default JS implementation: " + defaultImplementation.get().toString());
 		}
 	}
 

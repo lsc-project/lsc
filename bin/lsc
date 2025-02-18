@@ -162,6 +162,47 @@ function is_run_command() {
 	fi
 }
 
+# Java options for GraalVM
+function build_graal_parameters() {
+
+	JAVA_MAJOR_VERSION=$( java -version 2>&1 \
+		| head -1 \
+		| cut -d'"' -f2 \
+		| sed 's/^1\.//' \
+		| cut -d'.' -f1 )
+
+	GRAAL_OPTS=""
+
+	for jar in compiler compiler-management; do
+		GRAAL_UPGRADE_MODULE_PATH="${GRAAL_UPGRADE_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+	done
+
+	# Java >= 21
+	if [ "${JAVA_MAJOR_VERSION}" -ge 21 ]; then
+
+		GRAAL_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI"
+
+		for jar in collections compiler compiler-management polyglot truffle-api truffle-compiler word; do
+			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+		done
+
+	else # Java 11, 17
+
+		GRAAL_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
+
+		for jar in graal-sdk truffle-api; do
+			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+		done
+
+	fi
+
+	GRAAL_OPTS="${GRAAL_OPTS} --module-path=${GRAAL_MODULE_PATH}"
+	GRAAL_OPTS="${GRAAL_OPTS} --upgrade-module-path=${GRAAL_UPGRADE_MODULE_PATH}"
+
+	export GRAAL_OPTS
+
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -178,6 +219,9 @@ if [ $run_status -eq 1 ]
 then
 	log "Starting LSC"
 fi
+
+build_graal_parameters
+JAVA_OPTS="$JAVA_OPTS ${GRAAL_OPTS}"
 
 # JMX
 for param in $PARAMETERS; do

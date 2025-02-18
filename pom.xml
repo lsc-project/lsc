@@ -76,12 +76,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<staging.dir>${project.build.directory}/staging</staging.dir>
 		<jmockit-version>1.7</jmockit-version>
-		<graalvm.tools.version>23.0.7</graalvm.tools.version>
-		<graalvm.js.version>23.0.7</graalvm.js.version>
-		<graalvm.compiler.version>23.0.7</graalvm.compiler.version>
-		<graalvm.truffle.version>23.0.7</graalvm.truffle.version>
-		<graalvm.sdk.version>23.0.7</graalvm.sdk.version>
-		<graalvm.polyglot.version>24.1.2</graalvm.polyglot.version>
+		<!-- GraalVM versions: 22.3.5 for jdk >= 11, 24.1.2 for jdk >= 17-->
+		<graalvm.tools.version>22.3.5</graalvm.tools.version>
+		<graalvm.js.version>22.3.5</graalvm.js.version>
+		<graalvm.compiler.version>22.3.5</graalvm.compiler.version>
+		<graalvm.truffle.version>22.3.5</graalvm.truffle.version>
+		<graalvm.sdk.version>22.3.5</graalvm.sdk.version>
 		<compiler.dir>${project.build.directory}/compiler</compiler.dir>
 	</properties>
 
@@ -502,10 +502,24 @@
 					<scope>runtime</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.graalvm.polyglot</groupId>
-					<artifactId>js-community</artifactId>
-					<version>${graalvm.polyglot.version}</version>
-					<type>pom</type>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler</artifactId>
+					<version>${graalvm.compiler.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.compiler</groupId>
+					<artifactId>compiler-management</artifactId>
+					<version>${graalvm.compiler.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.truffle</groupId>
+					<artifactId>truffle-api</artifactId>
+					<version>${graalvm.truffle.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>org.graalvm.sdk</groupId>
+					<artifactId>graal-sdk</artifactId>
+					<version>${graalvm.sdk.version}</version>
 				</dependency>
 				<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 				<dependency>

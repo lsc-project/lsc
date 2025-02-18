@@ -179,6 +179,15 @@ then
 	log "Starting LSC"
 fi
 
+# Java options for GraalVM
+GRAAL_SDK=$( readlink -f ${LIB_DIR}/graal-sdk-*.jar )
+GRAAL_TRUFFLEAPI=$( readlink -f ${LIB_DIR}/truffle-api-*.jar )
+GRAAL_COMPILER=$( readlink -f ${LIB_DIR}/compiler-[0-9.]*.jar )
+GRAAL_COMPILER_MANAGEMENT=$( readlink -f ${LIB_DIR}/compiler-management-*.jar )
+JAVA_OPTS="$JAVA_OPTS -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
+JAVA_OPTS="$JAVA_OPTS --module-path=${GRAAL_SDK}:${GRAAL_TRUFFLEAPI}"
+JAVA_OPTS="$JAVA_OPTS --upgrade-module-path=${GRAAL_COMPILER}:${GRAAL_COMPILER_MANAGEMENT}"
+
 # JMX
 for param in $PARAMETERS; do
 	if [ "$param" == "-a" ]; then

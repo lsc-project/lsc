@@ -150,9 +150,6 @@ public final class JndiServices {
 	/** Send relax rules control when writing in directory (default to false) */
 	private boolean relaxRules;
 
-	/** Attribute name to sort on. */
-	private String sortedBy;
-
 	/** Remember connection properties to reconnect */
 	private Properties connProps;
 
@@ -1204,31 +1201,34 @@ public final class JndiServices {
 	 * Applying request controls such as pageSize and sortedBy for LDAP Context.
 	 */
 	public void contextRequestControls() {
-		List<BasicControl> requestControls = new ArrayList<>();
-				try {
+		try {
 			// Storing default request controls
 			defaultRequestControls = ctx.getRequestControls();
-				} catch (NamingException e) {
-						throw new RuntimeException(e);
-				}
-				try {
+		} catch (NamingException e) {
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			List<BasicControl> requestControls = new ArrayList<>();
+
 			// Setting global pageSize variable
 			String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
+			
 			if (pageSizeStr != null && Integer.parseInt(pageSizeStr) > -1) {
 				pageSize = Integer.parseInt(pageSizeStr);
 				requestControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
 			}
-			ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
-		} catch (NamingException | IOException e) {
-			throw new RuntimeException(e);
-		}
-		try {
+
 			// Setting global sortedBy variable
-			sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
+			String sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
+			
 			if (sortedBy != null) {
 				requestControls.add(new SortControl(sortedBy, Control.CRITICAL));
 			}
-			ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+			
+			if (requestControls.size() > 0) {
+				ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+			}
 		} catch (NamingException | IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -35,6 +35,14 @@
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
+		<!-- Include the lib-compiler directory -->
+		<fileSet>
+			<directory>target/lib-compiler</directory>
+			<outputDirectory>lib-compiler</outputDirectory>
+			<fileMode>0644</fileMode>
+			<directoryMode>0755</directoryMode>
+		</fileSet>
+
 		<!-- Include the sample directory and all required files -->
 		<fileSet>
 			<directory>sample/hsqldb/etc</directory>

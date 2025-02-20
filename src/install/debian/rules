@@ -48,6 +48,7 @@ override_dh_install:
 	sed -i \
 		-e 's:^CFG_DIR.*:CFG_DIR="/etc/lsc":' \
 		-e 's:^LIB_DIR.*:LIB_DIR="/usr/lib/lsc":' \
+		-e 's:^COMPILER_DIR.*:COMPILER_DIR="/usr/lib/lsc-compiler":' \
 		-e "s:^LOG_DIR.*:LOG_DIR=\"/var/log/lsc\":" \
 		`pwd`/debian/lsc/usr/bin/lsc \
 		`pwd`/debian/lsc/usr/bin/lsc-agent \

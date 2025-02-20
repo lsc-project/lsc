@@ -64,6 +64,7 @@ find . -type f -name '*.bat' -delete
 # Create directories
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}/lsc
+mkdir -p %{buildroot}%{_libdir}/lsc-compiler
 mkdir -p %{buildroot}%{_sysconfdir}/lsc
 mkdir -p %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d
 mkdir -p %{buildroot}%{_sysconfdir}/cron.d
@@ -71,7 +72,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/default
 mkdir -p %{buildroot}%{lsc_logdir}
 mkdir -p %{buildroot}%{_sharedstatedir}/lsc/
 mkdir -p %{buildroot}%{_unitdir}
-mkdir -p %{buildroot}%{_mandir}/man{1,5}/
+mkdir -p %{buildroot}%{_mandir}/man1
+mkdir -p %{buildroot}%{_mandir}/man5
 
 # Copy files
 ## bin
@@ -87,6 +89,7 @@ cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample \
   %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
 ## lib
 cp -a lib/* %{buildroot}%{_libdir}/lsc
+cp -a lib-compiler/* %{buildroot}%{_libdir}/lsc-compiler
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc
 ## systemd
@@ -117,6 +120,7 @@ sed -i 's:^30:#30:' %{buildroot}%{_sysconfdir}/cron.d/lsc
 sed -i \
   -e 's:^CFG_DIR.*:CFG_DIR="%{_sysconfdir}/lsc":' \
   -e 's:^LIB_DIR.*:LIB_DIR="%{_libdir}/lsc":' \
+  -e 's:^COMPILER_DIR.*:COMPILER_DIR="%{_libdir}/lsc-compiler":' \
   -e 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' \
   %{buildroot}%{_bindir}/lsc \
   %{buildroot}%{_bindir}/lsc-agent \
@@ -174,6 +178,7 @@ getent passwd lsc > /dev/null 2>&1 || \
 %{_unitdir}/lsc-sync.timer
 %{_unitdir}/lsc-sync@.timer
 %{_libdir}/lsc/
+%{_libdir}/lsc-compiler/
 %attr(-,lsc,lsc) %{lsc_logdir}
 %attr(-,lsc,lsc) %{_sharedstatedir}/lsc/
 %{_mandir}/man1/lsc*.1*

@@ -59,6 +59,7 @@ fi
 
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
+COMPILER_DIR="$LSC_HOME/lib-compiler"
 
 # Get configuration directory from command line
 cfg_dir="${CFG_DIR}" # default value
@@ -174,7 +175,7 @@ function build_graal_parameters() {
 	GRAAL_OPTS=""
 
 	for jar in compiler compiler-management; do
-		GRAAL_UPGRADE_MODULE_PATH="${GRAAL_UPGRADE_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+		GRAAL_UPGRADE_MODULE_PATH="${GRAAL_UPGRADE_MODULE_PATH}:$( readlink -f ${COMPILER_DIR}/${jar}-[0-9.]*.jar )"
 	done
 
 	# Java >= 21
@@ -183,7 +184,7 @@ function build_graal_parameters() {
 		GRAAL_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI"
 
 		for jar in collections compiler compiler-management polyglot truffle-api truffle-compiler word; do
-			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${COMPILER_DIR}/${jar}-[0-9.]*.jar )"
 		done
 
 	else # Java 11, 17
@@ -191,7 +192,7 @@ function build_graal_parameters() {
 		GRAAL_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -XX:+UseJVMCICompiler"
 
 		for jar in graal-sdk truffle-api; do
-			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${LIB_DIR}/${jar}-[0-9.]*.jar )"
+			GRAAL_MODULE_PATH="${GRAAL_MODULE_PATH}:$( readlink -f ${COMPILER_DIR}/${jar}-[0-9.]*.jar )"
 		done
 
 	fi

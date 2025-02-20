@@ -548,7 +548,7 @@
 				<jdk>[21,</jdk>
 			</activation>
 			<properties>
-				<module.opts>--illegal-access=permit --add-reads java.base=java.logging</module.opts>
+				<module.opts>--add-reads java.base=java.logging</module.opts>
 				<!-- GraalVM compiler embedded in jvm -->
 				<graalvm.opts>-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI --module-path=${compiler.dir} --upgrade-module-path=${compiler.dir}/compiler.jar${path.separator}${compiler.dir}/compiler-management.jar</graalvm.opts>
 				<graalvm.version>23.1.6</graalvm.version>
@@ -688,6 +688,7 @@
 											<artifactId>compiler</artifactId>
 											<version>${graalvm.version}</version>
 											<type>jar</type>
+											<overWrite>true</overWrite>
 											<destFileName>compiler.jar</destFileName>
 										</artifactItem>
 										<artifactItem>
@@ -696,6 +697,7 @@
 											<version>${graalvm.version}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
+											<destFileName>compiler-management.jar</destFileName>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.graalvm.polyglot</groupId>

@@ -58,8 +58,8 @@ if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
 fi
 
 # HSQLDB jar file
-[ -z "$HSQLDB_LIB" -a -e "$SAMPLE_HOME/../../lib/hsqldb*.jar" ] && HSQLDB_LIB=`ls "$SAMPLE_HOME/../../lib/hsqldb*.jar"`
-[ -z "$HSQLDB_LIB" -a -e "$SAMPLE_HOME/../lib/lsc/hsqldb*.jar" ] && HSQLDB_LIB=`ls "$SAMPLE_HOME/../lib/lsc/hsqldb*.jar"`
+[ -z "$HSQLDB_LIB" -a -e "$SAMPLE_HOME/../../lib/"hsqldb*.jar ] && HSQLDB_LIB=`ls "$SAMPLE_HOME/../../lib/"hsqldb*.jar`
+[ -z "$HSQLDB_LIB" -a -e "$SAMPLE_HOME/../lib/lsc/"hsqldb*.jar ] && HSQLDB_LIB=`ls "$SAMPLE_HOME/../lib/lsc/"hsqldb*.jar`
 [ -z "$HSQLDB_LIB" ] && echo "hsqldb driver (hsqldb*.jar) is missing" && exit 1
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb

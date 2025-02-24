@@ -79,9 +79,10 @@ public class SetUtils {
 		}
 
 		Set<Object> attrValues = new LinkedHashSet<Object>(attr.size());
-		NamingEnumeration<?> ne = attr.getAll();
-		while (ne.hasMore()) {
-			Object value = ne.next();
+		NamingEnumeration<?> namingEnumeration = attr.getAll();
+
+		while (namingEnumeration.hasMore()) {
+			Object value = namingEnumeration.next();
 
 			// ignore empty string values
 			if ((value instanceof String) && ((String) value).length() == 0) {
@@ -90,6 +91,9 @@ public class SetUtils {
 
 			attrValues.add(value);
 		}
+
+		namingEnumeration.close();
+
 		return attrValues;
 	}
 
@@ -218,20 +222,20 @@ public class SetUtils {
 		Iterator<Object> iterator = second.iterator();
 		for (Object element1: first) {
 			Object element2 = iterator.next(); 
-			
+
 			ByteBuffer element1Buff = null;
-			
+
 			// use a byte buffer is element1 is binary
 			if (element1.getClass().isAssignableFrom(byte[].class)) {
 				element1Buff = ByteBuffer.wrap((byte[]) element1);
 			}
-			
+
 			ByteBuffer element2Buff = null;
-			
+
 			// use a byte buffer if element2 value is binary
 			if (element2.getClass().isAssignableFrom(byte[].class)) {
 				element2Buff = ByteBuffer.wrap((byte[]) element2);
-				
+
 				// make sure we have a byte buffer for element1 too
 				if (element1Buff == null) {
 					// if element1 is binary, make this element2 value binary
@@ -242,7 +246,7 @@ public class SetUtils {
 					}
 				}
 			}
-			
+
 			// element1Buff is set if either element1 or element2 value are
 			// binary
 			// do a binary comparison
@@ -255,7 +259,7 @@ public class SetUtils {
 						return false;
 					}
 				}
-				
+
 				// binary comparison
 				if (element2Buff.compareTo(element1Buff) != 0) {
 					return false;
@@ -268,7 +272,7 @@ public class SetUtils {
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -329,7 +333,7 @@ public class SetUtils {
 		}
 		return checkOrder(srcAttrValues, dstAttrValues);
 	}
-	
+
 	public static void addAllIfNotPresent(Set<Object> set, Set<Object> values) {
 		Set<Object> valuesToAdd = findMissingNeedles(set, values);
 		set.addAll(valuesToAdd);

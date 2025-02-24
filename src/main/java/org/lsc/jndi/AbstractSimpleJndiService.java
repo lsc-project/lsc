@@ -95,7 +95,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 * by this JndiSrcService.
 	 */
 	protected String filterAll;
-	
+
 	/** Where to find the entries. */
 	protected  String baseDn;
 	/**
@@ -204,11 +204,15 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		// get dn
 		beanToFill.setMainIdentifier(sr.getNameInNamespace());
 
-		NamingEnumeration<?> ne = sr.getAttributes().getAll();
-		while (ne.hasMore()) {
-			Attribute attr = (Attribute) ne.next();
+		NamingEnumeration<?> namingEnumeration = sr.getAttributes().getAll();
+
+		while (namingEnumeration.hasMore()) {
+			Attribute attr = (Attribute) namingEnumeration.next();
 			beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
 		}
+
+		namingEnumeration.close();
+
 		return beanToFill;
 	}
 
@@ -263,7 +267,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 
 		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
 	}
-	
+
 	public void close() throws IOException {
 		try {
 			jndiServices.finalize();

@@ -62,7 +62,7 @@ import javax.naming.directory.Attribute;
 public abstract class AbstractLscXmlRpcObject {
 
 	protected String message;
-	
+
 	public static final String LSC_XMLRPC_PROTOCOL_VERSION = "1.0"; 
 	public static final String LSC_XMLRPC_SERVICE_NAME = "LSC-XMLRPC"; 
 
@@ -72,7 +72,7 @@ public abstract class AbstractLscXmlRpcObject {
 	public static int UNHANDLED_ERROR	 				= 500;
 	public static int BAD_SERVICE_NAME	 				= 510;
 	public static int BAD_PROTOCOL_VERSION 				= 511;
-	
+
 	/**
 	 * Encode a list of parameters starting with the result code, followed by the
 	 * protocol version and ending by the parameters as an embedded array
@@ -93,7 +93,7 @@ public abstract class AbstractLscXmlRpcObject {
 		result.add(data);
 		return result;
 	}
-	
+
 
 	/**
 	 * Check in the request that the service and the version are correct
@@ -110,7 +110,7 @@ public abstract class AbstractLscXmlRpcObject {
 			return RESULT_SUCCESS;
 		}
 	}
-	
+
 	/**
 	 * Check in the response that the result code and the protocol version are correct
 	 * @param service the result code to check
@@ -134,7 +134,7 @@ public abstract class AbstractLscXmlRpcObject {
 	public String getErrorMessage() {
 		return message;
 	}
-	
+
 	/**
 	 * Parse the response to get the parameters as a String list
 	 * @param result the response
@@ -160,7 +160,7 @@ public abstract class AbstractLscXmlRpcObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Parse the response to get the parameters as an objects list
 	 * @param result the response
@@ -182,7 +182,7 @@ public abstract class AbstractLscXmlRpcObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Parse the response to get a boolean result 
 	 * @param result the request
@@ -200,7 +200,7 @@ public abstract class AbstractLscXmlRpcObject {
 			}
 		}
 	}
-	
+
 	public Object[] encodeRequest(Object... parameters) {
 		Object[] params = new Object[parameters.length + 2];
 		int index = 0;
@@ -211,7 +211,7 @@ public abstract class AbstractLscXmlRpcObject {
 		}
 		return params;
 	}
-	
+
 	public Object encodeMap(List<Attribute> attributes) {
 		Map<String, Object> values = new HashMap<String, Object>();
 		for(Attribute attribute: attributes) {
@@ -223,10 +223,13 @@ public abstract class AbstractLscXmlRpcObject {
 	public Object encodeAttributeValue(Attribute attribute) {
 		List<Object> values = new ArrayList<Object>();
 		try {
-			NamingEnumeration<?> enumeration = attribute.getAll();
-			while(enumeration.hasMore()) {
-				values.add(enumeration.nextElement());
+			NamingEnumeration<?> namingEnumeration = attribute.getAll();
+
+			while(namingEnumeration.hasMore()) {
+				values.add(namingEnumeration.nextElement());
 			}
+
+			namingEnumeration.close();
 		} catch (NamingException ne) {
 			System.err.println(ne);
 			ne.printStackTrace();

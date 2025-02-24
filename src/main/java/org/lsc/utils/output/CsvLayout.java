@@ -148,10 +148,10 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		return result;
 	}
 
-	public String getHeader() {
+	public String getPresentationHeader() {
 		String result = "";
 		if (outputHeader) {
-			result = attrs + "\n";
+			result = attrs;
 		}
 		return result;
 	}

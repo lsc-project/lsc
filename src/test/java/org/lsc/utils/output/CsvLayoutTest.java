@@ -177,11 +177,7 @@ public class CsvLayoutTest {
 
 		// log one line to check that the outputHeader is prepended
 		ILoggingEvent event = makeLoggingEvent(jm.toString(), jm);
-		assertEquals("givenName%sn%dn%%cn\n", layout.getHeader());
-		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.doLayout(event));
-
-		// log the same line again to check that the outputHeader is not logged again
-		event = makeLoggingEvent(jm.toString(), jm);
+		assertEquals("givenName%sn%dn%%cn", layout.getPresentationHeader());
 		assertEquals("Jon%%cn=test,o=testing%%Tester CN\n", layout.doLayout(event));
 	}
 }

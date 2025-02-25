@@ -241,15 +241,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	}
 
 	/**
-	 * @param taskNames the taskNames to set
-	 */
-	public void setTaskNames(String[] taskNames) {
-		if (taskNames != null) {
-			this.taskNamesList.addAll(Arrays.asList(taskNames));
-		}
-	}
-
-	/**
 	 * @param outputHeader the outputHeader to set
 	 */
 	public void setOutputHeader(Boolean outputHeader) {

@@ -301,12 +301,6 @@ public class LdifLayout extends PatternLayout {
 		this.onlyLdif = onlyLdif;
 	}
 
-	public void setLogOperations(LscModificationType[] lscModificationTypes) {
-		if (lscModificationTypes != null && lscModificationTypes.length > 0) {
-			operations.addAll(Arrays.asList(lscModificationTypes));
-		}
-	}
-
 	public void setLogOperations(String logOperations) {
 		this.logOperations = logOperations;
 	}

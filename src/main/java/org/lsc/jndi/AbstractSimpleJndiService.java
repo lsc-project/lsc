@@ -204,11 +204,15 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		// get dn
 		beanToFill.setMainIdentifier(sr.getNameInNamespace());
 
-		NamingEnumeration<?> ne = sr.getAttributes().getAll();
-		while (ne.hasMore()) {
-			Attribute attr = (Attribute) ne.next();
+		NamingEnumeration<?> namingEnumeration = sr.getAttributes().getAll();
+		
+		while (namingEnumeration.hasMore()) {
+			Attribute attr = (Attribute) namingEnumeration.next();
 			beanToFill.setDataset(attr.getID(), SetUtils.attributeToSet(attr));
 		}
+		
+		namingEnumeration.close();
+		
 		return beanToFill;
 	}
 

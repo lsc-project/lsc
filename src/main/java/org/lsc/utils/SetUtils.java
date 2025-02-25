@@ -79,9 +79,10 @@ public class SetUtils {
 		}
 
 		Set<Object> attrValues = new LinkedHashSet<Object>(attr.size());
-		NamingEnumeration<?> ne = attr.getAll();
-		while (ne.hasMore()) {
-			Object value = ne.next();
+		NamingEnumeration<?> namingEnumeration = attr.getAll();
+		
+		while (namingEnumeration.hasMore()) {
+			Object value = namingEnumeration.next();
 
 			// ignore empty string values
 			if ((value instanceof String) && ((String) value).length() == 0) {
@@ -90,6 +91,9 @@ public class SetUtils {
 
 			attrValues.add(value);
 		}
+		
+		namingEnumeration.close();
+		
 		return attrValues;
 	}
 

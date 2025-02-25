@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.lsc.beans.IBean;
@@ -101,10 +100,39 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		cache = new TreeMap<String, Task>();
 	}
 
-	public void init() throws LscConfigurationException {
+	/**
+	 * Initialize a single task
+	 * 
+	 * @param taskName The task to initialize
+	 * @exception LscConfigurationException If the initialization failed
+	 */
+	public void init(String taskName) throws LscConfigurationException {
 		Collection<TaskType> tasks = LscConfiguration.getTasks();
-		for(TaskType t: tasks) {
-			cache.put(t.getName(), new Task(t));
+		
+		for(TaskType taskType: tasks) {
+			if (taskType.getName().equalsIgnoreCase(taskName)) {
+				cache.put(taskName, new Task(taskType));
+			}
+		}
+	}
+
+	/**
+	 * Initialize all the tasks. It's called when the 'all' parameter is provided instead of a list of tasks.
+	 * 
+	 * @throws LscConfigurationException If we can't read or process the configuration
+	 */
+	public void initAllTasks() throws LscConfigurationException {
+		// Fetch all the configured tasks
+		Collection<TaskType> tasks = LscConfiguration.getTasks();
+		
+		// Initialize each task if not already done
+		for(TaskType taskType: tasks) {
+			String taskName = taskType.getName();
+		
+			// Only initialize a task if it's not already in cache
+			if (!cache.containsKey(taskName)) {
+				cache.put(taskName, new Task(taskType));
+			}
 		}
 	}
 
@@ -126,10 +154,113 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Launch a single task, ,accordingly to its mode (async, sync or clean)
+	 * 
+	 * @param task The task to launch
+	 * @param mode The mode (sync, async or clean)
+	 * @return <code>true</code> if the launch was successful
+	 * @throws Exception If we get some error while executing a task
+	 */
+	private boolean processTask(Task task, Task.Mode mode) throws Exception{
+		boolean launchResult = launchTask(task, mode);
+		
+		if (launchResult) {
+			switch (mode) {
+				case sync:
+					String syncHook = task.getSyncHook();
+					
+					if((syncHook != null) && (syncHook.length() != 0)) {
+						runPostHook(task.getName(), syncHook, task.getTaskType());
+					}
+					
+					break;
+					
+				case async:
+					// Nothing to do
+					break;
+					
+				case clean:
+					String cleanHook = task.getCleanHook();
+					
+					if((cleanHook != null) && (cleanHook.length() != 0)) {
+						runPostHook(task.getName(), cleanHook, task.getTaskType());
+					}
+	
+					break;
+			}
+		}
+
+		return launchResult;
+	}
+	
+	/**
+	 * Process the  tasks. If the list of tasks contains the 'all' keyword, all 
+	 * the tasks will be launched, regardless of the provided list
+	 * 
+	 * @param tasks The tasks to process
+	 * @param mode Tells if the task is to be launched in mode sync, async or clean
+	 * @return The number of launched tasks. The value will be negative if at least one task 
+	 * failed to be launched
+	 * @throws Exception If an exception occurred while launching a task
+	 */
+	private int processTasks(List<String> tasks, Task.Mode mode) throws Exception {
+		int nbLaunchedTasks = 0;
+		boolean launchTask = false;
+		
+		// First check if all the tasks have to be launched
+		if (tasks.contains(ALL_TASKS_KEYWORD)) {
+			// Initialize all the tasks
+			initAllTasks();
+			
+			for (TaskType taskType:LscConfiguration.getTasks()) {
+				Task task = cache.get(taskType.getName());
+				launchTask |= processTask(task, mode);
+				nbLaunchedTasks++;
+			}
+		} else {
+			// No, we can process each listed task
+			for (String taskName:tasks) {
+				boolean canLaunch = true;
+				
+				// Check if it's the cache
+				Task task = cache.get(taskName);
+				
+				if (task == null) {
+					// Not in the cache, initialize the task
+					TaskType taskType = LscConfiguration.getTask(taskName);
+					
+					if (taskType != null) {
+						task = new Task(taskType);
+						cache.put(taskName, task);
+					} else {
+						// The task is not even found, it's probably a configuration error
+						LOGGER.error("Task '{}' cannot be found in configuration. Check the spelling", taskName);
+						canLaunch = false;
+					}
+				}
+				
+				// Launch the task if it exists
+				if (canLaunch) {
+					launchTask |= processTask(task, mode);
+					nbLaunchedTasks++;
+				}
+			}
+		}
+		
+		if (!launchTask) {
+			return -nbLaunchedTasks;
+		} else {
+			return nbLaunchedTasks;
+		}
+	}
 
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
+	 * 
 	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks string list of the synchronization tasks to launch
 	 * @param cleanTasks string list of the cleaning tasks to launch
@@ -138,77 +269,41 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 			final List<String> cleanTasks) throws Exception {
-		boolean foundATask = false;
-		boolean canClose = true;
 		boolean launchResult = true;
-
-		if(getTasksName() == null) {
+		
+		if (getTasksName() == null) {
 			return false;
-		} else if(getTasks().length == 0) {
-			init();
 		}
+
+		// Some asynTasks are going to be executed, so start JMX
 		if(!asyncTasks.isEmpty()) {
 			LscServerImpl.startJmx(this);
 		}
+		
+		// Process the three different type of tasks, and get the number of executed tasks.
+		// If this number is negative, it means there was a failure in the execution of
+		// at least one task.
+		int nbLaunchedSyncTasks = processTasks(syncTasks, Task.Mode.sync);
+		int nbLaunchedCleanTasks = processTasks(cleanTasks, Task.Mode.clean);
+		int nbLaunchedAsyncTasks = processTasks(asyncTasks, Task.Mode.async);
+		
+		// Check the number of total tasks executed
+		int nbLaunchedTasks = Math.abs(nbLaunchedSyncTasks) 
+				+ Math.abs(nbLaunchedCleanTasks) 
+				+ Math.abs(nbLaunchedAsyncTasks);
 
-		Collection<Task> asyncTasksToLaunch = userOrderedTask(asyncTasks, asyncTasks.contains(ALL_TASKS_KEYWORD));
-		Collection<Task> syncTasksToLaunch = userOrderedTask(syncTasks, syncTasks.contains(ALL_TASKS_KEYWORD));
-		Collection<Task> cleanTasksToLaunch = userOrderedTask(cleanTasks, cleanTasks.contains(ALL_TASKS_KEYWORD));
-
-		for (Task task: syncTasksToLaunch) {
-			foundATask = true;
-
-			if (!launchTask(task, Task.Mode.sync)) {
-				launchResult = false;
-			} else {
-				if(task.getSyncHook() != null && task.getSyncHook() != "") {
-					runPostHook(task.getName(), task.getSyncHook(), task.getTaskType());
-				}
-			}
-		}
-		for (Task task: cleanTasksToLaunch) {
-			foundATask = true;
-
-			if (!launchTask(task, Task.Mode.clean)) {
-				launchResult = false;
-			} else {
-				if(task.getCleanHook() != null && task.getCleanHook() != "") {
-					runPostHook(task.getName(), task.getCleanHook(), task.getTaskType());
-				}
-			}
-		}
-		for (Task task: asyncTasksToLaunch) {
-			foundATask = true;
-
-			canClose = false;
-
-			if(!launchTask(task, Task.Mode.async)) {
-				launchResult = false;
-			}
-		}
-
-		if (canClose) {
+		// If no async task has been executed, we can safely close the JndiServices
+		if (nbLaunchedAsyncTasks == 0) {
 			close();
 		}
 
-		if (!foundATask) {
+		if (nbLaunchedTasks == 0) {
 			LOGGER.error("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
+			
 			return false;
 		}
 
 		return launchResult;
-	}
-
-	private Collection<Task> userOrderedTask(List<String> userValues, boolean all) {
-		Collection<Task> allTasks = cache.values();
-		if (all) {
-			return allTasks;
-		}
-		Collection<String> allTaskNames = allTasks.stream().map(Task::getName).collect(Collectors.toList());
-		return userValues.stream()
-				.filter(allTaskNames::contains)
-				.map(cache::get)
-				.collect(Collectors.toList());
 	}
 
 	/**

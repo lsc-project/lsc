@@ -223,10 +223,13 @@ public abstract class AbstractLscXmlRpcObject {
 	public Object encodeAttributeValue(Attribute attribute) {
 		List<Object> values = new ArrayList<Object>();
 		try {
-			NamingEnumeration<?> enumeration = attribute.getAll();
-			while(enumeration.hasMore()) {
-				values.add(enumeration.nextElement());
+			NamingEnumeration<?> namingEnumeration = attribute.getAll();
+			
+			while(namingEnumeration.hasMore()) {
+				values.add(namingEnumeration.nextElement());
 			}
+			
+			namingEnumeration.close();
 		} catch (NamingException ne) {
 			System.err.println(ne);
 			ne.printStackTrace();

@@ -543,10 +543,11 @@ public final class JndiServices {
 		String searchBase = base == null ? "" : base;
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
 
-		NamingEnumeration<SearchResult> ne = null;
+		NamingEnumeration<SearchResult> namingEnumeration = null;
 		try {
 			sc.setSearchScope(scope);
 			String rewrittenBase = null;
+			
 			if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
 				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
 					rewrittenBase = searchBase.substring(0,
@@ -557,28 +558,35 @@ public final class JndiServices {
 			} else {
 				rewrittenBase = searchBase;
 			}
-			ne = ctx.search(rewrittenBase, searchFilter, sc);
-
+			
+			namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
 		} catch (NamingException nex) {
 			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
 			throw nex;
 		}
 
 		SearchResult sr = null;
-		if (ne.hasMoreElements()) {
-			sr = (SearchResult) ne.nextElement();
-			if (ne.hasMoreElements()) {
+		
+		if (namingEnumeration.hasMoreElements()) {
+			sr = (SearchResult) namingEnumeration.nextElement();
+			
+			if (namingEnumeration.hasMoreElements()) {
 				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\")", searchBase, searchFilter);
+				namingEnumeration.close();
 				throw new SizeLimitExceededException(
 						"Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\")");
 			} else {
+				namingEnumeration.close();
 				return sr;
 			}
 		} else {
 			// try hasMore method to throw exceptions if there are any and we didn't get our
 			// entry
-			ne.hasMore();
+			namingEnumeration.hasMore();
 		}
+		
+		namingEnumeration.close();
+		
 		return sr;
 	}
 
@@ -673,30 +681,39 @@ public final class JndiServices {
 
 	private SearchResult doReadEntry(final String base, final String filter, final boolean allowError,
 			final SearchControls sc) throws NamingException {
-		NamingEnumeration<SearchResult> ne = null;
+		NamingEnumeration<SearchResult> namingEnumeration = null;
 		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 		try {
-			ne = ctx.search(rewriteBase(base), filter, sc);
+			namingEnumeration = ctx.search(rewriteBase(base), filter, sc);
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
 				throw nex;
 			}
+			
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
 				LOGGER.debug(nex.toString(), nex);
 			}
+			
 			return null;
 		}
 
 		SearchResult sr = null;
-		if (ne.hasMore()) {
-			sr = (SearchResult) ne.next();
-			if (ne.hasMore()) {
+		
+		if (namingEnumeration.hasMore()) {
+			sr = (SearchResult) namingEnumeration.next();
+			
+			if (namingEnumeration.hasMore()) {
 				LOGGER.error("Too many entries returned (base: \"{}\")", base);
 			} else {
+				namingEnumeration.close();
+				
 				return sr;
 			}
 		}
+		
+		namingEnumeration.close();
+		
 		return sr;
 	}
 
@@ -735,7 +752,7 @@ public final class JndiServices {
 	}
 
 	private List<String> doGetDnList(final String base, final String filter, final int scope) throws NamingException {
-		NamingEnumeration<SearchResult> ne = null;
+		NamingEnumeration<SearchResult> namingEnumeration = null;
 		List<String> list = new ArrayList<String>();
 		try {
 			contextRequestControls();
@@ -746,19 +763,22 @@ public final class JndiServices {
 			sc.setReturningObjFlag(true);
 			byte[] pagedResultsResponse = null;
 			do {
-				ne = ctx.search(base, filter, sc);
+				namingEnumeration = ctx.search(base, filter, sc);
 				String completedBaseDn = "";
 				if (base.length() > 0) {
 					completedBaseDn = "," + base;
 				}
-			while (ne.hasMoreElements()) {
-				list.add(ne.next().getName() + completedBaseDn);
+			while (namingEnumeration.hasMoreElements()) {
+				list.add(namingEnumeration.next().getName() + completedBaseDn);
 			}
 			pagedResultsResponse = pagination();
 			} while (pagedResultsResponse != null);
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
+			
+			namingEnumeration.close();
+			
 			throw e;
 		} catch (IOException e) {
 			LOGGER.error(e.toString());
@@ -766,6 +786,9 @@ public final class JndiServices {
 		} finally {
 			ctx.setRequestControls(defaultRequestControls);
 		}
+		
+		namingEnumeration.close();
+		
 		return list;
 	}
 
@@ -928,12 +951,15 @@ public final class JndiServices {
 	private void doDeleteChildrenRecursively(LdapContext updateCtx, String distinguishName) throws NamingException {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
-		NamingEnumeration<SearchResult> ne = ctx.search(distinguishName, DEFAULT_FILTER, sc);
-		while (ne.hasMore()) {
-			SearchResult sr = (SearchResult) ne.next();
+		NamingEnumeration<SearchResult> namingEnumeration = ctx.search(distinguishName, DEFAULT_FILTER, sc);
+		while (namingEnumeration.hasMore()) {
+			SearchResult sr = (SearchResult) namingEnumeration.next();
 			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
 			deleteChildrenRecursively(updateCtx, childrenDn);
 		}
+		
+		namingEnumeration.close();
+		
 		updateCtx.destroySubcontext(new LdapName(distinguishName));
 	}
 
@@ -987,9 +1013,13 @@ public final class JndiServices {
 		if (schemaDnSR.hasMore()) {
 			sr = schemaDnSR.next();
 		}
+		
+		schemaDnSR.close();
+		
 		if (sr != null) {
 			subschemaSubentry = sr.getAttributes().get("subschemaSubentry");
 		}
+		
 		if (subschemaSubentry != null && subschemaSubentry.size() > 0) {
 			subschemaSubentryDN = (String) subschemaSubentry.get();
 		}
@@ -1097,11 +1127,14 @@ public final class JndiServices {
 			Attribute attr = res.getAttributes().get(attribute);
 			if (attr != null) {
 				values = new ArrayList<String>();
-				NamingEnumeration<?> enu = attr.getAll();
-				while (enu.hasMoreElements()) {
-					Object val = enu.next();
+				NamingEnumeration<?> namingEnumeration = attr.getAll();
+				
+				while (namingEnumeration.hasMoreElements()) {
+					Object val = namingEnumeration.next();
 					values.add(val.toString());
 				}
+				
+				namingEnumeration.close();
 			}
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
@@ -1155,6 +1188,8 @@ public final class JndiServices {
 						res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
 					}
 				}
+				
+				results.close();
 
 				pagedResultsResponse = pagination();
 			} while (pagedResultsResponse != null);

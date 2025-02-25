@@ -213,11 +213,14 @@ public class ActiveDirectoryDstService extends SimpleJndiDstService {
 			Attribute attr = res.getAttributes().get(attribute);
 			if (attr != null) {
 				values = new ArrayList<String>();
-				NamingEnumeration<?> enu = attr.getAll();
-				while (enu.hasMoreElements()) {
-					Object val = enu.next();
+				NamingEnumeration<?> namingEnumeration = attr.getAll();
+				
+				while (namingEnumeration.hasMoreElements()) {
+					Object val = namingEnumeration.next();
 					values.add(val.toString());
 				}
+				
+				namingEnumeration.close();
 			}
 		} catch (NamingException e) {
 			throw new LscServiceException(e);

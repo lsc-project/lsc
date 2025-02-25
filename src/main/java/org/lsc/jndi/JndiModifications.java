@@ -182,10 +182,13 @@ public class JndiModifications {
 				List<String> values = new ArrayList<String>(attr.size());
 
 				try {
-					NamingEnumeration<?> ne = attr.getAll();
-					while (ne.hasMoreElements()) {
-						values.add(ne.next().toString());
+					NamingEnumeration<?> namingEnumeration = attr.getAll();
+					
+					while (namingEnumeration.hasMoreElements()) {
+						values.add(namingEnumeration.next().toString());
 					}
+					
+					namingEnumeration.close();
 				} catch (NamingException e) {
 					LOGGER.error("Error in getting the value(s) of the attribute {}", id);
 				}

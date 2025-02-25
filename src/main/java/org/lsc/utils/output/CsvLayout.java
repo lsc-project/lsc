@@ -208,13 +208,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/**
 	 * @param logOperations the logOperation to set
 	 */
-	public void setLogOperations(LscModificationType[] logOperations) {
-		operations.addAll(Arrays.asList(logOperations));
-	}
-
-	/**
-	 * @param logOperations the logOperation to set
-	 */
 	public void setLogOperations(String logOperations) {
 		this.logOperations = logOperations;
 	}

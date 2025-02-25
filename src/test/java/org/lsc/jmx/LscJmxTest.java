@@ -73,6 +73,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lsc.CommonLdapSyncTest;
 import org.lsc.Ldap2LdapSyncTest;
 import org.lsc.SimpleSynchronize;
+import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiModificationType;
@@ -131,8 +132,11 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	@BeforeEach
 	public void setupJmx() throws CommunicationException {
 		LscConfiguration.reset();
-		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
-		jndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+		
+		ConnectionType connectionType = LscConfiguration.getConnection("dst-ldap");
+		
+		assertNotNull(connectionType);
+		jndiServices = JndiServices.getInstance((LdapConnectionType) connectionType);
 		clean();
 	}
 
@@ -185,9 +189,7 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	public void run() {
 		try {
 			SimpleSynchronize sync = new SimpleSynchronize();
-			sync.init();
 			sync.setThreads(1);
-			LscServerImpl.startJmx(sync);
 			LOGGER.info("The JMX bean has been registered. Synchronizing data ...");
 			Ldap2LdapSyncTest.launchSyncCleanTask(getTaskName(), true, false, false);
 		} catch (RuntimeException e) {

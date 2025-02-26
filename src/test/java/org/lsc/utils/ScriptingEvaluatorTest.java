@@ -72,7 +72,7 @@ public class ScriptingEvaluatorTest extends AbstractLdapTestUnit {
 
 	@Test
 	public void testGJEngineIsCorrectlyLoaded() throws Exception {
-		String expression = "\njs:\ntest=\"js\"";
+		String expression = "gj:test=\"value\"";
 
 		Class ScriptingEvaluatorClass = Class.forName("org.lsc.utils.ScriptingEvaluator");
 		Constructor<ScriptingEvaluator> pcc = ScriptingEvaluatorClass.getDeclaredConstructor();
@@ -90,9 +90,26 @@ public class ScriptingEvaluatorTest extends AbstractLdapTestUnit {
 	}
 
 	@Test
+	public void testRhinoEngineIsCorrectlyLoaded() throws Exception {
+		String expression = "rjs:test=\"value\"";
+
+		Class ScriptingEvaluatorClass = Class.forName("org.lsc.utils.ScriptingEvaluator");
+		Constructor<ScriptingEvaluator> pcc = ScriptingEvaluatorClass.getDeclaredConstructor();
+		pcc.setAccessible(true);
+		ScriptingEvaluator ScriptingEvaluatorObject = pcc.newInstance();
+
+		Method identifyScriptingEngineMethod = ScriptingEvaluator.class.getDeclaredMethod("identifyScriptingEngine", String.class);
+		identifyScriptingEngineMethod.setAccessible(true);
+		ScriptableEvaluator se = (ScriptableEvaluator) identifyScriptingEngineMethod.invoke(ScriptingEvaluatorObject, expression );
+
+		String engine = se.getClass().getSimpleName();
+		assertEquals("RhinoJScriptEvaluator", engine);
+	}
+
+	@Test
 	public void testScriptShouldEvaluateWhenStartingWithANewLine() throws LscServiceException {
-		String expression = "\ngj:true";
-		boolean booleanOutput = ScriptingEvaluator.evalToBoolean(task, expression, new HashMap<>());
-		assertTrue(booleanOutput);
+		String expression = "\n\ngj:\n\ntest=\"value\"";
+		String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
+		assertEquals("value", stringOutput);
 	}
 }

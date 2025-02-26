@@ -94,6 +94,13 @@ public class ScriptingEvaluator {
 		}
 		// Compile regex jscript pattern match
 		compileRegexPatternMatch();
+
+		// Display all registered JS engines in debug mode
+		String registeredLanguages = "";
+		for (String key : instancesTypeCache.keySet()) {
+			registeredLanguages += key + "=" + instancesTypeCache.get(key).toString() + ", ";
+		}
+		LOGGER.debug("All registered JS engines: " + registeredLanguages );
 	}
 
 	private static ScriptingEvaluator getInstance() {
@@ -116,6 +123,7 @@ public class ScriptingEvaluator {
 		String[] parts = expression.split(":");
 		String match = matchJScriptEvaluator(parts[0]);
 		if (!match.isEmpty()) {
+			LOGGER.debug("Selected JS engine: " + match + " = " + instancesTypeCache.get(match).toString() );
 			return instancesTypeCache.get(match);
 		}
 		return defaultImplementation.orElseThrow(() -> new LscServiceException("Missing Script evaluator"));

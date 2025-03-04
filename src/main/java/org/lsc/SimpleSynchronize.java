@@ -209,6 +209,10 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	private int processTasks(List<String> tasks, Task.Mode mode) throws Exception {
 		int nbLaunchedTasks = 0;
 		boolean launchTask = false;
+
+		if ((tasks == null) || (tasks.size() == 0)) {
+			return 0;
+		}
 		
 		// First check if all the tasks have to be launched
 		if (tasks.contains(ALL_TASKS_KEYWORD)) {
@@ -276,7 +280,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 
 		// Some asynTasks are going to be executed, so start JMX
-		if(!asyncTasks.isEmpty()) {
+		if((asyncTasks!=null) && !asyncTasks.isEmpty()) {
 			LscServerImpl.startJmx(this);
 		}
 		

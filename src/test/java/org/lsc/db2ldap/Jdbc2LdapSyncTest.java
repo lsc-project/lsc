@@ -1,19 +1,26 @@
 package org.lsc.db2ldap;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.directory.api.ldap.model.name.Rdn;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
 import org.apache.directory.server.core.annotations.ApplyLdifFiles;
@@ -52,49 +59,199 @@ import com.ibatis.sqlmap.client.SqlMapSession;
 		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
 		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
+/**
+ * The DB -> LDAP test class
+ */
 public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(Jdbc2LdapSyncTest.class);
 
-	public final static String TASK_NAME = "db2ldapTestTask";
-	public final static String SOURCE_DN = "ou=db2ldapTestTask,ou=Test Data,dc=lsc-project,dc=org";
-	public final static String DEST_TABLE = "testdata";
+	public final static String SYNC_TASK_NAME = "db2ldapSyncTestTask";
+	public final static String CLEAN_TASK_NAME = "db2ldapCleanTestTask";
+	public final static String DEST_DN = "ou=db2ldapTestTask,ou=Test Data,dc=lsc-project,dc=org";
+	public final static String SRC_TABLE = "inetorgperson";
 	public final static String DEST_TABLE_DEF = "id VARCHAR(36) PRIMARY KEY, MAIL VARCHAR(256), MAIL_LOWER VARCHAR(256), LAST_UPDATE TIMESTAMP, SN VARCHAR(64), CN VARCHAR(128), DESCRIPTION VARCHAR(512), TELEPHONENUMBER VARCHAR(128)";
 
 	public String getTaskName() {
-		return TASK_NAME;
+		return SYNC_TASK_NAME;
 	}
 
-	public String getSourceDn() {
-		return SOURCE_DN;
+	public String getDestDn() {
+		return DEST_DN;
 	}
 
-	public String DN_ADD_SRC = "cn=CN0001," + getSourceDn(); // DN from LDAP
+	public String DN_ADD_DST = "cn=CN0001," + getDestDn(); // DN from LDAP
 	public String DN_ADD_EXID = "12345678-1234-1234-1234-123456123456"; // externalId from LDAP
 	public String DN_ADD_DESC = "Number one's descriptive text"; // Description from LDAP
 	public String DN_ADD_TEL = "+49-89-5293-79"; // Telephone number from LDAP
 	public String DB_MOD_MAIL = "Hans.Test@lsc-project.org";
 	public String DB_MOD_DESC = "Modified description";
 
-	protected static JndiServices srcJndiServices;
-	protected static SqlMapClient dstSqlMapClient;
+	protected static SqlMapClient srcSqlMapClient;
+	protected static JndiServices dstJndiServices;
+	protected static DatabaseConnectionType databaseConnectionType;
+	private Connection dbConnection;
+
+	private static final int ID_ROW = 1;
+	private static final int UID_ROW = 2;
+	private static final int DATE_ROW = 3;
+	private static final int SN_ROW = 4;
+	private static final int CN_ROW = 5;
+	private static final int GN_ROW = 6;
+	private static final int MAIL_ROW = 7;
+	private static final int O_ROW = 8;
+	private static final int ADDRESS_ROW = 9;
+	private static final int TELEPHONE_ROW = 10;
+	private static final int CAR_ROW = 11;
+	private static final int PASSWD_ROW = 12;
+
+
+	private String[][] data = {
+			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@philipou.net", "Normation", "", "+33 (0)1 83 62 26 96", "BHU772|DED899", "aaa"},
+			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@schermesser.com", "Octo", "", "", "", "bbb"},
+			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@aepik.net", "AFNOR", "", "", "", "ccc"},
+			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@gmail.com", "Dictao", "156 av. de Malakof, 75116 PARIS, France", "", "", "ddd"},
+			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@gmail.com", "Linagora", "", "33(0)810251251", "", "eee"},
+			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@linagora.com", "Linagora", "", "33(0)810251251", "", "fff"},
+			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@linagora.com", "Linagora", "", "33(0)810251251", "", "ggg"},
+			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@linagora.com", "Linagora", "", "33(0)810251251", "", "hhh"},
+			{"9", "e.lecharny", "31/12/2015", "Pereira", "Lecharny, Emmanuel", "Emmanuel", "epereira@linagora.com", "Worteks", "", "33(0)810251251", "", "iii"}
+	};
+
 
 	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
-		assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		assertNotNull(LscConfiguration.getConnection("dst-jdbc"));
+		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+		assertNotNull(LscConfiguration.getConnection("src-jdbc"));
 		reloadConnections();
+		loadDbData();
+	}
+
+
+	private void deleteFromDb() throws SQLException {
+		try (Statement statempent = dbConnection.createStatement()) {
+			statempent.executeUpdate("DELETE FROM " + SRC_TABLE);
+			dbConnection.commit();
+		} catch ( SQLException s) {
+			// That's ok
+		}
+
+
+		try (Statement statement = dbConnection.createStatement()) {
+			String request = String.format("Select * FROM %s ", SRC_TABLE);
+
+			try (ResultSet resultSet = statement.executeQuery(request)) {
+				int rowcount = 0;
+
+				while (resultSet.next()) {
+					rowcount++;
+
+					System.out.println("Entry :"+resultSet.getString("cn"));
+				}
+
+				if (rowcount == 0) {
+					System.out.println("----> No entry in the database");
+				}
+			}
+		}
+	}
+
+	private void loadDbData() {
+		try {
+			DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
+			pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+
+			try {
+				Class.forName(pc.getDriver()).newInstance();
+				dbConnection = DriverManager.getConnection(pc.getUrl());
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
+				// error
+			}
+
+			try (Statement statempent = dbConnection.createStatement()) {
+
+				try {
+					statempent.executeUpdate("DROP TABLE " + SRC_TABLE);
+				} catch ( SQLException s) {
+					// That's ok
+				}
+
+				// Create the table
+				statempent.executeUpdate("CREATE TABLE " + SRC_TABLE + "(" +
+						"id BIGINT," +
+						"uid VARCHAR(20)," +
+						"endOfValidity DATE, " +
+						"sn VARCHAR(100)," +
+						"cn VARCHAR(100)," +
+						"givenName VARCHAR(100)," +
+						"mail VARCHAR(100), " +
+						"o VARCHAR(100)," +
+						"address VARCHAR(100)," +
+						"telephoneNumber VARCHAR(100)," +
+						"carLicense VARCHAR(100)," +
+						"userpassword VARCHAR(20))");
+
+				dbConnection.commit();
+			}
+
+			// Inject the data
+
+			try (PreparedStatement pstmt = dbConnection.prepareStatement("INSERT INTO " + SRC_TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?, ?)")) {
+
+				for (String[] values:data) {
+					int colNb = 1;
+
+					for (String value:values) {
+						switch (colNb) {
+
+							case ID_ROW:
+								pstmt.setLong(ID_ROW, Long.valueOf(value));
+								break;
+
+							case DATE_ROW:
+								SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+
+								try {
+									Date date = new Date(df.parse(value).getTime());
+									pstmt.setDate(DATE_ROW, date);
+								} catch (ParseException pe) {
+									//
+								}
+
+								break;
+
+							case UID_ROW:
+							case SN_ROW:
+							case CN_ROW:
+							case GN_ROW:
+							case MAIL_ROW:
+							case O_ROW:
+							case ADDRESS_ROW:
+							case TELEPHONE_ROW:
+							case CAR_ROW:
+							case PASSWD_ROW:
+								pstmt.setString(colNb, value);
+						}
+
+						colNb++;
+					}
+
+					pstmt.execute();
+				}
+			}
+		} catch (SQLException s) {
+				s.printStackTrace();
+		}
 	}
 
 	private void reloadConnections() {
-		srcJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("src-ldap"));
-		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("dst-jdbc");
-		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+		databaseConnectionType = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
+		databaseConnectionType.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
 		try {
-			dstSqlMapClient = DaoConfig.getSqlMapClient(pc);
+			srcSqlMapClient = DaoConfig.getSqlMapClient(databaseConnectionType);
 		} catch (LscServiceConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -102,131 +259,101 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 	}
 
 	@Test
-	@Disabled
-	public void testSyncLdap2Db() throws Exception {
+	public void testSyncDb2ldap() throws Exception {
 		String functionName = "testSyncLdap2Db";
 
 		// check ADD
-		assertTrue(srcJndiServices.exists(DN_ADD_SRC), functionName + " - srcJndiServices missing");
-		assertNotNull(dstSqlMapClient, functionName + " - dstSqlMapClient is null");
+		assertTrue(dstJndiServices.exists(DN_ADD_DST), functionName + " - srcJndiServices missing");
+		assertNotNull(srcSqlMapClient, functionName + " - dstSqlMapClient is null");
 		Connection con = null;
 		SqlMapSession sqlMapSession = null;
-		ResultSet rs = null;
-		int rowcount = 0;
 
 		try {
 			// Initialize the Database
-			sqlMapSession = dstSqlMapClient.openSession();
+			sqlMapSession = srcSqlMapClient.openSession();
 			sqlMapSession.startTransaction();
 			con = sqlMapSession.getCurrentConnection();
 			assertNotNull(con, functionName + " - Connection is null");
 
-			Statement stm = con.createStatement();
-			String sql = String.format("DROP TABLE %s IF EXISTS; CREATE TABLE %s (%s)", DEST_TABLE, DEST_TABLE,
-					DEST_TABLE_DEF);
+			// Start the Sync Process for the first time to fill up the LddapServer
+			launchSyncTask(SYNC_TASK_NAME);
 
-			rs = stm.executeQuery(sql);
-			assertNotNull(rs, functionName + " - ResultSet is null");
-			sqlMapSession.commitTransaction();
+			// Check the result. We should have 2 entries that aren't updated
+			dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+			int nbRows = 0;
+			int nbExpectedfailures = 2;
 
-			// Start the Sync Process for the first time to fill up the database
-			launchSyncCleanTask(TASK_NAME, false, true, false);
+			for (String[] values:data) {
+				String sn = values[SN_ROW - 1];
+				String gn = values[GN_ROW - 1];
 
-			// Check existence of row in destination with data
-			stm = con.createStatement();
-			sql = String.format("Select * FROM %s WHERE ID = '%s'", DEST_TABLE, DN_ADD_EXID);
-			rs = stm.executeQuery(sql);
-			rowcount = 0;
+				// The cn is a composition of the DB givename + commonname
+				String dn = String.format("cn=%s %s,ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+						Rdn.escapeValue(gn), Rdn.escapeValue(sn)); 
 
-			while (rs.next()) {
-				rowcount++;
-				assertEquals(null, rs.getString("MAIL"), "After 1st Sync wrong Mail");
-				assertEquals(DN_ADD_DESC, rs.getString("DESCRIPTION"), "After 1st Sync wrong Description");
-				assertEquals(DN_ADD_TEL, rs.getString("TELEPHONENUMBER"), "After 1st Sync wrong Telephone");
+				if (dstJndiServices.exists(dn)) {
+					nbRows++;
+				}
 			}
 
-			assertTrue(rowcount == 1, functionName + " - ResultSet size after insert != 1");
+			assertEquals(nbRows, data.length - nbExpectedfailures);
 
-			// Modify data in DB
-			// Add Mail
-			// Remove Telephonenumber
-			// Modify Description
-			sqlMapSession.startTransaction();
-			stm = con.createStatement();
-			sql = String.format(
-					"UPDATE %s SET MAIL = '%s', MAIL_LOWER = LCASE('%s'), DESCRIPTION = '%s',"
-							+ " TELEPHONENUMBER = null WHERE ID = '%s'",
-					DEST_TABLE, DB_MOD_MAIL, DB_MOD_MAIL, DB_MOD_DESC, DN_ADD_EXID);
-			LOGGER.debug(sql);
-			rowcount = stm.executeUpdate(sql);
-			assertTrue(rowcount == 1, functionName + " - update row count != 1");
-			sqlMapSession.commitTransaction();
+			// Now try a clean phase
+			deleteFromDb();
+			launchCleanTask(SYNC_TASK_NAME);
 
-			// Check the result in the DB before the sync
-			stm = con.createStatement();
-			sql = String.format("Select * FROM %s WHERE ID = '%s'", DEST_TABLE, DN_ADD_EXID);
-			rs = stm.executeQuery(sql);
-			rowcount = 0;
+			// We should have nothing in LDAP now
+			// Check the result
+			dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+			nbRows = 0;
 
-			while (rs.next()) {
-				rowcount++;
-				assertEquals(DB_MOD_MAIL, rs.getString("MAIL"), "After update wrong Mail");
-				assertEquals(DB_MOD_DESC, rs.getString("DESCRIPTION"), "After update wrong Description");
-				assertEquals(null, rs.getString("TELEPHONENUMBER"), "After update wrong Telephone");
+			for (String[] values:data) {
+				String sn = values[SN_ROW - 1];
+				String gn = values[GN_ROW - 1];
+
+				// The cn is a composition of the DB givename + commonname
+				String dn = String.format("cn=%s %s,ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+						Rdn.escapeValue(gn), Rdn.escapeValue(sn)); 
+				assertFalse(dstJndiServices.exists(dn));
 			}
-
-			assertTrue(rowcount == 1, functionName + " - ResultSet size after insert != 1");
-
-			// Start the Sync Process for the second time
-			launchSyncCleanTask(TASK_NAME, false, true, false);
-
-			// Check the result in the DB after the sync
-			stm = con.createStatement();
-			sql = String.format("Select * FROM %s WHERE ID = '%s'", DEST_TABLE, DN_ADD_EXID);
-			rs = stm.executeQuery(sql);
-			rowcount = 0;
-
-			while (rs.next()) {
-				rowcount++;
-				assertEquals(null, rs.getString("MAIL"), "After 2nd Sync wrong Mail");
-				assertEquals(DN_ADD_DESC, rs.getString("DESCRIPTION"), "After 2nd Sync wrong Description");
-				assertEquals(DN_ADD_TEL, rs.getString("TELEPHONENUMBER"), "After 2nd Sync wrong Telephone");
-			}
-
-			assertTrue(rowcount == 1, functionName + " - ResultSet size after insert and syc != 1");
 		} finally {
 			try {
 				LOGGER.debug("Closing SQL Session");
 				sqlMapSession.endTransaction();
-				if (con != null)
+
+				if (con != null) {
 					con.close();
+				}
 			} finally {
 				sqlMapSession.close();
 			}
 		}
 	}
 
-	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync, boolean doClean)
-			throws Exception {
+	public static void launchSyncTask(String taskName) throws Exception {
 		// initialize required stuff
-		SimpleSynchronize sync = new SimpleSynchronize();
+		SimpleSynchronize synchronize = new SimpleSynchronize();
 		List<String> asyncType = new ArrayList<String>();
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-		if (doAsync) {
-			asyncType.add(taskName);
-		}
+		syncType.add(taskName);
 
-		if (doSync) {
-			syncType.add(taskName);
-		}
+		boolean ret = synchronize.launch(asyncType, syncType, cleanType);
+		assertTrue(ret, "launchSyncTask failed");
+	}
 
-		if (doClean) {
-			cleanType.add(taskName);
-		}
 
-		boolean ret = sync.launch(asyncType, syncType, cleanType);
-		assertTrue(ret, "launchSyncCleanTask failed");
+	public static void launchCleanTask(String taskName) throws Exception {
+		// initialize required stuff
+		SimpleSynchronize synchronize = new SimpleSynchronize();
+		List<String> asyncType = new ArrayList<String>();
+		List<String> syncType = new ArrayList<String>();
+		List<String> cleanType = new ArrayList<String>();
+
+		cleanType.add(taskName);
+
+		boolean ret = synchronize.launch(asyncType, syncType, cleanType);
+		assertTrue(ret, "launchCleanTask failed");
 	}
 }

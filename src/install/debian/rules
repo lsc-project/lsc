@@ -42,7 +42,7 @@ override_dh_install:
 	find debian/lsc -type f -name '*.bat' -delete
 	# Reconfigure files
 	## logback
-	sed -i "s:/tmp/lsc/log:/var/log/lsc:" \
+	sed -i -e 's:\${TMP_DIR}:/var/log/lsc:' \
 		`pwd`/debian/lsc/etc/lsc/logback.xml
 	## bin
 	sed -i \

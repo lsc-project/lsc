@@ -110,7 +110,7 @@ cp -a bin/check_lsc* %{buildroot}%{_libdir}/nagios/plugins/
 
 # Reconfigure files
 ## logback
-sed -i 's:/tmp/lsc/log:%{lsc_logdir}:' \
+sed -i -e 's:\${TMP_DIR}:%{lsc_logdir}:' \
   %{buildroot}%{_sysconfdir}/lsc/logback.xml
 ## cron
 sed -i 's: root : lsc :' %{buildroot}%{_sysconfdir}/cron.d/lsc

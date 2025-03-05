@@ -210,22 +210,28 @@
 				</dataset>
 			</propertiesBasedSyncOptions>
 		</task>
+		<!-- ======================================================== -->
+		<!-- Synchronization DB -> LDAP                               -->
+		<!-- We will use the sn+gn as the pivot attribute in the      -->
+		<!-- destination LDAP server                                  -->
+		<!-- ======================================================== -->
 		<task>
-			<name>db2ldapTestTask</name>
+			<name>db2ldapSyncTestTask</name>
 			<bean>org.lsc.beans.SimpleBean</bean>
 			<databaseSourceService>
 				<name>db2ldapTestTask-src</name>
 				<connection reference="src-jdbc"/>
 				<requestNameForList>getListTestDb2Ldap</requestNameForList>
 				<requestNameForObject>getObjectTestDb2Ldap</requestNameForObject>
+				<requestNameForClean>getObjectForDeleteTestDb2Ldap</requestNameForClean>
 			</databaseSourceService>
 			<ldapDestinationService>
 				<name>db2ldapTestTask-dst</name>
 				<connection reference="dst-ldap"/>
 				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes>
-					<string>givenName</string>
 					<string>sn</string>
+					<string>gn</string>
 				</pivotAttributes>
 				<fetchedAttributes>
 					<string>description</string>
@@ -234,12 +240,13 @@
 					<string>userPassword</string>
 					<string>sn</string>
 					<string>mail</string>
+					<string>gn</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
-				<getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
+				<getAllFilter>(&amp;(sn=*)(gn=*))</getAllFilter>
+				<getOneFilter>(&amp;(sn={sn})(gn={gn}))</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
-				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("gn") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
 				<defaultDelimiter>,</defaultDelimiter>
 				<defaultPolicy>KEEP</defaultPolicy>
 				<dataset>
@@ -247,7 +254,7 @@
 					<policy>FORCE</policy>
 					<defaultValues></defaultValues>
 					<forceValues>
-						<string>srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn")</string>
+						<string>srcBean.getDatasetFirstValueById("gn") + " " + srcBean.getDatasetFirstValueById("sn")</string>
 					</forceValues>
 				</dataset>
 				<dataset>
@@ -273,7 +280,19 @@
 						<string>"inetOrgPerson"</string>
 					</defaultValues>
 					<forceValues></forceValues>
-					<createValues></createValues>
+					<createValues>
+						<string>"person"</string>
+						<string>"top"</string>
+						<string>"organizationalPerson"</string>
+						<string>"inetOrgPerson"</string>
+					</createValues>
+				</dataset>
+				<dataset>
+					<name>gn</name>
+					<policy>FORCE</policy>
+					<forceValues>
+						<string>srcBean.getDatasetFirstValueById("gn")</string>
+					</forceValues>
 				</dataset>
 				<dataset>
 					<name>default</name>
@@ -285,7 +304,6 @@
 					<defaultValues>
 						<string>srcBean.getDatasetFirstValueById("userPassword")</string>
 					</defaultValues>
-
 				</dataset>
 				<dataset>
 					<name>userPassword</name>

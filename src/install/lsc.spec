@@ -146,8 +146,8 @@ getent passwd lsc > /dev/null 2>&1 || \
 %systemd_post lsc-sync.service
 %systemd_post lsc-sync@.service
 # Handle symlink hack in doc removal
-[ -h %{_docdir}/lsc/%{_lib} ] && rm -f %{_docdir}/lsc/%{_lib}
-[ -h %{_docdir}/lsc/bin/lsc ] && rm -rf %{_docdir}/lsc/bin
+[ -h %{_docdir}/lsc/%{_lib} ] && rm -f %{_docdir}/lsc/%{_lib} || :
+[ -h %{_docdir}/lsc/bin/lsc ] && rm -rf %{_docdir}/lsc/bin || :
 
 %preun
 %systemd_preun lsc-async.service

@@ -214,12 +214,12 @@ public class ActiveDirectoryDstService extends SimpleJndiDstService {
 			if (attr != null) {
 				values = new ArrayList<String>();
 				NamingEnumeration<?> namingEnumeration = attr.getAll();
-				
+
 				while (namingEnumeration.hasMoreElements()) {
 					Object val = namingEnumeration.next();
 					values.add(val.toString());
 				}
-				
+
 				namingEnumeration.close();
 			}
 		} catch (NamingException e) {

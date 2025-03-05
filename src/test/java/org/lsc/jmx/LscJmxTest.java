@@ -132,9 +132,9 @@ public class LscJmxTest extends CommonLdapSyncTest implements Runnable {
 	@BeforeEach
 	public void setupJmx() throws CommunicationException {
 		LscConfiguration.reset();
-		
+
 		ConnectionType connectionType = LscConfiguration.getConnection("dst-ldap");
-		
+
 		assertNotNull(connectionType);
 		jndiServices = JndiServices.getInstance((LdapConnectionType) connectionType);
 		clean();

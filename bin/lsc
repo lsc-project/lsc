@@ -166,7 +166,7 @@ function is_run_command() {
 # Java options for GraalVM
 function build_graal_parameters() {
 
-	JAVA_MAJOR_VERSION=$( java -version 2>&1 \
+	JAVA_MAJOR_VERSION=$( ${JAVA_COMMAND} -version 2>&1 \
 		| head -1 \
 		| cut -d'"' -f2 \
 		| sed 's/^1\.//' \

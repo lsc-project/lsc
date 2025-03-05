@@ -148,10 +148,10 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 		return result;
 	}
 
-	public String getHeader() {
+	public String getPresentationHeader() {
 		String result = "";
 		if (outputHeader) {
-			result = attrs + "\n";
+			result = attrs;
 		}
 		return result;
 	}
@@ -208,13 +208,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	/**
 	 * @param logOperations the logOperation to set
 	 */
-	public void setLogOperations(LscModificationType[] logOperations) {
-		operations.addAll(Arrays.asList(logOperations));
-	}
-
-	/**
-	 * @param logOperations the logOperation to set
-	 */
 	public void setLogOperations(String logOperations) {
 		this.logOperations = logOperations;
 	}
@@ -238,15 +231,6 @@ public class CsvLayout extends LayoutBase<ILoggingEvent> {
 	 */
 	public void setTaskNames(String taskNames) {
 		this.taskNames = taskNames;
-	}
-
-	/**
-	 * @param taskNames the taskNames to set
-	 */
-	public void setTaskNames(String[] taskNames) {
-		if (taskNames != null) {
-			this.taskNamesList.addAll(Arrays.asList(taskNames));
-		}
 	}
 
 	/**

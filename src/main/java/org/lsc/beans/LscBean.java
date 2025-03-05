@@ -443,7 +443,7 @@ public abstract class LscBean implements IBean, Serializable {
 						&& (dn.charAt(dn.length() - 1) == '"')) {
 					dn = dn.substring(1, dn.length() - 1);
 				}
-				
+
 				if (dn.startsWith("ldap://")) {
 					ab.setDistinguishName(entry.getNameInNamespace());
 				} else {
@@ -466,6 +466,8 @@ public abstract class LscBean implements IBean, Serializable {
 					ab.setAttribute((Attribute) namingEnumeration.next());
 				}
 				
+				namingEnumeration.close();
+
 				namingEnumeration.close();
 
 				return ab;

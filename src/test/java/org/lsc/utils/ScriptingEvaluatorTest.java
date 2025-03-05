@@ -14,6 +14,10 @@ import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import org.lsc.utils.ScriptingEvaluator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,15 +58,58 @@ public class ScriptingEvaluatorTest extends AbstractLdapTestUnit {
 
 	@Test
 	public void testString() throws LscServiceException {
-		String expression = "gjs:dn='ou=test-user' + ',ou=people,dc=example,dc=com'";
+		String expression = "gj:dn='ou=test-user' + ',ou=people,dc=example,dc=com'";
 		String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
 		assertEquals("ou=test-user,ou=people,dc=example,dc=com", stringOutput);
 	}
 
 	@Test
 	public void testBoolean() throws LscServiceException {
-		String expression = "gjs:booleanVariable=true";
+		String expression = "gj:booleanVariable=true";
 		boolean booleanOutput = ScriptingEvaluator.evalToBoolean(task, expression, new HashMap<>());
 		assertTrue(booleanOutput);
+	}
+
+	@Test
+	public void testGJEngineIsCorrectlyLoaded() throws Exception {
+		String expression = "gj:test=\"value\"";
+
+		Class ScriptingEvaluatorClass = Class.forName("org.lsc.utils.ScriptingEvaluator");
+		Constructor<ScriptingEvaluator> pcc = ScriptingEvaluatorClass.getDeclaredConstructor();
+		pcc.setAccessible(true);
+		ScriptingEvaluator ScriptingEvaluatorObject = pcc.newInstance();
+
+		Method identifyScriptingEngineMethod = ScriptingEvaluator.class.getDeclaredMethod("identifyScriptingEngine", String.class);
+		identifyScriptingEngineMethod.setAccessible(true);
+		ScriptableEvaluator se = (ScriptableEvaluator) identifyScriptingEngineMethod.invoke(ScriptingEvaluatorObject, expression );
+
+		Field field = se.getClass().getDeclaredField("engine");
+		field.setAccessible(true);
+		String engine = field.get(se).getClass().getSimpleName();
+		assertEquals("GraalJSScriptEngine", engine);
+	}
+
+	@Test
+	public void testRhinoEngineIsCorrectlyLoaded() throws Exception {
+		String expression = "rjs:test=\"value\"";
+
+		Class ScriptingEvaluatorClass = Class.forName("org.lsc.utils.ScriptingEvaluator");
+		Constructor<ScriptingEvaluator> pcc = ScriptingEvaluatorClass.getDeclaredConstructor();
+		pcc.setAccessible(true);
+		ScriptingEvaluator ScriptingEvaluatorObject = pcc.newInstance();
+
+		Method identifyScriptingEngineMethod = ScriptingEvaluator.class.getDeclaredMethod("identifyScriptingEngine", String.class);
+		identifyScriptingEngineMethod.setAccessible(true);
+		ScriptableEvaluator se = (ScriptableEvaluator) identifyScriptingEngineMethod.invoke(ScriptingEvaluatorObject, expression );
+
+		String engine = se.getClass().getSimpleName();
+		assertEquals("RhinoJScriptEvaluator", engine);
+	}
+
+	@Test
+	public void testScriptShouldEvaluateWhenStartingWithANewLine() throws LscServiceException {
+		String expression = "\n\ngj:\n\ntest=\"value\"";
+		String stringOutput = ScriptingEvaluator.evalToString(task, expression, new HashMap<>());
+		assertEquals("value", stringOutput);
 	}
 }

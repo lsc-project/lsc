@@ -6,7 +6,7 @@ iBATIS
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+   You may obtain a copy of the License a
 
        https://www.apache.org/licenses/LICENSE-2.0
 
@@ -21,13 +21,13 @@ OGNL
 //  Copyright (c) 2004, Drew Davidson and Luke Blanshard
 //  All rights reserved.
 //
-//  Redistribution and use in source and binary forms, with or without
+//  Redistribution and use in source and binary forms, with or withou
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
 //  Redistributions of source code must retain the above copyright notice,
 //  this list of conditions and the following disclaimer.
-//  Redistributions in binary form must reproduce the above copyright
+//  Redistributions in binary form must reproduce the above copyrigh
 //  notice, this list of conditions and the following disclaimer in the
 //  documentation and/or other materials provided with the distribution.
 //  Neither the name of the Drew Davidson nor the names of its contributors
@@ -53,11 +53,11 @@ X-Stream/mxparser
 =================
 
 "This product includes software developed by the Indiana
-     University Extreme! Lab.  For further information please visit
+     University Extreme! Lab.  For further information please visi
      http://www.extreme.indiana.edu/"
-     
-     
-Rhino Notice.txt
+
+
+Rhino Notice.tx
 ================
 
 Rhino is licensed subject to the terms of the Mozilla Public License, v. 2.0.
@@ -71,11 +71,11 @@ Portions of the floating-point conversion code, and portions of the test suite
 come from the Google V8 JavaScript engine and are subject to the following:
 
 Copyright 2010-2015 the V8 project authors. All rights reserved.
-Redistribution and use in source and binary forms, with or without
+Redistribution and use in source and binary forms, with or withou
 modification, are permitted provided that the following conditions are
 met:
 
-    * Redistributions of source code must retain the above copyright
+    * Redistributions of source code must retain the above copyrigh
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
       copyright notice, this list of conditions and the following
@@ -96,7 +96,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Rhino Notice-tools.txt
+Rhino Notice-tools.tx
 ======================
 
 Rhino is licensed subject to the terms of the Mozilla Public License, v. 2.0.
@@ -110,15 +110,15 @@ the following license:
 
 Copyright 1997, 1998 Sun Microsystems, Inc.  All Rights Reserved.
 
-Redistribution and use in source and binary forms, with or without
+Redistribution and use in source and binary forms, with or withou
 modification, are permitted provided that the following conditions
 are met:
-  - Redistributions of source code must retain the above copyright
+  - Redistributions of source code must retain the above copyrigh
     notice, this list of conditions and the following disclaimer.
 
-  - Redistributions in binary form must reproduce the above copyright
+  - Redistributions in binary form must reproduce the above copyrigh
     notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
+    documentation and/or othehttps://github.com/lsc-project/lsc/pull/374/conflict?name=src%252Fmain%252Fjava%252Forg%252Flsc%252Fjndi%252FAbstractSimpleJndiService.java&ancestor_oid=34f77d2ebdb5d6997f303eb285e45ae7d340a0bc&base_oid=0053aa88b6c633b204b900af9adb6b0f17f26ea5&head_oid=d241201ec1ec1223b74c7a29e9093fa2b93ca8a5r materials provided with the distribution.
 
   - Neither the name of Sun Microsystems nor the names of its
     contributors may be used to endorse or promote products derived
@@ -144,7 +144,7 @@ Apache Groovy Notice
 Apache Groovy
 Copyright 2003-2025 The Apache Software Foundation
 
-This product includes software developed at
+This product includes software developed a
 The Apache Software Foundation (http://www.apache.org/).
 
 The Java source files in src/main/java/org/apache/groovy/util/concurrent/concurrentlinkedhashmap/
@@ -155,7 +155,7 @@ The Java source file src/main/java/org/apache/groovy/util/concurrent/ConcurrentR
 is from https://github.com/hazelcast/hazelcast and the following notice applies:
 Copyright (c) 2008-2020, Hazelcast, Inc. All Rights Reserved.
 
-This product bundles icons from the famfamfam.com silk icons set
+This product bundles icons from the famfamfam.com silk icons se
 http://www.famfamfam.com/lab/icons/silk/
 Licensed under the Creative Commons Attribution Licence v2.5
 http://creativecommons.org/licenses/by/2.5/
@@ -164,9 +164,9 @@ http://creativecommons.org/licenses/by/2.5/
 Apache Directory Notice
 =======================
 
-This product includes software developed at
+This product includes software developed a
 http://jdbm.sourceforge.net/
 
-this product includes software developed by Logback 
+this product includes software developed by Logback
 (https://logback.qos.ch) under the EPL v1.0 license.
 

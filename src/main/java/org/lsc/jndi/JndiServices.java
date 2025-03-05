@@ -155,7 +155,7 @@ public final class JndiServices {
 
 	/** Remember default resquest controls */
 	private Control[] defaultRequestControls;
-	
+
 	/**
 	 * Initiate the object and the connection according to the properties.
 	 *
@@ -547,7 +547,7 @@ public final class JndiServices {
 		try {
 			sc.setSearchScope(scope);
 			String rewrittenBase = null;
-			
+
 			if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
 				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
 					rewrittenBase = searchBase.substring(0,
@@ -558,7 +558,7 @@ public final class JndiServices {
 			} else {
 				rewrittenBase = searchBase;
 			}
-			
+
 			namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
 		} catch (NamingException nex) {
 			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
@@ -566,10 +566,10 @@ public final class JndiServices {
 		}
 
 		SearchResult sr = null;
-		
+
 		if (namingEnumeration.hasMoreElements()) {
 			sr = (SearchResult) namingEnumeration.nextElement();
-			
+
 			if (namingEnumeration.hasMoreElements()) {
 				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\")", searchBase, searchFilter);
 				namingEnumeration.close();
@@ -584,9 +584,9 @@ public final class JndiServices {
 			// entry
 			namingEnumeration.hasMore();
 		}
-		
+
 		namingEnumeration.close();
-		
+
 		return sr;
 	}
 
@@ -689,31 +689,31 @@ public final class JndiServices {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
 				throw nex;
 			}
-			
+
 			if (!allowError) {
 				LOGGER.error("Error while reading entry {}: {}", base, nex);
 				LOGGER.debug(nex.toString(), nex);
 			}
-			
+
 			return null;
 		}
 
 		SearchResult sr = null;
-		
+
 		if (namingEnumeration.hasMore()) {
 			sr = (SearchResult) namingEnumeration.next();
-			
+
 			if (namingEnumeration.hasMore()) {
 				LOGGER.error("Too many entries returned (base: \"{}\")", base);
 			} else {
 				namingEnumeration.close();
-				
+
 				return sr;
 			}
 		}
-		
+
 		namingEnumeration.close();
-		
+
 		return sr;
 	}
 
@@ -776,9 +776,9 @@ public final class JndiServices {
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
-			
+
 			namingEnumeration.close();
-			
+
 			throw e;
 		} catch (IOException e) {
 			LOGGER.error(e.toString());
@@ -786,9 +786,9 @@ public final class JndiServices {
 		} finally {
 			ctx.setRequestControls(defaultRequestControls);
 		}
-		
+
 		namingEnumeration.close();
-		
+
 		return list;
 	}
 
@@ -957,9 +957,9 @@ public final class JndiServices {
 			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
 			deleteChildrenRecursively(updateCtx, childrenDn);
 		}
-		
+
 		namingEnumeration.close();
-		
+
 		updateCtx.destroySubcontext(new LdapName(distinguishName));
 	}
 
@@ -1013,13 +1013,13 @@ public final class JndiServices {
 		if (schemaDnSR.hasMore()) {
 			sr = schemaDnSR.next();
 		}
-		
+
 		schemaDnSR.close();
-		
+
 		if (sr != null) {
 			subschemaSubentry = sr.getAttributes().get("subschemaSubentry");
 		}
-		
+
 		if (subschemaSubentry != null && subschemaSubentry.size() > 0) {
 			subschemaSubentryDN = (String) subschemaSubentry.get();
 		}
@@ -1128,12 +1128,12 @@ public final class JndiServices {
 			if (attr != null) {
 				values = new ArrayList<String>();
 				NamingEnumeration<?> namingEnumeration = attr.getAll();
-				
+
 				while (namingEnumeration.hasMoreElements()) {
 					Object val = namingEnumeration.next();
 					values.add(val.toString());
 				}
-				
+
 				namingEnumeration.close();
 			}
 		} catch (NamingException e) {
@@ -1191,6 +1191,8 @@ public final class JndiServices {
 				
 				results.close();
 
+				results.close();
+
 				pagedResultsResponse = pagination();
 			} while (pagedResultsResponse != null);
 		}
@@ -1242,13 +1244,13 @@ public final class JndiServices {
 		} catch (NamingException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		try {
 			List<BasicControl> requestControls = new ArrayList<>();
 
 			// Setting global pageSize variable
 			String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
-			
+
 			if (pageSizeStr != null && Integer.parseInt(pageSizeStr) > -1) {
 				pageSize = Integer.parseInt(pageSizeStr);
 				requestControls.add(new PagedResultsControl(pageSize, Control.CRITICAL));
@@ -1256,11 +1258,11 @@ public final class JndiServices {
 
 			// Setting global sortedBy variable
 			String sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
-			
+
 			if (sortedBy != null) {
 				requestControls.add(new SortControl(sortedBy, Control.CRITICAL));
 			}
-			
+
 			if (requestControls.size() > 0) {
 				ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
 			}

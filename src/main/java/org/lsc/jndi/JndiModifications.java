@@ -183,11 +183,11 @@ public class JndiModifications {
 
 				try {
 					NamingEnumeration<?> namingEnumeration = attr.getAll();
-					
+
 					while (namingEnumeration.hasMoreElements()) {
 						values.add(namingEnumeration.next().toString());
 					}
-					
+
 					namingEnumeration.close();
 				} catch (NamingException e) {
 					LOGGER.error("Error in getting the value(s) of the attribute {}", id);

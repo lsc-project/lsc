@@ -7,55 +7,27 @@
 <sqlMap namespace="Db2LdapTest">
 	<select id="getObjectTestDb2Ldap" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 				SELECT
-						pers.id,
-						pers.uid,
-						pers.sn,
-						pers.givenName,
-						pers.cn,
-						pers.mail,
-						pers.givenName,
-						pers.address,
-						pers.telephoneNumber,
-						pers.telephoneNumber userPassword
-				FROM INETORGPERSON pers
-				WHERE pers.mail LIKE #mail#
+						id,
+						uid,
+						sn,
+						gn,
+						cn,
+						mail,
+						gn,
+						address,
+						telephoneNumber,
+						telephoneNumber,
+						userPassword
+				FROM INETORGPERSON
+				WHERE gn = #gn# AND sn = #sn#
 	</select>
 
 	<select id="getListTestDb2Ldap" resultClass="java.util.HashMap">
-			SELECT pers.mail AS mail, pers.sn AS sn
-			FROM INETORGPERSON pers
+			SELECT gn, sn FROM INETORGPERSON
 	</select>
 
-	<statement id="add" parameterClass="java.util.HashMap">
-			INSERT INTO INETORGPERSON 
-				( id, uid, sn, givenName, cn, mail, address, telephoneNumber, mail, objectClass) 
-			VALUES 
-				( #id#, #uid#, #sn#, #givenName#, #cn#, #mail#, #address#, #telephoneNumber#, #mail#, 'inetOrgPerson')
+	<statement id="getObjectForDeleteTestDb2Ldap" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+			SELECT gn, sn FROM INETORGPERSON WHERE gn = #gn# AND sn = #sn#
 	</statement>
 
-	<statement id="update" parameterClass="java.util.HashMap">
-			UPDATE INETORGPERSON
-				SET 
-					sn = #sn#,
-					givenName = #givenName#,
-					cn = #cn#,
-					mail = #mail#,
-					address = #address#,
-					telephoneNumber = #telephoneNumber#,
-					mail = #mail#,
-					objectClass = 'inetOrgPerson'
-				WHERE id = #id# 
-	</statement>
-
-	<statement id="rename" parameterClass="java.util.HashMap">
-			UPDATE INETORGPERSON
-				SET
-					uid = #uid#
-				WHERE
-					id = #id#
-	</statement>
-
-	<statement id="delete" parameterClass="java.util.HashMap">
-			DELETE FROM INETORGPERSON WHERE id = #id#
-	</statement>
 </sqlMap>

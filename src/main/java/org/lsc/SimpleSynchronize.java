@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- *
- * Copyright (c) 2008 - 2011 LSC Project
+ * 
+ * Copyright (c) 2008 - 2011 LSC Project 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  * and objects to avoid implementing each every time. You may want to override
  * this class to implement your own way of synchronizing - but you also need
  * to rewrite the org.lsc.Launcher class.
- *
+ * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class SimpleSynchronize extends AbstractSynchronize {
@@ -96,19 +96,19 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	public SimpleSynchronize() {
 		super();
-		setThreads(5);
+		setThreads(5); 
 		cache = new TreeMap<String, Task>();
 	}
 
 	/**
 	 * Initialize a single task
-	 *
+	 * 
 	 * @param taskName The task to initialize
 	 * @exception LscConfigurationException If the initialization failed
 	 */
 	public void init(String taskName) throws LscConfigurationException {
 		Collection<TaskType> tasks = LscConfiguration.getTasks();
-
+		
 		for(TaskType taskType: tasks) {
 			if (taskType.getName().equalsIgnoreCase(taskName)) {
 				cache.put(taskName, new Task(taskType));
@@ -118,17 +118,17 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 	/**
 	 * Initialize all the tasks. It's called when the 'all' parameter is provided instead of a list of tasks.
-	 *
+	 * 
 	 * @throws LscConfigurationException If we can't read or process the configuration
 	 */
 	public void initAllTasks() throws LscConfigurationException {
 		// Fetch all the configured tasks
 		Collection<TaskType> tasks = LscConfiguration.getTasks();
-
+		
 		// Initialize each task if not already done
 		for(TaskType taskType: tasks) {
 			String taskName = taskType.getName();
-
+		
 			// Only initialize a task if it's not already in cache
 			if (!cache.containsKey(taskName)) {
 				cache.put(taskName, new Task(taskType));
@@ -154,11 +154,11 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			}
 		}
 	}
-
-
+	
+	
 	/**
 	 * Launch a single task, ,accordingly to its mode (async, sync or clean)
-	 *
+	 * 
 	 * @param task The task to launch
 	 * @param mode The mode (sync, async or clean)
 	 * @return <code>true</code> if the launch was successful
@@ -166,43 +166,43 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	 */
 	private boolean processTask(Task task, Task.Mode mode) throws Exception{
 		boolean launchResult = launchTask(task, mode);
-
+		
 		if (launchResult) {
 			switch (mode) {
 				case sync:
 					String syncHook = task.getSyncHook();
-
+					
 					if((syncHook != null) && (syncHook.length() != 0)) {
 						runPostHook(task.getName(), syncHook, task.getTaskType());
 					}
-
+					
 					break;
-
+					
 				case async:
 					// Nothing to do
 					break;
-
+					
 				case clean:
 					String cleanHook = task.getCleanHook();
-
+					
 					if((cleanHook != null) && (cleanHook.length() != 0)) {
 						runPostHook(task.getName(), cleanHook, task.getTaskType());
 					}
-
+	
 					break;
 			}
 		}
 
 		return launchResult;
 	}
-
+	
 	/**
-	 * Process the  tasks. If the list of tasks contains the 'all' keyword, all
+	 * Process the  tasks. If the list of tasks contains the 'all' keyword, all 
 	 * the tasks will be launched, regardless of the provided list
-	 *
+	 * 
 	 * @param tasks The tasks to process
 	 * @param mode Tells if the task is to be launched in mode sync, async or clean
-	 * @return The number of launched tasks. The value will be negative if at least one task
+	 * @return The number of launched tasks. The value will be negative if at least one task 
 	 * failed to be launched
 	 * @throws Exception If an exception occurred while launching a task
 	 */
@@ -210,11 +210,15 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		int nbLaunchedTasks = 0;
 		boolean launchTask = false;
 
+		if ((tasks == null) || (tasks.size() == 0)) {
+			return 0;
+		}
+		
 		// First check if all the tasks have to be launched
 		if (tasks.contains(ALL_TASKS_KEYWORD)) {
 			// Initialize all the tasks
 			initAllTasks();
-
+			
 			for (TaskType taskType:LscConfiguration.getTasks()) {
 				Task task = cache.get(taskType.getName());
 				launchTask |= processTask(task, mode);
@@ -224,14 +228,14 @@ public class SimpleSynchronize extends AbstractSynchronize {
 			// No, we can process each listed task
 			for (String taskName:tasks) {
 				boolean canLaunch = true;
-
+				
 				// Check if it's the cache
 				Task task = cache.get(taskName);
-
+				
 				if (task == null) {
 					// Not in the cache, initialize the task
 					TaskType taskType = LscConfiguration.getTask(taskName);
-
+					
 					if (taskType != null) {
 						task = new Task(taskType);
 						cache.put(taskName, task);
@@ -241,7 +245,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 						canLaunch = false;
 					}
 				}
-
+				
 				// Launch the task if it exists
 				if (canLaunch) {
 					launchTask |= processTask(task, mode);
@@ -249,7 +253,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				}
 			}
 		}
-
+		
 		if (!launchTask) {
 			return -nbLaunchedTasks;
 		} else {
@@ -260,7 +264,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	/**
 	 * Main method Check properties, and for each task, launch the
 	 * synchronization and the cleaning phases.
-	 *
+	 * 
 	 * @param asyncTasks string list of the asynchronous synchronization tasks to launch
 	 * @param syncTasks string list of the synchronization tasks to launch
 	 * @param cleanTasks string list of the cleaning tasks to launch
@@ -270,26 +274,26 @@ public class SimpleSynchronize extends AbstractSynchronize {
 	public final boolean launch(final List<String> asyncTasks, final List<String> syncTasks,
 			final List<String> cleanTasks) throws Exception {
 		boolean launchResult = true;
-
+		
 		if (getTasksName() == null) {
 			return false;
 		}
 
 		// Some asynTasks are going to be executed, so start JMX
-		if(!asyncTasks.isEmpty()) {
+		if((asyncTasks!=null) && !asyncTasks.isEmpty()) {
 			LscServerImpl.startJmx(this);
 		}
-
+		
 		// Process the three different type of tasks, and get the number of executed tasks.
 		// If this number is negative, it means there was a failure in the execution of
 		// at least one task.
 		int nbLaunchedSyncTasks = processTasks(syncTasks, Task.Mode.sync);
 		int nbLaunchedCleanTasks = processTasks(cleanTasks, Task.Mode.clean);
 		int nbLaunchedAsyncTasks = processTasks(asyncTasks, Task.Mode.async);
-
+		
 		// Check the number of total tasks executed
-		int nbLaunchedTasks = Math.abs(nbLaunchedSyncTasks)
-				+ Math.abs(nbLaunchedCleanTasks)
+		int nbLaunchedTasks = Math.abs(nbLaunchedSyncTasks) 
+				+ Math.abs(nbLaunchedCleanTasks) 
 				+ Math.abs(nbLaunchedAsyncTasks);
 
 		// If no async task has been executed, we can safely close the JndiServices
@@ -299,7 +303,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 		if (nbLaunchedTasks == 0) {
 			LOGGER.error("No specified tasks could be launched! Check spelling and that they exist in the configuration file.");
-
+			
 			return false;
 		}
 
@@ -376,10 +380,10 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 	/**
 	 * Invoke the hook method whether it's a postsync or postclean
-	 *
+	 * 
 	 * @param taskName the task name
 	 * @param servicePostHook the fully qualified name of the method to invoke
-	 * @param taskType the TaskType used to initialize the task
+	 * @param taskType the TaskType used to initialize the task 
 	 */
 	private void runPostHook(String taskName, String servicePostHook, TaskType taskType) {
 		if (servicePostHook != null && servicePostHook.length() > 0) {
@@ -459,7 +463,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		for(Entry<String, LscDatasets> entry : entries.entrySet()) {
 			new SynchronizeEntryRunner(task, counter, this, entry, true).run();
 		}
-		return counter.getCountError() == 0;
+		return counter.getCountError() == 0; 
 	}
 
 	public final boolean launch(String taskName, IBean bean) {

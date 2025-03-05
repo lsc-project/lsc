@@ -7,18 +7,19 @@
 <sqlMap namespace="Db2LdapTest">
 	<select id="getObjectTestDb2Ldap" resultClass="java.util.HashMap" parameterClass="java.util.Map">
 				SELECT
-						pers.id,
-						pers.uid,
-						pers.sn,
-						pers.givenName,
-						pers.cn,
-						pers.mail,
-						pers.givenName,
-						pers.address,
-						pers.telephoneNumber,
-						pers.telephoneNumber userPassword
-				FROM INETORGPERSON pers
-				WHERE pers.mail LIKE #mail#
+						id,
+						uid,
+						sn,
+						givenName,
+						cn,
+						mail,
+						givenName,
+						address,
+						telephoneNumber,
+						telephoneNumber,
+						userPassword
+				FROM INETORGPERSON
+				WHERE mail LIKE #mail#
 	</select>
 
 	<select id="getListTestDb2Ldap" resultClass="java.util.HashMap">
@@ -55,7 +56,7 @@
 					id = #id#
 	</statement>
 
-	<statement id="delete" parameterClass="java.util.HashMap">
+	<statement id="getObjectForDeleteTestDb2Ldap" parameterClass="java.util.HashMap">
 			DELETE FROM INETORGPERSON WHERE id = #id#
 	</statement>
 </sqlMap>

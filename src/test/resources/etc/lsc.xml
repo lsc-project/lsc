@@ -25,7 +25,7 @@
 			<referral>IGNORE</referral>
 			<derefAliases>NEVER</derefAliases>
 			<version>VERSION_3</version>
-			<pageSize>-1</pageSize>
+			<pageSize>5</pageSize>
 			<factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
 			<tlsActivated>false</tlsActivated>
 			<saslMutualAuthentication>false</saslMutualAuthentication>

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+	<!-- Stop logback initialization blathering at startup -->
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
 	<!-- standard output to console -->
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">

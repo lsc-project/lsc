@@ -20,6 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchResult;
+
 import org.apache.directory.api.ldap.model.name.Rdn;
 import org.apache.directory.server.annotations.CreateLdapServer;
 import org.apache.directory.server.annotations.CreateTransport;
@@ -105,7 +108,8 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 	private static final int PASSWD_ROW = 12;
 
 
-	private String[][] data = {
+	private String[][] dataCorrect = {
+			// ID  UID         DATE          SN        CN                  GN
 			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@philipou.net", "Normation", "", "+33 (0)1 83 62 26 96", "BHU772|DED899", "aaa"},
 			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@schermesser.com", "Octo", "", "", "", "bbb"},
 			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@aepik.net", "AFNOR", "", "", "", "ccc"},
@@ -114,26 +118,55 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@linagora.com", "Linagora", "", "33(0)810251251", "", "fff"},
 			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@linagora.com", "Linagora", "", "33(0)810251251", "", "ggg"},
 			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@linagora.com", "Linagora", "", "33(0)810251251", "", "hhh"},
-			{"9", "e.lecharny", "31/12/2015", "Pereira", "Lecharny, Emmanuel", "Emmanuel", "epereira@linagora.com", "Worteks", "", "33(0)810251251", "", "iii"}
+			{"9", "e.lecharny", "31/12/2015", "Lecharny", "Lecharny, Emmanuel", "Emmanuel", "emmlec@worteks.com", "Worteks", "", "33(0)810251251", "", "iii"}
 	};
 
+	private String[][] dataWithDuplicatePivot = {
+			// ID  UID         DATE          SN        CN                  GN
+			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@philipou.net", "Normation", "", "+33 (0)1 83 62 26 96", "BHU772|DED899", "aaa"},
+			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@schermesser.com", "Octo", "", "", "", "bbb"},
+			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@aepik.net", "AFNOR", "", "", "", "ccc"},
+			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@gmail.com", "Dictao", "156 av. de Malakof, 75116 PARIS, France", "", "", "ddd"},
+			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@gmail.com", "Linagora", "", "33(0)810251251", "", "eee"},
+			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@linagora.com", "Linagora", "", "33(0)810251251", "", "fff"},
+			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@linagora.com", "Linagora", "", "33(0)810251251", "", "ggg"},
+			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@linagora.com", "Linagora", "", "33(0)810251251", "", "hhh"},
+			{"9", "e.lecharny", "31/12/2015", "Pereira", "Pereira, Emmanuel", "Esteban", "epereira@linagora.com", "Worteks", "", "33(0)810251251", "", "iii"}
+	};
 
 	@BeforeEach
-	public void setup() {
+	public void setup() throws SQLException {
 		LscConfiguration.reset();
 		LscConfiguration.getInstance();
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		assertNotNull(LscConfiguration.getConnection("src-jdbc"));
+
+		// Reconnect
 		reloadConnections();
-		loadDbData();
+
+		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
+		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+
+		try {
+			Class.forName(pc.getDriver()).newInstance();
+			dbConnection = DriverManager.getConnection(pc.getUrl());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
+			// error
+		}
+
+		// Cleanupo the database
+		deleteAllFromDb();
 	}
 
 
-	private void deleteFromDb() throws SQLException {
+	/**
+	 * Delete all the row from the DB
+	 */
+	private void deleteAllFromDb() throws SQLException {
 		try (Statement statempent = dbConnection.createStatement()) {
 			statempent.executeUpdate("DELETE FROM " + SRC_TABLE);
 			dbConnection.commit();
-		} catch ( SQLException s) {
+		} catch (SQLException s) {
 			// That's ok
 		}
 
@@ -146,34 +179,66 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 
 				while (resultSet.next()) {
 					rowcount++;
-
-					System.out.println("Entry :"+resultSet.getString("cn"));
 				}
 
-				if (rowcount == 0) {
-					System.out.println("----> No entry in the database");
-				}
+				// We should have no element in the database
+				assertTrue(rowcount == 0);
 			}
 		}
 	}
 
-	private void loadDbData() {
-		try {
-			DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
-			pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
-			try {
-				Class.forName(pc.getDriver()).newInstance();
-				dbConnection = DriverManager.getConnection(pc.getUrl());
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
-				// error
+	/**
+	 * Delete one entry from the DB
+	 */
+	private void deleteFromDb(String UID) throws SQLException {
+		try (Statement statempent = dbConnection.createStatement()) {
+			String request = String.format("DELETE FROM %s WHERE UID='%s'", SRC_TABLE, UID);
+			statempent.executeUpdate(request);
+			dbConnection.commit();
+		} catch (SQLException s) {
+			// That's ok
+		}
+
+		// Check that the element has been deleted
+		try (Statement statement = dbConnection.createStatement()) {
+			String request = String.format("Select * FROM %s WHERE uid='%s'", SRC_TABLE, UID);
+
+			try (ResultSet resultSet = statement.executeQuery(request)) {
+				int rowcount = 0;
+
+				while (resultSet.next()) {
+					rowcount++;
+				}
+
+				// We should have no element in the database
+				assertTrue(rowcount == 0);
 			}
+		}
+		// Check that all the remaining elements are still present
+		try (Statement statement = dbConnection.createStatement()) {
+			String request = String.format("Select * FROM %s", SRC_TABLE);
 
+			try (ResultSet resultSet = statement.executeQuery(request)) {
+				int rowcount = 0;
+
+				while (resultSet.next()) {
+					rowcount++;
+				}
+
+				// We should have no element in the database
+				assertTrue(rowcount > 0);
+			}
+		}
+	}
+
+	private void loadDbData(String[][] data) {
+		try {
 			try (Statement statempent = dbConnection.createStatement()) {
 
 				try {
 					statempent.executeUpdate("DROP TABLE " + SRC_TABLE);
-				} catch ( SQLException s) {
+				} catch (SQLException s) {
 					// That's ok
 				}
 
@@ -184,7 +249,7 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 						"endOfValidity DATE, " +
 						"sn VARCHAR(100)," +
 						"cn VARCHAR(100)," +
-						"givenName VARCHAR(100)," +
+						"gn VARCHAR(100)," +
 						"mail VARCHAR(100), " +
 						"o VARCHAR(100)," +
 						"address VARCHAR(100)," +
@@ -258,9 +323,127 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		}
 	}
 
+	/**
+	 * This test chack that 7 entries added in a database are properly propagated to a KLDAP server,
+	 * then when the entries are deleted from the Database, that they are suppressed from the ldap server
+	 */
 	@Test
-	public void testSyncDb2ldap() throws Exception {
+	public void testSyncDb2ldapNoError() throws Exception {
 		String functionName = "testSyncLdap2Db";
+
+		// Inject the data with no error
+		loadDbData(dataCorrect);
+
+		// check ADD
+		assertTrue(dstJndiServices.exists(DN_ADD_DST), functionName + " - srcJndiServices missing");
+		assertNotNull(srcSqlMapClient, functionName + " - dstSqlMapClient is null");
+		Connection con = null;
+		SqlMapSession sqlMapSession = null;
+
+		try {
+			// Initialize the Database
+			sqlMapSession = srcSqlMapClient.openSession();
+			sqlMapSession.startTransaction();
+			con = sqlMapSession.getCurrentConnection();
+			assertNotNull(con, functionName + " - Connection is null");
+
+			// Start the Sync Process for the first time to fill up the LddapServer
+			launchSyncTask(SYNC_TASK_NAME);
+
+			// Check the result.
+			dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+			int nbRows = 0;
+
+			for (String[] values:dataCorrect) {
+				String sn = values[SN_ROW - 1];
+				String gn = values[GN_ROW - 1];
+
+				// The cn is a composition of the DB givenaNme + commonName
+				String dn = String.format("cn=%s %s,ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+						Rdn.escapeValue(gn), Rdn.escapeValue(sn)); 
+
+				if (dstJndiServices.exists(dn)) {
+					nbRows++;
+
+					SearchResult result = dstJndiServices.getEntry(dn, "(objectclass=*)");
+
+					Attributes attributes = result.getAttributes();
+
+					// We should have only 5 attributes
+					assertEquals(5, attributes.size());
+
+					// Now check the content
+					// The CN is a special case: it's a concatenation of the GN and SN
+					assertEquals(values[GN_ROW - 1] + " " + values[SN_ROW - 1], attributes.get("cn").get());
+					assertEquals(values[SN_ROW - 1], attributes.get("sn").get());
+					assertEquals(values[GN_ROW - 1], attributes.get("gn").get());
+					assertEquals(values[MAIL_ROW - 1], attributes.get("mail").get());
+
+					assertTrue(attributes.get("ObjectClass").contains("inetOrgPerson"));
+				}
+			}
+
+			assertEquals(nbRows, dataCorrect.length);
+
+			// Now try a clean phase. We will delete one row from the DB
+			deleteFromDb("e.lecharny");
+			launchCleanTask(SYNC_TASK_NAME);
+
+			// We should have nothing in LDAP now
+			// Check the result
+			dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+
+			// First check the removed entry
+			String removedCn = String.format("%s %s", 
+					Rdn.escapeValue(dataCorrect[dataCorrect.length - 1][GN_ROW - 1]),
+					Rdn.escapeValue(dataCorrect[dataCorrect.length - 1][SN_ROW - 1]));
+
+			String dn = String.format("cn=%s,ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", removedCn);
+
+			assertFalse(dstJndiServices.exists(dn));
+
+			// Check the other entries
+			nbRows = 0;
+
+			for (String[] values:dataCorrect) {
+				String sn = values[SN_ROW - 1];
+				String gn = values[GN_ROW - 1];
+
+				// The cn is a composition of the DB givename + commonname
+				String cn = String.format("%s %s", Rdn.escapeValue(gn), Rdn.escapeValue(sn));
+
+				if (!cn.equals(removedCn)) {
+					dn = String.format("cn=%s %s,ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+							Rdn.escapeValue(gn), Rdn.escapeValue(sn)); 
+
+					assertTrue(dstJndiServices.exists(dn));
+					nbRows++;
+				}
+			}
+
+			// Check the number of found entries
+			assertEquals(dataWithDuplicatePivot.length - 1, nbRows);
+		} finally {
+			try {
+				LOGGER.debug("Closing SQL Session");
+				sqlMapSession.endTransaction();
+
+				if (con != null) {
+					con.close();
+				}
+			} finally {
+				sqlMapSession.close();
+			}
+		}
+	}
+
+
+	@Test
+	public void testSyncDb2ldapDuplicatePivot() throws Exception {
+		String functionName = "testSyncLdap2Db";
+
+		// Inject the data that have a duplicate pivot
+		loadDbData(dataWithDuplicatePivot);
 
 		// check ADD
 		assertTrue(dstJndiServices.exists(DN_ADD_DST), functionName + " - srcJndiServices missing");
@@ -283,7 +466,7 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 			int nbRows = 0;
 			int nbExpectedfailures = 2;
 
-			for (String[] values:data) {
+			for (String[] values:dataWithDuplicatePivot) {
 				String sn = values[SN_ROW - 1];
 				String gn = values[GN_ROW - 1];
 
@@ -296,18 +479,17 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 				}
 			}
 
-			assertEquals(nbRows, data.length - nbExpectedfailures);
+			assertEquals(nbRows, dataWithDuplicatePivot.length - nbExpectedfailures);
 
-			// Now try a clean phase
-			deleteFromDb();
+			// Now try a clean phase. We will delete all the rows from the DB
+			deleteAllFromDb();
 			launchCleanTask(SYNC_TASK_NAME);
 
 			// We should have nothing in LDAP now
 			// Check the result
 			dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
-			nbRows = 0;
 
-			for (String[] values:data) {
+			for (String[] values:dataCorrect) {
 				String sn = values[SN_ROW - 1];
 				String gn = values[GN_ROW - 1];
 

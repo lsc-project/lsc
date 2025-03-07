@@ -10,28 +10,31 @@
 						id,
 						uid,
 						sn,
-						givenName,
+						gn,
 						cn,
 						mail,
-						givenName,
+						gn,
 						address,
 						telephoneNumber,
 						telephoneNumber,
 						userPassword
 				FROM INETORGPERSON
-				WHERE mail LIKE #mail#
+				WHERE gn = #gn# AND sn = #sn#
 	</select>
 
 	<select id="getListTestDb2Ldap" resultClass="java.util.HashMap">
-			SELECT pers.mail AS mail, pers.sn AS sn
-			FROM INETORGPERSON pers
+			SELECT gn, sn FROM INETORGPERSON
 	</select>
 
-	<statement id="add" parameterClass="java.util.HashMap">
+	<statement id="getObjectForDeleteTestDb2Ldap" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+			SELECT gn, sn FROM INETORGPERSON WHERE gn = #gn# AND sn = #sn#
+	</statement>
+
+	<!-- statement id="add" parameterClass="java.util.HashMap">
 			INSERT INTO INETORGPERSON 
 				( id, uid, sn, givenName, cn, mail, address, telephoneNumber, mail, objectClass) 
 			VALUES 
-				( #id#, #uid#, #sn#, #givenName#, #cn#, #mail#, #address#, #telephoneNumber#, #mail#, 'inetOrgPerson')
+				( #id#, #uid#, #sn#, #givenname#, #cn#, #mail#, #address#, #telephoneNumber#, #mail#, 'inetOrgPerson')
 	</statement>
 
 	<statement id="update" parameterClass="java.util.HashMap">
@@ -54,9 +57,5 @@
 					uid = #uid#
 				WHERE
 					id = #id#
-	</statement>
-
-	<statement id="getObjectForDeleteTestDb2Ldap" parameterClass="java.util.HashMap">
-			DELETE FROM INETORGPERSON WHERE id = #id#
-	</statement>
+	</statement -->
 </sqlMap>

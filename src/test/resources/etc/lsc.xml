@@ -231,7 +231,7 @@
 				<baseDn>ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org</baseDn>
 				<pivotAttributes>
 					<string>sn</string>
-					<string>givenName</string>
+					<string>gn</string>
 				</pivotAttributes>
 				<fetchedAttributes>
 					<string>description</string>
@@ -240,13 +240,13 @@
 					<string>userPassword</string>
 					<string>sn</string>
 					<string>mail</string>
-					<string>givenName</string>
+					<string>gn</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
-				<getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
+				<getAllFilter>(&amp;(sn=*)(gn=*))</getAllFilter>
+				<getOneFilter>(&amp;(sn={sn})(gn={gn}))</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
-				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
+				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("gn") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
 				<defaultDelimiter>,</defaultDelimiter>
 				<defaultPolicy>KEEP</defaultPolicy>
 				<dataset>
@@ -254,7 +254,7 @@
 					<policy>FORCE</policy>
 					<defaultValues></defaultValues>
 					<forceValues>
-						<string>srcBean.getDatasetFirstValueById("givenName") + " " + srcBean.getDatasetFirstValueById("sn")</string>
+						<string>srcBean.getDatasetFirstValueById("gn") + " " + srcBean.getDatasetFirstValueById("sn")</string>
 					</forceValues>
 				</dataset>
 				<dataset>
@@ -288,10 +288,10 @@
 					</createValues>
 				</dataset>
 				<dataset>
-					<name>givenName</name>
+					<name>gn</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string>srcBean.getDatasetFirstValueById("givenName")</string>
+						<string>srcBean.getDatasetFirstValueById("gn")</string>
 					</forceValues>
 				</dataset>
 				<dataset>

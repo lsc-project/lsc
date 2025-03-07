@@ -233,49 +233,6 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		}
 	}
 
-	/**
-	 * Delete one entry from the DB
-	 */
-	private void deleteFromDb(String UID) throws SQLException {
-		try (Statement statempent = dbConnection.createStatement()) {
-			String request = String.format("DELETE FROM %s WHERE UID='%s'", SRC_TABLE, UID);
-			statempent.executeUpdate(request);
-			dbConnection.commit();
-		} catch (SQLException s) {
-			// That's ok
-		}
-
-		// Check that the element has been deleted
-		try (Statement statement = dbConnection.createStatement()) {
-			String request = String.format("Select * FROM %s WHERE uid='%s'", SRC_TABLE, UID);
-
-			try (ResultSet resultSet = statement.executeQuery(request)) {
-				int rowcount = 0;
-
-				while (resultSet.next()) {
-					rowcount++;
-				}
-
-				// We should have no element in the database
-				assertTrue(rowcount == 0);
-			}
-		}
-		// Check that all the remaining elements are still present
-		try (Statement statement = dbConnection.createStatement()) {
-			String request = String.format("Select * FROM %s", SRC_TABLE);
-
-			try (ResultSet resultSet = statement.executeQuery(request)) {
-				int rowcount = 0;
-
-				while (resultSet.next()) {
-					rowcount++;
-				}
-
-				// We should have no element in the database
-				assertTrue(rowcount > 0);
-			}
-		}
-	}
 
 	private void loadDbData(String[][] data) {
 		try {

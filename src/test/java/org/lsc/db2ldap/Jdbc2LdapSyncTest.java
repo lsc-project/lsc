@@ -277,8 +277,6 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		}
 	}
 
-=======
->>>>>>> 9935eca (Fixes #369)
 	private void loadDbData(String[][] data) {
 		try {
 			try (Statement statempent = dbConnection.createStatement()) {

@@ -4,13 +4,14 @@
 	<!-- Stop logback initialization blathering at startup -->
 	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-			<layout class="ch.qos.logback.classic.PatternLayout">
-				<Pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</Pattern>
-			</layout>
-		</encoder>
-	</appender>
+        <!-- Standard output to console -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                        <layout class="org.lsc.utils.output.LdifLayout">
+                                <Pattern>%date{MMM dd HH:mm:ss} - %-5level - %message%n</Pattern>
+                        </layout>
+                </encoder>
+        </appender>
 	<root level="info">
 		<appender-ref ref="CONSOLE"/>
 	</root>

@@ -194,7 +194,7 @@ run_java_command()
 		LDAPCP=$(cygpath -p -w "$LDAPCP")
 	fi
 
-	"${JAVA_COMMAND}" -cp "$LDAPCP" $1 $2 $3 $4 $5
+	"${JAVA_COMMAND}" -cp "$LDAPCP" --add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED --add-exports java.base/sun.security.x509=ALL-UNNAMED $1 $2 $3 $4 $5
 }
 
 start_ldap() {

@@ -250,31 +250,6 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.izpack</groupId>
-				<artifactId>izpack-maven-plugin</artifactId>
-				<version>5.2.4</version>
-
-				<!-- common configuration by all executions -->
-				<configuration>
-					<baseDir>${project.build.directory}/${project.build.finalName}-dist/lsc-${project.version}</baseDir>
-					<installFile>${project.basedir}/src/install/install.xml</installFile>
-					<mkdirs>true</mkdirs>
-					<finalName>${project.artifactId}-${project.version}-installer.jar</finalName>
-					<autoIncludeUrl>true</autoIncludeUrl>
-				</configuration>
-
-				<executions>
-					<execution>
-						<id>standard-installer</id>
-						<phase>package</phase>
-						<goals>
-							<goal>izpack</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>6.0.0</version>

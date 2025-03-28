@@ -13,7 +13,7 @@
 #
 # ---------------------------------------------------------------------------------
 #
-# Copyright (c) 2008 - 2011 LSC Project 
+# Copyright (c) 2008 - 2025 LSC Project 
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -39,11 +39,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-#       (c) 2008 - 2011 LSC Project
+#       (c) 2008 - 2025 LSC Project
 #   Sebastien Bahloul <seb@lsc-project.org>
 #   Thomas Chemineau <thomas@lsc-project.org>
 #   Jonathan Clarke <jon@lsc-project.org>
 #   Remy-Christophe Schermesser <rcs@lsc-project.org>
+#   David Coutadeur <david.coutadeur@gmail.com>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,12 +55,15 @@
 # work out where LSC sample lives
 SAMPLE_HOME=$(dirname "${BASH_SOURCE}")/..
 if [ ${SAMPLE_HOME:0:1} != "/" ] ; then
-	SAMPLE_HOME="${PWD}/${SAMPLE_HOME}"
+        SAMPLE_HOME="${PWD}/${SAMPLE_HOME}"
 fi
+CONFIGPATH="${SAMPLE_HOME}/etc"
+
+LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
+LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
 # HSQLDB jar file
-[ -z "$HSQLDB_LIB" -a -e $SAMPLE_HOME/../../lib/hsqldb*.jar ] && HSQLDB_LIB=`ls $SAMPLE_HOME/../../lib/hsqldb*.jar`
-[ -z "$HSQLDB_LIB" -a -e $SAMPLE_HOME/../lib/lsc/hsqldb*.jar ] && HSQLDB_LIB=`ls $SAMPLE_HOME/../lib/lsc/hsqldb*.jar`
+[ -z "$HSQLDB_LIB" -a -e "${LSC_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_LIB_DIR}"/hsqldb*.jar )
 [ -z "$HSQLDB_LIB" ] && echo "hsqldb driver (hsqldb*.jar) is missing" && exit 1
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
@@ -73,19 +77,6 @@ HSQLDB_TABLEDEF="ID VARCHAR,UID VARCHAR,MAIL VARCHAR,MAIL_LOWER VARCHAR,LAST_UPD
 # Default CSV separator
 CSV_SEPARATOR=";"
 
-# Configuration for sample
-SAMPLE_CONFIG_DIR="$SAMPLE_HOME/etc"
-# is this Cygwin? if so, convert path to Windows format for the JVM
-CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
-if [ -e "$CYGPATH_COMMAND" ]; then
-	SAMPLE_CONFIG_DIR=$(cygpath -w "$SAMPLE_CONFIG_DIR")
-	HSQLDB_LIB=$(cygpath -w "$HSQLDB_LIB")
-	HSQLDB_RC=$(cygpath -w "$HSQLDB_RC")
-	HSQLDB_DIR=$(cygpath -u "$HSQLDB_DIR")
-	CYGWIN_BASE=$(cygpath -w / | sed -e "s#\\\\#/#g")
-	CYGWIN_TMP=$(cygpath -w /tmp | sed -e "s#\\\\#/#g")
-fi
-
 # ---------------------------------------------------------------------------------
 # FUNCTIONS
 # ---------------------------------------------------------------------------------
@@ -95,7 +86,7 @@ fi
 #
 data_drop()
 {
-  hsqldb_sqlQuery "DROP TABLE $HSQLDB_TABLE;"
+  hsqldb_sqlQuery "DROP TABLE ${HSQLDB_TABLE};"
 }
 
 #
@@ -103,7 +94,7 @@ data_drop()
 #
 data_create()
 {
-	hsqldb_sqlQuery "CREATE TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF);"
+	hsqldb_sqlQuery "CREATE TABLE ${HSQLDB_TABLE} (${HSQLDB_TABLEDEF});"
 }
 
 #
@@ -111,7 +102,7 @@ data_create()
 #
 data_show()
 {
-  hsqldb_sqlQuery "SELECT * FROM $HSQLDB_TABLE;"
+  hsqldb_sqlQuery "SELECT * FROM ${HSQLDB_TABLE};"
 }
 
 #
@@ -121,13 +112,13 @@ data_show()
 hsqldb_cleanData()
 {
   oldpwd=`pwd`
-  cd $HSQLDB_DIR > /dev/null 2>&1
+  cd ${HSQLDB_DIR} > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     rm -f *
     cd ..
-    rmdir `basename "$HSQLDB_DIR"`
+    rmdir `basename "${HSQLDB_DIR}"`
   fi
-  cd $oldpwd
+  cd ${oldpwd}
 }
 
 #
@@ -169,41 +160,22 @@ function get_java() {
 
 run_java_command()
 {
-	# check if we have java executable
-	get_java
+        # check if we have java executable
+        get_java
 
-	for jar in "$SAMPLE_HOME"/../../lib/slf4j-api*.jar; do
-		LDAPCP="$LDAPCP:$jar"
-	done
+        for jar in "${LSC_LIB_DIR}"/*.jar; do
+                LDAPCP="$LDAPCP:$jar"
+        done
 
-	for jar in "$SAMPLE_HOME"/../../lib/*.jar; do
-		LDAPCP="$LDAPCP:$jar"
-	done
-
-	for jar in "$SAMPLE_HOME"/../lib/*.jar; do
-		LDAPCP="$LDAPCP:$jar"
-	done
-
-	for jar in "$SAMPLE_HOME"/../lib/lsc/*.jar; do
-		LDAPCP="$LDAPCP:$jar"
-	done
-
-	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
-	if [ -e "$CYGPATH_COMMAND" ]; then
-		LDAPCP=$(cygpath -p -w "$LDAPCP")
-	fi
-
-	"${JAVA_COMMAND}" -cp "$LDAPCP" --add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED --add-exports java.base/sun.security.x509=ALL-UNNAMED $1 $2 $3 $4 $5
+        "${JAVA_COMMAND}" \
+                -cp "$LDAPCP" \
+                --add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED \
+                --add-exports java.base/sun.security.x509=ALL-UNNAMED $1 $2 $3 $4 $5
 }
 
 start_ldap() {
 	echo "Starting LDAP server on ldap://localhost:33389/ ..."
-	run_java_command "org.lsc.opendj.LdapServer -a -f $SAMPLE_CONFIG_DIR"
-}
-
-stop_ldap() {
-	run_java_command "org.lsc.opendj.LdapServer --stop -f $SAMPLE_CONFIG_DIR"
+	run_java_command "org.lsc.opendj.LdapServer -a -f ${CONFIGPATH}"
 }
 
 start_hsql() {
@@ -228,30 +200,10 @@ run() {
 	if [ -n "$CLEANTASK" ]; then
 		CLEANTASK="--clean $CLEANTASK"
 	fi
-	CLASSPATH=""
-	for jar in "$SAMPLE_HOME"/../lib/*.jar; do
-		CLASSPATH="$CLASSPATH:$jar"
-	done
 	
-	CONFIGPATH=$SAMPLE_HOME/etc;
-
-	# is this Cygwin? if so, convert path to Windows format for the JVM
-	CYGPATH_COMMAND="$(which cygpath 2>/dev/null)"
-	if [ -e "$CYGPATH_COMMAND" ]; then
-		CLASSPATH=$(cygpath -p -w "$CLASSPATH")
-		CONFIGPATH=$(cygpath -w "$CONFIGPATH")
-		
-		[ ! -f "$CONFIGPATH/lsc.xml.bak" ] && cp "$CONFIGPATH/lsc.xml" "$CONFIGPATH/lsc.xml.bak"
-		cat "$CONFIGPATH/lsc.xml"  | sed -e "s#jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc#jdbc:hsqldb:file:$CYGWIN_TMP/lsc/hsqldb/lsc#g" > "$CONFIGPATH/lsc.xml.new"
-		mv "$CONFIGPATH/lsc.xml.new" "$CONFIGPATH/lsc.xml"
-	fi
-
-	export CLASSPATH
-	export CONFIGPATH
-
-	command="\"$SAMPLE_HOME/../../bin/lsc\" --config \"$CONFIGPATH\" --synchronize $SYNCTASK $CLEANTASK"
+	command="\"${SAMPLE_HOME}/../../bin/lsc\" --config \"${CONFIGPATH}\" -t 1 --synchronize ${SYNCTASK} ${CLEANTASK}"
 	echo "Running $command"
-	"$SAMPLE_HOME/../../bin/lsc" --config "$CONFIGPATH" --threads 1 --synchronize $SYNCTASK $CLEANTASK
+	eval "${command}"
 }
 
 # ---------------------------------------------------------------------------------
@@ -289,10 +241,6 @@ case "$1" in
     ACTIONS="$ACTIONS startldap"
 	shift
 	;;
-  "--stop-ldap-server")
-    ACTIONS="$ACTIONS stopldap"
-!	shift
-	;;
   "--start-hsql-server")
     ACTIONS="$ACTIONS starthsql"
 	shift
@@ -328,7 +276,6 @@ case "$1" in
     echo "   --drop                 Drop the table $HSQLDB_TABLE from database"
     echo "  LDAP"
     echo "   --start-ldap-server    Launch an embedded OpenDJ LDAP server"
-    echo "   --stop-ldap-server     Halt an embedded OpenDJ LDAP server"
     echo "  Other functions"
     echo "   --run                  Run the synchronization task"
     echo "   --set-ext-id           Run task to set externalId"

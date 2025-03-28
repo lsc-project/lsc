@@ -129,6 +129,10 @@ sed -i \
   -e 's:^VAR_DIR.*:VAR_DIR="%{_sharedstatedir}/lsc":' \
   -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="%{_rundir}/hsqldb.pid":' \
   %{buildroot}%{_bindir}/hsqldb
+sed -i \
+  -e 's:^LSC_LIB_DIR=.*:LSC_LIB_DIR="%{_libdir}/lsc":' \
+  -e 's:^LSC_BIN_DIR=.*:LSC_BIN_DIR="%{_bindir}":' \
+  sample/hsqldb/bin/lsc-sample
 
 
 %pre

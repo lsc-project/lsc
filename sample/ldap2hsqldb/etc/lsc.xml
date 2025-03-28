@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd"
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
 	revision="0">
 	<connections>
 		<ldapConnection>
@@ -79,7 +79,7 @@
 					<policy>FORCE</policy>
 					<forceValues>
 						<string>
-							<![CDATA[rjs:
+							<![CDATA[
 							var carl = srcBean.getDatasetValuesById("carLicense");
 							var result = new java.util.ArrayList();
 							for (var i=0;i<carl.size(); i++) {
@@ -94,7 +94,7 @@
 					<name>accesssa</name>
 					<policy>FORCE</policy>
 					<forceValues>
-						<string><![CDATA[js:
+						<string><![CDATA[
 						//var val = srcBean.getDatasetFirstValueById("accesssa")
 						//var val2 = val.toLowerCase();
 						//new java.lang.Boolean(srcBean.getDatasetFirstValueById("accesssa"));
@@ -165,7 +165,7 @@
 					<policy>KEEP</policy>
 					<defaultValues>
 						<string>
-						<![CDATA[rjs:
+						<![CDATA[
 						java.util.UUID.randomUUID().toString();
 						]]>
 						</string>

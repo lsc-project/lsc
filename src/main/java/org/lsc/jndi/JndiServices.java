@@ -754,8 +754,13 @@ public final class JndiServices {
 	private List<String> doGetDnList(final String base, final String filter, final int scope) throws NamingException {
 		NamingEnumeration<SearchResult> namingEnumeration = null;
 		List<String> list = new ArrayList<String>();
+
+		// Create a new context for the search operation
+		LdapContext searchContext = (LdapContext)ctx.lookup("");
+
 		try {
-			contextRequestControls();
+			setRequestControls(searchContext);
+		
 			SearchControls sc = new SearchControls();
 			sc.setDerefLinkFlag(false);
 			sc.setReturningAttributes(new String[] { "1.1" });
@@ -771,7 +776,8 @@ public final class JndiServices {
 			while (namingEnumeration.hasMoreElements()) {
 				list.add(namingEnumeration.next().getName() + completedBaseDn);
 			}
-			pagedResultsResponse = pagination();
+
+			pagedResultsResponse = pagination(ctx);
 			} while (pagedResultsResponse != null);
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());
@@ -784,7 +790,7 @@ public final class JndiServices {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 		} finally {
-			ctx.setRequestControls(defaultRequestControls);
+			searchContext.close();
 		}
 
 		namingEnumeration.close();
@@ -1166,33 +1172,44 @@ public final class JndiServices {
 		constraints.setReturningObjFlag(true);
 		try {
 			byte[] pagedResultsResponse;
-			contextRequestControls();
-			do {
-				NamingEnumeration<SearchResult> results = ctx.search(searchBase, searchFilter, constraints);
 
-				if (results != null) {
-					Map<String, Object> attrsValues = null;
-					while (results.hasMoreElements()) {
-						attrsValues = new HashMap<String, Object>();
-
-						SearchResult ldapResult = (SearchResult) results.next();
-
-						// get the value for each attribute requested
-						for (String attributeName : attrsNames) {
-							Attribute attr = ldapResult.getAttributes().get(attributeName);
-							if (attr != null && attr.get() != null) {
-								attrsValues.put(attributeName, attr.get());
+			// Create a new context for the search operation
+			LdapContext searchContext = (LdapContext)ctx.lookup("");
+			
+			try {
+				setRequestControls(searchContext);
+				
+				do {
+					NamingEnumeration<SearchResult> results = searchContext.search(searchBase, searchFilter, constraints);
+	
+					if (results != null) {
+						Map<String, Object> attrsValues = null;
+						while (results.hasMoreElements()) {
+							attrsValues = new HashMap<String, Object>();
+	
+							SearchResult ldapResult = (SearchResult) results.next();
+	
+							// get the value for each attribute requested
+							for (String attributeName : attrsNames) {
+								Attribute attr = ldapResult.getAttributes().get(attributeName);
+								if (attr != null && attr.get() != null) {
+									attrsValues.put(attributeName, attr.get());
+								}
 							}
+	
+							res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
 						}
 
-						res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
+
 					}
-				}
-
-				results.close();
-
-				pagedResultsResponse = pagination();
-			} while (pagedResultsResponse != null);
+					
+					results.close();
+	
+					pagedResultsResponse = pagination(searchContext);
+				} while (pagedResultsResponse != null);
+			} finally {
+				searchContext.close();
+			}
 		}
 		catch (CommunicationException e) {
 			// Avoid handling the communication exception as a generic one
@@ -1215,9 +1232,9 @@ public final class JndiServices {
 	 * @throws IOException
 	 * @throws NamingException
 	 */
-	public byte[] pagination() throws IOException, NamingException {
+	public byte[] pagination(LdapContext ldapContext) throws IOException, NamingException {
 		byte[] pagedResultsResponse = null;
-		Control[] respCtls = ctx.getResponseControls();
+		Control[] respCtls = ldapContext.getResponseControls();
 		if (respCtls != null) {
 			for(Control respCtl : respCtls) {
 				if (respCtl instanceof PagedResultsResponseControl) {
@@ -1226,28 +1243,24 @@ public final class JndiServices {
 			}
 		}
 		if (pagedResultsResponse != null) {
-			ctx.setRequestControls(new Control[]{
+			ldapContext.setRequestControls(new Control[]{
 					new PagedResultsControl(pageSize, pagedResultsResponse, Control.CRITICAL)});
 		}
 		return pagedResultsResponse;
 	}
 
 	/**
-	 * Applying request controls such as pageSize and sortedBy for LDAP Context.
+	 * Returning the request controls such as pageSize and sortedBy for a LDAP Context.
+	 * 
+	 * @param ldapContext The Ldap Context that will receive the controls
 	 */
-	public void contextRequestControls() {
-		try {
-			// Storing default request controls
-			defaultRequestControls = ctx.getRequestControls();
-		} catch (NamingException e) {
-			throw new RuntimeException(e);
-		}
-
+	public void setRequestControls(LdapContext ldapContext) {
 		try {
 			List<BasicControl> requestControls = new ArrayList<>();
 
 			// Setting global pageSize variable
-			String pageSizeStr = (String) ctx.getEnvironment().get("java.naming.ldap.pageSize");
+			String pageSizeStr = (String) ldapContext.getEnvironment().get("java.naming.ldap.pageSize");
+			
 
 			if (pageSizeStr != null && Integer.parseInt(pageSizeStr) > -1) {
 				pageSize = Integer.parseInt(pageSizeStr);
@@ -1255,14 +1268,14 @@ public final class JndiServices {
 			}
 
 			// Setting global sortedBy variable
-			String sortedBy = (String) ctx.getEnvironment().get("java.naming.ldap.sortedBy");
+			String sortedBy = (String) ldapContext.getEnvironment().get("java.naming.ldap.sortedBy");
 
 			if (sortedBy != null) {
 				requestControls.add(new SortControl(sortedBy, Control.CRITICAL));
 			}
 
 			if (requestControls.size() > 0) {
-				ctx.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+				ldapContext.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
 			}
 		} catch (NamingException | IOException e) {
 			throw new RuntimeException(e);

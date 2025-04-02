@@ -766,9 +766,10 @@ public final class JndiServices {
 			sc.setReturningAttributes(new String[] { "1.1" });
 			sc.setSearchScope(scope);
 			sc.setReturningObjFlag(true);
+						
 			byte[] pagedResultsResponse = null;
 			do {
-				namingEnumeration = ctx.search(base, filter, sc);
+				namingEnumeration = searchContext.search(base, filter, sc);
 				String completedBaseDn = "";
 				if (base.length() > 0) {
 					completedBaseDn = "," + base;
@@ -777,7 +778,7 @@ public final class JndiServices {
 				list.add(namingEnumeration.next().getName() + completedBaseDn);
 			}
 
-			pagedResultsResponse = pagination(ctx);
+			pagedResultsResponse = pagination(searchContext);
 			} while (pagedResultsResponse != null);
 		} catch (NamingException e) {
 			LOGGER.error(e.toString());

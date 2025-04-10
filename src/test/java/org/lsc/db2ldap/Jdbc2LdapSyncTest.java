@@ -110,28 +110,28 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 
 	private String[][] dataCorrect = {
 			// ID  UID         DATE          SN        CN                  GN
-			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@philipou.net", "Normation", "", "+33 (0)1 83 62 26 96", "BHU772|DED899", "aaa"},
-			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@schermesser.com", "Octo", "", "", "", "bbb"},
-			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@aepik.net", "AFNOR", "", "", "", "ccc"},
-			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@gmail.com", "Dictao", "156 av. de Malakof, 75116 PARIS, France", "", "", "ddd"},
-			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@gmail.com", "Linagora", "", "33(0)810251251", "", "eee"},
-			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@linagora.com", "Linagora", "", "33(0)810251251", "", "fff"},
-			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@linagora.com", "Linagora", "", "33(0)810251251", "", "ggg"},
-			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@linagora.com", "Linagora", "", "33(0)810251251", "", "hhh"},
-			{"9", "e.lecharny", "31/12/2015", "Lecharny", "Lecharny, Emmanuel", "Emmanuel", "emmlec@worteks.com", "Worteks", "", "33(0)810251251", "", "iii"}
+			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@normalize.net", "Normalize", "", "+33 (0)1 23 45 67 89", "BHU772|DED899", "aaa"},
+			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@trio.com", "Trio", "", "", "", "bbb"},
+			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@afsud.net", "AFSUD", "", "", "", "ccc"},
+			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@diczia.com", "Diczia", "15 av. du condor, 75116 PARIS, France", "", "", "ddd"},
+			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "eee"},
+			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "fff"},
+			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "ggg"},
+			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "hhh"},
+			{"9", "e.lecharny", "31/12/2015", "Lecharny", "Lecharny, Emmanuel", "Emmanuel", "emmlec@tornado.com", "Tornado", "", "+33 (0)1 23 45 67 89", "", "iii"}
 	};
 
 	private String[][] dataWithDuplicatePivot = {
 			// ID  UID         DATE          SN        CN                  GN
-			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@philipou.net", "Normation", "", "+33 (0)1 83 62 26 96", "BHU772|DED899", "aaa"},
-			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@schermesser.com", "Octo", "", "", "", "bbb"},
-			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@aepik.net", "AFNOR", "", "", "", "ccc"},
-			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@gmail.com", "Dictao", "156 av. de Malakof, 75116 PARIS, France", "", "", "ddd"},
-			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@gmail.com", "Linagora", "", "33(0)810251251", "", "eee"},
-			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@linagora.com", "Linagora", "", "33(0)810251251", "", "fff"},
-			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@linagora.com", "Linagora", "", "33(0)810251251", "", "ggg"},
-			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@linagora.com", "Linagora", "", "33(0)810251251", "", "hhh"},
-			{"9", "e.lecharny", "31/12/2015", "Pereira", "Pereira, Emmanuel", "Esteban", "epereira@linagora.com", "Worteks", "", "33(0)810251251", "", "iii"}
+			{"1", "j.clarke", "31/12/2015", "Clarke", "Clarke, Jonathan", "Jonathan", "jonathan@normalize.net", "Normalize", "", "+33 (0)1 23 45 67 89", "BHU772|DED899", "aaa"},
+			{"2", "r.schermesser", "31/12/2015", "Schermesser", "Schermesser, Remy-Christophe", "Remy-Christophe", "remy@trio.com", "Trio", "", "", "", "bbb"},
+			{"3", "t.chemineau", "31/12/2015", "Chemineau", "Chemineau, Thomas", "Thomas", "thomas@afsud.net", "AFSUD", "", "", "", "ccc"},
+			{"4", "s.bahloul", "31/12/2015", "Bahloul", "Bahloul, Sebastien", "Sebastien", "sebastien.bahloul@diczia.com", "Diczia", "15 av. du condor, 75116 PARIS, France", "", "", "ddd"},
+			{"5", "c.oudot", "31/12/2015", "Oudot", "Oudot, Clement", "Clement", "clem.oudot@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "eee"},
+			{"6", "r.ouazana", "31/12/2015", "Ouazana", "Ouazana, Raphael", "Raphael", "rouazana@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "fff"},
+			{"7", "d.coutadeur", "31/12/2015", "Coutadeur", "Coutadeur, David", "David", "dcoutadeur@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "ggg"},
+			{"8", "e.pereira", "31/12/2015", "Pereira", "Pereira, Esteban", "Esteban", "epereira@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "hhh"},
+			{"9", "e.lecharny", "31/12/2015", "Pereira", "Pereira, Emmanuel", "Esteban", "epereira@acme.com", "ACME", "", "+33 (0)1 23 45 67 89", "", "iii"}
 	};
 
 	@BeforeEach

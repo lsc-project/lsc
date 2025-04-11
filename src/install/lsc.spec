@@ -16,7 +16,7 @@
 
 Name: lsc
 Version: 2.2
-Release: 0%{?dist}
+Release: 1%{?dist}
 Summary: LDAP Synchronization Connector
 License: BSD-3-Clause
 URL: https://lsc-project.org

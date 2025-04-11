@@ -194,6 +194,10 @@ getent passwd lsc > /dev/null 2>&1 || \
 
 
 %changelog
+
+* Fri Apr 11 2025 - Clement Oudot <clem@lsc-project.org> - 2.2-1
+- Upgrade to LSC 2.2
+
 * Tue Aug 24 2021 - Clement Oudot <clem@lsc-project.org> - 2.1.6-1
 - Upgrade to LSC 2.1.6
 

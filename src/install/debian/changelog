@@ -1,6 +1,6 @@
-lsc (2.2.0-1) unstable; urgency=low
+lsc (2.2-1) unstable; urgency=low
 
-  * Update to 2.2.0
+  * Update to 2.2
 
  -- Clement Oudot (LTB-project) <clem.oudot@gmail.com>  Fri, 11 Apr 2025 12:00:00 +0100
 

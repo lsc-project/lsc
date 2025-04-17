@@ -3,7 +3,7 @@ bin/lsc usr/bin
 bin/lsc-agent usr/bin
 bin/hsqldb usr/bin
 ## lib
-lib/* usr/lib/lsc
+lib/*.jar usr/lib/lsc
 lib-compiler/* usr/lib/lsc-compiler
 ## sample
 sample/* usr/share/doc/lsc

@@ -88,7 +88,7 @@ cp -a etc/sql-map-config.xml-sample \
 cp -a etc/sql-map-config.d/InetOrgPerson.xml-sample \
   %{buildroot}%{_sysconfdir}/lsc/sql-map-config.d/InetOrgPerson.xml
 ## lib
-cp -a lib/* %{buildroot}%{_libdir}/lsc
+cp -a lib/*.jar %{buildroot}%{_libdir}/lsc
 cp -a lib-compiler/* %{buildroot}%{_libdir}/lsc-compiler
 ## cron
 cp -a etc/cron.d/lsc.cron %{buildroot}%{_sysconfdir}/cron.d/lsc

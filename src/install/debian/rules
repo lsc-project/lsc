@@ -62,3 +62,6 @@ override_dh_install:
 		-e 's:^LSC_LIB_DIR=.*:LSC_LIB_DIR="/usr/lib/lsc":' \
 		-e 's:^LSC_BIN_DIR=.*:LSC_BIN_DIR="/usr/bin":' \
 		`pwd`/debian/lsc/usr/share/doc/lsc/hsqldb/bin/lsc-sample
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz

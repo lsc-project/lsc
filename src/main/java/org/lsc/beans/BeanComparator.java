@@ -335,17 +335,18 @@ public final class BeanComparator {
 							// Adding and deleting the values is less expensive than replacing everything
 							multiMi = new ArrayList<LscDatasetModification>(2);
 
+							if (extraValues.size() > 0) {
+								LOGGER.debug("{} Removing values from attribute \"{}\": old values are {}",
+								new Object[]{logPrefix, attrName, extraValues});
+								multiMi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, dstAttr.getID(), extraValues));
+							}
+
 							if (missingValues.size() > 0) {
 								LOGGER.debug("{} Adding values to attribute \"{}\": new values are {}",
 								new Object[]{logPrefix, attrName, missingValues});
 								multiMi.add(new LscDatasetModification(LscDatasetModificationType.ADD_VALUES, dstAttr.getID(), missingValues));
 							}
 
-							if (extraValues.size() > 0) {
-								LOGGER.debug("{} Removing values from attribute \"{}\": old values are {}",
-								new Object[]{logPrefix, attrName, extraValues});
-								multiMi.add(new LscDatasetModification(LscDatasetModificationType.DELETE_VALUES, dstAttr.getID(), extraValues));
-							}
 						}
 					} else if (attrStatus == PolicyType.MERGE) {
 						// check if there are any extra values to be added

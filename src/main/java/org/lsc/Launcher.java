@@ -255,16 +255,10 @@ public final class Launcher {
 				validateConfiguration = true;
 			}
 			if (cmdLine.hasOption("V")) {
-				final Properties properties = new Properties();
-				try {
-					properties.load(Launcher.class.getClassLoader().getResourceAsStream(".properties"));
-					System.out.println(properties.getProperty("lsc.version"));
-				} catch (IOException e) {
-					System.err.println(".properties missing in jar, this is a build issue");
-					e.printStackTrace(System.err);
-				}
+				Package p = getClass().getPackage();
+				String version = p.getImplementationVersion();
+				System.out.println("Version: " + version);
 				return 1;
-
 			}
 
 			if (cmdLine.getOptions().length == 0 || cmdLine.hasOption("h")

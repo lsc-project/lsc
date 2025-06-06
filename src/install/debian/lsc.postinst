@@ -7,6 +7,9 @@ lsc_group=lsc
 # Always do this
 chown -R ${lsc_user}:${lsc_group} ${lsc_logdir}
 chown ${lsc_user}:${lsc_group} /var/lib/lsc
+# Upgrade home directory of lsc user set by previous lsc versions
+[ "$( getent passwd ${lsc_user} | cut -d: -f6 )" = "/etc/lsc" ] && \
+  usermod -d /var/lib/lsc ${lsc_user}
 
 #DEBHELPER#
 

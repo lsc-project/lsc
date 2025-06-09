@@ -5,7 +5,7 @@
 	<groupId>org.lsc</groupId>
 	<artifactId>lsc-core</artifactId>
 	<name>LDAP Synchronization Connector</name>
-	<version>2.3-SNAPSHOT</version>
+	<version>2.2.1</version>
 	<description>
 		This project is the LDAP Synchronization Connector which
 		simplifies synchronizations between relation databases and LDAP

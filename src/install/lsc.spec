@@ -15,7 +15,7 @@
 #%%global snapshot        1
 
 Name: lsc
-Version: 2.2
+Version: 2.2.1
 Release: 1%{?dist}
 Summary: LDAP Synchronization Connector
 License: BSD-3-Clause
@@ -197,6 +197,9 @@ getent passwd lsc > /dev/null 2>&1 || \
 
 
 %changelog
+
+* Mon Jun 09 2025 - Clement Oudot <clem@lsc-project.org> - 2.2.1-1
+- Upgrade to LSC 2.2.1
 
 * Fri Apr 11 2025 - Clement Oudot <clem@lsc-project.org> - 2.2-1
 - Upgrade to LSC 2.2

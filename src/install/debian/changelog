@@ -1,3 +1,9 @@
+lsc (2.2.1-1) unstable; urgency=low
+
+  * Update to 2.2.1
+
+ -- Clement Oudot (LSC-project) <clem@lsc-project.org>  Mon, 09 Jun 2025 12:00:00 +0100
+
 lsc (2.2-1) unstable; urgency=low
 
   * Update to 2.2

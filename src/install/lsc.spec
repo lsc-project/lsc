@@ -154,7 +154,7 @@ getent passwd lsc > /dev/null 2>&1 || \
 [ -h %{_docdir}/lsc/bin/lsc ] && rm -rf %{_docdir}/lsc/bin || :
 # Upgrade home directory of lsc user set by previous lsc versions
 [ "$( getent passwd lsc | cut -d: -f6 )" = "/etc/lsc" ] && \
-  usermod -d %{_sharedstatedir}/lsc lsc
+  usermod -d %{_sharedstatedir}/lsc lsc || :
 
 %preun
 %systemd_preun lsc-async.service

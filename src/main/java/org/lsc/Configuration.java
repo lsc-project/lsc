@@ -46,6 +46,10 @@
 package org.lsc;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.lsc.configuration.JaxbXmlConfigurationHelper;
@@ -176,7 +180,14 @@ public class Configuration {
 		if(location == null) {
 			setUp();
 		}
-		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
+
+		Path path = Paths.get(location);
+
+		if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+			return path.getParent().toString();
+		} else {
+			return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
+		}
 	}
 
 	/**

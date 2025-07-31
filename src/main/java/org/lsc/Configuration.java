@@ -271,7 +271,7 @@ public class Configuration {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
 		} catch (LscConfigurationException e) {
-			message = "Unable to load configuration (" + e + ")";
+			message = "Unable to load configuration (" + e.getCause() + ")";
 			LOGGER.error(message, e);
 			return;
 		}

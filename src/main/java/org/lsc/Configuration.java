@@ -52,15 +52,11 @@ import org.lsc.configuration.JaxbXmlConfigurationHelper;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
-import org.lsc.utils.output.CsvLayout;
-import org.lsc.utils.output.LdifLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.FileAppender;
 import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
@@ -131,6 +127,16 @@ public class Configuration {
 	
 	// Default constructor.
 	protected Configuration() {
+	}
+
+	/**
+	 * A enumeration for the two possible configuration type.
+	 * If the configuration is a directory, then LSC will try to load the lsc.xml
+	 * file, otherwise it will try to load the provided file.
+	*/
+	private enum ConfigType {
+		DIRECTORY,
+		FILE
 	}
 
 	public static Properties getPropertiesSubset(final Properties originalProperties, String prefix) {
@@ -215,30 +221,57 @@ public class Configuration {
 	 */
 	public static void setUp(String lscConfigurationPath, boolean validate) throws LscException {
 		String message = null;
-		if(lscConfigurationPath == null 
-				|| ! new File(lscConfigurationPath).isDirectory()
-				|| ! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile() ) {
-			message = "Defined configuration location (" + lscConfigurationPath + ") points to a non existing LSC configured instance. " +
-				"LSC configuration loading will fail !";
+		ConfigType configType = ConfigType.FILE; // Default to loading the provided file, if any
+	
+		if (lscConfigurationPath == null) {
+			message = "No configuration provided. LSC configuration loading will fail !";
 			LOGGER.error(message);
 			throw new RuntimeException(message);
 		}
+		
+		if (new File(lscConfigurationPath).isDirectory() ) {
+			// We have a directory: try to find the lss.xml default file
+			if (! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()) {
+			    message = "The location (" + lscConfigurationPath + 
+				") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
+				" configuration file. LSC configuration loading will fail !";
+				LOGGER.error(message);
+				throw new RuntimeException(message);
+			}
+
+			configType = ConfigType.DIRECTORY;
+		} else if (! new File(lscConfigurationPath).isFile()) {
+			// Ok, we have a file name, but it does not exist    
+			message = "Defined configuration file (" + lscConfigurationPath + 
+				") does not exist. LSC configuration loading will fail !";
+			LOGGER.error(message);
+			throw new RuntimeException(message);
+		}
+		
 		try {
 			location = cleanup(lscConfigurationPath);
 			if(!LscConfiguration.isInitialized()) {
-				File xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
-				if(xml.exists() && xml.isFile()) {
-					LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
+				File xml;
+				
+				if ( configType == ConfigType.DIRECTORY) {
+					xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
+				
+					if ( !xml.exists() && !xml.isFile()) {
+						message = "Unable to load configuration configuration inside the directory: " + location;
+						LOGGER.error(message);
+
+						return;
+					}
 				} else {
-		            message = "Unable to load configuration configuration inside the directory: " + location;
-		            LOGGER.error(message);
-		            return;
+					xml = new File(location);
 				}
+
+				LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
 		} catch (LscConfigurationException e) {
-			message = "Unable to load configuration (" + e + ")";
+			message = "Unable to load configuration (" + e.getCause() + ")";
 			LOGGER.error(message, e);
 			return;
 		}

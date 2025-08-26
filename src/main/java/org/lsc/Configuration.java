@@ -130,7 +130,7 @@ public class Configuration {
 	}
 
 	/**
-	 * A enumeration for the two possible configuration type.
+	 * An enumeration for the two possible configuration types.
 	 * If the configuration is a directory, then LSC will try to load the lsc.xml
 	 * file, otherwise it will try to load the provided file.
 	*/
@@ -230,7 +230,7 @@ public class Configuration {
 		}
 		
 		if (new File(lscConfigurationPath).isDirectory() ) {
-			// We have a directory: try to find the lss.xml default file
+			// We have a directory: try to find the lsc.xml default file
 			if (! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()) {
 			    message = "The location (" + lscConfigurationPath + 
 				") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
@@ -257,7 +257,7 @@ public class Configuration {
 					xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
 				
 					if ( !xml.exists() && !xml.isFile()) {
-						message = "Unable to load configuration configuration inside the directory: " + location;
+						message = "Unable to load configuration inside the directory: " + location;
 						LOGGER.error(message);
 
 						return;

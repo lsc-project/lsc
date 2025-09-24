@@ -288,7 +288,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 		Response searchResponse = null;
 		try {
-			searchResponse = sf.get(); // Blocking call
+			searchResponse = sf.get(1, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.warn("Interrupted search !");
 		}

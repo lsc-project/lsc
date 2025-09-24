@@ -11,6 +11,7 @@ Environment="LSC_SYNC_TASKS=-s all"
 Environment="LSC_CLEAN_TASKS=-c all"
 Environment="LSC_EXTRA_ARGS="
 EnvironmentFile=-/etc/default/lsc-%i
+WorkingDirectory=/var/lib/lsc
 ExecStartPre=/usr/bin/lsc -v -f ${LSC_CONFIG_DIR}
 ExecStart=/usr/bin/lsc -f ${LSC_CONFIG_DIR} ${LSC_SYNC_TASKS} ${LSC_CLEAN_TASKS} ${LSC_EXTRA_ARGS}
 

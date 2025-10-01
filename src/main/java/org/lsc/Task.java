@@ -99,12 +99,19 @@ public class Task {
 
 	private TaskType taskType;
 
+	private Boolean errorIfEmptySource;
+
+	private Boolean errorIfEmptyDestination;
+
 	public Task(TaskType t) throws LscConfigurationException {
 		this.name = t.getName();
 		this.taskType = t;
 		try {
 			cleanHook = t.getCleanHook();
 			syncHook = t.getSyncHook();
+
+			errorIfEmptySource      = t.isErrorIfEmptySource();
+			errorIfEmptyDestination = t.isErrorIfEmptyDestination();
 
 			// Instantiate the destination service from properties
 			if (LscConfiguration.getSourceService(t) == null) {
@@ -181,6 +188,14 @@ public class Task {
 
 	public String getSyncHook() {
 		return syncHook;
+	}
+
+	public Boolean getErrorIfEmptySource() {
+		return errorIfEmptySource;
+	}
+
+	public Boolean getErrorIfEmptyDestination() {
+		return errorIfEmptyDestination;
 	}
 
 	public String getName() {

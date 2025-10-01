@@ -164,8 +164,12 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 
+		Boolean errorIfEmptyDestination = (task.getErrorIfEmptyDestination() != null) ?
+							task.getErrorIfEmptyDestination() :
+							true;
+
 		// Make sure we have at least one entry to work on
-		if (ids.isEmpty()) {
+		if (ids.isEmpty() && errorIfEmptyDestination) {
 			LOGGER.error("Empty or non existant destination (no IDs found)");
 			return false;
 		}
@@ -208,8 +212,12 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 
+		Boolean errorIfEmptySource = (task.getErrorIfEmptySource() != null) ?
+						task.getErrorIfEmptySource() :
+						true;
+
 		// Make sure we have at least one entry to work on
-		if (ids.isEmpty()) {
+		if (ids.isEmpty() && errorIfEmptySource) {
 			LOGGER.error("Empty or non existant source (no IDs found)");
 			return false;
 		}

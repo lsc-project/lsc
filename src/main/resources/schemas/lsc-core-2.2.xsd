@@ -487,6 +487,8 @@
 				<xsd:element name="xaFileDestinationService" type="xaFileDestinationServiceType" />
 				<xsd:element name="pluginDestinationService" type="pluginDestinationServiceType" />
 			</xsd:choice>
+			<xsd:element name="errorIfEmptySource" type="xsd:boolean" default="true" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="errorIfEmptyDestination" type="xsd:boolean" default="true" minOccurs="0" maxOccurs="1" />
 			<xsd:choice>
 				<xsd:element name="propertiesBasedSyncOptions" type="propertiesBasedSyncOptionsType" />
 				<xsd:element name="forceSyncOptions" type="forceSyncOptionsType" />

@@ -80,7 +80,14 @@ while getopts "f:-:" opt > /dev/null 2>&1; do
   esac
 done
 # Get logdir property from logback.xml
-logdir=$( grep 'property[ ]\+name="logdir"' "${cfg_dir}/logback.xml" | sed -e 's/^.*value="\([^"]*\)".*$/\1/' )
+# Check if xmllint exists
+if command -v xmllint >/dev/null 2>&1; then
+    # Get logdir property from XML file by parsing it
+    logdir=$( xmllint --xpath 'string(/configuration/property[@name="logdir"]/@value)' "${cfg_dir}/logback.xml" )
+else
+    # if xmllint not present, try to read the property anyway
+    logdir=$( grep 'property[ ]\+name="logdir"' "${cfg_dir}/logback.xml" | grep -Fv '<!--' | sed -e 's/^.*value="\([^"]*\)".*$/\1/' )
+fi
 if [ "${logdir}" = "\${TMP_DIR}" ] || [ "${logdir}" = "\$TMP_DIR" ]; then
 	# Create temp directory
 	LOG_DIR="$( mktemp -d /tmp/lsc-$(date +%Y-%M-%d-%T).XXXXXXXXXX )"

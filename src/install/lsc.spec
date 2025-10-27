@@ -31,6 +31,7 @@ BuildRequires:  systemd
 Requires(pre): coreutils
 Requires: crontabs
 Requires: which
+Requires: libxml2
 
 %description
 The Ldap Synchronization Connector project provides tools to synchronize

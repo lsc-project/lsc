@@ -22,6 +22,7 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 ReadWritePaths=/var/log/lsc
 UMask=0007
+WorkingDirectory=/var/lib/lsc
 
 [Install]
 WantedBy=multi-user.target

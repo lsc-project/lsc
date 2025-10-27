@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/lsc-project/lsc
 
 Package: lsc
 Architecture: all
-Depends: cron, ${misc:Depends}
+Depends: cron, libxml2-utils, ${misc:Depends}
 Description: LDAP Synchronization Connector
  LSC offers a powerful transformation engine, based on a scripting language, 
  to easily manipulate data on the fly. Various identity management functions 

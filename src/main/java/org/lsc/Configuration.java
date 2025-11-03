@@ -176,7 +176,20 @@ public class Configuration {
 		if(location == null) {
 			setUp();
 		}
-		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
+		
+		if(location != null) {
+			File locationFile = new File(location);
+
+			if (locationFile.isFile()) {
+
+				// We have provided a file, get the parent directory as a location
+				location = locationFile.getParent();
+			}
+
+			return new File(location).getAbsolutePath() + File.separator;
+		} else {
+			return "";
+		}
 	}
 
 	/**
@@ -232,7 +245,7 @@ public class Configuration {
 		if (new File(lscConfigurationPath).isDirectory() ) {
 			// We have a directory: try to find the lsc.xml default file
 			if (! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()) {
-			    message = "The location (" + lscConfigurationPath + 
+				message = "The location (" + lscConfigurationPath + 
 				") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
 				" configuration file. LSC configuration loading will fail !";
 				LOGGER.error(message);
@@ -241,7 +254,7 @@ public class Configuration {
 
 			configType = ConfigType.DIRECTORY;
 		} else if (! new File(lscConfigurationPath).isFile()) {
-			// Ok, we have a file name, but it does not exist    
+			// Ok, we have a file name, but it does not exist
 			message = "Defined configuration file (" + lscConfigurationPath + 
 				") does not exist. LSC configuration loading will fail !";
 			LOGGER.error(message);

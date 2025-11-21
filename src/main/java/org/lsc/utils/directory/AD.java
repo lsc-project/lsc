@@ -72,7 +72,7 @@ public class AD {
 	 * @param constToApply an Array of constants to apply
 	 * @return the modified value
 	 */
-	public static int userAccountControlSet(int origValue, String[] constToApply) {
+	public static int userAccountControlSet(int origValue, String... constToApply) {
 		int result = origValue;
 
 		for(String str: constToApply) {
@@ -89,6 +89,18 @@ public class AD {
 		return result;
 	}
 
+	
+    /**
+     * Set or unset some bits to a UserAccountControl attribute of an AD
+     *
+     * @param origValue the original String value of UserAccessControl
+     * @param constToApply an Array of constants to apply
+     * @return the modified value
+     */
+    public static int userAccountControlSet(String origValue, String... constToApply) {
+        return userAccountControlSet( Integer.parseInt(origValue), constToApply);
+    }
+    
 	/**
 	 * Check if a bit is set in UserAccountControl
 	 *
@@ -100,6 +112,17 @@ public class AD {
 		Integer constValue = Integer.parseInt(constToCheck);
 		return ((value & constValue) > 0);
 	}
+    
+    /**
+     * Check if a bit is set in UserAccountControl
+     *
+     * @param value the String value of UserAccountControl
+     * @param constToCheck a constant to test
+     * @return is the attribute present
+     */
+    public static boolean userAccountControlCheck(String value, String constToCheck) {
+        return userAccountControlCheck(Integer.parseInt(value), constToCheck);
+    }
 
 	/**
 	 * Toggle a bit in UserAccountControl
@@ -116,6 +139,17 @@ public class AD {
 			return (value | constValue);
 		}
 	}
+	
+    /**
+     * Toggle a bit in UserAccountControl
+     *
+     * @param value the value of UserAccountControl
+     * @param constToApply the bit to toggle
+     * @return the modified value
+     */
+    public static int userAccountControlToggle(String value, String constToApply) {
+        return userAccountControlToggle( Integer.parseInt(value), constToApply);
+    }
 
 	/**
 	 * Encode a password so that it can be updated in Active Directory

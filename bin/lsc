@@ -161,7 +161,7 @@ function build_classpath() {
 
 function build_parameters() {
 	# Force configuration directory if no -f option
-	echo "$PARAMETERS" | grep '\-f ' > /dev/null 
+	echo "$PARAMETERS" | grep -- '-f ' > /dev/null 
 	if [ $? != 0 ]; then
 		PARAMETERS="$PARAMETERS -f $CFG_DIR"
 	fi
@@ -171,7 +171,7 @@ function build_parameters() {
 
 # Function to know if the command will run a task
 function is_run_command() {
-	echo "$PARAMETERS" | grep '\-c \|\-s \|\-a ' > /dev/null 
+	echo "$PARAMETERS" | grep -E -- '-c |-s |-a ' > /dev/null 
 	if [ $? -eq 0 ]
 	then
 		return 1

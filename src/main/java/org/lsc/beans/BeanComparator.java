@@ -60,6 +60,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
+import org.apache.directory.api.util.Strings;
 import org.lsc.Configuration;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
@@ -95,6 +96,7 @@ public final class BeanComparator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
+
 	/**
 	 * Static method to return the kind of operation that would happen
 	 *
@@ -106,16 +108,31 @@ public final class BeanComparator {
 	 */
 	public static LscModificationType calculateModificationType(Task task,
 					IBean srcBean, IBean dstBean) throws LscServiceException {
+	    return calculateModificationType( task, srcBean, dstBean, null);
+	}
+
+	/**
+	 * Static method to return the kind of operation that would happen
+	 *
+	 * @param task task object (used for syncoptions, custom library and source/destination service)
+	 * @param srcBean Bean from source
+	 * @param dstBean JNDI bean
+	 * @param itmBean The cloned SRC bean, or null if the clone has not yet been created
+	 * @return JndiModificationType the modification type that would happen
+	 * @throws LscServiceException
+	 */
+	public static LscModificationType calculateModificationType(Task task,
+					IBean srcBean, IBean dstBean, IBean itmBean) throws LscServiceException {
 		// no beans, nothing to do
-		if (srcBean == null && dstBean == null) {
-			return null;
-		}
-		
-		// if there is no source bean, we will delete the destination entry, if it exists
-		if (srcBean == null && dstBean != null) {
-			return LscModificationType.DELETE_OBJECT;
-		}
-		
+ 		if (srcBean == null) {
+ 			if (dstBean == null) {
+ 				return null;
+ 			} else {
+				// if there is no source bean, we will delete the destination entry, if it exists
+				return LscModificationType.DELETE_OBJECT;
+			}
+ 		}
+	
 		// if there is no destination bean, we must create it
 		if (dstBean == null) {
 			return LscModificationType.CREATE_OBJECT;
@@ -124,8 +141,11 @@ public final class BeanComparator {
 		// we have the object in the source and the destination
 		// this must be either a MODIFY or MODRDN operation
 		// clone the source bean to calculate modifications on the DN
-		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
-		if (!"".equals(itmBean.getMainIdentifier()) &&
+		if (itmBean == null) {
+			itmBean = cloneSrcBean(task, srcBean, dstBean);
+		}
+
+		if (!Strings.isEmpty(itmBean.getMainIdentifier()) &&
 				dstBean.getMainIdentifier().compareToIgnoreCase(itmBean.getMainIdentifier()) != 0) {
 			return LscModificationType.CHANGE_ID;
 		} else {
@@ -154,7 +174,7 @@ public final class BeanComparator {
 		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
 
 		// get modification type to perform
-		LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
+		LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean, itmBean);
 
 		// if there's nothing to do, just return
 		if (modificationType == null) {

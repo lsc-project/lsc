@@ -367,7 +367,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		// TODO Fix LdifLogger to avoid this
-		LSCStructuralLogger.DESTINATION.info("", lm);
+		//LSCStructuralLogger.DESTINATION.info("", lm);
 	}
 
 	/**

@@ -88,7 +88,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.2</version>
+				<version>3.5.4</version>
 				<configuration>
 					<argLine>
 						-Dcom.sun.management.jmxremote 
@@ -107,7 +107,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.9.0</version>
 				<executions>
 					<execution>
 						<id>copy</id>
@@ -155,7 +155,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<configuration>
 					<propertiesEncoding>UTF-8</propertiesEncoding><!-- To avoid warning during plugin execution. -->
 				</configuration>
@@ -164,7 +164,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
+				<version>3.12.0</version>
 				<configuration>
 					<show>public</show>
 					<quiet>true</quiet>
@@ -199,7 +199,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.4.2</version>
+				<version>3.5.0</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -288,7 +288,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.6.1</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -517,7 +517,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
-						<version>3.13.0</version>
+						<version>3.15.0</version>
 						<configuration>
 							<source>11</source>
 							<target>11</target>
@@ -547,7 +547,7 @@
 				<module.opts>--add-reads java.base=java.logging</module.opts>
 				<!-- GraalVM compiler embedded in jvm -->
 				<graalvm.opts>-XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI --module-path=${compiler.dir} --upgrade-module-path=${compiler.dir}/compiler-${graalvm.version}.jar${path.separator}${compiler.dir}/compiler-management-${graalvm.version}.jar</graalvm.opts>
-				<graalvm.version>23.1.6</graalvm.version>
+				<graalvm.version>23.1.10</graalvm.version>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -609,7 +609,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
-						<version>3.8.1</version>
+						<version>3.9.0</version>
 						<executions>
 							<execution>
 								<id>copy</id>
@@ -773,7 +773,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.4</version>
+			<version>4.5.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -794,14 +794,14 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.18.0</version>
+			<version>2.21.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.18.0</version>
+			<version>3.20.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -820,21 +820,21 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.16</version>
+			<version>2.0.17</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.5.16</version>
+			<version>1.5.27</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.5.16</version>
+			<version>1.5.27</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -848,7 +848,7 @@
 		<dependency>
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
-			<version>1.7.15</version>
+			<version>1.7.15.1</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -860,14 +860,14 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.80</version>
+			<version>1.83</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
-			<version>1.9.0</version>
+			<version>1.11.0</version>
 			<type>jar</type>
 			<optional>false</optional>
 		</dependency>
@@ -900,22 +900,15 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>5.15.2</version>
+			<version>5.18.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
-			<version>5.15.2</version>
+			<version>5.18.0</version>
 			<scope>test</scope>
 		</dependency>
-		<!--dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-			<type>jar</type>
-			<optional>false</optional>
-		</dependency-->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
@@ -924,7 +917,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.4.0-jre</version>
+			<version>33.5.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
@@ -942,12 +935,12 @@
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>2.3.3</version>
+			<version>4.0.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-core</artifactId>
-			<version>3.0.0</version>
+			<version>4.0.6</version>
 			</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
@@ -1010,7 +1003,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.18.2</version>
+			<version>2.21.0</version>
 		</dependency>
 		
 		<!-- ApacheDS dependencies -->
@@ -1065,8 +1058,8 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
+                        <version>5.11.4</version>
 			<scope>test</scope>
-			<version>5.11.4</version>
 		</dependency>
 	</dependencies>
 

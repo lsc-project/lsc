@@ -221,8 +221,22 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 			for (TaskType taskType:LscConfiguration.getTasks()) {
 				Task task = cache.get(taskType.getName());
-				launchTask |= processTask(task, mode);
-				nbLaunchedTasks++;
+				
+				// Check the task type and discard it if it does not match with the requested mode
+				if (task.getSourceService() instanceof IAsynchronousService
+						|| task.getDestinationService() instanceof IAsynchronousService) {
+					// This is a n async task, only execute it in async mode, otherwise ignore it
+					if(mode == Task.Mode.async) {
+						launchTask |= processTask(task, mode);
+						nbLaunchedTasks++;
+					}
+				} else {
+					// It's a sync or cleanup task only execute it in sync or cleanup mode
+					if(mode != Task.Mode.async) {
+						launchTask |= processTask(task, mode);
+						nbLaunchedTasks++;
+					}
+				}
 			}
 		} else {
 			// No, we can process each listed task
@@ -289,7 +303,17 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		// at least one task.
 		int nbLaunchedSyncTasks = processTasks(syncTasks, Task.Mode.sync);
 		int nbLaunchedCleanTasks = processTasks(cleanTasks, Task.Mode.clean);
-		int nbLaunchedAsyncTasks = processTasks(asyncTasks, Task.Mode.async);
+
+
+		// A special case: if we have already launched async or cleanup tasks,
+		// we can't process any async task
+		int nbLaunchedAsyncTasks = 0;
+		
+		if (nbLaunchedSyncTasks + nbLaunchedCleanTasks == 0 )
+		{
+			// We can start async tasks when no sync/cleanup tasks have been launched
+			nbLaunchedAsyncTasks = processTasks(asyncTasks, Task.Mode.async);
+		}
 
 		// Check the number of total tasks executed
 		int nbLaunchedTasks = Math.abs(nbLaunchedSyncTasks)

@@ -264,9 +264,12 @@ public class Configuration {
 					}
 				} else {
 					xml = new File(location);
+					location = xml.getParent();
 				}
 
-				LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
+				LscConfiguration.loadFromInstance(
+				        new JaxbXmlConfigurationHelper().getConfiguration(
+				                xml.toString(), System.getenv()));
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}

@@ -69,6 +69,7 @@ import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapServiceType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.service.IService;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public abstract class AbstractSimpleJndiService implements Closeable {
+public abstract class AbstractSimpleJndiService implements IService, Closeable {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSimpleJndiService.class);
 	/**
@@ -152,7 +153,8 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		} catch (IOException e) {
 			throw new LscServiceConfigurationException(e);
 		}
-		LOGGER.warn("Properties configuration is not any more supported ! Please consider upgrading your LSC version !");
+		LOGGER.warn("Properties configuration is not any more supported ! "
+		        + "Please consider upgrading your LSC version !");
 	}
 
 	/**
@@ -163,10 +165,13 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 */
 	public AbstractSimpleJndiService(final LdapServiceType ldapService) throws LscServiceConfigurationException {
 		baseDn = ldapService.getBaseDn();
-		filterIdSync = (ldapService.getOneFilter() != null ? ldapService.getOneFilter().trim() : ldapService.getGetOneFilter().trim());
-		filterAll = (ldapService.getAllFilter() != null ? ldapService.getAllFilter().trim() : ldapService.getGetAllFilter().trim());
+		filterIdSync = (ldapService.getOneFilter() != null ? ldapService.getOneFilter().trim() : 
+		    ldapService.getGetOneFilter().trim());
+		filterAll = (ldapService.getAllFilter() != null ? ldapService.getAllFilter().trim() : 
+		    ldapService.getGetAllFilter().trim());
 		_filteredSc = new SearchControls();
-		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(new String[ldapService.getFetchedAttributes().getString().size()] ));
+		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(
+		        new String[ldapService.getFetchedAttributes().getString().size()] ));
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 
 		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
 			attrsId.add(pivotAttr);
@@ -177,7 +182,9 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		}
 		jndiServices = JndiServices.getInstance((LdapConnectionType) ldapService.getConnection().getReference());
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
-			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
+			LOGGER.warn("Your baseDn settings ({}) does not end with the LDAP naming context ({}). "
+			        + "This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.",  
+			        baseDn, jndiServices.getContextDn());
 		}
 	}
 
@@ -256,10 +263,12 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 				if (valueId != null) {
 					valueId = Matcher.quoteReplacement(valueId);
 				}
-				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+				searchString = Pattern.compile("\\{" + attributeName + "\\}", 
+				        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
 			}
 		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", 
+			        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		} else {
 			// this is kept for backwards compatibility but will be removed
 			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));

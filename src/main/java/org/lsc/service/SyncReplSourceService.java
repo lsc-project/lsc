@@ -45,7 +45,6 @@
  */
 package org.lsc.service;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -100,7 +99,7 @@ import org.slf4j.LoggerFactory;
  * to a compatible directory to get updates on the fly.
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SyncReplSourceService extends SimpleJndiSrcService implements IAsynchronousService, Closeable {
+public class SyncReplSourceService extends SimpleJndiSrcService implements IAsynchronousService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(SyncReplSourceService.class);
 
@@ -141,7 +140,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		connection = getConnection(ldapConn);
 	}
 
-	public static LdapAsyncConnection getConnection(LdapConnectionType ldapConn) throws LscServiceConfigurationException {
+	public static LdapAsyncConnection getConnection(LdapConnectionType ldapConn) 
+	        throws LscServiceConfigurationException {
 		LdapUrl url;
 		try {
 			url = new LdapUrl(ldapConn.getUrl());
@@ -216,7 +216,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 *             directory, or if more than one object would be returned.
 	 */
 	@Override
-	public IBean getBean(final String id, final LscDatasets pivotAttrs, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(final String id, final LscDatasets pivotAttrs, boolean fromSameService) 
+	        throws LscServiceException {
 		IBean srcBean = null;
 		String searchString = null;
 		
@@ -356,9 +357,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	                    LscDatasets datasets = convertEntry(searchResultEntry.getEntry(), true);
 	                    
 	                    // Check if it's a deletion
-	                    SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
+	                    SyncStateValue syncStateCtrl = (SyncStateValue)searchResponse.getControl(SyncStateValue.OID);
 	                    
-	                    if ((syncStateCtrl != null) && (syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE)) {
+	                    if ((syncStateCtrl != null) 
+	                            && (syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE)) {
 	                        // It's a deletion, add a special attribute that is not valid in LDAP
 	                        // (because of the starting '_'. That will mark the entry as deleted
 	                        datasets.getDatasets().put(DELETED_ENTRY, entryDn);
@@ -433,7 +435,8 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 	}
 
-	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
+	public static Control getSearchContinuationControl(LdapServerType serverType) 
+	        throws LscServiceConfigurationException {
 		switch(serverType) {
     		case OPEN_LDAP:
     		case APACHE_DS:

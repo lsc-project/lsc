@@ -55,6 +55,8 @@ import java.util.Map;
 
 import javax.transaction.xa.XAResource;
 
+//import javax.transaction.xa.XAResource;
+
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
 import org.lsc.beans.IBean;
@@ -87,7 +89,8 @@ public class MultipleDstService implements IWritableService {
 			for (Object service : task.getMultiDestinationService().getXaServices().getReference()) {
 				if (service instanceof ServiceType) {
 					ServiceType wrService = (ServiceType) service;
-					Constructor<IXAWritableService> xaServiceConstructor = (Constructor<IXAWritableService>) LscConfiguration
+					Constructor<IXAWritableService> xaServiceConstructor = 
+					        (Constructor<IXAWritableService>) LscConfiguration
 							.getServiceImplementation(wrService).getConstructor(TaskType.class);
 					IXAWritableService xaService = xaServiceConstructor.newInstance(task);
 					xaServices.add(xaService);

@@ -53,7 +53,7 @@ import org.lsc.LscDatasets;
 import org.lsc.exception.LscServiceException;
 
 /**
- * Extende default IService interface to add an asynchronous method
+ * Extends default IService interface to add an asynchronous method
  * 
  * @author Sebastien Bahloul
  */

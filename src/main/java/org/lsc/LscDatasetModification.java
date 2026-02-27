@@ -71,10 +71,9 @@ public class LscDatasetModification {
 	}
 
 	public LscDatasetModification(LscDatasetModificationType operationType, String name, Collection<Object> values) {
-		setOperation(operationType);
-		setDatasetName(name);
-		this.values = new ArrayList<Object>();
-		this.values.addAll(values);
+		operation = operationType;
+		attributeName = name;
+		this.values = new ArrayList<Object>(values);
 	}
 
 	public String getAttributeName() {
@@ -100,4 +99,31 @@ public class LscDatasetModification {
 	public void setOperation(LscDatasetModificationType operation) {
 		this.operation = operation;
 	}
+	
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("attribute[").append(attributeName).append("]");
+        sb.append(", Operation ").append(operation);
+        
+        if (values != null) {
+            sb.append( ", values={");
+            
+            boolean isFirst = true;
+            
+            for (Object value:values) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    sb.append(",");
+                }
+                
+                sb.append(value);
+            }
+            
+            sb.append("}");
+        }
+        
+        return sb.toString();
+    }
 }

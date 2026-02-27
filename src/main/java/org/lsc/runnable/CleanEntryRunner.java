@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.naming.CommunicationException;
 
@@ -25,7 +24,6 @@ import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.Hooks;
-import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 
 /**
  * @author sfroger

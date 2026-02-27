@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -80,7 +81,12 @@ import org.apache.directory.server.core.annotations.LoadSchema;
 import org.apache.directory.server.core.hash.SshaPasswordHashingInterceptor;
 import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.lsc.beans.IBean;
+import org.lsc.configuration.DatasetType;
 import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.PolicyType;
+import org.lsc.configuration.PropertiesBasedSyncOptionsType;
+import org.lsc.configuration.TaskType;
+import org.lsc.configuration.ValuesType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.service.IService;
@@ -111,7 +117,8 @@ import org.lsc.utils.directory.LDAP;
 		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
-
+    private static final String TASK_NAME_STAR = "*";
+    
 	private static final String JPEG_PHOTO = "/9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAAAgAAADEBAgAMAAAAWgAAADIBAgAUAAAAZgAAAHoAAAAsAQAAAQAAACwBAAABAAAAR0lNUCAyLjEwLjgAMjAxOTowMzowNSAxNzozMjo1NwAIAAABBAABAAAAAAEAAAEBBAABAAAAAAEAAAIBAwADAAAA4AAAAAMBAwABAAAABgAAAAYBAwABAAAABgAAABUBAwABAAAAAwAAAAECBAABAAAA5gAAAAICBAABAAAAdQYAAAAAAAAIAAgACAD/2P/gABBKRklGAAEBAAABAAEAAP/bAEMACAYGBwYFCAcHBwkJCAoMFA0MCwsMGRITDxQdGh8eHRocHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAQABAAMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOfooor9MPnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9kA/9sAQwD//////////////////////////////////////////////////////////////////////////////////////9sAQwH//////////////////////////////////////////////////////////////////////////////////////8IAEQgAAQABAwERAAIRAQMRAf/EABQAAQAAAAAAAAAAAAAAAAAAAAH/xAAUAQEAAAAAAAAAAAAAAAAAAAAB/9oADAMBAAIQAxAAAAET/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oADAMBAAIAAwAAABD/AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Qf//EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Qf//Z";
 
 	@BeforeEach
@@ -400,4 +407,261 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		byte[] realValue = (byte[]) at.get();
 		assertTrue(Arrays.equals(Base64.decodeBase64(valueBase64.getBytes()), realValue));
 	}
+
+	
+    private void setDefaultValues( DatasetType dataset, String...    vals ) {
+        // Inject the default numbers
+        ValuesType values = new ValuesType();
+        List<String> v = values.getString();
+        
+        for ( String val:vals ) {
+            v.add( val );
+        }
+            
+        dataset.setDefaultValues(values);
+    }
+    
+    
+    private void setForceValues( DatasetType dataset, String...    vals ) {
+        // Inject the force numbers
+        ValuesType values = new ValuesType();
+        List<String> v = values.getString();
+        
+        for ( String val:vals ) {
+            v.add( val );
+        }
+            
+        dataset.setForceValues(values);
+    }
+    
+
+	
+    private DatasetType setDataSet( String taskName, String attribute, PolicyType policy) {
+        TaskType task = LscConfiguration.getTask(taskName);
+        PropertiesBasedSyncOptionsType propertiesBasedSyncOptions = task.getPropertiesBasedSyncOptions();
+        List<DatasetType> datasets = propertiesBasedSyncOptions.getDataset();
+        DatasetType dataset = new DatasetType();
+        dataset.setPolicy(policy);
+        dataset.setName(attribute);
+        datasets.add(dataset);
+        
+        return dataset;
+    }
+        
+
+	
+    private void setCreateValues( DatasetType dataset, String...    vals ) {
+        // Inject the force numbers
+        ValuesType values = new ValuesType();
+        List<String> v = values.getString();
+        
+        for ( String val:vals ) {
+            v.add( val );
+        }
+            
+        dataset.setCreateValues(values);
+    }
+    
+  
+    /**
+     * Check that we can inject a TelephoneNumber attribute.
+     * 
+     * The default values are 123456 and 789987;
+     * The force values are 000000 and 11111.
+     * 
+     * There are 2 use cases:
+     * <ul>
+     *   <li>Entry addition: the entry does not exist on target</li>
+     *   <li>Entry modification: the entry exists on target</li>
+     * </ul>
+     * 
+     * We also have various use cases for the telephoneNumber attribute:
+     * <ul>
+     *   <li>
+     *     Add mode
+     *     <ul>
+     *       <li>The attribute does not exist on source</li>
+     *       <li>The attribute exists on source (012)</li>
+     *     </ul>
+     *   </li>
+     *   <li>
+     *     Modify mode
+     *     <ul>
+     *       <li>
+     *         The attribute does not exist on source
+     *         <ul>
+     *           <li>The attribute does not exist on target</li>
+     *           <li>The attribute exists on target (987)</li>
+     *         </ul>
+     *       </li>
+     *       <li>
+     *         The attribute exists on source (123/234)
+     *         <ul>
+     *           <li>The attribute does not exist on target</li>
+     *           <li>The attribute exists on target (876)</li>
+     *         </ul>
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     * 
+     * Those use cases have to be combined with the potential default/create/force values
+     */
+    @Test
+    @Disabled
+    public final void testSyncL2LStarTelephoneNumber() throws Exception {
+        // make sure the contents of the directory are as we expect to begin with
+        String TASK_NAME = "L2LTestTask";
+        
+        // The two roots
+        String origin = "ou=origin,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
+        String target = "ou=target,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
+
+        // The entries
+        String noTelAddOrigin = "cn=noTelAdd," + origin;
+        String noTelAddTarget = "cn=noTelAdd," + target;
+
+        String telAddOrigin = "cn=telAdd," + origin;
+        String telAddTarget = "cn=telAdd," + target;
+        
+        //---------------------------------------------------------------------------------
+        // First check with no default/create/force values.
+        //---------------------------------------------------------------------------------
+        // perform the sync
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+        
+        // Check the results
+
+        // Inject telephoneNumber
+        DatasetType telephoneNumber = setDataSet(TASK_NAME, "telephoneNumber", PolicyType.MERGE );
+        //setDefaultValues( telephoneNumber, "123456", "789987" );
+        setCreateValues( telephoneNumber, "'000000'", "11111" );
+
+        // Inject ObjectClass
+        DatasetType objectClass = setDataSet(TASK_NAME_STAR, "objectClass", PolicyType.MERGE );
+        setDefaultValues( objectClass, "'top'", "'person'" );
+        setCreateValues( objectClass, "'inetOrgPerson'" );
+
+        // Inject initials
+        DatasetType initials = setDataSet(TASK_NAME_STAR, "initials", PolicyType.FORCE );
+        setCreateValues( initials, "cn=oops" );
+
+        // Inject default
+        setDataSet(TASK_NAME_STAR, "default", PolicyType.FORCE );
+
+        // Inject Description
+        DatasetType description = setDataSet(TASK_NAME_STAR, "description", PolicyType.MERGE );
+        
+        setForceValues( description, "var j=0; \n"
+                + "                   var dstDescriptionValues = new Array();\n"
+                + "                   var srcDescriptionValues = srcBean.getDatasetById('description').toArray();\n"
+                + "                   for (var i=0; i < srcDescriptionValues.length; i++ ) {\n"
+                + "                       if ( srcDescriptionValues[i] != null ) {\n"
+                + "                           // The sample just copy the value, but you can do what you want there !\n"
+                + "                           // Just keep in mind to force a correct data type because the \n"
+                + "                           // source values are mapped to a generic Object type\n"
+                + "                           // which will not be well handled by the Javascript engine !\n"
+                + "                           dstDescriptionValues[j++] = \"modified: \" + srcDescriptionValues[i];\n"
+                + "                       }\n"
+                + "                   }\n"
+                + "                   dstDescriptionValues" );
+
+        // Inject seeAlso
+        setDataSet(TASK_NAME_STAR, "seeAlso", PolicyType.FORCE );
+
+        // Inject jpegPhoto
+        DatasetType jpegPhoto = setDataSet(TASK_NAME_STAR, "jpegPhoto", PolicyType.FORCE );
+        setForceValues( jpegPhoto, "srcBean.getDatasetFirstBinaryValueById('jpegPhoto')" );
+
+        // Inject userPassword
+        DatasetType userPassword = setDataSet(TASK_NAME_STAR, "userPassword", PolicyType.FORCE );
+        setForceValues( userPassword, "'secret' + srcBean.getDatasetFirstValueById('cn')" );
+
+        // Inject mail
+        DatasetType mail = setDataSet(TASK_NAME_STAR, "mail", PolicyType.FORCE );
+        setCreateValues( mail, "'ok@domain.net'" );
+        
+        //initialInjectionCheckL2LTests(origin, target);
+        
+        // check MODRDN (cn=CN00002/cn=CommonName0002)
+        assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
+        assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
+        assertFalse(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
+
+        // check ADD (cn=CN0003)
+        assertTrue(srcJndiServices.exists(DN_ADD_SRC));
+        assertFalse(dstJndiServices.exists(DN_ADD_DST));
+        
+        /*
+        SearchResult srcEntry = getEntry(DN_ADD_SRC);
+        
+        checkAttributeIsEmpty(srcEntry, "userPassword");
+        checkAttributeIsEmpty(srcEntry, "telephoneNumber");
+        checkAttributeValue(srcEntry, "description", "Number three's descriptive text");
+        checkAttributeValue(srcEntry, "sn", "SN0003");
+
+        // check MODIFY (cn=CN0001)
+        assertTrue(srcJndiServices.exists(DN_MODIFY_SRC));
+        assertTrue(dstJndiServices.exists(DN_MODIFY_DST));
+        
+        SearchResult srcModifySrc = getEntry(DN_MODIFY_SRC);
+
+        checkAttributeIsEmpty(srcModifySrc, "telephoneNumber");
+        checkAttributeValue(srcModifySrc, "description", "Number one's descriptive text");
+        checkAttributeValue(srcModifySrc, "sn", "SN0001");
+        checkBinaryAttributeValue(DN_MODIFY_SRC, "jpegPhoto", JPEG_PHOTO);
+        
+        // the original password is present and can be used
+        assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secret0001"));
+
+        // the new password cannot be used yet
+        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
+        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
+
+        // perform the sync
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        
+        // check ADD
+        // the entry has been created
+        assertTrue(dstJndiServices.exists(cn3Target));
+        SearchResult srcAddDst = getEntry(cn3Target);
+
+        List<String> attributeValues = null;
+
+        // Check the ObjectClass attribute
+        attributeValues = Arrays.asList("top", "person", "organizationalPerson", "inetOrgPerson");
+        checkAttributeValues(srcAddDst, "objectClass", attributeValues);
+
+        // the telephoneNumber was created
+        attributeValues = Arrays.asList("000000", "11111");
+        checkAttributeValues(srcAddDst, "telephoneNumber", attributeValues);
+
+        //checkSyncResultsFirstPass();
+
+        // sync again to confirm convergence
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        
+        // the telephoneNumber was merged
+        attributeValues = Arrays.asList("000000", "11111", "123456", "789987");
+        checkAttributeValues("cn=CN0003," + target, "telephoneNumber", attributeValues);
+
+        //checkSyncResultsSecondPass();
+
+        // sync a third time to make sure nothing changed
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        //checkSyncResultsSecondPass();
+        // the telephoneNumber was merged
+        attributeValues = Arrays.asList("000000", "11111", "123456", "789987");
+        checkAttributeValues(cn3Target, "telephoneNumber", attributeValues);
+    */
+    }
 }

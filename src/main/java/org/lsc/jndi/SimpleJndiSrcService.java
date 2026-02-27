@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
-public class SimpleJndiSrcService extends AbstractSimpleJndiService implements IService {
+public class SimpleJndiSrcService extends AbstractSimpleJndiService {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(SimpleJndiSrcService.class);
 	/**
@@ -93,7 +93,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 */
 	@SuppressWarnings("unchecked")
 	@Deprecated
-	public SimpleJndiSrcService(final Properties props, final String beanClassName) throws LscServiceConfigurationException {
+	public SimpleJndiSrcService(final Properties props, final String beanClassName) 
+	        throws LscServiceConfigurationException {
 		super(props);
 		filterIdClean = props.getProperty("filterIdClean");
 		try {
@@ -116,7 +117,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 		super((LdapSourceServiceType)LscConfiguration.getSourceService(task));
 		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getCleanFilter();
 		if(filterIdClean == null) {
-		    LOGGER.warn("No clean filter has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+		    LOGGER.warn("No clean filter has been specified for task={}"
+		            + ". During the clean phase, LSC wouldn't be able to "
+		            + "get the right entries and may delete all destination entries !", task.getName() );
 		}
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
@@ -138,7 +141,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	public IBean getBean(final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) 
+	        throws LscServiceException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();

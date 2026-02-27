@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.lsc.AbstractSynchronize;
 import org.lsc.beans.InfoCounter;
+import org.lsc.beans.syncoptions.ISyncOptions;
 import org.lsc.LscDatasets;
 import org.lsc.LscModificationType;
 import org.lsc.LscModifications;
@@ -13,6 +14,7 @@ import org.lsc.Task;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceCommunicationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.service.SyncReplSourceService;
 import org.lsc.utils.ScriptingEvaluator;
@@ -38,33 +40,51 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 		this.hooks = new Hooks();
 	}
 	
+	
+	private void deleteEntry() throws LscServiceException {
+	    if ((task.getDestinationService() instanceof SimpleJndiDstService)) {
+            // Create a modification for the Delete operation
+            LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
+            
+            // Get the source entry DN which is stored in the entry's key
+            String dn = id.getKey();
+            
+            // Transform it to get rid of the base, as we are using JNDI which uses a context
+            String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().
+                rewriteBase(dn);
+            
+            lm.setMainIdentifer(newDn);
+            
+            // And now, delete the entry
+            task.getDestinationService().apply(lm);
+	    } else {
+	        // todo: what if the destination server is not a LDAP server???
+	    }
+	}
+	
 	@Override
 	public void run() {
 		counter.incrementCountAll();
 		
 		try {
+		    LscDatasets value = id.getValue();
+		    
 		    // Deal with the special case of deleted entries, when the destination service
 		    // is a LDAP server. We *must* base the deletion on the source entry's DN
 		    // because we have nothing else to identify the entry (the pivot is not present).
-		    if (id.getValue().getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY) 
-		            && (task.getDestinationService() instanceof SimpleJndiDstService)) {
-		        // Create a modification for the Delete operation
-		        LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
-		        
-		        // Get the source entry DN which is stored in the entry's key
-		        String dn = id.getKey();
-		        
-		        // Transform it to get rid of the base, as we are using JNDI which uses a context
-		        String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().
-		            rewriteBase(dn);
-		        
-		        lm.setMainIdentifer(newDn);
-		        
-		        // And now, delete the entry
-		        task.getDestinationService().apply(lm);
+		    if (value.getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY)) {
+		        deleteEntry();
 		    } else {
-		        IBean data = abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(), 
-		                id.getKey(), id.getValue(), true, fromSource);
+		        IBean data = abstractSynchronize.getBean(
+		                task, 
+		                fromSource ? 
+		                    task.getSourceService() : 
+		                    task.getDestinationService(), 
+		                id.getKey(), 
+		                value, 
+		                true, 
+		                fromSource);
+		        
 		        run(data);
 		    }
 		} catch (RuntimeException e) {
@@ -81,7 +101,6 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 	}
 
 	public boolean run(IBean entry) {
-
 		LscModifications lm = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
@@ -95,26 +114,45 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			if (entry == null) {
 				counter.incrementCountError();
 				StringBuilder sb = new StringBuilder("Cannot synchronize entry");
+				
 				if (id != null) {
 					sb.append(" ").append(id.getKey());
 				}
+				
 				sb.append(": no matching object found in source");
-				if (id != null && id.getValue() != null && !id.getValue().getDatasets().isEmpty()) {
+				
+				if ((id != null) && (id.getValue() != null) && !id.getValue().getDatasets().isEmpty()) {
 					sb.append(" with pivots ").append(id.getValue().toString());
 				}
+				
 				LOGGER.error(sb.toString());
+				
 				return false;
 			}
 
-			// Search destination for matching object
-			if(id != null) {
-				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), ! fromSource, fromSource);
+			// Fetch destination for matching object
+			if (id != null) {
+				dstBean = abstractSynchronize.getBean(
+				        task, 
+				        task.getDestinationService(), 
+				        id.getKey(), 
+				        id.getValue(), 
+				        !fromSource, 
+				        fromSource);
 			} else {
 				LscDatasets entryDatasets = new LscDatasets();
+				
 				for(String datasetName: entry.datasets().getAttributesNames()) {
 					entryDatasets.getDatasets().put(datasetName, entry.getDatasetById(datasetName));
 				}
-				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), entry.getMainIdentifier(), entryDatasets, ! fromSource, fromSource);
+				
+				dstBean = abstractSynchronize.getBean(
+				        task, 
+				        task.getDestinationService(), 
+				        entry.getMainIdentifier(), 
+				        entryDatasets, 
+				        !fromSource, 
+				        fromSource);
 			}
 
 			// Calculate operation that would be performed
@@ -125,15 +163,16 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			String conditionString = task.getSyncOptions().getCondition(modificationType);
 
 			// Don't use JavaScript evaluator for primitive cases
-			if (conditionString.matches("true")) {
+			if (conditionString.matches(ISyncOptions.DEFAULT_CONDITION)) {
 				applyCondition = true;
 			} else if (conditionString.matches("false")) {
 				applyCondition = false;
 			} else {
-				conditionObjects = new HashMap<String, Object>();
+				conditionObjects = new HashMap<>();
 				conditionObjects.put("dstBean", dstBean);
 				conditionObjects.put("srcBean", entry);
 				conditionObjects.putAll(task.getScriptingVars());
+				
 				if (task.getCustomLibraries() != null) {
 					conditionObjects.put("custom", task.getCustomLibraries());
 				}
@@ -143,7 +182,7 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			}
 
 			if (applyCondition) {
-				lm = BeanComparator.calculateModifications(task, entry, dstBean);
+				lm = BeanComparator.calculateModifications(task, entry, dstBean, modificationType);
 
 				// if there's nothing to do, skip to the next object
 				if (lm == null) {
@@ -155,7 +194,8 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 				// no modification: log action for debugging purposes and forget
 				if ((modificationType == LscModificationType.CREATE_OBJECT && abstractSynchronize.nocreate)
 						|| (modificationType == LscModificationType.UPDATE_OBJECT && abstractSynchronize.noupdate)
-						|| (modificationType == LscModificationType.CHANGE_ID && (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate))) {
+						|| (modificationType == LscModificationType.CHANGE_ID 
+						&& (abstractSynchronize.nomodrdn || abstractSynchronize.noupdate))) {
 					abstractSynchronize.logShouldAction(lm, syncName);
 					return true;
 				}
@@ -172,23 +212,29 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 							lm);
 				counter.incrementCountCompleted();
 				abstractSynchronize.logAction(lm, id, syncName);
+				
 				return true;
 			} else {
 				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), new Exception("Technical problem while applying modifications to the destination"));
+				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), 
+				        new Exception("Technical problem while applying modifications to the destination"));
+				
 				return false;
 			}
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
-			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : ( entry != null ? entry.getMainIdentifier() : e.toString())), e);
+			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : 
+			    ( entry != null ? entry.getMainIdentifier() : e.toString())), e);
 
 			if (e.getCause() instanceof LscServiceCommunicationException) {
 				LOGGER.error("Connection lost! Aborting.");
 			}
+			
 			return false;
 		} catch (Exception e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), e);
+			
 			return false;
 		}
 	}

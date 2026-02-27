@@ -1170,7 +1170,7 @@ public final class JndiServices {
 		constraints.setDerefLinkFlag(false);
 		constraints.setReturningAttributes(attributes);
 		constraints.setSearchScope(scope);
-		constraints.setReturningObjFlag(true);
+		constraints.setReturningObjFlag(false);
 		try {
 			byte[] pagedResultsResponse;
 
@@ -1208,6 +1208,9 @@ public final class JndiServices {
 
 					pagedResultsResponse = pagination(searchContext);
 				} while (pagedResultsResponse != null);
+			} catch ( Exception e) {
+			    e.printStackTrace();
+			    throw e;
 			} finally {
 				searchContext.close();
 			}

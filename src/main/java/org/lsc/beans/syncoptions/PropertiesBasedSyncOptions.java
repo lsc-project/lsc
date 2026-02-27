@@ -75,66 +75,79 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 
 	public final PolicyType getStatus(final String id, final String attributeName) {
 		PolicyType statusType = LscConfiguration.getDataset(conf, attributeName).getPolicy();
+		
 		return (statusType != null ? statusType : conf.getDefaultPolicy());
 	}
 
 	public final List<String> getDefaultValues(final String id, final String attributeName) {
 		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getDefaultValues();
 		ArrayList<String> copy = null;
+		
 		if (datasetValues != null && datasetValues.getString().size() > 0) {
 			copy = new ArrayList<String>(datasetValues.getString());
 		}
+		
 		return copy;
 	}
 
 	public final List<String> getCreateValues(final String id, final String attributeName) {
 		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getCreateValues();
 		ArrayList<String> copy = null;
+		
 		if (datasetValues != null && datasetValues.getString().size() > 0) {
 			copy = new ArrayList<String>(datasetValues.getString());
 		}
+		
 		return copy;
 	}
 
 	public final List<String> getForceValues(final String id, final String attributeName) {
 		ValuesType datasetValues = LscConfiguration.getDataset(conf, attributeName).getForceValues();
 		ArrayList<String> copy = null;
+		
 		if (datasetValues != null && datasetValues.getString().size() > 0) {
 			copy = new ArrayList<String>(datasetValues.getString());
 		}
+		
 		return copy;
 	}
 
 	@Override
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
+		
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getCreateValues().getString().isEmpty()) {
+			if ((attr.getCreateValues() != null) && !attr.getCreateValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
+		
 		return createAttrs;
 	}
 
 	@Override
 	public Set<String> getDefaultValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
+		
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getDefaultValues().getString().isEmpty()) {
+			if ((attr.getDefaultValues() != null) && !attr.getDefaultValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
+		
 		return createAttrs;
 	}
 
 	@Override
 	public Set<String> getForceValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
+		
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getForceValues().getString().isEmpty()) {
+		    if ((attr.getForceValues() != null) && (!attr.getForceValues().getString().isEmpty())) {
 				createAttrs.add(attr.getName());
 			}
 		}
+		
 		return createAttrs;
 	}
 
@@ -143,50 +156,62 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public String getCreateCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getCreate() == null) {
+	    ConditionsType conditions = conf.getConditions();
+
+		if ((conditions == null) || conditions.getCreate() == null) {
 			return DEFAULT_CONDITION;
+		} else {
+		    return conditions.getCreate();
 		}
-		return conf.getConditions().getCreate();
 	}
 
 	public String getDeleteCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getDelete() == null) {
+	    ConditionsType conditions = conf.getConditions();
+
+		if ((conditions == null) || (conditions.getDelete() == null)) {
 			return DEFAULT_CONDITION;
+		} else {
+		    return conditions.getDelete();
 		}
-		return conf.getConditions().getDelete();
 	}
 
 	public String getUpdateCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getUpdate() == null) {
+	    ConditionsType conditions = conf.getConditions();
+	    
+		if ((conditions == null) || conditions.getUpdate() == null) {
 			return DEFAULT_CONDITION;
+		} else {
+		    return conditions.getUpdate();
 		}
-		return conf.getConditions().getUpdate();
 	}
 
 	public String getChangeIdCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getChangeId() == null) {
+	    ConditionsType conditions = conf.getConditions();
+
+		if ((conditions == null) || (conditions.getChangeId() == null)) {
 			return DEFAULT_CONDITION;
+		} else {
+		    return conditions.getChangeId();
 		}
-		return conf.getConditions().getChangeId();
 	}
 
 	public String getCondition(LscModificationType operation) {
-		String result = DEFAULT_CONDITION;
 		switch (operation) {
 			case CREATE_OBJECT:
-				result = this.getCreateCondition();
-				break;
+				return getCreateCondition();
+				
 			case UPDATE_OBJECT:
-				result = this.getUpdateCondition();
-				break;
+				return getUpdateCondition();
+				
 			case DELETE_OBJECT:
-				result = this.getDeleteCondition();
-				break;
+				return getDeleteCondition();
+				
 			case CHANGE_ID:
-				result = this.getChangeIdCondition();
-				break;
+				return getChangeIdCondition();
+				
+			default:
+			    return DEFAULT_CONDITION;
 		}
-		return result;
 	}
 
 	public OutputFormat getPostHookOutputFormat() {
@@ -194,9 +219,11 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 		if (conf.getHooks() == null || conf.getHooks().getOutputFormat() == null) {
 			return OutputFormat.LDIF;
 		}
+		
 		switch (conf.getHooks().getOutputFormat()) {
 			case "json":
 				return OutputFormat.JSON;
+				
 			default:
 				return OutputFormat.LDIF;
 		}
@@ -205,12 +232,14 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Optional<String> getCreatePostHook() {
 		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getCreatePostHook())
 				.filter(s -> !s.isEmpty());
+		
 		return hook;
 	}
 
 	public Optional<String> getDeletePostHook() {
 		Optional<String> hook = Optional.ofNullable(conf.getHooks()).map(o -> o.getDeletePostHook())
 				.filter(s -> !s.isEmpty());
+		
 		return hook;
 	}
 
@@ -229,15 +258,20 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Optional<String> getPostHook(LscModificationType operation) {
 		switch (operation) {
 			case CREATE_OBJECT:
-				return this.getCreatePostHook();
+				return getCreatePostHook();
+				
 			case UPDATE_OBJECT:
-				return this.getUpdatePostHook();
+				return getUpdatePostHook();
+				
 			case DELETE_OBJECT:
-				return this.getDeletePostHook();
+				return getDeletePostHook();
+				
 			case CHANGE_ID:
-				return this.getChangeIdPostHook();
+				return getChangeIdPostHook();
+				
+			default: 
+			    return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	public String getDelimiter(String name) {

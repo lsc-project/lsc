@@ -60,6 +60,8 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
+import org.apache.directory.api.util.Strings;
 import org.lsc.Configuration;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasetModification.LscDatasetModificationType;
@@ -96,7 +98,14 @@ public final class BeanComparator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BeanComparator.class);
 
 	/**
-	 * Static method to return the kind of operation that would happen
+	 * Static method to return the kind of operation that would happen:
+	 * 
+	 * <ul>
+     *   <li>CREATE_OBJECT: If the source bean is not null but the destination bean is null</li>
+	 *   <li>DELETE_OBJECT: If the destination bean is not null but the source bean is null</li>
+	 *   <li>UPDATE_OBJECT: Both source and destination DN are equal
+	 *   <li>CHANGE_ID: The source and destination DN are different, it's a rename
+	 * </ul>
 	 *
 	 * @param task task object (used for syncoptions, custom library and source/destination service)
 	 * @param srcBean Bean from source
@@ -107,13 +116,14 @@ public final class BeanComparator {
 	public static LscModificationType calculateModificationType(Task task,
 					IBean srcBean, IBean dstBean) throws LscServiceException {
 		// no beans, nothing to do
-		if (srcBean == null && dstBean == null) {
-			return null;
-		}
-		
-		// if there is no source bean, we will delete the destination entry, if it exists
-		if (srcBean == null && dstBean != null) {
-			return LscModificationType.DELETE_OBJECT;
+		if (srcBean == null) {
+		    if (dstBean == null) {
+		        return null;
+		    } else {
+		        // if there is no source bean, we will delete the destination entry, 
+		        // if it exists
+		        return LscModificationType.DELETE_OBJECT;
+		    }
 		}
 		
 		// if there is no destination bean, we must create it
@@ -122,16 +132,38 @@ public final class BeanComparator {
 		}
 
 		// we have the object in the source and the destination
-		// this must be either a MODIFY or MODRDN operation
+		// this may be either a MODIFY or MODRDN operation.
 		// clone the source bean to calculate modifications on the DN
-		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
-		if (!"".equals(itmBean.getMainIdentifier()) &&
-				dstBean.getMainIdentifier().compareToIgnoreCase(itmBean.getMainIdentifier()) != 0) {
+		IBean cloneBean = cloneSrcBean(task, srcBean, dstBean);
+		String cloneMainIdentifier = cloneBean.getMainIdentifier();
+		
+		if (!Strings.isEmpty(cloneMainIdentifier) &&
+				dstBean.getMainIdentifier().compareToIgnoreCase(cloneMainIdentifier) != 0) {
 			return LscModificationType.CHANGE_ID;
 		} else {
 			return LscModificationType.UPDATE_OBJECT;
 		}
 	}
+
+    /**
+     * Static comparison method. By default, source information override
+     * destination (i.e. Database =&gt; Directory) But if a piece of information is
+     * present only in the destination, it remains
+     * 
+     * @param task the corresponding task parameter
+     * @param srcBean the source bean
+     * @param dstBean the destination bean
+     * @throws org.lsc.exception.LscServiceException lsc service
+     * @return modifications to apply to the directory
+     */
+    public static LscModifications calculateModifications(
+                    Task task, IBean srcBean, IBean dstBean) 
+                    throws LscServiceException {
+        // get modification type to perform
+        LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
+        
+        return calculateModifications(task, srcBean, dstBean, modificationType);
+    }
 
 	/**
 	 * Static comparison method. By default, source information override
@@ -145,16 +177,16 @@ public final class BeanComparator {
 	 * @return modifications to apply to the directory
 	 */
 	public static LscModifications calculateModifications(
-					Task task, IBean srcBean, IBean dstBean) 
+					Task task, IBean srcBean, IBean dstBean, LscModificationType modificationType) 
 					throws LscServiceException {
 
 		LscModifications lm = null;
 
-		// clone the source bean to work on it
+		// clone the source bean to work on it, changing the DN.
 		IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
 
 		// get modification type to perform
-		LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
+		//LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
 
 		// if there's nothing to do, just return
 		if (modificationType == null) {
@@ -301,8 +333,7 @@ public final class BeanComparator {
 					break;
 
 				case ADD_VALUES:
-					LOGGER.debug("{} Adding attribute \"{}\" with values {}",
-									new Object[]{logPrefix, attrName, toSetAttrValues});
+					LOGGER.debug("{} Adding attribute \"{}\" with values {}",  logPrefix, attrName, toSetAttrValues);
 
 					if (modType != LscModificationType.CREATE_OBJECT && attrStatus == PolicyType.FORCE) {
 						// By default, if we try to modify an attribute in
@@ -362,12 +393,18 @@ public final class BeanComparator {
 					break;
 			}
 
-			if (mi == null && multiMi == null) {
-				LOGGER.debug("{} Attribute \"{}\" will not be written to the destination", logPrefix, attrName);
-			} else if (multiMi != null) {
-				modificationItems.addAll(multiMi);
-			} else if (mi != null) {
-				modificationItems.add(mi);
+			if (mi == null) {
+			    if (multiMi == null) {
+		             LOGGER.debug("{} Attribute \"{}\" will not be written to the destination", logPrefix, attrName);
+			    } else {
+	                modificationItems.addAll(multiMi);
+			    }
+			} else {
+			    if (multiMi != null) {
+	                modificationItems.addAll(multiMi);
+			    } else {
+                    modificationItems.add(mi);
+			    }
 			}
 
 			// Remove attributes from JavaScript objects
@@ -419,16 +456,19 @@ public final class BeanComparator {
 	 */
 	private static LscDatasetModificationType getRequiredOperationForAttribute (
 					Set<Object> toSetAttrValues, Set<Object> currentAttrValues) {
-		if (toSetAttrValues.size() == 0 && currentAttrValues.size() != 0) {
-			return LscDatasetModificationType.DELETE_VALUES;
-		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() == 0) {
-			return LscDatasetModificationType.ADD_VALUES;
-		} else if (toSetAttrValues.size() > 0 && currentAttrValues.size() > 0) {
-			return LscDatasetModificationType.REPLACE_VALUES;
-		} else {
-//			LOGGER.warn("Check your default / create / force values because the expression has returned a null value !");
-			return LscDatasetModificationType.UNKNOWN;
-		}
+	    if (toSetAttrValues.size() == 0) {
+	        if (currentAttrValues.size() == 0) {
+	            return LscDatasetModificationType.UNKNOWN;
+	        } else {
+	            return LscDatasetModificationType.DELETE_VALUES;
+	        }
+	    } else {
+            if (currentAttrValues.size() == 0) {
+                return LscDatasetModificationType.ADD_VALUES;
+            } else {
+                return LscDatasetModificationType.REPLACE_VALUES;
+            }
+	    }
 	}
 
 	/**
@@ -451,25 +491,81 @@ public final class BeanComparator {
 
 		// Check if an explicit list was configured
 		List<String> syncOptionsWriteAttributes = task.getDestinationService().getWriteDatasetIds();
+		boolean allUserAttribute = false;
+        boolean allOperationalAttribute = false;
+        boolean noAttributeAttribute = false;
+        boolean otherAttribute = false;
 
 		if (syncOptionsWriteAttributes != null) {
 			for (String attrName : syncOptionsWriteAttributes) {
-				res.add(attrName);
+			    switch (attrName) {
+			        case SchemaConstants.ALL_USER_ATTRIBUTES:
+			            // The '*' special attribute
+			            allUserAttribute = true;
+                        res.add(SchemaConstants.ALL_USER_ATTRIBUTES);
+
+			            break;
+			            
+			        case SchemaConstants.ALL_OPERATIONAL_ATTRIBUTES:
+			            // The '+' special attribute
+			            allOperationalAttribute = true;
+                        res.add(SchemaConstants.ALL_OPERATIONAL_ATTRIBUTES);
+			            
+			            break;
+			            
+			        case SchemaConstants.NO_ATTRIBUTE:
+			            // The No Attribute special attribute
+			            if ( !otherAttribute) {
+			                noAttributeAttribute = true;
+			            }
+			        
+			        default:
+			            otherAttribute = true;
+                        res.add(Strings.lowerCaseAscii(attrName));
+
+                        break;
+			    }
+			}
+			
+			// No need to keep an explicit list of attribute if '*' and '+' are specified
+			if (allUserAttribute && allOperationalAttribute) {
+			    otherAttribute = false;
+			    res.clear();
 			}
 		}
 
 		// If no explicit list of attribute types to write is specified,
 		// we build a list from all source attributes, all force and default values
-		if (res.size() == 0) {
+		if (!otherAttribute) {
+		    
 			List<String> itmBeanAttrsList = srcBean.datasets().getAttributesNames();
 			Set<String> forceAttrsList = task.getSyncOptions().getForceValuedAttributeNames();
 			Set<String> defaultAttrsList = task.getSyncOptions().getDefaultValuedAttributeNames();
 			Set<String> createAttrsList = task.getSyncOptions().getCreateAttributeNames();
 
-			if (itmBeanAttrsList != null) res.addAll(itmBeanAttrsList);
-			if (forceAttrsList != null) res.addAll(forceAttrsList);
-			if (defaultAttrsList != null) res.addAll(defaultAttrsList);
-			if (createAttrsList != null) res.addAll(createAttrsList);
+			if (itmBeanAttrsList != null) {
+			    for (String attr:itmBeanAttrsList) {
+			        res.add(Strings.toLowerCaseAscii(attr));
+			    }
+			}
+			
+			if (forceAttrsList != null) {
+                for (String attr:forceAttrsList) {
+                    res.add(Strings.toLowerCaseAscii(attr));
+                }
+			}
+			
+			if (defaultAttrsList != null) {
+                for (String attr:defaultAttrsList) {
+                    res.add(Strings.toLowerCaseAscii(attr));
+                }
+			}
+			
+			if (createAttrsList != null) {
+                for (String attr:createAttrsList) {
+                    res.add(Strings.toLowerCaseAscii(attr));
+                }
+			}
 		}
 
 		return res;
@@ -530,28 +626,32 @@ public final class BeanComparator {
 		// We clone the source object, because syncoptions should not be used
 		// on modified values of the source object :)
 		//
-		IBean itmBean = null;
+		IBean cloneBean = null;
+		
 		if (srcBean != null) {
 		    try {
-	            itmBean = srcBean.clone();
+		        cloneBean = srcBean.clone();
 		    } catch(CloneNotSupportedException e) {
 		        throw new LscServiceException(e);
 		    }
 
 			// apply any new DN from properties to this intermediary bean
 			String dn = task.getSyncOptions().getDn();
+			
 			if (dn != null) {
 				Map<String, Object> table = new HashMap<String, Object>();
 				table.put("srcBean", srcBean);
 				table.put("dstBean", dstBean);
+				
 				if (task.getCustomLibraries() != null) {
 					table.put("custom", task.getCustomLibraries());
 				}
-				itmBean.setMainIdentifier(ScriptingEvaluator.evalToString(task, dn, table));
+				
+				cloneBean.setMainIdentifier(ScriptingEvaluator.evalToString(task, dn, table));
 			}
 		}
 
-		return itmBean;
+		return cloneBean;
 	}
 
 	/**

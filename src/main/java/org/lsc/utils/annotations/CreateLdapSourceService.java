@@ -111,7 +111,7 @@ public @interface CreateLdapSourceService {
     /**
      * Filter to get a single entry based on pivot attributes.
      * Can use placeholders like {mail} which will be replaced with pivot values.
-     * Example: "(&(objectClass=inetOrgPerson)(mail={mail}))"
+     * Example: "(&amp;(objectClass=inetOrgPerson)(mail={mail}))"
      * 
      * @return LDAP filter string for getting one object
      */
@@ -123,7 +123,7 @@ public @interface CreateLdapSourceService {
     /**
      * Filter used during the clean phase to identify entries to delete.
      * Typically mirrors getOneFilter.
-     * Example: "(&(objectClass=inetOrgPerson)(mail={mail}))"
+     * Example: "(&amp;(objectClass=inetOrgPerson)(mail={mail}))"
      * 
      * @return LDAP filter string for clean operations
      * @default empty string (optional)
@@ -132,7 +132,7 @@ public @interface CreateLdapSourceService {
     
     /**
      * Filter for detecting changes in asynchronous mode.
-     * Example: "(&(objectClass=inetOrgPerson)(modifyTimestamp>={lastRunTimestamp}))"
+     * Example: "(&amp;(objectClass=inetOrgPerson)(modifyTimestamp>={lastRunTimestamp}))"
      * @return LDAP filter for changed entries
      * @default empty string
      */

@@ -45,8 +45,6 @@
  */
 package org.lsc.utils.annotations;
 
-import org.apache.directory.api.ldap.model.message.SearchScope;
-
 public @interface CreateLdapDestinationService {
     //-----------------------------------------------------------
     // From ServiceType
@@ -110,7 +108,7 @@ public @interface CreateLdapDestinationService {
     /**
      * Filter to get a single entry based on pivot attributes.
      * Can use placeholders like {mail} which will be replaced with pivot values.
-     * Example: "(&(objectClass=inetOrgPerson)(mail={mail}))"
+     * Example: "(&amp;(objectClass=inetOrgPerson)(mail={mail}))"
      * 
      * @return LDAP filter string for getting one object
      */

@@ -357,7 +357,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0002,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0002,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0002,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
@@ -416,7 +417,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0003,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0003,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0003,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
@@ -476,7 +478,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0004,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0004,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0004,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
@@ -536,7 +539,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0005,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0005,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0005,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
@@ -586,7 +590,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0006,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0006,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0006,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
@@ -635,7 +640,8 @@ public class L2L_DisplayName_Force_Dx_Cx_Frrr_ITTest extends CommonLdapSyncTest 
         assertTrue(ret);
         
         // Now check the result
-        Entry destinationEntry = connection.lookup( "cn=CN0007,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
+        Entry destinationEntry = connection.lookup( 
+                "cn=CN0007,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org");
         
         Entry expectedResult = new DefaultEntry( connection.getSchemaManager(),
                 "cn=CN0007,ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",

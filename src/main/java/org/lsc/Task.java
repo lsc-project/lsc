@@ -127,8 +127,10 @@ public class Task {
 			if (t.getCustomLibrary() != null && t.getCustomLibrary().getString() != null) {
 				customLibraries = new Object[t.getCustomLibrary().getString().size()];
 				int customLibrariesIndex = 0;
-				for (String custumLibraryClassName : t.getCustomLibrary().getString()) {
-					customLibraries[customLibrariesIndex++] = Class.forName(custumLibraryClassName).newInstance();
+				for (String customLibraryClassName : t.getCustomLibrary().getString()) {
+					customLibraries[customLibrariesIndex++] = 
+					    Class.forName(
+					        customLibraryClassName).getDeclaredConstructor().newInstance();
 				}
 			}
 

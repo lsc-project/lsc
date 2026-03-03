@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -148,9 +149,10 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
 		try {
-			Class.forName(pc.getDriver()).newInstance();
+			Class.forName(pc.getDriver()).getDeclaredConstructor().newInstance();
 			dbConnection = DriverManager.getConnection(pc.getUrl());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
+		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | 
+		        NoSuchMethodException | ClassNotFoundException | SQLException e) {
 			// error
 		}
 

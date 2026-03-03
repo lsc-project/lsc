@@ -48,6 +48,7 @@ package org.lsc.persistence;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -74,12 +75,13 @@ public class DaoConfigTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DaoConfigTest.class);
 
 	@BeforeEach
-	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, LscConfigurationException {
+	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, 
+	    IllegalAccessException, LscConfigurationException, NoSuchMethodException, InvocationTargetException {
 		LscConfiguration.reset();
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
 		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
 
-		Class.forName(pc.getDriver()).newInstance();
+		Class.forName(pc.getDriver()).getDeclaredConstructor().newInstance();
 		con = DriverManager.getConnection(pc.getUrl());
 	}
 

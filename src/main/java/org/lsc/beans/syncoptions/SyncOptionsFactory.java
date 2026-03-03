@@ -45,6 +45,7 @@
  */
 package org.lsc.beans.syncoptions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,17 +68,17 @@ public final class SyncOptionsFactory {
 
 	private void convertFromTask(TaskType task) throws LscConfigurationException {
 		try {
-			ISyncOptions iso = (ISyncOptions) LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).newInstance();
+			ISyncOptions iso = (ISyncOptions) 
+			        LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).
+			            getDeclaredConstructor().newInstance();
 			iso.initialize(task);
 			cache.put(task.getName(), iso);
-		} catch (InstantiationException e) {
+		} catch (InstantiationException | IllegalAccessException | 
+		        InvocationTargetException | NoSuchMethodException e ) {
 			LOGGER.error(
-					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
-					LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).getClass().getName());
-		} catch (IllegalAccessException e) {
-			LOGGER.error(
-					"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
-					LscConfiguration.getSyncOptionsImplementation(LscConfiguration.getSyncOptions(task)).getClass().getName());
+				"Internal error while instanciating '{}' name. Choose another implementation or fix it !",
+				LscConfiguration.getSyncOptionsImplementation(
+				        LscConfiguration.getSyncOptions(task)).getClass().getName());
 		}
 	}
 

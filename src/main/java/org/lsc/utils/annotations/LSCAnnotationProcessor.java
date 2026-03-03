@@ -163,7 +163,7 @@ public class LSCAnnotationProcessor {
             Class<? extends ConnectionType> type = createConnection.type();
             
             try {
-                ConnectionType connectionType = type.getConstructor().newInstance();
+                ConnectionType connectionType = type.getDeclaredConstructor().newInstance();
                 
                 if (connectionType instanceof LdapConnectionType) {
                     // LDAP connection

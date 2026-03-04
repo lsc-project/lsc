@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -133,7 +134,8 @@ public class JaxbXmlConfigurationHelper {
 
 			String xmlContentWithEnvInlined = getEnvInlinedContent(env, filename);
 
-			return (Lsc) unmarshaller.unmarshal(IOUtils.toInputStream(xmlContentWithEnvInlined));
+			return (Lsc) unmarshaller.unmarshal(
+			        IOUtils.toInputStream(xmlContentWithEnvInlined, Charset.defaultCharset()));
 		} catch (JAXBException e) {
 			throw new LscConfigurationException(e);
 		}

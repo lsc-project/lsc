@@ -427,15 +427,6 @@ public final class BeanComparator {
 		return result;
 	}
 
-	private static boolean isModified(IBean dstBean, Set<Object> dstAttrValues,
-			Set<Object> toSetAttrValues) {
-		if (dstBean instanceof OrderedValuesBean) {
-			return !SetUtils.doSetsMatchWithOrder(toSetAttrValues, dstAttrValues);
-		} else {
-			return !SetUtils.doSetsMatch(toSetAttrValues, dstAttrValues);
-		}
-	}
-
 	/**
 	 * <P>
 	 * Return the operation to perform on a set of current values, so that they
@@ -518,6 +509,8 @@ public final class BeanComparator {
 			            if ( !otherAttribute) {
 			                noAttributeAttribute = true;
 			            }
+			            
+			            break;
 			        
 			        default:
 			            otherAttribute = true;
@@ -533,6 +526,8 @@ public final class BeanComparator {
 			    res.clear();
 			}
 		}
+		
+		// TODO: Handle the 1.1 special case
 
 		// If no explicit list of attribute types to write is specified,
 		// we build a list from all source attributes, all force and default values

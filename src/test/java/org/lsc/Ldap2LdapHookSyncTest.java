@@ -289,8 +289,8 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			String entry = String.join("", new ArrayList<>(hookResults.subList(2, hookResults.size())));
 
 			ObjectMapper mapper = new ObjectMapper();
-			JsonFactory factory = mapper.getJsonFactory();
-			JsonParser jp = factory.createJsonParser(entry);
+			JsonFactory factory = mapper.getFactory();
+			JsonParser jp = factory.createParser(entry);
 			try {
 				JsonNode hookOperation = mapper.readTree(jp);
 				assertEquals(hookOperation, expectedEntry);

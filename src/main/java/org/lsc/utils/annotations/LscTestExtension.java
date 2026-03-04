@@ -52,16 +52,11 @@ import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.lsc.configuration.Lsc;
 import org.lsc.configuration.LscConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A LSC test extension class.
  */
 public class LscTestExtension extends ApacheDSTestExtension{
-    /** A logger for this class */
-    private static final Logger LOG = LoggerFactory.getLogger( LscTestExtension.class );
-
     /** The name of the field containing the LSC instance in the caller class */
     private static final String LSC_INSTANCE = "classLscInstance";
     

@@ -180,7 +180,6 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException
 	 * @throws NamingException
 	 */
-	@SuppressWarnings("unchecked")
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		List<String> idList = null;
 		try {
@@ -203,7 +202,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 		 * since it may be important when cleaning by full DN (for different levels).
 		 * This is really an API bug, getListPivots() should return a List, not a Map.
 		 */
-		Map<String, LscDatasets> ids = new ListOrderedMap();
+		Map<String, LscDatasets> ids = new ListOrderedMap<>();
 
 		for (String dn : idList) {
 			String completedDn = jndiServices.completeDn(dn);

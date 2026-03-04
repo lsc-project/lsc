@@ -167,7 +167,7 @@ public abstract class AbstractJdbcService implements IService {
 		 * list returned, since it may be important when coming from a database. This is
 		 * really an API bug, getListPivots() should return a List, not a Map.
 		 */
-		Map<String, LscDatasets> ret = new ListOrderedMap();
+		Map<String, LscDatasets> ret = new ListOrderedMap<>();
 
 		try {
 			List<HashMap<String, Object>> ids = (List<HashMap<String, Object>>) sqlMapper

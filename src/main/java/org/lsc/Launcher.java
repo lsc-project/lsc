@@ -46,6 +46,7 @@
 package org.lsc;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -53,7 +54,7 @@ import java.util.StringTokenizer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -275,7 +276,7 @@ public final class Launcher {
 			LOGGER.error("Missing arguments ({})", e.toString());
 			LOGGER.debug(e.toString(), e);
 			return 1;
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			LOGGER.error("Unable to parse the options ({})", e.toString());
 			LOGGER.debug(e.toString(), e);
 			return 1;
@@ -305,10 +306,11 @@ public final class Launcher {
 
 	/**
 	 * Print the command line help.
+	 * @throws IOException 
 	 */
-	private static void printHelp() {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("lsc", options);
+	private static void printHelp() throws IOException {
+		HelpFormatter formatter = HelpFormatter.builder().get();
+		formatter.printHelp("lsc", "", options, "", true);
 	}
 
 }

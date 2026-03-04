@@ -275,13 +275,14 @@ public final class EmbeddedOpenDJ {
 	 */
 	public static List<Entry> entriesFromLdifString(String ldif) throws IOException, LDIFException {
 		LDIFImportConfig ldifImportConfig = new LDIFImportConfig(new StringReader(ldif));
-		LDIFReader reader = new LDIFReader(ldifImportConfig);
+        List<Entry> entries = new ArrayList<Entry>();
 
-		List<Entry> entries = new ArrayList<Entry>();
-		Entry entry;
-		while ((entry = reader.readEntry()) != null) {
-			entries.add(entry);
-		}
+        try ( LDIFReader reader = new LDIFReader(ldifImportConfig) ) {
+    		Entry entry;
+    		while ((entry = reader.readEntry()) != null) {
+    			entries.add(entry);
+    		}
+        }
 
 		return entries;
 	}

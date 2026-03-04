@@ -757,6 +757,14 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.15.0</version>
+      <type>jar</type>
+      <optional>false</optional>
+    </dependency>
+
+    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>1.4.21</version>

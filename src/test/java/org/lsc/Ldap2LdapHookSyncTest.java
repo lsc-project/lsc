@@ -251,7 +251,7 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 		if(operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
-			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
+			List<String> entry = new ArrayList<>(hookResults.subList(3, (hookResults.size()-1)));
 			
 			for (String attr : expectedEntry) {
 				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());

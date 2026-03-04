@@ -45,6 +45,7 @@
  */
 package org.lsc.connectors.xmlrpc;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -179,7 +180,13 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 		if (cmdLine.hasOption("o")) {
 			objectType = cmdLine.getOptionValue("o");
 		} else {
-			printHelp(options);
+		    try {
+		        printHelp(options);
+		    } 
+		    catch (IOException e ) {
+	            LOGGER.error("Unable to parse options : {}({})", e.getMessage(), e);
+	            System.exit(1);
+		    }
 			return 3;
 		}
 		return 0;

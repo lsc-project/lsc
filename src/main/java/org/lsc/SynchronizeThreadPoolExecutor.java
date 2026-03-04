@@ -63,7 +63,7 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	protected void beforeExecute(Thread t, Runnable r) {
 		if(r instanceof AbstractEntryRunner) {
 			AbstractEntryRunner task = (AbstractEntryRunner) r;
-			t.setName(task.getSyncName() + "-" + t.getId());
+			t.setName(task.getSyncName() + "-" + t.threadId());
 		}
 		super.beforeExecute(t, r);
 	}

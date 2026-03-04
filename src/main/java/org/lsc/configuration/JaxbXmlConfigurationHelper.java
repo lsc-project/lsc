@@ -73,7 +73,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.lsc.exception.LscConfigurationException;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -205,7 +205,7 @@ public class JaxbXmlConfigurationHelper {
 		String resultString = line;
 		
 		for(String envVariableKey : env.keySet()) {
-			String escapedValue = StringEscapeUtils.escapeXml(env.get(envVariableKey));
+			String escapedValue = StringEscapeUtils.escapeXml11(env.get(envVariableKey));
 			resultString = resultString.replaceAll("\\$\\{\\Q" + envVariableKey + "\\E\\}", escapedValue);
 		}
 		

@@ -65,8 +65,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -298,18 +298,18 @@ public class SymmetricEncryption {
 		try {
 			Options options = new Options();
 			options.addOption("f", "cfg", true, "Specify configuration directory");
-			CommandLine cmdLine = new GnuParser().parse(options, argv);
+			CommandLine cmdLine = new DefaultParser().parse(options, argv);
 
 			if (cmdLine.getOptions().length > 0 && cmdLine.hasOption("f")) {
 				// if a configuration directory was set on command line, use it to set up
 				// Configuration
 				Configuration.setUp(cmdLine.getOptionValue("f"), false);
 			} else {
-				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp("lsc", options);
+				HelpFormatter formatter = HelpFormatter.builder().get();
+				formatter.printHelp("lsc", "", options, "", true);
 				System.exit(1);
 			}
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			StringBuilder sbf = new StringBuilder();
 			for (String arg : argv) {
 				sbf.append(arg).append(" ");

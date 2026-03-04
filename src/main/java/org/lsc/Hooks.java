@@ -169,16 +169,17 @@ public class Hooks {
 						Level level) {
 		new Thread(new Runnable() {
 			public void run() {
-				Scanner sc = new Scanner(src);
-				while (sc.hasNextLine()) {
-					LOGGER.atLevel(level).log(
-						"Hook {} with format {} for identifier {} and operation {} returned on {}: {}",
-						hook,
-						outputFormat,
-						identifier,
-						operation,
-						output,
-						sc.nextLine());
+				try ( Scanner sc = new Scanner(src) ) {
+    				while (sc.hasNextLine()) {
+    					LOGGER.atLevel(level).log(
+    						"Hook {} with format {} for identifier {} and operation {} returned on {}: {}",
+    						hook,
+    						outputFormat,
+    						identifier,
+    						operation,
+    						output,
+    						sc.nextLine());
+    				}
 				}
 			}
 		}).start();

@@ -66,8 +66,8 @@ import javax.management.remote.rmi.RMIConnector;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.ArrayUtils;
@@ -218,7 +218,7 @@ public class LscAgent implements NotificationListener {
 		options.addOption("t", "attributes", true, "Specify the attributes pivot to synchronize (comma separated, identifier parameter required)");
 		options.addOption("s", "status", true, "Get a task status");
 
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 
 		try {
 			CommandLine cmdLine = parser.parse(options, args);
@@ -273,7 +273,7 @@ public class LscAgent implements NotificationListener {
 				printHelp(options);
 				return 1;
 			}
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			LOGGER.error("Unable to parse the options ({})", e.toString());
 			LOGGER.debug(e.toString(), e);
 			return 1;
@@ -286,10 +286,11 @@ public class LscAgent implements NotificationListener {
 	 * 
 	 * @param options
 	 *            specified options to manage
+	 * @throws IOException 
 	 */
-	private static void printHelp(final Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("lsc", options);
+	private static void printHelp(final Options options) throws IOException {
+		HelpFormatter formatter = HelpFormatter.builder().get();
+		formatter.printHelp("lsc", "", options, "", true);
 	}
 
 	/**

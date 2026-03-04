@@ -513,17 +513,6 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
         // make sure the contents of the directory are as we expect to begin with
         String TASK_NAME = "L2LTestTask";
         
-        // The two roots
-        String origin = "ou=origin,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
-        String target = "ou=target,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
-
-        // The entries
-        String noTelAddOrigin = "cn=noTelAdd," + origin;
-        String noTelAddTarget = "cn=noTelAdd," + target;
-
-        String telAddOrigin = "cn=telAdd," + origin;
-        String telAddTarget = "cn=telAdd," + target;
-        
         //---------------------------------------------------------------------------------
         // First check with no default/create/force values.
         //---------------------------------------------------------------------------------

@@ -46,7 +46,6 @@
 package org.lsc.utils.output;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;

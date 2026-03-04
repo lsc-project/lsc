@@ -50,7 +50,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;

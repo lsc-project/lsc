@@ -46,11 +46,12 @@
 package org.lsc.opendj;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.lsc.Configuration;
@@ -136,7 +137,7 @@ public class LdapServer {
 		options.addOption("o", "stop", false, "Stop the embedded directory");
 		options.addOption("f", "config", true, "Specify configuration directory");
 		options.addOption("h", "help", false, "Get this text");
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 		return parser.parse(options, args);
 	}
 
@@ -151,7 +152,7 @@ public class LdapServer {
 			} else {
 				printHelp(options);
 			}
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			if (LOGGER.isErrorEnabled()) {
 				StringBuilder sbf = new StringBuilder();
 				for (String arg : args) {
@@ -204,9 +205,10 @@ public class LdapServer {
 	 * Print the formater
 	 * 
 	 * @param options
+	 * @throws IOException 
 	 */
-	private static void printHelp(Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("lsc", options);
+	private static void printHelp(Options options) throws IOException {
+		HelpFormatter formatter = HelpFormatter.builder().get();
+		formatter.printHelp("lsc", "", options, "", true);
 	}
 }

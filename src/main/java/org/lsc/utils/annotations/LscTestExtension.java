@@ -74,15 +74,6 @@ public class LscTestExtension extends ApacheDSTestExtension{
             Field field = testClass.getField( fieldName );
             field.set( null, lsc );
     }
-    
-    /**
-     * Reset the lsc instance in the caller test class
-     */
-    private void resetLscInstance( ExtensionContext context, String fieldName, Lsc lsc) 
-            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-            Class<?> testClass = context.getTestClass().get();
-            Field field = testClass.getField( fieldName );
-    }
 
     /**
      * Create the LSC instance based on the existing annotations.

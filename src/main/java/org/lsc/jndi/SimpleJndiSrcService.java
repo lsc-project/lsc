@@ -167,9 +167,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @return Map of all entries names that are returned by the directory with an associated map of
 	 *         attribute names and values (never null)
-	 * @throws LscServiceException 
-	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
-	 *             searching the directory.
+	 * @throws LscServiceException If we can't get the list of pivots
 	 */
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {

@@ -7,7 +7,11 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import javax.script.*;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 
 import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
@@ -17,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+/**
+ * A class used to evaluate some expression in Javascript or Groovy
+ */
 public class ScriptingEvaluator {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(ScriptingEvaluator.class);
 
 	/**
@@ -26,7 +32,7 @@ public class ScriptingEvaluator {
 	 */
 	private static Cache<Object, Object> instancesCache;
 
-	private static Map<String, Class<? extends ScriptableEvaluator>> implementetionsCache;
+	private static Map<String, Class<? extends ScriptableEvaluator>> implementationsCache;
 
 	public static ScriptEngineManager mgr;
 
@@ -37,7 +43,7 @@ public class ScriptingEvaluator {
 	private Map<Pattern, String> prefixRegex = new HashMap<>();
 
 	static {
-		implementetionsCache = new HashMap<String, Class<? extends ScriptableEvaluator>>();
+		implementationsCache = new HashMap<String, Class<? extends ScriptableEvaluator>>();
 		instancesCache = CacheBuilder.newBuilder().maximumSize(15).build();
 		mgr = new ScriptEngineManager();
 	}
@@ -45,30 +51,34 @@ public class ScriptingEvaluator {
 	private ScriptingEvaluator() {
 		instancesTypeCache = new HashMap<>();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
+
 		for (ScriptEngineFactory sef : factories) {
 			boolean loaded = false;
 			for (String name : sef.getNames()) {
-				if ("js".equals(name)) {
-					instancesTypeCache.put(name, new JScriptEvaluator(sef.getScriptEngine()));
-					loaded = true;
-					break;
-				} else if ("groovy".equals(name)) {
-					instancesTypeCache.put("gr", new GroovyEvaluator(sef.getScriptEngine()));
-					loaded = true;
-					break;
-				} else if ("Graal.js".equals(name)) {
-					/**
-					 * for some reason graal.js is not enumerated in factories this code is not hit
-					 * so leave it out by getting it explicitly with
-					 * ScriptEngineManager().getEngineByName("graal.js"); later.
-					 */
-					loaded = true;
-					break;
+			    switch ( name ) {
+			        case "js":
+			            instancesTypeCache.put(name, new JScriptEvaluator(sef.getScriptEngine()));
+			            loaded = true;
+			            break;
 
-				}
+			        case "groovy":
+			            instancesTypeCache.put("gr", new GroovyEvaluator(sef.getScriptEngine()));
+			            loaded = true;
+			            break;
+
+			        case "Graal.js":
+			            /*
+			             * for some reason graal.js is not enumerated in factories this code is not hit
+			             * so leave it out by getting it explicitly with
+			             * ScriptEngineManager().getEngineByName("graal.js"); later.
+			             */
+			            loaded = true;
+			            break;
+			    }
 			}
+
 			if (!loaded) {
-				LOGGER.debug("Unsupported scripting engine: " + sef.getEngineName());
+				LOGGER.debug("Unsupported scripting engine: {}", sef.getEngineName());
 			}
 		}
 
@@ -90,17 +100,20 @@ public class ScriptingEvaluator {
 		} else {
 			defaultImplementation = Optional.ofNullable(
 					Optional.ofNullable(instancesTypeCache.get("js")).orElse(instancesTypeCache.get("rjs")));
-			LOGGER.info("Default JS implementation: " + defaultImplementation.get().toString());
+			LOGGER.info("Default JS implementation: {}", defaultImplementation.get().toString());
 		}
+
 		// Compile regex jscript pattern match
 		compileRegexPatternMatch();
 
 		// Display all registered JS engines in debug mode
 		String registeredLanguages = "";
+
 		for (String key : instancesTypeCache.keySet()) {
 			registeredLanguages += key + "=" + instancesTypeCache.get(key).toString() + ", ";
 		}
-		LOGGER.debug("All registered JS engines: " + registeredLanguages );
+
+		LOGGER.debug("All registered JS engines: {}", registeredLanguages );
 	}
 
 	private static ScriptingEvaluator getInstance() {
@@ -115,15 +128,18 @@ public class ScriptingEvaluator {
 		return scriptingEvaluator;
 	}
 
-	public static void contribute(String implementationName, Class<? extends ScriptableEvaluator> implementationClass) {
-		implementetionsCache.put(implementationName, implementationClass);
+	public static void contribute(String implementationName,
+	        Class<? extends ScriptableEvaluator> implementationClass) {
+		implementationsCache.put(implementationName, implementationClass);
 	}
 
 	private ScriptableEvaluator identifyScriptingEngine(String expression) throws LscServiceException {
 		String[] parts = expression.split(":");
 		String match = matchJScriptEvaluator(parts[0]);
+
 		if (!match.isEmpty()) {
-			LOGGER.debug("Selected JS engine: " + match + " = " + instancesTypeCache.get(match).toString() );
+			LOGGER.debug("Selected JS engine: {} = {}", match, instancesTypeCache.get(match).toString() );
+
 			return instancesTypeCache.get(match);
 		}
 		return defaultImplementation.orElseThrow(() -> new LscServiceException("Missing Script evaluator"));

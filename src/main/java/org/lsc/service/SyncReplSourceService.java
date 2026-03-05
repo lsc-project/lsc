@@ -93,6 +93,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

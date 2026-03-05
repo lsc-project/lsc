@@ -47,6 +47,8 @@ package org.lsc.exception;
 
 
 /**
+ * An exception for errors in the configuration
+ *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  */
 public class LscConfigurationException extends LscException {
@@ -54,14 +56,30 @@ public class LscConfigurationException extends LscException {
 	/** Generated serial version UID */
 	private static final long serialVersionUID = 3542985145807766785L;
 	
+	/**
+	 * Create an instance taking a message input
+	 *
+	 * @param message The message to propagate
+	 */
 	public LscConfigurationException(String message) {
 		super(message);
 	}
 	
+    /**
+     * Create an instance taking a message input and the error origin
+     *
+     * @param message The message to propagate
+     * @param origin The original error
+     */
 	public LscConfigurationException(String message, Throwable origin) {
 		super(message, origin);
 	}
 	
+    /**
+     * Create an instance taking a original error
+     *
+     * @param e The original error
+     */
 	public LscConfigurationException(Throwable e) {
 		super("Configuration exception: " + e.getLocalizedMessage(), e);
 	}

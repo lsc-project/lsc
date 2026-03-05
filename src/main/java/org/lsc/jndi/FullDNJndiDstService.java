@@ -177,8 +177,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @return Map of all entries DNs (this is not for display only!) that are
 	 *         returned by the directory with an associated map of attribute names
 	 *         and values (never null)
-	 * @throws LscServiceException
-	 * @throws NamingException
+	 * @throws LscServiceException If we can't get the the list of pivots
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
@@ -220,7 +219,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param jm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
+	 * @throws LscServiceCommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
 	public boolean apply(JndiModifications jm) throws LscServiceCommunicationException {

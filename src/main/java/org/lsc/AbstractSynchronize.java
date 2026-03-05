@@ -245,7 +245,6 @@ public abstract class AbstractSynchronize {
 	}
 
 	public final synchronized void startAsynchronousSynchronize2Ldap(Task task) {
-
 		AsynchronousRunner asyncRunner = new AsynchronousRunner(task, this);
 		String taskName = task.getName();
 

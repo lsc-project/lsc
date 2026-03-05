@@ -45,8 +45,6 @@
  */
 package org.lsc.jndi;
 
-import javax.naming.CommunicationException;
-
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.service.IService;
 
@@ -71,7 +69,7 @@ public interface IJndiWritableService extends IService {
 	 *
 	 * @param jm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
+	 * @throws LscServiceCommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
 	public boolean apply(final JndiModifications jm) throws LscServiceCommunicationException;

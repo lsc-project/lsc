@@ -92,6 +92,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,7 +310,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             
             // We will use the configured base DN and filter
             searchRequest.setBase(new Dn(getBaseDn()));
-            searchRequest.setFilter(getFilterAll());
+            
+            // Evaluate the filter
+            String allFilter = getFilterAll();
+            
+            //Map<String, Object> conditionObjects = new HashMap<>();
+            //conditionObjects.put("dstBean", dstBean);
+            //conditionObjects.putAll(gettask.getScriptingVars());
+
+            //String computedFilter = ScriptingEvaluator.evalToBoolean(task, allFilter, conditionObjects);
+
+            searchRequest.setFilter(allFilter);
             searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
             searchRequest.setScope(SearchScope.SUBTREE);
             searchRequest.addAttributes(getAttrsId().toArray(new String[0]));

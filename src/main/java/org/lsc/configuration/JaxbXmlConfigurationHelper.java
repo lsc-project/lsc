@@ -121,10 +121,7 @@ public class JaxbXmlConfigurationHelper {
 	 * @param filename filename to read from
 	 * @param env      the environment variables by name
 	 * @return the completed configuration object
-	 * @throws FileNotFoundException     thrown if the file can not be accessed
-	 *                                   (either because of a misconfiguration or
-	 *                                   due to a rights issue)
-	 * @throws LscConfigurationException
+	 * @throws LscConfigurationException If we can't read the configuration
 	 */
 	public Lsc getConfiguration(String filename, Map<String, String> env) throws LscConfigurationException {
 		LOGGER.debug("Loading XML configuration from: " + filename);

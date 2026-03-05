@@ -74,7 +74,20 @@ public class Task {
 	 * Enum for the type of mode
 	 */
 	public enum Mode {
-		clean, sync, async;
+	    /**
+	     * The clean mode
+	     */
+		clean,
+		
+        /**
+         * The synchronous mode
+         */
+		sync,
+		
+        /**
+         * The asynchronous mode
+         */
+		async;
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
@@ -103,6 +116,12 @@ public class Task {
 
 	private Boolean errorIfEmptyDestination;
 
+	/**
+	 * A constructor that create an instance for a give type
+	 * 
+	 * @param t The task type
+	 * @throws LscConfigurationException  If the configuration is incorrect
+	 */
 	public Task(TaskType t) throws LscConfigurationException {
 		this.name = t.getName();
 		this.taskType = t;
@@ -119,6 +138,7 @@ public class Task {
 			} else if (LscConfiguration.getDestinationService(t) == null) {
 				throw new LscConfigurationException("Missing destination service for task=" + t.getName());
 			}
+			
 			Constructor<?> constr = LscConfiguration.getServiceImplementation(LscConfiguration.getDestinationService(t))
 					.getConstructor(new Class[] { TaskType.class });
 			destinationService = (IWritableService) constr.newInstance(new Object[] { t });
@@ -127,6 +147,7 @@ public class Task {
 			if (t.getCustomLibrary() != null && t.getCustomLibrary().getString() != null) {
 				customLibraries = new Object[t.getCustomLibrary().getString().size()];
 				int customLibrariesIndex = 0;
+				
 				for (String customLibraryClassName : t.getCustomLibrary().getString()) {
 					customLibraries[customLibrariesIndex++] = 
 					    Class.forName(
@@ -137,8 +158,10 @@ public class Task {
 			// Load custom scripts
 			if (t.getScriptInclude() != null && t.getScriptInclude().getString() != null) {
 				scriptIncludes = new ArrayList<File>();
+				
 				for (String script : t.getScriptInclude().getString()) {
 					File scriptFile = new File(Configuration.getConfigurationDirectory() + "/" + script);
+					
 					if (scriptFile.exists()) {
 						scriptIncludes.add(scriptFile);
 					} else {
@@ -166,10 +189,11 @@ public class Task {
 	}
 
 	/**
-	 * @param t
-	 * @param syncName
-	 * @return ISyncOptions syncoptions object for the specified syncName
-	 * @throws LscConfigurationException
+	 * Initialized the Sync options
+	 * 
+	 * @param t The task for which we want to initialize the Sync options
+	 * @return ISyncOptions syncOptions object for the specified syncName
+	 * @throws LscConfigurationException If the configuration is incorrect
 	 */
 	protected void initializeSyncOptions(TaskType t) throws LscConfigurationException {
 		syncOptions = SyncOptionsFactory.convert(t);
@@ -180,58 +204,125 @@ public class Task {
 			} else {
 				LOGGER.warn("Unknown '{}' synchronization task name. Defaulting to Force policy ...", name);
 			}
+			
 			syncOptions = new ForceSyncOptions();
 		}
 	}
 
+	/**
+	 * Get the clean hook
+	 * 
+	 * @return The clean hook
+	 */
 	public String getCleanHook() {
 		return cleanHook;
 	}
 
+    /**
+     * Get the sync hook
+     * 
+     * @return The sync hook
+     */
 	public String getSyncHook() {
 		return syncHook;
 	}
 
+	/**
+	 * Tells if an error should be generated if the source is empty
+	 * 
+	 * @return <code>true</code> if an error will be generated on an empty source
+	 */
 	public Boolean getErrorIfEmptySource() {
 		return errorIfEmptySource;
 	}
 
+    /**
+     * Tells if an error should be generated if the destination is empty
+     * 
+     * @return <code>true</code> if an error will be generated on an empty destination
+     */
 	public Boolean getErrorIfEmptyDestination() {
 		return errorIfEmptyDestination;
 	}
 
+	/**
+	 * Get the task's name
+	 * 
+	 * @return The task's name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Get the source service
+	 * 
+	 * @return The source service
+	 */
 	public IService getSourceService() {
 		return sourceService;
 	}
 
+    /**
+     * Get the destination service
+     * 
+     * @return The destination service
+     */
 	public IWritableService getDestinationService() {
 		return destinationService;
 	}
 
+	/**
+	 * Get the Sync options
+	 * 
+	 * @return The Sync options
+	 */
 	public ISyncOptions getSyncOptions() {
 		return syncOptions;
 	}
 
+	/**
+	 * Get the list of custom librairies
+	 * 
+	 * @return The list of custom librairies
+	 */
 	public Object[] getCustomLibraries() {
 		return customLibraries;
 	}
 
+    /**
+     * Get the list of script includes
+     * 
+     * @return The list of script includes
+     */
 	public List<File> getScriptIncludes() {
 		return scriptIncludes;
 	}
 
+    /**
+     * Get the map of scripting variables
+     * 
+     * @return The map of scripting variables
+     */
 	public Map<String, Object> getScriptingVars() {
 		return scriptingVars;
 	}
 
+	/**
+	 * Add a new scripting variable
+	 * 
+	 * @param identifier The variable name
+	 * @param value The variable value
+	 */
 	public void addScriptingVar(String identifier, Object value) {
 		scriptingVars.put(identifier, value);
 	}
 
+	/**
+	 * Get the task's type
+	 * 
+	 * @return The task's type
+	 */
 	public TaskType getTaskType() {
 		return taskType;
 	}

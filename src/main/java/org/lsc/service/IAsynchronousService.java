@@ -47,8 +47,6 @@ package org.lsc.service;
 
 import java.util.Map.Entry;
 
-import javax.naming.NamingException;
-
 import org.lsc.LscDatasets;
 import org.lsc.exception.LscServiceException;
 
@@ -62,8 +60,7 @@ public interface IAsynchronousService extends IService {
 	 * This call is blocking until a data available on the data source
 	 * 
 	 * @return the next available bean
-	 * @throws NamingException
-	 * @throws LscServiceException
+	 * @throws LscServiceException If we can't get thge next ID
 	 */
 	Entry<String, LscDatasets> getNextId() throws LscServiceException;
 

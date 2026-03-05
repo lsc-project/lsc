@@ -125,16 +125,16 @@ public @interface CreateLdapSourceService {
      * Typically mirrors getOneFilter.
      * Example: "(&amp;(objectClass=inetOrgPerson)(mail={mail}))"
      * 
-     * @return LDAP filter string for clean operations
-     * @default empty string (optional)
+     * @return LDAP filter string for clean operations. The default value is
+     * an empty string (optional)
      */
     String cleanFilter() default "";
     
     /**
      * Filter for detecting changes in asynchronous mode.
      * Example: "(&amp;(objectClass=inetOrgPerson)(modifyTimestamp>={lastRunTimestamp}))"
-     * @return LDAP filter for changed entries
-     * @default empty string
+     * @return LDAP filter for changed entries.  The default value is
+     * an empty string
      */
     String filterAsync() default "";
     
@@ -142,16 +142,15 @@ public @interface CreateLdapSourceService {
      * Interval for asynchronous LDAP source service (in milliseconds).
      * Only used with asyncLdapSourceService implementation.
      * 
-     * @return interval in milliseconds, -1 to disable
-     * @default -1 (disabled)
+     * @return interval in milliseconds, -1 to disable. The default value is
+     * -1 (disabled)
      */
     int interval() default -1;
     
     /**
      * The date format
      * 
-     * @return The date format
-     * @default "" (disabled)
+     * @return The date format. The default value is "" (disabled)
      */
     String dateFormat() default "";
 }

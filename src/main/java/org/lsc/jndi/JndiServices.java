@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.CannotProceedException;
 import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
@@ -95,6 +96,7 @@ import org.apache.directory.api.ldap.codec.api.LdapApiService;
 import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
 import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
 import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.api.ldap.model.name.Dn;
@@ -1170,45 +1172,75 @@ public final class JndiServices {
 		constraints.setDerefLinkFlag(false);
 		constraints.setReturningAttributes(attributes);
 		constraints.setSearchScope(scope);
-		constraints.setReturningObjFlag(true);
+		constraints.setReturningObjFlag(false);
+
 		try {
 			byte[] pagedResultsResponse;
 
 			// Create a new context for the search operation
 			LdapContext searchContext = (LdapContext)ctx.lookup("");
+			NamingEnumeration<SearchResult> results = null;
 
 			try {
 				setRequestControls(searchContext);
 
 				do {
-					NamingEnumeration<SearchResult> results = searchContext.search(searchBase, searchFilter, constraints);
+					results = searchContext.search(searchBase, searchFilter, constraints);
 
 					if (results != null) {
 						Map<String, Object> attrsValues = null;
+
 						while (results.hasMoreElements()) {
 							attrsValues = new HashMap<String, Object>();
 
 							SearchResult ldapResult = (SearchResult) results.next();
 
 							// get the value for each attribute requested
-							for (String attributeName : attrsNames) {
-								Attribute attr = ldapResult.getAttributes().get(attributeName);
-								if (attr != null && attr.get() != null) {
+							if ( attrsNames.contains(SchemaConstants.ALL_USER_ATTRIBUTES) ) {
+								// The '*' special attribute is present, we get all the attributes from
+								// the read entry into the map.
+								// Note: at this stage, we don't care about the operational attributes,
+								// because we can't know if any of them are User or Operational
+								// We expect the configuration lists the required attributes...
+								for (NamingEnumeration<String> ids = ldapResult.getAttributes().getIDs(); ids.hasMore();) {
+									String attributeName = (String)ids.next();
+									Attribute attr = ldapResult.getAttributes().get(attributeName);
+
 									attrsValues.put(attributeName, attr.get());
+								}
+							} else {
+								// Otherwise process the configured fetched attributes.
+
+								for (String attributeName : attrsNames) {
+									Attribute attr = ldapResult.getAttributes().get(attributeName);
+
+									if (attr != null && attr.get() != null) {
+										attrsValues.put(attributeName, attr.get());
+									}
 								}
 							}
 
 							res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
 						}
-
-
 					}
 
 					results.close();
 
 					pagedResultsResponse = pagination(searchContext);
 				} while (pagedResultsResponse != null);
+
+				return res;
+			} catch (IOException ioe) {
+				LOGGER.error("Error while encoding the Paged control, {}", ioe.getMessage());
+
+				// There was an error encoding the Paged Search control, get out
+				throw new CannotProceedException( ioe.getMessage() );
 			} finally {
+				// Final cleanup
+				if ( results != null ) {
+					results.close();
+				}
+
 				searchContext.close();
 			}
 		}
@@ -1218,7 +1250,7 @@ public final class JndiServices {
 		} catch (ServiceUnavailableException e) {
 			// Avoid handling the service unavailable exception as a generic one
 			throw e;
-		} catch (NamingException | IOException e) {
+		} catch (NamingException e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 		} finally {

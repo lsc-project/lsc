@@ -92,7 +92,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @param task Initialized task containing all necessary pieces of information
 	 *             to initiate connection and load settings
-	 * @throws LscServiceException
+	 * @throws LscServiceConfigurationException If the configuration is incorrect
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
@@ -107,10 +107,12 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	}
 
 	/**
-	 * @param ldapService
-	 * @param writableDatasetIds
-	 * @param beanClass
-	 * @throws LscServiceException
+	 * Constructor based on a Ldap service, a set of Datasets and a task
+	 *
+	 * @param ldapService The LdapService to use
+	 * @param writableDatasetIds The set of Datasets
+	 * @param beanClass The Bean class to instanciate
+	 * @throws LscServiceConfigurationException If the configuration is incorrect
 	 */
 	public SimpleJndiDstService(final LdapServiceType ldapService, List<String> writableDatasetIds,
 			Class<IBean> beanClass) throws LscServiceConfigurationException {
@@ -188,7 +190,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param jm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
+	 * @throws LscServiceCommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
 	public boolean apply(JndiModifications jm) throws LscServiceCommunicationException {
@@ -204,8 +206,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param lm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
-	 * and all other attempts to use this service should fail.
+	 * @throws LscServiceException If the execution fails.
 	 */
 	public boolean apply(LscModifications lm) throws LscServiceException {
 		JndiModifications jm = new JndiModifications(JndiModificationType.getFromLscModificationType(lm.getOperation()), lm.getTaskName());

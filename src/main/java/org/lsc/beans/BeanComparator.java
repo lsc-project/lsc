@@ -477,49 +477,18 @@ public final class BeanComparator {
     private static Set<String> getWriteAttributes(Task task, IBean srcBean) {
         Set<String> res = new HashSet<String>();
 
-        // Check if an explicit list was configured
+        // Check if an explicit list was configured in destination service fetched attributes
         List<String> syncOptionsWriteAttributes = task.getDestinationService().getWriteDatasetIds();
-        boolean allUserAttribute = false;
-        boolean allOperationalAttribute = false;
-        boolean otherAttribute = false;
 
         if (syncOptionsWriteAttributes != null) {
             for (String attrName : syncOptionsWriteAttributes) {
-                // TODO: Handle the 1.1 special case
-                switch (attrName) {
-                    case SchemaConstants.ALL_USER_ATTRIBUTES:
-                        // The '*' special attribute
-                        allUserAttribute = true;
-                        res.add(SchemaConstants.ALL_USER_ATTRIBUTES);
-
-                        break;
-
-                    case SchemaConstants.ALL_OPERATIONAL_ATTRIBUTES:
-                        // The '+' special attribute
-                        allOperationalAttribute = true;
-                        res.add(SchemaConstants.ALL_OPERATIONAL_ATTRIBUTES);
-
-                        break;
-
-                    default:
-                        otherAttribute = true;
-                        res.add(attrName.toLowerCase());
-
-                        break;
-                }
-            }
-
-            // No need to keep an explicit list of attribute if '*' and '+' are specified
-            if (allUserAttribute && allOperationalAttribute) {
-                otherAttribute = false;
-                res.clear();
+                res.add(attrName.toLowerCase());
             }
         }
 
-
-        // If no explicit list of attribute types to write is specified,
+        // If no explicit list of attribute types to write is specified or if list contains *
         // we build a list from all source attributes, all force and default values
-        if (!otherAttribute) {
+        if ( res.size() == 0 || res.contains(SchemaConstants.ALL_USER_ATTRIBUTES)) {
 
             List<String> itmBeanAttrsList = srcBean.datasets().getAttributesNames();
             Set<String> forceAttrsList = task.getSyncOptions().getForceValuedAttributeNames();
@@ -551,8 +520,15 @@ public final class BeanComparator {
             }
         }
 
+        // Remove * from resulting list of attributes
+        if( !res.isEmpty() && res.contains(SchemaConstants.ALL_USER_ATTRIBUTES) )
+        {
+            res.remove(SchemaConstants.ALL_USER_ATTRIBUTES);
+        }
+
         return res;
     }
+
 
     /**
      * Check modifications across other directory objects - Never used at this time : implementation may be buggy

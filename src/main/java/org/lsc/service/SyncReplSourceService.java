@@ -93,6 +93,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +115,12 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	/** The interval in milliseconds */
 	private int interval;
 	
-	private SearchFuture sf;
+	
+	/** The SearchFuture instance that will wait for any update from the LDAP server */
+	private SearchFuture searchFuture;
+	
+	/** A variable used to compute the duration of the refresh phase */
+	private long refreshStart = 0L;
 
 	public SyncReplSourceService(final TaskType task)
 			throws LscServiceConfigurationException {
@@ -266,11 +272,60 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 		return null;
 	}
+	
+	
+	/**
+	 * Create the searchFuture
+	 * 
+	 * @throws LscServiceException
+	 */
+	private void createSearchFuture() throws LscServiceException {
+        try {
+            // Prepare a search Request with 
+            SearchRequest searchRequest = new SearchRequestImpl();
+            
+            // Create the proper control, depending on the targeted server:
+            // OpenLDAP/ApacheDS: SyncRequestValue control
+            // Microsoft AD: LDAP_SERVER_NOTIFICATION_OID control
+            // Most of the other servers: PersistentSearch control
+            Control searchContinuationControl = getSearchContinuationControl(srsc.getServerType());
+            
+            searchRequest.addControl(searchContinuationControl);
+            
+            // We will use the configured base DN and filter
+            searchRequest.setBase(new Dn(getBaseDn()));
+            
+            // Evaluate the filter
+            String allFilter = getFilterAll();
+            
+            //Map<String, Object> conditionObjects = new HashMap<>();
+            //conditionObjects.put("dstBean", dstBean);
+            //conditionObjects.putAll(gettask.getScriptingVars());
 
+            //String computedFilter = ScriptingEvaluator.evalToBoolean(task, allFilter, conditionObjects);
+
+            searchRequest.setFilter(allFilter);
+            searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
+            searchRequest.setScope(SearchScope.SUBTREE);
+            searchRequest.addAttributes(getAttrsId().toArray(new String[0]));
+            
+            // Reclaim all attributes so that we don't have to do it later.
+            //searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
+            
+            // Now do a search in asynchronous mode
+            searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
+            refreshStart = System.currentTimeMillis();
+        } catch (LdapInvalidDnException e) {
+            throw new LscServiceException(e.toString(), e);
+        } catch (LdapException e) {
+            throw new LscServiceException(e.toString(), e);
+        }
+	}
+	
 	@Override
 	public java.util.Map.Entry<String, LscDatasets> getNextId() throws LscServiceException {
 		Map<String, LscDatasets> temporaryMap = new HashMap<String, LscDatasets>(1);
-		if(sf == null || sf.isCancelled()) {
+		if(searchFuture == null || searchFuture.isCancelled()) {
 			try {
 				SearchRequest searchRequest = new SearchRequestImpl();
 				searchRequest.addControl(getSearchContinuationControl(srsc.getServerType()));
@@ -279,7 +334,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
 				searchRequest.setScope(SearchScope.SUBTREE);
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
-				sf = getConnection(ldapConn).searchAsync(searchRequest);
+				searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
 			} catch (LdapInvalidDnException e) {
 				throw new LscServiceException(e.toString(), e);
 			} catch (LdapException e) {
@@ -288,7 +343,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		}
 		Response searchResponse = null;
 		try {
-			searchResponse = sf.get(1, TimeUnit.NANOSECONDS);
+			searchResponse = searchFuture.get(1, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.warn("Interrupted search !");
 		}
@@ -301,7 +356,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
 				throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
 			}
-			sf = null;
+			searchFuture = null;
 		}
 		return null;
 	}

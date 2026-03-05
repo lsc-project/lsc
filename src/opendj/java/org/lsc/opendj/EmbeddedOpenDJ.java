@@ -315,7 +315,7 @@ public final class EmbeddedOpenDJ {
 	 * 
 	 * </pre>
 	 * 
-	 * is a <bold>little</bold> easier to work with than
+	 * is a <strong>little</strong> easier to work with than
 	 * 
 	 * <pre>
 	 * private static final String JOHN_SMITH_LDIF = &quot;dn: cn=John Smith,dc=example,dc=com\n&quot;
@@ -467,17 +467,14 @@ public final class EmbeddedOpenDJ {
 	 * <p>
 	 * Search for a file in the possible configuration locations:
 	 * <ul>
-	 * <li>As a resource on the classpath (historical method)</li>
-	 * <li>As a file in the configuration directory</li>
+	 *   <li>As a resource on the classpath (historical method)</li>
+	 *   <li>As a file in the configuration directory</li>
 	 * </ul>
-	 * </P>
-	 * 
-	 * <P>
+	 * <p>
 	 * This method first looks on the classpath, then if that fails, looks in the
 	 * configuration directory. Finally, it returns the absolute path name to the
 	 * file.
-	 * </P>
-	 * .
+	 * 
 	 * 
 	 * @param fileName Name of the file or directory to locate.
 	 * @return Absolute path name to the file, or null.

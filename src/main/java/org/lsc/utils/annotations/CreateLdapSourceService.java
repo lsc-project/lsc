@@ -133,8 +133,8 @@ public @interface CreateLdapSourceService {
     /**
      * Filter for detecting changes in asynchronous mode.
      * Example: "(&amp;(objectClass=inetOrgPerson)(modifyTimestamp>={lastRunTimestamp}))"
-     * @return LDAP filter for changed entries
-     * @default empty string
+     * @return LDAP filter for changed entries.  The default value is
+     * an empty string
      */
     String filterAsync() default "";
 

@@ -61,6 +61,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.directory.api.util.Strings;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -128,6 +129,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		_filteredSc = new SearchControls();
 
 		String attrsValue = serviceProps.getProperty("attrs");
+		
 		if (attrsValue != null) {
 			String[] attributes = attrsValue.split(" ");
 			attrs = Arrays.asList(attributes);
@@ -135,6 +137,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		}
 
 		String attrsIdValue = serviceProps.getProperty("pivotAttrs");
+		
 		if (attrsIdValue != null) {
 			attrsId = Arrays.asList(attrsIdValue.split(" "));
 		}
@@ -146,6 +149,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		} catch (LscConfigurationException e) {
 			throw new LscServiceConfigurationException(e);
 		}
+		
 		try {
 			jndiServices = JndiServices.getInstance(serviceProps);
 		} catch (NamingException e) {
@@ -153,6 +157,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		} catch (IOException e) {
 			throw new LscServiceConfigurationException(e);
 		}
+		
 		LOGGER.warn("Properties configuration is not any more supported ! "
 		        + "Please consider upgrading your LSC version !");
 	}
@@ -165,22 +170,47 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	 */
 	public AbstractSimpleJndiService(final LdapServiceType ldapService) throws LscServiceConfigurationException {
 		baseDn = ldapService.getBaseDn();
-		filterIdSync = (ldapService.getOneFilter() != null ? ldapService.getOneFilter().trim() : 
-		    ldapService.getGetOneFilter().trim());
-		filterAll = (ldapService.getAllFilter() != null ? ldapService.getAllFilter().trim() : 
+		
+		// Get the allFilter, and trim it 
+		filterAll = (ldapService.getAllFilter() != null ? 
+		    ldapService.getAllFilter().trim() : 
 		    ldapService.getGetAllFilter().trim());
+		
+		// Deal with the case were we don't have a oneFilter, we will default to allFilter
+		String oneFilter = ldapService.getOneFilter();
+		String getOneFilter = ldapService.getGetOneFilter();
+		
+		if (Strings.isEmpty(oneFilter)) {
+		    if (Strings.isEmpty(getOneFilter)) {
+	            filterIdSync = filterAll;
+		    } else {
+		        filterIdSync = getOneFilter.trim();
+		    }
+		} else {
+            filterIdSync = oneFilter.trim();
+		}
+		
+		if ( Strings.isEmpty(filterIdSync)) {
+            filterIdSync = filterAll;
+		}
+
 		_filteredSc = new SearchControls();
 		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(
 		        new String[ldapService.getFetchedAttributes().getString().size()] ));
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 
+		
 		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
 			attrsId.add(pivotAttr);
 		}
+		
 		attrs = new ArrayList<String>(ldapService.getFetchedAttributes().getString().size());
+		
 		for (String attr: ldapService.getFetchedAttributes().getString()) {
 			attrs.add(attr);
 		}
+		
 		jndiServices = JndiServices.getInstance((LdapConnectionType) ldapService.getConnection().getReference());
+		
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
 			LOGGER.warn("Your baseDn settings ({}) does not end with the LDAP naming context ({}). "
 			        + "This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.",  
@@ -201,9 +231,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	 *             thrown if a directory exception is encountered while
 	 *             switching to the Java POJO
 	 */
-	public final IBean getBeanFromSR(final SearchResult sr,
-					final IBean beanToFill) throws NamingException {
-
+	public final IBean getBeanFromSR(final SearchResult sr, final IBean beanToFill) throws NamingException {
 		if (sr == null) {
 			return null;
 		}
@@ -226,8 +254,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	/**
 	 * Get a list of object values from the NamingEnumeration.
 	 * 
-	 * @param ne
-	 *            the naming enumeration
+	 * @param ne the naming enumeration
 	 * 
 	 * @return the object list
 	 * 
@@ -235,13 +262,13 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	 *             thrown if a directory exception is encountered while
 	 *             switching to the Java POJO
 	 */
-	protected static List<?> getValue(final NamingEnumeration<?> ne)
-					throws NamingException {
+	protected static List<?> getValue(final NamingEnumeration<?> ne) throws NamingException {
 		List<Object> l = new ArrayList<Object>();
 
 		while (ne.hasMore()) {
 			l.add(ne.next());
 		}
+		
 		return l;
 	}
 
@@ -257,12 +284,15 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
 		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
 				.replaceAll(Matcher.quoteReplacement(id));
+		
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
+		
 				if (valueId != null) {
 					valueId = Matcher.quoteReplacement(valueId);
 				}
+				
 				searchString = Pattern.compile("\\{" + attributeName + "\\}", 
 				        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
 			}
@@ -346,6 +376,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
 	    Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
 	    list.add(LdapConnectionType.class);
+	    
 	    return list;
 	}
 }

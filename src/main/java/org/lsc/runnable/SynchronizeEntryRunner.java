@@ -205,21 +205,29 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			}
 
 			// if we got here, we have a modification to apply - let's do it!
-			if (task.getDestinationService().apply(lm)) {
-				// Retrieve posthook for the current operation
-				hooks.postSyncHook(	task.getSyncOptions().getPostHook(modificationType),
-							task.getSyncOptions().getPostHookOutputFormat(),
-							lm);
-				counter.incrementCountCompleted();
-				abstractSynchronize.logAction(lm, id, syncName);
-				
-				return true;
-			} else {
-				counter.incrementCountError();
-				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), 
-				        new Exception("Technical problem while applying modifications to the destination"));
-				
-				return false;
+			while (true) {
+    			try
+    			{
+        			if (task.getDestinationService().apply(lm)) {
+        				// Retrieve posthook for the current operation
+        				hooks.postSyncHook(	task.getSyncOptions().getPostHook(modificationType),
+        							task.getSyncOptions().getPostHookOutputFormat(),
+        							lm);
+        				counter.incrementCountCompleted();
+        				abstractSynchronize.logAction(lm, id, syncName);
+        				
+        				return true;
+        			} else {
+        				counter.incrementCountError();
+        				abstractSynchronize.logActionError(lm, (id != null ? id.getValue() : entry.getMainIdentifier()), 
+        				        new Exception("Technical problem while applying modifications to the destination"));
+        				
+        				return false;
+        			}
+    			} catch (LscServiceException lse) {
+    			    // We had an issue applying the modification. Wait and test again
+    			    Thread.sleep(5000L);
+    			}
 			}
 		} catch (RuntimeException e) {
 			counter.incrementCountError();

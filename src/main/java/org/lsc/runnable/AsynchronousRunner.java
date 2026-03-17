@@ -44,6 +44,7 @@ public class AsynchronousRunner implements Runnable {
 		} else {
 			LOGGER.error("LSC should never reach this point! Please consider debugging the code because "
 			        + "we are trying to launch an asynchronous sync without any asynchronous service!"); 
+
 			return;
 		}
 

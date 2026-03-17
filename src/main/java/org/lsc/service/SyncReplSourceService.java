@@ -69,12 +69,12 @@ import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRe
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateTypeEnum;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateValue;
 import org.apache.directory.api.ldap.extras.intermediate.syncrepl.SyncInfoValue;
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.message.*;
 import org.apache.directory.api.ldap.model.message.controls.AbstractControl;
 import org.apache.directory.api.ldap.model.message.controls.PersistentSearch;
@@ -151,9 +151,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			url = new LdapUrl(ldapConn.getUrl());
 			boolean isLdaps = "ldaps://".equalsIgnoreCase(url.getScheme());
 			int port = url.getPort();
+
 			if (port == -1) {
 				port = isLdaps ? 636 : 389;
 			}
+			
 			LdapAsyncConnection conn = new LdapNetworkConnection(url.getHost(), port);
 			LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setUseSsl(isLdaps);
@@ -169,19 +171,14 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				bad.addBinaryAttribute(ldapConn.getBinaryAttributes().getString().toArray(new String[0]));
 				lcc.setBinaryAttributeDetector(bad);
 			}
+			
 			if(conn.connect()) {
 				conn.bind(ldapConn.getUsername(), ldapConn.getPassword());
 				return conn;
 			} else {
 				return null;
 			}
-//		} catch (org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException e) {
-//			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (LdapException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (KeyStoreException e) {
+		} catch (LdapException | NoSuchAlgorithmException | KeyStoreException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
 		}
 	}
@@ -197,11 +194,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if (!connection.isConnected()) {
 				connection = getConnection(ldapConn);
 			}
+			
 			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
 					getAttrsId().toArray(new String[0])));
-		} catch (RuntimeException e) {
-			throw new LscServiceException(e.toString(), e);
-		} catch (LdapException e) {
+		} catch (RuntimeException | LdapException e) {
 			throw new LscServiceException(e.toString(), e);
 		}
 	}
@@ -247,6 +243,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdSync.replaceAll("\\{0\\}", id);
 		}
 
+		// Do the actual search, but with a retry
 		try {
 			EntryCursor entryCursor = null;
 			
@@ -254,18 +251,30 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			String searchBaseDn = (fromSameService ? id : baseDn);
 			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
 			
-			if (!connection.isConnected()) {
-				connection = getConnection(ldapConn);
-			}
-			
-			if(getAttrs() != null) {
-				List<String> attrList = new ArrayList<String>(getAttrs());
-				attrList.addAll(pivotAttrs.getAttributesNames());
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope, 
-				        attrList.toArray(new String[0]));
-			} else {
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope);
-			}
+            while (true) {
+                try {
+                    if (!connection.isConnected()) {
+                        connection = getConnection(ldapConn);
+                    }
+                    
+        			if(getAttrs() != null) {
+        				List<String> attrList = new ArrayList<String>(getAttrs());
+        				attrList.addAll(pivotAttrs.getAttributesNames());
+        				entryCursor = connection.search(searchBaseDn, searchString, searchScope, 
+        				        attrList.toArray(new String[0]));
+        				
+        				break;
+        			} else {
+			            entryCursor = connection.search(searchBaseDn, searchString, searchScope);
+			            
+			            break;
+			        }
+			    } catch(Exception e) {
+			        // Let's retry after having wait for 1 second
+		            LOGGER.error("Cannot connect, will retry in 5s: {}", e.getMessage());
+                    Thread.sleep(5000L);
+                }
+            }
 
 			// Fetch the first entry found, and close the cursor
 			for ( Entry entry:entryCursor ) {
@@ -325,19 +334,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             searchRequest.setFilter(allFilter);
             searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
             searchRequest.setScope(SearchScope.SUBTREE);
-            searchRequest.addAttributes(getAttrsId().toArray(new String[0]));
+            //searchRequest.addAttributes(getAttrsId().toArray(new String[0]));
             
             // Reclaim all attributes so that we don't have to do it later.
-            //searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
+            searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
             
             // Now do a search in asynchronous mode
             searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
             refreshStart = System.currentTimeMillis();
-        } catch (LdapInvalidDnException e) {
+        } catch (LdapException  e) {
             throw new LscServiceException(e.toString(), e);
-        } catch (LdapException e) {
-            throw new LscServiceException(e.toString(), e);
-        }
+        } 
 	}
 	
 	@Override
@@ -352,7 +359,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		            try {
 		                createSearchFuture();
 		                
-                        LOGGER.info( "Reconnected!");
+		                if ( nbRetries > 0 ) {
+		                    LOGGER.info( "Reconnected to the source!");
+		                } else {
+		                    LOGGER.info( "Connected to the source, search started");
+		                }
 		                nbRetries = 0;
 		            } catch ( LscException le ) {
 		                // Let's try again
@@ -470,10 +481,13 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		switch(aliasesHandling) {
     		case ALWAYS:
     			return AliasDerefMode.DEREF_ALWAYS;
+    			
     		case FIND:
     			return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+    			
     		case SEARCH:
     			return AliasDerefMode.DEREF_IN_SEARCHING;
+    			
     		case NEVER:
     		default:
     			return AliasDerefMode.NEVER_DEREF_ALIASES;
@@ -487,7 +501,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
     		case APACHE_DS:
     			SyncRequestValue syncControl = new SyncRequestValueImpl(true);
     			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
+    			
     			return syncControl;
+    			
     		case OPEN_DS:
     		case OPEN_DJ:
     		case ORACLE_DS:
@@ -499,9 +515,12 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
     			searchControl.setChangesOnly(true);
     			searchControl.setReturnECs(false);
     			searchControl.setChangeTypes(PersistentSearch.CHANGE_TYPES_MAX);
+    			
     			return searchControl;
+    			
     		case ACTIVE_DIRECTORY:
     			return new AbstractControl("1.2.840.113556.1.4.528", true) {};
+    			
     		default:
     			throw new LscServiceConfigurationException("Unknown or unsupported server type !");
 		}
@@ -541,17 +560,24 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             for ( Attribute attribute:entry ) {
                 if(attribute.size() > 0){
                     String id = attribute.getId();
-                    Set<Object> datasetsValues = new HashSet<Object>();
                     
-                    for ( Value value:attribute) {
-                        if (value.isHumanReadable()) {
+                    if (attribute.isHumanReadable()) {
+                        Set<String> datasetsValues = new HashSet<>();
+                        
+                        for ( Value value:attribute) {
                             datasetsValues.add(value.getString());
-                        } else {
+                        }
+
+                        dataSets.put(id, datasetsValues);
+                    } else {
+                        Set<byte[]> datasetsValues = new HashSet<>();
+                        
+                        for ( Value value:attribute) {
                             datasetsValues.add(value.getBytes());
                         }
-                    }
 
-                    dataSets.put(id, datasetsValues);
+                        dataSets.put(id, datasetsValues);
+                    }
                 }
             }
         }

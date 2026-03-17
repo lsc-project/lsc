@@ -326,8 +326,10 @@
 						<xsd:element name="allFilter" type="xsd:string" />
 					</xsd:choice>
 					<xsd:choice>
-						<xsd:element name="getOneFilter" type="xsd:string" />
-						<xsd:element name="oneFilter" type="xsd:string" />
+						<xsd:element name="getOneFilter" type="xsd:string" 
+						minOccurs="0"/>
+						<xsd:element name="oneFilter" type="xsd:string" 
+						minOccurs="0"/>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>

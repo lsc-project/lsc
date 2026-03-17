@@ -98,17 +98,8 @@ public class MultipleDstService implements IWritableService {
 					LOGGER.error("Unknown referenced service: " + service.toString());
 				}
 			}
-		} catch (InstantiationException e) {
-			throw new LscServiceConfigurationException(e);
-		} catch (SecurityException e) {
-			throw new LscServiceConfigurationException(e);
-		} catch (NoSuchMethodException e) {
-			throw new LscServiceConfigurationException(e);
-		} catch (IllegalArgumentException e) {
-			throw new LscServiceConfigurationException(e);
-		} catch (IllegalAccessException e) {
-			throw new LscServiceConfigurationException(e);
-		} catch (InvocationTargetException e) {
+		} catch (InstantiationException | SecurityException | NoSuchMethodException | IllegalArgumentException |
+		        IllegalAccessException | InvocationTargetException e) {
 			throw new LscServiceConfigurationException(e);
 		}
 	}
@@ -129,27 +120,34 @@ public class MultipleDstService implements IWritableService {
 	@Override
 	public boolean apply(LscModifications lm) throws LscServiceException {
 		Map<String, String> transactionIds = new HashMap<String, String>();
+		
 		try {
 			boolean doNotCommit = false;
+			
 			for (IXAWritableService iws : xaServices) {
 				String transactionId = iws.start();
 				transactionIds.put(iws.getId(), transactionId);
 			}
+			
 			for (IXAWritableService iws : xaServices) {
 				iws.submit(transactionIds.get(iws.getId()), lm);
 			}
+			
 			for (IXAWritableService iws : xaServices) {
 				iws.end(transactionIds.get(iws.getId()));
 			}
+			
 			for (IXAWritableService iws : xaServices) {
 				int retCode = iws.prepare(transactionIds.get(iws.getId()));
 				if (retCode != XAResource.XA_OK && retCode != XAResource.XA_RDONLY) {
 					doNotCommit = true;
 				}
 			}
+			
 			if (doNotCommit) {
 				return false;
 			}
+			
 			for (IXAWritableService iws : xaServices) {
 				iws.commit(transactionIds.get(iws.getId()));
 			}
@@ -167,9 +165,11 @@ public class MultipleDstService implements IWritableService {
 	@Override
 	public List<String> getWriteDatasetIds() {
 		List<String> writableDatasetIds = new ArrayList<String>();
+		
 		for (IXAWritableService xaService : xaServices) {
 			writableDatasetIds.addAll(xaService.getWriteDatasetIds());
 		}
+		
 		return writableDatasetIds;
 	}
 

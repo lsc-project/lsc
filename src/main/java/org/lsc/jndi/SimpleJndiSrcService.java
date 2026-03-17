@@ -51,6 +51,7 @@ import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -145,22 +146,26 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService {
 	        throws LscServiceException {
 		IBean srcBean;
 		try {
-			srcBean = this.beanClass.getDeclaredConstructor().newInstance();
+			srcBean = beanClass.getDeclaredConstructor().newInstance();
 			String searchString = null;
-			if(fromSameService || filterIdClean == null) {
+			
+			if(fromSameService || (filterIdClean == null)) {
 				searchString = filterIdSync;
 			} else {
 				searchString = filterIdClean; 
 			}
 
-			return this.getBeanFromSR(get(pivotName, pivotAttributes, searchString), srcBean);
+			SearchResult searchResult = get(pivotName, pivotAttributes, searchString);
+			
+			return getBeanFromSR(searchResult, srcBean);
 		} catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
                 InvocationTargetException e) {
-            LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+            LOGGER.error("Bad class name: {} ({})", beanClass.getName(), e);
             LOGGER.debug(e.toString(), e);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}
+		
 		return null;
 	}
 

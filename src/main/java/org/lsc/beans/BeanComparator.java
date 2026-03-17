@@ -185,10 +185,10 @@ public final class BeanComparator {
         // clone the source bean to work on it, changing the DN.
         IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
 
-        // if there's nothing to do, just return
-        if (modificationType == null) {
-            return null;
-        }
+		// if there's nothing to do, just return
+		if (modificationType == null) {
+			return null;
+		}
 
         // prepare JndiModifications object
         lm = new LscModifications(modificationType, task.getName());

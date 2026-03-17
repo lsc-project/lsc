@@ -226,18 +226,19 @@ public class LSCAnnotationProcessor {
         ldapSourceService.setBaseDn(createLdapSourceService.baseDn());
         ldapSourceService.setPivotAttributes(
                 setValues(createLdapSourceService.pivotAttributes()));
-        if ( Strings.isNotEmpty(createLdapSourceService.allFilter() ) ) {
         
+        if ( Strings.isNotEmpty(createLdapSourceService.allFilter() ) ) {
             ldapSourceService.setAllFilter(createLdapSourceService.allFilter());
         }
-
+        
         if ( Strings.isNotEmpty(createLdapSourceService.oneFilter() ) ) {
-        }
             ldapSourceService.setOneFilter(createLdapSourceService.oneFilter());
+        }
 
         if ( Strings.isNotEmpty(createLdapSourceService.cleanFilter() ) ) {
-            ldapSourceService.setCleanFilter(createLdapSourceService.cleanFilter()); 
+            ldapSourceService.setCleanFilter(createLdapSourceService.cleanFilter());
         }
+        
         ldapSourceService.setDateFormat(createLdapSourceService.dateFormat());
         ldapSourceService.setFetchedAttributes(
                 setValues(createLdapSourceService.fetchedAttributes()));

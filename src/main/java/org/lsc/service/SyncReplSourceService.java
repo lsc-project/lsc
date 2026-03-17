@@ -69,16 +69,17 @@ import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRe
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateTypeEnum;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateValue;
 import org.apache.directory.api.ldap.extras.intermediate.syncrepl.SyncInfoValue;
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.message.*;
 import org.apache.directory.api.ldap.model.message.controls.AbstractControl;
 import org.apache.directory.api.ldap.model.message.controls.PersistentSearch;
 import org.apache.directory.api.ldap.model.message.controls.PersistentSearchImpl;
+import org.apache.directory.api.ldap.model.message.extended.SearchNoDResponse;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.api.ldap.model.url.LdapUrl;
 import org.apache.directory.ldap.client.api.LdapAsyncConnection;
@@ -88,6 +89,7 @@ import org.apache.directory.ldap.client.api.future.SearchFuture;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.*;
+import org.lsc.exception.LscException;
 import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
@@ -148,9 +150,11 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			url = new LdapUrl(ldapConn.getUrl());
 			boolean isLdaps = "ldaps://".equalsIgnoreCase(url.getScheme());
 			int port = url.getPort();
+
 			if (port == -1) {
 				port = isLdaps ? 636 : 389;
 			}
+			
 			LdapAsyncConnection conn = new LdapNetworkConnection(url.getHost(), port);
 			LdapConnectionConfig lcc = conn.getConfig();
 			lcc.setUseSsl(isLdaps);
@@ -166,19 +170,14 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				bad.addBinaryAttribute(ldapConn.getBinaryAttributes().getString().toArray(new String[0]));
 				lcc.setBinaryAttributeDetector(bad);
 			}
+			
 			if(conn.connect()) {
 				conn.bind(ldapConn.getUsername(), ldapConn.getPassword());
 				return conn;
 			} else {
 				return null;
 			}
-//		} catch (org.apache.directory.shared.ldap.model.exception.LdapURLEncodingException e) {
-//			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (LdapException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new LscServiceConfigurationException(e.toString(), e);
-		} catch (KeyStoreException e) {
+		} catch (LdapException | NoSuchAlgorithmException | KeyStoreException e) {
 			throw new LscServiceConfigurationException(e.toString(), e);
 		}
 	}
@@ -194,11 +193,10 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if (!connection.isConnected()) {
 				connection = getConnection(ldapConn);
 			}
+			
 			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
 					getAttrsId().toArray(new String[0])));
-		} catch (RuntimeException e) {
-			throw new LscServiceException(e.toString(), e);
-		} catch (LdapException e) {
+		} catch (RuntimeException | LdapException e) {
 			throw new LscServiceException(e.toString(), e);
 		}
 	}
@@ -243,6 +241,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdSync.replaceAll("\\{0\\}", id);
 		}
 
+		// Do the actual search, but with a retry
 		try {
 			EntryCursor entryCursor = null;
 			
@@ -250,18 +249,30 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			String searchBaseDn = (fromSameService ? id : baseDn);
 			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
 			
-			if (!connection.isConnected()) {
-				connection = getConnection(ldapConn);
-			}
-			
-			if(getAttrs() != null) {
-				List<String> attrList = new ArrayList<String>(getAttrs());
-				attrList.addAll(pivotAttrs.getAttributesNames());
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope, 
-				        attrList.toArray(new String[0]));
-			} else {
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope);
-			}
+            while (true) {
+                try {
+                    if (!connection.isConnected()) {
+                        connection = getConnection(ldapConn);
+                    }
+                    
+        			if(getAttrs() != null) {
+        				List<String> attrList = new ArrayList<String>(getAttrs());
+        				attrList.addAll(pivotAttrs.getAttributesNames());
+        				entryCursor = connection.search(searchBaseDn, searchString, searchScope, 
+        				        attrList.toArray(new String[0]));
+        				
+        				break;
+        			} else {
+			            entryCursor = connection.search(searchBaseDn, searchString, searchScope);
+			            
+			            break;
+			        }
+			    } catch(Exception e) {
+			        // Let's retry after having wait for 1 second
+		            LOGGER.error("Cannot connect, will retry in 5s: {}", e.getMessage());
+                    Thread.sleep(5000L);
+                }
+            }
 
 			// Fetch the first entry found, and close the cursor
 			for ( Entry entry:entryCursor ) {
@@ -314,28 +325,19 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             // Evaluate the filter
             String allFilter = getFilterAll();
             
-            //Map<String, Object> conditionObjects = new HashMap<>();
-            //conditionObjects.put("dstBean", dstBean);
-            //conditionObjects.putAll(gettask.getScriptingVars());
-
-            //String computedFilter = ScriptingEvaluator.evalToBoolean(task, allFilter, conditionObjects);
-
             searchRequest.setFilter(allFilter);
             searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
             searchRequest.setScope(SearchScope.SUBTREE);
-            searchRequest.addAttributes(getAttrsId().toArray(new String[0]));
             
             // Reclaim all attributes so that we don't have to do it later.
-            //searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
+            searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
             
             // Now do a search in asynchronous mode
             searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
             refreshStart = System.currentTimeMillis();
-        } catch (LdapInvalidDnException e) {
+        } catch (LdapException  e) {
             throw new LscServiceException(e.toString(), e);
-        } catch (LdapException e) {
-            throw new LscServiceException(e.toString(), e);
-        }
+        } 
 	}
 	
 	@Override
@@ -344,8 +346,116 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		    createSearchFuture();
 		}
 		
+		int nbRetries = 0;
+		boolean retry = false;
+		
 		// Ok, we are ready. Get the first entry that waits
 		try {
+		    while ( retry ) {
+		        if ((searchFuture == null) || searchFuture.isCancelled()) {
+		            try {
+		                createSearchFuture();
+		                
+		                if ( nbRetries > 0 ) {
+		                    LOGGER.info( "Reconnected to the source!");
+		                } else {
+		                    LOGGER.info( "Connected to the source, search started");
+		                }
+		                nbRetries = 0;
+		            } catch ( LscException le ) {
+		                // Let's try again
+		                nbRetries++;
+		                LOGGER.info( "Not connected, waiting 5s and retrying, attempt #{}", nbRetries);
+                        
+                        // Wait 5 secondes
+                        Thread.sleep( 5000 );
+                        
+                        // Let's retry 
+                        continue;
+		            }
+		        }
+		        
+    		    Response searchResponse = searchFuture.get();
+    		    
+    		    if (searchResponse == null) {
+    		        // Not a SearchResponse instance...
+    		        return null;
+    		    } else if ( searchResponse instanceof SearchNoDResponse ) {
+                    // We may have lost the connection, check that
+                    if ( !connection.isConnected() )
+                    {
+                        LOGGER.info( "Not connected, retrying...");
+
+                        // Let's retry 
+                        continue;
+                    }
+                    else {
+                        return null;
+                    }
+    		    } else if ( searchResponse instanceof SearchResultEntry) {
+    		        // We've got something that may be an entry, a referral or an SyncInfo Value
+    		        // Intermediate response (at the end of the refresh phase)
+    	            SearchResultEntry searchResultEntry = ((SearchResultEntry) searchResponse);
+    	            Dn entryDn = searchResultEntry.getObjectName();
+    	                
+    	            LOGGER.info( "Processing entry {}", entryDn);
+                
+    	            switch (searchResultEntry.getType()) {
+    	                case SEARCH_RESULT_ENTRY:
+    	                    // A plain entry. Let's check it's status, it may be for a deleted
+    	                    // entry
+    	                    LscDatasets datasets = convertEntry(searchResultEntry.getEntry(), true);
+    	                    
+    	                    // Check if it's a deletion
+    	                    SyncStateValue syncStateCtrl = (SyncStateValue)searchResponse.getControl(SyncStateValue.OID);
+    	                    
+    	                    if ((syncStateCtrl != null) 
+    	                            && (syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE)) {
+    	                        // It's a deletion, add a special attribute that is not valid in LDAP
+    	                        // (because of the starting '_'. That will mark the entry as deleted
+    	                        datasets.getDatasets().put(DELETED_ENTRY, entryDn);
+    	                    }
+    
+    	                    return Map.entry(entryDn.toString(), datasets);
+    	                    
+    	                case SEARCH_RESULT_REFERENCE:
+    	                    // TODO...
+    	                    return null;
+    	                    
+    	                case SEARCH_RESULT_DONE:
+    	                    // This is the end, beautiful friend,
+    	                    // This is the end, my only friend
+    	                    // (The Doors)
+    	                    LdapResult result = ((SearchResultDone)searchResultEntry).getLdapResult();
+    	                    
+    	                    if (result.getResultCode() != ResultCodeEnum.SUCCESS) {
+    	                        throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
+    	                    }
+    	                    
+    	                    searchFuture = null;
+    	                    
+    	                    return null;
+    	                    
+    	                default:
+    	                    // Can't be...
+    	                    return null;
+    	            }
+    		    } else if ( searchResponse instanceof SyncInfoValue ){
+    		        // This is the end of the refresh phase, log the info
+    		        SyncInfoValue syncInfoValue = (SyncInfoValue)searchResponse;
+    		        LOGGER.info("Refresh phase done: {} in {} ms", syncInfoValue.isRefreshDone(),
+    		                System.currentTimeMillis() - refreshStart);
+    		        
+    		        // Now we are done with the refresh, we need to cleanup the destination
+    		        // by removing the deleted entries 
+    		        cleanupDestination();
+    		        
+    		        return null;
+    		    } else {
+    		        // Can't be
+    		        return null;
+    		    }
+		    }
 		    
 		    Response searchResponse = searchFuture.get();
 		    
@@ -434,10 +544,13 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 		switch(aliasesHandling) {
     		case ALWAYS:
     			return AliasDerefMode.DEREF_ALWAYS;
+    			
     		case FIND:
     			return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+    			
     		case SEARCH:
     			return AliasDerefMode.DEREF_IN_SEARCHING;
+    			
     		case NEVER:
     		default:
     			return AliasDerefMode.NEVER_DEREF_ALIASES;
@@ -450,7 +563,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
     		case APACHE_DS:
     			SyncRequestValue syncControl = new SyncRequestValueImpl(true);
     			syncControl.setMode(SynchronizationModeEnum.REFRESH_AND_PERSIST);
+    			
     			return syncControl;
+    			
     		case OPEN_DS:
     		case OPEN_DJ:
     		case ORACLE_DS:
@@ -462,9 +577,12 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
     			searchControl.setChangesOnly(true);
     			searchControl.setReturnECs(false);
     			searchControl.setChangeTypes(PersistentSearch.CHANGE_TYPES_MAX);
+    			
     			return searchControl;
+    			
     		case ACTIVE_DIRECTORY:
     			return new AbstractControl("1.2.840.113556.1.4.528", true) {};
+    			
     		default:
     			throw new LscServiceConfigurationException("Unknown or unsupported server type !");
 		}
@@ -504,17 +622,24 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             for ( Attribute attribute:entry ) {
                 if(attribute.size() > 0){
                     String id = attribute.getId();
-                    Set<Object> datasetsValues = new HashSet<Object>();
                     
-                    for ( Value value:attribute) {
-                        if (value.isHumanReadable()) {
+                    if (attribute.isHumanReadable()) {
+                        Set<String> datasetsValues = new HashSet<>();
+                        
+                        for ( Value value:attribute) {
                             datasetsValues.add(value.getString());
-                        } else {
+                        }
+
+                        dataSets.put(id, datasetsValues);
+                    } else {
+                        Set<byte[]> datasetsValues = new HashSet<>();
+                        
+                        for ( Value value:attribute) {
                             datasetsValues.add(value.getBytes());
                         }
-                    }
 
-                    dataSets.put(id, datasetsValues);
+                        dataSets.put(id, datasetsValues);
+                    }
                 }
             }
         }

@@ -172,24 +172,25 @@ public class Configuration {
 	 * the user's current directory.
 	 * @return Path to configuration directory
 	 */
-        public static String getConfigurationDirectory() {
-            if (location == null) {
-                setUp();
+	public static String getConfigurationDirectory() {
+		if(location == null) {
+			setUp();
+		}
+		
+	    if(location != null) {
+            File locationFile = new File(location);
+
+            if (locationFile.isFile()) {
+
+                // We have provided a file, get the parent directory as a location
+                location = locationFile.getParent();
             }
 
-            if(location != null) {
-                File locationFile = new File(location);
-
-                if (locationFile.isFile()) { 
-                    // We have provided a file, get the parent directory as a location
-                    location = locationFile.getParent();
-                }
-
-                return new File(location).getAbsolutePath() + File.separator;
-            } else {
-                return "";
-            }
+            return new File(location).getAbsolutePath() + File.separator;
+        } else {
+            return "";
         }
+	}
 
 	/**
 	 * Set up configuration for the given location, including logback.
@@ -203,12 +204,12 @@ public class Configuration {
 		}
 		
 		try {
-			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && 
+			if (new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && 
 			        new File(System.getProperty("LSC_HOME"), "etc/lsc.xml").exists()) {
-				Configuration.setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
+				setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
 			} else {
-				// Silently bypass mis-configuration because if setUp(String) is called,
-			    // this method is run first, probably with bad default settings
+				// Silently bypass mis-configuration because if setUp(String) is 
+			    // called, this method is run first, probably with bad default settings
 				if(Configuration.class.getClassLoader().getResource("etc") != null) {
 					setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
 				}
@@ -247,10 +248,11 @@ public class Configuration {
 		if (new File(lscConfigurationPath).isDirectory() ) {
 			// We have a directory: try to find the lsc.xml default file
 			if (! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()) {
-			    message = "The location (" + lscConfigurationPath + 
-			        ") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
-			        " configuration file. LSC configuration loading will fail !";
+			    message = "The location (" + lscConfigurationPath +
+			            ") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
+			            " configuration file. LSC configuration loading will fail !";
 				LOGGER.error(message);
+				
 				throw new RuntimeException(message);
 			}
 
@@ -290,6 +292,7 @@ public class Configuration {
 			}
 		} catch (LscConfigurationException e) {
 			LOGGER.error("Unable to load configuration ({})", e.getCause(), e);
+			
 			return;
 		}
 

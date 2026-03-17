@@ -421,18 +421,24 @@ public abstract class AbstractSynchronize {
 	}
 
 	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
-		List<PivotTransformationType.Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
-		if (! fromSameService && transformations != null) {
-			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
-			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
-				for (PivotTransformationType.Transformation transformation: transformations) {
-					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
-						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
-					}
-				}
-			}
-			return service.getBean(pivotName, newPivots, fromSameService);
+		if (! fromSameService) {
+		    List<PivotTransformationType.Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
+
+		    if (transformations != null) {
+    			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
+    		
+    			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
+    				for (PivotTransformationType.Transformation transformation: transformations) {
+    					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
+    						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
+    					}
+    				}
+    			}
+			
+    			return service.getBean(pivotName, newPivots, fromSameService);
+		    }
 		}
+		
 		return service.getBean(pivotName, pivotAttributes, fromSameService);
 	}
 

@@ -325,16 +325,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             // Evaluate the filter
             String allFilter = getFilterAll();
             
-            //Map<String, Object> conditionObjects = new HashMap<>();
-            //conditionObjects.put("dstBean", dstBean);
-            //conditionObjects.putAll(gettask.getScriptingVars());
-
-            //String computedFilter = ScriptingEvaluator.evalToBoolean(task, allFilter, conditionObjects);
-
             searchRequest.setFilter(allFilter);
             searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
             searchRequest.setScope(SearchScope.SUBTREE);
-            //searchRequest.addAttributes(getAttrsId().toArray(new String[0]));
             
             // Reclaim all attributes so that we don't have to do it later.
             searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);

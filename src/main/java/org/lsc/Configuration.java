@@ -176,7 +176,20 @@ public class Configuration {
 		if(location == null) {
 			setUp();
 		}
-		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
+		
+	    if(location != null) {
+            File locationFile = new File(location);
+
+            if (locationFile.isFile()) {
+
+                // We have provided a file, get the parent directory as a location
+                location = locationFile.getParent();
+            }
+
+            return new File(location).getAbsolutePath() + File.separator;
+        } else {
+            return "";
+        }
 	}
 
 	/**
@@ -185,17 +198,20 @@ public class Configuration {
 	 * IMPORTANT: don't log ANYTHING before calling this method!
 	 */
 	public static void setUp() {
-		if(LscConfiguration.isInitialized()) {
+		if (LscConfiguration.isInitialized()) {
 			// Nothing to do there : default configuration must only be used if LSC is not already configured
 			return;
 		}
+		
 		try {
-			if(new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && new File(System.getProperty("LSC_HOME"), "etc/lsc.xml").exists()) {
-				Configuration.setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
+			if (new File(System.getProperty("LSC_HOME"), "etc").isDirectory() && 
+			        new File(System.getProperty("LSC_HOME"), "etc/lsc.xml").exists()) {
+				setUp(new File(System.getProperty("LSC_HOME"), "etc").getAbsolutePath(), false);
 			} else {
-				// Silently bypass mis-configuration because if setUp(String) is called, this method is run first, probably with bad default settings
+				// Silently bypass mis-configuration because if setUp(String) is 
+			    // called, this method is run first, probably with bad default settings
 				if(Configuration.class.getClassLoader().getResource("etc") != null) {
-					Configuration.setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
+					setUp(Configuration.class.getClassLoader().getResource("etc").getPath(), false);
 				}
 			}
 		} catch (LscException le) {
@@ -232,16 +248,17 @@ public class Configuration {
 		if (new File(lscConfigurationPath).isDirectory() ) {
 			// We have a directory: try to find the lsc.xml default file
 			if (! new File(lscConfigurationPath, JaxbXmlConfigurationHelper.LSC_CONF_XML).isFile()) {
-			    message = "The location (" + lscConfigurationPath + 
-				") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
-				" configuration file. LSC configuration loading will fail !";
+			    message = "The location (" + lscConfigurationPath +
+			            ") does not contain a " + JaxbXmlConfigurationHelper.LSC_CONF_XML +
+			            " configuration file. LSC configuration loading will fail !";
 				LOGGER.error(message);
+				
 				throw new RuntimeException(message);
 			}
 
 			configType = ConfigType.DIRECTORY;
 		} else if (! new File(lscConfigurationPath).isFile()) {
-			// Ok, we have a file name, but it does not exist    
+			// Ok, we have a file name, but it does not exist
 			message = "Defined configuration file (" + lscConfigurationPath + 
 				") does not exist. LSC configuration loading will fail !";
 			LOGGER.error(message);
@@ -250,6 +267,7 @@ public class Configuration {
 		
 		try {
 			location = cleanup(lscConfigurationPath);
+			
 			if(!LscConfiguration.isInitialized()) {
 				File xml;
 				
@@ -257,8 +275,7 @@ public class Configuration {
 					xml = new File(location, JaxbXmlConfigurationHelper.LSC_CONF_XML);
 				
 					if ( !xml.exists() && !xml.isFile()) {
-						message = "Unable to load configuration inside the directory: " + location;
-						LOGGER.error(message);
+						LOGGER.error("Unable to load configuration inside the directory: {}", location);
 
 						return;
 					}
@@ -274,8 +291,8 @@ public class Configuration {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}
 		} catch (LscConfigurationException e) {
-			message = "Unable to load configuration (" + e.getCause() + ")";
-			LOGGER.error(message, e);
+			LOGGER.error("Unable to load configuration ({})", e.getCause(), e);
+			
 			return;
 		}
 

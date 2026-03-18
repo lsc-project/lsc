@@ -5,7 +5,7 @@
   <groupId>org.lsc</groupId>
   <artifactId>lsc-core</artifactId>
   <name>LDAP Synchronization Connector</name>
-  <version>2.2.1</version>
+  <version>2.3.0-SNAPSHOT</version>
 
   <description>
     This project is the LDAP Synchronization Connector which
@@ -93,7 +93,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
         <configuration>
           <argLine>
             -Dcom.sun.management.jmxremote 
@@ -113,7 +113,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.10.0</version>
         <executions>
           <execution>
             <id>copy</id>
@@ -164,7 +164,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.5.0</version>
         <configuration>
           <propertiesEncoding>UTF-8</propertiesEncoding><!-- To avoid warning during plugin execution. -->
         </configuration>
@@ -234,7 +234,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.6</version><!--$NO-MVN-MAN-VER$ -->
+        <version>3.8.0</version><!--$NO-MVN-MAN-VER$ -->
         <configuration>
           <tarLongFileMode>gnu</tarLongFileMode>
           <descriptors>
@@ -246,7 +246,7 @@
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>directory-single</goal>
+              <!--goal>directory-single</goal-->
               <goal>single</goal>
             </goals>
           </execution>
@@ -256,7 +256,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>6.0.0</version>
+        <version>6.0.2</version>
         <inherited>true</inherited>
         <extensions>true</extensions>
       </plugin>
@@ -519,7 +519,7 @@
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>
-          <version>2.3.1</version>
+          <version>2.3.9</version>
         </dependency>
 
         <dependency>
@@ -892,7 +892,7 @@
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>2.3.3</version>
+      <version>4.0.4</version>
     </dependency>
 
     <dependency>
@@ -904,7 +904,7 @@
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-impl</artifactId>
-      <version>4.0.5</version>
+      <version>4.0.6</version>
     </dependency>
 
     <dependency>
@@ -928,7 +928,7 @@
     <dependency>
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>4.0.25</version>
+      <version>4.0.29</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
@@ -967,7 +967,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.18.6</version>
+      <version>2.20.0</version>
     </dependency>
     
     <!-- ApacheDS dependencies -->

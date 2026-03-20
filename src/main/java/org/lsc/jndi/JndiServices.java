@@ -96,6 +96,7 @@ import org.apache.directory.api.ldap.codec.api.LdapApiService;
 import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
 import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
 import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.api.ldap.model.name.Dn;
@@ -1017,9 +1018,7 @@ public final class JndiServices {
     				break;
     
     			case MODIFY_ENTRY:
-    				Object[] table = jm.getModificationItems().toArray();
-    				ModificationItem[] mis = new ModificationItem[table.length];
-    				System.arraycopy(table, 0, mis, 0, table.length);
+    			    ModificationItem[] mis = jm.getModificationItems().toArray(new ModificationItem[0]);
     				updateCtx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
     				break;
     
@@ -1357,8 +1356,7 @@ public final class JndiServices {
 			return res;
 		}
 
-		String[] attributes = new String[attrsNames.size()];
-		attributes = attrsNames.toArray(attributes);
+		String[] attributes = attrsNames.toArray(new String[0]);
 
 		SearchControls constraints = new SearchControls();
 		constraints.setDerefLinkFlag(false);
@@ -1389,12 +1387,27 @@ public final class JndiServices {
     							SearchResult ldapResult = (SearchResult) results.next();
     
     							// get the value for each attribute requested
-    							for (String attributeName : attrsNames) {
-    								Attribute attr = ldapResult.getAttributes().get(attributeName);
-    								
-    								if (attr != null && attr.get() != null) {
-    									attrsValues.put(attributeName, attr.get());
-    								}
+    							if ( attrsNames.contains(SchemaConstants.ALL_USER_ATTRIBUTES) ) {
+    							    // The '*' special attribute is present, we get all the attributes from
+    							    // the read entry into the map.
+    							    // Note: at this stage, we don't care about the operational attributes,
+    							    // because we can't know if any of them are User or Operational
+    							    // We expect the configuration lists the required attributes...
+                                    for (NamingEnumeration<String> ids = ldapResult.getAttributes().getIDs(); ids.hasMore();) {
+                                        String attributeName = (String)ids.next();
+                                        Attribute attr = ldapResult.getAttributes().get(attributeName);
+                                        
+                                        attrsValues.put(attributeName, attr.get());
+                                    }
+    							} else {
+    							    // Otherwise process the configured fetched attributes.
+        							for (String attributeName : attrsNames) {
+        								Attribute attr = ldapResult.getAttributes().get(attributeName);
+        								
+        								if (attr != null && attr.get() != null) {
+        									attrsValues.put(attributeName, attr.get());
+        								}
+        							}
     							}
     
     							res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
@@ -1499,7 +1512,7 @@ public final class JndiServices {
 			}
 
 			if (requestControls.size() > 0) {
-				ldapContext.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+				ldapContext.setRequestControls(requestControls.toArray(new Control[0]));
 			}
 		} catch (NamingException | IOException e) {
 			throw new RuntimeException(e);

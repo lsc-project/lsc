@@ -136,7 +136,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			List<String> attrs = getAttrs();
 			
 			if (attrs != null) {
-				sc.setReturningAttributes(attrs.toArray(new String[attrs.size()]));
+				sc.setReturningAttributes(attrs.toArray(new String[0]));
 			}
 			
 			SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);

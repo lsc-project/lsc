@@ -471,7 +471,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 
 	@Override
 	public Task[] getTasks() {
-		return cache.values().toArray(new Task[cache.values().size()]);
+		return cache.values().toArray(new Task[0]);
 	}
 
 	/**

@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -80,13 +79,9 @@ import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.annotations.LoadSchema;
 import org.apache.directory.server.core.hash.SshaPasswordHashingInterceptor;
 import org.lsc.beans.IBean;
-import org.lsc.configuration.DatasetType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PolicyType;
-import org.lsc.configuration.PropertiesBasedSyncOptionsType;
-import org.lsc.configuration.TaskType;
-import org.lsc.configuration.ValuesType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.service.IService;
@@ -494,6 +489,14 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
     private final static String DN_MODRDN_DST_BEFORE = "cn=CommonName0002," + DESTINATION_DN;
     private final static String DN_MODRDN_DST_AFTER = "cn=CN0002," + DESTINATION_DN;
 
+    // Define the type of task to launch
+    private static enum TaskType {
+        ASYNC,
+        CLEAN,
+        SYNC,
+        SYNC_CLEAN
+    }
+    
 	@BeforeEach
 	public void setup() {
         LscConfiguration.loadFromInstance(classLscInstance);
@@ -534,9 +537,7 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 
 	@Test
 	public final void testSyncLdap2Ldap() throws Exception {
-
 		// make sure the contents of the directory are as we expect to begin with
-
 		// check MODRDN
 		assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
 		assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
@@ -564,21 +565,21 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
 
 		// perform the sync
-		launchSyncCleanTask(TASK_NAME, false, true, false);
+		launchTask(TASK_NAME, TaskType.SYNC);
 
 		// check the results of the synchronization
 		reloadJndiConnections();
 		checkSyncResultsFirstPass();
 
 		// sync again to confirm convergence
-		launchSyncCleanTask(TASK_NAME, false, true, false);
+		launchTask(TASK_NAME, TaskType.SYNC);
 
 		// check the results of the synchronization
 		reloadJndiConnections();
 		checkSyncResultsSecondPass();
 
 		// sync a third time to make sure nothing changed
-		launchSyncCleanTask(TASK_NAME, false, true, false);
+		launchTask(TASK_NAME, TaskType.SYNC);
 
 		// check the results of the synchronization
 		reloadJndiConnections();
@@ -709,14 +710,14 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 		assertFalse(srcJndiServices.exists(DN_DELETE_SRC));
 
 		// perform the clean
-		launchSyncCleanTask(TASK_NAME, false, false, true);
+		launchTask(TASK_NAME, TaskType.CLEAN);
 
 		// check the results of the clean
 		reloadJndiConnections();
 		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
 	}
 
-	public static void launchSyncCleanTask(String taskName, boolean doAsync, boolean doSync, boolean doClean)
+	private static void launchTask(String taskName, TaskType taskType)
 			throws Exception {
 		// initialize required stuff
 		SimpleSynchronize sync = new SimpleSynchronize();
@@ -724,16 +725,23 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 		List<String> syncType = new ArrayList<String>();
 		List<String> cleanType = new ArrayList<String>();
 
-		if (doAsync) {
-			asyncType.add(taskName);
-		}
+		switch ( taskType ) {
+		    case ASYNC:
+	            asyncType.add(taskName);
+	            break;
+	            
+		    case CLEAN:
+	            cleanType.add(taskName);
+                break;
 
-		if (doSync) {
-			syncType.add(taskName);
-		}
-
-		if (doClean) {
-			cleanType.add(taskName);
+		    case SYNC:
+		        syncType.add(taskName);
+		        break;
+		        
+		    case SYNC_CLEAN:
+                syncType.add(taskName);
+	            cleanType.add(taskName);
+                break;
 		}
 
 		boolean ret = sync.launch(asyncType, syncType, cleanType);
@@ -778,250 +786,4 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 		byte[] realValue = (byte[]) at.get();
 		assertTrue(Arrays.equals(Base64.decodeBase64(valueBase64.getBytes()), realValue));
 	}
-
-	
-    private void setDefaultValues( DatasetType dataset, String...    vals ) {
-        // Inject the default numbers
-        ValuesType values = new ValuesType();
-        List<String> v = values.getString();
-        
-        for ( String val:vals ) {
-            v.add( val );
-        }
-            
-        dataset.setDefaultValues(values);
-    }
-    
-    
-    private void setForceValues( DatasetType dataset, String...    vals ) {
-        // Inject the force numbers
-        ValuesType values = new ValuesType();
-        List<String> v = values.getString();
-        
-        for ( String val:vals ) {
-            v.add( val );
-        }
-            
-        dataset.setForceValues(values);
-    }
-    
-
-	
-    private DatasetType setDataSet( String taskName, String attribute, PolicyType policy) {
-        TaskType task = LscConfiguration.getTask(taskName);
-        PropertiesBasedSyncOptionsType propertiesBasedSyncOptions = task.getPropertiesBasedSyncOptions();
-        List<DatasetType> datasets = propertiesBasedSyncOptions.getDataset();
-        DatasetType dataset = new DatasetType();
-        dataset.setPolicy(policy);
-        dataset.setName(attribute);
-        datasets.add(dataset);
-        
-        return dataset;
-    }
-        
-
-	
-    private void setCreateValues( DatasetType dataset, String...    vals ) {
-        // Inject the force numbers
-        ValuesType values = new ValuesType();
-        List<String> v = values.getString();
-        
-        for ( String val:vals ) {
-            v.add( val );
-        }
-            
-        dataset.setCreateValues(values);
-    }
-    
-  
-    /**
-     * Check that we can inject a TelephoneNumber attribute.
-     * 
-     * The default values are 123456 and 789987;
-     * The force values are 000000 and 11111.
-     * 
-     * There are 2 use cases:
-     * <ul>
-     *   <li>Entry addition: the entry does not exist on target</li>
-     *   <li>Entry modification: the entry exists on target</li>
-     * </ul>
-     * 
-     * We also have various use cases for the telephoneNumber attribute:
-     * <ul>
-     *   <li>
-     *     Add mode
-     *     <ul>
-     *       <li>The attribute does not exist on source</li>
-     *       <li>The attribute exists on source (012)</li>
-     *     </ul>
-     *   </li>
-     *   <li>
-     *     Modify mode
-     *     <ul>
-     *       <li>
-     *         The attribute does not exist on source
-     *         <ul>
-     *           <li>The attribute does not exist on target</li>
-     *           <li>The attribute exists on target (987)</li>
-     *         </ul>
-     *       </li>
-     *       <li>
-     *         The attribute exists on source (123/234)
-     *         <ul>
-     *           <li>The attribute does not exist on target</li>
-     *           <li>The attribute exists on target (876)</li>
-     *         </ul>
-     *       </li>
-     *     </ul>
-     *   </li>
-     * </ul>
-     * 
-     * Those use cases have to be combined with the potential default/create/force values
-     */
-    @Test
-    @Disabled
-    public final void testSyncL2LStarTelephoneNumber() throws Exception {
-        // make sure the contents of the directory are as we expect to begin with
-        String TASK_NAME = "L2LTestTask";
-        
-        //---------------------------------------------------------------------------------
-        // First check with no default/create/force values.
-        //---------------------------------------------------------------------------------
-        // perform the sync
-        launchSyncCleanTask(TASK_NAME, false, true, false);
-        
-        // Check the results
-
-        // Inject telephoneNumber
-        DatasetType telephoneNumber = setDataSet(TASK_NAME, "telephoneNumber", PolicyType.MERGE );
-        //setDefaultValues( telephoneNumber, "123456", "789987" );
-        setCreateValues( telephoneNumber, "'000000'", "11111" );
-
-        // Inject ObjectClass
-        DatasetType objectClass = setDataSet(TASK_NAME, "objectClass", PolicyType.MERGE );
-        setDefaultValues( objectClass, "'top'", "'person'" );
-        setCreateValues( objectClass, "'inetOrgPerson'" );
-
-        // Inject initials
-        DatasetType initials = setDataSet(TASK_NAME, "initials", PolicyType.FORCE );
-        setCreateValues( initials, "cn=oops" );
-
-        // Inject default
-        setDataSet(TASK_NAME, "default", PolicyType.FORCE );
-
-        // Inject Description
-        DatasetType description = setDataSet(TASK_NAME, "description", PolicyType.MERGE );
-        
-        setForceValues( description, "var j=0; \n"
-                + "                   var dstDescriptionValues = new Array();\n"
-                + "                   var srcDescriptionValues = srcBean.getDatasetById('description').toArray();\n"
-                + "                   for (var i=0; i < srcDescriptionValues.length; i++ ) {\n"
-                + "                       if ( srcDescriptionValues[i] != null ) {\n"
-                + "                           // The sample just copy the value, but you can do what you want there !\n"
-                + "                           // Just keep in mind to force a correct data type because the \n"
-                + "                           // source values are mapped to a generic Object type\n"
-                + "                           // which will not be well handled by the Javascript engine !\n"
-                + "                           dstDescriptionValues[j++] = \"modified: \" + srcDescriptionValues[i];\n"
-                + "                       }\n"
-                + "                   }\n"
-                + "                   dstDescriptionValues" );
-
-        // Inject seeAlso
-        setDataSet(TASK_NAME, "seeAlso", PolicyType.FORCE );
-
-        // Inject jpegPhoto
-        DatasetType jpegPhoto = setDataSet(TASK_NAME, "jpegPhoto", PolicyType.FORCE );
-        setForceValues( jpegPhoto, "srcBean.getDatasetFirstBinaryValueById('jpegPhoto')" );
-
-        // Inject userPassword
-        DatasetType userPassword = setDataSet(TASK_NAME, "userPassword", PolicyType.FORCE );
-        setForceValues( userPassword, "'secret' + srcBean.getDatasetFirstValueById('cn')" );
-
-        // Inject mail
-        DatasetType mail = setDataSet(TASK_NAME, "mail", PolicyType.FORCE );
-        setCreateValues( mail, "'ok@domain.net'" );
-        
-        //initialInjectionCheckL2LTests(origin, target);
-        
-        // check MODRDN (cn=CN00002/cn=CommonName0002)
-        assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
-        assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
-        assertFalse(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
-
-        // check ADD (cn=CN0003)
-        assertTrue(srcJndiServices.exists(DN_ADD_SRC));
-        assertFalse(dstJndiServices.exists(DN_ADD_DST));
-        
-        /*
-        SearchResult srcEntry = getEntry(DN_ADD_SRC);
-        
-        checkAttributeIsEmpty(srcEntry, "userPassword");
-        checkAttributeIsEmpty(srcEntry, "telephoneNumber");
-        checkAttributeValue(srcEntry, "description", "Number three's descriptive text");
-        checkAttributeValue(srcEntry, "sn", "SN0003");
-
-        // check MODIFY (cn=CN0001)
-        assertTrue(srcJndiServices.exists(DN_MODIFY_SRC));
-        assertTrue(dstJndiServices.exists(DN_MODIFY_DST));
-        
-        SearchResult srcModifySrc = getEntry(DN_MODIFY_SRC);
-
-        checkAttributeIsEmpty(srcModifySrc, "telephoneNumber");
-        checkAttributeValue(srcModifySrc, "description", "Number one's descriptive text");
-        checkAttributeValue(srcModifySrc, "sn", "SN0001");
-        checkBinaryAttributeValue(DN_MODIFY_SRC, "jpegPhoto", JPEG_PHOTO);
-        
-        // the original password is present and can be used
-        assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secret0001"));
-
-        // the new password cannot be used yet
-        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
-        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
-
-        // perform the sync
-        launchSyncCleanTask(TASK_NAME, false, true, false);
-
-        // check the results of the synchronization
-        reloadJndiConnections();
-        
-        // check ADD
-        // the entry has been created
-        assertTrue(dstJndiServices.exists(cn3Target));
-        SearchResult srcAddDst = getEntry(cn3Target);
-
-        List<String> attributeValues = null;
-
-        // Check the ObjectClass attribute
-        attributeValues = Arrays.asList("top", "person", "organizationalPerson", "inetOrgPerson");
-        checkAttributeValues(srcAddDst, "objectClass", attributeValues);
-
-        // the telephoneNumber was created
-        attributeValues = Arrays.asList("000000", "11111");
-        checkAttributeValues(srcAddDst, "telephoneNumber", attributeValues);
-
-        //checkSyncResultsFirstPass();
-
-        // sync again to confirm convergence
-        launchSyncCleanTask(TASK_NAME, false, true, false);
-
-        // check the results of the synchronization
-        reloadJndiConnections();
-        
-        // the telephoneNumber was merged
-        attributeValues = Arrays.asList("000000", "11111", "123456", "789987");
-        checkAttributeValues("cn=CN0003," + target, "telephoneNumber", attributeValues);
-
-        //checkSyncResultsSecondPass();
-
-        // sync a third time to make sure nothing changed
-        launchSyncCleanTask(TASK_NAME, false, true, false);
-
-        // check the results of the synchronization
-        reloadJndiConnections();
-        //checkSyncResultsSecondPass();
-        // the telephoneNumber was merged
-        attributeValues = Arrays.asList("000000", "11111", "123456", "789987");
-        checkAttributeValues(cn3Target, "telephoneNumber", attributeValues);
-    */
-    }
 }

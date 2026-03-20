@@ -99,7 +99,7 @@ public class LscServerImpl implements LscServer, Runnable {
 				asynchronousTasksName.add(task.getName());
 			}
 		}
-		return asynchronousTasksName.toArray(new String[asynchronousTasksName.size()]);
+		return asynchronousTasksName.toArray(new String[0]);
 	}
 
 	public String[] getSyncTasksName() {
@@ -109,7 +109,7 @@ public class LscServerImpl implements LscServer, Runnable {
 				synchronousTasksName.add(task.getName());
 			}
 		}
-		return synchronousTasksName.toArray(new String[synchronousTasksName.size()]);
+		return synchronousTasksName.toArray(new String[0]);
 	}
 
 	public boolean isAsyncTaskRunning(String taskName) {

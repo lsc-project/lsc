@@ -47,6 +47,7 @@ package org.lsc.jndi;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -195,8 +196,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		}
 
 		_filteredSc = new SearchControls();
-		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(
-		        new String[ldapService.getFetchedAttributes().getString().size()] ));
+		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(new String[0] ));
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 
 		
 		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
@@ -217,6 +217,29 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 			        baseDn, jndiServices.getContextDn());
 		}
 	}
+
+    /**
+     * Map the ldap search result into a AbstractBean inherited object.
+     * 
+     * @param dataSets the read entry in a DataSets
+     * @param beanToFill the bean to fill
+     * 
+     * @return the modified bean
+     * @throws NamingException
+     *             thrown if a directory exception is encountered while
+     *             switching to the Java POJO
+     */
+    public final IBean getBeanFromDataSet(String id, LscDatasets dataSets, IBean beanToFill) throws NamingException {
+        if (dataSets == null) {
+            return null;
+        }
+
+        // get dn
+        beanToFill.setMainIdentifier(id);
+        beanToFill.setDatasets(dataSets);
+
+        return beanToFill;
+    }
 
 	/**
 	 * Map the ldap search result into a AbstractBean inherited object.
@@ -271,6 +294,41 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		
 		return l;
 	}
+	
+	/**
+	 * Create a Filter instance based on the provided string filter.
+	 * 
+	 * @param id
+	 * @param pivotAttrs
+	 * @param searchString
+	 * @return The ExprNode instance that can be used to evalute the entry
+	 * @throws ParseException
+	 */
+	private String buildFilter(String id, LscDatasets pivotAttrs, String searchString) {
+        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
+                .replaceAll(Matcher.quoteReplacement(id));
+        
+        if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
+            for (String attributeName : pivotAttrs.getAttributesNames()) {
+                String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
+        
+                if (valueId != null) {
+                    valueId = Matcher.quoteReplacement(valueId);
+                }
+                
+                searchString = Pattern.compile("\\{" + attributeName + "\\}", 
+                        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+            }
+        } else if (attrsId.size() == 1) {
+            searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", 
+                    Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+        } else {
+            // this is kept for backwards compatibility but will be removed
+            searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
+        }
+
+        return searchString;
+	}
 
 	/**
 	 * Get the ldap search result according the specified identifier.
@@ -282,29 +340,9 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
-		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
-				.replaceAll(Matcher.quoteReplacement(id));
+		String processedFilter = buildFilter(id, pivotAttrs, searchString);
 		
-		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
-			for (String attributeName : pivotAttrs.getAttributesNames()) {
-				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
-		
-				if (valueId != null) {
-					valueId = Matcher.quoteReplacement(valueId);
-				}
-				
-				searchString = Pattern.compile("\\{" + attributeName + "\\}", 
-				        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
-			}
-		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", 
-			        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
-		} else {
-			// this is kept for backwards compatibility but will be removed
-			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
-		}
-
-		return getJndiServices().getEntry(baseDn, searchString, _filteredSc);
+		return getJndiServices().getEntry(baseDn, processedFilter, _filteredSc);
 	}
 
 	public void close() throws IOException {

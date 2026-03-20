@@ -59,6 +59,7 @@ import org.lsc.beans.InfoCounter;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PivotTransformationType;
 import org.lsc.exception.LscServiceException;
+import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.runnable.AsynchronousRunner;
 import org.lsc.runnable.CleanEntryRunner;
 import org.lsc.runnable.SynchronizeEntryRunner;
@@ -439,7 +440,11 @@ public abstract class AbstractSynchronize {
 		    }
 		}
 		
-		return service.getBean(pivotName, pivotAttributes, fromSameService);
+		if ( service instanceof SimpleJndiSrcService ) {
+		    return ((SimpleJndiSrcService)service).getBeanInternal(pivotName, pivotAttributes, fromSameService);
+		} else {
+		    return service.getBean(pivotName, pivotAttributes, fromSameService);
+		}
 	}
 
 	protected Object transform(Task task, PivotTransformationType.Transformation transformation, Object value) throws LscServiceException{

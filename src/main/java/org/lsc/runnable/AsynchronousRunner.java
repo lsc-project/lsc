@@ -108,9 +108,12 @@ public class AsynchronousRunner implements Runnable {
                     try {
                         Callable<Object> task = supplier.get();
                         
-                        if (task == null) {
-                            LOGGER.info("--- Thread {}: done", id);
-                            break;
+                        if (task != null) {
+                            Object result = task.call();
+                            LOGGER.debug("Thread {} ran task {}", id, result);
+                        } else {
+                            LOGGER.info("--- Thread {}: no task to run, waiting 1s.", id);
+                            Thread.sleep(1000L);
                         }
                         
                         Object result = task.call();

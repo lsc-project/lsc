@@ -51,7 +51,8 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 		
 		try {
 			// Search for the corresponding object in the source
-			IBean taskBean = abstractSynchronize.getBean(task, task.getSourceService(), id.getKey(), id.getValue(), false, false);
+			IBean taskBean = abstractSynchronize.getBean(
+			        task, task.getSourceService(), id.getKey(), id.getValue(), false, false);
 
 			// If we didn't find the object in the source, delete it in the
 			// destination
@@ -66,7 +67,8 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 				} else if (conditionString.matches("false")) {
 					doDelete = false;
 				} else {
-					IBean dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), id.getKey(), id.getValue(), true, false);
+					IBean dstBean = abstractSynchronize.getBean(
+					        task, task.getDestinationService(), id.getKey(), id.getValue(), true, false);
 					// Log an error if the bean could not be retrieved!
 					// This shouldn't happen.
 					if (dstBean == null) {

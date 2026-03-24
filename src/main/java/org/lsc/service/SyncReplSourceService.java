@@ -128,12 +128,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
      **/
     public static final String DELETED_ENTRY = "_deleted-entry";
     
-    // A small speedup: no reason  to compile this pattern many times
-    private static final Pattern ID_PATTERN = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE);
-
-
-	public SyncReplSourceService(final TaskType task)
-			throws LscServiceConfigurationException {
+	public SyncReplSourceService(final TaskType task) throws LscServiceConfigurationException {
 		super(task);
 		srsc = task.getAsyncLdapSourceService();
 		// Default interval
@@ -225,7 +220,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdClean; 
 		}
 
-		searchString = ID_PATTERN.matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+		searchString = searchString.replaceAll(ID_REGEXP, id);
 		
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
@@ -238,7 +233,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
 		} else {
 			// this is kept for backwards compatibility but will be removed
-			searchString = filterIdSync.replaceAll("\\{0\\}", id);
+			searchString = filterIdSync.replaceAll(PLACE_HOLDER, id);
 		}
 
 		// Do the actual search, but with a retry

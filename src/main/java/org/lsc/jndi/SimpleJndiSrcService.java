@@ -46,6 +46,7 @@
 package org.lsc.jndi;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -175,9 +176,16 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 */
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
-			return jndiServices.getAttrsList(getBaseDn(),
-							getFilterAll(), SearchControls.SUBTREE_SCOPE,
-							getAttrsId());
+		    // Get the pivot attributes
+		    List<String> requestedAttrs = getAttrsId();
+		    String filterAll = getFilterAll();
+		    
+		    // When we don't have a OneFilter, we will get back all the requested attributes
+		    if ( filterAll.equalsIgnoreCase(getFilterId())) {
+		        requestedAttrs = getAttrs();
+		    }
+		    
+			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, requestedAttrs);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}

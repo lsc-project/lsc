@@ -76,8 +76,6 @@ import org.lsc.utils.annotations.LscTestExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.PrintStream;
-import java.io.ByteArrayOutputStream;
 
 /**
  * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
@@ -208,12 +206,12 @@ tasks = {
                connectionRef = "src-ldap",
                baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                pivotAttributes = {"cn"},
-               allFilter = "(CN=CN0001)",
-               cleanFilter="(CN=CN0001)",
+               allFilter = "\"(CN=CN0001)\"",
+               cleanFilter="\"(CN=CN0001)\"",
                dateFormat = "yyyyMMddHHmmss'Z'",
                interval = 5,
                fetchedAttributes = {
-                   "cn"
+                   "cn", "sn"
                }),
        ldapDestinationService = 
            @CreateLdapDestinationService(
@@ -221,7 +219,7 @@ tasks = {
                connectionRef = "dst-ldap",
                baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                pivotAttributes = {"cn"},
-               allFilter = "(cn=optimizevaluereplacement)",
+               allFilter = "\"(cn=optimizevaluereplacement)\"",
                fetchedAttributes = {
                    "description", 
                    "cn", 
@@ -298,8 +296,8 @@ tasks = {
                 connectionRef = "src-ldap",
                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                 pivotAttributes = {"cn"},
-                allFilter = "(cn=optimizevaluereplacement)",
-                cleanFilter="(cn=optimizevaluereplacement)",
+                allFilter = "\"(cn=optimizevaluereplacement)\"",
+                cleanFilter="\"(cn=optimizevaluereplacement)\"",
                 dateFormat = "yyyyMMddHHmmss'Z'",
                 interval = 5,
                 fetchedAttributes = {
@@ -311,7 +309,7 @@ tasks = {
                 connectionRef = "dst-ldap",
                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                 pivotAttributes = {"cn"},
-                allFilter = "(cn=optimizevaluereplacement)",
+                allFilter = "\"(cn=optimizevaluereplacement)\"",
                 fetchedAttributes = {
                     "description", 
                     "cn"
@@ -374,8 +372,8 @@ tasks = {
                  connectionRef = "src-ldap",
                  baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn"},
-                 allFilter = "(cn=optimizevaluereplacement)",
-                 cleanFilter="(cn=optimizevaluereplacement)",
+                 allFilter = "\"(cn=optimizevaluereplacement)\"",
+                 cleanFilter="\"(cn=optimizevaluereplacement)\"",
                  dateFormat = "yyyyMMddHHmmss'Z'",
                  interval = 5,
                  fetchedAttributes = {
@@ -387,7 +385,7 @@ tasks = {
                  connectionRef = "dst-ldap",
                  baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn"},
-                 allFilter = "(cn=optimizevaluereplacement)",
+                 allFilter = "\"(cn=optimizevaluereplacement)\"",
                  fetchedAttributes = {
                      "description", 
                      "cn"
@@ -522,28 +520,15 @@ public class Ldap2LdapOptimizeValueReplacementTest extends CommonLdapSyncTest {
 	}
 
 	// Function launching the desired task, and returning the standard output
-	public static String launchSyncTask(String task) throws Exception {
-
+	public static void launchSyncTask(String task) throws Exception {
 		// Initialize the tasks
 		SimpleSynchronize sync = new SimpleSynchronize();
 		List<String> syncType = new ArrayList<String>();
 		syncType.add(task);
 
-		// Change system output stream to a variable
-		PrintStream orgStream = System.out; // save original stream
-		ByteArrayOutputStream lscOutput = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(lscOutput));
-
 		// Launch tasks
 		boolean ret = sync.launch(new ArrayList<String>(), syncType, new ArrayList<String>());
-
-		// Restore standard output stream
-		System.setOut(orgStream);
-
 		// Check the global status of the task
 		assertTrue(ret);
-
-		return lscOutput.toString();
 	}
-
 }

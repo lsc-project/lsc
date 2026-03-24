@@ -60,6 +60,7 @@ import javax.script.ScriptEngine;
 import org.apache.commons.io.FilenameUtils;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.lsc.Task;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.AbstractSimpleJndiService;
 import org.lsc.jndi.ScriptableJndiServices;
 import org.slf4j.Logger;
@@ -96,19 +97,20 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 	 */
 	@Override
 	public String evalToString(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params) throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 
 		if (result == null) {
 			return null;
 		}
+		
 		return (String) result;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Object> evalToObjectList(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params)  throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 		if (result == null) {
 			return null;
@@ -132,7 +134,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<byte[]> evalToByteArrayList(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params)  throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 
 		if(result instanceof byte[][]) {
@@ -155,7 +157,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 
 	@Override
 	public byte[] evalToByteArray(final Task task, final String expression,
-					final Map<String, Object> params) {
+					final Map<String, Object> params)  throws LscServiceException {
 		Object result = instanceEval(task, expression, params);
 
 		if(result instanceof byte[]) {
@@ -168,7 +170,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 	}
 
 	@Override
-	public Boolean evalToBoolean(final Task task, final String expression, final Map<String, Object> params) {
+	public Boolean evalToBoolean(Task task, String expression, Map<String, Object> params) throws LscServiceException {
 		return (Boolean) instanceEval(task, expression, params);
 	}
 
@@ -181,8 +183,7 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 	 *                the keys are the name used in the
 	 * @return the evaluation result
 	 */
-	private Object instanceEval(final Task task, final String expression,
-					final Map<String, Object> params) {
+	private Object instanceEval(Task task, String expression, Map<String, Object> params) throws LscServiceException {
 		Bindings bindings = engine.createBindings();
 
 
@@ -233,9 +234,14 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
-			return null;
+            throw new LscServiceException(e);
 		}
 
 		return ret;
 	}
+
+    @Override
+    public String evalToFilter(String expression, Map<String, Object> params) throws LscServiceException {
+        return expression;
+    }
 }

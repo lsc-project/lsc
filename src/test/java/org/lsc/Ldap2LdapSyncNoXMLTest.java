@@ -315,9 +315,9 @@ import org.lsc.utils.directory.LDAP;
                  connectionRef = "src-ldap",
                  baseDn = "ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn", "sn"},
-                 allFilter = "(sn=*)",
-                 oneFilter = "(sn={sn})",
-                 filterAsync = "(&(sn=*)(modifytimestamp>={0}))",
+                 allFilter = "\"(sn=*)\"",
+                 oneFilter = "\"(sn={sn})\"",
+                 filterAsync = "\"(&(sn=*)(modifytimestamp>={0}))\"",
                  dateFormat = "yyyyMMddHHmmss'Z'",
                  interval = 5,
                  fetchedAttributes = {
@@ -335,8 +335,8 @@ import org.lsc.utils.directory.LDAP;
                  connectionRef = "dst-ldap",
                  baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn", "sn"},
-                 allFilter = "(sn=*)",
-                 oneFilter = "(sn={sn})",
+                 allFilter = "\"(sn=*)\"",
+                 oneFilter = "\"(sn={sn})\"",
                  fetchedAttributes = {
                      "description", 
                      "cn", 

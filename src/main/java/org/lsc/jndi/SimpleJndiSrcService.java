@@ -226,16 +226,16 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService {
 	 */
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
-		    List<String> requestedAttrs = getAttrs();
+		    // Get the pivot attributes
+		    List<String> requestedAttrs = getAttrsId();
+		    String filterAll = getFilterAll();
 		    
 		    // When we don't have a OneFilter, we will get back all the requested attributes
-		    if ( getFilterAll().equalsIgnoreCase(getFilterId())) {
+		    if ( filterAll.equalsIgnoreCase(getFilterId())) {
 		        requestedAttrs = getAttrs();
 		    }
 		    
-			return jndiServices.getAttrsList(getBaseDn(),
-							getFilterAll(), SearchControls.SUBTREE_SCOPE,
-							requestedAttrs);
+			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, requestedAttrs);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}

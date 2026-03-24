@@ -144,7 +144,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 
 			try {
 				listPivots = jndiServices.getAttrsList(getBaseDn(),
-								filterTimestamp.replaceAll("\\{0\\}", date), SearchControls.SUBTREE_SCOPE,
+								filterTimestamp.replaceAll(PLACE_HOLDER, date), SearchControls.SUBTREE_SCOPE,
 								getAttrsId()).entrySet();
 			} catch (NamingException e) {
 				throw new LscServiceException(e);

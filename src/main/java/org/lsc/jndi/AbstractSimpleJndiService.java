@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -114,6 +113,12 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	protected  SearchControls _filteredSc;
 
 	protected JndiServices jndiServices;
+	
+	/** A pre-compiled regexp for the ID identifier. It's case insensitive (the '(i?)' part)*/
+    protected static String ID_REGEXP = "(?i)\\{id\\}";
+    
+    /** A default placeholder used for backward compatibility. It's case insensitive (the '(i?)' part) */
+    protected static String PLACE_HOLDER = "(?i)\\{0\\}";
 
 	/**
 	 * The default initializer.
@@ -294,7 +299,7 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 		
 		return l;
 	}
-	
+
 	/**
 	 * Create a Filter instance based on the provided string filter.
 	 * 
@@ -305,26 +310,27 @@ public abstract class AbstractSimpleJndiService implements IService, Closeable {
 	 * @throws ParseException
 	 */
 	private String buildFilter(String id, LscDatasets pivotAttrs, String searchString) {
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
-                .replaceAll(Matcher.quoteReplacement(id));
+        // Lookup for the '{id}' pattern in the filter. If found, it will be replaced
+	    // by the entry's ID. We use the quoteReplacement method to escape special chars
+        String idQuoteReplacement = Matcher.quoteReplacement(id);
+
+        // Replace the ID everywhere in the search filter
+	    searchString = searchString.replaceAll(ID_REGEXP, idQuoteReplacement);
         
+	    // Now proceed with the other attributes, if any
         if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
             for (String attributeName : pivotAttrs.getAttributesNames()) {
-                String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
-        
-                if (valueId != null) {
-                    valueId = Matcher.quoteReplacement(valueId);
-                }
+                String value = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
                 
-                searchString = Pattern.compile("\\{" + attributeName + "\\}", 
-                        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+                String valueId = Matcher.quoteReplacement(value);
+        
+                searchString = searchString.replaceAll("(?i)\\{" + attributeName + "\\}", valueId);
             }
         } else if (attrsId.size() == 1) {
-            searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", 
-                    Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+            searchString = searchString.replaceAll("(?i)\\{" + attrsId.get(0) + "\\}", idQuoteReplacement);
         } else {
             // this is kept for backwards compatibility but will be removed
-            searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
+            searchString = filterIdSync.replaceAll(PLACE_HOLDER, idQuoteReplacement);
         }
 
         return searchString;

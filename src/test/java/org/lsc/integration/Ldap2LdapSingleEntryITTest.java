@@ -178,8 +178,8 @@ import org.lsc.utils.annotations.LscTestExtension;
                     connectionRef = "src-ldap",
                     baseDn = "ou=L2L001Src,ou=Test Data,dc=lsc-project,dc=org",
                     pivotAttributes = {"cn", "sn"},
-                    allFilter = "(sn=*)",
-                    oneFilter = "(sn={sn})",
+                    allFilter = "\"(sn=*)\"",
+                    oneFilter = "\"(sn={sn})\"",
                     fetchedAttributes = {
                         /*"description", 
                         "cn", 
@@ -197,8 +197,8 @@ import org.lsc.utils.annotations.LscTestExtension;
                     connectionRef = "dst-ldap",
                     baseDn = "ou=L2L001Dst,ou=Test Data,dc=lsc-project,dc=org",
                     pivotAttributes = {"cn"},
-                    allFilter = "(sn=*)",
-                    oneFilter = "(sn={sn})",
+                    allFilter = "\"(sn=*)\"",
+                    oneFilter = "\"(sn={sn})\"",
                     fetchedAttributes = {
                         /*"description", 
                         "cn", 

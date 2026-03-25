@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008 - 2011 LSC Project 
+ *
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -58,7 +58,9 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
+import org.junit.jupiter.api.AfterAll;
 import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.Lsc;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiServices;
 
@@ -68,7 +70,7 @@ import org.lsc.jndi.JndiServices;
  * resources, and entries in the local OpenDS directory. testSync() performs a
  * synchronization between two branches of the local LDAP server, and should
  * perform 3 operations : 1 ADD, 1 MODRDN, 1 MODIFY. The
- * 
+ *
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
 public class CommonLdapSyncTest extends AbstractLdapTestUnit {
@@ -76,20 +78,23 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 	public final static String TASK_NAME = "ldap2ldapTestTask";
 	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
 	public final static String DESTINATION_DN = "ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
-	
+
+    /** The LSC instance */
+    public static Lsc classLscInstance;
+
 	public String getTaskName() {
 		return TASK_NAME;
 	}
-	
+
 	public String getSourceDn() {
 		return SOURCE_DN;
 	}
-	
+
 	public String getDestinationDn() {
 		return DESTINATION_DN;
 	}
-	
-	public String DN_ADD_SRC = "cn=CN0003," + getSourceDn(); 
+
+	public String DN_ADD_SRC = "cn=CN0003," + getSourceDn();
 	public String DN_ADD_DST = "cn=CN0003," + getDestinationDn();
 	public String DN_MODIFY_SRC = "cn=CN0001," + getSourceDn();
 	public String DN_MODIFY_DST = "cn=CN0001," + getDestinationDn();
@@ -100,27 +105,28 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 	public String DN_MODRDN_DST_AFTER = "cn=CN0002," + getDestinationDn();
 
 	protected JndiServices srcJndiServices;
-	
+
 	protected JndiServices dstJndiServices;
-	
+
 	protected void reloadJndiConnections() {
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("src-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType)LscConfiguration.getConnection("dst-ldap"));
 	}
-	
+
 	/**
 	 * Get an object from the destination directory, and check that a given attribute
 	 * has n values exactly that matches the values provided.
-	 * 
+	 *
 	 * In these tests we use this function to read from the source too, since
 	 * it is in reality the same directory.
-	 * 
+	 *
 	 * @param dn The object to read.
 	 * @param attributeName The attribute to check.
 	 * @param expectedValues List of values expected in the attribute.
 	 * @throws NamingException
 	 */
-	protected void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
+	protected void checkAttributeValues(String dn, String attributeName, List<String> expectedValues)
+	        throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		if (expectedValues.size() > 0) {
@@ -151,10 +157,10 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 	/**
 	 * Get an object from the destination directory, and check that a given attribute
 	 * has one value exactly that matches the value provided.
-	 * 
+	 *
 	 * In these tests we use this function to read from the source too, since
 	 * it is in reality the same directory.
-	 * 
+	 *
 	 * @param dn The object to read.
 	 * @param attributeName The attribute to check.
 	 * @param value The value expected in the attribute.
@@ -168,5 +174,12 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 
 		String realValue = (String) at.get();
 		assertEquals(value, realValue);
+	}
+
+	@AfterAll
+	protected static void resetLsc() {
+	    //classLscInstance.getTasks().getTask().clear();
+	    //classLscInstance.getConnections().
+	    classLscInstance = null;
 	}
 }

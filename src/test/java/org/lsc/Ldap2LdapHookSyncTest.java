@@ -6,8 +6,8 @@
  * flat files...
  *
  *                  ==LICENSE NOTICE==
- * 
- * Copyright (c) 2008 - 2011 LSC Project 
+ *
+ * Copyright (c) 2008 - 2011 LSC Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -21,7 +21,7 @@
  *     * Neither the name of the LSC Project nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -85,18 +85,39 @@ import java.util.Scanner;
  * ldap2ldapHookTestCreate ldap2ldapHookTestUpdate ldap2ldapHookTestDelete
  */
 @ExtendWith({ ApacheDSTestExtension.class })
-@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
-		@LoadSchema(name = "other", enabled = true) }, partitions = {
-				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
-						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
-								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
-								@CreateIndex(attribute = "ou") }) })
-@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
+@CreateDS(
+        name = "DSWithPartitionAndServer", loadedSchemas = {
+            @LoadSchema(name = "inetOrgPerson", enabled = true)
+		},
+        partitions = {
+                @CreatePartition(
+                    name = "lsc-project",
+                    suffix = "dc=lsc-project,dc=org",
+                    contextEntry = @ContextEntry(
+                            entryLdif = "dn: dc=lsc-project,dc=org\n"
+                                        + "dc: lsc-project\n"
+                                        + "objectClass: top\n"
+                                        + "objectClass: domain\n\n"),
+                    indexes = {
+                            @CreateIndex(attribute = "objectClass"),
+                            @CreateIndex(attribute = "dc"),
+							@CreateIndex(attribute = "ou")
+                    })
+        })
+@CreateLdapServer(
+            allowAnonymousAccess = true,
+    transports = { @CreateTransport(protocol = "LDAP", port = 33389),
 		@CreateTransport(protocol = "LDAPS", port = 33636) })
 @ApplyLdifs({
 		// Entry # 0
-		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
-		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+		"dn: cn=Directory Manager,ou=system",
+		"objectClass: person",
+		"objectClass: top",
+		"cn: Directory Manager",
+		"description: Directory Manager",
+		"sn: Directory Manager",
+		"userpassword: secret"
+})
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 	@BeforeEach
@@ -123,14 +144,48 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 
 		ObjectMapper mapperCreatedEntry = new ObjectMapper();
-		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
-				"[ { \"attributeName\" : \"objectClass\", \"values\" : [ \"inetOrgPerson\", \"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"cn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, { \"attributeName\" : \"sn\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
+	      JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
+	                "[ { \"attributeName\" : \"cn\", "
+	                + "\"values\" :  [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
+	                + "{ \"attributeName\" : \"sn\", "
+	                + "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
+	                + "{ \"attributeName\" : \"objectclass\", "
+	                + "\"values\" : [ \"inetOrgPerson\",\"person\",\"top\" ], \"operation\" : \"ADD_VALUES\" } ]");
 
+	      /*
+		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
+				"[ { \"attributeName\" : \"objectclass\", "
+				+ "\"values\" : [ \"inetOrgPerson\",\"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, "
+				+ "{ \"attributeName\" : \"cn\", "
+				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
+				+ "{ \"attributeName\" : \"sn\", "
+				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
+				*/
 		checkJSONSyncResults("create", expectedCreatedEntry);
 
 		ObjectMapper mapperUpdatedEntry = new ObjectMapper();
 		JsonNode expectedUpdatedEntry = mapperUpdatedEntry.readTree(
-				"[ { \"attributeName\" : \"description\", \"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" }, {\"attributeName\":\"userCertificate;binary\",\"values\":[\"MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvcNAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTALBgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzMDQxWhcNMzMxMDI0MTQzMDQxWjBYMQswCQYDVQQGEwJGUjENMAsGA1UECAwEdGVzdDENMAsGA1UEBwwEdGVzdDENMAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdWt0QgFnEi7a1hIJQv4ZdOM5y0GGLHQYNrUNSReArvpkYUY5zasFNVzVHCApRuj0t1NMDrn1gNzKkxTIbYGaWRSn+21J0ow+Nxh2TAQW8dkJnWTksCfyGGGItI5q3ST3EUKnepaAzUYYENcSHRyx7UY/3XuzcW0aGhy4PrVTIHBpyLq0Uzv8nH5nbWM+LYt6YbQMmlAz/psTXIC2dfEZhUb4plLGSo7rZxM5geC6Z+os+I8+uw+mGjps1VP7eGq0jCGHNs2rUHMqBNgLvwMH2WlMXo/iNarAb8fUEPdp59FwiTygBlWAn6GoKHJ1HWPpqMxdtjL2Y5+ZMcp70eJqcCAwEAAaNTMFEwHQYDVR0OBBYEFLwffjUBL/Rp4a6MgeCJiFnCZFu8MB8GA1UdIwQYMBaAFLwffjUBL/Rp4a6MgeCJiFnCZFu8MA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBACjwsg1Z9PyauoKAhkIfyPTEnlEOCo1nN37c2vnH4fyY6fuBdV6GWtk/u9FCuDmYT/4KDRxe33ZUChwSUX0INgamOarWRES3UoPC1GeOvuMf7uustEMLcHAYZVKXSZUrsOjw+VIZ5XrD6GDE64QtvW5Ve3jf43aGgLf27NF0vhF9+gHOZjjBT33S977HUutMUKfRu9PdHAn8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqUSZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=\"],\"operation\":\"REPLACE_VALUES\"} ]");
+				"[ { \"attributeName\" : \"description\", "
+				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" }, "
+				+ "{\"attributeName\":\"usercertificate;binary\","
+				+ "\"values\":[\"MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvc"
+				+ "NAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTAL"
+				+ "BgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzM"
+				+ "DQxWhcNMzMxMDI0MTQzMDQxWjBYMQswCQYDVQQGEwJGUjENMAsGA1UECAwEdGVzdDENMAsGA1"
+				+ "UEBwwEdGVzdDENMAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDC"
+				+ "CASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKdWt0QgFnEi7a1hIJQv4ZdOM5y0GGLH"
+				+ "QYNrUNSReArvpkYUY5zasFNVzVHCApRuj0t1NMDrn1gNzKkxTIbYGaWRSn+21J0ow+Nxh2TAQ"
+				+ "W8dkJnWTksCfyGGGItI5q3ST3EUKnepaAzUYYENcSHRyx7UY/3XuzcW0aGhy4PrVTIHBpyLq0"
+				+ "Uzv8nH5nbWM+LYt6YbQMmlAz/psTXIC2dfEZhUb4plLGSo7rZxM5geC6Z+os+I8+uw+mGjps1"
+				+ "VP7eGq0jCGHNs2rUHMqBNgLvwMH2WlMXo/iNarAb8fUEPdp59FwiTygBlWAn6GoKHJ1HWPpqM"
+				+ "xdtjL2Y5+ZMcp70eJqcCAwEAAaNTMFEwHQYDVR0OBBYEFLwffjUBL/Rp4a6MgeCJiFnCZFu8M"
+				+ "B8GA1UdIwQYMBaAFLwffjUBL/Rp4a6MgeCJiFnCZFu8MA8GA1UdEwEB/wQFMAMBAf8wDQYJKo"
+				+ "ZIhvcNAQELBQADggEBACjwsg1Z9PyauoKAhkIfyPTEnlEOCo1nN37c2vnH4fyY6fuBdV6GWtk"
+				+ "/u9FCuDmYT/4KDRxe33ZUChwSUX0INgamOarWRES3UoPC1GeOvuMf7uustEMLcHAYZVKXSZUr"
+				+ "sOjw+VIZ5XrD6GDE64QtvW5Ve3jf43aGgLf27NF0vhF9+gHOZjjBT33S977HUutMUKfRu9PdH"
+				+ "An8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqU"
+				+ "SZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=\"],"
+				+ "\"operation\":\"REPLACE_VALUES\"} ]");
 
 		checkJSONSyncResults("update", expectedUpdatedEntry);
 
@@ -152,11 +207,11 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		reloadJndiConnections();
 
 		List<String> expectedCreatedEntry = Arrays.asList(
-				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", 
+				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
 				"changetype: add",
-				"objectClass: inetOrgPerson", 
-				"objectClass: person", 
-				"objectClass: top", 
+				"objectclass: inetOrgPerson",
+				"objectclass: person",
+				"objectclass: top",
 				"cn: CN0001-hook",
 				"sn: CN0001-hook");
 
@@ -184,20 +239,20 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 				String data = hookReader.nextLine();
 				hookResults.add(data);
 			}
-			
+
 			hookReader.close();
 			hookFile.delete(); // remove hook log
 		} catch (Exception e) {
 			fail("Error while reading hook-ldif-" + operation + ".log");
 		}
-		
+
 		assertEquals(hookResults.get(0), "cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org");
 		assertEquals(hookResults.get(1), operation);
 
 		if(operation != "delete") {
 			// Make sure all attributes in expectedEntry are present in the hook file
 			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
-			
+
 			for (String attr : expectedEntry) {
 				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
 			}
@@ -234,8 +289,8 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			String entry = String.join("", new ArrayList<>(hookResults.subList(2, hookResults.size())));
 
 			ObjectMapper mapper = new ObjectMapper();
-			JsonFactory factory = mapper.getJsonFactory();
-			JsonParser jp = factory.createJsonParser(entry);
+			JsonFactory factory = mapper.getFactory();
+			JsonParser jp = factory.createParser(entry);
 			try {
 				JsonNode hookOperation = mapper.readTree(jp);
 				assertEquals(hookOperation, expectedEntry);

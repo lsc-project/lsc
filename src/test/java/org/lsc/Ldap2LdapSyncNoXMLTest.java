@@ -82,6 +82,7 @@ import org.apache.directory.server.core.hash.SshaPasswordHashingInterceptor;
 import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.DatasetType;
+import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.PolicyType;
 import org.lsc.configuration.PropertiesBasedSyncOptionsType;
@@ -90,6 +91,15 @@ import org.lsc.configuration.ValuesType;
 import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiSrcService;
 import org.lsc.service.IService;
+import org.lsc.utils.annotations.CreateConnection;
+import org.lsc.utils.annotations.CreateDataset;
+import org.lsc.utils.annotations.CreateLSC;
+import org.lsc.utils.annotations.CreateLdapDestinationService;
+import org.lsc.utils.annotations.CreateLdapSourceService;
+import org.lsc.utils.annotations.CreatePropertiesBasedSyncOptions;
+import org.lsc.utils.annotations.CreateTask;
+import org.lsc.utils.annotations.CreateValuesType;
+import org.lsc.utils.annotations.LscTestExtension;
 import org.lsc.utils.directory.LDAP;
 
 /**
@@ -101,33 +111,395 @@ import org.lsc.utils.directory.LDAP;
  * 
  * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
  */
-@ExtendWith({ ApacheDSTestExtension.class })
-@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
-		@LoadSchema(name = "other", enabled = true) }, additionalInterceptors = {
-				SshaPasswordHashingInterceptor.class }, partitions = {
-						@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
-								+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
-										@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
-										@CreateIndex(attribute = "ou") }) })
-@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ExtendWith({ LscTestExtension.class })
+@CreateDS(
+    name = "DSWithPartitionAndServer",
+    loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true),
+        @LoadSchema(name = "inetOrgPerson", enabled = true) 
+	}, 
+    additionalInterceptors = {
+		SshaPasswordHashingInterceptor.class }, 
+    partitions = {
+		@CreatePartition(
+		    name = "lsc-project", 
+		    suffix = "dc=lsc-project,dc=org", 
+		    contextEntry = 
+		        @ContextEntry(
+		            entryLdif = 
+		                "dn: dc=lsc-project,dc=org\n" +
+						"dc: lsc-project\n" + 
+		                "objectClass: top\n" + 
+						"objectClass: domain\n\n"
+		        ), 
+		    indexes = {
+				@CreateIndex(attribute = "objectClass"), 
+				@CreateIndex(attribute = "dc"),
+				@CreateIndex(attribute = "ou") 
+			}) 
+	})
+@CreateLdapServer(
+    allowAnonymousAccess = true, 
+    transports = { 
+        @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) 
+    })
 @ApplyLdifs({
-		// Entry # 0
-		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
-		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
-@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
-public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
-    private static final String TASK_NAME_STAR = "*";
+    // Entry # 0
+    "dn: cn=Directory Manager,ou=system", 
+    "objectClass: top", 
+    "objectClass: person", 
+    "cn: Directory Manager",
+    "description: Directory Manager", 
+    "sn: Directory Manager", 
+    "userpassword: secret",
     
-	private static final String JPEG_PHOTO = "/9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAAAgAAADEBAgAMAAAAWgAAADIBAgAUAAAAZgAAAHoAAAAsAQAAAQAAACwBAAABAAAAR0lNUCAyLjEwLjgAMjAxOTowMzowNSAxNzozMjo1NwAIAAABBAABAAAAAAEAAAEBBAABAAAAAAEAAAIBAwADAAAA4AAAAAMBAwABAAAABgAAAAYBAwABAAAABgAAABUBAwABAAAAAwAAAAECBAABAAAA5gAAAAICBAABAAAAdQYAAAAAAAAIAAgACAD/2P/gABBKRklGAAEBAAABAAEAAP/bAEMACAYGBwYFCAcHBwkJCAoMFA0MCwsMGRITDxQdGh8eHRocHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAQABAAMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOfooor9MPnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9kA/9sAQwD//////////////////////////////////////////////////////////////////////////////////////9sAQwH//////////////////////////////////////////////////////////////////////////////////////8IAEQgAAQABAwERAAIRAQMRAf/EABQAAQAAAAAAAAAAAAAAAAAAAAH/xAAUAQEAAAAAAAAAAAAAAAAAAAAB/9oADAMBAAIQAxAAAAET/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oADAMBAAIAAwAAABD/AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Qf//EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Qf//Z";
+        // Test data entry
+        "dn: ou=Test Data,dc=lsc-project,dc=org",
+        "objectClass: top",
+        "objectClass: organizationalUnit",
+        "ou: Test Data",
+    
+            // Source data
+            "dn: ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+            "objectClass: top",
+            "objectClass: organizationalUnit",
+            "ou: L2Lsrc",
+            
+                // Source entry 0001
+                "dn: cn=CN0001,ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CN0001",
+                "sn: SN0001",
+                "userPassword: secret0001",
+                "description: Number one's descriptive text",
+                "jpegPhoto:: /9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACg"
+                            + "BAwABAAAAAgAAADEBAgAMAAAAWgAAADIBAgAUAAAAZgAAAHoAAAAsAQAAAQAAACwBAAABAAAAR0lNUCAyLjE"
+                            + "wLjgAMjAxOTowMzowNSAxNzozMjo1NwAIAAABBAABAAAAAAEAAAEBBAABAAAAAAEAAAIBAwADAAAA4AAAAAM"
+                            + "BAwABAAAABgAAAAYBAwABAAAABgAAABUBAwABAAAAAwAAAAECBAABAAAA5gAAAAICBAABAAAAdQYAAAAAAAA"
+                            + "IAAgACAD/2P/gABBKRklGAAEBAAABAAEAAP/bAEMACAYGBwYFCAcHBwkJCAoMFA0MCwsMGRITDxQdGh8eHRo"
+                            + "cHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjI"
+                            + "yMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAQABAAMBIgACEQEDEQH/xAAfAAA"
+                            + "BBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgv/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWE"
+                            + "HInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmd"
+                            + "oaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nn"
+                            + "a4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQI"
+                            + "EBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCk"
+                            + "qNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqe"
+                            + "oqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AOf"
+                            + "ooor9MPnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC"
+                            + "iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig"
+                            + "AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo"
+                            + "oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK"
+                            + "KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC"
+                            + "iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig"
+                            + "AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo"
+                            + "oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK"
+                            + "KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC"
+                            + "iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig"
+                            + "AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo"
+                            + "oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK"
+                            + "KKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAC"
+                            + "iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiig"
+                            + "AooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo"
+                            + "oAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK"
+                            + "KKACiiigAooooAKKKKACiiigD/9kA/9sAQwD////////////////////////////////////////////////"
+                            + "//////////////////////////////////////9sAQwH////////////////////////////////////////"
+                            + "//////////////////////////////////////////////8IAEQgAAQABAwERAAIRAQMRAf/EABQAAQAAAAA"
+                            + "AAAAAAAAAAAAAAAH/xAAUAQEAAAAAAAAAAAAAAAAAAAAB/9oADAMBAAIQAxAAAAET/8QAFBABAAAAAAAAAAA"
+                            + "AAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAA"
+                            + "AAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAA"
+                            + "AAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oADAMBAAIAAwAAABD/AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD"
+                            + "/2gAIAQMBAT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Qf//EABQQAQAAAAAAAAAAAAAAAAA"
+                            + "AAAD/2gAIAQEAAT8Qf//Z",
+
+                // Source entry 0002
+                "dn: cn=CN0002,ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CN0002",
+                "sn: SN0002",
+                "userPassword: secret0002",
+                "description: Number two's descriptive text",
+                "telephoneNumber: 987987",
+    
+                // Source entry 0003
+                "dn: cn=CN0003,ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CN0003",
+                "sn: SN0003",
+                "description: Number three's descriptive text",
+
+            // Destination data
+            "dn: ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+            "objectClass: top",
+            "objectClass: organizationalUnit",
+            "ou: L2Ldst",
+
+                // Destination entry 0001
+                "dn: cn=CN0001,ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CN0001",
+                "sn: SN0001",
+                "telephoneNumber: 123456",
+                "telephoneNumber: 456789",
+                "seeAlso: cn=CN0001,ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                "description: Number one's descriptive text",
+                
+                // Destination entry 0002
+                "dn: cn=CommonName0002,ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CommonName0002",
+                "sn: SN0002",
+                
+                // Destination entry 0004
+                "dn: cn=CN0004,ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                "objectClass: top",
+                "objectClass: person",
+                "objectClass: organizationalPerson",
+                "objectClass: inetOrgPerson",
+                "cn: CN0004",
+                "sn: SN0004"
+
+})
+@ApplyLdifFiles({ 
+    "lsc-schema.ldif"
+})
+
+//Create the LSC instance
+@CreateLSC(
+ id = "L2Lconfig", 
+ revision = 1, 
+ connections = {
+     // Source
+     @CreateConnection(
+         name = "src-ldap",
+         type = LdapConnectionType.class,
+         id = "LdapSrc",
+         url = "ldap://localhost:33389/dc=lsc-project,dc=org",
+         username="cn=Directory Manager,ou=system",
+         password = "secret",
+         binaryAttributes = {@CreateValuesType(string={"personalSignature"})},
+         pageSize = -1
+     ),
+     // Destination
+     @CreateConnection(
+         name = "dst-ldap",
+         type = LdapConnectionType.class,
+         id = "LdapDest",
+         url = "ldap://localhost:33389",
+         username="cn=Directory Manager,ou=system",
+         password = "secret",
+         binaryAttributes = {@CreateValuesType(string={"personalSignature"})},
+         pageSize = -1
+     )
+ },
+ tasks = {
+     @CreateTask(
+         id = "L2LTestTask",
+         name = "L2LTestTask",
+         // bean, default
+         // cleanHook, empty
+         // syncHook, empty
+         ldapSourceService = 
+             @CreateLdapSourceService(
+                 name = "ldap-source",
+                 connectionRef = "src-ldap",
+                 baseDn = "ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+                 pivotAttributes = {"cn", "sn"},
+                 allFilter = "(sn=*)",
+                 oneFilter = "(sn={sn})",
+                 filterAsync = "(&(sn=*)(modifytimestamp>={0}))",
+                 dateFormat = "yyyyMMddHHmmss'Z'",
+                 interval = 5,
+                 fetchedAttributes = {
+                     "description", 
+                     "cn", 
+                     "sn", 
+                     "userPassword", 
+                     "telephoneNumber", 
+                     "seeAlso", 
+                     "jpegPhoto"
+                 }),
+         ldapDestinationService = 
+             @CreateLdapDestinationService(
+                 name = "ldap-destination",
+                 connectionRef = "dst-ldap",
+                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                 pivotAttributes = {"cn", "sn"},
+                 allFilter = "(sn=*)",
+                 oneFilter = "(sn={sn})",
+                 fetchedAttributes = {
+                     "description", 
+                     "cn", 
+                     "sn", 
+                     "objectClass",
+                     "userPassword", 
+                     "telephoneNumber", 
+                     "seeAlso", 
+                     "jpegPhoto",
+                     "mail"
+                 }),
+         propertiesBasedSyncOptions = 
+             @CreatePropertiesBasedSyncOptions(
+                 mainIdentifier = "\"cn=\" + srcBean.getDatasetFirstValueById(\"cn\") + \","
+                         + "ou=L2LDst,ou=Test Data,dc=lsc-project,dc=org\"",
+                 defaultDelimiter = ",",
+                 defaultPolicy = PolicyType.KEEP,
+                 //conditions = ''
+                 //hooks = "",
+                 dataset = {
+                     // TelepĥoneNumber dataset
+                     @CreateDataset(
+                         name = "telephoneNumber",
+                         policy = PolicyType.MERGE,
+                         defaultValues = {
+                             @CreateValuesType(string = {"\"123456\"","\"789987\""})
+                         },
+                         createValues = {
+                             @CreateValuesType(string = {"\"000000\"","\"11111\""})
+                         }),
+                     // ObjectClass dataset
+                     @CreateDataset(
+                         name = "objectclass",
+                         policy = PolicyType.MERGE,
+                         defaultValues = {
+                             @CreateValuesType(string = {"\"person\"","\"top\""})
+                         },
+                         createValues = {
+                             @CreateValuesType(string = {"\"inetOrgPerson\""})
+                         }),
+                     // initials dataset
+                     @CreateDataset(
+                         name = "initials",
+                         policy = PolicyType.FORCE,
+                         createValues = {
+                             @CreateValuesType(string = {"\"cn=oops\""})
+                         }),
+                     // default dataset
+                     @CreateDataset(
+                         name = "default",
+                         policy = PolicyType.FORCE),
+                     // description dataset
+                     @CreateDataset(
+                         name = "description",
+                         policy = PolicyType.MERGE,
+                         forceValues = {
+                             @CreateValuesType(string = {
+                                 "  var j=0;\n"
+                                 + "var dstDescrValues = new Array();\n"
+                                 + "var srcDescrValues = srcBean.getDatasetById(\"description\").toArray();\n"
+                                 + "for (var i=0; i < srcDescrValues.length; i++ ) {\n"
+                                 + "    if ( srcDescrValues[i] != null ) {\n"
+                                 + "        // The sample just copy the value but you can do what you want here!\n"
+                                 + "        // Just keep in mind to force a correct data type because the source "
+                                 + "        // values are mapped to a generic Object type\n"
+                                 + "        // which will not be well handled by the Javascript engine !\n"
+                                 + "        dstDescrValues[j++] = \"modified: \" + srcDescrValues[i];\n"
+                                 + "     }\n"
+                                 + "}\n"
+                                 + "dstDescrValues\n"
+                                 + ""
+                             })
+                         }),
+                     // seeAlso dataset
+                     @CreateDataset(
+                         name = "seealso",
+                         policy = PolicyType.FORCE),
+                     // jpegPhoto dataset
+                     @CreateDataset(
+                         name = "jpegPhoto",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"srcBean.getDatasetFirstBinaryValueById(\"jpegPhoto\")"})
+                         }),
+                     // userPassword dataset
+                     @CreateDataset(
+                         name = "userPassword",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"\"secret\" + srcBean.getDatasetFirstValueById(\"cn\")"})
+                         }),
+                     // mail dataset
+                     @CreateDataset(
+                         name = "mail",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"\"ok@domain.net\""})
+                         })
+                 })
+     )}
+)
+
+public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
+    public final static String TASK_NAME = "L2LTestTask";
+    
+    private static final String JPEG_PHOTO =
+            "/9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAA"
+            + "AgAAADEBAgAMAAAAWgAAADIBAgAUAAAAZgAAAHoAAAAsAQAAAQAAACwBAAABAAAAR0lNUCAyLjEwLjgAMjAxOTowMzowNSAxNzozMjo1Nw"
+            + "AIAAABBAABAAAAAAEAAAEBBAABAAAAAAEAAAIBAwADAAAA4AAAAAMBAwABAAAABgAAAAYBAwABAAAABgAAABUBAwABAAAAAwAAAAECBAAB"
+            + "AAAA5gAAAAICBAABAAAAdQYAAAAAAAAIAAgACAD/2P/gABBKRklGAAEBAAABAAEAAP/bAEMACAYGBwYFCAcHBwkJCAoMFA0MCwsMGRITDx"
+            + "QdGh8eHRocHCAkLicgIiwjHBwoNyksMDE0NDQfJzk9ODI8LjM0Mv/bAEMBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIy"
+            + "MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAQABAAMBIgACEQEDEQH/xAAfAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCg"
+            + "v/xAC1EAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpD"
+            + "REVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1d"
+            + "bX2Nna4eLj5OXm5+jp6vHy8/T19vf4+fr/xAAfAQADAQEBAQEBAQEBAAAAAAAAAQIDBAUGBwgJCgv/xAC1EQACAQIEBAMEBwUEBAABAncA"
+            + "AQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaG"
+            + "lqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4"
+            + "+fr/2gAMAwEAAhEDEQA/AOfooor9MPnwooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA"
+            + "CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooo"
+            + "AKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiii"
+            + "gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK"
+            + "KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoo"
+            + "ooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACi"
+            + "iigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK"
+            + "KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA"
+            + "ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKA"
+            + "CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooo"
+            + "AKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiii"
+            + "gAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK"
+            + "KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoo"
+            + "ooAKKKKACiiigD/9kA/9sAQwD/////////////////////////////////////////////////////////////////////////////////"
+            + "/////9sAQwH//////////////////////////////////////////////////////////////////////////////////////8IAEQgAAQ"
+            + "ABAwERAAIRAQMRAf/EABQAAQAAAAAAAAAAAAAAAAAAAAH/xAAUAQEAAAAAAAAAAAAAAAAAAAAB/9oADAMBAAIQAxAAAAET/8QAFBABAAAA"
+            + "AAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP"
+            + "/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9oA"
+            + "DAMBAAIAAwAAABD/AP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Qf//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Qf/"
+            + "/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Qf//Z";
+
+    // A few definition overloading those from the parent class
+    private final static String SOURCE_DN = "ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org";
+    private final static String DESTINATION_DN = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org";
+
+    private final static String DN_ADD_SRC = "cn=CN0003," + SOURCE_DN; 
+    private final static String DN_ADD_DST = "cn=CN0003," + DESTINATION_DN;
+    private final static String DN_MODIFY_SRC = "cn=CN0001," + SOURCE_DN;
+    private final static String DN_MODIFY_DST = "cn=CN0001," + DESTINATION_DN;
+    private final static String DN_DELETE_SRC = "cn=CN0004," + SOURCE_DN;
+    private final static String DN_DELETE_DST = "cn=CN0004," + DESTINATION_DN;
+    private final static String DN_MODRDN_SRC = "cn=CN0002," + SOURCE_DN;
+    private final static String DN_MODRDN_DST_BEFORE = "cn=CommonName0002," + DESTINATION_DN;
+    private final static String DN_MODRDN_DST_AFTER = "cn=CN0002," + DESTINATION_DN;
 
 	@BeforeEach
 	public void setup() {
-		LscConfiguration.reset();
-		LscConfiguration.getInstance();
-		assertNotNull(LscConfiguration.getConnection("src-ldap"));
-		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
-		reloadJndiConnections();
+        LscConfiguration.loadFromInstance(classLscInstance);
+        LscConfiguration.getInstance();
+        reloadJndiConnections();
 	}
 
 	/**
@@ -156,7 +528,7 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 		// OpenDS automatically hashes the password using seeded SHA,
 		// so we can't test the full value, just the beginning.
 		// This is sufficient to confirm we can read the attribute as a String.
-        assertTrue(userPassword.startsWith("{SSHA}"));
+		assertTrue(userPassword.startsWith("{SSHA}"));
 
 		((SimpleJndiSrcService) srcService).close();
 	}
@@ -513,17 +885,6 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
         // make sure the contents of the directory are as we expect to begin with
         String TASK_NAME = "L2LTestTask";
         
-        // The two roots
-        String origin = "ou=origin,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
-        String target = "ou=target,ou=L2LWithStar,ou=Test Data,dc=lsc-project,dc=org";
-
-        // The entries
-        String noTelAddOrigin = "cn=noTelAdd," + origin;
-        String noTelAddTarget = "cn=noTelAdd," + target;
-
-        String telAddOrigin = "cn=telAdd," + origin;
-        String telAddTarget = "cn=telAdd," + target;
-        
         //---------------------------------------------------------------------------------
         // First check with no default/create/force values.
         //---------------------------------------------------------------------------------
@@ -538,19 +899,19 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
         setCreateValues( telephoneNumber, "'000000'", "11111" );
 
         // Inject ObjectClass
-        DatasetType objectClass = setDataSet(TASK_NAME_STAR, "objectClass", PolicyType.MERGE );
+        DatasetType objectClass = setDataSet(TASK_NAME, "objectClass", PolicyType.MERGE );
         setDefaultValues( objectClass, "'top'", "'person'" );
         setCreateValues( objectClass, "'inetOrgPerson'" );
 
         // Inject initials
-        DatasetType initials = setDataSet(TASK_NAME_STAR, "initials", PolicyType.FORCE );
+        DatasetType initials = setDataSet(TASK_NAME, "initials", PolicyType.FORCE );
         setCreateValues( initials, "cn=oops" );
 
         // Inject default
-        setDataSet(TASK_NAME_STAR, "default", PolicyType.FORCE );
+        setDataSet(TASK_NAME, "default", PolicyType.FORCE );
 
         // Inject Description
-        DatasetType description = setDataSet(TASK_NAME_STAR, "description", PolicyType.MERGE );
+        DatasetType description = setDataSet(TASK_NAME, "description", PolicyType.MERGE );
         
         setForceValues( description, "var j=0; \n"
                 + "                   var dstDescriptionValues = new Array();\n"
@@ -567,18 +928,18 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
                 + "                   dstDescriptionValues" );
 
         // Inject seeAlso
-        setDataSet(TASK_NAME_STAR, "seeAlso", PolicyType.FORCE );
+        setDataSet(TASK_NAME, "seeAlso", PolicyType.FORCE );
 
         // Inject jpegPhoto
-        DatasetType jpegPhoto = setDataSet(TASK_NAME_STAR, "jpegPhoto", PolicyType.FORCE );
+        DatasetType jpegPhoto = setDataSet(TASK_NAME, "jpegPhoto", PolicyType.FORCE );
         setForceValues( jpegPhoto, "srcBean.getDatasetFirstBinaryValueById('jpegPhoto')" );
 
         // Inject userPassword
-        DatasetType userPassword = setDataSet(TASK_NAME_STAR, "userPassword", PolicyType.FORCE );
+        DatasetType userPassword = setDataSet(TASK_NAME, "userPassword", PolicyType.FORCE );
         setForceValues( userPassword, "'secret' + srcBean.getDatasetFirstValueById('cn')" );
 
         // Inject mail
-        DatasetType mail = setDataSet(TASK_NAME_STAR, "mail", PolicyType.FORCE );
+        DatasetType mail = setDataSet(TASK_NAME, "mail", PolicyType.FORCE );
         setCreateValues( mail, "'ok@domain.net'" );
         
         //initialInjectionCheckL2LTests(origin, target);

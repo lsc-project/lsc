@@ -109,7 +109,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Set<String> getCreateAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getCreateValues().getString().isEmpty()) {
+		    if ((attr.getCreateValues() != null) && !attr.getCreateValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
@@ -120,7 +120,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Set<String> getDefaultValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getDefaultValues().getString().isEmpty()) {
+		    if ((attr.getDefaultValues() != null) && !attr.getDefaultValues().getString().isEmpty()) {
 				createAttrs.add(attr.getName());
 			}
 		}
@@ -131,7 +131,7 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Set<String> getForceValuedAttributeNames() {
 		Set<String> createAttrs = new HashSet<String>();
 		for (DatasetType attr : conf.getDataset()) {
-			if (!attr.getForceValues().getString().isEmpty()) {
+		    if ((attr.getForceValues() != null) && (!attr.getForceValues().getString().isEmpty())) {
 				createAttrs.add(attr.getName());
 			}
 		}
@@ -143,50 +143,63 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	}
 
 	public String getCreateCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getCreate() == null) {
-			return DEFAULT_CONDITION;
-		}
-		return conf.getConditions().getCreate();
+        ConditionsType conditions = conf.getConditions();
+        
+        if ((conditions == null) || conditions.getCreate() == null) {
+            return DEFAULT_CONDITION;
+        } else {
+            return conditions.getCreate();
+        }
 	}
 
 	public String getDeleteCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getDelete() == null) {
+	    ConditionsType conditions = conf.getConditions();
+	    
+	    if ((conditions == null) || conditions.getDelete() == null) {
 			return DEFAULT_CONDITION;
-		}
-		return conf.getConditions().getDelete();
+	    } else {
+	        return conditions.getDelete();
+	    }
 	}
 
 	public String getUpdateCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getUpdate() == null) {
-			return DEFAULT_CONDITION;
-		}
-		return conf.getConditions().getUpdate();
+        ConditionsType conditions = conf.getConditions();
+        
+        if ((conditions == null) || conditions.getUpdate() == null) {
+            return DEFAULT_CONDITION;
+        } else {
+            return conditions.getUpdate();
+        }
 	}
 
 	public String getChangeIdCondition() {
-		if (conf.getConditions() == null || conf.getConditions().getChangeId() == null) {
-			return DEFAULT_CONDITION;
-		}
-		return conf.getConditions().getChangeId();
+        ConditionsType conditions = conf.getConditions();
+        
+        if ((conditions == null) || conditions.getChangeId() == null) {
+            return DEFAULT_CONDITION;
+        } else {
+            return conditions.getChangeId();
+        }
 	}
 
 	public String getCondition(LscModificationType operation) {
 		String result = DEFAULT_CONDITION;
 		switch (operation) {
 			case CREATE_OBJECT:
-				result = this.getCreateCondition();
-				break;
+			    return getCreateCondition();
+			    
 			case UPDATE_OBJECT:
-				result = this.getUpdateCondition();
-				break;
+			    return getUpdateCondition();
+			    
 			case DELETE_OBJECT:
-				result = this.getDeleteCondition();
-				break;
+			    return getDeleteCondition();
+			    
 			case CHANGE_ID:
-				result = this.getChangeIdCondition();
-				break;
+			    return getChangeIdCondition();
+			    
+			default:
+			    return DEFAULT_CONDITION;
 		}
-		return result;
 	}
 
 	public OutputFormat getPostHookOutputFormat() {
@@ -229,15 +242,20 @@ public class PropertiesBasedSyncOptions implements ISyncOptions {
 	public Optional<String> getPostHook(LscModificationType operation) {
 		switch (operation) {
 			case CREATE_OBJECT:
-				return this.getCreatePostHook();
+				return getCreatePostHook();
+				
 			case UPDATE_OBJECT:
-				return this.getUpdatePostHook();
+				return getUpdatePostHook();
+				
 			case DELETE_OBJECT:
-				return this.getDeletePostHook();
+				return getDeletePostHook();
+				
 			case CHANGE_ID:
-				return this.getChangeIdPostHook();
+				return getChangeIdPostHook();
+				
+			default:
+			    return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	public String getDelimiter(String name) {

@@ -58,7 +58,9 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.SearchResult;
 
 import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
+import org.junit.jupiter.api.AfterAll;
 import org.lsc.configuration.LdapConnectionType;
+import org.lsc.configuration.Lsc;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.jndi.JndiServices;
 
@@ -77,6 +79,9 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 	public final static String SOURCE_DN = "ou=ldap2ldap2TestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";
 	public final static String DESTINATION_DN = "ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org";
 	
+    /** The LSC instance */
+    public static Lsc classLscInstance;
+
 	public String getTaskName() {
 		return TASK_NAME;
 	}
@@ -120,7 +125,8 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 	 * @param expectedValues List of values expected in the attribute.
 	 * @throws NamingException
 	 */
-	protected void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) throws NamingException {
+	protected void checkAttributeValues(String dn, String attributeName, List<String> expectedValues) 
+	        throws NamingException {
 		SearchResult sr = dstJndiServices.readEntry(dn, false);
 		Attribute at = sr.getAttributes().get(attributeName);
 		if (expectedValues.size() > 0) {
@@ -168,5 +174,12 @@ public class CommonLdapSyncTest extends AbstractLdapTestUnit {
 
 		String realValue = (String) at.get();
 		assertEquals(value, realValue);
+	}
+	
+	@AfterAll
+	protected static void resetLsc() {
+	    //classLscInstance.getTasks().getTask().clear();
+	    //classLscInstance.getConnections().
+	    classLscInstance = null;
 	}
 }

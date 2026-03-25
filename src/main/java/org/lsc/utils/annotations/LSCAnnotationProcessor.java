@@ -49,6 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.directory.api.util.Strings;
+import org.lsc.configuration.ConditionsType;
 import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.ConnectionsType;
 import org.lsc.configuration.DatabaseConnectionType;
@@ -400,6 +401,41 @@ public class LSCAnnotationProcessor {
             syncOptions.setDefaultDelimiter(properties.defaultDelimiter());
         }
         
+        CreateConditions[] conditions = properties.conditions();
+        
+        if ( conditions != null ) {
+            for ( CreateConditions condition : conditions) {
+                ConditionsType conditionsType = new ConditionsType();
+                syncOptions.setConditions(conditionsType);
+
+                // The create condition
+                String create = condition.create();
+                
+                if ( Strings.isNotEmpty(create)) {
+                    conditionsType.setCreate(create);
+                }
+                
+                // The update condition
+                String update = condition.update();
+                
+                if ( Strings.isNotEmpty(update)) {
+                    conditionsType.setUpdate(update);
+                }
+                
+                // The delete condition
+                String delete = condition.delete();
+                
+                if ( Strings.isNotEmpty(delete)) {
+                    conditionsType.setDelete(delete);
+                }
+                
+                // The changeId condition
+                String changeId = condition.changeId();
+                if ( Strings.isNotEmpty(changeId)) {
+                    conditionsType.setChangeId(changeId);
+                }
+            }
+        }
         // The datasets
         CreateDataset[] datasets = properties.dataset();
         List<DatasetType> datasetsType = syncOptions.getDataset();

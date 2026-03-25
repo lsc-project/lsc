@@ -400,9 +400,8 @@ public class LSCAnnotationProcessor {
         if (Strings.isNotEmpty(properties.defaultDelimiter())) {
             syncOptions.setDefaultDelimiter(properties.defaultDelimiter());
         }
-
         CreateConditions[] conditions = properties.conditions();
-
+        
         if ( conditions != null ) {
             for ( CreateConditions condition : conditions) {
                 ConditionsType conditionsType = new ConditionsType();
@@ -410,25 +409,25 @@ public class LSCAnnotationProcessor {
 
                 // The create condition
                 String create = condition.create();
-
+                
                 if ( Strings.isNotEmpty(create)) {
                     conditionsType.setCreate(create);
                 }
-
+                
                 // The update condition
                 String update = condition.update();
-
+                
                 if ( Strings.isNotEmpty(update)) {
                     conditionsType.setUpdate(update);
                 }
-
+                
                 // The delete condition
                 String delete = condition.delete();
-
+                
                 if ( Strings.isNotEmpty(delete)) {
                     conditionsType.setDelete(delete);
                 }
-
+                
                 // The changeId condition
                 String changeId = condition.changeId();
                 if ( Strings.isNotEmpty(changeId)) {
@@ -436,7 +435,7 @@ public class LSCAnnotationProcessor {
                 }
             }
         }
- 
+
         // The datasets
         CreateDataset[] datasets = properties.dataset();
         List<DatasetType> datasetsType = syncOptions.getDataset();

@@ -58,19 +58,46 @@ import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith({ ApacheDSTestExtension.class })
-@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
-		@LoadSchema(name = "other", enabled = true) }, partitions = {
-				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
-						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
-								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
-								@CreateIndex(attribute = "ou") }) })
-@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@CreateDS(
+    name = "DSWithPartitionAndServer", 
+    loadedSchemas = {
+        @LoadSchema(name = "other", enabled = true) }, 
+    partitions = {
+		@CreatePartition(
+		    name = "lsc-project", 
+		    suffix = "dc=lsc-project,dc=org", 
+		    contextEntry = @ContextEntry(
+		        entryLdif = 
+		            "dn: dc=lsc-project,dc=org\n"+
+					"dc: lsc-project\n" + 
+		            "objectClass: top\n" + 
+					"objectClass: domain\n\n"), 
+		    indexes = {
+				@CreateIndex(attribute = "objectClass"), 
+				@CreateIndex(attribute = "dc"),
+				@CreateIndex(attribute = "ou") 
+		    }) 
+	})
+@CreateLdapServer(
+    allowAnonymousAccess = true, 
+    transports = { 
+        @CreateTransport(protocol = "LDAP", port = 33389),
+		@CreateTransport(protocol = "LDAPS", port = 33636) 
+})
 @ApplyLdifs({
-		// Entry # 0
-		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
-		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
-@ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
+	// Entry # 0
+	"dn: cn=Directory Manager,ou=system", 
+	"objectClass: person", 
+	"objectClass: top", 
+	"cn: Directory Manager",
+	"description: Directory Manager", 
+	"sn: Directory Manager", 
+	"userpassword: secret" 
+})
+@ApplyLdifFiles({ 
+    "lsc-schema.ldif", 
+    "lsc-project.ldif" 
+})
 public class Ldap2LdapSamePivotConversionSyncTest extends Ldap2LdapBinaryPivotSyncTest {
 
 	public static String SOURCE_DN = "ou=ldap2ldapSamePivotConversionTestTaskSrc,ou=Test Data,dc=lsc-project,dc=org";

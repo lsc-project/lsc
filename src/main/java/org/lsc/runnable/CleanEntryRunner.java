@@ -84,6 +84,7 @@ public class CleanEntryRunner extends AbstractEntryRunner {
 
 					// Evaluate if we have to do something
 					doDelete = ScriptingEvaluator.evalToBoolean(task, conditionString, conditionObjects);
+                    LOGGER.debug("DoDelete returns {}", doDelete);
 				}
 				
 				if (doDelete) {

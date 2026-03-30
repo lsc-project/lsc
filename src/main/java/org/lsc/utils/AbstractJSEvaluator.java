@@ -195,16 +195,18 @@ public abstract class AbstractJSEvaluator implements ScriptableEvaluator {
                 return new ArrayList<Object>();
             }
         }
-        
-        if (result instanceof String[]) {
-            return Arrays.asList((String[])result);
-        }
-        
+
         if (result instanceof Object[]) {
             return Arrays.asList((Object[])result);
         }
         
         List<Object> resultsArray = new ArrayList<Object>();
+        
+        if (result instanceof String[]) {
+            for (String resultValue : (String[]) result) {
+                resultsArray.add(resultValue);
+            }
+        }
         
         if (result instanceof List) {
             for (Object resultValue : (List<?>) result) {
@@ -217,15 +219,28 @@ public abstract class AbstractJSEvaluator implements ScriptableEvaluator {
                 resultsArray.add(result.toString());
             }
         }
+        
         return resultsArray;
     }
 
+    @Override
+    public String evalToFilter(String expression, Map<String, Object> params) throws LscServiceException {
+        Object result = filterEval(expression, params);
+
+        if (result == null) {
+            return expression;
+        } else if (result instanceof String) {
+            return (String) result;
+        } else {
+            return result.toString();
+        }
+    }
 
     /**
      * Local instance evaluation.
      * 
      * @param task The associated task
-     * @param expression the expression to eval
+     * @param expression the expression to evaluate
      * @param params the keys are the name used in the
      * @return the evaluation result
      * @throws LscServiceException If the evaluation throws an exception
@@ -233,6 +248,17 @@ public abstract class AbstractJSEvaluator implements ScriptableEvaluator {
     abstract protected Object instanceEval(Task task, String expression, Map<String, Object> params) 
         throws LscServiceException;
     
+
+    /**
+     * Local instance evaluation of a filter.
+     * 
+     * @param expression the expression to evaluate
+     * @param params the keys are the name used in the
+     * @return the evaluation result
+     * @throws LscServiceException If the evaluation throws an exception
+     */
+    abstract protected Object filterEval(String expression, Map<String, Object> params) throws LscServiceException;
+
     /**
      * A method to convert the JavaScript result value to Java
      * 

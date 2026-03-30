@@ -190,6 +190,70 @@ public final class RhinoJScriptEvaluator extends AbstractJSEvaluator {
 	}
 
     /** {@inheritDoc} */
+    protected Object filterEval(String expression, Map<String, Object> params)  throws LscServiceException {
+        RhinoDebugger rhinoDebugger = null;
+        Map<String, Object> localParams = new HashMap<String, Object>();
+        
+        if (params != null) {
+            localParams.putAll(params);
+        }
+
+        /*
+         * Allow to have shorter names for function in the package
+         * org.lsc.utils.directory
+         */
+        String expressionImport = "with (new JavaImporter(Packages.org.lsc.utils.directory)) {"
+                + "with (new JavaImporter(Packages.org.lsc.utils)) {\n" + expression + "\n}}";
+
+        ContextFactory factory = new ContextFactory();
+
+        if (debug) {
+            rhinoDebugger = new RhinoDebugger(expressionImport, factory);
+        }
+
+        cx = factory.enterContext();
+
+        Scriptable scope = cx.initStandardObjects();
+        Script script = cx.compileString(expressionImport, "<cmd>", 1, null);
+
+        for (Entry<String, Object> entry : localParams.entrySet()) {
+            Object jsObj = Context.javaToJS(entry.getValue(), scope);
+            ScriptableObject.putProperty(scope, entry.getKey(), jsObj);
+        }
+
+        Object ret = null;
+        
+        try {
+            if (debug) {
+                rhinoDebugger.initContext(cx, scope, script);
+                Object jsObj = Context.javaToJS(rhinoDebugger, scope);
+                ScriptableObject.putProperty(scope, "rhinoDebugger", jsObj);
+                ret = rhinoDebugger.exec();
+            } else {
+                ret = script.exec(cx, scope);
+            }
+        } catch (EcmaError e) {
+            LOGGER.error(e.toString());
+            LOGGER.debug(e.toString(), e);
+            throw new LscServiceException(e);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            LOGGER.debug(e.toString(), e);
+            throw new LscServiceException(e);
+        } finally {
+            if (debug) {
+                rhinoDebugger.run();
+            }
+            
+            Context.exit();
+        }
+        
+        return ret;
+    }
+
+    /** {@inheritDoc} */
 	protected Object convertJsToJava(Object src) {
 		if (src == null) {
 			return null;

@@ -239,4 +239,9 @@ public final class GroovyEvaluator implements ScriptableEvaluator {
 
 		return ret;
 	}
+
+    @Override
+    public String evalToFilter(String expression, Map<String, Object> params) throws LscServiceException {
+        return expression;
+    }
 }

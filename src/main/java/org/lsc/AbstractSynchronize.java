@@ -450,10 +450,13 @@ public abstract class AbstractSynchronize {
 	protected Object transform(Task task, PivotTransformationType.Transformation transformation, Object value) throws LscServiceException{
 		Map<String, Object> javaScriptObjects = new HashMap<String, Object>();
 		javaScriptObjects.put("value", value);
+		
 		if (task.getCustomLibraries() != null) {
 			javaScriptObjects.put("custom", task.getCustomLibraries());
 		}
+		
 		javaScriptObjects.putAll(task.getScriptingVars());
+		
 		if (LscConfiguration.isLdapBinaryAttribute(transformation.getToAttribute())) {
 			return ScriptingEvaluator.evalToByteArray(task, transformation.getValue(), javaScriptObjects);
 		} else {

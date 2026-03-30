@@ -105,9 +105,12 @@ public final class JScriptEvaluator extends AbstractJSEvaluator {
 		 * Allow to have shorter names for function in the package
 		 * org.lsc.utils.directory
 		 */
-		String expressionImport = "var version = java.lang.System.getProperty(\"java.version\");\n"
-				+ "load(\"nashorn:mozilla_compat.js\");\n" + "importPackage(org.lsc.utils.directory);\n"
-				+ "importPackage(org.lsc.utils);\n" + expression;
+		String expressionImport = 
+		        "var version = java.lang.System.getProperty(\"java.version\");\n" +
+				"load(\"nashorn:mozilla_compat.js\");\n" + 
+		        "importPackage(org.lsc.utils.directory);\n" +
+				"importPackage(org.lsc.utils);\n" + 
+		        expression;
 
 		// add LDAP interface for destination
 		if (!bindings.containsKey("ldap") && task.getDestinationService() instanceof AbstractSimpleJndiService) {
@@ -165,6 +168,52 @@ public final class JScriptEvaluator extends AbstractJSEvaluator {
 
 		return ret;
 	}
+
+    /** {@inheritDoc} */
+    protected Object filterEval(String expression, Map<String, Object> params)  throws LscServiceException {
+        Bindings bindings = engine.createBindings();
+
+        /*
+         * Allow to have shorter names for function in the package
+         * org.lsc.utils.directory
+         */
+        String expressionImport = 
+                "var version = java.lang.System.getProperty(\"java.version\");\n" +
+                "load(\"nashorn:mozilla_compat.js\");\n" + 
+                "importPackage(org.lsc.utils.directory);\n" +
+                "importPackage(org.lsc.utils);\n" + 
+                expression;
+
+        if (params != null) {
+            for (String paramName : params.keySet()) {
+                bindings.put(paramName, params.get(paramName));
+            }
+        }
+
+        Object ret = null;
+        try {
+            ret = engine.eval(expressionImport, bindings);
+        } catch (ScriptException e) {
+            LOGGER.error("Fail to compute expression: " + expression + " on "
+                    + (params.containsKey("srcBean") && ((IBean) params.get("srcBean")).getMainIdentifier() != null
+                            ? "id=" + ((IBean) params.get("srcBean")).getMainIdentifier()
+                            : (params.containsKey("dstBean")
+                                    && ((IBean) params.get("dstBean")).getMainIdentifier() != null
+                                            ? "id=" + ((IBean) params.get("dstBean")).getMainIdentifier()
+                                            : "unknown id !"))
+                    + "\nReason: " + e.toString());
+            LOGGER.debug(e.toString(), e);
+            throw new LscServiceException(e);
+        } catch (RuntimeException e) {
+            throw new LscServiceException(e);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            LOGGER.debug(e.toString(), e);
+            throw new LscServiceException(e);
+        }
+
+        return ret;
+    }
 
     /** {@inheritDoc} */
 	protected Object convertJsToJava(Object src) {

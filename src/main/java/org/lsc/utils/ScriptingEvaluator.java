@@ -239,4 +239,10 @@ public class ScriptingEvaluator {
 		
 		return se.evalToBoolean(task, getInstance().removePrefix(expression), params);
 	}
+
+    public static String evalFilter(String expression, Map<String, Object> params) throws LscServiceException {
+        ScriptableEvaluator se = getInstance().identifyScriptingEngine(expression);
+        
+        return se.evalToFilter(getInstance().removePrefix(expression), params);
+    }
 }

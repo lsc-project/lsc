@@ -58,6 +58,7 @@ import java.util.regex.Matcher;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.InvalidSearchFilterException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
@@ -69,7 +70,9 @@ import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapServiceType;
 import org.lsc.exception.LscConfigurationException;
+import org.lsc.exception.LscException;
 import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.utils.ScriptingEvaluator;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -306,7 +309,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 * @return The ExprNode instance that can be used to evalute the entry
 	 * @throws ParseException
 	 */
-	private String buildFilter(String id, LscDatasets pivotAttrs, String searchString) {
+	private String buildFilter(String id, LscDatasets pivotAttrs, String searchString) throws LscException {
         // Lookup for the '{id}' pattern in the filter. If found, it will be replaced
 	    // by the entry's ID. We use the quoteReplacement method to escape special chars
         String idQuoteReplacement = Matcher.quoteReplacement(id);
@@ -329,6 +332,9 @@ public abstract class AbstractSimpleJndiService implements Closeable {
             // this is kept for backwards compatibility but will be removed
             searchString = filterIdSync.replaceAll(PLACE_HOLDER, idQuoteReplacement);
         }
+        
+        // Evaluate the script now, if any. We won't use any parameter ATM
+        searchString = ScriptingEvaluator.evalFilter(searchString, null);
 
         return searchString;
 	}
@@ -343,7 +349,14 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             the identified object
 	 */
 	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
-		String processedFilter = buildFilter(id, pivotAttrs, searchString);
+		String processedFilter = null;
+		
+		try {
+		    processedFilter = buildFilter(id, pivotAttrs, searchString);
+		} catch ( LscException le ) {
+		    LOGGER.error("Error while processing filter {}, {}", searchString, le.getMessage());
+		    throw new InvalidSearchFilterException(searchString);
+		}
 		
 		return getJndiServices().getEntry(baseDn, processedFilter, _filteredSc);
 	}

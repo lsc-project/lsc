@@ -64,6 +64,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IWritableService;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +171,12 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 */
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {
-			return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE, getAttrsId());
+		    String filterAll = getFilterAll();
+		    
+		    // Evaluate the script now, if any. We won't use any parameter ATM
+		    filterAll = ScriptingEvaluator.evalFilter(filterAll, null);
+
+			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, getAttrsId());
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}

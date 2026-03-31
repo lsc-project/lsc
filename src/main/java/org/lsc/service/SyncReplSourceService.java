@@ -237,6 +237,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			// this is kept for backwards compatibility but will be removed
 			searchString = filterIdSync.replaceAll(PLACE_HOLDER, id);
 		}
+		
+		// Evaluate the script now, if any. We won't use any parameter ATM
+		searchString = ScriptingEvaluator.evalFilter(searchString, null);
 
 		// Do the actual search, but with a retry
 		try {

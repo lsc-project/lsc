@@ -61,6 +61,7 @@ import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +203,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService {
             } else {
                 searchString = filterIdClean; 
             }
-
+            
             SearchResult searchResult = get(pivotName, pivotAttributes, searchString);
             
             return getBeanFromSR(searchResult, srcBean);
@@ -230,6 +231,9 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService {
 		    List<String> requestedAttrs = getAttrsId();
 		    String filterAll = getFilterAll();
 		    
+		      // Evaluate the script now, if any. We won't use any parameter ATM
+		    filterAll = ScriptingEvaluator.evalFilter(filterAll, null);
+
 		    // When we don't have a OneFilter, we will get back all the requested attributes
 		    if ( filterAll.equalsIgnoreCase(getFilterId())) {
 		        requestedAttrs = getAttrs();

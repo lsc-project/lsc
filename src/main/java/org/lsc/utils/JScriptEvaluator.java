@@ -194,14 +194,19 @@ public final class JScriptEvaluator extends AbstractJSEvaluator {
         try {
             ret = engine.eval(expressionImport, bindings);
         } catch (ScriptException e) {
-            LOGGER.error("Fail to compute expression: " + expression + " on "
-                    + (params.containsKey("srcBean") && ((IBean) params.get("srcBean")).getMainIdentifier() != null
-                            ? "id=" + ((IBean) params.get("srcBean")).getMainIdentifier()
-                            : (params.containsKey("dstBean")
-                                    && ((IBean) params.get("dstBean")).getMainIdentifier() != null
-                                            ? "id=" + ((IBean) params.get("dstBean")).getMainIdentifier()
-                                            : "unknown id !"))
-                    + "\nReason: " + e.toString());
+            LOGGER.error("Fail to compute expression: " + expressionImport);
+            
+            if (params != null) {
+                LOGGER.error(" ---> on "
+                        + (params.containsKey("srcBean") && ((IBean) params.get("srcBean")).getMainIdentifier() != null
+                                ? "id=" + ((IBean) params.get("srcBean")).getMainIdentifier()
+                                : (params.containsKey("dstBean")
+                                        && ((IBean) params.get("dstBean")).getMainIdentifier() != null
+                                                ? "id=" + ((IBean) params.get("dstBean")).getMainIdentifier()
+                                                : "unknown id !"))
+                        + "\nReason: " + e.toString());
+            }
+            
             LOGGER.debug(e.toString(), e);
             throw new LscServiceException(e);
         } catch (RuntimeException e) {

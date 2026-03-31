@@ -206,8 +206,8 @@ tasks = {
                connectionRef = "src-ldap",
                baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                pivotAttributes = {"cn"},
-               allFilter = "(CN=CN0001)",
-               cleanFilter="(CN=CN0001)",
+               allFilter = "\"(CN=CN0001)\"",
+               cleanFilter="\"(CN=CN0001)\"",
                dateFormat = "yyyyMMddHHmmss'Z'",
                interval = 5,
                fetchedAttributes = {
@@ -219,7 +219,7 @@ tasks = {
                connectionRef = "dst-ldap",
                baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                pivotAttributes = {"cn"},
-               allFilter = "(cn=optimizevaluereplacement)",
+               allFilter = "\"(cn=optimizevaluereplacement)\"",
                fetchedAttributes = {
                    "description", 
                    "cn", 
@@ -296,8 +296,8 @@ tasks = {
                 connectionRef = "src-ldap",
                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                 pivotAttributes = {"cn"},
-                allFilter = "(cn=optimizevaluereplacement)",
-                cleanFilter="(cn=optimizevaluereplacement)",
+                allFilter = "\"(cn=optimizevaluereplacement)\"",
+                cleanFilter="\"(cn=optimizevaluereplacement)\"",
                 dateFormat = "yyyyMMddHHmmss'Z'",
                 interval = 5,
                 fetchedAttributes = {
@@ -309,7 +309,7 @@ tasks = {
                 connectionRef = "dst-ldap",
                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                 pivotAttributes = {"cn"},
-                allFilter = "(cn=optimizevaluereplacement)",
+                allFilter = "\"(cn=optimizevaluereplacement)\"",
                 fetchedAttributes = {
                     "description", 
                     "cn"
@@ -372,8 +372,8 @@ tasks = {
                  connectionRef = "src-ldap",
                  baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn"},
-                 allFilter = "(cn=optimizevaluereplacement)",
-                 cleanFilter="(cn=optimizevaluereplacement)",
+                 allFilter = "\"(cn=optimizevaluereplacement)\"",
+                 cleanFilter="\"(cn=optimizevaluereplacement)\"",
                  dateFormat = "yyyyMMddHHmmss'Z'",
                  interval = 5,
                  fetchedAttributes = {
@@ -385,7 +385,7 @@ tasks = {
                  connectionRef = "dst-ldap",
                  baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"cn"},
-                 allFilter = "(cn=optimizevaluereplacement)",
+                 allFilter = "\"(cn=optimizevaluereplacement)\"",
                  fetchedAttributes = {
                      "description", 
                      "cn"

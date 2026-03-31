@@ -83,13 +83,8 @@ import org.lsc.utils.annotations.CreateValuesType;
 import org.lsc.utils.annotations.LscTestExtension;
 
 /**
- * This test case attempts to reproduce a typical ldap2ldap setup via
- * SimpleSynchronize. This relies on settings in lsc.properties from the test
- * resources, and entries in the local OpenDS directory. testSync() performs a
- * synchronization between two branches of the local LDAP server, and should
- * perform 3 operations : 1 ADD, 1 MODRDN, 1 MODIFY. The
- * 
- * @author Jonathan Clarke &ltjonathan@phillipoux.net&gt;
+ * This test case leverage a scripted filter which select entries older than a specific date
+ * which will not be synced
  */
 @ExtendWith({ LscTestExtension.class })
 @CreateDS(
@@ -146,7 +141,7 @@ import org.lsc.utils.annotations.LscTestExtension;
         "objectClass: organizationalUnit",
         "ou: source",
         
-            // Source entry test, present in destination, and that will be updated
+            // Source entry test, present in destination, but is one year old
             "dn: uid=test1,OU=source,OU=Test Data,DC=lsc-project,DC=org",
             "objectClass: top",
             "objectClass: person",
@@ -155,9 +150,10 @@ import org.lsc.utils.annotations.LscTestExtension;
             "cn: test1",
             "sn: test1",
             "uid: test1",
-            "description: A test entry that does exist in both servers",
+            "description: A one year old entry present on both servers",
+            "createTimeStamp: 20250330000000Z",
 
-            // Source entry test2, should be added to destination
+            // Source entry test2, not present in destination, but is one year old
             "dn: uid=test2,ou=source,ou=Test Data,dc=lsc-project,dc=org",
             "objectClass: top",
             "objectClass: person",
@@ -166,16 +162,39 @@ import org.lsc.utils.annotations.LscTestExtension;
             "cn: test2",
             "sn: test2",
             "uid: test2",
-            "description: Number three's descriptive text",
+            "description: A year old entry",
+            "createTimeStamp: 20250330000000Z",
 
+            // Source entry test, present in destination, which will be updated
+            "dn: uid=test3,ou=source,ou=Test Data,dc=lsc-project,dc=org",
+            "objectClass: top",
+            "objectClass: person",
+            "objectClass: organizationalPerson",
+            "objectClass: inetOrgPerson",
+            "cn: test3",
+            "sn: test3",
+            "uid: test3",
+            "description: A recent entry present in both servers",
+
+            // Source entry test, absent from destination, which will be added
+            "dn: uid=test4,ou=source,ou=Test Data,dc=lsc-project,dc=org",
+            "objectClass: top",
+            "objectClass: person",
+            "objectClass: organizationalPerson",
+            "objectClass: inetOrgPerson",
+            "cn: test4",
+            "sn: test4",
+            "uid: test4",
+            "description: A recent entry absent from destination",
+            
         // Destination data
         "dn: cn=destination,ou=Test Data,dc=lsc-project,dc=org",
         "objectClass: top",
         "objectClass: organizationalRole",
         "cn: destination",
 
-            // This entry will be updated from source, with an added description attribute
-            "dn: CN=test1,CN=destination,OU=Test Data,DC=lsc-project,DC=org",
+            // This entry will not be updated because the source entry is one year old
+            "dn: cn=test1,cn=destination,ou=Test Data,dc=lsc-project,dc=org",
             "objectClass: top",
             "objectClass: person",
             "objectClass: organizationalPerson",
@@ -183,14 +202,14 @@ import org.lsc.utils.annotations.LscTestExtension;
             "cn: test1",
             "sn: test1",
             
-            // Destination entry toDelete will be deleted in clean mode
-            "dn: cn=toDelete,cn=destination,ou=Test Data,dc=lsc-project,dc=org",
+            // This entry will be updated because the source entry is recent
+            "dn: cn=test3,cn=destination,ou=Test Data,dc=lsc-project,dc=org",
             "objectClass: top",
             "objectClass: person",
             "objectClass: organizationalPerson",
             "objectClass: inetOrgPerson",
-            "cn: toDelete",
-            "sn: toDelete"
+            "cn: test3",
+            "sn: test3",
 
 })
 @ApplyLdifFiles({ 
@@ -238,10 +257,9 @@ import org.lsc.utils.annotations.LscTestExtension;
                  connectionRef = "src-ldap",
                  baseDn = "ou=source,ou=Test Data,dc=lsc-project,dc=org",
                  pivotAttributes = {"uid"},
-                 // The allFilter select all entries from source
-                 allFilter = "\"(uid=*)\"",
-                 // The one filter will select every entry from source
-                 oneFilter = "\"(uid={uid})\"",
+                 // The allFilter select all entries from source, as soon as they are less than 1 years old
+                 allFilter = "\"(&(uid=*)(createTimeStamp>=\" + (new Date().getFullYear()-1) + \"1231235959Z))\"",
+                 oneFilter = "\"(&(uid={uid})(createTimeStamp>=\" + (new Date().getFullYear()-1) + \"1231235959Z))\"",
                  // The clean filter will select all entries from *destination*, thus the 'cn'
                  cleanFilter = "\"(uid={cn})\"",
                  dateFormat = "yyyyMMddHHmmss'Z'",
@@ -318,20 +336,19 @@ import org.lsc.utils.annotations.LscTestExtension;
      )}
 )
 
-public class Ldap2LdapSyncCleanTest extends CommonLdapSyncTest {
+public class Ldap2LdapScriptInFilter extends CommonLdapSyncTest {
     public final static String TASK_NAME = "L2LTestTaskDelete";
     
     /** The Ldap connection to the defined Ldap server */
     private LdapConnection connection;
 
     // A few definition overloading those from the parent class
-    private final static String SOURCE_DN = "ou=source,ou=Test Data,dc=lsc-project,dc=org";
     private final static String DESTINATION_DN = "cn=destination,ou=Test Data,dc=lsc-project,dc=org";
 
-    private final static String DN_DELETE_SRC = "uid=toDelete," + SOURCE_DN;
-    private final static String DN_DELETE_DST = "CN=toDelete," + DESTINATION_DN;
-    private final static String DN_UPDATE_DST = "CN=test1," + DESTINATION_DN;
-    private final static String DN_CREATE_DST = "CN=test2," + DESTINATION_DN;
+    private final static String DN_TEST1_DST = "CN=test1," + DESTINATION_DN;
+    private final static String DN_TEST2_DST = "CN=test2," + DESTINATION_DN;
+    private final static String DN_TEST3_DST = "CN=test3," + DESTINATION_DN;
+    private final static String DN_TEST4_DST = "CN=test4," + DESTINATION_DN;
 
     // Define the type of task to launch
     private static enum TaskType {
@@ -354,49 +371,29 @@ public class Ldap2LdapSyncCleanTest extends CommonLdapSyncTest {
 	 * Test that we can forbid the deletion of entries based on a condition
 	 */
 	@Test
-	public final void testCleanLdap2Ldap() throws Exception {
-		// make sure the contents of the directory are as we expect to begin with
-		assertTrue(dstJndiServices.exists(DN_DELETE_DST));
-		assertFalse(srcJndiServices.exists(DN_DELETE_SRC));
-
-		// perform the clean
-		System.out.println("------> Clean phase, delete toDelete");
-		launchTask(TASK_NAME, TaskType.CLEAN);
-
-		// check the results of the clean
-		reloadJndiConnections();
-		
-		// The CN=toDelete entry must have been deleted, the CN=test1 should be present, and
-		// CN=test2 absent
-		assertFalse(dstJndiServices.exists(DN_DELETE_DST));
-        assertFalse(dstJndiServices.exists(DN_CREATE_DST));
-        assertTrue(dstJndiServices.exists(DN_UPDATE_DST));
-        
-		// Now launch the create task
+	public final void testSyncWithScriptedFilter() throws Exception {
+		// Launch the create task
         launchTask(TASK_NAME, TaskType.SYNC);
         
         // check the result on sync
         reloadJndiConnections();
 
-        // The CN+toDelete must be absent, the CN=test1 must have been updated
-        // and the CN=test2 must have been added
-        assertFalse(dstJndiServices.exists(DN_DELETE_DST));
-        assertTrue(dstJndiServices.exists(DN_UPDATE_DST));
-        assertTrue(dstJndiServices.exists(DN_CREATE_DST));
-
-        // Check that the updated entry contains the description Attribute
-        Entry test1Entry = connection.lookup(DN_UPDATE_DST);
-        assertTrue(test1Entry.contains( "description", "A test entry that does exist in both servers"));
-
-        // And check that the test2 entry has been created properly
-        Entry test2Entry = connection.lookup(DN_CREATE_DST);
-        assertTrue(test2Entry.contains( "cn", "test2"));
-        assertTrue(test2Entry.contains( "sn", "test2"));
-        assertTrue(test2Entry.contains( "objectClass", "top", "person", "organizationalPerson", "inetOrgPerson"));
-        assertTrue(test2Entry.contains( "description", "Number three's descriptive text"));
+        // The test1 should be present, but not updated
+        assertTrue(dstJndiServices.exists(DN_TEST1_DST));
+        Entry test1Entry = connection.lookup(DN_TEST1_DST);
+        assertFalse(test1Entry.containsAttribute( "description"));
         
-        // The uid must not be present
-        assertFalse(test2Entry.containsAttribute( "uid" ));
+        // The test2 should not have been added
+        assertFalse(dstJndiServices.exists(DN_TEST2_DST));
+
+        // The test3 should be present and have been updated
+        assertTrue(dstJndiServices.exists(DN_TEST3_DST));
+        
+        // The test4 should have been added
+        assertTrue(dstJndiServices.exists(DN_TEST4_DST));
+        Entry test4Entry = connection.lookup(DN_TEST4_DST);
+        System.out.println(test4Entry);
+        assertTrue(test4Entry.contains( "description", " A recent entry absent from destination"));
 	}
 
 	private static void launchTask(String taskName, TaskType taskType)

@@ -97,9 +97,9 @@
 					<string>seeAlso</string>
 					<string>jpegPhoto</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*))</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
-				<filterAsync>(&amp;(sn=*)(modifytimestamp&gt;={0}))</filterAsync>
+				<getAllFilter>"(&amp;(sn=*))"</getAllFilter>
+				<getOneFilter>"(sn={sn})"</getOneFilter>
+				<filterAsync>"(&amp;(sn=*)(modifytimestamp&gt;={0}))"</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -122,8 +122,8 @@
 					<string>jpegPhoto</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(sn=*)</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
+				<getAllFilter>"(sn=*)"</getAllFilter>
+				<getOneFilter>"(sn={sn})"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -242,8 +242,8 @@
 					<string>mail</string>
 					<string>gn</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*)(gn=*))</getAllFilter>
-				<getOneFilter>(&amp;(sn={sn})(gn={gn}))</getOneFilter>
+				<getAllFilter>"(&amp;(sn=*)(gn=*))"</getAllFilter>
+				<getOneFilter>"(&amp;(sn={sn})(gn={gn}))"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("gn") + " " + srcBean.getDatasetFirstValueById("sn") + ",ou=db2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -333,8 +333,8 @@
 					<string>telephoneNumber</string>
 					<string>seeAlso</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*))</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
+				<getAllFilter>"(&amp;(sn=*))"</getAllFilter>
+				<getOneFilter>"(sn={sn})"</getOneFilter>
 				<filterAsync>(&amp;(sn=*)(modifytimestamp&gt;={0}))</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
@@ -357,8 +357,8 @@
 					<string>seeAlso</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(sn=*)</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
+				<getAllFilter>"(sn=*)"</getAllFilter>
+				<getOneFilter>"(sn={sn})"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapJmxTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -402,10 +402,10 @@
 					<string>seeAlso</string>
 					<string>personalSignature</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(personalSignature=*))</getAllFilter>
-				<getOneFilter>(personalSignature={personalSignature})</getOneFilter>
-				<cleanFilter>(personalSignature={personalSignature})</cleanFilter>
-				<filterAsync>(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))</filterAsync>
+				<getAllFilter>"(&amp;(personalSignature=*))"</getAllFilter>
+				<getOneFilter>"(personalSignature={personalSignature})"</getOneFilter>
+				<cleanFilter>"(personalSignature={personalSignature})"</cleanFilter>
+				<filterAsync>"(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))"</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -428,8 +428,8 @@
 					<string>mail</string>
 					<string>personalSignature</string>
 				</fetchedAttributes>
-				<getAllFilter>(personalSignature=*)</getAllFilter>
-				<getOneFilter>(personalSignature={personalSignature})</getOneFilter>
+				<getAllFilter>"(personalSignature=*)"</getAllFilter>
+				<getOneFilter>"(personalSignature={personalSignature})"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapBinaryTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -470,9 +470,9 @@
 					<string>seeAlso</string>
 					<string>personalSignature</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(personalSignature=*))</getAllFilter>
-				<getOneFilter>(personalSignature={personalSignature})</getOneFilter>
-				<filterAsync>(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))</filterAsync>
+				<getAllFilter>"(&amp;(personalSignature=*))"</getAllFilter>
+				<getOneFilter>"(personalSignature={personalSignature})"</getOneFilter>
+				<filterAsync>"(&amp;(personalSignature=*)(modifytimestamp&gt;={0}))"</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -494,8 +494,8 @@
 					<string>mail</string>
 					<string>favouriteDrink</string>
 				</fetchedAttributes>
-				<getAllFilter>(favouriteDrink=*)</getAllFilter>
-				<getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+				<getAllFilter>"(favouriteDrink=*)"</getAllFilter>
+				<getOneFilter>"(favouriteDrink={favouriteDrink})"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapBinary2StringTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -577,8 +577,8 @@
 					<string>seeAlso</string>
 					<string>favouriteDrink</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(favouriteDrink=*))</getAllFilter>
-				<getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+				<getAllFilter>"(&amp;(favouriteDrink=*))"</getAllFilter>
+				<getOneFilter>"(favouriteDrink={favouriteDrink})"</getOneFilter>
 				<filterAsync>(&amp;(favouriteDrink=*)(modifytimestamp&gt;={0}))</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
@@ -601,8 +601,8 @@
 					<string>mail</string>
 					<string>favouriteDrink</string>
 				</fetchedAttributes>
-				<getAllFilter>(favouriteDrink=*)</getAllFilter>
-				<getOneFilter>(favouriteDrink={favouriteDrink})</getOneFilter>
+				<getAllFilter>"(favouriteDrink=*)"</getAllFilter>
+				<getOneFilter>"(favouriteDrink={favouriteDrink})"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=" + srcBean.getDatasetFirstValueById("cn") + ",ou=ldap2ldapSamePivotConversionTestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -659,8 +659,8 @@
 					<string>telephoneNumber</string>
 					<string>carLicense</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(externalId=*))</getAllFilter>
-				<getOneFilter>(externalId={externalId})</getOneFilter>
+				<getAllFilter>"(&amp;(externalId=*))"</getAllFilter>
+				<getOneFilter>"(externalId={externalId})"</getOneFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 			</ldapSourceService>
 			<databaseDestinationService>
@@ -697,8 +697,8 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-B)</getAllFilter>
-				<getOneFilter>(cn=CN0001-B)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-B)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-B)"</getOneFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -714,8 +714,8 @@
 					<string>sn</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-C)</getAllFilter>
-				<getOneFilter>(cn=CN0001-C)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-C)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-C)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-C,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -759,9 +759,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-A)</getAllFilter>
-				<getOneFilter>(cn=CN0001-A)</getOneFilter>
-				<cleanFilter>(cn=CN0001-A)</cleanFilter>
+				<getAllFilter>"(cn=CN0001-A)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-A)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001-A)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -777,8 +777,8 @@
 					<string>sn</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-B)</getAllFilter>
-				<getOneFilter>(cn=CN0001-B)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-B)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-B)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-B,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -822,9 +822,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -840,8 +840,8 @@
 					<string>sn</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-A)</getAllFilter>
-				<getOneFilter>(cn=CN0001-A)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-A)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-A)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-A,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -885,9 +885,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -903,8 +903,8 @@
 					<string>sn</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -952,9 +952,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -968,8 +968,8 @@
 				<fetchedAttributes>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1001,9 +1001,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getAllFilter>
-				<getOneFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getOneFilter>
-				<cleanFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</cleanFilter>
+				<getAllFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</getAllFilter>
+				<getOneFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</getOneFilter>
+				<cleanFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1020,8 +1020,8 @@
 					<string>description</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1062,9 +1062,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1080,8 +1080,8 @@
 					<string>sn</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1129,9 +1129,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1146,8 +1146,8 @@
 					<string>description</string>
 					<string>userCertificate;binary</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1193,9 +1193,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getAllFilter>
-				<getOneFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</getOneFilter>
-				<cleanFilter>(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)</cleanFilter>
+				<getAllFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</getAllFilter>
+				<getOneFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</getOneFilter>
+				<cleanFilter>"(cn=7SlBBCtxp0ILsbBEp_DeUjS69rpgpWIbOfhXLGvP2HvGY_g_XecLW9J8ymR5b7qN)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1212,8 +1212,8 @@
 					<string>description</string>
 					<string>objectClass</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001-hook)</getAllFilter>
-				<getOneFilter>(cn=CN0001-hook)</getOneFilter>
+				<getAllFilter>"(cn=CN0001-hook)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001-hook)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1255,9 +1255,9 @@
 				<fetchedAttributes>
 					<string>cn</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=CN0001)</getAllFilter>
-				<getOneFilter>(cn=CN0001)</getOneFilter>
-				<cleanFilter>(cn=CN0001)</cleanFilter>
+				<getAllFilter>"(cn=CN0001)"</getAllFilter>
+				<getOneFilter>"(cn=CN0001)"</getOneFilter>
+				<cleanFilter>"(cn=CN0001)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1274,8 +1274,8 @@
 					<string>objectClass</string>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=optimizevaluereplacement)</getAllFilter>
-				<getOneFilter>(cn=optimizevaluereplacement)</getOneFilter>
+				<getAllFilter>"(cn=optimizevaluereplacement)"</getAllFilter>
+				<getOneFilter>"(cn=optimizevaluereplacement)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=optimizevaluereplacement,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1427,9 +1427,9 @@
 					<string>cn</string>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=optimizevaluereplacement)</getAllFilter>
-				<getOneFilter>(cn=optimizevaluereplacement)</getOneFilter>
-				<cleanFilter>(cn=optimizevaluereplacement)</cleanFilter>
+				<getAllFilter>"(cn=optimizevaluereplacement)"</getAllFilter>
+				<getOneFilter>"(cn=optimizevaluereplacement)"</getOneFilter>
+				<cleanFilter>"(cn=optimizevaluereplacement)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1444,8 +1444,8 @@
 					<string>cn</string>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=optimizevaluereplacement)</getAllFilter>
-				<getOneFilter>(cn=optimizevaluereplacement)</getOneFilter>
+				<getAllFilter>"(cn=optimizevaluereplacement)"</getAllFilter>
+				<getOneFilter>"(cn=optimizevaluereplacement)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=optimizevaluereplacement,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>
@@ -1582,9 +1582,9 @@
 					<string>cn</string>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=optimizevaluereplacement)</getAllFilter>
-				<getOneFilter>(cn=optimizevaluereplacement)</getOneFilter>
-				<cleanFilter>(cn=optimizevaluereplacement)</cleanFilter>
+				<getAllFilter>"(cn=optimizevaluereplacement)"</getAllFilter>
+				<getOneFilter>"(cn=optimizevaluereplacement)"</getOneFilter>
+				<cleanFilter>"(cn=optimizevaluereplacement)"</cleanFilter>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
 			</ldapSourceService>
@@ -1599,8 +1599,8 @@
 					<string>cn</string>
 					<string>description</string>
 				</fetchedAttributes>
-				<getAllFilter>(cn=optimizevaluereplacement)</getAllFilter>
-				<getOneFilter>(cn=optimizevaluereplacement)</getOneFilter>
+				<getAllFilter>"(cn=optimizevaluereplacement)"</getAllFilter>
+				<getOneFilter>"(cn=optimizevaluereplacement)"</getOneFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"cn=optimizevaluereplacement,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org"</mainIdentifier>

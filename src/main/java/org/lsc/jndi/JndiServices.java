@@ -1456,7 +1456,9 @@ public final class JndiServices {
     			LOGGER.debug(ne.toString(), ne);
     			throw ne;
     		} finally {
-    			ctx.setRequestControls(defaultRequestControls);
+                if (ctx != null) {
+                    ctx.setRequestControls(defaultRequestControls);
+                }
     		}
 		}
 	}

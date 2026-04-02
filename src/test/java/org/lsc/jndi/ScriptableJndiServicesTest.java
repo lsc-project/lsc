@@ -59,35 +59,140 @@ import org.apache.directory.server.core.annotations.CreateDS;
 import org.apache.directory.server.core.annotations.CreateIndex;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.annotations.LoadSchema;
-import org.apache.directory.server.core.integ.AbstractLdapTestUnit;
-import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lsc.CommonLdapSyncTest;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LscConfiguration;
+import org.lsc.configuration.PolicyType;
+import org.lsc.utils.annotations.CreateConnection;
+import org.lsc.utils.annotations.CreateLSC;
+import org.lsc.utils.annotations.CreateLdapDestinationService;
+import org.lsc.utils.annotations.CreateLdapSourceService;
+import org.lsc.utils.annotations.CreatePropertiesBasedSyncOptions;
+import org.lsc.utils.annotations.CreateTask;
+import org.lsc.utils.annotations.CreateValuesType;
+import org.lsc.utils.annotations.LscTestExtension;
 
-@ExtendWith({ ApacheDSTestExtension.class })
-@CreateDS(name = "DSWithPartitionAndServer", loadedSchemas = {
-		@LoadSchema(name = "other", enabled = true) }, partitions = {
-				@CreatePartition(name = "lsc-project", suffix = "dc=lsc-project,dc=org", contextEntry = @ContextEntry(entryLdif = "dn: dc=lsc-project,dc=org\n"
-						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
-								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
-								@CreateIndex(attribute = "ou") }) })
-@CreateLdapServer(transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@ExtendWith({ LscTestExtension.class })
+@CreateDS(
+    name = "DSWithPartitionAndServer", 
+    loadedSchemas = {
+		@LoadSchema(name = "other", enabled = true) }, 
+    partitions = {
+		@CreatePartition(
+		    name = "lsc-project", 
+		    suffix = "dc=lsc-project,dc=org", 
+		    contextEntry = @ContextEntry(
+		        entryLdif = 
+		            "dn: dc=lsc-project,dc=org\n" +
+					"dc: lsc-project\n" + 
+		            "objectClass: top\n" + 
+					"objectClass: domain\n\n"), 
+		    indexes = {
+				@CreateIndex(attribute = "objectClass"), 
+				@CreateIndex(attribute = "dc"),
+				@CreateIndex(attribute = "ou") 
+		    }) 
+    })
+@CreateLdapServer(transports = { 
+    @CreateTransport(protocol = "LDAP", port = 33389),
+	@CreateTransport(protocol = "LDAPS", port = 33636) 
+})
 @ApplyLdifs({
 		// Entry # 0
-		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",
-		"description: Directory Manager", "sn: Directory Manager", "userpassword: secret" })
+		"dn: cn=Directory Manager,ou=system", 
+		"objectClass: person", 
+		"objectClass: top", 
+		"cn: Directory Manager",
+		"description: Directory Manager", 
+		"sn: Directory Manager", 
+		"userpassword: secret"
+    
+})
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
-public class ScriptableJndiServicesTest extends AbstractLdapTestUnit {
+
+//Create the LSC instance
+@CreateLSC(
+id = "L2Lconfig", 
+revision = 1, 
+connections = {
+   // Source
+   @CreateConnection(
+       name = "src-ldap",
+       type = LdapConnectionType.class,
+       id = "LdapSrc",
+       url = "ldap://localhost:33389/dc=lsc-project,dc=org",
+       username="cn=Directory Manager,ou=system",
+       password = "secret",
+       binaryAttributes = {@CreateValuesType(string={"personalSignature"})},
+       pageSize = -1
+   ),
+   // Destination
+   @CreateConnection(
+       name = "dst-ldap",
+       type = LdapConnectionType.class,
+       id = "LdapDest",
+       url = "ldap://localhost:33389/dc=lsc-project,dc=org",
+       username="cn=Directory Manager,ou=system",
+       password = "secret",
+       binaryAttributes = {@CreateValuesType(string={"personalSignature"})},
+       pageSize = -1
+   )
+},
+tasks = {
+   @CreateTask(
+       id = "L2LTestTask",
+       name = "L2LTestTask",
+       // bean, default
+       // cleanHook, empty
+       // syncHook, empty
+       ldapSourceService = 
+           @CreateLdapSourceService(
+               name = "ldap-source",
+               connectionRef = "src-ldap",
+               baseDn = "dc=lsc-project,dc=org",
+               pivotAttributes = {"cn", "sn"},
+               allFilter = "\"(sn=*)\"",
+               oneFilter = "\"(sn={sn})\"",
+               dateFormat = "yyyyMMddHHmmss'Z'",
+               interval = 5,
+               fetchedAttributes = {
+                   "*"
+               }),
+       ldapDestinationService = 
+           @CreateLdapDestinationService(
+               name = "ldap-destination",
+               connectionRef = "dst-ldap",
+               baseDn = "dc=lsc-project,dc=org",
+               pivotAttributes = {"cn"},
+               allFilter = "\"(sn=*)\"",
+               oneFilter = "\"(sn={sn})\"",
+               fetchedAttributes = {
+                   "*"
+               }),
+       propertiesBasedSyncOptions = 
+           @CreatePropertiesBasedSyncOptions(
+               mainIdentifier = "\"dc=lsc-project,dc=org\"",
+               defaultDelimiter = ",",
+               defaultPolicy = PolicyType.KEEP,
+               //conditions = ''
+               //hooks = "",
+               dataset = {})
+   )}
+)
+public class ScriptableJndiServicesTest extends CommonLdapSyncTest {
 
 	private JndiServices dstJndiServices;
 
 	@BeforeEach
 	public void setup() {
-		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
+        LscConfiguration.loadFromInstance(classLscInstance);
+        LscConfiguration.getInstance();
+        reloadJndiConnections();
+
+        assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
 	}
 

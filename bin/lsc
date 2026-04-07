@@ -79,6 +79,13 @@ while getopts "f:-:" opt > /dev/null 2>&1; do
         ;;
   esac
 done
+
+# Check if $cfg_dir is a file (/path/to/lsc/lsc.xml)
+if [ -f "$cfg_dir" ]; then
+    # get parent directory
+    cfg_dir=$( dirname $cfg_dir )
+fi
+
 # Get logdir property from logback.xml
 # Check if xmllint exists
 if command -v xmllint >/dev/null 2>&1; then

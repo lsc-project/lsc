@@ -172,12 +172,24 @@ public class Configuration {
 	 * the user's current directory.
 	 * @return Path to configuration directory
 	 */
-	public static String getConfigurationDirectory() {
-		if(location == null) {
-			setUp();
-		}
-		return (location != null ? new File(location).getAbsolutePath() + File.separator : "");
-	}
+        public static String getConfigurationDirectory() {
+            if (location == null) {
+                setUp();
+            }
+
+            if(location != null) {
+                File locationFile = new File(location);
+
+                if (locationFile.isFile()) { 
+                    // We have provided a file, get the parent directory as a location
+                    location = locationFile.getParent();
+                }
+
+                return new File(location).getAbsolutePath() + File.separator;
+            } else {
+                return "";
+            }
+        }
 
 	/**
 	 * Set up configuration for the given location, including logback.
@@ -264,9 +276,12 @@ public class Configuration {
 					}
 				} else {
 					xml = new File(location);
+					location = xml.getParent();
 				}
 
-				LscConfiguration.loadFromInstance(new JaxbXmlConfigurationHelper().getConfiguration(xml.toString(), System.getenv()));
+				LscConfiguration.loadFromInstance(
+				    new JaxbXmlConfigurationHelper().getConfiguration(
+				            xml.toString(), System.getenv()));
 			} else {
 				LOGGER.error("LSC already configured. Unable to load new parameters ...");
 			}

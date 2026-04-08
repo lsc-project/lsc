@@ -1,0 +1,270 @@
+<?xml version="1.0" ?>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" xmlns:exec="http://lsc-project.org/XSD/lsc-executable-plugin-1.0.xsd" revision="0">
+<!--
+     See full documentation online:
+     https://lsc-project.org/documentation/latest/index_configuration.html
+-->
+  <connections>
+
+    <ldapConnection>
+      <name>ucs</name>
+      <url>ldap://openldap1:10389/o=service,o=worteks</url>
+      <username>uid=lsc,ou=security,o=service,o=worteks</username>
+      <password>lsc-source</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <relaxRules>true</relaxRules>
+    </ldapConnection>
+
+    <ldapConnection>
+      <name>pds</name>
+      <url>ldap://openldap2:10389/o=service,o=worteks</url>
+      <username>uid=lsc,ou=security,o=service,o=worteks</username>
+      <password>lsc-destination</password>
+      <authentication>SIMPLE</authentication>
+      <referral>IGNORE</referral>
+      <derefAliases>NEVER</derefAliases>
+      <version>VERSION_3</version>
+      <pageSize>-1</pageSize>
+      <factory>com.sun.jndi.ldap.LdapCtxFactory</factory>
+      <tlsActivated>false</tlsActivated>
+      <relaxRules>true</relaxRules>
+    </ldapConnection>
+
+  </connections>
+
+  <tasks>
+    <task>
+      <name>ucs2pds-full</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+
+      <asyncLdapSourceService>
+        <name>ucs2pds-full-src-service</name>
+        <connection reference="ucs"/>
+        <baseDn>cn=mailboxes,ou=fr,o=service,o=worteks</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <!-- Operational -->
+          <string>modifiersName</string>
+          <string>modifyTimestamp</string>
+          <!-- Mandatory -->
+          <string>objectClass</string>
+          <string>uid</string>
+          <string>userPassword</string>
+          <string>cn</string>
+          <string>sn</string>
+          <!-- Optional -->
+          <string>displayName</string>
+          <string>mailAlternativeAddress</string>
+          <string>mailPrimaryAddress</string>
+          <string>FormerMailAddress</string>
+          <string>FormerMailAddressBeginDate;entry-json</string>
+          <string>FormerMailAddressEndDate;entry-json</string>
+          <string>MailboxAccountStatus</string>
+          <string>MailboxAdvertisementType</string>
+          <string>MailboxAliasDedicatedInboxDisplayName</string>
+          <string>MailboxAliasDedicatedInboxName</string>
+          <string>MailboxAliasDisplayName;entry-json</string>
+          <string>MailboxAntivirusType</string>
+          <string>MailboxBeginDate</string>
+          <string>MailboxCatchAllDomains</string>
+          <string>MailboxCFSID</string>
+          <string>MailboxDefaultAddress</string>
+          <string>MailboxDomainId</string>
+          <string>MailboxGroupName</string>
+          <string>MailboxHiddenAlias</string>
+          <string>MailboxMailServiceType</string>
+          <string>MailboxOfferType</string>
+          <string>MailboxPasswordType</string>
+          <string>MailboxPasswordState</string>
+          <string>MailboxPasswordLastUpdate</string>
+          <string>MailboxProductReference</string>
+          <string>MailboxQuota</string>
+          <string>MailboxServiceAntivirusAll</string>
+          <string>MailboxServiceIMAP</string>
+          <string>MailboxServicePOP</string>
+          <string>MailboxServiceSMTPIn</string>
+          <string>MailboxServiceSMTPOut</string>
+          <string>MailboxServiceWebmail</string>
+          <string>MailboxSite</string>
+          <string>MailboxStorage</string>
+          <string>MailboxStorageOverQuota</string>
+          <string>MailboxUserOidVal</string>
+          <string>MailboxUserServiceOidVal</string>
+          <string>OxVersionId</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=Mailbox)</getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=Mailbox)(uid={uid}))]]></getOneFilter>
+        <cleanFilter><![CDATA[(&(objectClass=Mailbox)(uid={uid}))]]></cleanFilter>
+        <serverType>OpenLDAP</serverType>
+      </asyncLdapSourceService>
+
+      <ldapDestinationService>
+        <name>ucs2pds-full-dst-service</name>
+        <connection reference="pds" />
+        <baseDn>cn=mailboxes,ou=fr,o=service,o=worteks</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <!-- Operational -->
+          <string>modifyTimestamp</string>
+          <string>modifiersName</string>
+          <!-- Mandatory -->
+          <string>objectClass</string>
+          <string>uid</string>
+          <string>userPassword</string>
+          <string>cn</string>
+          <string>sn</string>
+          <!-- Optional -->
+          <string>displayName</string>
+          <string>givenName</string>
+          <string>mailAlternativeAddress</string>
+          <string>mailPrimaryAddress</string>
+          <string>FormerMailAddress</string>
+          <string>FormerMailAddressBeginDate;entry-json</string>
+          <string>FormerMailAddressEndDate;entry-json</string> 
+          <string>MailboxAccountStatus</string>
+          <string>MailboxAdvertisementType</string>
+          <string>MailboxAliasDedicatedInboxDisplayName</string>
+          <string>MailboxAliasDedicatedInboxName</string>
+          <string>MailboxAliasDisplayName;entry-json</string>
+          <string>MailboxAntivirusType</string>
+          <string>MailboxBeginDate</string>
+          <string>MailboxCatchAllDomains</string>
+          <string>MailboxCFSID</string>
+          <string>MailboxDefaultAddress</string>
+          <string>MailboxDomainId</string>
+          <string>MailboxGroupName</string>
+          <string>MailboxHiddenAlias</string>
+          <string>MailboxMailServiceType</string>
+          <string>MailboxOfferType</string>
+          <string>MailboxPasswordLastUpdate</string>
+          <string>MailboxPasswordState</string>
+          <string>MailboxPasswordType</string>
+          <string>MailboxProductReference</string>
+          <string>MailboxQuota</string>
+          <string>MailboxServiceAntivirusAll</string>
+          <string>MailboxServiceIMAP</string>
+          <string>MailboxServicePOP</string>
+          <string>MailboxServiceSMTPIn</string>
+          <string>MailboxServiceSMTPOut</string>
+          <string>MailboxServiceWebmail</string>
+          <string>MailboxSite</string>
+          <string>MailboxStorage</string>
+          <string>MailboxStorageOverQuota</string>
+          <string>MailboxUserOidVal</string>
+          <string>MailboxUserServiceOidVal</string>
+          <string>OxVersionId</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=Mailbox)</getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=Mailbox)(uid={uid}))]]></getOneFilter>
+      </ldapDestinationService>
+
+      <propertiesBasedSyncOptions>
+
+        <mainIdentifier>srcBean.getMainIdentifier()</mainIdentifier>
+        <defaultDelimiter></defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+
+        <conditions>
+          <create><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></create>
+          <update><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></update>
+          <delete>true</delete>
+          <changeId><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></changeId>
+        </conditions>
+
+        <dataset>
+          <!-- Inject the following ObjectClass in each created entry -->
+          <name>objectClass</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"mailbox"</string>
+          </forceValues>
+        </dataset>
+
+      </propertiesBasedSyncOptions>
+    </task>
+    
+    <task>
+      <name>ucs2pds-async</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+
+      <asyncLdapSourceService>
+        <name>ucs2pds-src-service</name>
+        <connection reference="ucs"/>
+        <baseDn>cn=mailboxes,ou=fr,o=service,o=worteks</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>mailPrimaryAddress</string>
+          <string>modifiersName</string>
+          <string>modifyTimestamp</string>
+          <string>objectClass</string>
+          <string>sn</string>
+          <string>uid</string>
+          <string>userPassword</string>
+        </fetchedAttributes>
+        <getAllFilter><![CDATA[(&(objectClass=Mailbox)(modifyTimestamp>=20250722120000Z))]]></getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=Mailbox)(uid={uid}))]]></getOneFilter>
+        <interval>100</interval>
+        <serverType>OpenLDAP</serverType>
+      </asyncLdapSourceService>
+
+      <ldapDestinationService>
+        <name>ucs2pds-dst-service</name>
+        <connection reference="pds" />
+        <baseDn>cn=mailboxes,ou=fr,o=service,o=worteks</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+          <string>cn</string>
+          <string>mailPrimaryAddress</string>
+          <string>modifyTimestamp</string>
+          <string>objectClass</string>
+          <string>sn</string>
+          <string>uid</string>
+          <string>userPassword</string>
+        </fetchedAttributes>
+        <getAllFilter>(objectClass=Mailbox)</getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=Mailbox)(uid={uid}))]]></getOneFilter>
+      </ldapDestinationService>
+
+      <propertiesBasedSyncOptions>
+
+        <mainIdentifier>srcBean.getMainIdentifier()</mainIdentifier>
+        <defaultDelimiter></defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+
+        <conditions>
+          <create><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></create>
+          <update><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></update>
+          <delete>false</delete>
+          <changeId><![CDATA['uid=lsc,ou=security,o=service,o=worteks' != srcBean.getDatasetFirstValueById('modifiersName')]]></changeId>
+        </conditions>
+
+        <dataset>
+          <name>objectClass</name>
+          <forceValues>
+            <string>"inetOrgPerson"</string>
+            <string>"mailbox"</string>
+          </forceValues>
+        </dataset>
+
+      </propertiesBasedSyncOptions>
+
+    </task>
+  </tasks>
+</lsc>
+

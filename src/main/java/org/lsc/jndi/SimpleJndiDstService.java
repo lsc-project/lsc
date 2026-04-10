@@ -92,25 +92,29 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @param task Initialized task containing all necessary pieces of information
 	 *             to initiate connection and load settings
-	 * @throws LscServiceException
+	 * @throws LscServiceConfigurationException If the configuration is incorrect
 	 */
 	@SuppressWarnings({ "unchecked" })
 	public SimpleJndiDstService(final TaskType task) throws LscServiceConfigurationException {
 		super(task.getLdapDestinationService());
 		writableDatasetIds = task.getLdapDestinationService().getFetchedAttributes().getString();
+
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("Bean class {} not found. Check this class name really exists.", task.getBean());
+		
 			throw new LscServiceConfigurationException(e);
 		}
 	}
 
 	/**
-	 * @param ldapService
-	 * @param writableDatasetIds
-	 * @param beanClass
-	 * @throws LscServiceException
+	 * Constructor based on a Ldap service, a set of Datasets and a task
+	 * 
+	 * @param ldapService The LdapService to use
+	 * @param writableDatasetIds The set of Datasets
+	 * @param beanClass The Bean class to instanciate
+	 * @throws LscServiceConfigurationException If the configuration is incorrect
 	 */
 	public SimpleJndiDstService(final LdapServiceType ldapService, List<String> writableDatasetIds,
 			Class<IBean> beanClass) throws LscServiceConfigurationException {
@@ -135,35 +139,24 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *                             is not found in the directory, or if more than
 	 *                             one object would be returned.
 	 */
-	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) 
+	        throws LscServiceException {
 		try {
 			SearchResult srObject = get(pivotName, pivotAttributes, filterIdSync);
 			Method method = beanClass.getMethod("getInstance", 
 							new Class[] { SearchResult.class, String.class, Class.class });
-			return (IBean) method.invoke(null, new Object[] { srObject, jndiServices.completeDn(getBaseDn()), beanClass });
-		} catch (SecurityException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (NoSuchMethodException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalArgumentException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (InvocationTargetException e) {
+			
+			return (IBean) method.invoke(null, new Object[] { srObject, jndiServices.completeDn(getBaseDn()), 
+			        beanClass });
+		} catch (SecurityException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException |
+		        InvocationTargetException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
 							beanClass.getName(), e.toString());
 			LOGGER.debug(e.toString(), e);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}
+		
 		return null;
 	}
 
@@ -188,7 +181,7 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param jm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
+	 * @throws LscServiceCommunicationException If the connection to the service is lost,
 	 * and all other attempts to use this service should fail.
 	 */
 	public boolean apply(JndiModifications jm) throws LscServiceCommunicationException {
@@ -204,14 +197,15 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *
 	 * @param lm Modifications to apply in a {@link JndiModifications} object.
 	 * @return Operation status
-	 * @throws CommunicationException If the connection to the service is lost,
-	 * and all other attempts to use this service should fail.
+	 * @throws LscServiceException If the execution fails.
 	 */
 	public boolean apply(LscModifications lm) throws LscServiceException {
-		JndiModifications jm = new JndiModifications(JndiModificationType.getFromLscModificationType(lm.getOperation()), lm.getTaskName());
+		JndiModifications jm = new JndiModifications(
+		        JndiModificationType.getFromLscModificationType(lm.getOperation()), lm.getTaskName());
 		jm.setDistinguishName(lm.getMainIdentifier());
 		jm.setNewDistinguishName(lm.getNewMainIdentifier());
 		jm.setModificationItems(JndiModifications.fromLscAttributeModifications(lm.getLscAttributeModifications()));
+		
 		try {
 			return jndiServices.apply(jm);
 		} catch (CommunicationException e) {

@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.CannotProceedException;
 import javax.naming.CommunicationException;
 import javax.naming.Context;
 import javax.naming.ContextNotEmptyException;
@@ -95,6 +96,7 @@ import org.apache.directory.api.ldap.codec.api.LdapApiService;
 import org.apache.directory.api.ldap.codec.api.LdapApiServiceFactory;
 import org.apache.directory.api.ldap.codec.controls.search.persistentSearch.PersistentSearchFactory;
 import org.apache.directory.api.ldap.extras.controls.syncrepl_impl.SyncStateValueFactory;
+import org.apache.directory.api.ldap.model.constants.SchemaConstants;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.exception.LdapURLEncodingException;
 import org.apache.directory.api.ldap.model.name.Dn;
@@ -244,6 +246,7 @@ public final class JndiServices {
 		}
 
 		String recursiveDeleteStr = (String) ctx.getEnvironment().get("java.naming.recursivedelete");
+		
 		if (recursiveDeleteStr != null) {
 			recursiveDelete = Boolean.parseBoolean(recursiveDeleteStr);
 		} else {
@@ -251,6 +254,7 @@ public final class JndiServices {
 		}
 
 		String relaxRulesStr = (String) ctx.getEnvironment().get("java.naming.relaxRules");
+		
 		if (relaxRulesStr != null) {
 			relaxRules = Boolean.parseBoolean(relaxRulesStr);
 		} else {
@@ -261,6 +265,7 @@ public final class JndiServices {
 		LdapApiService ldapApiService = LdapApiServiceFactory.getSingleton();
 		ControlFactory<?> factory = new SyncStateValueFactory(ldapApiService);
 		ldapApiService.registerResponseControl(factory);
+		
 		/* Load Persistent Search response control */
 		factory = new PersistentSearchFactory(ldapApiService);
 		ldapApiService.registerResponseControl(factory);
@@ -310,10 +315,13 @@ public final class JndiServices {
 			if (!cache.containsKey(props)) {
 				cache.put(props, new JndiServices(props));
 			}
+			
 			JndiServices instance = cache.get(props);
+			
 			if (instance.ctx == null) {
 				instance.initConnection();
 			}
+			
 			return instance;
 		}
 	}
@@ -323,9 +331,11 @@ public final class JndiServices {
 		props.setProperty(DirContext.INITIAL_CONTEXT_FACTORY,
 				(connection.getFactory() != null ? connection.getFactory() : "com.sun.jndi.ldap.LdapCtxFactory"));
 		props.put(TLS_CONFIGURATION, connection.isTlsActivated());
+		
 		if (connection.getUsername() != null) {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthentication().value());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
+			
 			if (connection.getAuthentication().equals(LdapAuthenticationType.GSSAPI)) {
 				if (System.getProperty("java.security.krb5.conf") != null) {
 					throw new RuntimeException("Multiple Kerberos connections not supported (existing value: "
@@ -335,6 +345,7 @@ public final class JndiServices {
 					System.setProperty("java.security.krb5.conf",
 							new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
 				}
+				
 				if (System.getProperty("java.security.auth.login.config") != null) {
 					throw new RuntimeException("Multiple JAAS not supported (existing value: "
 							+ System.getProperty("java.security.auth.login.config")
@@ -343,11 +354,13 @@ public final class JndiServices {
 					System.setProperty("java.security.auth.login.config",
 							new File(Configuration.getConfigurationDirectory(), "gsseg_jaas.conf").getAbsolutePath());
 				}
+				
 				props.setProperty("javax.security.sasl.server.authentication",
-						"" + connection.isSaslMutualAuthentication());
+						connection.isSaslMutualAuthentication().toString());
 //				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
 				props.put("javax.security.auth.useSubjectCredsOnly", "true");
 				props.setProperty("javax.security.sasl.qop", connection.getSaslQop().value());
+				
 				try {
 					LoginContext lc = new LoginContext(JndiServices.class.getName(),
 							new KerberosCallbackHandler(connection.getUsername(), connection.getPassword()));
@@ -364,12 +377,16 @@ public final class JndiServices {
 		}
 		try {
 			LdapUrl connectionUrl = new LdapUrl(connection.getUrl());
+			
 			if (connectionUrl.getHost() == null) {
 				if (LOGGER.isDebugEnabled())
 					LOGGER.debug("Hostname is empty in LDAP URL, will try to lookup through the naming context ...");
+				
 				String domainExt = convertToDomainExtension(connectionUrl.getDn());
+				
 				if (domainExt != null) {
 					String hostname = lookupLdapSrvThroughDNS("_ldap._tcp." + domainExt);
+					
 					if (hostname != null) {
 						connectionUrl.setHost(hostname.substring(0, hostname.indexOf(":")));
 						connectionUrl.setPort(Integer.parseInt(hostname.substring(hostname.indexOf(":") + 1)));
@@ -380,35 +397,45 @@ public final class JndiServices {
 		} catch (LdapURLEncodingException e) {
 			throw new LscConfigurationException(e);
 		}
+		
 		props.setProperty(DirContext.PROVIDER_URL, connection.getUrl());
+		
 		if (connection.getReferral() != null) {
 			props.setProperty(DirContext.REFERRAL, connection.getReferral().value().toLowerCase());
 		} else {
 			props.setProperty(DirContext.REFERRAL, LdapReferralType.IGNORE.value().toLowerCase());
 		}
+		
 		if (connection.getDerefAliases() != null) {
 			props.setProperty("java.naming.ldap.derefAliases", getDerefJndiValue(connection.getDerefAliases()));
 		} else {
 			props.setProperty("java.naming.ldap.derefAliases", getDerefJndiValue(LdapDerefAliasesType.NEVER));
 		}
+		
 		if (connection.getBinaryAttributes() != null) {
 			props.setProperty("java.naming.ldap.attributes.binary",
 					StringUtils.join(connection.getBinaryAttributes().getString(), " "));
 		}
+		
 		if (connection.getPageSize() != null) {
 			props.setProperty("java.naming.ldap.pageSize", "" + connection.getPageSize());
 		}
+		
 		if (connection.getSortedBy() != null) {
 			props.setProperty("java.naming.ldap.sortedBy", connection.getSortedBy());
 		}
+		
 		props.setProperty("java.naming.ldap.version",
 				(connection.getVersion() == LdapVersionType.VERSION_2 ? "2" : "3"));
+		
 		if (connection.isRecursiveDelete() != null) {
 			props.setProperty("java.naming.recursivedelete", Boolean.toString(connection.isRecursiveDelete()));
 		}
+		
 		if (connection.isRelaxRules() != null) {
 			props.setProperty("java.naming.relaxRules", Boolean.toString(connection.isRelaxRules()));
 		}
+		
 		return props;
 	}
 
@@ -417,45 +444,56 @@ public final class JndiServices {
 		env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
 		env.put("java.naming.provider.url", "dns:");
 		DirContext ctx;
+		
 		try {
 			ctx = new InitialDirContext(env);
+		
 			if (ctx != null) {
 				Attributes attrs = ctx.getAttributes(hostname, new String[] { "SRV" });
 				String[] attributes = ((String) attrs.getAll().next().get()).split(" ");
+			
 				return attributes[3] + ":" + attributes[2];
 			}
 		} catch (NamingException e) {
 		}
+		
 		return hostname + ":389";
 	}
 
 	private static String convertToDomainExtension(Dn dn) {
 		String fqdn = "";
 		List<Rdn> rdns = dn.getRdns();
+		
 		for (Rdn rdn : rdns) {
 			if (!rdn.getAva().getType().equalsIgnoreCase("dc")) {
 				return null;
 			}
+		
 			if (fqdn.length() > 0) {
 				fqdn = rdn.getValue() + "." + fqdn;
 			} else {
 				fqdn = rdn.getValue();
 			}
 		}
+		
 		return fqdn;
 	}
 
 	private static String getDerefJndiValue(LdapDerefAliasesType derefAliases) {
 		switch (derefAliases) {
-		case ALWAYS:
-			return "always";
-		case FIND:
-			return "finding";
-		case SEARCH:
-			return "searching";
-		case NEVER:
-			return "never";
+    		case ALWAYS:
+    			return "always";
+    		
+    		case FIND:
+    			return "finding";
+    		
+    		case SEARCH:
+    			return "searching";
+    	
+    		case NEVER:
+    			return "never";
 		}
+
 		return "";
 	}
 
@@ -463,8 +501,9 @@ public final class JndiServices {
 		try {
 			return getInstance(getLdapProperties(connection));
 		} catch (Exception e) {
-			LOGGER.error("Error opening LDAP connection \"" + connection.getName() + "\" to " + connection.getUrl()
-					+ " (" + e.toString() + ")");
+			LOGGER.error("Error opening LDAP connection \"{}\" to {} ()", 
+			        connection.getName(), connection.getUrl(), e.toString());
+			
 			throw new RuntimeException(e);
 		}
 	}
@@ -520,8 +559,9 @@ public final class JndiServices {
 			return doGetEntry(base, filter, sc, scope);
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+				LOGGER.warn("Communication error, retrying: {}", nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
+				
 				try {
 					initConnection();
 				} catch (IOException ioex) {
@@ -530,6 +570,7 @@ public final class JndiServices {
 					// throw the initial communication exception
 					throw nex;
 				}
+				
 				return doGetEntry(base, filter, sc, scope);
 			} else {
 				throw nex;
@@ -543,26 +584,66 @@ public final class JndiServices {
 		String searchBase = base == null ? "" : base;
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
 
-		NamingEnumeration<SearchResult> namingEnumeration = null;
-		try {
-			sc.setSearchScope(scope);
-			String rewrittenBase = null;
+		// Iterate until we get the entry 
+        NamingEnumeration<SearchResult> namingEnumeration = null;
+        
+        // Prepare the controls
+        sc.setSearchScope(scope);
+        String rewrittenBase = null;
 
-			if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
-				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
-					rewrittenBase = searchBase.substring(0,
-							searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
-				} else {
-					rewrittenBase = "";
-				}
-			} else {
-				rewrittenBase = searchBase;
-			}
+        if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+            if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
+                rewrittenBase = searchBase.substring(0,
+                        searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
+            } else {
+                rewrittenBase = "";
+            }
+        } else {
+            rewrittenBase = searchBase;
+        }
 
-			namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
-		} catch (NamingException nex) {
-			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
-			throw nex;
+        // Loop until we get something
+		while (true) {
+    		try {
+    			namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
+    			
+    			// We are done, quit the loop
+    			break;
+    		} catch (CommunicationException ce) {
+    		    //  Connection is down. Let's try again
+    		    try {
+                    LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                    Thread.sleep(5000L);
+                    
+                    try {
+                        initConnection();
+                        LOGGER.info("Connection reinitialized!");
+
+                    } catch (NamingException | IOException e) {
+                        LOGGER.error("Error: communication failure: {}", e.getMessage());
+                        // retry
+                    }
+                } catch (InterruptedException e) {
+                    // Interruption: rethrow the exception
+                    LOGGER.error("Error: communication failure, interrupoted: {}", ce.getMessage());
+                    
+                    // Close the namingEnumaration if not null
+                    if (namingEnumeration != null) {
+                        namingEnumeration.close();
+                    }
+
+                    throw ce;
+                }
+    		} catch (NamingException nex) {
+    			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
+                
+                // Close the namingEnumaration if not null
+                if (namingEnumeration != null) {
+                    namingEnumeration.close();
+                }
+
+                throw nex;
+    		}
 		}
 
 		SearchResult sr = null;
@@ -573,16 +654,27 @@ public final class JndiServices {
 			if (namingEnumeration.hasMoreElements()) {
 				LOGGER.error("Too many entries returned (base: \"{}\", filter: \"{}\")", searchBase, searchFilter);
 				namingEnumeration.close();
+				
 				throw new SizeLimitExceededException(
 						"Too many entries returned (base: \"" + searchBase + "\", filter: \"" + searchFilter + "\")");
 			} else {
 				namingEnumeration.close();
+				
 				return sr;
 			}
 		} else {
 			// try hasMore method to throw exceptions if there are any and we didn't get our
 			// entry
-			namingEnumeration.hasMore();
+		    try {
+		        namingEnumeration.hasMore();
+		    } catch (NamingException ne) {
+                // Close the namingEnumaration if not null
+                if (namingEnumeration != null) {
+                    namingEnumeration.close();
+                }
+
+                throw ne;
+		    }
 		}
 
 		namingEnumeration.close();
@@ -604,6 +696,7 @@ public final class JndiServices {
 			LOGGER.error(e.toString());
 			LOGGER.debug(e.toString(), e);
 		}
+		
 		return false;
 	}
 
@@ -634,6 +727,7 @@ public final class JndiServices {
 	public SearchResult readEntry(final String base, final String filter, final boolean allowError)
 			throws NamingException {
 		SearchControls sc = new SearchControls();
+		
 		return readEntry(base, filter, allowError, sc);
 	}
 
@@ -641,6 +735,7 @@ public final class JndiServices {
 		try {
 			Dn lowerCasedContextDn = (getContextDn().isEmpty()) ? null : new Dn(contextDn.toString().toLowerCase());
 			Dn lowerCasedBaseDn = new Dn(base.toLowerCase());
+			
 			if (!lowerCasedBaseDn.isDescendantOf(lowerCasedContextDn)) {
 				return base;
 			}
@@ -650,6 +745,7 @@ public final class JndiServices {
 			}
 
 			Dn lowerCasedRelativeDn = lowerCasedBaseDn.getDescendantOf(lowerCasedContextDn);
+			
 			return base.substring(0, lowerCasedRelativeDn.toString().length());
 		} catch (LdapInvalidDnException e) {
 			throw new RuntimeException(e);
@@ -664,6 +760,7 @@ public final class JndiServices {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
 				LOGGER.info("Communication error, retrying: " + nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
+				
 				try {
 					initConnection();
 				} catch (IOException ioex) {
@@ -672,6 +769,7 @@ public final class JndiServices {
 					// throw the initial communication exception
 					throw nex;
 				}
+				
 				return doReadEntry(base, filter, allowError, sc);
 			} else {
 				throw nex;
@@ -683,38 +781,66 @@ public final class JndiServices {
 			final SearchControls sc) throws NamingException {
 		NamingEnumeration<SearchResult> namingEnumeration = null;
 		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-		try {
-			namingEnumeration = ctx.search(rewriteBase(base), filter, sc);
-		} catch (NamingException nex) {
-			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				throw nex;
-			}
+		
+		while (true) {
+    		try {
+    			namingEnumeration = ctx.search(rewriteBase(base), filter, sc);
+    	        SearchResult sr = null;
+    	        
+	            if (namingEnumeration.hasMore()) {
+	                sr = (SearchResult) namingEnumeration.next();
+	    
+	                if (namingEnumeration.hasMore()) {
+	                    LOGGER.error("Too many entries returned (base: \"{}\")", base);
+	                }
+	            }
+	            
+	            return sr;
+    		} catch (CommunicationException ce) {
+                //  Connection is down. Let's try again
+                try {
+                    LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                    
+                    try {
+                        Thread.sleep(5000L);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        throw ce;
+                    }
+                    
+                    try {
+                        initConnection();
+                        LOGGER.info("Connection reinitialized!");
 
-			if (!allowError) {
-				LOGGER.error("Error while reading entry {}: {}", base, nex);
-				LOGGER.debug(nex.toString(), nex);
-			}
+                    } catch (NamingException | IOException e) {
+                        LOGGER.error("Error: communication failure: {}", e.getMessage());
+                        // retry
+                    }
+                } catch (NamingException nex) {
+        			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+        				throw nex;
+        			}
+        
+        			if (!allowError) {
+        				LOGGER.error("Error while reading entry {}: {}", base, nex);
+        				LOGGER.debug(nex.toString(), nex);
+        			}
+        
+        			return null;
+                }
+    		} catch ( NamingException ne ) {
+    		    if (!allowError) {
+	                LOGGER.error("Error while reading entry {}: {}", base, ne);
+	                LOGGER.debug(ne.toString(), ne);
+	            }
 
-			return null;
+	            return null;
+    		} finally {
+    		    if ( namingEnumeration != null) {
+    		        namingEnumeration.close();
+    		    }
+    		}
 		}
-
-		SearchResult sr = null;
-
-		if (namingEnumeration.hasMore()) {
-			sr = (SearchResult) namingEnumeration.next();
-
-			if (namingEnumeration.hasMore()) {
-				LOGGER.error("Too many entries returned (base: \"{}\")", base);
-			} else {
-				namingEnumeration.close();
-
-				return sr;
-			}
-		}
-
-		namingEnumeration.close();
-
-		return sr;
 	}
 
 	/**
@@ -736,6 +862,7 @@ public final class JndiServices {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
 				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
+				
 				try {
 					initConnection();
 				} catch (IOException ioex) {
@@ -744,6 +871,7 @@ public final class JndiServices {
 					// throw the initial communication exception
 					throw nex;
 				}
+				
 				return doGetDnList(base, filter, scope);
 			} else {
 				throw nex;
@@ -758,45 +886,70 @@ public final class JndiServices {
 		// Create a new context for the search operation
 		LdapContext searchContext = (LdapContext)ctx.lookup("");
 
-		try {
-			setRequestControls(searchContext);
+		setRequestControls(searchContext);
 
-			SearchControls sc = new SearchControls();
-			sc.setDerefLinkFlag(false);
-			sc.setReturningAttributes(new String[] { "1.1" });
-			sc.setSearchScope(scope);
-			sc.setReturningObjFlag(true);
+		SearchControls sc = new SearchControls();
+		sc.setDerefLinkFlag(false);
+		sc.setReturningAttributes(new String[] { "1.1" });
+		sc.setSearchScope(scope);
+		sc.setReturningObjFlag(true);
 
-			byte[] pagedResultsResponse = null;
-			do {
-				namingEnumeration = searchContext.search(base, filter, sc);
-				String completedBaseDn = "";
-				if (base.length() > 0) {
-					completedBaseDn = "," + base;
-				}
-			while (namingEnumeration.hasMoreElements()) {
-				list.add(namingEnumeration.next().getName() + completedBaseDn);
-			}
+		byte[] pagedResultsResponse = null;
+		
+		while (true) {
+		    try {
+    			do {
+    				namingEnumeration = searchContext.search(base, filter, sc);
+    				String completedBaseDn = "";
+    				
+    				if (base.length() > 0) {
+    					completedBaseDn = "," + base;
+    				}
+    				
+        			while (namingEnumeration.hasMoreElements()) {
+        				list.add(namingEnumeration.next().getName() + completedBaseDn);
+        			}
+        
+        			pagedResultsResponse = pagination(searchContext);
+    			} while (pagedResultsResponse != null);
+    			
+    			return list;
+		    } catch (CommunicationException ce) {
+                LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                
+                try {
+                    // Wait a bit and retry
+                    Thread.sleep(5000L);
+                } catch (InterruptedException iee) {
+                    throw ce;
+                }
+                
+                try {
+                    initConnection();
+                    LOGGER.info("Connection reinitialized!");
 
-			pagedResultsResponse = pagination(searchContext);
-			} while (pagedResultsResponse != null);
-		} catch (NamingException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
+                } catch (NamingException | IOException e) {
+                    LOGGER.error("Error: communication failure: {}", e.getMessage());
+                    // retry
+                }
+		    } catch (NamingException ne) {
+		         LOGGER.error(ne.toString());
+		         LOGGER.debug(ne.toString(), ne);
 
-			namingEnumeration.close();
+	            namingEnumeration.close();
 
-			throw e;
-		} catch (IOException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} finally {
-			searchContext.close();
+	            throw ne;
+		    } catch (IOException ioe) {
+		        LOGGER.error("Error while encoding the Paged control, {}", ioe.getMessage());
+                
+                // There was an error encoding the Paged Search control, get out
+                throw new CannotProceedException( ioe.getMessage() );
+            } finally {
+                if ( namingEnumeration != null ) {
+                    namingEnumeration.close();
+                }
+		    }
 		}
-
-		namingEnumeration.close();
-
-		return list;
 	}
 
 	/**
@@ -809,26 +962,34 @@ public final class JndiServices {
 	 * @throws CommunicationException If the connection to the directory is lost
 	 */
 	public boolean apply(final JndiModifications jm) throws CommunicationException {
-		try {
-			return doApply(jm);
-		} catch (CommunicationException cex) {
-			LOGGER.warn("Communication error, retrying: " + cex.getMessage());
-			LOGGER.debug(cex.getMessage(), cex);
-			try {
-				initConnection();
-			} catch (IOException ioex) {
-				LOGGER.error("I/O error: " + ioex.getMessage());
-				LOGGER.debug(ioex.getMessage(), ioex);
-				// throw the initial communication exception
-				throw cex;
-			} catch (NamingException nex) {
-				LOGGER.error("Naming error: " + nex.getMessage());
-				LOGGER.debug(nex.getMessage(), nex);
-				// throw the initial communication exception
-				throw cex;
-			}
-			return doApply(jm);
-		}
+	    // Loop until we get a working connection
+	    while (true) {
+	        try {
+	            return doApply(jm);
+	        } catch (CommunicationException ce) {
+	            // Let's retry if we have a communication exception
+	            LOGGER.warn("Communication error, retrying: {}", ce.getMessage());
+	            LOGGER.debug(ce.getMessage(), ce);
+	            
+	            try {
+                    Thread.sleep(5000L);
+                    
+                    try {
+                        initConnection();
+                        LOGGER.info("Connection reinitialized!");
+
+                    } catch (NamingException | IOException e) {
+                        LOGGER.error("Error: communication failure: {}", e.getMessage());
+                    }
+                    
+                    // Retry
+                } catch (InterruptedException e1) {
+                    // Interrupted service, get out
+                    LOGGER.error("Interrupted...: {}", e1.getMessage());
+                    return false;
+                }
+	        }
+	    }
 	}
 
 	private boolean doApply(final JndiModifications jm) throws CommunicationException {
@@ -842,42 +1003,42 @@ public final class JndiServices {
 			LdapContext updateCtx = getContext(true);
 
 			switch (jm.getOperation()) {
-
-			case ADD_ENTRY:
-				updateCtx.createSubcontext(new LdapName(rewriteBase(jm.getDistinguishName())),
-						getAttributes(jm.getModificationItems(), true));
-				break;
-
-			case DELETE_ENTRY:
-				if (recursiveDelete) {
-					deleteChildrenRecursively(updateCtx, rewriteBase(jm.getDistinguishName()));
-				} else {
-					updateCtx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
-				}
-				break;
-
-			case MODIFY_ENTRY:
-				Object[] table = jm.getModificationItems().toArray();
-				ModificationItem[] mis = new ModificationItem[table.length];
-				System.arraycopy(table, 0, mis, 0, table.length);
-				updateCtx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
-				break;
-
-			case MODRDN_ENTRY:
-				// We do not display this warning if we do not apply the modification with the
-				// option modrdn = false
-				LOGGER.warn(
-						"WARNING: updating the RDN of the entry will cancel other modifications! Relaunch synchronization to complete update.");
-				updateCtx.rename(new LdapName(rewriteBase(jm.getDistinguishName())),
-						new LdapName(rewriteBase(jm.getNewDistinguishName())));
-				break;
-
-			default:
-				LOGGER.error("Unable to identify the right modification type: {}", jm.getOperation());
-				return false;
+    
+    			case ADD_ENTRY:
+    				updateCtx.createSubcontext(new LdapName(rewriteBase(jm.getDistinguishName())),
+    						getAttributes(jm.getModificationItems(), true));
+    				break;
+    
+    			case DELETE_ENTRY:
+    				if (recursiveDelete) {
+    					deleteChildrenRecursively(updateCtx, rewriteBase(jm.getDistinguishName()));
+    				} else {
+    					updateCtx.destroySubcontext(new LdapName(rewriteBase(jm.getDistinguishName())));
+    				}
+    				break;
+    
+    			case MODIFY_ENTRY:
+    			    ModificationItem[] mis = jm.getModificationItems().toArray(new ModificationItem[0]);
+    				updateCtx.modifyAttributes(new LdapName(rewriteBase(jm.getDistinguishName())), mis);
+    				break;
+    
+    			case MODRDN_ENTRY:
+    				// We do not display this warning if we do not apply the modification with the
+    				// option modrdn = false
+    				LOGGER.warn(
+    						"WARNING: updating the RDN of the entry will cancel other modifications! "
+    						+ "Relaunch synchronization to complete update.");
+    				updateCtx.rename(new LdapName(rewriteBase(jm.getDistinguishName())),
+    						new LdapName(rewriteBase(jm.getNewDistinguishName())));
+    				
+    				break;
+    
+    			default:
+    				LOGGER.error("Unable to identify the right modification type: {}", jm.getOperation());
+    				return false;
 			}
-			return true;
 
+			return true;
 		} catch (ContextNotEmptyException e) {
 			LOGGER.error(
 					"Object {} not deleted because it has children (LDAP error code 66 received). To delete this entry and it's subtree, set the dst.java.naming.recursivedelete property to true",
@@ -887,23 +1048,33 @@ public final class JndiServices {
 		} catch (NamingException ne) {
 			if (LOGGER.isErrorEnabled()) {
 				StringBuilder errorMessage = new StringBuilder("Error while ");
+
 				switch (jm.getOperation()) {
-				case ADD_ENTRY:
-					errorMessage.append("adding");
-					break;
-				case MODIFY_ENTRY:
-					errorMessage.append("modifying");
-					break;
-				case MODRDN_ENTRY:
-					errorMessage.append("renaming");
-					break;
-				case DELETE_ENTRY:
-					if (recursiveDelete) {
-						errorMessage.append("recursively ");
-					}
-					errorMessage.append("deleting");
-					break;
+    				case ADD_ENTRY:
+    					errorMessage.append("adding");
+    					
+    					break;
+
+    				case MODIFY_ENTRY:
+    					errorMessage.append("modifying");
+    					
+    					break;
+
+    				case MODRDN_ENTRY:
+    					errorMessage.append("renaming");
+    					
+    					break;
+
+    				case DELETE_ENTRY:
+    					if (recursiveDelete) {
+    						errorMessage.append("recursively ");
+    					}
+
+    					errorMessage.append("deleting");
+    				
+    					break;
 				}
+				
 				errorMessage.append(" entry ").append(jm.getDistinguishName());
 				errorMessage.append(" in directory :").append(ne.toString());
 
@@ -914,10 +1085,12 @@ public final class JndiServices {
 				// we lost the connection to the source or destination, stop everything!
 				throw (CommunicationException) ne;
 			}
+			
 			if (ne instanceof ServiceUnavailableException) {
 				// we lost the connection to the source or destination, stop everything!
 				CommunicationException ce = new CommunicationException(ne.getExplanation());
 				ce.setRootCause(ne);
+				
 				throw ce;
 			}
 
@@ -934,11 +1107,13 @@ public final class JndiServices {
 	private void deleteChildrenRecursively(LdapContext updateCtx, String distinguishName) throws NamingException {
 		try {
 			doDeleteChildrenRecursively(updateCtx, distinguishName);
+			
 			return;
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
 				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
+				
 				try {
 					initConnection();
 				} catch (IOException ioex) {
@@ -947,7 +1122,9 @@ public final class JndiServices {
 					// throw the initial communication exception
 					throw nex;
 				}
+				
 				doDeleteChildrenRecursively(getContext(true), distinguishName);
+				
 				return;
 			} else {
 				throw nex;
@@ -959,6 +1136,7 @@ public final class JndiServices {
 		SearchControls sc = new SearchControls();
 		sc.setSearchScope(SearchControls.ONELEVEL_SCOPE);
 		NamingEnumeration<SearchResult> namingEnumeration = ctx.search(distinguishName, DEFAULT_FILTER, sc);
+		
 		while (namingEnumeration.hasMore()) {
 			SearchResult sr = (SearchResult) namingEnumeration.next();
 			String childrenDn = rewriteBase(sr.getName() + "," + distinguishName);
@@ -979,11 +1157,13 @@ public final class JndiServices {
 	 */
 	private Attributes getAttributes(final List<ModificationItem> modificationItems, final boolean forgetEmpty) {
 		Attributes attrs = new BasicAttributes();
+		
 		for (ModificationItem mi : modificationItems) {
 			if (!(forgetEmpty && mi.getAttribute().size() == 0)) {
 				attrs.put(mi.getAttribute());
 			}
 		}
+		
 		return attrs;
 	}
 
@@ -1050,20 +1230,49 @@ public final class JndiServices {
 	}
 
 	public List<String> sup(String dn, int level) throws NamingException {
+	    /* Potential improvement using the Apache LDAP API, but I'm pretty sure 
+	     * this function is never used anywhere.
+	    try {
+            Dn entryDn = new Dn( dn );
+            
+            List<String> cList = new ArrayList<String>();
+
+            if (level < 0) {
+                return null;
+            }
+            
+            if (level > 0) {
+                while (level-- > 0) {
+                    entryDn = entryDn.getParent();
+                    cList.add(entryDn.getName());
+                }
+            } else {
+                
+            }
+            
+            return cList;
+        } catch (LdapInvalidDnException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        */
 		int ncLevel = (new LdapName(contextDn.toString())).size();
 
 		LdapName lName = new LdapName(dn);
 		List<String> cList = new ArrayList<String>();
+		
 		if (level > 0) {
 			if (lName.size() > level) {
 				for (int i = 0; i < level; i++) {
 					lName.remove(lName.size() - 1);
 				}
+		
 				cList.add(lName.toString());
 			}
 		} else if (level == 0) {
 			cList.add(lName.toString());
 			int size = lName.size();
+			
 			for (int i = 0; i < size - 1 && i < size - ncLevel; i++) {
 				lName.remove(lName.size() - 1);
 				cList.add(lName.toString());
@@ -1071,6 +1280,7 @@ public final class JndiServices {
 		} else {
 			return null;
 		}
+		
 		return cList;
 	}
 
@@ -1090,25 +1300,7 @@ public final class JndiServices {
 	 */
 	public Map<String, LscDatasets> getAttrsList(final String base, final String filter, final int scope,
 			final List<String> attrsNames) throws NamingException {
-		try {
-			return doGetAttrsList(base, filter, scope, attrsNames);
-		} catch (NamingException nex) {
-			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
-				LOGGER.debug(nex.getMessage(), nex);
-				try {
-					initConnection();
-				} catch (IOException ioex) {
-					LOGGER.error("I/O error: " + ioex.getMessage());
-					LOGGER.debug(ioex.getMessage(), ioex);
-					// throw the initial communication exception
-					throw nex;
-				}
-				return doGetAttrsList(base, filter, scope, attrsNames);
-			} else {
-				throw nex;
-			}
-		}
+		return doGetAttrsList(base, filter, scope, attrsNames);
 	}
 
 	/**
@@ -1121,6 +1313,7 @@ public final class JndiServices {
 	 */
 	public List<String> getAttributeValues(String objectDn, String attribute) throws LscServiceException {
 		List<String> values = null;
+		
 		try {
 			// Setup search
 			SearchControls sc = new SearchControls();
@@ -1132,6 +1325,7 @@ public final class JndiServices {
 			// Retrieve attribute values
 			SearchResult res = getEntry(objectDn, "objectClass=*", sc, SearchControls.OBJECT_SCOPE);
 			Attribute attr = res.getAttributes().get(attribute);
+			
 			if (attr != null) {
 				values = new ArrayList<String>();
 				NamingEnumeration<?> namingEnumeration = attr.getAll();
@@ -1149,9 +1343,8 @@ public final class JndiServices {
 		return values;
 	}
 
-	public Map<String, LscDatasets> doGetAttrsList(final String base, final String filter, final int scope,
+	private Map<String, LscDatasets> doGetAttrsList(final String base, final String filter, final int scope,
 			final List<String> attrsNames) throws NamingException {
-
 		// sanity checks
 		String searchBase = base == null ? "" : rewriteBase(base);
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
@@ -1163,68 +1356,111 @@ public final class JndiServices {
 			return res;
 		}
 
-		String[] attributes = new String[attrsNames.size()];
-		attributes = attrsNames.toArray(attributes);
+		String[] attributes = attrsNames.toArray(new String[0]);
 
 		SearchControls constraints = new SearchControls();
 		constraints.setDerefLinkFlag(false);
 		constraints.setReturningAttributes(attributes);
 		constraints.setSearchScope(scope);
-		constraints.setReturningObjFlag(true);
-		try {
-			byte[] pagedResultsResponse;
+		constraints.setReturningObjFlag(false);
+		
+		while (true) {
+    		try {
+    			byte[] pagedResultsResponse;
+    
+    			// Create a new context for the search operation
+    			LdapContext searchContext = (LdapContext)ctx.lookup("");
+    			NamingEnumeration<SearchResult> results = null;
+    
+    			try {
+    				setRequestControls(searchContext);
+    
+    				do {
+    					results = searchContext.search(searchBase, searchFilter, constraints);
+    
+    					if (results != null) {
+    						Map<String, Object> attrsValues = null;
+    						
+    						while (results.hasMoreElements()) {
+    							attrsValues = new HashMap<String, Object>();
+    
+    							SearchResult ldapResult = (SearchResult) results.next();
+    
+    							// get the value for each attribute requested
+    							if ( attrsNames.contains(SchemaConstants.ALL_USER_ATTRIBUTES) ) {
+    							    // The '*' special attribute is present, we get all the attributes from
+    							    // the read entry into the map.
+    							    // Note: at this stage, we don't care about the operational attributes,
+    							    // because we can't know if any of them are User or Operational
+    							    // We expect the configuration lists the required attributes...
+                                    for (NamingEnumeration<String> ids = ldapResult.getAttributes().getIDs(); ids.hasMore();) {
+                                        String attributeName = (String)ids.next();
+                                        Attribute attr = ldapResult.getAttributes().get(attributeName);
+                                        
+                                        attrsValues.put(attributeName, attr.get());
+                                    }
+    							} else {
+    							    // Otherwise process the configured fetched attributes.
+        							for (String attributeName : attrsNames) {
+        								Attribute attr = ldapResult.getAttributes().get(attributeName);
+        								
+        								if (attr != null && attr.get() != null) {
+        									attrsValues.put(attributeName, attr.get());
+        								}
+        							}
+    							}
+    
+    							res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
+    						}
+    					}
+    
+    					results.close();
+    					pagedResultsResponse = pagination(searchContext);
+    				} while (pagedResultsResponse != null);
+    				
+    				return res;
+    			} catch (IOException ioe) {
+                    LOGGER.error("Error while encoding the Paged control, {}", ioe.getMessage());
+                    
+                    // There was an error encoding the Paged Search control, get out
+                    throw new CannotProceedException( ioe.getMessage() );
+    			}
+    			finally {
+    			    // Final cleanup
+    			    if ( results != null ) {
+    			        results.close();
+    			    }
+    			    
+    				searchContext.close();
+    			}
+    		} catch (CommunicationException | ServiceUnavailableException ce) {
+                LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                
+                try {
+                    // Wait a bit and retry
+                    Thread.sleep(5000L);
+                } catch (InterruptedException iee) {
+                    throw ce;
+                }
+                
+                try {
+                    initConnection();
+                    LOGGER.info("Connection reinitialized!");
 
-			// Create a new context for the search operation
-			LdapContext searchContext = (LdapContext)ctx.lookup("");
-
-			try {
-				setRequestControls(searchContext);
-
-				do {
-					NamingEnumeration<SearchResult> results = searchContext.search(searchBase, searchFilter, constraints);
-
-					if (results != null) {
-						Map<String, Object> attrsValues = null;
-						while (results.hasMoreElements()) {
-							attrsValues = new HashMap<String, Object>();
-
-							SearchResult ldapResult = (SearchResult) results.next();
-
-							// get the value for each attribute requested
-							for (String attributeName : attrsNames) {
-								Attribute attr = ldapResult.getAttributes().get(attributeName);
-								if (attr != null && attr.get() != null) {
-									attrsValues.put(attributeName, attr.get());
-								}
-							}
-
-							res.put(ldapResult.getNameInNamespace(), new LscDatasets(attrsValues));
-						}
-
-
-					}
-
-					results.close();
-
-					pagedResultsResponse = pagination(searchContext);
-				} while (pagedResultsResponse != null);
-			} finally {
-				searchContext.close();
-			}
+                } catch (NamingException | IOException e) {
+                    LOGGER.error("Error: communication failure: {}", e.getMessage());
+                    // retry
+                }
+    		} catch (NamingException ne) {
+    			LOGGER.error(ne.toString());
+    			LOGGER.debug(ne.toString(), ne);
+    			throw ne;
+    		} finally {
+                if (ctx != null) {
+                    ctx.setRequestControls(defaultRequestControls);
+                }
+    		}
 		}
-		catch (CommunicationException e) {
-			// Avoid handling the communication exception as a generic one
-			throw e;
-		} catch (ServiceUnavailableException e) {
-			// Avoid handling the service unavailable exception as a generic one
-			throw e;
-		} catch (NamingException | IOException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} finally {
-			ctx.setRequestControls(defaultRequestControls);
-		}
-		return res;
 	}
 
 	/**
@@ -1236,6 +1472,7 @@ public final class JndiServices {
 	public byte[] pagination(LdapContext ldapContext) throws IOException, NamingException {
 		byte[] pagedResultsResponse = null;
 		Control[] respCtls = ldapContext.getResponseControls();
+		
 		if (respCtls != null) {
 			for(Control respCtl : respCtls) {
 				if (respCtl instanceof PagedResultsResponseControl) {
@@ -1243,10 +1480,12 @@ public final class JndiServices {
 				}
 			}
 		}
+		
 		if (pagedResultsResponse != null) {
 			ldapContext.setRequestControls(new Control[]{
 					new PagedResultsControl(pageSize, pagedResultsResponse, Control.CRITICAL)});
 		}
+		
 		return pagedResultsResponse;
 	}
 
@@ -1275,7 +1514,7 @@ public final class JndiServices {
 			}
 
 			if (requestControls.size() > 0) {
-				ldapContext.setRequestControls(requestControls.toArray(new Control[requestControls.size()]));
+				ldapContext.setRequestControls(requestControls.toArray(new Control[0]));
 			}
 		} catch (NamingException | IOException e) {
 			throw new RuntimeException(e);
@@ -1334,15 +1573,19 @@ public final class JndiServices {
 			LOGGER.debug("Using relax rules control to apply modifications");
 			LdapContext newCtx = ctx.newInstance(null);
 			Control[] controls = newCtx.getRequestControls();
+			
 			if (controls == null) {
 				controls = new Control[0];
 			}
+			
 			int length = newCtx.getRequestControls().length;
 			controls = Arrays.copyOf(controls, length + 1);
 			controls[length] = new BasicControl(RELAX_RULES_CONTROL_OID, Control.CRITICAL, null);
 			newCtx.setRequestControls(controls);
+			
 			return newCtx;
 		}
+
 		// No need to create a derived context
 		return ctx;
 	}
@@ -1355,6 +1598,7 @@ public final class JndiServices {
 				return contextDn.toString();
 			}
 		}
+		
 		return dn;
 	}
 

@@ -129,7 +129,7 @@ public class XALdifDstService implements IXAWritableService {
 	@Override
 	public String start() throws LscServiceException {
 
-		if (xaSessions.containsKey("" + Thread.currentThread().getId())) {
+		if (xaSessions.containsKey("" + Thread.currentThread().threadId())) {
 			LOGGER.debug("XA transaction already started in this thread !");
 			return null;
 		}
@@ -144,7 +144,7 @@ public class XALdifDstService implements IXAWritableService {
 				LOGGER.debug("Enlisting XADisk in the XA transaction.");
 			XAResource xaResource = xaSession.getXAResource();
 			tx1.enlistResource(xaResource);
-			xaSessions.put("" + Thread.currentThread().getId(), xaSession);
+			xaSessions.put("" + Thread.currentThread().threadId(), xaSession);
 		} catch (NotSupportedException e) {
 			throw new LscServiceException(e);
 		} catch (SystemException e) {
@@ -209,7 +209,7 @@ public class XALdifDstService implements IXAWritableService {
 	@Override
 	public boolean apply(LscModifications lm) throws LscServiceException {
 
-		XASession xaSession = xaSessions.get("" + Thread.currentThread().getId());
+		XASession xaSession = xaSessions.get("" + Thread.currentThread().threadId());
 
 		if (xaSession != null) {
 			if (LOGGER.isDebugEnabled())

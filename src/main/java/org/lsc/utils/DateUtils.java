@@ -53,7 +53,7 @@ import java.util.TimeZone;
 /**
  * Manage LDAP date format.
  * 
- * <p/>For example, use :
+ * <p>For example, use :</p>
  * <ul>
  * <li>DateUtils.parse("20070622192826Z");</li>
  * <li>DateUtils.format(new Date());</li>

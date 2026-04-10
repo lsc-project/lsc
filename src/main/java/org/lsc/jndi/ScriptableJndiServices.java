@@ -100,7 +100,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param base The base DN to search from.
 	 * @param filter The LDAP filter to use.
-	 * @return List<String> List of DNs returned by the search.
+	 * @return List&lt;String&gt; List of DNs returned by the search.
 	 * @throws NamingException
 	 */
 	public final List<String> search(final Object base, final Object filter) throws NamingException {
@@ -117,7 +117,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param base The base DN to search from.
 	 * @param filter The LDAP filter to use.
-	 * @return List<String> List of DNs returned by the search.
+	 * @return List&lt;String&gt; List of DNs returned by the search.
 	 * @throws NamingException
 	 */
 	public final List<String> list(final Object base, final Object filter) throws NamingException {
@@ -137,7 +137,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * @param base      The base DN to search from.
 	 * @param filter    The LDAP filter to use.
 	 * @param attribute The attribute to search.
-	 * @return List<String> List of attributes values returned by the search.
+	 * @return List&lt;String&gt; List of attributes values returned by the search.
 	 * @throws NamingException
 	 */
 	public final List<String> searchAttribute(final Object base, final Object filter, final Object attribute)
@@ -154,7 +154,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * @param base      The base DN to search from.
 	 * @param filter    The LDAP filter to use.
 	 * @param attribute The attribute to search.
-	 * @return List<String> List of attributes values returned by the search.
+	 * @return List&lt;String&gt; List of attributes values returned by the search.
 	 * @throws NamingException
 	 */
 	public final List<String> listAttribute(final Object base, final Object filter, final Object attribute)
@@ -185,7 +185,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param base The base DN to search from.
 	 * @param filter The LDAP filter to use.
-	 * @return List<String> List of DNs returned by the search.
+	 * @return List&lt;String&gt; List of DNs returned by the search.
 	 * @throws NamingException
 	 */
 	public final List<String> read(final Object base, final Object filter) throws NamingException {
@@ -201,7 +201,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param dn The DN of the entry to check.
 	 * @param filter The LDAP filter to check on the above DN.
-	 * @return List<String> List containing the DN if it exists and matches the filter, or null otherwise.
+	 * @return List&lt;String&gt; List containing the DN if it exists and matches the filter, or null otherwise.
 	 * @throws NamingException
 	 */
 	public final List<String> exists(final Object dn, final Object filter) throws NamingException {
@@ -212,7 +212,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * <P>Tests if an entry exists with the given DN.</P>
 	 * 
 	 * @param dn The DN of the entry to check.
-	 * @return List<String> List containing the DN if it exists and matches the filter, or null otherwise.
+	 * @return List&lt;String&gt; List containing the DN if it exists and matches the filter, or null otherwise.
 	 * @throws NamingException
 	 */
 	public final List<String> exists(final Object dn) throws NamingException {
@@ -234,7 +234,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param a List of Strings
 	 * @param b List of Strings
-	 * @return List<String> List of Strings containing all elements from a and b.
+	 * @return List&lt;String&gt; List of Strings containing all elements from a and b.
 	 * @throws NamingException
 	 */
 	public final List<String> or(final Object a, final Object b) throws NamingException {
@@ -258,7 +258,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param base The DN of the entry to read.
 	 * @param attrName The name of the attribute to read.
-	 * @return List<String> List of values of the attribute, as Strings.
+	 * @return List&lt;String&gt; List of values of the attribute, as Strings.
 	 * @throws NamingException
 	 */
 	public final List<String> attribute(final Object base, final Object attrName) throws NamingException {
@@ -282,7 +282,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param a List of Strings
 	 * @param b List of Strings
-	 * @return List<String> List of Strings containing elements that are in both a and b.
+	 * @return List&lt;String&gt; List of Strings containing elements that are in both a and b.
 	 * @throws NamingException
 	 */
 	public final List<String> and(final Object a, final Object b) throws NamingException {
@@ -315,7 +315,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param a List of Strings
 	 * @param b List of Strings
-	 * @return List<String> List of Strings containing all elements from a not in b.
+	 * @return List&lt;String&gt; List of Strings containing all elements from a not in b.
 	 * @throws NamingException
 	 */
 	public final List<String> retain(final Object a, final Object b) throws NamingException {
@@ -350,7 +350,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param dn The DN whose parent we want.
 	 * @param level The number of levels to go up, or 0 to return all parent DNs.
-	 * @return List<String> List containing the parent DN, or all parent DNs if level is 0, or null if level is negative.
+	 * @return List&lt;String&gt; List containing the parent DN, or all parent DNs if level is 0, or null if level is negative.
 	 * @throws NamingException
 	 */
 	public final List<String> sup(final Object dn, final Object level) throws NamingException {
@@ -373,7 +373,7 @@ public class ScriptableJndiServices extends ScriptableObject {
 	 * 
 	 * @param dn The DN whose parents we want.
 	 * @param filter The LDAP filter to check.
-	 * @return List<String> List of DNs as Strings that are this entry's DN, or it's parents DN,
+	 * @return List&lt;String&gt; List of DNs as Strings that are this entry's DN, or it's parents DN,
 	 * 						that exist and match the given filter.
 	 * @throws NamingException
 	 */

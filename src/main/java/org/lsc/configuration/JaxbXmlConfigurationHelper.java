@@ -73,7 +73,7 @@ import javax.xml.validation.SchemaFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.lsc.exception.LscConfigurationException;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -121,10 +121,7 @@ public class JaxbXmlConfigurationHelper {
 	 * @param filename filename to read from
 	 * @param env      the environment variables by name
 	 * @return the completed configuration object
-	 * @throws FileNotFoundException     thrown if the file can not be accessed
-	 *                                   (either because of a misconfiguration or
-	 *                                   due to a rights issue)
-	 * @throws LscConfigurationException
+	 * @throws LscConfigurationException If we can't read the configuration
 	 */
 	public Lsc getConfiguration(String filename, Map<String, String> env) throws LscConfigurationException {
 		LOGGER.debug("Loading XML configuration from: " + filename);
@@ -205,7 +202,7 @@ public class JaxbXmlConfigurationHelper {
 		String resultString = line;
 		
 		for(String envVariableKey : env.keySet()) {
-			String escapedValue = StringEscapeUtils.escapeXml(env.get(envVariableKey));
+			String escapedValue = StringEscapeUtils.escapeXml11(env.get(envVariableKey));
 			resultString = resultString.replaceAll("\\$\\{\\Q" + envVariableKey + "\\E\\}", escapedValue);
 		}
 		

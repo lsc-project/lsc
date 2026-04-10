@@ -138,7 +138,7 @@ public interface IBean extends Cloneable, Serializable {
 	 * Get all values of an attribute from its name
 	 * 
 	 * @param id The attribute name (case insensitive)
-	 * @return List<String> List of attribute values, or an empty list
+	 * @return List&lt;String&gt; List of attribute values, or an empty list
 	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 * @deprecated See getDatasetById(String id)
 	 */

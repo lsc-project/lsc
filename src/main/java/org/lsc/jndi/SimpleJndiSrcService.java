@@ -45,11 +45,13 @@
  */
 package org.lsc.jndi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -141,24 +143,26 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	public IBean getBean(final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean;
 		try {
-			srcBean = this.beanClass.newInstance();
+			srcBean = beanClass.getDeclaredConstructor().newInstance();
 			String searchString = null;
-			if(fromSameService || filterIdClean == null) {
+			
+			if(fromSameService || (filterIdClean == null)) {
 				searchString = filterIdSync;
 			} else {
 				searchString = filterIdClean; 
 			}
 
-			return this.getBeanFromSR(get(pivotName, pivotAttributes, searchString), srcBean);
-		} catch (InstantiationException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
-			LOGGER.debug(e.toString(), e);
+			SearchResult searchResult = get(pivotName, pivotAttributes, searchString);
+			
+			return getBeanFromSR(searchResult, srcBean);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                InvocationTargetException | NoSuchMethodException e) {
+            LOGGER.error("Bad class name: {} ({})", beanClass.getName(), e);
+            LOGGER.debug(e.toString(), e);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}
+		
 		return null;
 	}
 
@@ -167,9 +171,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * 
 	 * @return Map of all entries names that are returned by the directory with an associated map of
 	 *         attribute names and values (never null)
-	 * @throws LscServiceException 
-	 * @throws NamingException May throw a {@link NamingException} if an error occurs while
-	 *             searching the directory.
+	 * @throws LscServiceException If we can't get the list of pivots
 	 */
 	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
 		try {

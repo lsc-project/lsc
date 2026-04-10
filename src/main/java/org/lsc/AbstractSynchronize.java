@@ -154,7 +154,7 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the destination
 		Set<Entry<String, LscDatasets>> ids = null;
-		SynchronizeThreadPoolExecutor threadPool = null;
+		//SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
 			ids = task.getDestinationService().getListPivots().entrySet();
@@ -174,20 +174,22 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 		
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
-		for (Entry<String, LscDatasets> id : ids) {
-			threadPool.runTask(new CleanEntryRunner(task, counter, this, id));
-		}
-		
-		try {
-			threadPool.shutdown();
-			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
-			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+		try ( SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(getThreads()) ) {
+    		for (Entry<String, LscDatasets> id : ids) {
+    			threadPool.runTask(new CleanEntryRunner(task, counter, this, id));
+    		}
+    		
+    		try {
+    			threadPool.shutdown();
+    			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
+    		} catch (InterruptedException e) {
+    			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
+    			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+    		}
 		}
 
 		logStatus(task.getName(), Task.Mode.clean.toString(), counter);
+		
 		return counter.getCountError() == 0;
 	}
 
@@ -202,7 +204,6 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
 		Set<Entry<String, LscDatasets>> ids = null;
-		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
 			ids = task.getSourceService().getListPivots().entrySet();
@@ -222,21 +223,21 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
-
-		/*
-		 * Loop on all entries in the source and add or update them in the
-		 * destination
-		 */
-		for (Entry<String, LscDatasets> id : ids) {
-			threadPool.runTask(new SynchronizeEntryRunner(task, counter, this, id, true));
-		}
-		try {
-			threadPool.shutdown();
-			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
-			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+		try ( SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(getThreads()) ) {
+    		/*
+    		 * Loop on all entries in the source and add or update them in the
+    		 * destination
+    		 */
+    		for (Entry<String, LscDatasets> id : ids) {
+    			threadPool.runTask(new SynchronizeEntryRunner(task, counter, this, id, true));
+    		}
+    		try {
+    			threadPool.shutdown();
+    			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
+    		} catch (InterruptedException e) {
+    			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
+    			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+    		}
 		}
 
 		logStatus(task.getName(), Task.Mode.sync.toString(), counter);
@@ -244,7 +245,6 @@ public abstract class AbstractSynchronize {
 	}
 
 	public final synchronized void startAsynchronousSynchronize2Ldap(Task task) {
-
 		AsynchronousRunner asyncRunner = new AsynchronousRunner(task, this);
 		String taskName = task.getName();
 
@@ -367,7 +367,7 @@ public abstract class AbstractSynchronize {
 		}
 
 		// TODO Fix LdifLogger to avoid this
-		LSCStructuralLogger.DESTINATION.info("", lm);
+		//LSCStructuralLogger.DESTINATION.info("", lm);
 	}
 
 	/**
@@ -421,18 +421,24 @@ public abstract class AbstractSynchronize {
 	}
 
 	public IBean getBean(Task task, IService service, String pivotName, LscDatasets pivotAttributes, boolean fromSameService, boolean fromSource) throws LscServiceException {
-		List<PivotTransformationType.Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
-		if (! fromSameService && transformations != null) {
-			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
-			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
-				for (PivotTransformationType.Transformation transformation: transformations) {
-					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
-						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
-					}
-				}
-			}
-			return service.getBean(pivotName, newPivots, fromSameService);
+		if (! fromSameService) {
+		    List<PivotTransformationType.Transformation> transformations = LscConfiguration.getPivotTransformation(task.getTaskType());
+
+		    if (transformations != null) {
+    			LscDatasets newPivots = new LscDatasets(pivotAttributes.getDatasets());
+    		
+    			for (Entry<String, Object> pivot: pivotAttributes.getDatasets().entrySet()) {
+    				for (PivotTransformationType.Transformation transformation: transformations) {
+    					if (pivot.getKey().equalsIgnoreCase(transformation.getFromAttribute()) && LscConfiguration.pivotOriginMatchesFromSource(transformation.getPivotOrigin(), fromSource)) {
+    						newPivots.put(transformation.getToAttribute(), transform(task, transformation, pivot.getValue()));
+    					}
+    				}
+    			}
+			
+    			return service.getBean(pivotName, newPivots, fromSameService);
+		    }
 		}
+		
 		return service.getBean(pivotName, pivotAttributes, fromSameService);
 	}
 

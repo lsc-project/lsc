@@ -180,7 +180,7 @@ public abstract class LscBean implements IBean, Serializable {
 	 * Get all values of an attribute from its name
 	 * 
 	 * @param id The attribute name (case insensitive)
-	 * @return List<String> List of attribute values, or an empty list
+	 * @return List&lt;String&gt; List of attribute values, or an empty list
 	 * @throws NamingException attribute definition is missing or has a wrong syntax
 	 */
 	public final List<String> getDatasetValuesById(final String id)
@@ -504,7 +504,11 @@ public abstract class LscBean implements IBean, Serializable {
 				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
 				valuesAsSet.add(values);
 				tmp.put(name, valuesAsSet);
-			} else if (values instanceof Boolean) {
+			} else if (values instanceof byte[]) {
+                Set<Object> valuesAsSet = new LinkedHashSet<Object>();
+                valuesAsSet.add(values);
+                tmp.put(name, valuesAsSet);
+            } else if (values instanceof Boolean) {
 				Set<Object> valuesAsSet = new LinkedHashSet<Object>();
 				valuesAsSet.add(values.toString());
 				tmp.put(name, valuesAsSet);

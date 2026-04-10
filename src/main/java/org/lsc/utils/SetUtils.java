@@ -69,7 +69,7 @@ public class SetUtils {
 	 * values.
 	 * 
 	 * @param attr An Attribute containing values to extract.
-	 * @return {@link HashSet}<Object> Values as a set. Never null.
+	 * @return {@link HashSet}&lt;Object&gt; Values as a set. Never null.
 	 * @throws NamingException
 	 */
 	public static Set<Object> attributeToSet(Attribute attr)

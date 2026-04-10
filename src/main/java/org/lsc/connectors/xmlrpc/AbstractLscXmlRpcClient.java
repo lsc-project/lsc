@@ -45,13 +45,16 @@
  */
 package org.lsc.connectors.xmlrpc;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.xmlrpc.XmlRpcException;
@@ -100,12 +103,13 @@ public abstract class AbstractLscXmlRpcClient extends AbstractLscXmlRpcObject {
 	}
 	
 	protected int parseOptions(final String[] args) throws MalformedURLException {
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 		
 		try {
 			cmdLine = parser.parse(options, args);
 			if ( cmdLine.hasOption("h") ) {
-				url = new URL(cmdLine.getOptionValue("h"));
+			    Path path = Paths.get(cmdLine.getOptionValue("h"));
+				url = path.toUri().toURL();
 			}
 			if ( cmdLine.hasOption("u") ) {
 				username = cmdLine.getOptionValue("u");
@@ -117,7 +121,7 @@ public abstract class AbstractLscXmlRpcClient extends AbstractLscXmlRpcObject {
 				printHelp(options);
 				return -1;
 			}
-		} catch (ParseException e) {
+		} catch (ParseException | IOException e) {
 			LOGGER.error("Unable to parse the options ({})", e.toString());
 			LOGGER.debug(e.toString(), e);
 			return 1;
@@ -130,9 +134,10 @@ public abstract class AbstractLscXmlRpcClient extends AbstractLscXmlRpcObject {
 	 * 
 	 * @param options
 	 *            specified options to manage
+	 * @throws IOException 
 	 */
-	protected static void printHelp(final Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("lsc", options);
+	protected static void printHelp(final Options options) throws IOException {
+		HelpFormatter formatter = HelpFormatter.builder().get();
+		formatter.printHelp("lsc", "", options, "", true);
 	}
 }

@@ -481,11 +481,11 @@ public final class BeanComparator {
         List<String> syncOptionsWriteAttributes = task.getDestinationService().getWriteDatasetIds();
         boolean allUserAttribute = false;
         boolean allOperationalAttribute = false;
-        boolean noAttributeAttribute = false;
         boolean otherAttribute = false;
 
         if (syncOptionsWriteAttributes != null) {
             for (String attrName : syncOptionsWriteAttributes) {
+                // TODO: Handle the 1.1 special case
                 switch (attrName) {
                     case SchemaConstants.ALL_USER_ATTRIBUTES:
                         // The '*' special attribute
@@ -501,17 +501,9 @@ public final class BeanComparator {
 
                         break;
 
-                    case SchemaConstants.NO_ATTRIBUTE:
-                        // The No Attribute special attribute
-                        if ( !otherAttribute) {
-                            noAttributeAttribute = true;
-                        }
-
-                        break;
-
                     default:
                         otherAttribute = true;
-                        res.add(Strings.lowerCaseAscii(attrName));
+                        res.add(attrName.toLowerCase());
 
                         break;
                 }
@@ -524,7 +516,6 @@ public final class BeanComparator {
             }
         }
 
-        // TODO: Handle the 1.1 special case
 
         // If no explicit list of attribute types to write is specified,
         // we build a list from all source attributes, all force and default values
@@ -537,25 +528,25 @@ public final class BeanComparator {
 
             if (itmBeanAttrsList != null) {
                 for (String attr:itmBeanAttrsList) {
-                    res.add(Strings.toLowerCaseAscii(attr));
+                    res.add(attr.toLowerCase());
                 }
             }
 
             if (forceAttrsList != null) {
                 for (String attr:forceAttrsList) {
-                    res.add(Strings.toLowerCaseAscii(attr));
+                    res.add(attr.toLowerCase());
                 }
             }
 
             if (defaultAttrsList != null) {
                 for (String attr:defaultAttrsList) {
-                    res.add(Strings.toLowerCaseAscii(attr));
+                    res.add(attr.toLowerCase());
                 }
             }
 
             if (createAttrsList != null) {
                 for (String attr:createAttrsList) {
-                    res.add(Strings.toLowerCaseAscii(attr));
+                    res.add(attr.toLowerCase());
                 }
             }
         }

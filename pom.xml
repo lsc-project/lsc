@@ -1106,6 +1106,14 @@
       <scope>test</scope>
       <version>5.11.4</version>
     </dependency>
+
+    <!-- WireMock: HTTP server stubbing for the ldap-rest destination service tests -->
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>3.9.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <distributionManagement>

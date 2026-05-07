@@ -440,6 +440,36 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
+	<xsd:complexType name="ldapRestAuthType">
+		<xsd:choice>
+			<xsd:element name="bearer" type="xsd:string" />
+			<xsd:sequence>
+				<xsd:element name="hmacServiceId" type="xsd:string" />
+				<xsd:element name="hmacSecret" type="xsd:string" />
+			</xsd:sequence>
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:complexType name="ldapRestDestinationServiceType">
+		<xsd:complexContent>
+			<xsd:extension base="serviceType">
+				<xsd:sequence>
+					<xsd:element name="baseUrl" type="xsd:string" />
+					<xsd:element name="resourceType" type="xsd:string" />
+					<xsd:element name="apiPrefix" type="xsd:string"
+						default="/api" minOccurs="0" />
+					<xsd:element name="auth" type="ldapRestAuthType" />
+					<xsd:element name="timeoutMs" type="xsd:long"
+						default="10000" minOccurs="0" />
+					<xsd:element name="retries" type="xsd:int"
+						default="3" minOccurs="0" />
+					<xsd:element name="writeDatasetIds" type="valuesType"
+						minOccurs="0" />
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
 	<xsd:complexType name="multiDestinationServiceType">
 		<xsd:complexContent>
 			<xsd:extension base="serviceType">
@@ -483,6 +513,7 @@
 			<xsd:choice>
 				<xsd:element name="databaseDestinationService" type="databaseDestinationServiceType" />
 				<xsd:element name="ldapDestinationService" type="ldapDestinationServiceType" />
+				<xsd:element name="ldapRestDestinationService" type="ldapRestDestinationServiceType" />
 				<xsd:element name="multiDestinationService" type="multiDestinationServiceType" />
 				<xsd:element name="xaFileDestinationService" type="xaFileDestinationServiceType" />
 				<xsd:element name="pluginDestinationService" type="pluginDestinationServiceType" />

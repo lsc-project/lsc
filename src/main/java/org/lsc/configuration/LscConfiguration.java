@@ -65,6 +65,7 @@ import org.lsc.service.MultipleDstService;
 import org.lsc.service.SimpleJdbcDstService;
 import org.lsc.service.SimpleJdbcSrcService;
 import org.lsc.service.SyncReplSourceService;
+import org.lsc.service.ldaprest.LdapRestDstService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -337,6 +338,8 @@ public class LscConfiguration {
 			return t.getMultiDestinationService();
 		} else if (t.getPluginDestinationService() != null) {
 			return t.getPluginDestinationService();
+		} else if (t.getLdapRestDestinationService() != null) {
+			return t.getLdapRestDestinationService();
 		}
 		return null;
 	}
@@ -376,6 +379,8 @@ public class LscConfiguration {
 			t.setMultiDestinationService((MultiDestinationServiceType) s);
 		} else if (s instanceof LdapDestinationServiceType) {
 			t.setLdapDestinationService((LdapDestinationServiceType) s);
+		} else if (s instanceof LdapRestDestinationServiceType) {
+			t.setLdapRestDestinationService((LdapRestDestinationServiceType) s);
 		} else if (s instanceof PluginDestinationServiceType) {
 			t.setPluginDestinationService((PluginDestinationServiceType) s);
 		} else {
@@ -387,6 +392,8 @@ public class LscConfiguration {
 	public static Class<?> getServiceImplementation(ServiceType service) {
 		if (service instanceof LdapDestinationServiceType) {
 			return SimpleJndiDstService.class;
+		} else if (service instanceof LdapRestDestinationServiceType) {
+			return LdapRestDstService.class;
 		} else if (service instanceof AsyncLdapSourceServiceType) {
 			return SyncReplSourceService.class;
 		} else if (service instanceof LdapSourceServiceType) {

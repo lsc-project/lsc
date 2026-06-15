@@ -49,6 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -68,13 +70,10 @@ public class DateUtilsTest {
 	 */
 	@org.junit.jupiter.api.Test
 	public final void testParse() throws ParseException {
-		// Please take care : use 5 instead of 6 because month is a 0 starting value
-		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
+		// "20070622192826.0Z" is a UTC date string
+		GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 		gc.set(2007, 5, 22, 19, 28, 26);
-		// Then remove milliseconds
-		long time = gc.getTime().getTime();
-		time = time - time % 1000;
-		gc.setTimeInMillis(time);
+		gc.set(Calendar.MILLISECOND, 0);
 		assertEquals(gc.getTime(), DateUtils.parse("20070622192826.0Z"));
 		assertEquals(gc.getTime(), DateUtils.parse("20070622192826Z"));
 	}
@@ -84,12 +83,9 @@ public class DateUtilsTest {
 	 */
 	@Test
 	public final void testFormat() {
-		// Please take care : use 5 instead of 6 because month is a 0 starting value
-		GregorianCalendar gc = new GregorianCalendar(TimeZone.getDefault());
+		GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 		gc.set(2007, 5, 22, 19, 28, 26);
-		long time = gc.getTime().getTime();
-		time = time - time % 1000;
-		gc.setTimeInMillis(time);
+		gc.set(Calendar.MILLISECOND, 0);
 		assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
 		assertEquals("20070622192826Z", DateUtils.simpleFormat(gc.getTime()));
 	}
@@ -100,5 +96,58 @@ public class DateUtilsTest {
 	@Test
 	public final void testError() throws ParseException {
 		assertThrows(ParseException.class, () -> DateUtils.parse("0Z"));
+	}
+
+	@Test
+	public final void testParseUsesUtc() throws ParseException {
+		GregorianCalendar expected = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		expected.set(2007, 5, 22, 19, 28, 26);
+		expected.set(Calendar.MILLISECOND, 0);
+		assertEquals(expected.getTime(), DateUtils.parse("20070622192826Z"));
+	}
+
+	@Test
+	public final void testFormatUsesUtc() {
+		GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+		gc.set(2007, 5, 22, 19, 28, 26);
+		gc.set(Calendar.MILLISECOND, 0);
+		assertEquals("20070622192826.0Z", DateUtils.format(gc.getTime()));
+	}
+
+	@Test
+	public final void testThreadSafety() throws Exception {
+		int threadCount = 10;
+		int iterations = 1000;
+		java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threadCount);
+		java.util.concurrent.atomic.AtomicInteger errors = new java.util.concurrent.atomic.AtomicInteger(0);
+
+		for (int t = 0; t < threadCount; t++) {
+			final int threadId = t;
+			new Thread(() -> {
+				try {
+					GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+					gc.set(2007, 5, 22, 19, 28, 26);
+					gc.set(Calendar.MILLISECOND, 0);
+
+					for (int i = 0; i < iterations; i++) {
+						String formatted = DateUtils.format(gc.getTime());
+						if (!"20070622192826.0Z".equals(formatted)) {
+							errors.incrementAndGet();
+						}
+						Date parsed = DateUtils.parse("20070622192826.0Z");
+						if (!gc.getTime().equals(parsed)) {
+							errors.incrementAndGet();
+						}
+					}
+				} catch (Exception e) {
+					errors.incrementAndGet();
+				} finally {
+					latch.countDown();
+				}
+			}).start();
+		}
+
+		latch.await();
+		assertEquals(0, errors.get(), "Thread safety violations detected");
 	}
 }

@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.lsc.beans.IBean;
-import org.lsc.utils.CaseIgnoreStringHashMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 /**
  * Single object used to store all modifications on one object.
@@ -166,7 +166,7 @@ public class LscModifications {
 	 * @return the hash
 	 */
 	public Map<String, List<Object>> getModificationsItemsByHash() {
-		HashMap<String, List<Object>> result = new CaseIgnoreStringHashMap<List<Object>>();
+		Map<String, List<Object>> result = new CaseInsensitiveMap<>();
 		List<LscDatasetModification> mi = this.getLscAttributeModifications();
 
 		if (mi != null) {

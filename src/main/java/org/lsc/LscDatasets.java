@@ -56,7 +56,7 @@ import org.apache.directory.api.ldap.model.filter.EqualityNode;
 import org.apache.directory.api.ldap.model.filter.FilterEncoder;
 import org.apache.directory.api.ldap.model.filter.SimpleNode;
 import org.apache.directory.api.ldap.model.schema.AttributeType;
-import org.lsc.utils.CaseIgnoreStringHashMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 /**
  * Class used to represent a set of datasets and their values.
@@ -72,11 +72,11 @@ public class LscDatasets implements Serializable {
 	protected Map<String, Object> values;
 
 	public LscDatasets() {
-		values = new CaseIgnoreStringHashMap<Object>();
+		values = new CaseInsensitiveMap<>();
 	}
 
 	public LscDatasets(Map<String, ?> values) {
-		this.values = new CaseIgnoreStringHashMap<Object>(values);
+		this.values = new CaseInsensitiveMap<>(values);
 	}
 
 	@SuppressWarnings("rawtypes")

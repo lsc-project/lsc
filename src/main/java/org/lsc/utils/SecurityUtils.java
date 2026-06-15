@@ -209,7 +209,7 @@ public class SecurityUtils {
 	 * @return hexadecimal string
 	 */
 	private static final String bytesToHexString(final byte[] bytes) {
-		return new String(Hex.encodeHex(bytes, false));
+		return Hex.encodeHexString(bytes, false);
 	}
 
 	/**

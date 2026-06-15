@@ -62,7 +62,7 @@ public class StringUtils {
 	 * @return the base16 encoded string
 	 */
 	public static String Base64toBase16(String base64encodedstring) {
-		return new String(Hex.encodeHex(Base64.decodeBase64(base64encodedstring.getBytes())));
+		return Hex.encodeHexString(Base64.decodeBase64(base64encodedstring.getBytes()));
 	}
 
 }

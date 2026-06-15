@@ -61,6 +61,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.utils.security.SymmetricEncryption;
@@ -208,15 +209,7 @@ public class SecurityUtils {
 	 * @return hexadecimal string
 	 */
 	private static final String bytesToHexString(final byte[] bytes) {
-		StringBuffer hexString = new StringBuffer();
-		for (int i = 0; i < bytes.length; i++) {
-			int hex = (0xff & bytes[i]);
-			String tmp = Integer.toHexString(hex);
-			tmp = (tmp.length() < 2) ? "0" + tmp : tmp; // if tmp=="9" => tmp=="09"
-			hexString.append(tmp);
-		}
-
-		return hexString.toString().toUpperCase();
+		return new String(Hex.encodeHex(bytes, false));
 	}
 
 	/**

@@ -48,6 +48,7 @@ package org.lsc.jndi;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -65,7 +66,6 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.exception.LscServiceInitializationException;
-import org.lsc.utils.StringLengthComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +188,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			idList = jndiServices.getDnList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE);
 			
 			// sort the list by shortest first - this makes sure clean operations delete leaf elements first
-			Collections.sort(idList, new StringLengthComparator());
+			Collections.sort(idList, Comparator.comparingInt(String::length).reversed());
 		} catch (ClassCastException e) {
 			// ignore errors, just leave list unsorted
 		} catch (UnsupportedOperationException e) {

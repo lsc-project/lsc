@@ -65,7 +65,7 @@ import org.lsc.LscModifications;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
-import org.lsc.utils.CaseIgnoreStringHashMap;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 /**
  * A custom JNDI service to translate modifications on the user's "memberOf"
@@ -175,7 +175,7 @@ public class ActiveDirectoryDstService extends SimpleJndiDstService {
 	 * @return
 	 */
 	protected Set<String> valuesDiff(List<?> vals1, List<?> vals2) {
-		CaseIgnoreStringHashMap<?> diff = new CaseIgnoreStringHashMap<Object>();
+		CaseInsensitiveMap<String, Void> diff = new CaseInsensitiveMap<>();
 		if (vals1 != null) {
 			for (Object o : vals1) {
 				diff.put(o.toString(), null);

@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.lsc.Task;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -157,7 +158,7 @@ public abstract class AbstractSynchronize {
 		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
-			ids = task.getDestinationService().getListPivots().entrySet();
+			ids = task.getDestinationService().getListPivots(task).entrySet();
 		} catch (LscServiceException e) {
 			LOGGER.error("Error getting list of IDs in the destination for task {}", task.getName());
 			LOGGER.debug(e.toString(), e);
@@ -205,7 +206,7 @@ public abstract class AbstractSynchronize {
 		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
-			ids = task.getSourceService().getListPivots().entrySet();
+			ids = task.getSourceService().getListPivots(task).entrySet();
 		} catch (Exception e) {
 			LOGGER.error("Error getting list of IDs in the source for task {}", task.getName());
 			LOGGER.debug(e.toString(), e);
@@ -431,9 +432,9 @@ public abstract class AbstractSynchronize {
 					}
 				}
 			}
-			return service.getBean(pivotName, newPivots, fromSameService);
+			return service.getBean(task, pivotName, newPivots, fromSameService);
 		}
-		return service.getBean(pivotName, pivotAttributes, fromSameService);
+		return service.getBean(task, pivotName, pivotAttributes, fromSameService);
 	}
 
 	protected Object transform(Task task, PivotTransformationType.Transformation transformation, Object value) throws LscServiceException{

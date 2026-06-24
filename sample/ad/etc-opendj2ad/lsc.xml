@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="0">
 	<connections>
 		<ldapConnection>
 			<name>ldap-src-conn</name>
@@ -48,9 +48,9 @@
 					<string>uid</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(uid={uid}))</getOneFilter>
-				<cleanFilter>(&amp;(objectClass=inetorgperson)(sn=bahloul)(uid={samAccountName}))</cleanFilter>
+				<allEntriesFilter>"(objectClass=inetorgperson)"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetorgperson)(uid=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
+				<cleanEntryFilter>"(&amp;(objectClass=inetorgperson)(sn=bahloul)(uid=" + pivotAttributes["samaccountname"] + "))"</cleanEntryFilter>
 			</ldapSourceService>
 			<ldapDestinationService>
 				<name>ad-dst-service</name>
@@ -67,8 +67,8 @@
 					<string>objectClass</string>
 					<string>samAccountName</string>
 				</fetchedAttributes>
-				<getAllFilter>(objectClass=user)</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=user)(samAccountName={uid}))</getOneFilter>
+				<allEntriesFilter>"(objectClass=user)"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=user)(samAccountName=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"CN=" + srcBean.getDatasetFirstValueById("cn") +

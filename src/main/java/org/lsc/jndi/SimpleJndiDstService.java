@@ -57,6 +57,7 @@ import javax.naming.directory.SearchResult;
 
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.LdapServiceType;
 import org.lsc.configuration.TaskType;
@@ -64,6 +65,7 @@ import org.lsc.exception.LscServiceCommunicationException;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IWritableService;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,11 +127,11 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param pivotName       Name of the entry to be returned, which is the name
-	 *                        returned by {@link #getListPivots()} (used for display
+	 *                        returned by {@link #getListPivots(Task task)} (used for display
 	 *                        only)
 	 * @param pivotAttributes Map of attribute names and values, which is the data
 	 *                        identifier in the source such as returned by
-	 *                        {@link #getListPivots()}. It must identify a unique
+	 *                        {@link #getListPivots(Task task)}. It must identify a unique
 	 *                        entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
@@ -137,9 +139,20 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 *                             is not found in the directory, or if more than
 	 *                             one object would be returned.
 	 */
-	public final IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public final IBean getBean(Task task, String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+		String searchString = null;
+		Boolean scriptAsFilter = false;
+		if( oneEntryFilter != null && !oneEntryFilter.isEmpty() )
+		{
+			searchString = oneEntryFilter;
+			scriptAsFilter = true;
+		}
+		else
+		{
+			searchString = filterIdSync;
+		}
 		try {
-			SearchResult srObject = get(pivotName, pivotAttributes, filterIdSync);
+			SearchResult srObject = get(task, pivotName, pivotAttributes, searchString, scriptAsFilter);
 			Method method = beanClass.getMethod("getInstance", 
 							new Class[] { SearchResult.class, String.class, Class.class });
 			return (IBean) method.invoke(null, new Object[] { srObject, jndiServices.completeDn(getBaseDn()), beanClass });
@@ -177,9 +190,16 @@ public class SimpleJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException May throw a {@link NamingException} if an error
 	 *                             occurs while searching the directory.
 	 */
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException {
 		try {
-			return jndiServices.getAttrsList(getBaseDn(), getFilterAll(), SearchControls.SUBTREE_SCOPE, getAttrsId());
+			String filterAll = getFilterAll();
+			String allEntriesFilter = allEntriesFilter();
+			if( allEntriesFilter != null && !allEntriesFilter.isEmpty() )
+			{
+				// Evaluate the filter as a script
+				filterAll = ScriptingEvaluator.evalFilter(task, allEntriesFilter, null);
+			}
+			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, getAttrsId());
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}

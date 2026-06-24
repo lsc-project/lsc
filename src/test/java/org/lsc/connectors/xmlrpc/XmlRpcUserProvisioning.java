@@ -58,6 +58,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
 import org.lsc.LscModifications;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.ConnectionType;
 import org.lsc.exception.LscServiceException;
@@ -214,7 +215,7 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 	}
 
 	@Override
-	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService)
+	public IBean getBean(Task task, String pivotName, LscDatasets pivotAttributes, boolean fromSameService)
 			throws LscServiceException {
 		try {
 			get(pivotName);
@@ -225,7 +226,7 @@ public class XmlRpcUserProvisioning extends AbstractLscXmlRpcClient implements I
 	}
 
 	@Override
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException {
 		try {
 			Map<String, LscDatasets> ids = new HashMap<String, LscDatasets>();
 			for (String id : listIds()) {

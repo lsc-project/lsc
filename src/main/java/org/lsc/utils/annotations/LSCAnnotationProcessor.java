@@ -227,16 +227,27 @@ public class LSCAnnotationProcessor {
         ldapSourceService.setPivotAttributes(
                 setValues(createLdapSourceService.pivotAttributes()));
         if ( Strings.isNotEmpty(createLdapSourceService.allFilter() ) ) {
-
             ldapSourceService.setAllFilter(createLdapSourceService.allFilter());
         }
 
         if ( Strings.isNotEmpty(createLdapSourceService.oneFilter() ) ) {
-        }
             ldapSourceService.setOneFilter(createLdapSourceService.oneFilter());
+        }
+
+        if ( Strings.isNotEmpty(createLdapSourceService.allEntriesFilter() ) ) {
+            ldapSourceService.setAllEntriesFilter(createLdapSourceService.allEntriesFilter());
+        }
+
+        if ( Strings.isNotEmpty(createLdapSourceService.oneEntryFilter() ) ) {
+            ldapSourceService.setOneEntryFilter(createLdapSourceService.oneEntryFilter());
+        }
 
         if ( Strings.isNotEmpty(createLdapSourceService.cleanFilter() ) ) {
             ldapSourceService.setCleanFilter(createLdapSourceService.cleanFilter());
+        }
+
+        if ( Strings.isNotEmpty(createLdapSourceService.cleanEntryFilter() ) ) {
+            ldapSourceService.setCleanEntryFilter(createLdapSourceService.cleanEntryFilter());
         }
         ldapSourceService.setDateFormat(createLdapSourceService.dateFormat());
         ldapSourceService.setFetchedAttributes(
@@ -274,6 +285,8 @@ public class LSCAnnotationProcessor {
                 setValues(createLdapDestinationService.pivotAttributes()));
         ldapDestinationService.setAllFilter(createLdapDestinationService.allFilter());
         ldapDestinationService.setOneFilter(createLdapDestinationService.oneFilter());
+        ldapDestinationService.setAllEntriesFilter(createLdapDestinationService.allEntriesFilter());
+        ldapDestinationService.setOneEntryFilter(createLdapDestinationService.oneEntryFilter());
         ldapDestinationService.setFetchedAttributes(
                 setValues(createLdapDestinationService.fetchedAttributes()));
 

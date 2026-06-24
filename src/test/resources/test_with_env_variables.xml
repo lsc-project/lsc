@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="1">
 	<connections>
 		<ldapConnection id="${LDAP_CONNECTION_ID}">
 			<name>${LDAP_CONNECTION_NAME}</name>
@@ -55,8 +55,8 @@
 					<string>telephoneNumber</string>
 					<string>seeAlso</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*))</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
+				<allEntriesFilter>"(&amp;(sn=*))"</allEntriesFilter>
+				<oneEntryFilter>"(sn=" + pivotAttributes["sn"] + ")"</oneEntryFilter>
 				<filterAsync>(&amp;(sn=*)(modifytimestamp&gt;={0}))</filterAsync>
 				<dateFormat>yyyyMMddHHmmss'Z'</dateFormat>
 				<interval>5</interval>
@@ -79,8 +79,8 @@
 					<string>seeAlso</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(sn=*)</getAllFilter>
-				<getOneFilter>(sn={sn})</getOneFilter>
+				<allEntriesFilter>"(sn=*)"</allEntriesFilter>
+				<oneEntryFilter>"(sn=" + pivotAttributes["sn"] + ")"</oneEntryFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>
@@ -163,8 +163,8 @@
 					<string>sn</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(sn=*)(givenName=*))</getAllFilter>
-				<getOneFilter>(&amp;(sn={sn})(givenName={givenName}))</getOneFilter>
+				<allEntriesFilter>"(&amp;(sn=*)(givenName=*))"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(sn=" + pivotAttributes["sn"] + ")(givenName=" + pivotAttributes["givenname"] + "))"</oneEntryFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>'cn=' + srcBean.getAttributeValueById('uid')</mainIdentifier>

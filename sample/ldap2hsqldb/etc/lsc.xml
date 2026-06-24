@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd"
 	revision="0">
 	<connections>
 		<ldapConnection>
@@ -51,9 +51,9 @@
 					<string>o</string>
 					<string>telephonenumber</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(objectClass=inetOrgPerson)(externalId=*)(accessSA=TRUE)(mail=*))</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetOrgPerson)(externalId={externalId})(accessSA=TRUE)(mail=*))</getOneFilter>
-				<cleanFilter>(&amp;(objectClass=inetOrgPerson)(externalId={externalId})(accessSA=TRUE)(mail=*))</cleanFilter>
+				<allEntriesFilter>"(&amp;(objectClass=inetOrgPerson)(externalId=*)(accessSA=TRUE)(mail=*))"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(externalId=" + pivotAttributes["externalid"] + ")(accessSA=TRUE)(mail=*))"</oneEntryFilter>
+				<cleanEntryFilter>"(&amp;(objectClass=inetOrgPerson)(externalId=" + pivotAttributes["externalid"] + ")(accessSA=TRUE)(mail=*))"</cleanEntryFilter>
 			</ldapSourceService>
 			<databaseDestinationService>
 				<name>MySyncTask-dst</name>
@@ -119,8 +119,8 @@
 					<string>mail</string>
 					<string>accessSA</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(objectClass=inetOrgPerson)(!(externalId=*)))</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetOrgPerson)(mail={mail})(!(externalId=*)))</getOneFilter>
+				<allEntriesFilter>"(&amp;(objectClass=inetOrgPerson)(!(externalId=*)))"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(mail=" + pivotAttributes["mail"] + ")(!(externalId=*)))"</oneEntryFilter>
 			</ldapSourceService>
 			<ldapDestinationService>
 				<name>SetExtId-dst</name>
@@ -135,8 +135,8 @@
 					<string>externalId</string>
 					<string>accessSA</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(objectClass=inetOrgPerson)(!(externalId=*)))</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetOrgPerson)(mail={mail})(!(externalId=*)))</getOneFilter>
+				<allEntriesFilter>"(&amp;(objectClass=inetOrgPerson)(!(externalId=*)))"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(mail=" + pivotAttributes["mail"] + ")(!(externalId=*)))"</oneEntryFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>srcBean.getMainIdentifier()</mainIdentifier>

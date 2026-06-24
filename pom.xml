@@ -261,9 +261,10 @@
       </plugin>
 
       <plugin>
-        <groupId>org.jvnet.jaxb2.maven2</groupId>
-        <artifactId>maven-jaxb2-plugin</artifactId>
-        <version>0.15.3</version>
+        <!-- https://github.com/highsource/jaxb-tools -->
+        <groupId>org.jvnet.jaxb</groupId>
+        <artifactId>jaxb-maven-plugin</artifactId>
+        <version>4.0.16</version>
         <executions>
           <execution>
             <goals>
@@ -276,29 +277,25 @@
           <generatePackage>org.lsc.configuration</generatePackage>
           <bindingDirectory>src/main/resources/schemas</bindingDirectory>
           <bindingIncludes>
-            <bindingInclude>lsc-core-2.2.xjc</bindingInclude>
+            <bindingInclude>lsc-core-2.3.xjc</bindingInclude>
           </bindingIncludes>
           <schemaDirectory>src/main/resources/schemas</schemaDirectory>
           <schemaIncludes>
-            <schemaInclude>lsc-core-2.2.xsd</schemaInclude>
+            <schemaInclude>lsc-core-2.3.xsd</schemaInclude>
           </schemaIncludes>
           <extension>true</extension>
-          <args><arg>-Xdefault-value</arg></args>
+          <args>
+            <arg>-Xannotate</arg>
+          </args>
           <cleanPackageDirectories>false</cleanPackageDirectories>
+          <plugins>
+            <plugin>
+              <groupId>org.jvnet.jaxb</groupId>
+              <artifactId>jaxb-plugin-annotate</artifactId>
+              <version>4.0.16</version>
+            </plugin>
+          </plugins>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>jaxb2-default-value</artifactId>
-            <version>1.1</version>
-          </dependency>
-
-          <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <!-- Compile OpenDJ embedded server -->
@@ -489,17 +486,17 @@
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-core</artifactId>
-          <version>2.3.0.1</version>
+          <version>4.0.9</version>
         </dependency>
         <dependency>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-          <version>2.3.1</version>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+          <version>4.0.5</version>
         </dependency>
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>
-          <version>2.3.1</version>
+          <version>4.0.9</version>
         </dependency>
         <dependency>
           <groupId>org.javassist</groupId>
@@ -587,19 +584,19 @@
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-core</artifactId>
-          <version>2.3.0.1</version>
+          <version>4.0.9</version>
         </dependency>
 
         <dependency>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-          <version>2.3.1</version>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+          <version>4.0.5</version>
         </dependency>
 
         <dependency>
           <groupId>com.sun.xml.bind</groupId>
           <artifactId>jaxb-impl</artifactId>
-          <version>2.3.9</version>
+          <version>4.0.9</version>
         </dependency>
 
         <dependency>

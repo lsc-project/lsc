@@ -51,7 +51,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,6 +61,7 @@ import java.util.regex.Pattern;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.InvalidSearchFilterException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
@@ -66,11 +69,14 @@ import org.apache.directory.api.util.Strings;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.Task;
 import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.LdapConnectionType;
 import org.lsc.configuration.LdapServiceType;
+import org.lsc.exception.LscException;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscServiceConfigurationException;
+import org.lsc.utils.ScriptingEvaluator;
 import org.lsc.utils.SetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,30 +277,22 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 * @return The ExprNode instance that can be used to evalute the entry
 	 * @throws ParseException
 	 */
-	private String buildFilter(String id, LscDatasets pivotAttrs, String searchString) {
-        searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
-                .replaceAll(Matcher.quoteReplacement(id));
+	private String buildFilter(Task task, String id, LscDatasets pivotAttrs, String searchString) throws LscException {
 
-        if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
-            for (String attributeName : pivotAttrs.getAttributesNames()) {
-                String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
+		if( ScriptingEvaluator.isFilterAScript(searchString) )
+		{
+			// Consider the filter is a script
+			Map<String, Object> table = computePivotAttributes(pivotAttrs);
+			searchString = ScriptingEvaluator.evalFilter(task, searchString, table);
+		}
+		else
+		{
+			// Consider the filter is a simple string
+			searchString = replacePlaceholdersInFilter(searchString, pivotAttrs, id);
+		}
 
-                if (valueId != null) {
-                    valueId = Matcher.quoteReplacement(valueId);
-                }
 
-                searchString = Pattern.compile("\\{" + attributeName + "\\}",
-                        Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
-            }
-        } else if (attrsId.size() == 1) {
-            searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}",
-                    Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
-        } else {
-            // this is kept for backwards compatibility but will be removed
-            searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
-        }
-
-        return searchString;
+		return searchString;
 	}
 
 	/**
@@ -306,8 +304,15 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             thrown if an directory exception is encountered while getting
 	 *             the identified object
 	 */
-	public SearchResult get(String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
-		String processedFilter = buildFilter(id, pivotAttrs, searchString);
+	public SearchResult get(Task task, String id, LscDatasets pivotAttrs, String searchString) throws NamingException {
+		String processedFilter = null;
+
+		try {
+		    processedFilter = buildFilter(task, id, pivotAttrs, searchString);
+		} catch ( LscException le ) {
+		    LOGGER.error("Error while processing filter {}, {}", searchString, le.getMessage());
+		    throw new InvalidSearchFilterException(searchString);
+		}
 
 		return getJndiServices().getEntry(baseDn, processedFilter, _filteredSc);
 	}
@@ -383,4 +388,52 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	    list.add(LdapConnectionType.class);
 	    return list;
 	}
+
+	public Map<String, Object> computePivotAttributes(LscDatasets pivotAttrs)
+	{
+		// Compute pivots attributes to send to the script
+		Map<String, Object> table = new HashMap<String, Object>();
+		Map<String, Object> pivotAttributes = new HashMap<String, Object>();
+		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
+			for (String attributeName : pivotAttrs.getAttributesNames()) {
+				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
+
+				if (valueId != null) {
+					pivotAttributes.put(attributeName, valueId);
+				}
+			}
+		}
+		table.put("pivotAttributes", pivotAttributes);
+		return table;
+	}
+
+	public String replacePlaceholdersInFilter(String searchString, LscDatasets pivotAttrs, String id)
+	{
+		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString)
+		.replaceAll(Matcher.quoteReplacement(id));
+
+		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
+			for (String attributeName : pivotAttrs.getAttributesNames()) {
+				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
+
+				if (valueId != null) {
+					valueId = Matcher.quoteReplacement(valueId);
+				}
+
+				searchString = Pattern.compile("\\{" + attributeName + "\\}",
+				Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(valueId);
+			}
+		}
+		else if (attrsId.size() == 1) {
+			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}",
+			Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
+		}
+		else {
+			// this is kept for backwards compatibility but will be removed
+			searchString = filterIdSync.replaceAll("\\{0\\}", Matcher.quoteReplacement(id));
+		}
+
+		return searchString;
+	}
+
 }

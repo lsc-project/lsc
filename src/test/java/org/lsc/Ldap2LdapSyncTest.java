@@ -150,7 +150,15 @@ public class Ldap2LdapSyncTest extends CommonLdapSyncTest {
 
 		IService srcService = new SimpleJndiSrcService(LscConfiguration.getTask(TASK_NAME));
 		Entry<String, LscDatasets> obj = ids.entrySet().iterator().next();
-		IBean srcBean = srcService.getBean(obj.getKey(), obj.getValue(), true);
+
+		// Ininitialize the task
+		TaskType taskType = LscConfiguration.getTask(TASK_NAME);
+		Task task = null;
+		if (taskType != null) {
+			task = new Task(taskType);
+		}
+
+		IBean srcBean = srcService.getBean(task, obj.getKey(), obj.getValue(), true);
 		String userPassword = srcBean.getDatasetFirstValueById("userPassword");
 
 		// OpenDS automatically hashes the password using seeded SHA,

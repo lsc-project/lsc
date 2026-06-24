@@ -87,6 +87,7 @@ import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.apache.directory.ldap.client.api.future.SearchFuture;
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.*;
 import org.lsc.exception.LscServiceCommunicationException;
@@ -176,7 +177,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	}
 	
 	@Override
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException {
 		try {
 			if (!connection.isConnected()) {
 				connection = getConnection(ldapConn);
@@ -194,9 +195,9 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param id Name of the entry to be returned, which is the name returned by
-	 *            {@link #getListPivots()} (used for display only)
+	 *            {@link #getListPivots(Task task)} (used for display only)
 	 * @param pivotAttrs Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
+	 *            source such as returned by {@link #getListPivots(Task task)}. It must identify a unique
 	 *            entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
@@ -204,7 +205,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 *             directory, or if more than one object would be returned.
 	 */
 	@Override
-	public IBean getBean(final String id, final LscDatasets pivotAttrs, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(Task task, final String id, final LscDatasets pivotAttrs, boolean fromSameService) throws LscServiceException {
 		IBean srcBean = null;
 		String searchString = null;
 		if(fromSameService || filterIdClean == null) {
@@ -213,17 +214,16 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = filterIdClean; 
 		}
 
-		searchString = Pattern.compile("\\{id\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
-		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
-			for (String attributeName : pivotAttrs.getAttributesNames()) {
-				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());
-				searchString = Pattern.compile("\\{" + attributeName + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(valueId));
-			}
-		} else if (attrsId.size() == 1) {
-			searchString = Pattern.compile("\\{" + attrsId.get(0) + "\\}", Pattern.CASE_INSENSITIVE).matcher(searchString).replaceAll(Matcher.quoteReplacement(id));
-		} else {
-			// this is kept for backwards compatibility but will be removed
-			searchString = filterIdSync.replaceAll("\\{0\\}", id);
+		if( ScriptingEvaluator.isFilterAScript(filterAll) )
+		{
+			// Evaluate the filter as a script
+			Map<String, Object> table = computePivotAttributes(pivotAttrs);
+			searchString = ScriptingEvaluator.evalFilter(task, searchString, table);
+		}
+		else
+		{
+			// Consider the filter is a simple string
+			searchString = replacePlaceholdersInFilter(searchString, pivotAttrs, id);
 		}
 
 		try {
@@ -269,7 +269,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	}
 
 	@Override
-	public java.util.Map.Entry<String, LscDatasets> getNextId() throws LscServiceException {
+	public java.util.Map.Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
 		Map<String, LscDatasets> temporaryMap = new HashMap<String, LscDatasets>(1);
 		if(sf == null || sf.isCancelled()) {
 			try {

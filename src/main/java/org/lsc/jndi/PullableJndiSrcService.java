@@ -53,6 +53,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.configuration.LdapSourceServiceType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
@@ -122,7 +123,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		}
 	}
 
-	public Entry<String, LscDatasets> getNextId() throws LscServiceException {
+	public Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
 		if (listPivots != null && !listPivots.isEmpty()) {
 			Entry<String, LscDatasets> entry = listPivots.iterator().next();
 			listPivots.remove(entry);
@@ -133,7 +134,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 		} else if (lastSuccessfulSync == null) {
 			// The fist time, we must resynchronize everything !
 			lastSuccessfulSync = new Date();
-			listPivots = this.getListPivots().entrySet();
+			listPivots = this.getListPivots(task).entrySet();
 		} else {
 			String date = dateFormater.format(lastSuccessfulSync);
 
@@ -153,7 +154,7 @@ public class PullableJndiSrcService extends SimpleJndiSrcService implements
 				return null;
 			}
 		}
-		return getNextId();
+		return getNextId(task);
 	}
 
 	/**

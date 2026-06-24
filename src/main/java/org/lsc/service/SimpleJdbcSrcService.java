@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.configuration.DatabaseConnectionType;
 import org.lsc.configuration.DatabaseSourceServiceType;
 import org.lsc.configuration.TaskType;
@@ -146,7 +147,7 @@ public class SimpleJdbcSrcService extends AbstractJdbcService implements IAsynch
 	static int count = 0;
 
 	@SuppressWarnings("unchecked")
-	public Entry<String, LscDatasets> getNextId() {
+	public Entry<String, LscDatasets> getNextId(Task task) {
 		Map<String, Object> idMap;
 		try {
 			idMap = (Map<String, Object>) sqlMapper.queryForObject(getRequestNameForNextId());

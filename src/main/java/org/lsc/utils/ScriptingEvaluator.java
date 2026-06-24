@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -56,10 +57,14 @@ public class ScriptingEvaluator {
 			boolean loaded = false;
 			for (String name : sef.getNames()) {
 			    switch ( name ) {
-			        case "js":
+			            /*
+			             * On older JDK versions, an internal js engine was provided
+			             * Now, js is provided by GraalJS, so we don't load it here
+			             */
+			        /*case "js":
 			            instancesTypeCache.put(name, new JScriptEvaluator(sef.getScriptEngine()));
 			            loaded = true;
-			            break;
+			            break;*/
 
 			        case "groovy":
 			            instancesTypeCache.put("gr", new GroovyEvaluator(sef.getScriptEngine()));
@@ -95,6 +100,7 @@ public class ScriptingEvaluator {
 			bindings.put("polyglot.js.nashorn-compat", true);
 			JScriptEvaluator graaljsevaluator = new JScriptEvaluator(graaljsEngine);
 			instancesTypeCache.put("gj", graaljsevaluator);
+			instancesTypeCache.put("js", graaljsevaluator);
 			defaultImplementation = Optional.of(graaljsevaluator);
 			LOGGER.info("Default JS implementation: GraalJS");
 		} else {
@@ -224,4 +230,22 @@ public class ScriptingEvaluator {
 		return se.evalToBoolean(task, getInstance().removePrefix(expression), params);
 	}
 
+	public static String evalFilter(Task task, String expression, Map<String, Object> params) throws LscServiceException {
+		ScriptableEvaluator se = getInstance().identifyScriptingEngine(expression);
+		return se.evalToFilter(task, getInstance().removePrefix(expression), params);
+	}
+
+	public static Boolean isFilterAScript(String filter)
+	{
+		Pattern patternJS = Pattern.compile("^[\\n\\t ]*(gj|gjs|js|rjs|gr|rdjs):");
+		Matcher matcherJS = patternJS.matcher(filter);
+		if( matcherJS.find() )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }

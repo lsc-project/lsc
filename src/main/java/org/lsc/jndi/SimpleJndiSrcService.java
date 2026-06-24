@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -59,6 +60,8 @@ import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
 import org.lsc.exception.LscServiceException;
 import org.lsc.service.IService;
+import org.lsc.Task;
+import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,16 +132,16 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param pivotName Name of the entry to be returned, which is the name returned by
-	 *            {@link #getListPivots()} (used for display only)
+	 *            {@link #getListPivots(Task task)} (used for display only)
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
+	 *            source such as returned by {@link #getListPivots(Task task)}. It must identify a unique
 	 *            entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	public IBean getBean(final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(Task task, final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean;
 		try {
 			srcBean = this.beanClass.newInstance();
@@ -149,7 +152,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 				searchString = filterIdClean; 
 			}
 
-			return this.getBeanFromSR(get(pivotName, pivotAttributes, searchString), srcBean);
+			return this.getBeanFromSR(get(task, pivotName, pivotAttributes, searchString), srcBean);
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
@@ -169,11 +172,19 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 *         attribute names and values (never null)
 	 * @throws LscServiceException If we can't get the list of pivots
 	 */
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException {
 		try {
-			return jndiServices.getAttrsList(getBaseDn(),
-							getFilterAll(), SearchControls.SUBTREE_SCOPE,
-							getAttrsId());
+			// Get the pivot attributes
+			List<String> requestedAttrs = getAttrsId();
+			String filterAll = getFilterAll();
+
+			if( ScriptingEvaluator.isFilterAScript(filterAll) )
+			{
+				// Evaluate the filter as a script
+				filterAll = ScriptingEvaluator.evalFilter(task, filterAll, null);
+			}
+
+			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, requestedAttrs);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
 		}

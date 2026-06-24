@@ -48,6 +48,7 @@ package org.lsc.service;
 import java.util.Map.Entry;
 
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.exception.LscServiceException;
 
 /**
@@ -62,7 +63,7 @@ public interface IAsynchronousService extends IService {
 	 * @return the next available bean
 	 * @throws LscServiceException If we can't get thge next ID
 	 */
-	Entry<String, LscDatasets> getNextId() throws LscServiceException;
+	Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException;
 
 	/**
 	 * The delay in milliseconds to look for available updates

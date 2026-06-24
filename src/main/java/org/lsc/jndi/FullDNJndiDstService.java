@@ -59,6 +59,7 @@ import javax.naming.directory.SearchResult;
 
 import org.apache.commons.collections4.map.ListOrderedMap;
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceCommunicationException;
@@ -122,14 +123,14 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param dn DN of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 * @param dn DN of the entry to be returned, which is the name returned by {@link #getListPivots(Task task)}
 	 * @param pivotAttributes Unused.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
 	 * @throws LscServiceException May throw a {@link NamingException} if the object is not found in the
 	 *             directory, or if more than one object would be returned. 
 	 */
-	public IBean getBean(String dn, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(Task task, String dn, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 
 		try {
 			SearchControls sc = new SearchControls();
@@ -180,7 +181,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 	 * @throws LscServiceException If we can't get the the list of pivots
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, LscDatasets> getListPivots() throws LscServiceException {
+	public Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException {
 		List<String> idList = null;
 		try {
 			// get list of DNs

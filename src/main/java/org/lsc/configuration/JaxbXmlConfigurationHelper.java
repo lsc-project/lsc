@@ -62,10 +62,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -92,7 +92,7 @@ import org.xml.sax.SAXException;
 public class JaxbXmlConfigurationHelper {
 
 	public static final String LSC_CONF_XML = "lsc.xml";
-	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-2.0.xsd"; 
+	public static final String LSC_NAMESPACE = "http://lsc-project.org/XSD/lsc-core-2.3.xsd"; 
 	private static final String PACKAGEPATH_SEPARATOR = ":";
 	private JAXBContext jaxbc;
 

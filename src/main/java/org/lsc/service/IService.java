@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.ConnectionType;
 import org.lsc.exception.LscServiceException;
@@ -75,16 +76,16 @@ public interface IService {
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param pivotName Name of the entry to be returned, which is the name returned by
-	 *            {@link #getListPivots()} (used for display only)
+	 *            {@link #getListPivots(Task task)} (used for display only)
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique
+	 *            source such as returned by {@link #getListPivots(Task task)}. It must identify a unique
 	 *            entry in the source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return The bean, or null if not found
 	 * @throws LscServiceException May throw a {@link LscServiceException} if the object is not found in the
 	 *             directory, or if more than one object would be returned.
 	 */
-	IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException;
+	IBean getBean(Task task, String pivotName, LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException;
 
 	/**
 	 * Returns a list of all the objects' identifiers.
@@ -94,7 +95,7 @@ public interface IService {
 	 * @throws LscServiceException May throw a {@link LscServiceException} if an error occurs while
 	 *             searching the directory.
 	 */
-	Map<String, LscDatasets> getListPivots() throws LscServiceException;
+	Map<String, LscDatasets> getListPivots(Task task) throws LscServiceException;
 	
 	/**
 	 * Provides a comprehensive collection of the supported connection types

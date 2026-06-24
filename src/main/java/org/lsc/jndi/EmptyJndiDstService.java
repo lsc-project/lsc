@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscServiceConfigurationException;
@@ -78,15 +79,15 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	/**
 	 * The simple object getter according to its identifier.
 	 * 
-	 * @param pivotName Name of the entry to be returned, which is the name returned by {@link #getListPivots()}
+	 * @param pivotName Name of the entry to be returned, which is the name returned by {@link #getListPivots(Task task)}
 	 *            (used for display only)
 	 * @param pivotAttributes Map of attribute names and values, which is the data identifier in the
-	 *            source such as returned by {@link #getListPivots()}. It must identify a unique entry in the
+	 *            source such as returned by {@link #getListPivots(Task task)}. It must identify a unique entry in the
 	 *            source.
 	 * @param fromSameService are the pivot attributes provided by the same service
 	 * @return Always returns null since this simulates an empty directory
 	 */
-	public IBean getBean(String pivotName, LscDatasets pivotAttributes, boolean fromSameService) {
+	public IBean getBean(Task task, String pivotName, LscDatasets pivotAttributes, boolean fromSameService) {
 		return null;
 	}
 
@@ -95,7 +96,7 @@ public class EmptyJndiDstService extends AbstractSimpleJndiService implements IJ
 	 * 
 	 * @return Map Always null since this simulates an empty directory
 	 */
-	public Map<String, LscDatasets> getListPivots() {
+	public Map<String, LscDatasets> getListPivots(Task task) {
 		return null;
 	}
 

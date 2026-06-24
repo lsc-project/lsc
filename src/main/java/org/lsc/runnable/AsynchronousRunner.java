@@ -49,7 +49,7 @@ public class AsynchronousRunner implements Runnable {
 
 			boolean interrupted = false;
 			while (!interrupted) {
-				nextId = aService.getNextId();
+				nextId = aService.getNextId(task);
 				if (nextId != null) {
 					threadPool.runTask(new SynchronizeEntryRunner(task, counter, abstractSynchronize, nextId, fromSource));
 				} else {

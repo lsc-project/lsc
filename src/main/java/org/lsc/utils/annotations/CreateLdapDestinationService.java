@@ -103,7 +103,7 @@ public @interface CreateLdapDestinationService {
      *
      * @return LDAP filter string for listing all objects
      */
-    String allFilter();
+    String allFilter() default "";
 
     /**
      * Filter to get a single entry based on pivot attributes.
@@ -112,5 +112,19 @@ public @interface CreateLdapDestinationService {
      *
      * @return LDAP filter string for getting one object
      */
-    String oneFilter();
+    String oneFilter() default "";
+
+    /**
+     * Script filter to get all entries from the source.
+     *
+     * @return LDAP filter string for listing all objects
+     */
+    String allEntriesFilter() default "";
+
+    /**
+     * Script filter to get a single entry based on pivot attributes.
+     *
+     * @return LDAP filter string for getting one object
+     */
+    String oneEntryFilter() default "";
 }

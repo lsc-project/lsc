@@ -48,11 +48,13 @@
  		No new version is released because it has never been implemented before and won't break any existing and functional configuration
 -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
-	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.2.xsd"
+	xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd"
+	targetNamespace="http://lsc-project.org/XSD/lsc-core-2.3.xsd"
 	elementFormDefault="qualified"
-	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-	jaxb:version="2.0">
+	xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+	jaxb:version="3.0"
+	xmlns:annox="urn:jaxb.jvnet.org:annox"
+	jaxb:extensionBindingPrefixes="annox">
 
 	<!-- <xsd:annotation> <xsd:documentation> This schema specifies the configuration 
 		options for LSC synchronizations tasks. </xsd:documentation> </xsd:annotation> -->
@@ -322,12 +324,56 @@
 					<xsd:element name="fetchedAttributes" type="valuesType"
 						minOccurs="0" />
 					<xsd:choice>
-						<xsd:element name="getAllFilter" type="xsd:string" />
-						<xsd:element name="allFilter" type="xsd:string" />
+						<xsd:element name="allEntriesFilter" type="xsd:string" />
+
+						<!-- @Deprecated in 2.3: getAllFilter -->
+						<xsd:element name="getAllFilter" type="xsd:string">
+							<xsd:annotation>
+								<xsd:appinfo>
+									<annox:annotate target="setter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="setter-parameter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="getter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="field">@java.lang.Deprecated</annox:annotate>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<!-- @Deprecated in 2.3: allFilter -->
+						<xsd:element name="allFilter" type="xsd:string">
+							<xsd:annotation>
+								<xsd:appinfo>
+									<annox:annotate target="setter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="setter-parameter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="getter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="field">@java.lang.Deprecated</annox:annotate>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
 					</xsd:choice>
 					<xsd:choice>
-						<xsd:element name="getOneFilter" type="xsd:string" />
-						<xsd:element name="oneFilter" type="xsd:string" />
+						<xsd:element name="oneEntryFilter" type="xsd:string" />
+
+						<!-- @Deprecated in 2.3: getOneFilter -->
+						<xsd:element name="getOneFilter" type="xsd:string">
+							<xsd:annotation>
+								<xsd:appinfo>
+									<annox:annotate target="setter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="setter-parameter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="getter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="field">@java.lang.Deprecated</annox:annotate>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+						<!-- @Deprecated in 2.3: oneFilter -->
+						<xsd:element name="oneFilter" type="xsd:string">
+							<xsd:annotation>
+								<xsd:appinfo>
+									<annox:annotate target="setter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="setter-parameter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="getter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="field">@java.lang.Deprecated</annox:annotate>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
@@ -338,8 +384,21 @@
 		<xsd:complexContent>
 			<xsd:extension base="ldapServiceType">
 				<xsd:sequence>
-					<xsd:element name="cleanFilter" type="xsd:string"
-						minOccurs="0" />
+					<xsd:choice minOccurs="0">
+						<xsd:element name="cleanEntryFilter" type="xsd:string" />
+
+						<!-- @Deprecated in 2.3: cleanFilter -->
+						<xsd:element name="cleanFilter" type="xsd:string">
+							<xsd:annotation>
+								<xsd:appinfo>
+									<annox:annotate target="setter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="setter-parameter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="getter">@java.lang.Deprecated</annox:annotate>
+									<annox:annotate target="field">@java.lang.Deprecated</annox:annotate>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:element>
+					</xsd:choice>
 					<xsd:element name="filterAsync" type="xsd:string"
 						minOccurs="0" />
 					<xsd:element name="dateFormat" type="xsd:string"

@@ -63,6 +63,7 @@ import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.lsc.LscDatasetModification;
 import org.lsc.LscDatasets;
+import org.lsc.Task;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.ConnectionType;
 import org.lsc.configuration.DatabaseConnectionType;
@@ -126,11 +127,11 @@ public abstract class AbstractJdbcService implements IService {
 	 * The simple object getter according to its identifier.
 	 * 
 	 * @param pivotName       Name of the entry to be returned, which is the name
-	 *                        returned by {@link #getListPivots()} (used for display
+	 *                        returned by {@link #getListPivots(Task task)} (used for display
 	 *                        only)
 	 * @param pivotAttributes Map of attribute names and values, which is the data
 	 *                        identifier in the source such as returned by
-	 *                        {@link #getListPivots()}. It must identify a unique
+	 *                        {@link #getListPivots(Task task)}. It must identify a unique
 	 *                        entry in the source.
 	 * @return The bean, or null if not found
 	 * @throws LscServiceException May throw a embedded
@@ -160,7 +161,7 @@ public abstract class AbstractJdbcService implements IService {
 	 *         associated map of attribute names and values (never null)
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, LscDatasets> getListPivots() {
+	public Map<String, LscDatasets> getListPivots(Task task) {
 		/*
 		 * TODO: This is a bit of a hack - we use ListOrderedMap to keep order of the
 		 * list returned, since it may be important when coming from a database. This is
@@ -209,7 +210,7 @@ public abstract class AbstractJdbcService implements IService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBean getBean(String id, LscDatasets attributes, boolean fromSameService) throws LscServiceException {
+	public IBean getBean(Task task, String id, LscDatasets attributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean = null;
 		try {
 			srcBean = beanClass.newInstance();

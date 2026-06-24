@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="1">
 	<connections>
 		<ldapConnection>
 			<name>ldap-src-conn</name>
@@ -42,9 +42,9 @@
 					<string>uid</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(&amp;(objectClass=inetorgperson)(mail=*))</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
-				<cleanFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</cleanFilter>
+				<allEntriesFilter>"(&amp;(objectClass=inetorgperson)(mail=*))"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetorgperson)(mail=" + pivotAttributes["mail"] + "))"</oneEntryFilter>
+				<cleanEntryFilter>"(&amp;(objectClass=inetorgperson)(mail=" + pivotAttributes["mail"] + "))"</cleanEntryFilter>
 			</ldapSourceService>
 			<databaseDestinationService>
 				<name>postgresql-src-service</name>

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="1">
 	<connections id="2">
 		<ldapConnection>
 			<name>ldap-dst-conn</name>
@@ -48,8 +48,8 @@
 					<string>uid</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
+				<allEntriesFilter>"(objectClass=inetorgperson)"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetorgperson)(mail=" + pivotAttributes["mail"] + "))"</oneEntryFilter>
 				<serverType>OpenDS</serverType>
 			</asyncLdapSourceService>
 			<ldapDestinationService>
@@ -68,8 +68,8 @@
 					<string>uid</string>
 					<string>mail</string>
 				</fetchedAttributes>
-				<getAllFilter>(objectClass=inetorgperson)</getAllFilter>
-				<getOneFilter>(&amp;(objectClass=inetorgperson)(mail={mail}))</getOneFilter>
+				<allEntriesFilter>"(objectClass=inetorgperson)"</allEntriesFilter>
+				<oneEntryFilter>"(&amp;(objectClass=inetorgperson)(mail=" + pivotAttributes["mail"] + "))"</oneEntryFilter>
 			</ldapDestinationService>
 			<propertiesBasedSyncOptions>
 				<mainIdentifier>"mail=" + srcBean.getDatasetFirstValueById("mail") + ",ou=People,dc=lsc-project,dc=org"</mainIdentifier>

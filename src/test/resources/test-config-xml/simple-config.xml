@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="1">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="1">
 	<ldapConnection id="myAdServer">
 		<url>ldap://localhost:1390/dc=AD,dc=net</url>
 		<username>cn=manager,dc=AD,dc=net</username>
@@ -28,8 +28,8 @@
 			<pivotAttributes>dn, cn</pivotAttributes> 
 			<fetchedAttributes>uid, mail, cn</fetchedAttributes>
 			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn> 
-			<getAllFilter>(&amp;(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
-			<getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
+			<allEntriesFilter>"(&amp;(objectClass=inetOrgPerson)(uid=*))"</allEntriesFilter>
+			<oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(uid=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
 		</ldapSourceService>
 		<ldapDestinationService>
 			<name>myAD-dst</name>
@@ -38,8 +38,8 @@
 			<pivotAttributes>dn, cn</pivotAttributes> 
 			<fetchedAttributes>uid, mail, cn</fetchedAttributes>
 			<dn>'cn=' + srcBean.getAttributeValueById('uid')</dn> 
-			<getAllFilter>(&amp;(objectClass=inetOrgPerson)(uid=*))</getAllFilter>
-			<getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
+			<allEntriesFilter>"(&amp;(objectClass=inetOrgPerson)(uid=*))"</allEntriesFilter>
+			<oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(uid=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
 		</ldapDestinationService>
 		<conditions>
 			<create>1 &gt; 0</create>

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.2.xsd" revision="0">
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.3.xsd" revision="0">
 <!--
      See full documentation online:
      https://lsc-project.org/documentation/latest/index_configuration.html
@@ -57,9 +57,9 @@
           <string>sn</string>
           <string>uid</string>
         </fetchedAttributes>
-        <getAllFilter>(&amp;(objectClass=inetOrgPerson))</getAllFilter>
-        <getOneFilter>(&amp;(objectClass=inetOrgPerson)(uid={uid}))</getOneFilter>
-        <cleanFilter>(&amp;(objectClass=inetOrgPerson)(uid={sAMAccountName}))</cleanFilter>
+        <allEntriesFilter>"(&amp;(objectClass=inetOrgPerson))"</allEntriesFilter>
+        <oneEntryFilter>"(&amp;(objectClass=inetOrgPerson)(uid=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
+        <cleanEntryFilter>"(&amp;(objectClass=inetOrgPerson)(uid=" + pivotAttributes["samaccountname"] + "))"</cleanEntryFilter>
       </ldapSourceService>
 
       <ldapDestinationService>
@@ -78,8 +78,8 @@
           <string>sAMAccountName</string>
           <string>sn</string>
         </fetchedAttributes>
-        <getAllFilter>(objectClass=user)</getAllFilter>
-        <getOneFilter>(&amp;(objectClass=user)(sAMAccountName={uid}))</getOneFilter>
+        <allEntriesFilter>"(objectClass=user)"</allEntriesFilter>
+        <oneEntryFilter>"(&amp;(objectClass=user)(sAMAccountName=" + pivotAttributes["uid"] + "))"</oneEntryFilter>
       </ldapDestinationService>
 
       <propertiesBasedSyncOptions>

@@ -106,7 +106,14 @@ public @interface CreateLdapSourceService {
      *
      * @return LDAP filter string for listing all objects
      */
-    String allFilter();
+    String allFilter() default "";
+
+    /**
+     * Script filter to get all entries from the source.
+     *
+     * @return LDAP filter string for listing all objects
+     */
+    String allEntriesFilter() default "";
 
     /**
      * Filter to get a single entry based on pivot attributes.
@@ -115,7 +122,14 @@ public @interface CreateLdapSourceService {
      *
      * @return LDAP filter string for getting one object
      */
-    String oneFilter();
+    String oneFilter() default "";
+
+    /**
+     * Script Filter to get a single entry based on pivot attributes.
+     *
+     * @return LDAP filter string for getting one object
+     */
+    String oneEntryFilter() default "";
 
     //-----------------------------------------------------------
     // From LdapSourceServiceType
@@ -129,6 +143,14 @@ public @interface CreateLdapSourceService {
      * @default empty string (optional)
      */
     String cleanFilter() default "";
+
+    /**
+     * Script Filter used during the clean phase to identify entries to delete.
+     *
+     * @return LDAP filter string for clean operations
+     * @default empty string (optional)
+     */
+    String cleanEntryFilter() default "";
 
     /**
      * Filter for detecting changes in asynchronous mode.

@@ -129,6 +129,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		_filteredSc = new SearchControls();
 
 		String attrsValue = serviceProps.getProperty("attrs");
+		
 		if (attrsValue != null) {
 			String[] attributes = attrsValue.split(" ");
 			attrs = Arrays.asList(attributes);
@@ -136,6 +137,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		}
 
 		String attrsIdValue = serviceProps.getProperty("pivotAttrs");
+		
 		if (attrsIdValue != null) {
 			attrsId = Arrays.asList(attrsIdValue.split(" "));
 		}
@@ -147,6 +149,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		} catch (LscConfigurationException e) {
 			throw new LscServiceConfigurationException(e);
 		}
+		
 		try {
 			jndiServices = JndiServices.getInstance(serviceProps);
 		} catch (NamingException e) {
@@ -154,7 +157,9 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 		} catch (IOException e) {
 			throw new LscServiceConfigurationException(e);
 		}
-		LOGGER.warn("Properties configuration is not any more supported ! Please consider upgrading your LSC version !");
+		
+		LOGGER.warn("Properties configuration is not any more supported ! "
+		        + "Please consider upgrading your LSC version !");
 	}
 
 	/**
@@ -165,19 +170,46 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 */
 	public AbstractSimpleJndiService(final LdapServiceType ldapService) throws LscServiceConfigurationException {
 		baseDn = ldapService.getBaseDn();
-		filterIdSync = (ldapService.getOneFilter() != null ? ldapService.getOneFilter().trim() : ldapService.getGetOneFilter().trim());
-		filterAll = (ldapService.getAllFilter() != null ? ldapService.getAllFilter().trim() : ldapService.getGetAllFilter().trim());
+	      
+        // Get the allFilter, and trim it 
+        filterAll = (ldapService.getAllFilter() != null ? 
+            ldapService.getAllFilter().trim() : 
+                ldapService.getGetAllFilter().trim());
+        
+        // Deal with the case were we don't have a oneFilter, we will default to allFilter
+        String oneFilter = ldapService.getOneFilter();
+        String getOneFilter = ldapService.getGetOneFilter();
+        
+        if (Strings.isEmpty(oneFilter)) {
+            if (Strings.isEmpty(getOneFilter)) {
+                filterIdSync = filterAll;
+            } else {
+                filterIdSync = getOneFilter.trim();
+            }
+        } else {
+            filterIdSync = oneFilter.trim();
+        }
+        
+        if ( Strings.isEmpty(filterIdSync)) {
+            filterIdSync = filterAll;
+        }
+
 		_filteredSc = new SearchControls();
 		_filteredSc.setReturningAttributes(ldapService.getFetchedAttributes().getString().toArray(new String[0] ));
 		attrsId = new ArrayList<String>(ldapService.getPivotAttributes().getString().size()); 
+		
 		for(String pivotAttr : ldapService.getPivotAttributes().getString()) {
 			attrsId.add(pivotAttr);
 		}
+		
 		attrs = new ArrayList<String>(ldapService.getFetchedAttributes().getString().size());
+		
 		for (String attr: ldapService.getFetchedAttributes().getString()) {
 			attrs.add(attr);
 		}
+		
 		jndiServices = JndiServices.getInstance((LdapConnectionType) ldapService.getConnection().getReference());
+		
 		if(!baseDn.endsWith(jndiServices.getContextDn())) {
 			LOGGER.warn("Your baseDn settings (" + baseDn + ") does not end with the LDAP naming context (" + jndiServices.getContextDn() + "). This is probably an error ! For LSC 1.X users, this is part of the changelog to 2.X.");
 		}
@@ -211,8 +243,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 * Map the ldap search result into a AbstractBean inherited object.
 	 * 
 	 * @param sr the ldap search result
-	 * @param beanToFill
-	 *            the bean to fill
+	 * @param beanToFill the bean to fill
 	 * 
 	 * @return the modified bean
 	 * 
@@ -243,8 +274,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	/**
 	 * Get a list of object values from the NamingEnumeration.
 	 * 
-	 * @param ne
-	 *            the naming enumeration
+	 * @param ne the naming enumeration
 	 * 
 	 * @return the object list
 	 * 
@@ -252,8 +282,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	 *             thrown if a directory exception is encountered while
 	 *             switching to the Java POJO
 	 */
-	protected static List<?> getValue(final NamingEnumeration<?> ne)
-					throws NamingException {
+    protected static List<?> getValue(final NamingEnumeration<?> ne) throws NamingException {
 		List<Object> l = new ArrayList<Object>();
 
 		while (ne.hasMore()) {
@@ -381,6 +410,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	public Collection<Class<? extends ConnectionType>> getSupportedConnectionType() {
 	    Collection<Class<? extends ConnectionType>> list = new ArrayList<Class<? extends ConnectionType>>();
 	    list.add(LdapConnectionType.class);
+	    
 	    return list;
 	}
 }

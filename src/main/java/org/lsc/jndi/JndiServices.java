@@ -346,7 +346,7 @@ public final class JndiServices {
 							new File(Configuration.getConfigurationDirectory(), "gsseg_jaas.conf").getAbsolutePath());
 				}
 				props.setProperty("javax.security.sasl.server.authentication",
-						"" + connection.isSaslMutualAuthentication());
+						connection.isSaslMutualAuthentication().toString());
 //				props.put("java.naming.security.sasl.authorizationId", "dn:" + connection.getUsername());
 				props.put("javax.security.auth.useSubjectCredsOnly", "true");
 				props.setProperty("javax.security.sasl.qop", connection.getSaslQop().value());
@@ -465,9 +465,10 @@ public final class JndiServices {
 		try {
 			return getInstance(getLdapProperties(connection));
 		} catch (Exception e) {
-			LOGGER.error("Error opening LDAP connection \"" + connection.getName() + "\" to " + connection.getUrl()
-					+ " (" + e.toString() + ")");
-			throw new RuntimeException(e);
+            LOGGER.error("Error opening LDAP connection \"{}\" to {} ()", 
+                    connection.getName(), connection.getUrl(), e.toString());
+            
+            throw new RuntimeException(e);
 		}
 	}
 
@@ -522,7 +523,7 @@ public final class JndiServices {
 			return doGetEntry(base, filter, sc, scope);
 		} catch (NamingException nex) {
 			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				LOGGER.warn("Communication error, retrying: " + nex.getMessage());
+                LOGGER.warn("Communication error, retrying: {}", nex.getMessage());
 				LOGGER.debug(nex.getMessage(), nex);
 				try {
 					initConnection();
@@ -545,26 +546,66 @@ public final class JndiServices {
 		String searchBase = base == null ? "" : base;
 		String searchFilter = filter == null ? DEFAULT_FILTER : filter;
 
+        // Iterate until we get the entry 
 		NamingEnumeration<SearchResult> namingEnumeration = null;
-		try {
-			sc.setSearchScope(scope);
-			String rewrittenBase = null;
 
-			if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
-				if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
-					rewrittenBase = searchBase.substring(0,
-							searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
-				} else {
-					rewrittenBase = "";
-				}
+	    // Prepare the controls
+		sc.setSearchScope(scope);
+		String rewrittenBase = null;
+
+		if (!getContextDn().isEmpty() && searchBase.toLowerCase().endsWith(contextDn.toString().toLowerCase())) {
+			if (!searchBase.equalsIgnoreCase(contextDn.toString())) {
+				rewrittenBase = searchBase.substring(0,
+						searchBase.toLowerCase().lastIndexOf(contextDn.toString().toLowerCase()) - 1);
 			} else {
-				rewrittenBase = searchBase;
+				rewrittenBase = "";
 			}
+		} else {
+			rewrittenBase = searchBase;
+		}
 
-			namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
-		} catch (NamingException nex) {
-			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
-			throw nex;
+        // Loop until we get something
+        while (true) {
+            try {
+                namingEnumeration = ctx.search(rewrittenBase, searchFilter, sc);
+                
+                // We are done, quit the loop
+                break;
+            } catch (CommunicationException ce) {
+                //  Connection is down. Let's try again
+                try {
+                    LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                    Thread.sleep(5000L);
+                    
+                    try {
+                        initConnection();
+                        LOGGER.info("Connection reinitialized!");
+
+                    } catch (NamingException | IOException e) {
+                        LOGGER.error("Error: communication failure: {}", e.getMessage());
+                        // retry
+                    }
+                } catch (InterruptedException e) {
+                    // Interruption: rethrow the exception
+                    LOGGER.error("Error: communication failure, interrupoted: {}", ce.getMessage());
+                    
+                    // Close the namingEnumaration if not null
+                    if (namingEnumeration != null) {
+                        namingEnumeration.close();
+                    }
+
+                    throw ce;
+                }
+    		} catch (NamingException nex) {
+    			LOGGER.error("Error while looking for {} in {}: {}", new Object[] { searchFilter, searchBase, nex });
+                
+                // Close the namingEnumaration if not null
+                if (namingEnumeration != null) {
+                    namingEnumeration.close();
+                }
+
+                throw nex;
+    		}
 		}
 
 		SearchResult sr = null;
@@ -681,43 +722,71 @@ public final class JndiServices {
 		}
 	}
 
-	private SearchResult doReadEntry(final String base, final String filter, final boolean allowError,
-			final SearchControls sc) throws NamingException {
-		NamingEnumeration<SearchResult> namingEnumeration = null;
-		sc.setSearchScope(SearchControls.OBJECT_SCOPE);
-		try {
-			namingEnumeration = ctx.search(rewriteBase(base), filter, sc);
-		} catch (NamingException nex) {
-			if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
-				throw nex;
-			}
+    private SearchResult doReadEntry(final String base, final String filter, final boolean allowError,
+            final SearchControls sc) throws NamingException {
+        NamingEnumeration<SearchResult> namingEnumeration = null;
+        sc.setSearchScope(SearchControls.OBJECT_SCOPE);
+        
+        while (true) {
+            try {
+                namingEnumeration = ctx.search(rewriteBase(base), filter, sc);
+                SearchResult sr = null;
+                
+                if (namingEnumeration.hasMore()) {
+                    sr = (SearchResult) namingEnumeration.next();
+        
+                    if (namingEnumeration.hasMore()) {
+                        LOGGER.error("Too many entries returned (base: \"{}\")", base);
+                    }
+                }
+                
+                return sr;
+            } catch (CommunicationException ce) {
+                //  Connection is down. Let's try again
+                try {
+                    LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                    
+                    try {
+                        Thread.sleep(5000L);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        throw ce;
+                    }
+                    
+                    try {
+                        initConnection();
+                        LOGGER.info("Connection reinitialized!");
 
-			if (!allowError) {
-				LOGGER.error("Error while reading entry {}: {}", base, nex);
-				LOGGER.debug(nex.toString(), nex);
-			}
+                    } catch (NamingException | IOException e) {
+                        LOGGER.error("Error: communication failure: {}", e.getMessage());
+                        // retry
+                    }
+                } catch (NamingException nex) {
+                    if (nex instanceof CommunicationException || nex instanceof ServiceUnavailableException) {
+                        throw nex;
+                    }
+        
+                    if (!allowError) {
+                        LOGGER.error("Error while reading entry {}: {}", base, nex);
+                        LOGGER.debug(nex.toString(), nex);
+                    }
+        
+                    return null;
+                }
+            } catch ( NamingException ne ) {
+                if (!allowError) {
+                    LOGGER.error("Error while reading entry {}: {}", base, ne);
+                    LOGGER.debug(ne.toString(), ne);
+                }
 
-			return null;
-		}
-
-		SearchResult sr = null;
-
-		if (namingEnumeration.hasMore()) {
-			sr = (SearchResult) namingEnumeration.next();
-
-			if (namingEnumeration.hasMore()) {
-				LOGGER.error("Too many entries returned (base: \"{}\")", base);
-			} else {
-				namingEnumeration.close();
-
-				return sr;
-			}
-		}
-
-		namingEnumeration.close();
-
-		return sr;
-	}
+                return null;
+            } finally {
+                if ( namingEnumeration != null) {
+                    namingEnumeration.close();
+                }
+            }
+        }
+    }
 
 	/**
 	 * Search for a list of DN.
@@ -753,53 +822,78 @@ public final class JndiServices {
 		}
 	}
 
-	private List<String> doGetDnList(final String base, final String filter, final int scope) throws NamingException {
-		NamingEnumeration<SearchResult> namingEnumeration = null;
-		List<String> list = new ArrayList<String>();
+    private List<String> doGetDnList(final String base, final String filter, final int scope) throws NamingException {
+        NamingEnumeration<SearchResult> namingEnumeration = null;
+        List<String> list = new ArrayList<String>();
 
-		// Create a new context for the search operation
-		LdapContext searchContext = (LdapContext)ctx.lookup("");
+        // Create a new context for the search operation
+        LdapContext searchContext = (LdapContext)ctx.lookup("");
 
-		try {
-			setRequestControls(searchContext);
+        setRequestControls(searchContext);
 
-			SearchControls sc = new SearchControls();
-			sc.setDerefLinkFlag(false);
-			sc.setReturningAttributes(new String[] { "1.1" });
-			sc.setSearchScope(scope);
-			sc.setReturningObjFlag(true);
+        SearchControls sc = new SearchControls();
+        sc.setDerefLinkFlag(false);
+        sc.setReturningAttributes(new String[] { "1.1" });
+        sc.setSearchScope(scope);
+        sc.setReturningObjFlag(true);
 
-			byte[] pagedResultsResponse = null;
-			do {
-				namingEnumeration = searchContext.search(base, filter, sc);
-				String completedBaseDn = "";
-				if (base.length() > 0) {
-					completedBaseDn = "," + base;
-				}
-			while (namingEnumeration.hasMoreElements()) {
-				list.add(namingEnumeration.next().getName() + completedBaseDn);
-			}
+        byte[] pagedResultsResponse = null;
+        
+        while (true) {
+            try {
+                do {
+                    namingEnumeration = searchContext.search(base, filter, sc);
+                    String completedBaseDn = "";
 
-			pagedResultsResponse = pagination(searchContext);
-			} while (pagedResultsResponse != null);
-		} catch (NamingException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
+                    if (base.length() > 0) {
+                        completedBaseDn = "," + base;
+                    }
 
-			namingEnumeration.close();
+                    while (namingEnumeration.hasMoreElements()) {
+                        list.add(namingEnumeration.next().getName() + completedBaseDn);
+                    }
+        
+                    pagedResultsResponse = pagination(searchContext);
+                } while (pagedResultsResponse != null);
+            
+                return list;
+            } catch (CommunicationException ce) {
+                LOGGER.error("Communication failure, retrying: {}", ce.getMessage());
+                
+                try {
+                    // Wait a bit and retry
+                    Thread.sleep(5000L);
+                } catch (InterruptedException iee) {
+                    throw ce;
+                }
+                
+                try {
+                    initConnection();
+                    LOGGER.info("Connection reinitialized!");
+                } catch (NamingException | IOException e) {
+                    LOGGER.error("Error: communication failure: {}", e.getMessage());
+                    // retry
+                }
+            } catch (NamingException ne) {
+                 LOGGER.error(ne.toString());
+                 LOGGER.debug(ne.toString(), ne);
 
-			throw e;
-		} catch (IOException e) {
-			LOGGER.error(e.toString());
-			LOGGER.debug(e.toString(), e);
-		} finally {
-			searchContext.close();
-		}
+                 namingEnumeration.close();
 
-		namingEnumeration.close();
+                 throw ne;
+             } catch (IOException ioe) {
+                 LOGGER.error("Error while encoding the Paged control, {}", ioe.getMessage());
+                 
+                 // There was an error encoding the Paged Search control, get out
+                 throw new CannotProceedException( ioe.getMessage() );
+             } finally {
+                 if ( namingEnumeration != null ) {
+                     namingEnumeration.close();
+                 }
+             }
+        }
+    }
 
-		return list;
-	}
 
 	/**
 	 * Apply directory modifications.

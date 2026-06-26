@@ -1,5 +1,7 @@
 package org.lsc.beans;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * This object is storing counters across all tasks Update methods are specified
  * as synchronized to avoid loosing counts of operations
@@ -8,25 +10,25 @@ package org.lsc.beans;
  */
 public class InfoCounter {
 
-	private int countAll = 0;
-	private int countError = 0;
-	private int countModifiable = 0;
-	private int countCompleted = 0;
+    private AtomicInteger countAll = new AtomicInteger(0);
+    private AtomicInteger countError = new AtomicInteger(0);
+    private AtomicInteger countModifiable = new AtomicInteger(0);
+    private AtomicInteger countCompleted = new AtomicInteger(0);
 
-	public synchronized void incrementCountAll() {
-		countAll++;
+    public void incrementCountAll() {
+        countAll.incrementAndGet();
+    }
+
+    public void incrementCountError() {
+        countError.incrementAndGet();
 	}
 
-	public synchronized void incrementCountError() {
-		countError++;
+    public void incrementCountModifiable() {
+        countModifiable.incrementAndGet();
 	}
 
-	public synchronized void incrementCountModifiable() {
-		countModifiable++;
-	}
-
-	public synchronized void incrementCountCompleted() {
-		countCompleted++;
+    public void incrementCountCompleted() {
+        countCompleted.incrementAndGet();
 	}
 
 	/**
@@ -37,8 +39,8 @@ public class InfoCounter {
 	 * 
 	 * @return the count of all objects taken from the data source
 	 */
-	public synchronized int getCountAll() {
-		return countAll;
+    public int getCountAll() {
+        return countAll.get();
 	}
 
 	/**
@@ -47,8 +49,8 @@ public class InfoCounter {
 	 * 
 	 * @return the number of objects in error
 	 */
-	public synchronized int getCountError() {
-		return countError;
+    public int getCountError() {
+        return countError.get();
 	}
 
 	/**
@@ -56,8 +58,8 @@ public class InfoCounter {
 	 * 
 	 * @return the count of all updates to do
 	 */
-	public synchronized int getCountModifiable() {
-		return countModifiable;
+    public int getCountModifiable() {
+        return countModifiable.get();
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class InfoCounter {
 	 * 
 	 * @return the count of all successful updates
 	 */
-	public synchronized int getCountCompleted() {
-		return countCompleted;
+    public int getCountCompleted() {
+        return countCompleted.get();
 	}
 }

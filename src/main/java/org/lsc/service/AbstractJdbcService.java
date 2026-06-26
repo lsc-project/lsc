@@ -45,6 +45,7 @@
  */
 package org.lsc.service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -212,7 +213,7 @@ public abstract class AbstractJdbcService implements IService {
 	public IBean getBean(String id, LscDatasets attributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean = null;
 		try {
-			srcBean = beanClass.newInstance();
+            srcBean = beanClass.getDeclaredConstructor().newInstance();
 			List<?> records = sqlMapper.queryForList(getRequestNameForObjectOrClean(fromSameService),
 					getAttributesMap(attributes));
 			if (records.size() > 1) {
@@ -232,11 +233,8 @@ public abstract class AbstractJdbcService implements IService {
 			}
 			srcBean.setMainIdentifier(id);
 			return srcBean;
-		} catch (InstantiationException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-					beanClass.getName(), e.toString());
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException e) {
 			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
 					beanClass.getName(), e.toString());
 			LOGGER.debug(e.toString(), e);

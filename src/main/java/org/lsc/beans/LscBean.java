@@ -46,6 +46,7 @@
 package org.lsc.beans;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -386,7 +387,7 @@ public abstract class LscBean implements IBean, Serializable {
 	@Override
 	public LscBean clone() throws CloneNotSupportedException {
 		try {
-			LscBean bean = this.getClass().newInstance();
+		    LscBean bean = this.getClass().getDeclaredConstructor().newInstance();
 			bean.setMainIdentifier(this.getMainIdentifier());
 
 			for (String attributeName : this.getAttributesNames()) {
@@ -394,11 +395,10 @@ public abstract class LscBean implements IBean, Serializable {
 						this.getDatasetAsSetById(attributeName));
 			}
 			return bean;
-		} catch (InstantiationException ex) {
-			throw new CloneNotSupportedException(ex.getLocalizedMessage());
-		} catch (IllegalAccessException ex) {
-			throw new CloneNotSupportedException(ex.getLocalizedMessage());
-		}
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException ex) {
+            throw new CloneNotSupportedException(ex.getLocalizedMessage());
+        }
 	}
 
 	// public void setDataSchema(DataSchemaProvider dataSchema) {
@@ -436,7 +436,7 @@ public abstract class LscBean implements IBean, Serializable {
 			final String baseDn, final Class<?> c) throws NamingException {
 		try {
 			if (entry != null) {
-				LscBean ab = (LscBean) c.newInstance();
+                LscBean ab = (LscBean) c.getDeclaredConstructor().newInstance();
 				String dn = entry.getName();
 
 				if ((dn.length() > 0) && (dn.charAt(0) == '"')
@@ -472,12 +472,10 @@ public abstract class LscBean implements IBean, Serializable {
 			} else {
 				return null;
 			}
-		} catch (InstantiationException ie) {
-			LOGGER.error(ie.toString());
-			LOGGER.debug(ie.toString(), ie);
-		} catch (IllegalAccessException iae) {
-			LOGGER.error(iae.toString());
-			LOGGER.debug(iae.toString(), iae);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException ex) {
+            LOGGER.error(ex.toString());
+            LOGGER.debug(ex.toString(), ex);
 		}
 
 		return null;

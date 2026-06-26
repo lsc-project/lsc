@@ -45,6 +45,7 @@
  */
 package org.lsc.jndi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -141,7 +142,7 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	public IBean getBean(final String pivotName, final LscDatasets pivotAttributes, boolean fromSameService) throws LscServiceException {
 		IBean srcBean;
 		try {
-			srcBean = this.beanClass.newInstance();
+            srcBean = this.beanClass.getDeclaredConstructor().newInstance();
 			String searchString = null;
 			if(fromSameService || filterIdClean == null) {
 				searchString = filterIdSync;
@@ -150,10 +151,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 			}
 
 			return this.getBeanFromSR(get(pivotName, pivotAttributes, searchString), srcBean);
-		} catch (InstantiationException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                InvocationTargetException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
 		} catch (NamingException e) {

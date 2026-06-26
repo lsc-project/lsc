@@ -79,7 +79,6 @@ import org.slf4j.LoggerFactory;
  * @author Jonathan Clarke &lt;jonathan@phillipoux.net&gt;
  */
 public class FullDNJndiDstService extends AbstractSimpleJndiService implements IJndiWritableService {
-
 	/**
 	 * Preceding the object feeding, it will be instantiated from this class.
 	 */
@@ -135,39 +134,28 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			SearchControls sc = new SearchControls();
 			sc.setSearchScope(SearchControls.OBJECT_SCOPE);
 			List<String> attrs = getAttrs();
+			
 			if (attrs != null) {
 				sc.setReturningAttributes(attrs.toArray(new String[attrs.size()]));
 			}
+			
 			SearchResult srObject = getJndiServices().readEntry(dn, getFilterId(), true, sc);
 			Method method = beanClass.getMethod("getInstance", new Class[]{SearchResult.class, String.class,
 								Class.class});
+			
 			return (IBean) method.invoke(null, new Object[]{srObject, jndiServices.completeDn(dn), beanClass});
 			
-		} catch (SecurityException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (NoSuchMethodException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalArgumentException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
-		} catch (InvocationTargetException e) {
-			LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})",
-							beanClass.getName(), e);
-			LOGGER.debug(e.toString(), e);
+		} catch (SecurityException | NoSuchMethodException | IllegalArgumentException | IllegalAccessException |
+                InvocationTargetException e) {
+            LOGGER.error("Unable to get static method getInstance on {} ! This is probably a programmer's error ({})", beanClass.getName(), e);
+            LOGGER.debug(e.toString(), e);
 		} catch (NamingException e) {
 			LOGGER.error("JNDI error while synchronizing {}: {} ", beanClass.getName(), e);
 			LOGGER.debug(e.toString(), e);
+			
 			throw new LscServiceException(e.toString(), e);
 		}
+		
 		return null;
 	}
 
@@ -188,9 +176,7 @@ public class FullDNJndiDstService extends AbstractSimpleJndiService implements I
 			
 			// sort the list by shortest first - this makes sure clean operations delete leaf elements first
 			Collections.sort(idList, new StringLengthComparator());
-		} catch (ClassCastException e) {
-			// ignore errors, just leave list unsorted
-		} catch (UnsupportedOperationException e) {
+		} catch (ClassCastException | UnsupportedOperationException e) {
 			// ignore errors, just leave list unsorted
 		} catch (NamingException e) {
 			throw new LscServiceException(e.toString(), e);

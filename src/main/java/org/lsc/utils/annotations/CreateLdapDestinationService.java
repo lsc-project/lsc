@@ -112,5 +112,5 @@ public @interface CreateLdapDestinationService {
      *
      * @return LDAP filter string for getting one object
      */
-    String oneFilter();
+    String oneFilter() default "";
 }

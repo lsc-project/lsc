@@ -80,8 +80,7 @@ import org.lsc.configuration.LscConfiguration;
 						+ "dc: lsc-project\n" + "objectClass: top\n" + "objectClass: domain\n\n"), indexes = {
 								@CreateIndex(attribute = "objectClass"), @CreateIndex(attribute = "dc"),
 								@CreateIndex(attribute = "ou") }) })
-@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636) })
+@CreateLdapServer(allowAnonymousAccess = true, transports = { @CreateTransport(protocol = "LDAP", port = 33389) })
 @ApplyLdifs({
 		// Entry # 0
 		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",

@@ -106,8 +106,7 @@ import java.util.Scanner;
         })
 @CreateLdapServer(
             allowAnonymousAccess = true,
-    transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636) })
+    transports = { @CreateTransport(protocol = "LDAP", port = 33389) })
 @ApplyLdifs({
 		// Entry # 0
 		"dn: cn=Directory Manager,ou=system",

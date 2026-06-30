@@ -116,8 +116,7 @@ import org.lsc.utils.annotations.LscTestExtension;
 @CreateLdapServer(
     allowAnonymousAccess = true,
     transports = {
-        @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636)
+        @CreateTransport(protocol = "LDAP", port = 33389)
     })
 @ApplyLdifs({
     // Entry # 0

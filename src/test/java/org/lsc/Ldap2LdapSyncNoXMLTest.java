@@ -79,7 +79,6 @@ import org.apache.directory.server.core.annotations.CreateIndex;
 import org.apache.directory.server.core.annotations.CreatePartition;
 import org.apache.directory.server.core.annotations.LoadSchema;
 import org.apache.directory.server.core.hash.SshaPasswordHashingInterceptor;
-import org.apache.directory.server.core.integ.ApacheDSTestExtension;
 import org.lsc.beans.IBean;
 import org.lsc.configuration.DatasetType;
 import org.lsc.configuration.LdapConnectionType;
@@ -141,8 +140,7 @@ import org.lsc.utils.directory.LDAP;
 @CreateLdapServer(
     allowAnonymousAccess = true,
     transports = {
-        @CreateTransport(protocol = "LDAP", port = 33389),
-		@CreateTransport(protocol = "LDAPS", port = 33636)
+        @CreateTransport(protocol = "LDAP", port = 33389)
     })
 @ApplyLdifs({
     // Entry # 0

@@ -96,8 +96,7 @@ import org.slf4j.LoggerFactory;
 								@CreateIndex(attribute = "ou") }) })
 @CreateLdapServer(
 		// allowAnonymousAccess = true,
-		transports = { @CreateTransport(protocol = "LDAP", port = 33389),
-				@CreateTransport(protocol = "LDAPS", port = 33636) })
+		transports = { @CreateTransport(protocol = "LDAP", port = 33389) })
 @ApplyLdifs({
 		// Entry # 0
 		"dn: cn=Directory Manager,ou=system", "objectClass: person", "objectClass: top", "cn: Directory Manager",

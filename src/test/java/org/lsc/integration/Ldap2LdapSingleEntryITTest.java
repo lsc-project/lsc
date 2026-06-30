@@ -121,10 +121,10 @@ import org.lsc.utils.annotations.LscTestExtension;
         })
 
 // And the LdapServer
-@CreateLdapServer(allowAnonymousAccess = true, transports = {
-        @CreateTransport(protocol = "LDAP", port = 33389),
-        @CreateTransport(protocol = "LDAPS", port = 33636)
-        })
+@CreateLdapServer(
+    allowAnonymousAccess = true, 
+    transports = {@CreateTransport(protocol = "LDAP", port = 33389)}
+    )
 
 // And the schema to use
 @ApplyLdifFiles({ "lsc-schema.ldif" })

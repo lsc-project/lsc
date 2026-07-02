@@ -240,4 +240,37 @@ public class JndiModifications {
 		}
 		return mis;
 	}
+    
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("Modification:\n");
+        sb.append("    DN: ").append(distinguishName).append('\n');
+        
+        if ( newDistinguishName != null) {
+            sb.append("    New DN: ").append(newDistinguishName).append('\n');
+        }
+        
+        sb.append("    operation: ").append(operation.getDescription()).append('\n');
+        
+        int nbOp = 0;
+        
+        if (modificationItems != null) {
+            for (ModificationItem modificationItem:modificationItems) {
+                if (nbOp > 0) {
+                    sb.append(",\n");
+                }
+                
+                sb.append("        [").append(nbOp).append("]");
+                sb.append(modificationItem);
+                
+                nbOp++;
+            }
+        }
+        
+        sb.append('\n');
+        
+        return sb.toString();
+    }
 }

@@ -122,7 +122,6 @@ public class DateUtilsTest {
 		java.util.concurrent.atomic.AtomicInteger errors = new java.util.concurrent.atomic.AtomicInteger(0);
 
 		for (int t = 0; t < threadCount; t++) {
-			final int threadId = t;
 			new Thread(() -> {
 				try {
 					GregorianCalendar gc = new GregorianCalendar(TimeZone.getTimeZone("UTC"));

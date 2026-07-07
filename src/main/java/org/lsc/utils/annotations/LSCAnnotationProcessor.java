@@ -249,6 +249,7 @@ public class LSCAnnotationProcessor {
         if ( Strings.isNotEmpty(createLdapSourceService.cleanEntryFilter() ) ) {
             ldapSourceService.setCleanEntryFilter(createLdapSourceService.cleanEntryFilter());
         }
+        ldapSourceService.setBypassOneEntry(createLdapSourceService.bypassOneEntry());
         ldapSourceService.setDateFormat(createLdapSourceService.dateFormat());
         ldapSourceService.setFetchedAttributes(
                 setValues(createLdapSourceService.fetchedAttributes()));
@@ -283,10 +284,19 @@ public class LSCAnnotationProcessor {
         ldapDestinationService.setBaseDn(createLdapDestinationService.baseDn());
         ldapDestinationService.setPivotAttributes(
                 setValues(createLdapDestinationService.pivotAttributes()));
-        ldapDestinationService.setAllFilter(createLdapDestinationService.allFilter());
-        ldapDestinationService.setOneFilter(createLdapDestinationService.oneFilter());
-        ldapDestinationService.setAllEntriesFilter(createLdapDestinationService.allEntriesFilter());
-        ldapDestinationService.setOneEntryFilter(createLdapDestinationService.oneEntryFilter());
+
+        if ( Strings.isNotEmpty(createLdapDestinationService.allFilter() ) ) {
+            ldapDestinationService.setAllFilter(createLdapDestinationService.allFilter());
+        }
+        if ( Strings.isNotEmpty(createLdapDestinationService.oneFilter() ) ) {
+            ldapDestinationService.setOneFilter(createLdapDestinationService.oneFilter());
+        }
+        if ( Strings.isNotEmpty(createLdapDestinationService.allEntriesFilter() ) ) {
+            ldapDestinationService.setAllEntriesFilter(createLdapDestinationService.allEntriesFilter());
+        }
+        if ( Strings.isNotEmpty(createLdapDestinationService.oneEntryFilter() ) ) {
+            ldapDestinationService.setOneEntryFilter(createLdapDestinationService.oneEntryFilter());
+        }
         ldapDestinationService.setFetchedAttributes(
                 setValues(createLdapDestinationService.fetchedAttributes()));
 

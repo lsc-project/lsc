@@ -153,6 +153,14 @@ public @interface CreateLdapSourceService {
     String cleanEntryFilter() default "";
 
     /**
+     * Boolean to bypass the oneEntry step
+     *
+     * @return bypass the oneEntry step (true or false)
+     * @default false (optional)
+     */
+    boolean bypassOneEntry() default false;
+
+    /**
      * Filter for detecting changes in asynchronous mode.
      * Example: "(&amp;(objectClass=inetOrgPerson)(modifyTimestamp>={lastRunTimestamp}))"
      * @return LDAP filter for changed entries.  The default value is

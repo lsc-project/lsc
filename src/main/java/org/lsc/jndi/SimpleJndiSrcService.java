@@ -54,6 +54,7 @@ import javax.naming.directory.SearchControls;
 
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
+import org.lsc.beans.SimpleBean;
 import org.lsc.configuration.LdapSourceServiceType;
 import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
@@ -91,6 +92,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 * entry. Use with destination attributes while getting the object to check for suppression
 	 */
 	protected String cleanEntryFilter;
+
+	protected Boolean bypassOneEntry;
 	/**
 	 * Constructor adapted to the context properties and the bean class name
 	 * to instantiate.
@@ -122,7 +125,8 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	@SuppressWarnings("unchecked")
 	public SimpleJndiSrcService(final TaskType task) throws LscServiceConfigurationException {
 		super((LdapSourceServiceType)LscConfiguration.getSourceService(task));
-		filterIdClean = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getCleanFilter();
+		LdapSourceServiceType ldapSourceService = (LdapSourceServiceType)LscConfiguration.getSourceService(task);
+		filterIdClean = ldapSourceService.getCleanFilter();
 		if( filterIdClean != null )
 		{
 			LOGGER.warn("DEPRECATED: <cleanFilter>" + filterIdClean + "</cleanFilter>" +
@@ -130,10 +134,12 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 					" Consider using cleanEntryFilter instead.");
 
 		}
-		cleanEntryFilter = ((LdapSourceServiceType)LscConfiguration.getSourceService(task)).getCleanEntryFilter();
+		cleanEntryFilter = ldapSourceService.getCleanEntryFilter();
 		if( filterIdClean == null && cleanEntryFilter == null ) {
-		    LOGGER.warn("No clean filter has been specified for task=" + task.getName() + ". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
+		    LOGGER.warn("No clean filter has been specified for task=" + task.getName() +
+				". During the clean phase, LSC wouldn't be able to get the right entries and may delete all destination entries !");
 		}
+		bypassOneEntry = ldapSourceService.isBypassOneEntry() != null ? ldapSourceService.isBypassOneEntry() : false;
 		try {
 			this.beanClass = (Class<IBean>) Class.forName(task.getBean());
 		} catch (ClassNotFoundException e) {
@@ -182,7 +188,17 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 				}
 			}
 
-			return this.getBeanFromSR(get(task, pivotName, pivotAttributes, searchString, scriptAsFilter), srcBean);
+			if( bypassOneEntry )
+			{
+				// directly returns the attributes fetched in first request
+				SimpleBean beanToFill = new SimpleBean();
+				return this.getBeanFromDataSet(pivotName, pivotAttributes, (IBean) beanToFill);
+			}
+			else
+			{
+				// search every entry one by one in the referential
+				return this.getBeanFromSR(get(task, pivotName, pivotAttributes, searchString, scriptAsFilter), srcBean);
+			}
 		} catch (InstantiationException e) {
 			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
 			LOGGER.debug(e.toString(), e);
@@ -215,6 +231,12 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 				filterAll = ScriptingEvaluator.evalFilter(task, allEntriesFilter, null);
 			}
 
+			if( bypassOneEntry )
+			{
+				// get all attributes directly at pivot step
+				requestedAttrs = getAttrs();
+			}
+
 			return jndiServices.getAttrsList(getBaseDn(), filterAll, SearchControls.SUBTREE_SCOPE, requestedAttrs);
 		} catch (NamingException e) {
 			throw new LscServiceException(e);
@@ -227,5 +249,10 @@ public class SimpleJndiSrcService extends AbstractSimpleJndiService implements I
 	 */
 	public final String getFilterIdClean() {
 		return filterIdClean;
+	}
+
+	public Boolean isBypassOneEntry()
+	{
+		return bypassOneEntry;
 	}
 }

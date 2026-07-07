@@ -405,6 +405,8 @@
 						minOccurs="0" />
 					<xsd:element name="interval" type="xsd:int"
 						default="5" minOccurs="0" />
+					<xsd:element name="bypassOneEntry" type="xsd:boolean"
+						default="false" minOccurs="0" maxOccurs="1" />
 				</xsd:sequence>
 			</xsd:extension>
 		</xsd:complexContent>

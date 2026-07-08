@@ -52,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
+import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -303,6 +304,53 @@ public class JndiServicesTest extends AbstractLdapTestUnit {
 			LOGGER.debug("key={}, value={}", key, value.getStringValueAttribute(attrName));
 		}
 		LOGGER.debug(" Final count : {}", i);
+	}
+
+	/**
+	 * Test that close() closes the LDAP connection and the instance cannot be used after.
+	 */
+	@Test
+	public final void testClose() throws Exception {
+		// Create a fresh instance (not cached) to avoid affecting other tests
+		Properties props = JndiServices.getLdapProperties(
+				(LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+		JndiServices freshInstance = JndiServices.getInstance(props, true);
+
+		// Verify the instance works before close
+		assertNotNull(freshInstance.getContext());
+
+		// Close the instance
+		freshInstance.close();
+
+		// After close, getContext() should return null
+		assertNull(freshInstance.getContext());
+	}
+
+	/**
+	 * Test that close() is idempotent - can be called multiple times safely.
+	 */
+	@Test
+	public final void testCloseIdempotent() throws Exception {
+		Properties props = JndiServices.getLdapProperties(
+				(LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
+		JndiServices freshInstance = JndiServices.getInstance(props, true);
+
+		// Close multiple times should not throw
+		freshInstance.close();
+		freshInstance.close();
+		freshInstance.close();
+
+		// Instance should still be in a clean state
+		assertNull(freshInstance.getContext());
+	}
+
+	/**
+	 * Test that JndiServices implements AutoCloseable.
+	 */
+	@Test
+	public final void testJndiServicesImplementsAutoCloseable() {
+		assertTrue(dstJndiServices instanceof AutoCloseable,
+				"JndiServices should implement AutoCloseable");
 	}
 
 	public void testAuthenticationThroughJAAS() {

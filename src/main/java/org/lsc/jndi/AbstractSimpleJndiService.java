@@ -359,11 +359,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	}
 
 	public void close() throws IOException {
-		try {
-			jndiServices.finalize();
-		} catch (Throwable e) {
-			throw new IOException(e);
-		}
+		jndiServices.close();
 	}
 
 	/**

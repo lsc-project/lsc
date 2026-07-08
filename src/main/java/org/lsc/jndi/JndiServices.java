@@ -118,7 +118,7 @@ import org.slf4j.LoggerFactory;
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  * @author Jonathan Clarke &lt;jon@lsc-project.org&gt;
  */
-public final class JndiServices {
+public final class JndiServices implements AutoCloseable {
 
 	protected static final String TLS_CONFIGURATION = "java.naming.tls";
 
@@ -1322,24 +1322,26 @@ public final class JndiServices {
 	}
 
 	/**
-	 * Close connection before this object is deleted by the garbage collector.
-	 * 
-	 * @see java.lang.Object#finalize()
+	 * Close the LDAP connection and release resources.
+	 *
+	 * <p>Cached instances survive close — the next {@link #getInstance} call
+	 * with the same properties will reconnect automatically via
+	 * {@link #initConnection()}.</p>
 	 */
 	@Override
-	protected void finalize() throws Throwable {
-		// Close the TLS connection (revert back to the underlying LDAP association)
+	public void close() throws IOException {
 		if (tlsResponse != null) {
 			tlsResponse.close();
+			tlsResponse = null;
 		}
-
-		// Close the connection to the LDAP server
 		if (ctx != null) {
-			ctx.close();
+			try {
+				ctx.close();
+			} catch (NamingException e) {
+				throw new IOException(e);
+			}
 			ctx = null;
 		}
-
-		super.finalize();
 	}
 
 	/**

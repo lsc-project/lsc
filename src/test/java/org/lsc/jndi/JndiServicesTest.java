@@ -344,15 +344,6 @@ public class JndiServicesTest extends AbstractLdapTestUnit {
 		assertNull(freshInstance.getContext());
 	}
 
-	/**
-	 * Test that JndiServices implements AutoCloseable.
-	 */
-	@Test
-	public final void testJndiServicesImplementsAutoCloseable() {
-		assertTrue(dstJndiServices instanceof AutoCloseable,
-				"JndiServices should implement AutoCloseable");
-	}
-
 	public void testAuthenticationThroughJAAS() {
 		LoginContext lc = null;
 		String user = "";

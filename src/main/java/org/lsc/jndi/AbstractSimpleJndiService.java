@@ -65,7 +65,6 @@ import javax.naming.directory.InvalidSearchFilterException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.apache.directory.api.util.Strings;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -359,11 +358,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	}
 
 	public void close() throws IOException {
-		try {
-			jndiServices.finalize();
-		} catch (Throwable e) {
-			throw new IOException(e);
-		}
+		jndiServices.close();
 	}
 
 	/**

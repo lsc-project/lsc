@@ -1322,24 +1322,28 @@ public final class JndiServices {
 	}
 
 	/**
-	 * Close connection before this object is deleted by the garbage collector.
-	 * 
-	 * @see java.lang.Object#finalize()
+     * Close the LDAP connection and release resources.
+     *
+     * <p>Cached instances survive close — the next {@link #getInstance} call
+     * with the same properties will reconnect automatically via
+     * {@link #initConnection()}.</p>
 	 */
-	@Override
-	protected void finalize() throws Throwable {
+	protected void close() throws IOException {
 		// Close the TLS connection (revert back to the underlying LDAP association)
 		if (tlsResponse != null) {
 			tlsResponse.close();
+	        tlsResponse = null;
 		}
 
-		// Close the connection to the LDAP server
-		if (ctx != null) {
-			ctx.close();
-			ctx = null;
-		}
-
-		super.finalize();
+	    if (ctx != null) {
+            try {
+                ctx.close();
+            } catch (NamingException e) {
+                throw new IOException(e);
+            }
+        
+            ctx = null;
+	    }
 	}
 
 	/**

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 
 	static long keepAliveTime = 60;
-	static int queueCapacity=10000;
+	static int queueCapacity=10;
 
 	BlockingQueue<Runnable> queue;
 
@@ -27,6 +27,10 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	final Logger LOGGER = LoggerFactory.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	public SynchronizeThreadPoolExecutor(int threads) {
+	    this(threads, Math.max(100, threads * 10));
+	}
+	
+    public SynchronizeThreadPoolExecutor(int threads, int maxQueue) {
 		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
 			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 				// this will block if the queue is full
@@ -49,7 +53,6 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	 * @param task the runnable object
 	 */
 	public void runTask(AbstractEntryRunner task) {
-		this.beforeExecute(new Thread(task.getSyncName() + "-" + task.getId().getKey()), task);
 		execute(task);
 	}
 	

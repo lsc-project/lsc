@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.lsc.Task;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -203,7 +202,6 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
 		Set<Entry<String, LscDatasets>> ids = null;
-		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
 			ids = task.getSourceService().getListPivots(task).entrySet();
@@ -223,23 +221,29 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
+        int cpuThreads = Runtime.getRuntime().availableProcessors();
+        int optimalThreads = Math.max(1, Math.min(
+                        getThreads(),
+                        Math.min(ids.size(), cpuThreads * 2)
+                    ));
 
-		/*
-		 * Loop on all entries in the source and add or update them in the
-		 * destination
-		 */
-		for (Entry<String, LscDatasets> id : ids) {
-			threadPool.runTask(new SynchronizeEntryRunner(task, counter, this, id, true));
-		}
-		try {
-			threadPool.shutdown();
-			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
-			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
-		}
-
+        try (SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(optimalThreads)) {
+    		/*
+    		 * Loop on all entries in the source and add or update them in the
+    		 * destination
+    		 */
+    		for (Entry<String, LscDatasets> id : ids) {
+    			threadPool.runTask(new SynchronizeEntryRunner(task, counter, this, id, true));
+    		}
+    		try {
+    			threadPool.shutdown();
+    			threadPool.awaitTermination(timeLimit, TimeUnit.SECONDS);
+    		} catch (InterruptedException e) {
+    			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
+    			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
+    		}
+        }
+        
 		logStatus(task.getName(), Task.Mode.sync.toString(), counter);
 		return counter.getCountError() == 0;
 	}

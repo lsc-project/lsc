@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.lsc.Task;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -155,7 +154,6 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the destination
 		Set<Entry<String, LscDatasets>> ids = null;
-		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
 			ids = task.getDestinationService().getListPivots(task).entrySet();
@@ -174,8 +172,16 @@ public abstract class AbstractSynchronize {
 			LOGGER.error("Empty or non existant destination (no IDs found)");
 			return false;
 		}
-		
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
+
+        int cpuThreads = Runtime.getRuntime().availableProcessors();
+        int optimalThreads = Math.max(1, Math.min(
+                        getThreads(),
+                        Math.min(ids.size(), cpuThreads * 2)
+                    ));
+
+        @SuppressWarnings("resource") // Java 17 does not have a ThreadPoolExecutor.close() method
+        SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(optimalThreads);
+        
 		for (Entry<String, LscDatasets> id : ids) {
 			threadPool.runTask(new CleanEntryRunner(task, counter, this, id));
 		}
@@ -187,7 +193,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
-
+        
 		logStatus(task.getName(), Task.Mode.clean.toString(), counter);
 		return counter.getCountError() == 0;
 	}
@@ -203,7 +209,6 @@ public abstract class AbstractSynchronize {
 		InfoCounter counter = new InfoCounter();
 		// Get list of all entries from the source
 		Set<Entry<String, LscDatasets>> ids = null;
-		SynchronizeThreadPoolExecutor threadPool = null;
 
 		try {
 			ids = task.getSourceService().getListPivots(task).entrySet();
@@ -223,8 +228,14 @@ public abstract class AbstractSynchronize {
 			return false;
 		}
 
-		threadPool = new SynchronizeThreadPoolExecutor(getThreads());
+        int cpuThreads = Runtime.getRuntime().availableProcessors();
+        int optimalThreads = Math.max(1, Math.min(
+                        getThreads(),
+                        Math.min(ids.size(), cpuThreads * 2)
+                    ));
 
+        @SuppressWarnings("resource") // Java 17 does not have a ThreadPoolExecutor.close() method
+        SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(optimalThreads);
 		/*
 		 * Loop on all entries in the source and add or update them in the
 		 * destination
@@ -239,7 +250,7 @@ public abstract class AbstractSynchronize {
 			LOGGER.error("Tasks terminated according to time limit: " + e.toString(), e);
 			LOGGER.info("If you want to avoid this message, " + "increase the time limit by using dedicated parameter.");
 		}
-
+        
 		logStatus(task.getName(), Task.Mode.sync.toString(), counter);
 		return counter.getCountError() == 0;
 	}

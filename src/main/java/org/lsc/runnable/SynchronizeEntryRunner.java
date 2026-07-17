@@ -3,7 +3,6 @@ package org.lsc.runnable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import org.lsc.AbstractSynchronize;
 import org.lsc.beans.InfoCounter;
@@ -14,11 +13,12 @@ import org.lsc.Task;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceCommunicationException;
+import org.lsc.jndi.SimpleJndiDstService;
+import org.lsc.service.SyncReplSourceService;
 import org.lsc.utils.ScriptingEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.lsc.Hooks;
-import org.lsc.beans.syncoptions.ISyncOptions.OutputFormat;
 
 /**
  * @author sbahloul
@@ -41,8 +41,32 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 	@Override
 	public void run() {
 		counter.incrementCountAll();
-		try {
-			run(abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(), id.getKey(), id.getValue(), true, fromSource));
+
+        try {
+            // Deal with the special case of deleted entries, when the destination service
+            // is a LDAP server. We *must* base the deletion on the source entry's DN
+            // because we have nothing else to identify the entry (the pivot is not present).
+            if (id.getValue().getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY)
+                    && (task.getDestinationService() instanceof SimpleJndiDstService)) {
+                // Create a modification for the Delete operation
+                LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
+
+                // Get the source entry DN which is stored in the entry's key
+                String dn = id.getKey();
+
+                // Transform it to get rid of the base, as we are using JNDI which uses a context
+                String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().
+                    rewriteBase(dn);
+
+                lm.setMainIdentifer(newDn);
+
+                // And now, delete the entry
+                task.getDestinationService().apply(lm);
+            } else {
+                IBean data = abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(),
+                        id.getKey(), id.getValue(), true, fromSource);
+                run(data);
+            }
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);

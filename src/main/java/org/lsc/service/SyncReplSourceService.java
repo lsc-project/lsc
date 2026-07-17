@@ -53,12 +53,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.naming.NamingException;
@@ -70,6 +67,7 @@ import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRe
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncRequest.SyncRequestValueImpl;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateTypeEnum;
 import org.apache.directory.api.ldap.extras.controls.syncrepl.syncState.SyncStateValue;
+import org.apache.directory.api.ldap.extras.intermediate.syncrepl.SyncInfoValue;
 import org.apache.directory.api.ldap.model.cursor.EntryCursor;
 import org.apache.directory.api.ldap.model.entry.Attribute;
 import org.apache.directory.api.ldap.model.entry.Entry;
@@ -116,7 +114,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	/** The interval in milliseconds */
 	private int interval;
 	
-	private SearchFuture sf;
+	/** The SearchFuture instance that will wait for any update from the LDAP server */
+	private SearchFuture searchFuture;
+
+	/** A variable used to compute the duration of the refresh phase */
+	private long refreshStart = 0L;
+
+	/**
+	 * A fake entry attribute used when an entry is deleted. It will be
+	 * stored into the created LscDataSetsfor deleted entries
+	 */
+	public static final String DELETED_ENTRY = "_deleted-entry";
 
 	public SyncReplSourceService(final TaskType task)
 			throws LscServiceConfigurationException {
@@ -183,7 +191,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				connection = getConnection(ldapConn);
 			}
 			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
-					getAttrsId().toArray(new String[getAttrsId().size()])));
+					getAttrsId().toArray(new String[0])));
 		} catch (RuntimeException e) {
 			throw new LscServiceException(e.toString(), e);
 		} catch (LdapException e) {
@@ -237,101 +245,176 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if(getAttrs() != null) {
 				List<String> attrList = new ArrayList<String>(getAttrs());
 				attrList.addAll(pivotAttrs.getAttributesNames());
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope, attrList.toArray(new String[attrList.size()]));
+				entryCursor = connection.search(searchBaseDn, searchString, searchScope,
+				        attrList.toArray(new String[0]));
 			} else {
 				entryCursor = connection.search(searchBaseDn, searchString, searchScope);
 			}
 
-			srcBean = this.beanClass.newInstance();
+				// Fetch the first entry found, and close the cursor
+			for ( Entry entry:entryCursor ) {
+				srcBean = beanClass.getDeclaredConstructor().newInstance();
 
-			entryCursor.next();
-			if(! entryCursor.available()) {
-				return null;
+				srcBean.setMainIdentifier(entry.getDn().getName());
+				srcBean.setDatasets(convertEntry(entry));
+
+				break;
 			}
-			Entry entry =  entryCursor.get();
-			// get dn
-			srcBean.setMainIdentifier(entry.getDn().getName());
-			srcBean.setDatasets(convertEntry(entry));
-			entryCursor.getSearchResultDone();
+
 			entryCursor.close();
+
 			return srcBean;
 		} catch (InstantiationException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+			LOGGER.error("Bad class name: {}({})", beanClass.getName(), e);
 			LOGGER.debug(e.toString(), e);
 		} catch (IllegalAccessException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+			LOGGER.error("Bad class name: {}({})", beanClass.getName(), e);
 			LOGGER.debug(e.toString(), e);
 		} catch (Exception e) {
-			LOGGER.error("LDAP error while reading entry " + id + " (" + e + ")");
+			LOGGER.error("LDAP error while reading entry {}({})", id, e);
 			LOGGER.debug(e.toString(), e);
 		}
 		return null;
 	}
 
-	@Override
-	public java.util.Map.Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
-		Map<String, LscDatasets> temporaryMap = new HashMap<String, LscDatasets>(1);
-		if(sf == null || sf.isCancelled()) {
-			try {
-				SearchRequest searchRequest = new SearchRequestImpl();
-				searchRequest.addControl(getSearchContinuationControl(srsc.getServerType()));
-				searchRequest.setBase(new Dn(getBaseDn()));
-				searchRequest.setFilter(getFilterAll());
-				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
-				searchRequest.setScope(SearchScope.SUBTREE);
-				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));
-				sf = getConnection(ldapConn).searchAsync(searchRequest);
-			} catch (LdapInvalidDnException e) {
-				throw new LscServiceException(e.toString(), e);
-			} catch (LdapException e) {
-				throw new LscServiceException(e.toString(), e);
-			}
-		}
-		Response searchResponse = null;
+	/**
+	 * Create the searchFuture
+	 *
+	 * @throws LscServiceException
+	 */
+	private void createSearchFuture() throws LscServiceException {
 		try {
-			searchResponse = sf.get(1, TimeUnit.NANOSECONDS);
+			// Prepare a search Request with
+			SearchRequest searchRequest = new SearchRequestImpl();
+
+
+			// Create the proper control, depending on the targeted server:
+			// OpenLDAP/ApacheDS: SyncRequestValue control
+			// Microsoft AD: LDAP_SERVER_NOTIFICATION_OID control
+			// Most of the other servers: PersistentSearch control
+			Control searchContinuationControl = getSearchContinuationControl(srsc.getServerType());
+
+			searchRequest.addControl(searchContinuationControl);
+
+			// We will use the configured base DN and filter
+			searchRequest.setBase(new Dn(getBaseDn()));
+			searchRequest.setFilter(getFilterAll());
+			searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
+			searchRequest.setScope(SearchScope.SUBTREE);
+
+			// Reclaim all attributes so that we don't have to do it later.
+			//searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
+
+			// Now do a search in asynchronous mode
+			searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
+			refreshStart = System.currentTimeMillis();
+		} catch (LdapInvalidDnException e) {
+			throw new LscServiceException(e.toString(), e);
+		} catch (LdapException e) {
+			throw new LscServiceException(e.toString(), e);
+		}
+	}
+
+
+	@Override
+	public Map.Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
+		if ((searchFuture == null) || searchFuture.isCancelled()) {
+			createSearchFuture();
+		}
+
+		// Ok, we are ready. Get the first entry that waits
+		try {
+
+			Response searchResponse = searchFuture.get();
+
+			if (searchResponse == null) {
+				// Not a SearchResponse instance...
+				return null;
+			} else if ( searchResponse instanceof SearchResultEntry) {
+				// We've got something that may be an entry, a referral or an SyncInfo Value
+				// Intermediate response (at the end of the refresh phase)
+				SearchResultEntry searchResultEntry = ((SearchResultEntry) searchResponse);
+				Dn entryDn = searchResultEntry.getObjectName();
+
+				LOGGER.info( "Processing entry {}", entryDn);
+
+				switch (searchResultEntry.getType()) {
+				case SEARCH_RESULT_ENTRY:
+					// A plain entry. Let's check it's status, it may be for a deleted
+					// entry
+					LscDatasets datasets = convertEntry(searchResultEntry.getEntry(), true);
+
+					// Check if it's a deletion
+					SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
+
+					if ((syncStateCtrl != null) && (syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE)) {
+						// It's a deletion, add a special attribute that is not valid in LDAP
+						// (because of the starting '_'. That will mark the entry as deleted
+						datasets.getDatasets().put(DELETED_ENTRY, entryDn);
+					}
+
+					return Map.entry(entryDn.toString(), datasets);
+
+				case SEARCH_RESULT_REFERENCE:
+					// TODO...
+					return null;
+				case SEARCH_RESULT_DONE:
+					LdapResult result = ((SearchResultDone)searchResultEntry).getLdapResult();
+
+					if (result.getResultCode() != ResultCodeEnum.SUCCESS) {
+						throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
+					}
+
+					searchFuture = null;
+
+					return null;
+
+				default:
+					// Can't be...
+					return null;
+				}
+			} else if ( searchResponse instanceof SyncInfoValue ) {
+				// This is the end of the refresh phase, log the info
+				SyncInfoValue syncInfoValue = (SyncInfoValue)searchResponse;
+				LOGGER.info("Refresh phase done: {} in {} ms", syncInfoValue.isRefreshDone(),
+				            System.currentTimeMillis() - refreshStart);
+
+				// Now we are done with the refresh, we need to cleanup the destination
+				// by removing the deleted entries
+				cleanupDestination();
+
+				return null;
+			} else {
+				// Can't be
+				return null;
+			}
 		} catch (InterruptedException e) {
 			LOGGER.warn("Interrupted search !");
+
+			return null;
 		}
-		if(checkSearchResponse(searchResponse)) {
-			SearchResultEntry sre = ((SearchResultEntry) searchResponse);
-			temporaryMap.put(sre.getObjectName().toString(), convertEntry(sre.getEntry(), true));
-			return temporaryMap.entrySet().iterator().next();
-		} else if(searchResponse != null && searchResponse.getType() == MessageTypeEnum.SEARCH_RESULT_DONE){
-			LdapResult result = ((SearchResultDone)searchResponse).getLdapResult();
-			if(result.getResultCode() != ResultCodeEnum.SUCCESS) {
-				throw new LscServiceCommunicationException(result.getDiagnosticMessage(), null);
-			}
-			sf = null;
-		}
-		return null;
 	}
 
-	private boolean checkSearchResponse(Response searchResponse) {
-		if (searchResponse == null || searchResponse.getType() != MessageTypeEnum.SEARCH_RESULT_ENTRY) {
-			return false;
-		}
-		
-		SyncStateValue syncStateCtrl = ( SyncStateValue ) searchResponse.getControl( SyncStateValue.OID );
-		if (syncStateCtrl != null && syncStateCtrl.getSyncStateType() == SyncStateTypeEnum.DELETE) {
-			return false;
-		}
-		
-		return true;
-	}
 
-	private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
-		switch(aliasesHandling) {
-		case ALWAYS:
-			return AliasDerefMode.DEREF_ALWAYS;
-		case FIND:
-			return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
-		case SEARCH:
-			return AliasDerefMode.DEREF_IN_SEARCHING;
-		case NEVER:
-		default:
-			return AliasDerefMode.NEVER_DEREF_ALIASES;
-		}
+    private AliasDerefMode getAlias(LdapDerefAliasesType aliasesHandling) {
+        switch(aliasesHandling) {
+        case ALWAYS:
+            return AliasDerefMode.DEREF_ALWAYS;
+        case FIND:
+            return AliasDerefMode.DEREF_FINDING_BASE_OBJ;
+        case SEARCH:
+            return AliasDerefMode.DEREF_IN_SEARCHING;
+        case NEVER:
+        default:
+            return AliasDerefMode.NEVER_DEREF_ALIASES;
+        }
+    }
+
+	/**
+	 * Check entries from destination to see if they haven't been deleted from source
+	 *
+	 */
+	private void cleanupDestination() {
 	}
 
 	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
@@ -368,53 +451,71 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	private LscDatasets convertEntry(Entry entry) {
 		return convertEntry(entry, false);
 	}
-	
+
 	private LscDatasets convertEntry(Entry entry, boolean onlyFirstValue) {
-		if(entry == null) return null;
+		if(entry == null) {
+			return null;
+		}
+
 		LscDatasets converted = new LscDatasets();
-		Iterator<Attribute> entryAttributes = entry.iterator();
-		while(entryAttributes.hasNext()) {
-			Attribute attr = entryAttributes.next();
-			if(attr != null && attr.size() > 0)  {
-				Iterator<Value> values = attr.iterator();
-				if(!onlyFirstValue) {
+
+		Map<String, Object> dataSets = converted.getDatasets();
+
+		if (onlyFirstValue) {
+			for ( Attribute attribute:entry ) {
+				if(attribute.size() > 0) {
+					String id = attribute.getId();
+					Value value = attribute.get();
+
+					if (value.isHumanReadable()) {
+						dataSets.put(id, value.getString());
+					} else {
+						dataSets.put(id, value.getBytes());
+					}
+				}
+			}
+		} else {
+			for ( Attribute attribute:entry ) {
+				if(attribute.size() > 0) {
+					String id = attribute.getId();
+
 					Set<Object> datasetsValues = new HashSet<Object>();
-					while(values.hasNext()) {
-						Value value = values.next();
+
+					for ( Value value:attribute) {
 						if (value.isHumanReadable()) {
 							datasetsValues.add(value.getString());
 						} else {
 							datasetsValues.add(value.getBytes());
 						}
 					}
-					converted.getDatasets().put(attr.getId(), datasetsValues);
-				} else {
-					Value value = values.next();
-					converted.getDatasets().put(attr.getId(), value.isHumanReadable() ? value.getString() : value.getBytes());
+
+					dataSets.put(id, datasetsValues);
 				}
 			}
 		}
+
 		return converted;
 	}
 
 	/**
 	 * Convert a search result entries list to a LSC ready to use map
-	 * @param entryCursor Unbounded ID LDAP SDK objects 
+	 * @param entryCursor Unbounded ID LDAP SDK objects
 	 * @return LSC compatible map
-	 * @throws LscServiceException 
+	 * @throws LscServiceException
 	 */
-	private Map<String, LscDatasets> convertSearchEntries(
-			EntryCursor entryCursor) throws LscServiceException {
+	private Map<String, LscDatasets> convertSearchEntries( EntryCursor entryCursor) throws LscServiceException {
 		Map<String, LscDatasets> converted = new HashMap<String, LscDatasets>();
+
 		try {
-			while (entryCursor.next()) {
-				Entry entry = entryCursor.get();
+			for (Entry entry:entryCursor) {
 				converted.put(entry.getDn().getName(), convertEntry(entry));
 			}
-			entryCursor.getSearchResultDone();
+
+			entryCursor.close();
 		} catch (Exception e) {
 			throw new LscServiceException("Error while performing search. Results may be incomplete." + e, e);
 		}
+
 		return converted;
 	}
 

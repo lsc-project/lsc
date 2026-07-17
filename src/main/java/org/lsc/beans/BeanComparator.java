@@ -115,6 +115,21 @@ public final class BeanComparator {
      */
     public static LscModificationType calculateModificationType(Task task,
                     IBean srcBean, IBean dstBean) throws LscServiceException {
+        return calculateModificationType( task, srcBean, dstBean, null);
+    }
+
+    /**
+     * Static method to return the kind of operation that would happen
+     *
+     * @param task task object (used for syncoptions, custom library and source/destination service)
+     * @param srcBean Bean from source
+     * @param dstBean JNDI bean
+     * @param itmBean The cloned SRC bean, or null if the clone has not yet been created
+     * @return JndiModificationType the modification type that would happen
+     * @throws LscServiceException
+     */
+    public static LscModificationType calculateModificationType(Task task,
+                    IBean srcBean, IBean dstBean, IBean itmBean) throws LscServiceException {
         // no beans, nothing to do
         if (srcBean == null) {
             if (dstBean == null) {
@@ -134,8 +149,11 @@ public final class BeanComparator {
         // we have the object in the source and the destination
         // this may be either a MODIFY or MODRDN operation.
         // clone the source bean to calculate modifications on the DN
-        IBean cloneBean = cloneSrcBean(task, srcBean, dstBean);
-        String cloneMainIdentifier = cloneBean.getMainIdentifier();
+        if (itmBean == null) {
+            itmBean = cloneSrcBean(task, srcBean, dstBean);
+        }
+
+        String cloneMainIdentifier = itmBean.getMainIdentifier();
 
         if (!Strings.isEmpty(cloneMainIdentifier) &&
                 dstBean.getMainIdentifier().compareToIgnoreCase(cloneMainIdentifier) != 0) {
@@ -160,7 +178,7 @@ public final class BeanComparator {
                     Task task, IBean srcBean, IBean dstBean)
                     throws LscServiceException {
         // get modification type to perform
-        LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean);
+        LscModificationType modificationType = calculateModificationType(task, srcBean, dstBean, null);
 
         return calculateModifications(task, srcBean, dstBean, modificationType);
     }
@@ -184,6 +202,10 @@ public final class BeanComparator {
 
         // clone the source bean to work on it, changing the DN.
         IBean itmBean = cloneSrcBean(task, srcBean, dstBean);
+
+        if (modificationType == null) {
+            modificationType = calculateModificationType(task, srcBean, dstBean, itmBean);
+        }
 
         // if there's nothing to do, just return
         if (modificationType == null) {

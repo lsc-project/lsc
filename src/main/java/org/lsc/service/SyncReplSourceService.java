@@ -302,9 +302,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
 			searchRequest.setScope(SearchScope.SUBTREE);
 
-			// Reclaim all attributes so that we don't have to do it later.
-			//searchRequest.addAttributes(SchemaConstants.ALL_ATTRIBUTES_ARRAY);
-
 			// Now do a search in asynchronous mode
 			searchFuture = getConnection(ldapConn).searchAsync(searchRequest);
 			refreshStart = System.currentTimeMillis();

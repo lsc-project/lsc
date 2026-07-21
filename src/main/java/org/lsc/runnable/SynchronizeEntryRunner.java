@@ -67,7 +67,7 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 		}
 	}
 
-	private void deleteEntry() {
+	private void deleteEntry() throws LscServiceException {
 		 // Create a modification for the Delete operation
          LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
 

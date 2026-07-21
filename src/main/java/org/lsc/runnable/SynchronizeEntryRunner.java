@@ -48,20 +48,7 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
             // because we have nothing else to identify the entry (the pivot is not present).
             if (id.getValue().getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY)
                     && (task.getDestinationService() instanceof SimpleJndiDstService)) {
-                // Create a modification for the Delete operation
-                LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
-
-                // Get the source entry DN which is stored in the entry's key
-                String dn = id.getKey();
-
-                // Transform it to get rid of the base, as we are using JNDI which uses a context
-                String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().
-                    rewriteBase(dn);
-
-                lm.setMainIdentifer(newDn);
-
-                // And now, delete the entry
-                task.getDestinationService().apply(lm);
+               deleteEntry();
             } else {
                 IBean data = abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(),
                         id.getKey(), id.getValue(), true, fromSource);
@@ -78,6 +65,22 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
 		}
+	}
+
+	private void deleteEntry() {
+		 // Create a modification for the Delete operation
+         LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
+
+         // Get the source entry DN which is stored in the entry's key
+         String dn = id.getKey();
+
+         // Transform it to get rid of the base, as we are using JNDI which uses a context
+         String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().rewriteBase(dn);
+
+         lm.setMainIdentifer(newDn);
+
+         // And now, delete the entry
+         task.getDestinationService().apply(lm);
 	}
 
 	public boolean run(IBean entry) {

@@ -376,10 +376,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 				LOGGER.info("Refresh phase done: {} in {} ms", syncInfoValue.isRefreshDone(),
 				            System.currentTimeMillis() - refreshStart);
 
-				// Now we are done with the refresh, we need to cleanup the destination
-				// by removing the deleted entries
-				cleanupDestination();
-
 				return null;
 			} else {
 				// Can't be
@@ -406,13 +402,6 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
             return AliasDerefMode.NEVER_DEREF_ALIASES;
         }
     }
-
-	/**
-	 * Check entries from destination to see if they haven't been deleted from source
-	 *
-	 */
-	private void cleanupDestination() {
-	}
 
 	public static Control getSearchContinuationControl(LdapServerType serverType) throws LscServiceConfigurationException {
 		switch(serverType) {

@@ -13,6 +13,7 @@ import org.lsc.Task;
 import org.lsc.beans.BeanComparator;
 import org.lsc.beans.IBean;
 import org.lsc.exception.LscServiceCommunicationException;
+import org.lsc.exception.LscServiceException;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.service.SyncReplSourceService;
 import org.lsc.utils.ScriptingEvaluator;

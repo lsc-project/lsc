@@ -43,18 +43,10 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 	public void run() {
 		counter.incrementCountAll();
 
-        try {
-            // Deal with the special case of deleted entries, when the destination service
-            // is a LDAP server. We *must* base the deletion on the source entry's DN
-            // because we have nothing else to identify the entry (the pivot is not present).
-            if (id.getValue().getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY)
-                    && (task.getDestinationService() instanceof SimpleJndiDstService)) {
-               deleteEntry();
-            } else {
-                IBean data = abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(),
-                        id.getKey(), id.getValue(), true, fromSource);
-                run(data);
-            }
+		try {
+			IBean data = abstractSynchronize.getBean(task, fromSource ? task.getSourceService() : task.getDestinationService(),
+			id.getKey(), id.getValue(), true, fromSource);
+			run(data);
 		} catch (RuntimeException e) {
 			counter.incrementCountError();
 			abstractSynchronize.logActionError(null, id.getValue(), e);
@@ -68,28 +60,17 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 		}
 	}
 
-	private void deleteEntry() throws LscServiceException {
-		 // Create a modification for the Delete operation
-         LscModifications lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
-
-         // Get the source entry DN which is stored in the entry's key
-         String dn = id.getKey();
-
-         // Transform it to get rid of the base, as we are using JNDI which uses a context
-         String newDn = ((SimpleJndiDstService)task.getDestinationService()).getJndiServices().rewriteBase(dn);
-
-         lm.setMainIdentifer(newDn);
-
-         // And now, delete the entry
-         task.getDestinationService().apply(lm);
-	}
-
 	public boolean run(IBean entry) {
 
 		LscModifications lm = null;
 		IBean dstBean = null;
 		/** Hash table to pass objects into JavaScript condition */
 		Map<String, Object> conditionObjects = null;
+		// Deal with the special case of deleted entries when the source is a LDAP async service
+		Boolean asyncDelete =
+			id.getValue().getDatasets().containsKey(SyncReplSourceService.DELETED_ENTRY) ?
+			true :
+			false;
 
 		try {
 			/*
@@ -121,8 +102,15 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 				dstBean = abstractSynchronize.getBean(task, task.getDestinationService(), entry.getMainIdentifier(), entryDatasets, ! fromSource, fromSource);
 			}
 
-			// Calculate operation that would be performed
-			LscModificationType modificationType = BeanComparator.calculateModificationType(task, entry, dstBean);
+			LscModificationType modificationType = null;
+			if (asyncDelete) {
+				// clean
+				modificationType = BeanComparator.calculateModificationType(task, null, dstBean);
+			}
+			else {
+				// Calculate operation that would be performed
+				modificationType = BeanComparator.calculateModificationType(task, entry, dstBean);
+			}
 
 			// Retrieve condition to evaluate before creating/updating
 			Boolean applyCondition = null;
@@ -147,7 +135,16 @@ public class SynchronizeEntryRunner extends AbstractEntryRunner {
 			}
 
 			if (applyCondition) {
-				lm = BeanComparator.calculateModifications(task, entry, dstBean);
+				if (asyncDelete) {
+					if( modificationType == LscModificationType.DELETE_OBJECT) {
+						// Create a modification for the Delete operation
+						lm = new LscModifications(LscModificationType.DELETE_OBJECT, task.getName());
+						lm.setMainIdentifer(dstBean.getMainIdentifier());
+					}
+				}
+				else {
+					lm = BeanComparator.calculateModifications(task, entry, dstBean);
+				}
 
 				// if there's nothing to do, skip to the next object
 				if (lm == null) {

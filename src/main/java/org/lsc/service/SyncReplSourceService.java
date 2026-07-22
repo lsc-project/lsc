@@ -282,7 +282,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	 *
 	 * @throws LscServiceException
 	 */
-	private void createSearchFuture() throws LscServiceException {
+	private void createSearchFuture(Task task) throws LscServiceException {
 		try {
 			// Prepare a search Request with
 			SearchRequest searchRequest = new SearchRequestImpl();
@@ -298,7 +298,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 
 			// We will use the configured base DN and filter
 			searchRequest.setBase(new Dn(getBaseDn()));
-			searchRequest.setFilter(getFilterAll());
+
+                        String filterAll = getFilterAll();
+                        String allEntriesFilter = allEntriesFilter();
+
+                        if( allEntriesFilter != null  && !allEntriesFilter.isEmpty() )
+                        {
+                                // Evaluate the filter as a script
+                                filterAll = ScriptingEvaluator.evalFilter(task, allEntriesFilter, null);
+                        }
+
+			searchRequest.setFilter(filterAll);
 			searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
 			searchRequest.setScope(SearchScope.SUBTREE);
 
@@ -316,7 +326,7 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	@Override
 	public Map.Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
 		if ((searchFuture == null) || searchFuture.isCancelled()) {
-			createSearchFuture();
+			createSearchFuture(task);
 		}
 
 		// Ok, we are ready. Get the first entry that waits

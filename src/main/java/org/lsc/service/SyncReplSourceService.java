@@ -182,7 +182,17 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			if (!connection.isConnected()) {
 				connection = getConnection(ldapConn);
 			}
-			return convertSearchEntries(connection.search(getBaseDn(), getFilterAll(), SearchScope.SUBTREE,
+
+                        String filterAll = getFilterAll();
+                        String allEntriesFilter = allEntriesFilter();
+
+                        if( allEntriesFilter != null  && !allEntriesFilter.isEmpty() )
+                        {
+                                // Evaluate the filter as a script
+                                filterAll = ScriptingEvaluator.evalFilter(task, allEntriesFilter, null);
+                        }
+
+			return convertSearchEntries(connection.search(getBaseDn(), filterAll, SearchScope.SUBTREE,
 					getAttrsId().toArray(new String[getAttrsId().size()])));
 		} catch (RuntimeException e) {
 			throw new LscServiceException(e.toString(), e);
@@ -272,11 +282,21 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 	public java.util.Map.Entry<String, LscDatasets> getNextId(Task task) throws LscServiceException {
 		Map<String, LscDatasets> temporaryMap = new HashMap<String, LscDatasets>(1);
 		if(sf == null || sf.isCancelled()) {
+
+                        String filterAll = getFilterAll();
+                        String allEntriesFilter = allEntriesFilter();
+
+                        if( allEntriesFilter != null  && !allEntriesFilter.isEmpty() )
+                        {
+                                // Evaluate the filter as a script
+                                filterAll = ScriptingEvaluator.evalFilter(task, allEntriesFilter, null);
+                        }
+
 			try {
 				SearchRequest searchRequest = new SearchRequestImpl();
 				searchRequest.addControl(getSearchContinuationControl(srsc.getServerType()));
 				searchRequest.setBase(new Dn(getBaseDn()));
-				searchRequest.setFilter(getFilterAll());
+				searchRequest.setFilter(filterAll);
 				searchRequest.setDerefAliases(getAlias(ldapConn.getDerefAliases()));
 				searchRequest.setScope(SearchScope.SUBTREE);
 				searchRequest.addAttributes(getAttrsId().toArray(new String[getAttrsId().size()]));

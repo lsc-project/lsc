@@ -47,6 +47,7 @@ package org.lsc.service;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -236,43 +237,57 @@ public class SyncReplSourceService extends SimpleJndiSrcService implements IAsyn
 			searchString = replacePlaceholdersInFilter(searchString, pivotAttrs, id);
 		}
 
+		// Do the actual search, but with a retry
 		try {
 			EntryCursor entryCursor = null;
+			
 			// When launching getBean in clean phase, the search base should be the Base DN, not the entry ID
 			String searchBaseDn = (fromSameService ? id : baseDn);
 			SearchScope searchScope = (fromSameService ? SearchScope.OBJECT : SearchScope.SUBTREE);
-			if (!connection.isConnected()) {
-				connection = getConnection(ldapConn);
-			}
-			if(getAttrs() != null) {
-				List<String> attrList = new ArrayList<String>(getAttrs());
-				attrList.addAll(pivotAttrs.getAttributesNames());
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope, attrList.toArray(new String[attrList.size()]));
-			} else {
-				entryCursor = connection.search(searchBaseDn, searchString, searchScope);
+
+			while (true) {
+				try {
+					if (!connection.isConnected()) {
+						connection = getConnection(ldapConn);
+					}
+					
+					if(getAttrs() != null) {
+						List<String> attrList = new ArrayList<String>(getAttrs());
+						attrList.addAll(pivotAttrs.getAttributesNames());
+						entryCursor = connection.search(searchBaseDn, searchString, searchScope, 
+								attrList.toArray(new String[0]));
+						
+						break;
+					} else {
+						entryCursor = connection.search(searchBaseDn, searchString, searchScope);
+
+						break;
+					}
+				} catch(Exception e) {
+					// Let's retry after having wait for 1 second
+					LOGGER.error("Cannot connect, will retry in 5s: {}", e.getMessage());
+					Thread.sleep(5000L);
+				}
 			}
 
-			srcBean = this.beanClass.newInstance();
+			// Fetch the first entry found, and close the cursor
+			for ( Entry entry:entryCursor ) {
+				srcBean = beanClass.getDeclaredConstructor().newInstance();
 
-			entryCursor.next();
-			if(! entryCursor.available()) {
-				return null;
+				srcBean.setMainIdentifier(entry.getDn().getName());
+				srcBean.setDatasets(convertEntry(entry));
+
+				break;
 			}
-			Entry entry =  entryCursor.get();
-			// get dn
-			srcBean.setMainIdentifier(entry.getDn().getName());
-			srcBean.setDatasets(convertEntry(entry));
-			entryCursor.getSearchResultDone();
+
 			entryCursor.close();
+			
 			return srcBean;
-		} catch (InstantiationException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
-			LOGGER.debug(e.toString(), e);
-		} catch (IllegalAccessException e) {
-			LOGGER.error("Bad class name: " + beanClass.getName() + "(" + e + ")");
+		} catch (InvocationTargetException e) {
+			LOGGER.error("Bad class name: {}({})", beanClass.getName(), e);
 			LOGGER.debug(e.toString(), e);
 		} catch (Exception e) {
-			LOGGER.error("LDAP error while reading entry " + id + " (" + e + ")");
+			LOGGER.error("LDAP error while reading entry {}({})", id, e);
 			LOGGER.debug(e.toString(), e);
 		}
 		return null;

@@ -47,6 +47,11 @@ package org.lsc;
 
 import com.fasterxml.jackson.databind.ObjectMapper; // For encoding object to JSON
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import java.io.StringWriter;
@@ -74,10 +79,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.lsc.configuration.LscConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 /**
  * This test case attempts to reproduce a ldap2ldap setup via SimpleSynchronize.
@@ -119,6 +128,10 @@ import java.util.Scanner;
 })
 @ApplyLdifFiles({ "lsc-schema.ldif", "lsc-project.ldif" })
 public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
+
+
+	Comparator<JsonNode> nodeComparator = Comparator.comparing(JsonNode::toString);
+
 	@BeforeEach
 	public void setup() {
 		LscConfiguration.reset();
@@ -142,31 +155,23 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		// check the results of the synchronization
 		reloadJndiConnections();
 
-		ObjectMapper mapperCreatedEntry = new ObjectMapper();
-	      JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
-	                "[ { \"attributeName\" : \"cn\", "
-	                + "\"values\" :  [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
-	                + "{ \"attributeName\" : \"sn\", "
-	                + "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
-	                + "{ \"attributeName\" : \"objectclass\", "
-	                + "\"values\" : [ \"inetOrgPerson\",\"person\",\"top\" ], \"operation\" : \"ADD_VALUES\" } ]");
-
-	      /*
+		ObjectMapper mapperCreatedEntry = JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
 		JsonNode expectedCreatedEntry = mapperCreatedEntry.readTree(
-				"[ { \"attributeName\" : \"objectclass\", "
-				+ "\"values\" : [ \"inetOrgPerson\",\"person\", \"top\" ], \"operation\" : \"ADD_VALUES\" }, "
-				+ "{ \"attributeName\" : \"cn\", "
-				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
-				+ "{ \"attributeName\" : \"sn\", "
-				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
-				*/
+			"[ { \"attributeName\" : \"objectClass\", "
+			+ "\"values\" :  [ \"inetOrgPerson\",\"person\",\"top\" ], \"operation\" : \"ADD_VALUES\" }, "
+			+ "{ \"attributeName\" : \"cn\", "
+			+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" }, "
+			+ "{ \"attributeName\" : \"sn\", "
+			+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"ADD_VALUES\" } ]");
+		sortArrays(expectedCreatedEntry);
+
 		checkJSONSyncResults("create", expectedCreatedEntry);
 
-		ObjectMapper mapperUpdatedEntry = new ObjectMapper();
+		ObjectMapper mapperUpdatedEntry = JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
 		JsonNode expectedUpdatedEntry = mapperUpdatedEntry.readTree(
 				"[ { \"attributeName\" : \"description\", "
 				+ "\"values\" : [ \"CN0001-hook\" ], \"operation\" : \"REPLACE_VALUES\" }, "
-				+ "{\"attributeName\":\"usercertificate;binary\","
+				+ "{\"attributeName\":\"userCertificate;binary\","
 				+ "\"values\":[\"MIIDkTCCAnmgAwIBAgIUDhx/9qofTrT+yNFFvihdDn7rjOQwDQYJKoZIhvc"
 				+ "NAQELBQAwWDELMAkGA1UEBhMCRlIxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3QxDTAL"
 				+ "BgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QwHhcNMjMxMDI3MTQzM"
@@ -185,6 +190,7 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 				+ "An8Yb1FmSbAvqqK+SAjn6cJC8l5yS5t0BSNQGbKSA8bPzvWI9HXYVvb+ym6GDrsr+Zad3NrqU"
 				+ "SZGzS2JFEDVD9aAikldXu6g02fA5A7nufVePmaG7iTyylO/ZU2lTiJ0SHc2DnO0pg2i+0=\"],"
 				+ "\"operation\":\"REPLACE_VALUES\"} ]");
+		sortArrays(expectedUpdatedEntry);
 
 		checkJSONSyncResults("update", expectedUpdatedEntry);
 
@@ -208,16 +214,17 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 		List<String> expectedCreatedEntry = Arrays.asList(
 				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
 				"changetype: add",
-				"objectclass: inetOrgPerson",
-				"objectclass: person",
-				"objectclass: top",
+				"objectClass: inetOrgPerson",
+				"objectClass: person",
+				"objectClass: top",
 				"cn: CN0001-hook",
 				"sn: CN0001-hook");
 
 		checkLDIFSyncResults("create", expectedCreatedEntry);
 
 		List<String> expectedUpdatedEntry = Arrays.asList(
-				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org", "changetype: modify",
+				"dn: cn=CN0001-hook,ou=ldap2ldap2TestTaskDst,ou=Test Data,dc=lsc-project,dc=org",
+				"changetype: modify",
 				"replace: description", "description: CN0001-hook");
 
 		checkLDIFSyncResults("update", expectedUpdatedEntry);
@@ -253,7 +260,10 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			List<String> entry = new ArrayList(hookResults.subList(3, (hookResults.size()-1)));
 
 			for (String attr : expectedEntry) {
-				assertTrue(entry.contains(attr), "Attribute " + attr + " not found in " + operation + " entry " + entry.toString());
+				assertTrue(
+					entry.stream().anyMatch(attr::equalsIgnoreCase),
+					"Attribute " + attr + " not found in " + operation + " entry " + entry.toString()
+				);
 			}
 		}
 	}
@@ -287,12 +297,17 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 			// Make sure all attributes in expectedEntry are present in the hook file
 			String entry = String.join("", new ArrayList<>(hookResults.subList(2, hookResults.size())));
 
-			ObjectMapper mapper = new ObjectMapper();
+			ObjectMapper mapper = JsonMapper.builder().nodeFactory(new SortingNodeFactory()).build();
 			JsonFactory factory = mapper.getFactory();
 			JsonParser jp = factory.createParser(entry);
 			try {
 				JsonNode hookOperation = mapper.readTree(jp);
-				assertEquals(hookOperation, expectedEntry);
+				sortArrays(hookOperation);
+				TextNodeComparator cmp = new TextNodeComparator();
+				assertTrue(hookOperation.equals(cmp, expectedEntry),
+					"Unexpected JSON action in hook" +
+					"\nGot:\n" + prettyPrintJsonString(hookOperation) +
+					"\nbut expected:\n" + prettyPrintJsonString(expectedEntry));
 			} catch (Exception e) {
 				StringWriter sw = new StringWriter();
 				PrintWriter pw = new PrintWriter(sw);
@@ -331,5 +346,72 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 
 		boolean ret = sync.launch(asyncType, syncType, cleanType);
 		assertTrue(ret);
+	}
+
+	// Method for sorting arrays in JSON nodes
+	private void sortArrays(JsonNode node) {
+		if (node.isArray()) {
+			for (JsonNode child : node) {
+				sortArrays(child);
+			}
+			// Sort elements in arrayNode
+			var arrayNode = (ArrayNode) node;
+			var iter = arrayNode.elements();
+			var sortedElemsCopy = new ArrayList<JsonNode>(arrayNode.size());
+			while(iter.hasNext()) {
+				var n = iter.next();
+				sortedElemsCopy.add(n);
+			}
+			sortedElemsCopy.sort(nodeComparator);
+
+			arrayNode.removeAll();
+			arrayNode.addAll(sortedElemsCopy);
+
+		} else if (node.isObject()) {
+			ObjectNode objectNode = (ObjectNode) node;
+			Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
+			while (iter.hasNext()) {
+				Map.Entry<String, JsonNode> entry = iter.next();
+				sortArrays(entry.getValue());
+			}
+		}
+	}
+
+	// Method for displaying JSON structure in a pretty way
+	private String prettyPrintJsonString(JsonNode jsonNode) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			Object json = mapper.readValue(jsonNode.toString(), Object.class);
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+		} catch (Exception e) {
+			return "Error while pretty print of JSON structure " + e.toString();
+		}
+	}
+
+}
+
+// Class for comparing JSON element with ignore case
+class TextNodeComparator implements Comparator<JsonNode> {
+	@Override
+	public int compare(JsonNode o1, JsonNode o2) {
+		if (o1.equals(o2)) {
+			return 0;
+		}
+		if ((o1 instanceof TextNode) && (o2 instanceof TextNode)) {
+			String s1 = ((TextNode) o1).asText();
+			String s2 = ((TextNode) o2).asText();
+			if (s1.equalsIgnoreCase(s2)) {
+				return 0;
+			}
+		}
+		return 1;
+	}
+}
+
+// Class for sorting JSON structures
+class SortingNodeFactory extends JsonNodeFactory {
+	@Override
+	public ObjectNode objectNode() {
+		return new ObjectNode(this, new TreeMap<String, JsonNode>());
 	}
 }

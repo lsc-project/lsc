@@ -15,7 +15,7 @@
 #%%global snapshot        1
 
 Name: lsc
-Version: 2.2.1
+Version: 2.3
 Release: 1%{?dist}
 Summary: LDAP Synchronization Connector
 License: BSD-3-Clause

@@ -1,3 +1,9 @@
+lsc (2.3-1) unstable; urgency=low
+
+  * Update to 2.3
+
+ -- David Coutadeur (LSC-project) <david.coutadeur@gmail.com>  Fri, 24 Jul 2026 12:00:00 +0100
+
 lsc (2.2.1-1) unstable; urgency=low
 
   * Update to 2.2.1

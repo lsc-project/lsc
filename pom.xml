@@ -790,20 +790,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.xmlrpc</groupId>
-      <artifactId>xmlrpc-client</artifactId>
-      <version>3.1.3</version>
-      <type>jar</type>
-      <optional>false</optional>
-      <exclusions>
-        <exclusion>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.21.0</version>
@@ -823,22 +809,6 @@
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.3.6</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <version>1.15.0</version>
-      <type>jar</type>
-      <optional>false</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <version>1.4.21</version>
-      <type>jar</type>
-      <optional>false</optional>
     </dependency>
 
     <dependency>
@@ -882,12 +852,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sleepycat</groupId>
-      <artifactId>je</artifactId>
-      <version>18.3.12</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
       <version>1.84</version>
@@ -904,42 +868,12 @@
     </dependency>
 
     <dependency>
-      <groupId>jcifs</groupId>
-      <artifactId>jcifs</artifactId>
-      <version>1.3.17</version>
-      <type>jar</type>
-      <optional>false</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>net.java.dev.stax-utils</groupId>
-      <artifactId>stax-utils</artifactId>
-      <version>20070216</version>
-      <type>jar</type>
-      <optional>false</optional>
-      <exclusions>
-        <exclusion>
-          <groupId>com.bea.xml</groupId>
-          <artifactId>jsr173-ri</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
       <version>5.23.0</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- Bumping up above 5.18.0 fails... -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.18.0</version>
-      <scope>test</scope>
-    </dependency>
- 
     <dependency>
       <groupId>org.reflections</groupId>
       <artifactId>reflections</artifactId>
@@ -1007,7 +941,7 @@
     <dependency>
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>4.0.31</version>
+      <version>5.0.7</version>
       <type>pom</type>
       <exclusions>
         <exclusion>
@@ -1037,18 +971,6 @@
       </exclusions>
     </dependency>
 
-    <dependency>
-      <groupId>xml-apis</groupId>
-      <artifactId>xml-apis</artifactId>
-      <version>2.0.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.22.0</version>
-    </dependency>
-    
     <!-- ApacheDS dependencies -->
     <dependency>
       <groupId>org.apache.directory.server</groupId>

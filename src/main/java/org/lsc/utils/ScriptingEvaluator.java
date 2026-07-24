@@ -1,5 +1,6 @@
 package org.lsc.utils;
 
+import java.lang.ThreadLocal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,6 @@ import org.lsc.exception.LscServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
 /**
  * A class used to evaluate some expression in Javascript or Groovy
  */
@@ -31,7 +29,8 @@ public class ScriptingEvaluator {
 	/**
 	 * The instances, one per thread to protect non thread safe engines like Rhino.
 	 */
-	private static Cache<Object, Object> instancesCache;
+	private static final ThreadLocal<ScriptingEvaluator> instances =
+		ThreadLocal.withInitial(ScriptingEvaluator::new);
 
 	private static Map<String, Class<? extends ScriptableEvaluator>> implementationsCache;
 
@@ -45,13 +44,15 @@ public class ScriptingEvaluator {
 
 	static {
 		implementationsCache = new HashMap<String, Class<? extends ScriptableEvaluator>>();
-		instancesCache = CacheBuilder.newBuilder().maximumSize(15).build();
 		mgr = new ScriptEngineManager();
 	}
 
 	private ScriptingEvaluator() {
 		instancesTypeCache = new HashMap<>();
 		List<ScriptEngineFactory> factories = mgr.getEngineFactories();
+
+		String threadName = Thread.currentThread().getName();
+		LOGGER.debug("Initialize new ScriptingEvaluator instance for thread {}", threadName );
 
 		for (ScriptEngineFactory sef : factories) {
 			boolean loaded = false;
@@ -123,15 +124,7 @@ public class ScriptingEvaluator {
 	}
 
 	private static ScriptingEvaluator getInstance() {
-		String threadName = Thread.currentThread().getName();
-		ScriptingEvaluator scriptingEvaluator = null;
-
-		scriptingEvaluator = (ScriptingEvaluator) instancesCache.getIfPresent(threadName);
-		if (scriptingEvaluator == null) {
-			scriptingEvaluator = new ScriptingEvaluator();
-			instancesCache.put(threadName, scriptingEvaluator);
-		}
-		return scriptingEvaluator;
+		return instances.get();
 	}
 
 	public static void contribute(String implementationName,

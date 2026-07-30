@@ -47,6 +47,12 @@ $ dpkg-buildpackage
 
 Sign packages:
 ```
-$ debsigs --sign=origin -k 'LSC Project Security' *.deb
+$ for i in *.deb; do debsigs --sign=origin -k 'LSC Project Security' $i; done
+```
+
+Verify signature:
+
+```
+dpkg-sig --list *.deb
 ```
 

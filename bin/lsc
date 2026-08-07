@@ -228,6 +228,79 @@ function build_graal_parameters() {
 
 }
 
+# Function for loading plugins
+# Plugins are loaded by the parameter PACKAGEPATH
+# Format:
+# JAVA_OPTS="-DLSC.PLUGINS.PACKAGEPATH=org.lsc.plugins.connectors.plugin1.generated:org.lsc.plugins.connectors.plugin2.generated"
+# Plugins are loaded by 2 ways:
+# * user modifies the JAVA_OPTS environment variable directly while running LSC
+# * automatic loading from the <config>/plugins/ directory, holding files with the plugins to load
+# Every plugin file is supposed to contain 1 line with the class of the plugin
+# for example: org.lsc.plugins.connectors.plugin1.generated
+function load_lsc_plugins() {
+
+	PLUGIN_DIR="${cfg_dir}/plugins"
+
+	# Get current PACKAGEPATH in JAVA_OPTS
+	CURRENT_PACKAGEPATH=""
+	if echo -n "${JAVA_OPTS}" | grep -q -- '-DLSC.PLUGINS.PACKAGEPATH='; then
+		CURRENT_PACKAGEPATH=$( echo -n "${JAVA_OPTS}" | sed -e 's/^.*-DLSC\.PLUGINS\.PACKAGEPATH=\([^ ]*\).*$/\1/' )
+	fi
+
+	# Check in plugins/ directory the extra packages to load
+	PACKAGES_TO_ADD=()
+	if [ -d "${PLUGIN_DIR}" ]; then
+		for PLUGIN_FILE in ${PLUGIN_DIR}/*; do
+			# Only load file if it has 1 line
+			if [ "$( wc -l ${PLUGIN_FILE} | sed -e 's/[ ]\+.*$//g' )" == "1" ]; then
+				# Get plugin class from file
+				PLUGIN=$( cat ${PLUGIN_FILE} )
+				# Parse current PACKAGEPATH (: separated)
+				IFS=':' read -ra PACKAGEPATH_ARRAY <<< "${CURRENT_PACKAGEPATH}"
+				found=0
+				# Check if plugin found in file is included in current PACKAGEPATH
+				for i in "${PACKAGEPATH_ARRAY[@]}"; do
+					if [ "${PLUGIN}" == "$i" ]; then
+						found=1
+					fi
+				done
+				if [ $found -eq 0 ]; then
+					# if the plugin is not referenced yet, add it to the list
+					PACKAGES_TO_ADD+=(${PLUGIN})
+				fi
+			fi
+		done
+	fi
+
+	# Generate the final PACKAGEPATH = current PACKAGEPATH + extra plugins referenced in plugins/ directory
+	TARGET_PACKAGEPATH="${CURRENT_PACKAGEPATH}"
+	for PLUGIN in ${PACKAGES_TO_ADD[@]}; do
+		if [ "${TARGET_PACKAGEPATH}" == "" ]; then
+			# If there is no package yet in target PACKAGEPATH, just add the first plugin
+			TARGET_PACKAGEPATH="${PLUGIN}"
+		else
+			TARGET_PACKAGEPATH="${TARGET_PACKAGEPATH}:${PLUGIN}"
+		fi
+	done
+
+	# Print the complete list of plugins to be loaded
+	IFS=':' read -ra PACKAGEPATH_ARRAY <<< "${TARGET_PACKAGEPATH}"
+	for i in "${PACKAGEPATH_ARRAY[@]}"; do
+		echo "Loading plugin $i"
+	done
+
+	# Adapt JAVA_OPTS variable if necessary
+	if [ "${CURRENT_PACKAGEPATH}" != "${TARGET_PACKAGEPATH}" ]; then
+		if [ "${CURRENT_PACKAGEPATH}" == "" ]; then
+			# If there is no current PACKAGEPATH parameter, add it to the end of JAVA_OPTS string
+			JAVA_OPTS="${JAVA_OPTS} -DLSC.PLUGINS.PACKAGEPATH=${TARGET_PACKAGEPATH}"
+		else
+			# else replace current PACKAGEPATH by target PACKAGEPATH in JAVA_OPTS string
+			JAVA_OPTS=$( echo -n "${JAVA_OPTS}" | sed -e "s/${CURRENT_PACKAGEPATH}/${TARGET_PACKAGEPATH}/" )
+		fi
+	fi
+}
+
 #====================================================================
 # Main
 #====================================================================
@@ -265,6 +338,7 @@ done
 
 build_classpath
 build_parameters
+load_lsc_plugins
 "${JAVA_COMMAND}" $JAVA_OPTS -cp "$CLASSPATH" org.lsc.Launcher $PARAMETERS
 
 status=$?

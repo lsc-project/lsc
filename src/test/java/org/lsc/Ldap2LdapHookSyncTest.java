@@ -355,11 +355,11 @@ public class Ldap2LdapHookSyncTest extends CommonLdapSyncTest {
 				sortArrays(child);
 			}
 			// Sort elements in arrayNode
-			var arrayNode = (ArrayNode) node;
-			var iter = arrayNode.elements();
-			var sortedElemsCopy = new ArrayList<JsonNode>(arrayNode.size());
+			ArrayNode arrayNode = (ArrayNode) node;
+			Iterator<JsonNode> iter = arrayNode.elements();
+			List<JsonNode> sortedElemsCopy = new ArrayList<JsonNode>(arrayNode.size());
 			while(iter.hasNext()) {
-				var n = iter.next();
+				JsonNode n = iter.next();
 				sortedElemsCopy.add(n);
 			}
 			sortedElemsCopy.sort(nodeComparator);

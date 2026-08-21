@@ -440,11 +440,146 @@ import org.lsc.utils.directory.LDAP;
                              @CreateValuesType(string = {"\"ok@domain.net\""})
                          })
                  })
+     ),
+     @CreateTask(
+         id = "L2LTestTask2",
+         name = "L2LTestTask2",
+         // bean, default
+         // cleanHook, empty
+         // syncHook, empty
+         ldapSourceService =
+             @CreateLdapSourceService(
+                 name = "ldap-source",
+                 connectionRef = "src-ldap",
+                 baseDn = "ou=L2Lsrc,ou=Test Data,dc=lsc-project,dc=org",
+                 pivotAttributes = {"cn", "sn"},
+                 allFilter = "(sn=*)",
+                 oneFilter = "(sn={sn})",
+                 filterAsync = "(&(sn=*)(modifytimestamp>={0}))",
+                 dateFormat = "yyyyMMddHHmmss'Z'",
+                 interval = 5,
+                 fetchedAttributes = {
+                     "description",
+                     "cn",
+                     "sn",
+                     "userPassword",
+                     "telephoneNumber",
+                     "seeAlso",
+                     "jpegPhoto"
+                 }),
+         ldapDestinationService =
+             @CreateLdapDestinationService(
+                 name = "ldap-destination",
+                 connectionRef = "dst-ldap",
+                 baseDn = "ou=L2Ldst,ou=Test Data,dc=lsc-project,dc=org",
+                 pivotAttributes = {"cn", "sn"},
+                 allFilter = "(sn=*)",
+                 oneFilter = "(sn={sn})",
+                 fetchedAttributes = {
+                     "description",
+                     "cn",
+                     "sn",
+                     "objectClass",
+                     "userPassword",
+                     "telephoneNumber",
+                     "seeAlso",
+                     "jpegPhoto",
+                     "mail"
+                 }),
+         propertiesBasedSyncOptions =
+             @CreatePropertiesBasedSyncOptions(
+                 mainIdentifier = "\"cn=\" + srcBean.getDatasetFirstValueById(\"cn\") + \","
+                         + "ou=L2LDst,ou=Test Data,dc=lsc-project,dc=org\"",
+                 defaultDelimiter = ",",
+                 defaultPolicy = PolicyType.KEEP,
+                 //conditions = ''
+                 //hooks = "",
+                 dataset = {
+                     // TelepĥoneNumber dataset
+                     @CreateDataset(
+                         name = "telephoneNumber",
+                         policy = PolicyType.MERGE,
+                         defaultValues = {
+                             @CreateValuesType(string = {"\"123456\"","\"789987\""})
+                         },
+                         createValues = {
+                             @CreateValuesType(string = {"\"000000\"","\"11111\""})
+                         }),
+                     // ObjectClass dataset
+                     @CreateDataset(
+                         name = "objectclass",
+                         policy = PolicyType.MERGE,
+                         defaultValues = {
+                             @CreateValuesType(string = {"\"person\"","\"top\""})
+                         },
+                         createValues = {
+                             @CreateValuesType(string = {"\"inetOrgPerson\""})
+                         }),
+                     // initials dataset
+                     @CreateDataset(
+                         name = "initials",
+                         policy = PolicyType.FORCE,
+                         createValues = {
+                             @CreateValuesType(string = {"\"cn=oops\""})
+                         }),
+                     // default dataset
+                     @CreateDataset(
+                         name = "default",
+                         policy = PolicyType.FORCE),
+                     // description dataset
+                     @CreateDataset(
+                         name = "description",
+                         policy = PolicyType.MERGE,
+                         forceValues = {
+                             @CreateValuesType(string = {
+                                 "  var j=0;\n"
+                                 + "var dstDescrValues = new Array();\n"
+                                 + "var srcDescrValues = srcBean.getDatasetById(\"description\").toArray();\n"
+                                 + "for (var i=0; i < srcDescrValues.length; i++ ) {\n"
+                                 + "    if ( srcDescrValues[i] != null ) {\n"
+                                 + "        // The sample just copy the value but you can do what you want here!\n"
+                                 + "        // Just keep in mind to force a correct data type because the source "
+                                 + "        // values are mapped to a generic Object type\n"
+                                 + "        // which will not be well handled by the Javascript engine !\n"
+                                 + "        dstDescrValues[j++] = \"modified: \" + srcDescrValues[i];\n"
+                                 + "     }\n"
+                                 + "}\n"
+                                 + "dstDescrValues\n"
+                                 + ""
+                             })
+                         }),
+                     // seeAlso dataset
+                     @CreateDataset(
+                         name = "seealso",
+                         policy = PolicyType.FORCE),
+                     // jpegPhoto dataset
+                     @CreateDataset(
+                         name = "jpegPhoto",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"srcBean.getDatasetFirstBinaryValueById(\"jpegPhoto\")"})
+                         }),
+                     // userPassword dataset
+                     @CreateDataset(
+                         name = "userPassword",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"\"secret\" + srcBean.getDatasetFirstValueById(\"cn\")"})
+                         }),
+                     // mail dataset
+                     @CreateDataset(
+                         name = "mail",
+                         policy = PolicyType.FORCE,
+                         forceValues = {
+                             @CreateValuesType(string = {"\"ok@domain.net\""})
+                         })
+                 })
      )}
 )
 
 public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
     public final static String TASK_NAME = "L2LTestTask";
+    public final static String ALL_TASKS = "all";
 
     private static final String JPEG_PHOTO =
             "/9j/4AAQSkZJRgABAQEBLAEsAAD/4QdkRXhpZgAASUkqAAgAAAAFABoBBQABAAAASgAAABsBBQABAAAAUgAAACgBAwABAAAA"
@@ -538,9 +673,67 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 
 		((SimpleJndiSrcService) srcService).close();
 	}
+	
 
+    @Test
+    public final void testSyncLdap2Ldap() throws Exception {
+
+        // make sure the contents of the directory are as we expect to begin with
+
+        // check MODRDN
+        assertTrue(srcJndiServices.exists(DN_MODRDN_SRC));
+        assertTrue(dstJndiServices.exists(DN_MODRDN_DST_BEFORE));
+        assertFalse(dstJndiServices.exists(DN_MODRDN_DST_AFTER));
+
+        // check ADD
+        assertTrue(srcJndiServices.exists(DN_ADD_SRC));
+        assertFalse(dstJndiServices.exists(DN_ADD_DST));
+        checkAttributeIsEmpty(DN_ADD_SRC, "userPassword");
+        checkAttributeIsEmpty(DN_ADD_SRC, "telephoneNumber");
+        checkAttributeValue(DN_ADD_SRC, "description", "Number three's descriptive text");
+        checkAttributeValue(DN_ADD_SRC, "sn", "SN0003");
+
+        // check MODIFY
+        assertTrue(srcJndiServices.exists(DN_MODIFY_SRC));
+        assertTrue(dstJndiServices.exists(DN_MODIFY_DST));
+        checkAttributeIsEmpty(DN_MODIFY_SRC, "telephoneNumber");
+        checkAttributeValue(DN_MODIFY_SRC, "description", "Number one's descriptive text");
+        checkAttributeValue(DN_MODIFY_SRC, "sn", "SN0001");
+        checkBinaryAttributeValue(DN_MODIFY_SRC, "jpegPhoto", JPEG_PHOTO);
+        // the original password is present and can be used
+        assertTrue(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secret0001"));
+        // the new password can not be used yet
+        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
+        assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
+
+        // perform the sync
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        checkSyncResultsFirstPass();
+
+        // sync again to confirm convergence
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        checkSyncResultsSecondPass();
+
+        // sync a third time to make sure nothing changed
+        launchSyncCleanTask(TASK_NAME, false, true, false);
+
+        // check the results of the synchronization
+        reloadJndiConnections();
+        checkSyncResultsSecondPass();
+    }
+
+
+    /**
+     * Try to launch all the tasks with 'all'
+     */
 	@Test
-	public final void testSyncLdap2Ldap() throws Exception {
+	public final void testSyncLdap2LdapAllTasks() throws Exception {
 
 		// make sure the contents of the directory are as we expect to begin with
 
@@ -570,22 +763,15 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_SRC, "secretCN0001"));
 		assertFalse(LDAP.canBind(LscConfiguration.getConnection("dst-ldap").getUrl(), DN_MODIFY_DST, "secretCN0001"));
 
-		// perform the sync
-		launchSyncCleanTask(TASK_NAME, false, true, false);
-
-		// check the results of the synchronization
-		reloadJndiConnections();
-		checkSyncResultsFirstPass();
-
-		// sync again to confirm convergence
-		launchSyncCleanTask(TASK_NAME, false, true, false);
+		// perform the sync, it should execute the 2 tasks
+		launchSyncCleanTask(ALL_TASKS, false, true, false);
 
 		// check the results of the synchronization
 		reloadJndiConnections();
 		checkSyncResultsSecondPass();
 
 		// sync a third time to make sure nothing changed
-		launchSyncCleanTask(TASK_NAME, false, true, false);
+		launchSyncCleanTask(ALL_TASKS, false, true, false);
 
 		// check the results of the synchronization
 		reloadJndiConnections();
@@ -1032,3 +1218,4 @@ public class Ldap2LdapSyncNoXMLTest extends CommonLdapSyncTest {
     */
     }
 }
+

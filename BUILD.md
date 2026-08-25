@@ -42,7 +42,7 @@ $ cp -a src/install/debian/ target/lsc-core-VERSION-dist/lsc-VERSION/
 Build packages:
 ```
 $ cd target/lsc-core-VERSION-dist/lsc-VERSION/
-$ dpkg-buildpackage
+$ dpkg-buildpackage -b -k 'LSC Project Security'
 ```
 
 Sign packages:
@@ -53,6 +53,10 @@ $ for i in *.deb; do debsigs --sign=origin -k 'LSC Project Security' $i; done
 Verify signature:
 
 ```
-dpkg-sig --list *.deb
+$ dpkg-sig --list *.deb
 ```
 
+Or:
+```
+$ for i in *.deb; do debsig-verify $i; done
+```

@@ -466,7 +466,7 @@ public final class JndiServices {
 			return getInstance(getLdapProperties(connection));
 		} catch (Exception e) {
 			LOGGER.error("Error opening LDAP connection \"" + connection.getName() + "\" to " + connection.getUrl()
-					+ " (" + e.toString() + ")");
+					+ " (" + e.toString() + ")", e);
 			throw new RuntimeException(e);
 		}
 	}

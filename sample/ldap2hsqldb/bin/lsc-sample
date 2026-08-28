@@ -60,10 +60,12 @@ fi
 CONFIGPATH="${SAMPLE_HOME}/etc"
 
 LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
+LSC_SAMPLE_LIB_DIR="${SAMPLE_HOME}/../lib"
 LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
 # HSQLDB jar file
 [ -z "$HSQLDB_LIB" -a -e "${LSC_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_LIB_DIR}"/hsqldb*.jar )
+[ -z "$HSQLDB_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar )
 [ -z "$HSQLDB_LIB" ] && echo "hsqldb driver (hsqldb*.jar) is missing" && exit 1
 # Temporary directory so that HSQLDB server could store files
 HSQLDB_DIR=/tmp/lsc/hsqldb
@@ -163,14 +165,17 @@ run_java_command()
         # check if we have java executable
         get_java
 
-        for jar in "${LSC_LIB_DIR}"/*.jar; do
-                LDAPCP="$LDAPCP:$jar"
+        for jar in "${LSC_LIB_DIR}"/*.jar "${LSC_SAMPLE_LIB_DIR}"/*.jar; do
+                [ -e "$jar" ] && LDAPCP="$LDAPCP:$jar"
         done
 
         "${JAVA_COMMAND}" \
                 -cp "$LDAPCP" \
                 --add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED \
-                --add-exports java.base/sun.security.x509=ALL-UNNAMED $1 $2 $3 $4 $5
+                --add-exports java.base/sun.security.x509=ALL-UNNAMED \
+				--add-opens java.base/java.lang=ALL-UNNAMED \
+				--add-opens java.base/java.util=ALL-UNNAMED \
+				--add-opens java.base/sun.security.x509=ALL-UNNAMED $1 $2 $3 $4 $5
 }
 
 start_ldap() {
@@ -247,7 +252,7 @@ case "$1" in
 	;;
   "--stop-hsql-server")
     ACTIONS="$ACTIONS stophsql"
-!	shift
+	shift
 	;;
   "--run")
 	run LDAP2JDBCTask LDAP2JDBCTask

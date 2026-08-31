@@ -58,6 +58,7 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.lsc.configuration.LscConfiguration;
+import org.lsc.jndi.JndiServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,7 +206,8 @@ public final class Launcher {
 			if (timeLimit > 0) {
 				sync.setTimeLimit(timeLimit);
 			}
-			sync.launch(asyncType, syncType, cleanType);
+			boolean launchResult = sync.launch(asyncType, syncType, cleanType);
+			return launchResult ? 0 : 1;
 		} catch (Exception e) {
 			if (!Configuration.isLoggingSetup()) {
 				System.err.println("Error: " + e.toString());
@@ -215,8 +217,11 @@ public final class Launcher {
 				LOGGER.debug(e.toString(), e);
 			}
 			return 1;
+		} finally {
+			if (asyncType == null || asyncType.isEmpty() || validateConfiguration) {
+				JndiServices.cleanSecurityProperties();
+			}
 		}
-		return 0;
 	}
 
 	/**

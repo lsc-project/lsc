@@ -59,6 +59,7 @@ import org.lsc.beans.syncoptions.ForceSyncOptions;
 import org.lsc.beans.syncoptions.PropertiesBasedSyncOptions;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.exception.LscException;
+import org.lsc.jndi.JndiServices;
 import org.lsc.jndi.PullableJndiSrcService;
 import org.lsc.jndi.SimpleJndiDstService;
 import org.lsc.service.MultipleDstService;
@@ -511,6 +512,7 @@ public class LscConfiguration {
 	public static void reset() {
 		instance = null;
 		original = null;
+		JndiServices.reset();
 	}
 
 	public static void setSyncOptions(TaskType task, SyncOptionsType syncOptions) throws LscConfigurationException {

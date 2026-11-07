@@ -86,6 +86,11 @@ CSV_SEPARATOR=";"
 #
 data_drop()
 {
+  # H2 file: URLs auto-create the DB — refuse to touch a database that was never imported.
+  if [ ! -e "${H2_DB}.mv.db" ]; then
+    echo "Error - no database at ${H2_DB} (run --import first)" 1>&2
+    return 1
+  fi
   h2_sqlQuery "DROP TABLE IF EXISTS $H2_TABLE"
 }
 
@@ -116,6 +121,11 @@ data_import()
 #
 data_show()
 {
+  # H2 file: URLs auto-create the DB — refuse to touch a database that was never imported.
+  if [ ! -e "${H2_DB}.mv.db" ]; then
+    echo "Error - no database at ${H2_DB} (run --import first)" 1>&2
+    return 1
+  fi
   h2_sqlQuery "SELECT * FROM $H2_TABLE"
 }
 

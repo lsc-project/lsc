@@ -64,8 +64,16 @@ LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/h2.log"
 VAR_DIR="$LSC_HOME/var"
 
-# H2 jar file (resolve glob at assignment; quoting at use would break expansion)
-H2_LIB=$(echo "$LIB_DIR"/h2*.jar)
+# H2 jar file — resolve glob at assignment; fail fast if missing
+H2_LIB=""
+for jar in "$LIB_DIR"/h2*.jar; do
+  [ -e "$jar" ] || continue
+  if [ -z "$H2_LIB" ]; then H2_LIB="$jar"; else H2_LIB="$H2_LIB:$jar"; fi
+done
+if [ -z "$H2_LIB" ]; then
+  echo "h2 driver (h2*.jar) is missing" 1>&2
+  exit 1
+fi
 
 # Temporary directory so that H2 server could store files
 H2_DIR=$VAR_DIR/h2

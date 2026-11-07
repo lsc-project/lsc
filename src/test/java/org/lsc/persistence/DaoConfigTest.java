@@ -77,7 +77,7 @@ public class DaoConfigTest {
 	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, LscConfigurationException {
 		LscConfiguration.reset();
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
-		pc.setUrl("jdbc:h2:file:target/h2/lsc;DB_CLOSE_DELAY=-1");
+		pc.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
 		if (pc.getUsername() == null) {
 			pc.setUsername("sa");
 		}

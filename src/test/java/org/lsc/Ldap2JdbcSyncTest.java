@@ -88,7 +88,7 @@ public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
 	private void reloadConnections() {
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("src-ldap"));
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("dst-jdbc");
-		pc.setUrl("jdbc:h2:file:target/h2/lsc;DB_CLOSE_DELAY=-1");
+		pc.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
 		pc.setDriver("org.h2.Driver");
 		if (pc.getUsername() == null) {
 			pc.setUsername("sa");

@@ -15,7 +15,7 @@
 		</connection>
 		<connection type="database">
 			<name>myH2Server</name>
-			<url>jdbc:h2:file:h2/lsc;DB_CLOSE_DELAY=-1</url>
+			<url>jdbc:h2:file:./h2/lsc;DB_CLOSE_DELAY=-1</url>
 			<username>elilly</username>
 			<password></password>
 			<driver>org.h2.blabla</driver>

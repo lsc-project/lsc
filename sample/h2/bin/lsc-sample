@@ -69,6 +69,9 @@ LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 [ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
 # Temporary directory so that H2 server could store files
 H2_DIR="/tmp/lsc/h2"
+# Database file path — must match sample/h2/etc/lsc.xml
+H2_DB="${H2_DIR}/lsc"
+H2_URL="jdbc:h2:file:${H2_DB}"
 # Table name
 H2_TABLE="csvdata"
 # Default CSV separator
@@ -95,12 +98,15 @@ data_import()
 {
   # $1 : CSV fullpath
   # $2 : CSV separator
-  mkdir -p $H2_DIR
-  h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$1')"
-  if [ $? -eq 0 ]; then
+  local csv_path csv_sep
+  csv_path=$(sql_escape "$1")
+  csv_sep=$(sql_escape "${2:-$CSV_SEPARATOR}")
+  mkdir -p "$H2_DIR"
+  # H2 CSVREAD defaults to comma; pass fieldSeparator explicitly (2.x csvOptions form)
+  if h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$csv_path', null, 'fieldSeparator=$csv_sep')"; then
     nblines=$(tail -n +2 "$1" | wc -l)
     echo "$nblines lines imported into table $H2_TABLE"
-    return
+    return 0
   fi
   exit 1
 }
@@ -129,18 +135,32 @@ h2_cleanData()
   cd ${oldpwd}
 }
 
+# Escape a value for use inside a single-quoted SQL string literal.
+sql_escape()
+{
+  printf '%s' "${1//\'/\'\'}"
+}
+
 #
-# Perform a SQL query on the H2 database. No checks on a running
-# process are performed, so be carefull.
+# Perform a SQL query on the H2 database. Returns non-zero on SQL failure
+# (org.h2.tools.Shell always exits 0, so errors are detected from its output).
 #
 h2_sqlQuery()
 {
   # $1 : sql query
+  local output rc
 
 	# check if we have java executable
 	get_java
 
-	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell -url "jdbc:h2:file:${H2_DIR}/lscdb" -user sa -password "" -sql "$1"
+	output=$("${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell \
+		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+	rc=$?
+	printf '%s\n' "$output"
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+		return 1
+	fi
+	return 0
 }
 
 # Determine where the java exectuable is
@@ -251,17 +271,17 @@ esac
 for action in $ACTIONS; do
   case "$action" in
     "dropdata")
-      data_drop
+      data_drop || exit 1
       ;;
     "importdata")
       if [ ! -e "$CSV_FILE" ]; then
-        echo " Error - file '$1' not found"
+        echo " Error - file '$CSV_FILE' not found"
         exit 1
       fi
       data_import "$CSV_FILE" "$CSV_SEPARATOR"
       ;;
     "showdata")
-      data_show
+      data_show || exit 1
       ;;
     "startldap")
       start_ldap

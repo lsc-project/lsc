@@ -69,11 +69,12 @@ LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 [ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
 # Temporary directory so that H2 server could store files
 H2_DIR=/tmp/lsc/h2
+# Database file path — shared by Shell (file:) and TCP server (-baseDir)
+H2_DB="${H2_DIR}/lscdb"
+H2_URL="jdbc:h2:file:${H2_DB}"
 # Table name
 H2_TABLE=userdata
 H2_TABLEDEF="ID VARCHAR,UID VARCHAR,MAIL VARCHAR,MAIL_LOWER VARCHAR,LAST_UPDATE TIMESTAMP, STATUS BOOLEAN, ENDOFVALIDITY VARCHAR,SN VARCHAR,CN VARCHAR,GIVENNAME VARCHAR,O VARCHAR,ADDRESS VARCHAR,TELEPHONENUMBER VARCHAR,CARLICENSE VARCHAR"
-# Default CSV separator
-CSV_SEPARATOR=";"
 
 # ---------------------------------------------------------------------------------
 # FUNCTIONS
@@ -126,15 +127,19 @@ h2_cleanData()
 h2_sqlQuery()
 {
   # $1 : sql query
+  local output rc
 	# check if we have java executable
 	get_java
 
-	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell -url "jdbc:h2:file:${H2_DIR}/lscdb" -user sa -password "" -sql "$1"
-	erg=$?
-	if [ $erg -eq 0 ]; then
-		echo "Command executed successfully"
+	output=$("${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell \
+		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+	rc=$?
+	printf '%s\n' "$output"
+	# org.h2.tools.Shell prints SQL errors but always exits 0; detect them here.
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+		return 1
 	fi
-	return $erg
+	return 0
 }
 
 # Determine where the java exectuable is
@@ -180,19 +185,25 @@ start_ldap() {
 
 start_h2() {
 	echo "Starting H2 TCP server on localhost:9092 ..."
-	mkdir -p ${H2_DIR}
+	mkdir -p "${H2_DIR}"
 	get_java
-	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server -tcpAllowOthers -ifNotExists -tcpPassword "" &
-	echo $! > ${H2_DIR}/h2.pid
+	# -baseDir makes tcp://localhost/lscdb resolve to ${H2_DIR}/lscdb (same file as Shell).
+	# No -tcpAllowOthers: remote connections stay disabled (localhost only).
+	# Sample-only shutdown password for local TCP management.
+	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
+		-tcp -baseDir "${H2_DIR}" -ifNotExists -tcpPassword "shutdown" &
+	echo $! > "${H2_DIR}/h2.pid"
 	sleep 2
 	echo "H2 TCP server started"
 }
 
 stop_h2() {
-	if [ -f ${H2_DIR}/h2.pid ]; then
+	if [ -f "${H2_DIR}/h2.pid" ]; then
 		get_java
-		"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server -tcpShutdown tcp://localhost:9092 -tcpPassword ""
-		rm -f ${H2_DIR}/h2.pid
+		"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
+			-tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2>/dev/null || true
+		kill -s KILL "$(cat "${H2_DIR}/h2.pid")" 2>/dev/null || true
+		rm -f "${H2_DIR}/h2.pid"
 		echo "H2 TCP server stopped"
 	else
 		echo "H2 TCP server is not running"
@@ -305,16 +316,16 @@ esac
 for action in $ACTIONS; do
   case "$action" in
     "dropdata")
-      data_drop
+      data_drop || exit 1
       ;;
     "createdata")
-      data_create
+      data_create || exit 1
       ;;
     "showdata")
-      data_show
+      data_show || exit 1
       ;;
     "sql")
-      h2_sqlQuery "$SQL_COMMAND"
+      h2_sqlQuery "$SQL_COMMAND" || exit 1
       ;;
     "startldap")
       start_ldap

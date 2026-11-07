@@ -188,8 +188,8 @@ under the terms of the GNU Lesser General Public License version 2.1
 as published by the Free Software Foundation.
 
 -------------------------------------------------------------------------------
-hsqlsb
-======
+H2 / Hypersonic SQL
+===================
 
 COPYRIGHTS AND LICENSES (based on BSD License)
 

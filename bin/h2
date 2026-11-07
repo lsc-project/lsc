@@ -64,11 +64,14 @@ LOG_DIR="/tmp"
 LOG_FILE="$LOG_DIR/h2.log"
 VAR_DIR="$LSC_HOME/var"
 
-# H2 jar file
-H2_LIB=$LIB_DIR/h2*.jar
+# H2 jar file (resolve glob at assignment; quoting at use would break expansion)
+H2_LIB=$(echo "$LIB_DIR"/h2*.jar)
 
 # Temporary directory so that H2 server could store files
 H2_DIR=$VAR_DIR/h2
+# Database file path — shared by Shell (file:) and TCP server (-baseDir)
+H2_DB="${H2_DIR}/lscdb"
+H2_URL="jdbc:h2:file:${H2_DB}"
 
 # H2 server PID file
 H2_PIDFILE=$VAR_DIR/h2.pid
@@ -87,8 +90,14 @@ function log() {
 }
 
 function fatal() {
-  log $1
+  log "$1"
   echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [h2] $1" 1>&2
+  exit 1
+}
+
+# Escape a value for use inside a single-quoted SQL string literal.
+function sql_escape() {
+  printf '%s' "${1//\'/\'\'}"
 }
 
 #
@@ -113,8 +122,12 @@ data_import()
 {
   # $1 : CSV fullpath
   # $2 : CSV separator
-  h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$1')"
-  if [ $? -eq 0 ]; then
+  local csv_path csv_sep
+  csv_path=$(sql_escape "$1")
+  csv_sep=$(sql_escape "${2:-$CSV_SEPARATOR}")
+  # H2 CSVREAD defaults to comma; pass fieldSeparator explicitly (2.x csvOptions form)
+  if h2_sqlQuery "DROP TABLE IF EXISTS $H2_TABLE" \
+    && h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$csv_path', null, 'fieldSeparator=$csv_sep')"; then
     nblines=$(tail -n +2 "$1" | wc -l)
     log "File $1 imported into $H2_TABLE ($nblines rows)"
     echo "$nblines lines imported into table $H2_TABLE"
@@ -137,12 +150,12 @@ data_show()
 #
 h2_checkInstance()
 {
-  if [ ! -e $H2_PIDFILE ]; then
+  if [ ! -e "$H2_PIDFILE" ]; then
     echo 1
     return
   fi
-  pid=`cat $H2_PIDFILE`
-  if [ `ps -e | grep $pid | grep -v "grep $pid" | wc -l` -eq 0 ]; then
+  pid=$(cat "$H2_PIDFILE")
+  if ! kill -0 "$pid" 2>/dev/null; then
     echo 1
     return
   fi
@@ -171,7 +184,16 @@ h2_cleanData()
 h2_sqlQuery()
 {
   # $1 : sql query
-  java -cp $H2_LIB org.h2.tools.Shell -url "jdbc:h2:file:${H2_DIR}/lscdb" -user sa -password "" -sql "$1"
+  local output rc
+  output=$(java -cp "$H2_LIB" org.h2.tools.Shell \
+    -url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+  rc=$?
+  printf '%s\n' "$output"
+  # org.h2.tools.Shell prints SQL errors but always exits 0; detect them here.
+  if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+    return 1
+  fi
+  return 0
 }
 
 #
@@ -180,25 +202,28 @@ h2_sqlQuery()
 #
 h2_startServer()
 {
-  mkdir -p $H2_DIR
-  java -cp $H2_LIB org.h2.tools.Server \
-    -tcpAllowOthers -ifNotExists -tcpPassword "" > /dev/null 2>&1 &
-  echo $! > $H2_PIDFILE
+  mkdir -p "$H2_DIR"
+  # -baseDir makes tcp://localhost/lscdb resolve to ${H2_DIR}/lscdb (same file as Shell).
+  # No -tcpAllowOthers: remote connections stay disabled (localhost only).
+  # Sample-only shutdown password for local TCP management.
+  java -cp "$H2_LIB" org.h2.tools.Server \
+    -tcp -baseDir "$H2_DIR" -ifNotExists -tcpPassword "shutdown" > /dev/null 2>&1 &
+  echo $! > "$H2_PIDFILE"
   sleep 2
-  if [ ! -d $H2_DIR ]; then
-    mkdir $H2_DIR
-  fi
 }
 
 #
-# Hard stop the current instance of H2 server. It means that it will send a
-# SIGKILL on the process found through the PIDFILE. No checks on a running process
+# Hard stop the current instance of H2 server. No checks on a running process
 # are performed, so be carefull.
 #
 h2_stopServer()
 {
-  java -cp $H2_LIB org.h2.tools.Server -tcpShutdown tcp://localhost:9092 -tcpPassword "" 2> /dev/null
-  kill -s KILL `cat $H2_PIDFILE` 2> /dev/null
+  java -cp "$H2_LIB" org.h2.tools.Server \
+    -tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2> /dev/null || true
+  if [ -f "$H2_PIDFILE" ]; then
+    kill -s KILL "$(cat "$H2_PIDFILE")" 2> /dev/null || true
+    rm -f "$H2_PIDFILE"
+  fi
 }
 
 # ---------------------------------------------------------------------------------

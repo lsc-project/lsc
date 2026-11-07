@@ -8,6 +8,7 @@ package org.lsc.utils;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -164,4 +165,34 @@ public class FrenchFiltersTest {
 	 */
 //	public static String filterDate(final String value, final String format)
 //					throws CharacterUnacceptedException {
+
+	@Test
+	public void testGeneratePwdLength() {
+		String pwd = FrenchFilters.generatePwd();
+		assertEquals(8, pwd.length(), "Password should be 8 characters long");
+	}
+
+	@Test
+	public void testGeneratePwdCharset() {
+		String validChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789/";
+		for (int i = 0; i < 100; i++) {
+			String pwd = FrenchFilters.generatePwd();
+			for (char c : pwd.toCharArray()) {
+				assertTrue(validChars.indexOf(c) >= 0,
+					"Password contains invalid character: " + c);
+			}
+		}
+	}
+
+	@Test
+	public void testGeneratePwdNotPredictable() {
+		java.util.Set<String> passwords = new java.util.HashSet<>();
+		for (int i = 0; i < 50; i++) {
+			passwords.add(FrenchFilters.generatePwd());
+		}
+		// A weak or seeded RNG would collapse diversity quickly;
+		// 50 draws over 58^8 space must yield nearly all unique values.
+		assertTrue(passwords.size() >= 49,
+			"Expected nearly unique passwords, got " + passwords.size() + "/50");
+	}
 }

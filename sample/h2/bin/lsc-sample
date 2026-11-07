@@ -60,10 +60,12 @@ fi
 CONFIGPATH="${SAMPLE_HOME}/etc"
 
 LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
+LSC_SAMPLE_LIB_DIR="${SAMPLE_HOME}/../lib"
 LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
 # H2 jar file
 [ -z "$H2_LIB" -a -e "${LSC_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_LIB_DIR}"/h2*.jar )
+[ -z "$H2_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/h2*.jar )
 [ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
 # Temporary directory so that H2 server could store files
 H2_DIR="/tmp/lsc/h2"
@@ -164,14 +166,17 @@ run_java_command()
 	# check if we have java executable
 	get_java
 
-	for jar in "${LSC_LIB_DIR}"/*.jar; do
-		LDAPCP="$LDAPCP:$jar"
+	for jar in "${LSC_LIB_DIR}"/*.jar "${LSC_SAMPLE_LIB_DIR}"/*.jar; do
+		[ -e "$jar" ] && LDAPCP="$LDAPCP:$jar"
 	done
 
 	"${JAVA_COMMAND}" \
 		-cp "$LDAPCP" \
 		--add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED \
-		--add-exports java.base/sun.security.x509=ALL-UNNAMED $1
+		--add-exports java.base/sun.security.x509=ALL-UNNAMED \
+		--add-opens java.base/java.lang=ALL-UNNAMED \
+		--add-opens java.base/java.util=ALL-UNNAMED \
+		--add-opens java.base/sun.security.x509=ALL-UNNAMED $1
 }
 
 start_ldap() {

@@ -42,14 +42,15 @@
 					<string>mail</string>
 				</pivotAttributes>
 				<fetchedAttributes>
-					<string>description</string>
-					<string>cn</string>
-					<string>sn</string>
-					<string>userPassword</string>
-					<string>objectClass</string>
-					<string>mail</string>
 					<string>carLicense</string>
+					<string>cn</string>
+					<string>description</string>
+					<string>mail</string>
+					<string>objectClass</string>
+					<string>sn</string>
+					<string>telephoneNumber</string>
 					<string>uid</string>
+					<string>userPassword</string>
 				</fetchedAttributes>
 				<getAllFilter>(objectClass=inetOrgPerson)</getAllFilter>
 				<getOneFilter>(&amp;(objectClass=inetOrgPerson)(mail={mail}))</getOneFilter>

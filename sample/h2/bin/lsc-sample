@@ -157,7 +157,9 @@ h2_sqlQuery()
 		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
 	rc=$?
 	printf '%s\n' "$output"
-	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+	# Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+	# Data rows are rendered with table pipes, so they will not match this pattern.
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
 		return 1
 	fi
 	return 0

@@ -68,6 +68,6 @@ To get the sample running, follow this simple steps:
 1. Shutdown the H2 server  
    `./bin/lsc-sample --stop-h2-server`
 2. Shutdown the ldap server  
-   `./bin/lsc-sample --stop-ldap-server`
+   Stop the `--start-ldap-server` process with Ctrl+C (it runs in the foreground).
 3. Clean up  
    `./bin/lsc-sample --clean`

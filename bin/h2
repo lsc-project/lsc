@@ -189,8 +189,9 @@ h2_sqlQuery()
     -url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
   rc=$?
   printf '%s\n' "$output"
-  # org.h2.tools.Shell prints SQL errors but always exits 0; detect them here.
-  if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+  # Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+  # Data rows are rendered with table pipes, so they will not match this pattern.
+  if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
     return 1
   fi
   return 0
@@ -207,23 +208,32 @@ h2_startServer()
   # No -tcpAllowOthers: remote connections stay disabled (localhost only).
   # Sample-only shutdown password for local TCP management.
   java -cp "$H2_LIB" org.h2.tools.Server \
-    -tcp -baseDir "$H2_DIR" -ifNotExists -tcpPassword "shutdown" > /dev/null 2>&1 &
+    -tcp -baseDir "$H2_DIR" -ifNotExists -tcpPassword "shutdown" \
+    > "$H2_DIR/h2-server.log" 2>&1 &
   echo $! > "$H2_PIDFILE"
   sleep 2
+  if ! kill -0 "$(cat "$H2_PIDFILE")" 2>/dev/null; then
+    fatal "Failed to start H2 TCP server (see $H2_DIR/h2-server.log)"
+  fi
 }
 
 #
-# Hard stop the current instance of H2 server. No checks on a running process
+# Stop the H2 server started by this script. No checks on a running process
 # are performed, so be carefull.
 #
 h2_stopServer()
 {
-  java -cp "$H2_LIB" org.h2.tools.Server \
-    -tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2> /dev/null || true
-  if [ -f "$H2_PIDFILE" ]; then
-    kill -s KILL "$(cat "$H2_PIDFILE")" 2> /dev/null || true
-    rm -f "$H2_PIDFILE"
+  if [ ! -f "$H2_PIDFILE" ]; then
+    return 0
   fi
+  pid=$(cat "$H2_PIDFILE")
+  # Only touch the server this script started — never another process on :9092.
+  if kill -0 "$pid" 2>/dev/null; then
+    java -cp "$H2_LIB" org.h2.tools.Server \
+      -tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2> /dev/null || true
+    kill -s KILL "$pid" 2> /dev/null || true
+  fi
+  rm -f "$H2_PIDFILE"
 }
 
 # ---------------------------------------------------------------------------------

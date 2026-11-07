@@ -67,8 +67,10 @@ LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 [ -z "$H2_LIB" -a -e "${LSC_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_LIB_DIR}"/h2*.jar )
 [ -z "$H2_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/h2*.jar )
 [ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
-# Temporary directory so that H2 server could store files
-H2_DIR=/tmp/lsc/h2
+# Temporary directory so that H2 server could store files.
+# Kept separate from sample/h2 (/tmp/lsc/h2) so --clean in one sample
+# cannot destroy the other sample's database or pid file.
+H2_DIR=/tmp/lsc/h2-ldap2
 # Database file path — shared by Shell (file:) and TCP server (-baseDir)
 H2_DB="${H2_DIR}/lscdb"
 H2_URL="jdbc:h2:file:${H2_DB}"
@@ -135,8 +137,9 @@ h2_sqlQuery()
 		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
 	rc=$?
 	printf '%s\n' "$output"
-	# org.h2.tools.Shell prints SQL errors but always exits 0; detect them here.
-	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error:'; then
+	# Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+	# Data rows are rendered with table pipes, so they will not match this pattern.
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
 		return 1
 	fi
 	return 0
@@ -190,19 +193,31 @@ start_h2() {
 	# -baseDir makes tcp://localhost/lscdb resolve to ${H2_DIR}/lscdb (same file as Shell).
 	# No -tcpAllowOthers: remote connections stay disabled (localhost only).
 	# Sample-only shutdown password for local TCP management.
+	# Redirect output so a background JVM does not hold the caller's stdout open.
 	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
-		-tcp -baseDir "${H2_DIR}" -ifNotExists -tcpPassword "shutdown" &
+		-tcp -baseDir "${H2_DIR}" -ifNotExists -tcpPassword "shutdown" \
+		> "${H2_DIR}/h2-server.log" 2>&1 &
 	echo $! > "${H2_DIR}/h2.pid"
 	sleep 2
+	if ! kill -0 "$(cat "${H2_DIR}/h2.pid")" 2>/dev/null; then
+		echo "Failed to start H2 TCP server (see ${H2_DIR}/h2-server.log)" 1>&2
+		rm -f "${H2_DIR}/h2.pid"
+		exit 1
+	fi
 	echo "H2 TCP server started"
 }
 
 stop_h2() {
 	if [ -f "${H2_DIR}/h2.pid" ]; then
-		get_java
-		"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
-			-tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2>/dev/null || true
-		kill -s KILL "$(cat "${H2_DIR}/h2.pid")" 2>/dev/null || true
+		pid=$(cat "${H2_DIR}/h2.pid")
+		# Only touch the server this script started — never another process on :9092.
+		if kill -0 "$pid" 2>/dev/null; then
+			get_java
+			"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
+				-tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" \
+				2>/dev/null || true
+			kill -s KILL "$pid" 2>/dev/null || true
+		fi
 		rm -f "${H2_DIR}/h2.pid"
 		echo "H2 TCP server stopped"
 	else
@@ -329,9 +344,6 @@ for action in $ACTIONS; do
       ;;
     "startldap")
       start_ldap
-      ;;
-    "stopldap")
-      stop_ldap
       ;;
     "starth2")
       start_h2

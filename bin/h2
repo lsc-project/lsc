@@ -176,13 +176,14 @@ h2_checkInstance()
 #
 h2_cleanData()
 {
-  cd $H2_DIR > /dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  local oldpwd
+  oldpwd=$(pwd)
+  if cd "$H2_DIR" > /dev/null 2>&1; then
     rm -f *
-    cd ..
-    rmdir `basename $H2_DIR`
+    cd "$oldpwd" || true
+    rmdir "$H2_DIR" 2>/dev/null || true
   fi
-  rm -f $H2_PIDFILE > /dev/null 2>&1
+  rm -f "$H2_PIDFILE" > /dev/null 2>&1
 }
 
 #
@@ -221,6 +222,7 @@ h2_startServer()
   echo $! > "$H2_PIDFILE"
   sleep 2
   if ! kill -0 "$(cat "$H2_PIDFILE")" 2>/dev/null; then
+    rm -f "$H2_PIDFILE"
     fatal "Failed to start H2 TCP server (see $H2_DIR/h2-server.log)"
   fi
 }

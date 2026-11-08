@@ -63,9 +63,12 @@ LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
 LSC_SAMPLE_LIB_DIR="${SAMPLE_HOME}/../lib"
 LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
-# H2 jar file
-[ -z "$H2_LIB" -a -e "${LSC_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_LIB_DIR}"/h2*.jar )
-[ -z "$H2_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/h2*.jar ] && H2_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/h2*.jar )
+# H2 jar file (take the first match; multi-match would break [ -e ] and -cp)
+if [ -z "$H2_LIB" ]; then
+  for _h2jar in "${LSC_LIB_DIR}"/h2*.jar "${LSC_SAMPLE_LIB_DIR}"/h2*.jar; do
+    if [ -e "$_h2jar" ]; then H2_LIB=$(readlink -f "$_h2jar"); break; fi
+  done
+fi
 [ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
 # Temporary directory so that H2 server could store files.
 # Kept separate from sample/h2 (/tmp/lsc/h2) so --clean in one sample

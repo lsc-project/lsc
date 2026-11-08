@@ -46,14 +46,14 @@
 
 		<!-- Include the sample directory and all required files -->
 		<fileSet>
-			<directory>sample/hsqldb/etc</directory>
+			<directory>sample/h2/etc</directory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
 		<fileSet>
 			<directory>src/test/resources/etc/config</directory>
-			<outputDirectory>sample/hsqldb/etc/config</outputDirectory>
+			<outputDirectory>sample/h2/etc/config</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -64,22 +64,22 @@
 				<include>logback-opends.xml</include>
 				<include>config</include>
 			</includes>
-			<outputDirectory>sample/hsqldb/etc</outputDirectory>
+			<outputDirectory>sample/h2/etc</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 		
 		<fileSet>
 			<includes>
-				<include>sample/hsqldb/README</include>
-				<include>sample/hsqldb/sample.csv</include>
+				<include>sample/h2/README</include>
+				<include>sample/h2/sample.csv</include>
 			</includes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
 
 		<fileSet>
-			<directory>sample/hsqldb/bin</directory>
+			<directory>sample/h2/bin</directory>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>
@@ -110,7 +110,7 @@
 		</fileSet>
 
 		<fileSet>
-			<directory>sample/hsqldb/bin</directory>
+			<directory>sample/h2/bin</directory>
 			<fileMode>0755</fileMode>
 			<directoryMode>0755</directoryMode>
 		</fileSet>

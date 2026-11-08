@@ -51,7 +51,7 @@ License: BSD
  ****************************************************************************
 
 This development has been done on top of other components, which are
-licensed under their own license : ibatis, hsqldb, tapestry or opendj
+licensed under their own license : ibatis, h2, tapestry or opendj
 
 License: CeCILL-2
  This software is governed by the CeCILL-2 license under French law and

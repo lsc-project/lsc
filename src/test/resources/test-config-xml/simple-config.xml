@@ -13,10 +13,10 @@
 		<tlsActivated>true</tlsActivated>
 	</ldapConnection>
 	<databaseConnection id="mySQLDBServer">
-		<url>jdbc:hsqldb:file:hsqldb/lsc</url>
+		<url>jdbc:h2:file:./h2/lsc;DB_CLOSE_DELAY=-1</url>
 		<username>elilly</username>
 		<password></password>
-		<driver>org.hsqldb.blabla</driver>
+		<driver>org.h2.blabla</driver>
 	</databaseConnection>
 
 	<task>

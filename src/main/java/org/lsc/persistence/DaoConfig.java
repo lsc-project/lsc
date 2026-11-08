@@ -148,10 +148,10 @@ public final class DaoConfig {
 
 	public static SqlMapClient getSqlMapClient(DatabaseConnectionType connection) throws LscServiceConfigurationException {
 		Properties databaseProps = new Properties();
-		databaseProps.put("username", connection.getUsername());
-		databaseProps.put("password", connection.getPassword());
-		databaseProps.put("url", connection.getUrl());
-		databaseProps.put("driver", connection.getDriver());
+		databaseProps.put("username", connection.getUsername() != null ? connection.getUsername() : "");
+		databaseProps.put("password", connection.getPassword() != null ? connection.getPassword() : "");
+		databaseProps.put("url", connection.getUrl() != null ? connection.getUrl() : "");
+		databaseProps.put("driver", connection.getDriver() != null ? connection.getDriver() : "");
 		return getSqlMapClient(databaseProps);
 	}
 }

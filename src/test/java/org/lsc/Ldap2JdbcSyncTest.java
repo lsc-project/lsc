@@ -88,7 +88,14 @@ public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
 	private void reloadConnections() {
 		srcJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("src-ldap"));
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("dst-jdbc");
-		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+		pc.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
+		pc.setDriver("org.h2.Driver");
+		if (pc.getUsername() == null) {
+			pc.setUsername("sa");
+		}
+		if (pc.getPassword() == null) {
+			pc.setPassword("");
+		}
 
 		try {
 			dstSqlMapClient = DaoConfig.getSqlMapClient(pc);
@@ -118,11 +125,11 @@ public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
 			assertNotNull(con, functionName + " - Connection is null");
 
 			Statement stm = con.createStatement();
-			String sql = String.format("DROP TABLE %s IF EXISTS; CREATE TABLE %s (%s)", DEST_TABLE, DEST_TABLE,
+			String sql = String.format("DROP TABLE IF EXISTS %s; CREATE TABLE %s (%s)", DEST_TABLE, DEST_TABLE,
 					DEST_TABLE_DEF);
 
-			rs = stm.executeQuery(sql);
-			assertNotNull(rs, functionName + " - ResultSet is null");
+			stm.execute(sql);
+			con.commit();
 			sqlMapSession.commitTransaction();
 
 			// Start the Sync Process for the first time to fill up the database
@@ -156,6 +163,7 @@ public class Ldap2JdbcSyncTest extends AbstractLdapTestUnit {
 			LOGGER.debug(sql);
 			rowcount = stm.executeUpdate(sql);
 			assertTrue(rowcount == 1, functionName + " - update row count != 1");
+			con.commit();
 			sqlMapSession.commitTransaction();
 
 			// Check the result in the DB before the sync

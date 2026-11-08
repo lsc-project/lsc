@@ -42,11 +42,11 @@ address, TCP port, username and password :
       <password>lsc</password>
 
 This sample requires that you start the embedded OpenDJ LDAP server:
-$ sample/hsqldb/bin/lsc-sample --start-ldap-server
+$ sample/h2/bin/lsc-sample --start-ldap-server
 
-In a new console, populate the LDAP server by using the HSQLDB sample:
-$ sample/hsqldb/bin/lsc-sample --import sample/hsqldb/sample.csv
-$ sample/hsqldb/bin/lsc-sample --run
+In a new console, populate the LDAP server by using the H2 sample:
+$ sample/h2/bin/lsc-sample --import sample/h2/sample.csv
+$ sample/h2/bin/lsc-sample --run
 
 Then, launch the LSC in a command line to start LDAP to postgresql synchronization: 
 $ bin/lsc -f sample/postgresql/etc-opendj2postgresql -s all -c all

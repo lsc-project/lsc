@@ -18,10 +18,10 @@
 		</ldapConnection>
 		<databaseConnection>
 			<name>dst-jdbc</name>
-			<url>jdbc:hsqldb:hsql://localhost/lscdb</url>
+			<url>jdbc:h2:tcp://localhost/lscdb</url>
 			<username>sa</username>
 			<password></password>
-			<driver>org.hsqldb.jdbcDriver</driver>
+			<driver>org.h2.Driver</driver>
 		</databaseConnection>
 	</connections>
 	<tasks>

@@ -52,16 +52,16 @@ override_dh_install:
 		-e "s:^LOG_DIR.*:LOG_DIR=\"/var/log/lsc\":" \
 		`pwd`/debian/lsc/usr/bin/lsc \
 		`pwd`/debian/lsc/usr/bin/lsc-agent \
-		`pwd`/debian/lsc/usr/bin/hsqldb
+		`pwd`/debian/lsc/usr/bin/h2
 	sed -i \
 		-e 's:^VAR_DIR.*:VAR_DIR="/var/lib/lsc":' \
-		-e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="/run/hsqldb.pid":' \
-		`pwd`/debian/lsc/usr/bin/hsqldb
+		-e 's:^H2_PIDFILE.*:H2_PIDFILE="/run/h2.pid":' \
+		`pwd`/debian/lsc/usr/bin/h2
 	# Sample
 	sed -i \
 		-e 's:^LSC_LIB_DIR=.*:LSC_LIB_DIR="/usr/lib/lsc":' \
 		-e 's:^LSC_BIN_DIR=.*:LSC_BIN_DIR="/usr/bin":' \
-		`pwd`/debian/lsc/usr/share/doc/lsc/hsqldb/bin/lsc-sample
+		`pwd`/debian/lsc/usr/share/doc/lsc/h2/bin/lsc-sample
 
 override_dh_builddeb:
 	dh_builddeb -- -Zxz

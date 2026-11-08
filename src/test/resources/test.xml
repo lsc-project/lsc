@@ -16,10 +16,10 @@
 		</ldapConnection>
 		<databaseConnection id="src-jdbc">
 			<name>src-jdbc</name>
-			<url>jdbc:hsqldb:file:hsqldb/lsc</url>
+			<url>jdbc:h2:file:./h2/lsc;DB_CLOSE_DELAY=-1</url>
 			<username>sa</username>
 			<password/>
-			<driver>org.hsqldb.jdbcDriver</driver>
+			<driver>org.h2.Driver</driver>
 		</databaseConnection>
 		<ldapConnection id="dst-ldap">
 			<name>dst-ldap</name>

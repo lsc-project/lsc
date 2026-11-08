@@ -6,10 +6,10 @@
 # identities from a list of data sources including any database with a JDBC
 # connector, another LDAP directory, flat files...
 #
-# LSC automatically embeds HSQLDB library. So, this script can:
-# - Create a table from a CSV file header in a HSQLDB database;
-# - Inject CSV data into a HSQLDB database;
-# - Read data from a HSQLDB database table.
+# LSC automatically embeds H2 database library. So, this script can:
+# - Create a table from a CSV file header in an H2 database;
+# - Inject CSV data into an H2 database;
+# - Read data from an H2 database table.
 #
 # ---------------------------------------------------------------------------------
 #
@@ -21,10 +21,10 @@
 #
 #   * Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
-#   * Redistributions in binary form must reproduce the above copyright notice,
+#   * Redistributions in binary form must reproduce the above copyright notice,
 #     this list of conditions and the following disclaimer in the documentation
 #     and/or other materials provided with the distribution.
-#   * Neither the name of the LSC Project nor the names of its contributors may be
+#   * Neither the name of the LSC Project nor the names of its contributors may be
 #     used to endorse or promote products derived from this software without
 #     specific prior written permission.
 #
@@ -63,83 +63,89 @@ LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
 LSC_SAMPLE_LIB_DIR="${SAMPLE_HOME}/../lib"
 LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
-# HSQLDB jar file
-[ -z "$HSQLDB_LIB" -a -e "${LSC_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_LIB_DIR}"/hsqldb*.jar )
-[ -z "$HSQLDB_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar )
-[ -z "$HSQLDB_LIB" ] && echo "hsqldb driver (hsqldb*.jar) is missing" && exit 1
-# Temporary directory so that HSQLDB server could store files
-HSQLDB_DIR=/tmp/lsc/hsqldb
-# HSQLDB configuration file
-HSQLDB_RC=$SAMPLE_HOME/etc/hsqldb.rc
-# HSQLDB server properties file
-HSQLDB_PROP=$SAMPLE_HOME/etc/server.properties
+# H2 jar file (take the first match; multi-match would break [ -e ] and -cp)
+if [ -z "$H2_LIB" ]; then
+  for _h2jar in "${LSC_LIB_DIR}"/h2*.jar "${LSC_SAMPLE_LIB_DIR}"/h2*.jar; do
+    if [ -e "$_h2jar" ]; then H2_LIB=$(readlink -f "$_h2jar"); break; fi
+  done
+fi
+[ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
+# Temporary directory so that H2 server could store files.
+# Kept separate from sample/h2 (/tmp/lsc/h2) so --clean in one sample
+# cannot destroy the other sample's database or pid file.
+H2_DIR=/tmp/lsc/h2-ldap2
+# Database file path — shared by Shell (file:) and TCP server (-baseDir)
+H2_DB="${H2_DIR}/lscdb"
+H2_URL="jdbc:h2:file:${H2_DB}"
 # Table name
-HSQLDB_TABLE=userdata
-HSQLDB_TABLEDEF="ID VARCHAR,UID VARCHAR,MAIL VARCHAR,MAIL_LOWER VARCHAR,LAST_UPDATE TIMESTAMP, STATUS BOOLEAN, ENDOFVALIDITY VARCHAR,SN VARCHAR,CN VARCHAR,GIVENNAME VARCHAR,O VARCHAR,ADDRESS VARCHAR,TELEPHONENUMBER VARCHAR,CARLICENSE VARCHAR"
-# Default CSV separator
-CSV_SEPARATOR=";"
+H2_TABLE=userdata
+H2_TABLEDEF="ID VARCHAR,UID VARCHAR,MAIL VARCHAR,MAIL_LOWER VARCHAR,LAST_UPDATE TIMESTAMP, STATUS BOOLEAN, ENDOFVALIDITY VARCHAR,SN VARCHAR,CN VARCHAR,GIVENNAME VARCHAR,O VARCHAR,ADDRESS VARCHAR,TELEPHONENUMBER VARCHAR,CARLICENSE VARCHAR"
 
 # ---------------------------------------------------------------------------------
 # FUNCTIONS
 # ---------------------------------------------------------------------------------
 
 #
-# Drop all data from the HSQLDB instance.
+# Drop all data from the H2 instance.
 #
 data_drop()
 {
-  hsqldb_sqlQuery "DROP TABLE ${HSQLDB_TABLE};"
+  h2_sqlQuery "DROP TABLE IF EXISTS ${H2_TABLE}"
 }
 
 #
-# Create table in the HSQLDB instance.
+# Create table in the H2 instance.
 #
 data_create()
 {
-	hsqldb_sqlQuery "CREATE TABLE ${HSQLDB_TABLE} (${HSQLDB_TABLEDEF});"
+	h2_sqlQuery "CREATE TABLE ${H2_TABLE} (${H2_TABLEDEF})"
 }
 
 #
-# Show data from the HSQLDB instance.
+# Show data from the H2 instance.
 #
 data_show()
 {
-  hsqldb_sqlQuery "SELECT * FROM ${HSQLDB_TABLE};"
+  h2_sqlQuery "SELECT * FROM ${H2_TABLE}"
 }
 
 #
-# Remove all data on disk that have been created by an hsqldb server. No checks
+# Remove all data on disk that have been created by an h2 server. No checks
 # on a running process are performed, so be carefull.
 #
-hsqldb_cleanData()
+h2_cleanData()
 {
   oldpwd=`pwd`
-  cd ${HSQLDB_DIR} > /dev/null 2>&1
+  cd ${H2_DIR} > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     rm -f *
     cd ..
-    rmdir `basename "${HSQLDB_DIR}"`
+    rmdir `basename "${H2_DIR}"`
   fi
   cd ${oldpwd}
 }
 
 #
-# Perform a SQL query on the running HSQLDB instance. No checks on a running
+# Perform a SQL query on the H2 database. No checks on a running
 # process are performed, so be carefull.
 #
-hsqldb_sqlQuery()
+h2_sqlQuery()
 {
   # $1 : sql query
-        #echo "Run hsqldb_sqlQuery: $1"
+  local output rc
 	# check if we have java executable
 	get_java
 
-	"${JAVA_COMMAND}" -jar "$HSQLDB_LIB" --rcFile "$HSQLDB_RC" --sql "$1" lscdb
-	erg=$?
-	if [ $erg -eq 0 ]; then
-		echo "Command executed successfully"
+	output=$("${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell \
+		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+	rc=$?
+	printf '%s\n' "$output"
+	# Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+	# Data rows are rendered with table pipes, so they will not match this pattern.
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
+		return 1
 	fi
-	exit $erg
+	return 0
 }
 
 # Determine where the java exectuable is
@@ -155,8 +161,8 @@ function get_java() {
     if [ -e "$JAVA_COMMAND" ]; then return; fi
 
     # Nothing seems approprite, warn and exit
-    log "No java executable found on PATH or in JAVA_HOME! Aborting."
-    log "Define JAVA_HOME or adjust your PATH variable to include java."
+    echo "No java executable found on PATH or in JAVA_HOME! Aborting."
+    echo "Define JAVA_HOME or adjust your PATH variable to include java."
     exit 2
 }
 
@@ -183,19 +189,51 @@ start_ldap() {
 	run_java_command "org.lsc.opendj.LdapServer -a -f ${CONFIGPATH}"
 }
 
-start_hsql() {
-	echo "Starting HSQL server on localhost ..."
-	run_java_command "org.hsqldb.Server" -database.0 "file:/tmp/hsqldb/ldap2sql" -dbname.0 lscdb 
+start_h2() {
+	echo "Starting H2 TCP server on localhost:9092 ..."
+	mkdir -p "${H2_DIR}"
+	get_java
+	# -baseDir makes tcp://localhost/lscdb resolve to ${H2_DIR}/lscdb (same file as Shell).
+	# No -tcpAllowOthers: remote connections stay disabled (localhost only).
+	# Sample-only shutdown password for local TCP management.
+	# Redirect output so a background JVM does not hold the caller's stdout open.
+	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
+		-tcp -baseDir "${H2_DIR}" -ifNotExists -tcpPassword "shutdown" \
+		> "${H2_DIR}/h2-server.log" 2>&1 &
+	echo $! > "${H2_DIR}/h2.pid"
+	sleep 2
+	if ! kill -0 "$(cat "${H2_DIR}/h2.pid")" 2>/dev/null; then
+		echo "Failed to start H2 TCP server (see ${H2_DIR}/h2-server.log)" 1>&2
+		rm -f "${H2_DIR}/h2.pid"
+		exit 1
+	fi
+	echo "H2 TCP server started"
 }
 
-stop_hsql() {
-	run_java_command "org.hsqldb.util.ShutdownServer" -url "jdbc:hsqldb:hsql://localhost/lscdb" 
+stop_h2() {
+	if [ -f "${H2_DIR}/h2.pid" ]; then
+		pid=$(cat "${H2_DIR}/h2.pid")
+		# Only touch the server this script started — never another process on :9092.
+		if kill -0 "$pid" 2>/dev/null; then
+			get_java
+			"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Server \
+				-tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" \
+				2>/dev/null || true
+			kill -s KILL "$pid" 2>/dev/null || true
+		fi
+		rm -f "${H2_DIR}/h2.pid"
+		echo "H2 TCP server stopped"
+	else
+		echo "H2 TCP server is not running"
+	fi
 }
 
 start_dbtool() {
-	echo "Starting HSQL Database Manager ..."
-	run_java_command "org.hsqldb.util.DatabaseManager" -url "jdbc:hsqldb:hsql://localhost/lscdb"
+	echo "Starting H2 Console ..."
+	get_java
+	"${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Console
 }
+
 run() {
 	SYNCTASK=$1
 	if [ -z "$SYNCTASK" ]; then
@@ -246,12 +284,12 @@ case "$1" in
     ACTIONS="$ACTIONS startldap"
 	shift
 	;;
-  "--start-hsql-server")
-    ACTIONS="$ACTIONS starthsql"
+  "--start-h2-server")
+    ACTIONS="$ACTIONS starth2"
 	shift
 	;;
-  "--stop-hsql-server")
-    ACTIONS="$ACTIONS stophsql"
+  "--stop-h2-server")
+    ACTIONS="$ACTIONS stoph2"
 	shift
 	;;
   "--run")
@@ -272,13 +310,13 @@ case "$1" in
     echo ""
     echo " One option from available options is:"
     echo "  Database:"
-    echo "   --start-hsql-server    Launch an embedded HSQL DB server"
-    echo "   --stop-hsql-server     Halt an embedded HSQL DB server"
-    echo "   --create               Create the table $HSQLDB_TABLE in database"
+    echo "   --start-h2-server      Launch an embedded H2 TCP server"
+    echo "   --stop-h2-server       Halt an embedded H2 TCP server"
+    echo "   --create               Create the table $H2_TABLE in database"
     echo "   --show                 Show data from database"
-    echo "   --dbtool               Start DB Tool"
+    echo "   --dbtool               Start H2 Console"
     echo "   --sql <command>        run sql command"
-    echo "   --drop                 Drop the table $HSQLDB_TABLE from database"
+    echo "   --drop                 Drop the table $H2_TABLE from database"
     echo "  LDAP"
     echo "   --start-ldap-server    Launch an embedded OpenDJ LDAP server"
     echo "  Other functions"
@@ -296,38 +334,34 @@ esac
 for action in $ACTIONS; do
   case "$action" in
     "dropdata")
-      data_drop
+      data_drop || exit 1
       ;;
     "createdata")
-      data_create
+      data_create || exit 1
       ;;
     "showdata")
-      data_show
+      data_show || exit 1
       ;;
     "sql")
-      hsqldb_sqlQuery "$SQL_COMMAND"
+      h2_sqlQuery "$SQL_COMMAND" || exit 1
       ;;
     "startldap")
       start_ldap
       ;;
-    "stopldap")
-      stop_ldap
+    "starth2")
+      start_h2
       ;;
-    "starthsql")
-      start_hsql
-      ;;
-    "stophsql")
-      stop_hsql
+    "stoph2")
+      stop_h2
       ;;
     "startdbtool")
       start_dbtool
       ;;
     "cleandata")
-      hsqldb_cleanData
+      h2_cleanData
       ;;
     "cleanldapdata")
       rm -rf /tmp/opendj-test
       ;;
   esac
 done
-

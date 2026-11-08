@@ -17,10 +17,10 @@
 		</ldapConnection>
 		<databaseConnection>
 			<name>src-jdbc</name>
-			<url>jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc</url>
+			<url>jdbc:h2:file:/tmp/lsc/h2/lsc</url>
 			<username>sa</username>
 			<password></password>
-			<driver>org.hsqldb.jdbcDriver</driver>
+			<driver>org.h2.Driver</driver>
 		</databaseConnection>
 	</connections>
 	<tasks>

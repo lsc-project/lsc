@@ -144,11 +144,18 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		reloadConnections();
 
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
-		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+		pc.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
+		pc.setDriver("org.h2.Driver");
+		if (pc.getUsername() == null) {
+			pc.setUsername("sa");
+		}
+		if (pc.getPassword() == null) {
+			pc.setPassword("");
+		}
 
 		try {
 			Class.forName(pc.getDriver()).newInstance();
-			dbConnection = DriverManager.getConnection(pc.getUrl());
+			dbConnection = DriverManager.getConnection(pc.getUrl(), pc.getUsername(), pc.getPassword());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | SQLException e) {
 			// error
 		}
@@ -237,11 +244,7 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 		try {
 			try (Statement statempent = dbConnection.createStatement()) {
 
-				try {
-					statempent.executeUpdate("DROP TABLE " + SRC_TABLE);
-				} catch (SQLException s) {
-					// That's ok
-				}
+				statempent.executeUpdate("DROP TABLE IF EXISTS " + SRC_TABLE);
 
 				// Create the table
 				statempent.executeUpdate("CREATE TABLE " + SRC_TABLE + "(" +
@@ -314,7 +317,7 @@ public class Jdbc2LdapSyncTest extends AbstractLdapTestUnit {
 	private void reloadConnections() {
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
 		databaseConnectionType = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
-		databaseConnectionType.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+		databaseConnectionType.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
 
 		try {
 			srcSqlMapClient = DaoConfig.getSqlMapClient(databaseConnectionType);

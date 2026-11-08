@@ -77,19 +77,24 @@ public class DaoConfigTest {
 	public void setUp() throws IOException, InstantiationException, SQLException, ClassNotFoundException, IllegalAccessException, LscConfigurationException {
 		LscConfiguration.reset();
 		DatabaseConnectionType pc = (DatabaseConnectionType) LscConfiguration.getConnection("src-jdbc");
-		pc.setUrl("jdbc:hsqldb:file:target/hsqldb/lsc");
+		pc.setUrl("jdbc:h2:file:./target/h2/lsc;DB_CLOSE_DELAY=-1");
+		if (pc.getUsername() == null) {
+			pc.setUsername("sa");
+		}
+		if (pc.getPassword() == null) {
+			pc.setPassword("");
+		}
 
 		Class.forName(pc.getDriver()).newInstance();
-		con = DriverManager.getConnection(pc.getUrl());
+		con = DriverManager.getConnection(pc.getUrl(), pc.getUsername(), pc.getPassword());
 	}
 
 	@Test
 	public final void testRequest() throws SQLException {
-		ResultSet rs = null;
-
 		Statement stm = con.createStatement();
-		String sql = "DROP TABLE test IF EXISTS; CREATE TABLE test (id INTEGER PRIMARY KEY)";
-		rs = stm.executeQuery(sql);
+		String sql = "DROP TABLE IF EXISTS test; CREATE TABLE test (id INTEGER PRIMARY KEY)";
+		stm.execute(sql);
+		ResultSet rs = stm.executeQuery("SELECT COUNT(*) FROM test");
 		while (rs.next()) {
 			LOGGER.debug("Table has {} rows.", rs.getInt(1));
 		}

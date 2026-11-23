@@ -26,8 +26,8 @@ areas.
     </p>
     <p>It is an open source project, released under the BSD license.</p>
     <p>
-      Requirements: JRE 1.6. Most tests are run against Sun / Oracle JRE but basic build is also achieved
-      through OpenJDK 6.
+      Requirements: JRE 21. Most tests are run against Sun / Oracle JRE but basic build is also achieved
+      through OpenJDK 21.
     </p>
   </description>
 

@@ -65,6 +65,7 @@ import javax.naming.directory.InvalidSearchFilterException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.lsc.Configuration;
 import org.lsc.LscDatasets;
 import org.lsc.beans.IBean;
@@ -446,7 +447,7 @@ public abstract class AbstractSimpleJndiService implements Closeable {
 	{
 		// Compute pivots attributes to send to the script
 		Map<String, Object> table = new HashMap<String, Object>();
-		Map<String, Object> pivotAttributes = new HashMap<String, Object>();
+		Map<String, Object> pivotAttributes = new CaseInsensitiveMap<String, Object>();
 		if (pivotAttrs != null && pivotAttrs.getDatasets() != null && pivotAttrs.getDatasets().size() > 0) {
 			for (String attributeName : pivotAttrs.getAttributesNames()) {
 				String valueId = pivotAttrs.getValueForFilter(attributeName.toLowerCase());

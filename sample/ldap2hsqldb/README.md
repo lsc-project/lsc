@@ -17,8 +17,8 @@ On Linux the bash interpreter is already preinstalled and you probably already u
 On Windows, you need to install [Cygwin](https://www.cygwin.com/) or [Git Bash](https://gitforwindows.org/).
 
 ## 2.2 Java
-You need a Java 8 Runtime environment.  
-You can install the latest OpenJDK Version 8 on Linux or Windows.
+You need a Java 17 Runtime environment.  
+You can install the latest OpenJDK Version 17 on Linux or Windows.
 In case you are a private user or own a license you can also use the Oracle JVM.
 A version from a different vendor should also work.  
 Make sure your PATH is set correctly so that typing `java --version` gives you the current version

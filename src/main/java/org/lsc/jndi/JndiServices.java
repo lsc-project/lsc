@@ -329,21 +329,26 @@ public final class JndiServices {
 			props.setProperty(DirContext.SECURITY_AUTHENTICATION, connection.getAuthentication().value());
 			props.setProperty(DirContext.SECURITY_PRINCIPAL, connection.getUsername());
 			if (connection.getAuthentication().equals(LdapAuthenticationType.GSSAPI)) {
-				if (System.getProperty("java.security.krb5.conf") != null) {
-					throw new RuntimeException("Multiple Kerberos connections not supported (existing value: "
-							+ System.getProperty("java.security.krb5.conf")
-							+ "). Need to set another LSC instance or unset system property !");
-				} else {
-					System.setProperty("java.security.krb5.conf",
-							new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath());
-				}
-				if (System.getProperty("java.security.auth.login.config") != null) {
-					throw new RuntimeException("Multiple JAAS not supported (existing value: "
-							+ System.getProperty("java.security.auth.login.config")
-							+ "). Need to set another LSC instance or unset system property !");
-				} else {
-					System.setProperty("java.security.auth.login.config",
-							new File(Configuration.getConfigurationDirectory(), "gsseg_jaas.conf").getAbsolutePath());
+				synchronized (JndiServices.class) {
+					String targetKrb5Conf = new File(Configuration.getConfigurationDirectory(), "krb5.ini").getAbsolutePath();
+					String existingKrb5Conf = System.getProperty("java.security.krb5.conf");
+					if (existingKrb5Conf == null) {
+						System.setProperty("java.security.krb5.conf", targetKrb5Conf);
+					} else if (!existingKrb5Conf.equals(targetKrb5Conf)) {
+						throw new RuntimeException("Multiple Kerberos connections not supported (existing value: "
+								+ existingKrb5Conf + ", requested value: " + targetKrb5Conf
+								+ "). Need to set another LSC instance or unset system property !");
+					}
+
+					String targetJaasConf = new File(Configuration.getConfigurationDirectory(), "gsseg_jaas.conf").getAbsolutePath();
+					String existingJaasConf = System.getProperty("java.security.auth.login.config");
+					if (existingJaasConf == null) {
+						System.setProperty("java.security.auth.login.config", targetJaasConf);
+					} else if (!existingJaasConf.equals(targetJaasConf)) {
+						throw new RuntimeException("Multiple JAAS not supported (existing value: "
+								+ existingJaasConf + ", requested value: " + targetJaasConf
+								+ "). Need to set another LSC instance or unset system property !");
+					}
 				}
 				props.setProperty("javax.security.sasl.server.authentication",
 						"" + connection.isSaslMutualAuthentication());
@@ -1396,6 +1401,27 @@ public final class JndiServices {
 
 	public static CallbackHandler getCallbackHandler(String user, String pass) {
 		return new KerberosCallbackHandler(user, pass);
+	}
+
+	/**
+	 * Unset Kerberos and JAAS security system properties and reset cached JAAS configuration.
+	 */
+	public static synchronized void cleanSecurityProperties() {
+		System.clearProperty("java.security.krb5.conf");
+		System.clearProperty("java.security.auth.login.config");
+		try {
+			javax.security.auth.login.Configuration.setConfiguration(null);
+		} catch (Exception e) {
+			LOGGER.warn("Failed to reset JAAS configuration: {}", e.getMessage());
+		}
+	}
+
+	/**
+	 * Reset connections cache and clean security properties.
+	 */
+	public static synchronized void reset() {
+		cache.clear();
+		cleanSecurityProperties();
 	}
 }
 

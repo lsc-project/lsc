@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URL;
@@ -342,6 +343,169 @@ public class JndiServicesTest extends AbstractLdapTestUnit {
 
         // Instance should still be in a clean state
         assertNull(freshInstance.getContext());
+    }
+
+    @Test
+    public final void testGssapiMultipleCallsSuccess() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        try {
+            JndiServices.cleanSecurityProperties();
+
+            // First call sets java.security.krb5.conf and java.security.auth.login.config
+            JndiServices.getLdapProperties(conn);
+            assertNotNull(System.getProperty("java.security.krb5.conf"));
+            assertNotNull(System.getProperty("java.security.auth.login.config"));
+
+            // Second call with same configuration succeeds without throwing
+            JndiServices.getLdapProperties(conn);
+            assertNotNull(System.getProperty("java.security.krb5.conf"));
+            assertNotNull(System.getProperty("java.security.auth.login.config"));
+        } finally {
+            JndiServices.cleanSecurityProperties();
+        }
+    }
+
+    @Test
+    public final void testGssapiConflictingKrb5ConfThrowsException() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        try {
+            JndiServices.cleanSecurityProperties();
+            System.setProperty("java.security.krb5.conf", "/different/path/krb5.conf");
+
+            RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+                JndiServices.getLdapProperties(conn);
+            });
+            assertTrue(thrown.getMessage().contains("Multiple Kerberos connections not supported"));
+        } finally {
+            JndiServices.cleanSecurityProperties();
+        }
+    }
+
+    @Test
+    public final void testGssapiConflictingJaasConfThrowsException() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        try {
+            JndiServices.cleanSecurityProperties();
+            System.setProperty("java.security.auth.login.config", "/different/path/jaas.conf");
+
+            RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+                JndiServices.getLdapProperties(conn);
+            });
+            assertTrue(thrown.getMessage().contains("Multiple JAAS not supported"));
+        } finally {
+            JndiServices.cleanSecurityProperties();
+        }
+    }
+
+    @Test
+    public final void testCleanSecurityProperties() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        JndiServices.cleanSecurityProperties();
+        JndiServices.getLdapProperties(conn);
+        assertNotNull(System.getProperty("java.security.krb5.conf"));
+        assertNotNull(System.getProperty("java.security.auth.login.config"));
+
+        JndiServices.cleanSecurityProperties();
+        assertNull(System.getProperty("java.security.krb5.conf"));
+        assertNull(System.getProperty("java.security.auth.login.config"));
+    }
+
+    @Test
+    public final void testLscConfigurationResetCleansSecurityProperties() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        JndiServices.cleanSecurityProperties();
+        JndiServices.getLdapProperties(conn);
+        assertNotNull(System.getProperty("java.security.krb5.conf"));
+        assertNotNull(System.getProperty("java.security.auth.login.config"));
+
+        LscConfiguration.reset();
+        assertNull(System.getProperty("java.security.krb5.conf"));
+        assertNull(System.getProperty("java.security.auth.login.config"));
+    }
+
+    @Test
+    public final void testGssapiConcurrentCalls() throws Exception {
+        org.lsc.configuration.LdapConnectionType conn = new org.lsc.configuration.LdapConnectionType();
+        conn.setName("gssapi-ldap");
+        conn.setUrl("ldap://localhost:33389/dc=lsc-project,dc=org");
+        conn.setUsername("user@REALM");
+        conn.setPassword("password");
+        conn.setAuthentication(org.lsc.configuration.LdapAuthenticationType.GSSAPI);
+        conn.setSaslQop(org.lsc.configuration.SaslQopType.AUTH);
+        conn.setTlsActivated(false);
+        conn.setSaslMutualAuthentication(false);
+
+        try {
+            JndiServices.cleanSecurityProperties();
+            int threadCount = 8;
+            java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+            java.util.concurrent.CountDownLatch startLatch = new java.util.concurrent.CountDownLatch(1);
+            java.util.List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+
+            for (int i = 0; i < threadCount; i++) {
+                futures.add(executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        JndiServices.getLdapProperties(conn);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }));
+            }
+
+            startLatch.countDown();
+            for (java.util.concurrent.Future<?> f : futures) {
+                f.get();
+            }
+            executor.shutdown();
+        } finally {
+            JndiServices.cleanSecurityProperties();
+        }
     }
 
 	public void testAuthenticationThroughJAAS() {

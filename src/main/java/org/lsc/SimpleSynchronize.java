@@ -65,6 +65,7 @@ import org.lsc.configuration.LscConfiguration;
 import org.lsc.configuration.TaskType;
 import org.lsc.exception.LscConfigurationException;
 import org.lsc.jmx.LscServerImpl;
+import org.lsc.jndi.JndiServices;
 import org.lsc.runnable.SynchronizeEntryRunner;
 import org.lsc.service.IAsynchronousService;
 import org.lsc.service.SyncReplSourceService;
@@ -137,7 +138,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 		}
 	}
 
-	private void close() {
+	public void close() {
 		for (Task task: cache.values()) {
 			if (task.getSourceService() instanceof Closeable) {
 				try {
@@ -154,6 +155,7 @@ public class SimpleSynchronize extends AbstractSynchronize {
 				}
 			}
 		}
+		JndiServices.cleanSecurityProperties();
 	}
 
 

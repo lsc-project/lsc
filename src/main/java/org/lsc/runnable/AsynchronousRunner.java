@@ -29,6 +29,7 @@ public class AsynchronousRunner implements Runnable {
 	public void run() {
 		counter = new InfoCounter();
 
+        @SuppressWarnings("resource") // Java 17 does not have a ThreadPoolExecutor.close() method
 		SynchronizeThreadPoolExecutor threadPool = new SynchronizeThreadPoolExecutor(abstractSynchronize.getThreads());
 
 		Entry<String, LscDatasets> nextId = null;

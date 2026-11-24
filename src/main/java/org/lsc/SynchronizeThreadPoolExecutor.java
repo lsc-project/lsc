@@ -13,13 +13,22 @@ import org.slf4j.LoggerFactory;
 /**
  * This object is managing LSC tasks. It is now a wrapper for JDK 
  * ThreadPoolExecutor but may rely on a different implementation  
+ * 
+ * The queue size is computed based on the number of requested threads, 
+ * and have a minimum value of 100.
+ * 
+ * The RejectedExecution handler will simply block when the queue is full,
+ * so the caller will wait until a thread completes and consume the queue.
+ *
  * @author Sebastien Bahloul &lt;seb@lsc-project.org&gt;
  *
  */
 public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 
 	static long keepAliveTime = 60;
-	static int queueCapacity=10000;
+    
+    /** The default queue size. We default to a small size */
+    static final int DEFAULT_QUEUE_CAPACITY = 100;
 
 	BlockingQueue<Runnable> queue;
 
@@ -27,18 +36,26 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	final Logger LOGGER = LoggerFactory.getLogger(SynchronizeThreadPoolExecutor.class);
 
 	public SynchronizeThreadPoolExecutor(int threads) {
-		super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), new RejectedExecutionHandler() {
-			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-				// this will block if the queue is full
-				try {
-						executor.getQueue().put(r);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		);
+	       // The queue size is computed based on the number of threads
+        // A first approach is to require 10 slots in the queue per requested thread
+        this(threads, Math.max(DEFAULT_QUEUE_CAPACITY, threads * 10));
+	}
+	
+    public SynchronizeThreadPoolExecutor(int threads, int queueCapacity) {
+        super(threads, threads, keepAliveTime, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(queueCapacity), 
+                new RejectedExecutionHandler() {
+        
+        			public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        				// this will block if the queue is full
+        				try {
+        						executor.getQueue().put(r);
+        					} catch (InterruptedException e) {
+        						Thread.currentThread().interrupt();
+        						throw new RuntimeException(e);
+        					}
+        				}
+        			}
+        		);
 		queue = getQueue(); 
 	}
 
@@ -49,7 +66,6 @@ public class SynchronizeThreadPoolExecutor extends ThreadPoolExecutor {
 	 * @param task the runnable object
 	 */
 	public void runTask(AbstractEntryRunner task) {
-		this.beforeExecute(new Thread(task.getSyncName() + "-" + task.getId().getKey()), task);
 		execute(task);
 	}
 	

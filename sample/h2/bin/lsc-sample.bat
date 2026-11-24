@@ -6,10 +6,10 @@ REM Ldap Synchronization Connector provides tools to synchronize electronic
 REM identities from a list of data sources including any database with a JDBC
 REM connector, another LDAP directory, flat files...
 REM
-REM LSC automatically embeds HSQLDB library. So, this script can:
-REM - Create a table from a CSV file header in a HSQLDB database;
-REM - Inject CSV data into a HSQLDB database;
-REM - Read data from a HSQLDB database table.
+REM LSC automatically embeds H2 database library. So, this script can:
+REM - Create a table from a CSV file header in an H2 database;
+REM - Inject CSV data into an H2 database;
+REM - Read data from an H2 database table.
 REM
 REM ---------------------------------------------------------------------------------
 REM
@@ -64,12 +64,12 @@ REM ----------------------------------------------------------------------------
 REM CONFIGURATION
 REM ---------------------------------------------------------------------------------
 
-for /f %%i in ("%0") do set LSC_HSQLDBSAMPLE=%%~dpi..
+for /f %%i in ("%0") do set LSC_H2SAMPLE=%%~dpi..
 
 set CLASSPATH=
- for  %%a in ("%LSC_HSQLDBSAMPLE%\lib\hsqldb-*.jar") do (
+ for  %%a in ("%LSC_H2SAMPLE%\lib\h2-*.jar") do (
    set CLASSPATH=!CLASSPATH!;%%a
  )
 set CLASSPATH=!CLASSPATH!
 
-"%LSC_HSQLDBSAMPLE%\..\..\bin\lsc.cmd" -f "%LSC_HSQLDBSAMPLE%\etc" -s all 
+"%LSC_H2SAMPLE%\..\..\bin\lsc.cmd" -f "%LSC_H2SAMPLE%\etc" -s all 

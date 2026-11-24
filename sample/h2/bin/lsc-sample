@@ -6,10 +6,10 @@
 # identities from a list of data sources including any database with a JDBC
 # connector, another LDAP directory, flat files...
 #
-# LSC automatically embeds HSQLDB library. So, this script can:
-# - Create a table from a CSV file header in a HSQLDB database;
-# - Inject CSV data into a HSQLDB database;
-# - Read data from a HSQLDB database table.
+# LSC automatically embeds H2 database library. So, this script can:
+# - Create a table from a CSV file header in an H2 database;
+# - Inject CSV data into an H2 database;
+# - Read data from an H2 database table.
 #
 # ---------------------------------------------------------------------------------
 #
@@ -21,10 +21,10 @@
 #
 #   * Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
-#   * Redistributions in binary form must reproduce the above copyright notice,
+#   * Redistributions in binary form must reproduce the above copyright notice,
 #     this list of conditions and the following disclaimer in the documentation
 #     and/or other materials provided with the distribution.
-#   * Neither the name of the LSC Project nor the names of its contributors may be
+#   * Neither the name of the LSC Project nor the names of its contributors may be
 #     used to endorse or promote products derived from this software without
 #     specific prior written permission.
 #
@@ -63,16 +63,20 @@ LSC_LIB_DIR="${SAMPLE_HOME}/../../lib"
 LSC_SAMPLE_LIB_DIR="${SAMPLE_HOME}/../lib"
 LSC_BIN_DIR="${SAMPLE_HOME}/../../bin"
 
-# HSQLDB jar file
-[ -z "$HSQLDB_LIB" -a -e "${LSC_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_LIB_DIR}"/hsqldb*.jar )
-[ -z "$HSQLDB_LIB" -a -e "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar ] && HSQLDB_LIB=$( readlink -f "${LSC_SAMPLE_LIB_DIR}"/hsqldb*.jar )
-[ -z "$HSQLDB_LIB" ] && echo "hsqldb driver (hsqldb*.jar) is missing" && exit 1
-# Temporary directory so that HSQLDB server could store files
-HSQLDB_DIR="/tmp/lsc/hsqldb"
-# HSQLDB configuration file
-HSQLDB_RC="${SAMPLE_HOME}/etc/hsqldb.rc"
+# H2 jar file (take the first match; multi-match would break [ -e ] and -cp)
+if [ -z "$H2_LIB" ]; then
+  for _h2jar in "${LSC_LIB_DIR}"/h2*.jar "${LSC_SAMPLE_LIB_DIR}"/h2*.jar; do
+    if [ -e "$_h2jar" ]; then H2_LIB=$(readlink -f "$_h2jar"); break; fi
+  done
+fi
+[ -z "$H2_LIB" ] && echo "h2 driver (h2*.jar) is missing" && exit 1
+# Temporary directory so that H2 server could store files
+H2_DIR="/tmp/lsc/h2"
+# Database file path — must match sample/h2/etc/lsc.xml
+H2_DB="${H2_DIR}/lsc"
+H2_URL="jdbc:h2:file:${H2_DB}"
 # Table name
-HSQLDB_TABLE="csvdata"
+H2_TABLE="csvdata"
 # Default CSV separator
 CSV_SEPARATOR=";"
 
@@ -81,15 +85,20 @@ CSV_SEPARATOR=";"
 # ---------------------------------------------------------------------------------
 
 #
-# Drop all data from the HSQLDB instance.
+# Drop all data from the H2 instance.
 #
 data_drop()
 {
-  hsqldb_sqlQuery "DROP TABLE $HSQLDB_TABLE; SHUTDOWN;"
+  # H2 file: URLs auto-create the DB — refuse to touch a database that was never imported.
+  if [ ! -e "${H2_DB}.mv.db" ]; then
+    echo "Error - no database at ${H2_DB} (run --import first)" 1>&2
+    return 1
+  fi
+  h2_sqlQuery "DROP TABLE IF EXISTS $H2_TABLE"
 }
 
 #
-# Create the SQL table into the HSQLDB database. All field are read from the first
+# Create the SQL table into the H2 database. All field are read from the first
 # line of the CSV file passed in the first parameter. Once the table is created,
 # data should be correctly imported.
 #
@@ -97,103 +106,76 @@ data_import()
 {
   # $1 : CSV fullpath
   # $2 : CSV separator
-  HSQLDB_TABLEDEF=""
-  IFSO=$IFS
-  IFS=$2
-  for field in `head -n 1 $1`; do
-    if [ -n "$HSQLDB_TABLEDEF" ]; then
-      HSQLDB_TABLEDEF="$HSQLDB_TABLEDEF, $field VARCHAR"
-    else
-      HSQLDB_TABLEDEF="$field VARCHAR"
-    fi
-  done
-  IFS=$IOFS
-	mkdir -p $HSQLDB_DIR
-  if [ -n "$HSQLDB_TABLEDEF" ]; then
-    hsqldb_sqlQuery "CREATE TEXT TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF); SHUTDOWN;"
-    if [ $? -eq 0 ]; then
-	  echo "Table $HSQLDB_TABLE created"
-      nblines=`cat $1 | wc -l`
-      let nblines--
-			
-      tail -n $nblines $1 > $HSQLDB_DIR/`basename $1`
-      sep=`hsqldb_checkCsvSeparator $2`
-		encoding=`file $1  2> /dev/null | cut -d' ' -f2`
-		if [ "x$encoding" == "xUTF-8" ] ; then
-			hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep;encoding=UTF-8\"; SHUTDOWN;" > /dev/null 2>&1
-		else
-			hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"`basename $1`;fs=$sep\"; SHUTDOWN;" > /dev/null 2>&1
-		fi
-	  if [ $? -eq 0 ]; then
-		  echo "$nblines lines added to table $HSQLDB_TABLE"
-		  return
-	  fi
-    fi
+  local csv_path csv_sep
+  csv_path=$(sql_escape "$1")
+  csv_sep=$(sql_escape "${2:-$CSV_SEPARATOR}")
+  mkdir -p "$H2_DIR"
+  # H2 CSVREAD defaults to comma; pass fieldSeparator explicitly (2.x csvOptions form)
+  if h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$csv_path', null, 'fieldSeparator=$csv_sep')"; then
+    nblines=$(tail -n +2 "$1" | wc -l)
+    echo "$nblines lines imported into table $H2_TABLE"
+    return 0
   fi
   exit 1
 }
 
 #
-# Show data from the HSQLDB instance.
+# Show data from the H2 instance.
 #
 data_show()
 {
-  hsqldb_sqlQuery "SELECT * FROM $HSQLDB_TABLE;"
+  # H2 file: URLs auto-create the DB — refuse to touch a database that was never imported.
+  if [ ! -e "${H2_DB}.mv.db" ]; then
+    echo "Error - no database at ${H2_DB} (run --import first)" 1>&2
+    return 1
+  fi
+  h2_sqlQuery "SELECT * FROM $H2_TABLE"
 }
 
 #
-# Return the CSV separator used by hsqldb.
-#
-hsqldb_checkCsvSeparator()
-{
-  # $1 : A separator
-  case "$1" in
-    ";")
-      echo -n "\semi"
-      ;;
-    "\"")
-      echo -n "\quote"
-      ;;
-    " ")
-      echo -n "\space"
-      ;;
-    "'")
-      echo -n "\apos"
-      ;;
-    *)
-      echo -n $1
-      ;;
-  esac
-}
-
-#
-# Remove all data on disk that have been created by an hsqldb server. No checks
+# Remove all data on disk that have been created by an h2 server. No checks
 # on a running process are performed, so be carefull.
 #
-hsqldb_cleanData()
+h2_cleanData()
 {
   oldpwd=`pwd`
-  cd ${HSQLDB_DIR} > /dev/null 2>&1
+  cd ${H2_DIR} > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     rm -f *
     cd ..
-    rmdir `basename "${HSQLDB_DIR}"`
+    rmdir `basename "${H2_DIR}"`
   fi
   cd ${oldpwd}
 }
 
+# Escape a value for use inside a single-quoted SQL string literal.
+sql_escape()
+{
+  printf '%s' "${1//\'/\'\'}"
+}
+
 #
-# Perform a SQL query on the running HSQLDB instance. No checks on a running
-# process are performed, so be carefull.
+# Perform a SQL query on the H2 database. Returns non-zero on SQL failure
+# (org.h2.tools.Shell always exits 0, so errors are detected from its output).
 #
-hsqldb_sqlQuery()
+h2_sqlQuery()
 {
   # $1 : sql query
+  local output rc
 
 	# check if we have java executable
 	get_java
 
-	"${JAVA_COMMAND}" -jar "$HSQLDB_LIB" --rcFile "$HSQLDB_RC" --sql "$1" lscdb
+	output=$("${JAVA_COMMAND}" -cp "$H2_LIB" org.h2.tools.Shell \
+		-url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+	rc=$?
+	printf '%s\n' "$output"
+	# Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+	# Data rows are rendered with table pipes, so they will not match this pattern.
+	if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
+		return 1
+	fi
+	return 0
 }
 
 # Determine where the java exectuable is
@@ -209,8 +191,8 @@ function get_java() {
     if [ -e "$JAVA_COMMAND" ]; then return; fi
 
     # Nothing seems approprite, warn and exit
-    log "No java executable found on PATH or in JAVA_HOME! Aborting."
-    log "Define JAVA_HOME or adjust your PATH variable to include java."
+    echo "No java executable found on PATH or in JAVA_HOME! Aborting."
+    echo "Define JAVA_HOME or adjust your PATH variable to include java."
     exit 2
 }
 
@@ -289,7 +271,7 @@ case "$1" in
     echo " One option from available options is:"
     echo "   --import <file> [<separator>]    Import data from CSV file"
     echo "   --show    Show data from database"
-    echo "   --drop    Drop the table $HSQLDB_TABLE from database"
+    echo "   --drop    Drop the table $H2_TABLE from database"
     echo "   --start-ldap-server    Launch an embedded OpenDJ LDAP server"
     echo "   --run     Run the synchronization task"
 	echo "   --clean   Remove all files from disk"
@@ -304,27 +286,26 @@ esac
 for action in $ACTIONS; do
   case "$action" in
     "dropdata")
-      data_drop
+      data_drop || exit 1
       ;;
     "importdata")
       if [ ! -e "$CSV_FILE" ]; then
-        echo " Error - file '$1' not found"
+        echo " Error - file '$CSV_FILE' not found"
         exit 1
       fi
       data_import "$CSV_FILE" "$CSV_SEPARATOR"
       ;;
     "showdata")
-      data_show
+      data_show || exit 1
       ;;
     "startldap")
       start_ldap
       ;;
     "cleandata")
-      hsqldb_cleanData
+      h2_cleanData
       ;;
     "cleanldapdata")
       rm -rf /tmp/opendj-test
       ;;
   esac
 done
-

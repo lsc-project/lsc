@@ -63,17 +63,17 @@
 		</ldapConnection>
 		<databaseConnection>
 			<name>src-jdbc</name>
-			<url>jdbc:hsqldb:file:hsqldb/lsc</url>
+			<url>jdbc:h2:file:./h2/lsc;DB_CLOSE_DELAY=-1</url>
 			<username>sa</username>
 			<password></password>
-			<driver>org.hsqldb.jdbcDriver</driver>
+			<driver>org.h2.Driver</driver>
 		</databaseConnection>
 		<databaseConnection>
 			<name>dst-jdbc</name>
-			<url>jdbc:hsqldb:hsql://localhost/lscdb</url>
+			<url>jdbc:h2:file:./h2/lscdb;DB_CLOSE_DELAY=-1</url>
 			<username>sa</username>
 			<password></password>
-			<driver>org.hsqldb.jdbcDriver</driver>
+			<driver>org.h2.Driver</driver>
 		</databaseConnection>
 	</connections>
 	<tasks>

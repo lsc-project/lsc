@@ -42,7 +42,7 @@ address, TCP port, username and password :
       <password>lsc</password>
 
 This sample requires that you start the embedded OpenDJ LDAP server:
-$ sample/hsqldb/bin/lsc-sample --start-ldap-server
+$ sample/h2/bin/lsc-sample --start-ldap-server
 
 Then, launch the LSC in a command line 
 $ bin/lsc -f sample/postgresql/etc -s all

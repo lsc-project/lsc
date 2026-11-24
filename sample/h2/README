@@ -3,12 +3,12 @@ This directory contains a fully configured demonstration for LSC.
 This demonstration comes with some sample data, in a CSV file, to be loaded into
 a simple SQL database table, and synchronized to a directory.
 
-Both the database (HSQLDB) and the directory (OpenDJ) are included as
+Both the database (H2) and the directory (OpenDJ) are included as
 dependencies of LSC, and will be launched automatically.
 
 At this time you need cygwin to use the SQL loading and the OpenDJ starting script.
 
-The lsc-sample.bat script only allows to run LSC with the correct CLASSPATH including hsqldb library. 
+The lsc-sample.bat script only allows to run LSC with the correct CLASSPATH including h2 library. 
 
 See full details about running this sample online:
 http://lsc-project.org/wiki/documentation/2.0/sample

@@ -1,4 +1,0 @@
-urlid lscdb
-url jdbc:hsqldb:file:/tmp/lsc/hsqldb/lsc
-username sa
-password

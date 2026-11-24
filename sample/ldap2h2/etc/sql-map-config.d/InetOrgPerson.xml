@@ -13,7 +13,7 @@
 		pers."GIVENNAME",
 		pers."CN",
 		pers."MAIL",
-		convert(pers."STATUS", VARCHAR) as accesssa,
+		CAST(pers."STATUS" AS VARCHAR) as accesssa,
 		pers."GIVENNAME",
 		pers."ADDRESS",
 		pers."O",
@@ -35,7 +35,7 @@
 		INSERT INTO userdata
 		( ID , UID , MAIL, MAIL_LOWER, LAST_UPDATE, STATUS, ENDOFVALIDITY , SN
 		, CN , GIVENNAME , O , ADDRESS , TELEPHONENUMBER , CARLICENSE )
-		VALUES ( #externalid# , #uid# , #mail#, LCASE(#mail#), NOW(), #accesssa#,
+		VALUES ( #externalid# , #uid# , #mail#, LCASE(#mail#), CURRENT_TIMESTAMP, #accesssa#,
 		#endofvalidity# , #sn# , #cn# , #givenname# , #o# ,
 		#registeredaddress# , #telephonenumber# , #carlicense# )
 	</insert>
@@ -46,7 +46,7 @@
 		UID = #uid#,
 		MAIL = #mail#,
 		MAIL_LOWER = LCASE(#mail#),
-		LAST_UPDATE = NOW(),
+		LAST_UPDATE = CURRENT_TIMESTAMP,
 		STATUS = #accesssa#,
 		ENDOFVALIDITY = #endofvalidity#,
 		SN = #sn#,

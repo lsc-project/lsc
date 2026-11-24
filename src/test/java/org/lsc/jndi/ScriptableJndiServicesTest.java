@@ -86,6 +86,9 @@ public class ScriptableJndiServicesTest extends AbstractLdapTestUnit {
 
 	@BeforeEach
 	public void setup() {
+		// Drop any config left behind by ConfigurationLoaderTest (test.xml bind DN
+		// lacks ,ou=system and yields ERR_268 on ApacheDS).
+		LscConfiguration.reset();
 		assertNotNull(LscConfiguration.getConnection("dst-ldap"));
 		dstJndiServices = JndiServices.getInstance((LdapConnectionType) LscConfiguration.getConnection("dst-ldap"));
 	}

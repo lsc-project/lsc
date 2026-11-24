@@ -80,7 +80,7 @@ mkdir -p %{buildroot}%{_mandir}/man5
 ## bin
 cp -a bin/lsc %{buildroot}%{_bindir}
 cp -a bin/lsc-agent %{buildroot}%{_bindir}
-cp -a bin/hsqldb %{buildroot}%{_bindir}
+cp -a bin/h2 %{buildroot}%{_bindir}
 ## config
 cp -a etc/logback.xml %{buildroot}%{_sysconfdir}/lsc
 cp -a etc/lsc.xml-sample %{buildroot}%{_sysconfdir}/lsc/lsc.xml
@@ -125,15 +125,15 @@ sed -i \
   -e 's:^LOG_DIR.*:LOG_DIR="%{lsc_logdir}":' \
   %{buildroot}%{_bindir}/lsc \
   %{buildroot}%{_bindir}/lsc-agent \
-  %{buildroot}%{_bindir}/hsqldb
+  %{buildroot}%{_bindir}/h2
 sed -i \
   -e 's:^VAR_DIR.*:VAR_DIR="%{_sharedstatedir}/lsc":' \
-  -e 's:^HSQLDB_PIDFILE.*:HSQLDB_PIDFILE="%{_rundir}/hsqldb.pid":' \
-  %{buildroot}%{_bindir}/hsqldb
+  -e 's:^H2_PIDFILE.*:H2_PIDFILE="%{_rundir}/h2.pid":' \
+  %{buildroot}%{_bindir}/h2
 sed -i \
   -e 's:^LSC_LIB_DIR=.*:LSC_LIB_DIR="%{_libdir}/lsc":' \
   -e 's:^LSC_BIN_DIR=.*:LSC_BIN_DIR="%{_bindir}":' \
-  sample/hsqldb/bin/lsc-sample
+  sample/h2/bin/lsc-sample
 
 
 %pre
@@ -178,7 +178,7 @@ getent passwd lsc > /dev/null 2>&1 || \
 %config(noreplace) %{_sysconfdir}/default/lsc-async
 %{_bindir}/lsc
 %{_bindir}/lsc-agent
-%{_bindir}/hsqldb
+%{_bindir}/h2
 %{_unitdir}/lsc-async.service
 %{_unitdir}/lsc-async@.service
 %{_unitdir}/lsc-sync.service

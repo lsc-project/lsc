@@ -1,5 +1,5 @@
-LDAP to HSQLDB Example
-======================
+LDAP to H2 Example
+==================
 
 # 1. Description
 This sample shows the synchronisation beteen a ldap directroy and a sql database. 
@@ -32,7 +32,7 @@ A more native Windows application is (LDAP Admin)[http://www.ldapadmin.org/].
 There are many other applications arround. So choose the one you like best.
 
 ## 2.4 Database Client
-The used HSQLDB comes with a simple Database Client. You can run it from the sample application. 
+H2 comes with a simple web-based Database Console. You can run it from the sample application. 
 In case this is not enough, you could use (SQuirreL SQL)[http://squirrel-sql.sourceforge.net/]. 
 There are also alternatives from Apache or every Database vendor provides its own client.
 
@@ -42,14 +42,14 @@ To get the sample running, follow this simple steps:
 1. Download and extract the lsc package.  
 2. Get the lsc-sample command known  
    Use the bash interpreter and change into the directory of the sample:  
-   `cd <directory of extracted lsc package>/sample/ldap2sql`
+   `cd <directory of extracted lsc package>/sample/ldap2h2`
    run the lsc-sample command:  
    `./bin/lsc-sample`  
    Review the output of the command.
 3. Start the ldap server  
    `./bin/lsc-sample --start-ldap-server`
-4. Start the hsql db server  
-   `./bin/lsc-sample --start-hsql-server`
+4. Start the H2 server  
+   `./bin/lsc-sample --start-h2-server`
 
 # 4. Play with the sample
 
@@ -65,9 +65,9 @@ To get the sample running, follow this simple steps:
    set `accessSA` to false to get the entry removed from the database.
 
 # 5. Shutdown
-1. Shutdown the hsql db server  
-   `./bin/lsc-sample --stop-hsql-server`
+1. Shutdown the H2 server  
+   `./bin/lsc-sample --stop-h2-server`
 2. Shutdown the ldap server  
-   `./bin/lsc-sample --stop-ldap-server`
+   Stop the `--start-ldap-server` process with Ctrl+C (it runs in the foreground).
 3. Clean up  
    `./bin/lsc-sample --clean`

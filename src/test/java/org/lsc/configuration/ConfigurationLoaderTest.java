@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.lsc.exception.LscConfigurationException;
 
@@ -22,6 +23,16 @@ import com.google.common.collect.ImmutableMap;
  * @author rschermesser
  */
 public class ConfigurationLoaderTest {
+
+	/**
+	 * loadFromInstance() replaces the process-wide LscConfiguration singleton.
+	 * Restore it after every test so later classes (e.g. JNDI tests that bind
+	 * with cn=Directory Manager,ou=system) do not see this file's credentials.
+	 */
+	@AfterEach
+	public void restoreGlobalConfiguration() {
+		LscConfiguration.reset();
+	}
 
 	private static final String LDAP_CONNECTION_ID_ENV_KEY = "LDAP_CONNECTION_ID";
 	private static final String LDAP_CONNECTION_ID_ENV_VALUE = "src-ldap";

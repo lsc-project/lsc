@@ -58,7 +58,7 @@ This means that if you want to synchronize groups, you will need to change the
 map you plan to use.
 
 This sample requires that you start the embedded OpenDJ LDAP server:
-$ sample/hsqldb/bin/lsc-sample --start-ldap-server
+$ sample/h2/bin/lsc-sample --start-ldap-server
 
 Then, launch the LSC in a command line 
 $ bin/lsc -f sample/nis/etc -s passwd

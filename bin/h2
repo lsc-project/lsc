@@ -6,10 +6,10 @@
 # identities from a list of data sources including any database with a JDBC
 # connector, another LDAP directory, flat files...
 #
-# LSC automatically embed HSQLDB library. So, this script could :
-# - Launch a HSQLDB server ;
+# LSC automatically embeds H2 database library. So, this script could :
+# - Launch an H2 TCP server ;
 # - Inject CSV data into it ;
-# - Shutdown the HSQLDB server previously started.
+# - Shutdown the H2 server previously started.
 #
 # ---------------------------------------------------------------------------------
 #
@@ -21,10 +21,10 @@
 #
 #   * Redistributions of source code must retain the above copyright notice, this
 #     list of conditions and the following disclaimer.
-#   * Redistributions in binary form must reproduce the above copyright notice,
+#   * Redistributions in binary form must reproduce the above copyright notice,
 #     this list of conditions and the following disclaimer in the documentation
 #     and/or other materials provided with the distribution.
-#   * Neither the name of the LSC Project nor the names of its contributors may be
+#   * Neither the name of the LSC Project nor the names of its contributors may be
 #     used to endorse or promote products derived from this software without
 #     specific prior written permission.
 #
@@ -61,20 +61,31 @@ fi
 CFG_DIR="$LSC_HOME/etc"
 LIB_DIR="$LSC_HOME/lib"
 LOG_DIR="/tmp"
-LOG_FILE="$LOG_DIR/hsqldb.log"
+LOG_FILE="$LOG_DIR/h2.log"
 VAR_DIR="$LSC_HOME/var"
 
-# HSQLDB jar file
-HSQLDB_LIB=$LIB_DIR/hsqldb*.jar
+# H2 jar file — resolve glob at assignment; fail fast if missing
+H2_LIB=""
+for jar in "$LIB_DIR"/h2*.jar; do
+  [ -e "$jar" ] || continue
+  if [ -z "$H2_LIB" ]; then H2_LIB="$jar"; else H2_LIB="$H2_LIB:$jar"; fi
+done
+if [ -z "$H2_LIB" ]; then
+  echo "h2 driver (h2*.jar) is missing" 1>&2
+  exit 1
+fi
 
-# Temporary directory so that HSQLDB server could store files
-HSQLDB_DIR=$VAR_DIR/hsqldb
+# Temporary directory so that H2 server could store files
+H2_DIR=$VAR_DIR/h2
+# Database file path — shared by Shell (file:) and TCP server (-baseDir)
+H2_DB="${H2_DIR}/lscdb"
+H2_URL="jdbc:h2:file:${H2_DB}"
 
-# HSQLDB server PID file
-HSQLDB_PIDFILE=$VAR_DIR/hsqldb.pid
+# H2 server PID file
+H2_PIDFILE=$VAR_DIR/h2.pid
 
 # Table name
-HSQLDB_TABLE=csvdata
+H2_TABLE=csvdata
 
 # Default CSV separator
 CSV_SEPARATOR=";"
@@ -83,29 +94,35 @@ CSV_SEPARATOR=";"
 # FUNCTIONS
 # ---------------------------------------------------------------------------------
 function log() {
-  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [hsqldb] $1" >> "$LOG_FILE"
+  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [h2] $1" >> "$LOG_FILE"
 }
 
 function fatal() {
-  log $1
-  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [hsqldb] $1" 1>&2
+  log "$1"
+  echo "$(date "+${DATE_FORMAT:-%Y/%m/%d %T}") [h2] $1" 1>&2
+  exit 1
+}
+
+# Escape a value for use inside a single-quoted SQL string literal.
+function sql_escape() {
+  printf '%s' "${1//\'/\'\'}"
 }
 
 #
-# Drop all data from the HSQLDB instance.
+# Drop all data from the H2 instance.
 #
 data_drop()
 {
-  hsqldb_sqlQuery "DROP TABLE $HSQLDB_TABLE;" 2> /dev/null
+  h2_sqlQuery "DROP TABLE IF EXISTS $H2_TABLE" 2> /dev/null
   if [ $? -eq 0 ]; then
-    log "Table $HSQLDB_TABLE deleted"
+    log "Table $H2_TABLE deleted"
   else
-    fatal "Unable to delete table $HSQLDB_TABLE"
+    fatal "Unable to delete table $H2_TABLE"
   fi
 }
 
 #
-# Create the SQL table into the HSQLDB database. All field are read from the first
+# Create the SQL table into the H2 database. All field are read from the first
 # line of the CSV file passed in the first parameter. Once the table is created,
 # data should be correctly imported.
 #
@@ -113,64 +130,40 @@ data_import()
 {
   # $1 : CSV fullpath
   # $2 : CSV separator
-  HSQLDB_TABLEDEF=""
-  IFSO=$IFS
-  IFS=$2
-  for field in `head -n 1 $1`; do
-    if [ -n "$HSQLDB_TABLEDEF" ]; then
-      HSQLDB_TABLEDEF="$HSQLDB_TABLEDEF, $field VARCHAR"
-    else
-      HSQLDB_TABLEDEF="$field VARCHAR"
-    fi
-  done
-  IFS=$IOFS
-  if [ -n "$HSQLDB_TABLEDEF" ]; then
-    hsqldb_sqlQuery "CREATE TEXT TABLE $HSQLDB_TABLE ($HSQLDB_TABLEDEF);"
-    if [ $? -eq 0 ]; then
-      log "Table $HSQLDB_TABLE created"
-      nblines=`cat $1 | wc -l`
-      scale=`echo $nblines | awk '{ print int(log($0/3)/log(2))+1 }'`
-      cp $1 $HSQLDB_DIR/`basename $1`
-      sep=`hsqldb_checkCsvSeparator $2`
-      encoding=`file $1  2> /dev/null | cut -d' ' -f2`
-      source="`basename $1`;ignore_first=true;cache_scale=$scale;fs=$sep"
-      if [ "x$encoding" == "xUTF-8" ] ; then
-	source=$source";encoding=UTF-8"
-      fi
-      hsqldb_sqlQuery "SET TABLE $HSQLDB_TABLE SOURCE \"$source\";" > /dev/null 2>&1
-      if [ $? -eq 0 ]; then
-        log "File $1 imported into $HSQLDB_TABLE ($nblines rows)"
-	echo "$nblines lines imported into table $HSQLDB_TABLE"
-      else
-        fatal "Unable to import $1 into table $HSQLDB_TABLE"
-      fi
-      rm -f $HSQLDB_DIR/`basename $1` > /dev/null 2>&1
-      return
-    fi
+  local csv_path csv_sep
+  csv_path=$(sql_escape "$1")
+  csv_sep=$(sql_escape "${2:-$CSV_SEPARATOR}")
+  # H2 CSVREAD defaults to comma; pass fieldSeparator explicitly (2.x csvOptions form)
+  if h2_sqlQuery "DROP TABLE IF EXISTS $H2_TABLE" \
+    && h2_sqlQuery "CREATE TABLE $H2_TABLE AS SELECT * FROM CSVREAD('$csv_path', null, 'fieldSeparator=$csv_sep')"; then
+    nblines=$(tail -n +2 "$1" | wc -l)
+    log "File $1 imported into $H2_TABLE ($nblines rows)"
+    echo "$nblines lines imported into table $H2_TABLE"
+  else
+    fatal "Unable to import $1 into table $H2_TABLE"
   fi
-  exit 1
 }
 
 #
-# Show data from the HSQLDB instance.
+# Show data from the H2 instance.
 #
 data_show()
 {
-  hsqldb_sqlQuery "SELECT * FROM $HSQLDB_TABLE;" 2> /dev/null
+  h2_sqlQuery "SELECT * FROM $H2_TABLE" 2> /dev/null
 }
 
 #
-# Check if the HSQLDB server is running or not. This function should check a
+# Check if the H2 server is running or not. This function should check a
 # process from the PIDFILE into the process list.
 #
-hsqldb_checkInstance()
+h2_checkInstance()
 {
-  if [ ! -e $HSQLDB_PIDFILE ]; then
+  if [ ! -e "$H2_PIDFILE" ]; then
     echo 1
     return
   fi
-  pid=`cat $HSQLDB_PIDFILE`
-  if [ `ps -e | grep $pid | grep -v "grep $pid" | wc -l` -eq 0 ]; then
+  pid=$(cat "$H2_PIDFILE")
+  if ! kill -0 "$pid" 2>/dev/null; then
     echo 1
     return
   fi
@@ -178,85 +171,79 @@ hsqldb_checkInstance()
 }
 
 #
-# Return the CSV separator used by hsqldb.
-#
-hsqldb_checkCsvSeparator()
-{
-  # $1 : A separator
-  case "$1" in
-    ";")
-      echo -n "\semi"
-      ;;
-    "\"")
-      echo -n "\quote"
-      ;;
-    " ")
-      echo -n "\space"
-      ;;
-    "'")
-      echo -n "\apos"
-      ;;
-    *)
-      echo -n $1
-      ;;
-  esac
-}
-
-#
-# Remove all data on disk that have been created by an hsqldb server. No checks
+# Remove all data on disk that have been created by an h2 server. No checks
 # on a running process are performed, so be carefull.
 #
-hsqldb_cleanData()
+h2_cleanData()
 {
-  cd $HSQLDB_DIR > /dev/null 2>&1
-  if [ $? -eq 0 ]; then
+  local oldpwd
+  oldpwd=$(pwd)
+  if cd "$H2_DIR" > /dev/null 2>&1; then
     rm -f *
-    cd ..
-    rmdir `basename $HSQLDB_DIR`
+    cd "$oldpwd" || true
+    rmdir "$H2_DIR" 2>/dev/null || true
   fi
-  rm -f $HSQLDB_PIDFILE > /dev/null 2>&1
+  rm -f "$H2_PIDFILE" > /dev/null 2>&1
 }
 
 #
-# Perform a SQL query on the running HSQLDB instance. No checks on a running
+# Perform a SQL query on the H2 database. No checks on a running
 # process are performed, so be carefull.
 #
-hsqldb_sqlQuery()
+h2_sqlQuery()
 {
   # $1 : sql query
-  java -jar $HSQLDB_LIB --rcFile $HSQLDB_DIR/hsqldb.rc --sql "$1" lscdb
-}
-
-#
-# Start an instance of a HSQLDB server. No checks on a running process are
-# performed, so be carefull. It will also build a RC file for futur auto
-# authentication.
-#
-hsqldb_startServer()
-{
-  mkdir -p $HSQLDB_DIR
-  java -cp $HSQLDB_LIB org.hsqldb.Server \
-    -database.0 file:$HSQLDB_DIR/mydb -dbname.0 lscdb -address 127.0.0.1 > /dev/null 2>&1 &
-  echo $! > $HSQLDB_PIDFILE
-  sleep 2
-  if [ ! -d $HSQLDB_DIR ]; then
-    mkdir $HSQLDB_DIR
+  local output rc
+  output=$(java -cp "$H2_LIB" org.h2.tools.Shell \
+    -url "$H2_URL" -user sa -password "" -sql "$1" 2>&1)
+  rc=$?
+  printf '%s\n' "$output"
+  # Shell prints SQL errors as a line ending in "; SQL statement:" but exits 0.
+  # Data rows are rendered with table pipes, so they will not match this pattern.
+  if [ "$rc" -ne 0 ] || printf '%s\n' "$output" | grep -q '^Error: org\.h2\..*; SQL statement:$'; then
+    return 1
   fi
-  echo "
-    urlid lscdb
-    url jdbc:hsqldb:hsql://localhost/lscdb
-    username sa
-    password" > $HSQLDB_DIR/hsqldb.rc
+  return 0
 }
 
 #
-# Hard stop the current instance of HSQLDB server. It means that it will send a
-# SIGKILL on the process found through the PIDFILE. No checks on a running process
+# Start an instance of a H2 TCP server. No checks on a running process are
+# performed, so be carefull.
+#
+h2_startServer()
+{
+  mkdir -p "$H2_DIR"
+  # -baseDir makes tcp://localhost/lscdb resolve to ${H2_DIR}/lscdb (same file as Shell).
+  # No -tcpAllowOthers: remote connections stay disabled (localhost only).
+  # Sample-only shutdown password for local TCP management.
+  java -cp "$H2_LIB" org.h2.tools.Server \
+    -tcp -baseDir "$H2_DIR" -ifNotExists -tcpPassword "shutdown" \
+    > "$H2_DIR/h2-server.log" 2>&1 &
+  echo $! > "$H2_PIDFILE"
+  sleep 2
+  if ! kill -0 "$(cat "$H2_PIDFILE")" 2>/dev/null; then
+    rm -f "$H2_PIDFILE"
+    fatal "Failed to start H2 TCP server (see $H2_DIR/h2-server.log)"
+  fi
+}
+
+#
+# Stop the H2 server started by this script. No checks on a running process
 # are performed, so be carefull.
 #
-hsqldb_stopServer()
+h2_stopServer()
 {
-  kill -s KILL `cat $HSQLDB_PIDFILE`
+  if [ ! -f "$H2_PIDFILE" ]; then
+    return 0
+  fi
+  pid=$(cat "$H2_PIDFILE")
+  # Only touch the server this script started — never another process on :9092.
+  if kill -0 "$pid" 2>/dev/null; then
+    java -cp "$H2_LIB" org.h2.tools.Server \
+      -tcpShutdown "tcp://localhost:9092" -tcpPassword "shutdown" 2> /dev/null || true
+    kill -s KILL "$pid" 2> /dev/null || true
+  fi
+  rm -f "$H2_PIDFILE"
 }
 
 # ---------------------------------------------------------------------------------
@@ -271,7 +258,7 @@ case "$1" in
   "--drop")
     shift
     if [ "$1" != "" ]; then
-      HSQLDB_TABLE="$1"
+      H2_TABLE="$1"
       shift
     fi
     ACTIONS="$ACTIONS dropdata"
@@ -282,7 +269,7 @@ case "$1" in
     CSV_FILE="$1"
     shift
     if [ "$1" != "" ]; then
-      HSQLDB_TABLE="$1"
+      H2_TABLE="$1"
       shift
     fi
     if [ "$1" != "" ]; then
@@ -294,7 +281,7 @@ case "$1" in
   "--show")
     shift
     if [ "$1" != "" ]; then
-      HSQLDB_TABLE="$1"
+      H2_TABLE="$1"
       shift
     fi
     ACTIONS="$ACTIONS showdata"
@@ -334,7 +321,7 @@ esac
 for action in $ACTIONS; do
   case "$action" in
     "dropdata")
-      if [ `hsqldb_checkInstance` -eq 1 ]; then
+      if [ `h2_checkInstance` -eq 1 ]; then
         echo " Error - server is not running"
         exit 1
       fi
@@ -345,43 +332,42 @@ for action in $ACTIONS; do
         echo " Error - file '$CSV_FILE' not found"
         exit 1
       fi
-      if [ `hsqldb_checkInstance` -eq 1 ]; then
+      if [ `h2_checkInstance` -eq 1 ]; then
         echo " Error - server is not running"
         exit 1
       fi
       data_import "$CSV_FILE" "$CSV_SEPARATOR"
       ;;
     "showdata")
-      if [ `hsqldb_checkInstance` -eq 1 ]; then
+      if [ `h2_checkInstance` -eq 1 ]; then
         echo " Error - server is not running"
         exit 1
       fi
       data_show
       ;;
     "startserver")
-      if [ `hsqldb_checkInstance` -eq 0 ]; then
+      if [ `h2_checkInstance` -eq 0 ]; then
         echo " Error - server already running"
         exit 1
       fi
-      hsqldb_cleanData
-      hsqldb_startServer
+      h2_cleanData
+      h2_startServer
       ;;
     "stopserver")
-      if [ `hsqldb_checkInstance` -eq 0 ]; then
-        hsqldb_stopServer
-        hsqldb_cleanData
+      if [ `h2_checkInstance` -eq 0 ]; then
+        h2_stopServer
+        h2_cleanData
       fi
       ;;
     "status")
-      if [ `hsqldb_checkInstance` -eq 0 ]; then
-        pid=`cat $HSQLDB_PIDFILE`
-	echo "HSQLDB Server is running (PID $pid)"
+      if [ `h2_checkInstance` -eq 0 ]; then
+        pid=`cat $H2_PIDFILE`
+	echo "H2 Server is running (PID $pid)"
         exit 0
       else
-	echo "HSQLDB Server is not running"
+	echo "H2 Server is not running"
         exit 1
       fi
 
   esac
 done
-

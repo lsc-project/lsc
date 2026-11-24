@@ -24,7 +24,7 @@
 	<insert id="insertInetOrgPerson" parameterClass="java.util.Map">
 				INSERT INTO testdata
 						( ID , MAIL , MAIL_LOWER , LAST_UPDATE , SN , CN , DESCRIPTION , TELEPHONENUMBER )
-						VALUES ( #externalid# , #mail# , LCASE(#mail#) , NOW() , #sn# , #cn# , #description# , #telephonenumber# )
+						VALUES ( #externalid# , #mail# , LCASE(#mail#) , CURRENT_TIMESTAMP , #sn# , #cn# , #description# , #telephonenumber# )
 		</insert>
 
 		<update id="updateInetOrgPerson" parameterClass="java.util.Map">
@@ -32,7 +32,7 @@
 			SET  ID = #externalid#,
 			MAIL = #mail#,
 			MAIL_LOWER = LCASE(#mail#),
-			LAST_UPDATE = NOW(),
+			LAST_UPDATE = CURRENT_TIMESTAMP,
 			SN = #sn#,
 			CN = #cn#,
 			DESCRIPTION = #description#,

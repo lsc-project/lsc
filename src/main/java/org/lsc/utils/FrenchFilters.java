@@ -48,7 +48,7 @@ package org.lsc.utils;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * Manage all common string manipulation for french
@@ -417,10 +417,10 @@ public final class FrenchFilters {
 	 */
 	public static String generatePwd() {
 		StringBuilder passwd = new StringBuilder("");
-		Random r = new Random();
+		SecureRandom r = new SecureRandom();
 
 		for (int i = 0; i < 8; i++) {
-			passwd.append(GOOD_PASSWORD.charAt(r.nextInt(64)));
+			passwd.append(GOOD_PASSWORD.charAt(r.nextInt(GOOD_PASSWORD.length())));
 		}
 
 		return passwd.toString();
